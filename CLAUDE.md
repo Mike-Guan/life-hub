@@ -46,6 +46,11 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
 - Commits: one short imperative subject line (`Add mode widget`), body only when the why isn't obvious.
 - Report progress with evidence: commit sha, PR number, CI run link. When something fails, read the
   log and quote the exact error with file and line before drawing a conclusion.
+- Several Claude threads work on this project. Ownership and progress live on the shared board
+  `/mnt/project-files/energy-bank/协作看板.md` (outside the repo). Read it at the start of each turn,
+  append a line before ending one, and ask the owner there before editing files another thread owns.
+  Companion rendering (`CompanionView.swift`, `CompanionArt.swift`, `Resources/runner-*`) belongs to
+  the UI thread; keep the CompanionKit public API stable.
 
 ## Current status
 - M0: local JSON persistence (`ModeLog`), no iCloud entitlements yet, runs in the simulator.
@@ -147,3 +152,4 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-02: CI gates on title/branch, swift-format, tests, HubCore coverage 80%, warnings as errors.
 - 2026-10-02: Adopted from Mike's work rules: this page as the single rules page, plan first,
   Mike runs merges and PROD tags, four review checks, doc comment scope, evidence in reports.
+- 2026-10-02: Threads coordinate through 协作看板.md; the UI thread owns companion rendering.
