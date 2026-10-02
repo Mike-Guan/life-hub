@@ -1,22 +1,26 @@
 import HubCore
 import SwiftUI
 
-// M0 draws the static per-mode art with SwiftUI motion. When `runner.riv` exists this view
-// switches to Rive internally; callers keep passing `mode` and `cheer`.
-/// RUNNER, reacting to the current mode.
+// Draws RUNNER from vector parts with SwiftUI motion. When `runner.riv` exists this view
+// switches to Rive internally; callers keep passing `mode`, `energy` and `cheer`.
+/// RUNNER, reacting to the current mode and energy.
 public struct CompanionView: View {
     let mode: Mode?
+    /// Energy 0-100, or nil when unknown. Below 30 RUNNER looks tired.
+    let energy: Double?
     /// Increment to play the cheer jump.
     let cheer: Int
     let showsBubble: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pop = 0
+    @State private var taps = 0
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
-    public init(mode: Mode?, cheer: Int = 0, showsBubble: Bool = true) {
+    public init(mode: Mode?, energy: Double? = nil, cheer: Int = 0, showsBubble: Bool = true) {
         self.mode = mode
+        self.energy = energy
         self.cheer = cheer
         self.showsBubble = showsBubble
     }
@@ -50,15 +54,21 @@ public struct CompanionView: View {
     }
 
     @ViewBuilder private var character: some View {
-        if let mode, let art = CompanionArt.image(for: mode) {
-            TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { context in
-                let motion = IdleMotion(mode: mode, time: context.date.timeIntervalSinceReferenceDate)
-                art
-                    .resizable()
-                    .interpolation(.high)
-                    .scaledToFit()
-                    .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                    .offset(y: reduceMotion ? 0 : motion.dy)
+        if let mode {
+            KeyframeAnimator(initialValue: 0.0, trigger: taps) { react in
+                TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { context in
+                    let time = context.date.timeIntervalSinceReferenceDate
+                    let motion = IdleMotion(mode: mode, time: time * (tired ? 0.6 : 1))
+                    RunnerFigure(mode: mode, pose: pose(mode, time: time, react: react))
+                        .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
+                        .offset(y: reduceMotion ? 0 : motion.dy)
+                }
+            } keyframes: { _ in
+                KeyframeTrack {
+                    CubicKeyframe(1, duration: 0.15)
+                    LinearKeyframe(1, duration: 0.35)
+                    CubicKeyframe(0, duration: 0.3)
+                }
             }
             .id(mode)
             .transition(.opacity)
@@ -94,8 +104,16 @@ public struct CompanionView: View {
         }
     }
 
+    private var tired: Bool { RunnerPose.isTired(energy) }
+
+    private func pose(_ mode: Mode, time: TimeInterval, react: Double) -> RunnerPose {
+        if reduceMotion { return RunnerPose(tired: tired) }
+        return RunnerPose(mode: mode, time: time, tired: tired, react: react)
+    }
+
     private func react() {
         pop += 1
+        taps += 1
         let lines = CompanionLines.lines(for: mode)
         let candidates = lines.filter { $0 != bubble }
         say((candidates.isEmpty ? lines : candidates).randomElement())
@@ -160,11 +178,14 @@ private struct SpeechBubble: View {
 }
 
 #Preview {
-    VStack(spacing: 16) {
-        ForEach(Mode.allCases) { mode in
-            CompanionView(mode: mode).frame(height: 180).toyCard()
+    ScrollView {
+        VStack(spacing: 16) {
+            ForEach(Mode.allCases) { mode in
+                CompanionView(mode: mode).frame(height: 180).toyCard()
+            }
+            CompanionView(mode: .boxing, energy: 10).frame(height: 180).toyCard()
         }
+        .padding()
     }
-    .padding()
     .background(Toy.paper)
 }

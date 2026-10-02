@@ -11,11 +11,7 @@ let package = Package(
         .package(path: "../HubCore")
     ],
     targets: [
-        .target(
-            name: "CompanionKit",
-            dependencies: ["HubCore"],
-            resources: [.process("Resources")]
-        ),
+        .target(name: "CompanionKit", dependencies: ["HubCore"]),
         .testTarget(name: "CompanionKitTests", dependencies: ["CompanionKit", "HubCore"]),
     ]
 )

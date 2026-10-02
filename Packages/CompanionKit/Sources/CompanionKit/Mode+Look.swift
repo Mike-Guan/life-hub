@@ -31,6 +31,4 @@ extension Mode {
         case .money: "money"
         }
     }
-
-    var artName: String { "runner-\(rawValue)" }
 }
