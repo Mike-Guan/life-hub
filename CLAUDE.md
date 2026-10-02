@@ -17,9 +17,20 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
 - Package tests: `swift test --package-path Packages/HubCore`.
 - CI (`.github/workflows/build.yml`) runs the tests and builds both apps on a macOS runner.
 
+## Process (details: `docs/05 Engineering/开发流程.md`)
+- Trunk-based. Branch from `main` as `feature/<issue>-<name>`, `fix/…`, `chore/…`, `docs/…`;
+  `hotfix/<version>` from a release tag only when PROD needs a fix and `main` has unreleased work.
+- Every change goes through a PR: one thing per PR, Conventional Commits title, squash merge, CI green,
+  PR template filled in (Before / After / How, verification level).
+- Environments = Xcode configurations: Debug = DEV (`.dev`), Staging = STG (`.stg`, TestFlight internal),
+  Release = PROD (`com.guanshiyang.lifehub`). Separate data and, later, separate CloudKit containers.
+- SemVer in `MARKETING_VERSION` (0.x until the MVP; M0 = 0.1.0), build number +1 per upload,
+  PROD releases tagged `vX.Y.Z`, `CHANGELOG.md` updated in each feature PR under [Unreleased].
+- Never commit signing team IDs, certificates or keys.
+
 ## Current status
-- M0: local JSON persistence (`ModeLog`), no iCloud entitlements, runs in the simulator.
-  SwiftData + CloudKit come once Mike's Apple Developer account is confirmed.
+- M0: local JSON persistence (`ModeLog`), no iCloud entitlements yet, runs in the simulator.
+  Mike has a paid Apple Developer account, so SwiftData + CloudKit are next.
 - Companion renders the static per-mode RUNNER art with SwiftUI motion until `runner.riv` exists;
   then CompanionKit switches to Rive behind the same `CompanionView` API.
 

@@ -5,6 +5,11 @@ options:
     iOS: "26.0"
     macOS: "26.0"
   createIntermediateGroups: true
+# DEV = Debug (local), STG = Staging (TestFlight internal), PROD = Release (Mike's daily build).
+configs:
+  Debug: debug
+  Staging: release
+  Release: release
 packages:
   HubCore:
     path: Packages/HubCore
@@ -16,11 +21,21 @@ settings:
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
     GENERATE_INFOPLIST_FILE: YES
-    INFOPLIST_KEY_CFBundleDisplayName: Life Hub
-    PRODUCT_BUNDLE_IDENTIFIER: com.guanshiyang.lifehub
     PRODUCT_NAME: LifeHub
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+  configs:
+    Debug:
+      PRODUCT_BUNDLE_IDENTIFIER: com.guanshiyang.lifehub.dev
+      INFOPLIST_KEY_CFBundleDisplayName: Life Hub DEV
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG ENV_DEV
+    Staging:
+      PRODUCT_BUNDLE_IDENTIFIER: com.guanshiyang.lifehub.stg
+      INFOPLIST_KEY_CFBundleDisplayName: Life Hub STG
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: ENV_STG
+    Release:
+      PRODUCT_BUNDLE_IDENTIFIER: com.guanshiyang.lifehub
+      INFOPLIST_KEY_CFBundleDisplayName: Life Hub
 targets:
   LifeHub-iOS:
     type: application

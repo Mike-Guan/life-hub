@@ -93,8 +93,9 @@ public final class ModeStore {
 }
 
 extension ModeStore {
-    /// The store the apps use: `Application Support/LifeHub/mode-log.json`, with a stable device id.
-    public static func live(defaults: UserDefaults = .standard) -> ModeStore {
+    /// The store the apps use: `Application Support/<bundle id>/mode-log.json`, with a stable device id.
+    /// The folder is per bundle id so DEV, STG and PROD builds never share data on the Mac.
+    public static func live(defaults: UserDefaults = .standard, bundle: Bundle = .main) -> ModeStore {
         let key = "deviceID"
         let deviceID: String
         if let existing = defaults.string(forKey: key) {
@@ -108,7 +109,8 @@ extension ModeStore {
             defaults.set(deviceID, forKey: key)
         }
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-        let url = base?.appending(path: "LifeHub", directoryHint: .isDirectory).appending(path: "mode-log.json")
+        let folder = bundle.bundleIdentifier ?? "LifeHub"
+        let url = base?.appending(path: folder, directoryHint: .isDirectory).appending(path: "mode-log.json")
         return ModeStore(fileURL: url, deviceID: deviceID)
     }
 

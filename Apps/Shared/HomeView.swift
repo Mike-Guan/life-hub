@@ -69,6 +69,15 @@ private struct Header: View {
                     .font(Toy.display(26))
                     .foregroundStyle(Toy.ink)
                 Spacer()
+                if let badge = AppEnvironment.badge {
+                    Text(badge)
+                        .font(Toy.body(11, weight: .heavy))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(Toy.pink))
+                        .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+                        .foregroundStyle(Toy.ink)
+                }
                 if let error {
                     Circle()
                         .fill(Toy.alert)

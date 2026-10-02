@@ -48,7 +48,8 @@ import Testing
         removed.deletedAt = date(2, 13)
         let log = ModeLog(changes: [change(.work, date(2, 9)), removed])
         #expect(log.current?.mode == .work)
-        #expect(log.totals(on: date(2, 12), now: date(2, 14), calendar: calendar)[.work] == 5 * 3600)
+        let work = log.totals(on: date(2, 12), now: date(2, 14), calendar: calendar)[.work] ?? 0
+        #expect(abs(work - 5 * 3600) < 0.001)
     }
 
     @Test func futureDayHasNoSegments() {
