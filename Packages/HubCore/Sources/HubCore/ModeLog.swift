@@ -20,26 +20,42 @@ public struct ModeLog: Codable, Equatable, Sendable {
 
     public var schemaVersion: Int
     public var changes: [ModeChange]
+    /// Records this build can't read (for example a mode added by a newer build). They are kept
+    /// as-is and written back on save, so an older build never deletes newer data.
+    public var unreadable: [JSONValue]
 
     public init(changes: [ModeChange] = []) {
         self.schemaVersion = Self.currentSchemaVersion
         self.changes = changes
+        self.unreadable = []
     }
 
     private enum CodingKeys: String, CodingKey { case schemaVersion, changes }
 
-    /// Lossy decoding: one unreadable record (for example a mode this build doesn't know) is skipped
-    /// instead of losing the whole history.
+    /// Lossy decoding: one unreadable record is set aside instead of losing the whole history.
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try values.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
         let items = try values.decodeIfPresent([Lossy].self, forKey: .changes) ?? []
         changes = items.compactMap(\.value)
+        unreadable = items.filter { $0.value == nil }.map(\.raw)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(schemaVersion, forKey: .schemaVersion)
+        var list = values.nestedUnkeyedContainer(forKey: .changes)
+        for change in changes { try list.encode(change) }
+        for raw in unreadable { try list.encode(raw) }
     }
 
     private struct Lossy: Decodable {
         let value: ModeChange?
-        init(from decoder: Decoder) throws { value = try? ModeChange(from: decoder) }
+        let raw: JSONValue
+        init(from decoder: Decoder) throws {
+            raw = try JSONValue(from: decoder)
+            value = try? ModeChange(from: decoder)
+        }
     }
 
     /// Non-deleted changes, oldest first.

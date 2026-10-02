@@ -20,5 +20,6 @@ make open                  # 生成 LifeHub.xcodeproj 并用 Xcode 打开
 - `docs/05 Engineering/范围文档.md`：当前范围、不做什么、停止条件
 - `docs/05 Engineering/副业平台可行性.md`：小红书 / 抖音能做什么
 - `docs/03 Product/companion/`：RUNNER 的 SVG 和 Rive 搭建步骤
+- `docs/00 Lessons/经验索引.md`：旧项目经验的场景索引，做每一步前先查
 
 给 Claude Code 的工程规则在 `CLAUDE.md`。

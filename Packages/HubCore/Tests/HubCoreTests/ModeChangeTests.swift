@@ -44,5 +44,22 @@ import Testing
         """
         let log = try decoder.decode(ModeLog.self, from: Data(json.utf8))
         #expect(log.changes.map(\.mode) == [.work])
+        #expect(log.unreadable.count == 1)
+    }
+
+    /// An older build must not delete records written by a newer one when it saves.
+    @MainActor @Test func unreadableRecordsSurviveASave() throws {
+        let json = """
+        {"schemaVersion":1,"changes":[
+          {"id":"7F1C2B1E-2D7A-4C1A-9E43-1B2C3D4E5F60","mode":"sleep","at":"2026-10-02T23:00:00Z","futureField":[1,true,null]}
+        ]}
+        """
+        var log = try ModeStore.decoder.decode(ModeLog.self, from: Data(json.utf8))
+        log.changes.append(ModeChange(mode: .chill, at: Date(timeIntervalSince1970: 1_790_000_000), deviceID: "test"))
+        let saved = try ModeStore.encoder.encode(log)
+        let reloaded = try ModeStore.decoder.decode(ModeLog.self, from: saved)
+        #expect(reloaded.changes.map(\.mode) == [.chill])
+        #expect(reloaded.unreadable == log.unreadable)
+        #expect(String(decoding: saved, as: UTF8.self).contains("futureField"))
     }
 }

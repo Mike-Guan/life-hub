@@ -79,6 +79,10 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - No data from Mike's work hub or company systems enters this app.
 
 ## Lessons from Lilo and Daily Widget
+- Before each step, look up the scenario table in `docs/00 Lessons/经验索引.md` and read the matching
+  entries' gotchas (e.g. sync → DW-02, DW-06, DW-01; data model → DW-02, DW-05; widgets → DW-04;
+  first TestFlight → DW-05, L-05, L-RELEASE). Full source notes live on Mike's Mac; ask for one if
+  the gotchas aren't enough.
 - Every core feature must give value on a day Mike does nothing. Automatic mode switching and widgets
   come before anything that needs manual logging.
 - Record state and summaries (mode timeline, energy events), not task lists.
@@ -86,6 +90,9 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - The app computes; widgets read a `WidgetSnapshot` written to the App Group container.
 - Data contract first: every record has schemaVersion, id, createdAt, updatedAt, updatedBy (device id),
   deletedAt (soft delete). Decoding tolerates missing fields with defaults. Unit-test the Codable types.
+- An older build must never delete newer data on save (DW-02): `ModeLog` keeps unreadable records and
+  writes them back. Unknown fields on readable records are still dropped; fix that before two
+  builds write the same store.
 - Evidence levels: "compiles", "verified locally on two real devices", "shipped via TestFlight" are
   different claims. Sync is only verified on a real iPhone + Mac, never on simulators alone.
 - Bundle id prefix: com.guanshiyang.lifehub; App Group group.com.guanshiyang.lifehub.
