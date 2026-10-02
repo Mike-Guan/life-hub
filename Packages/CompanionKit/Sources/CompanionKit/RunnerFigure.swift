@@ -148,7 +148,7 @@ struct RunnerFigure: View {
     }
 
     /// Visible parts in back-to-front order.
-    static func parts(for mode: Mode, pose: RunnerPose) -> [RunnerPart] {
+    nonisolated static func parts(for mode: Mode, pose: RunnerPose) -> [RunnerPart] {
         var visible = baseParts
         switch mode {
         case .work:
@@ -165,19 +165,19 @@ struct RunnerFigure: View {
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
 
-    static let baseParts: Set<RunnerPart> = [
+    nonisolated static let baseParts: Set<RunnerPart> = [
         .jacket, .stripeNeon, .hoodCollar, .hairBack, .earL, .earR, .faceBase, .hairFringe,
     ]
-    private static let workParts: Set<RunnerPart> = [
+    nonisolated private static let workParts: Set<RunnerPart> = [
         .eyesWork, .lidsWork, .eyebags, .browsWork, .maskUp, .panelLines, .headset, .cupL, .cupR, .mic,
     ]
-    private static let chillParts: Set<RunnerPart> = [
+    nonisolated private static let chillParts: Set<RunnerPart> = [
         .eyesChill, .mouthSmile, .maskDown, .earringNeon, .earbud, .monsterCan,
     ]
-    private static let boxingParts: Set<RunnerPart> = [
+    nonisolated private static let boxingParts: Set<RunnerPart> = [
         .cateyeL, .cateyeR, .browsBox, .mouthFang, .maskDown, .earringNeon, .headband, .gloveL, .gloveR,
     ]
-    private static let moneyParts: Set<RunnerPart> = [
+    nonisolated private static let moneyParts: Set<RunnerPart> = [
         .eyesMoney, .maskUp, .panelLines, .ledYen, .earringNeon, .chainGold, .coin,
     ]
 
