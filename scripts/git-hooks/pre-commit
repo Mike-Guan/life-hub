@@ -1,0 +1,9 @@
+#!/bin/sh
+# Lint staged Swift files before each commit. Install with `make hooks`.
+files=$(git diff --cached --name-only --diff-filter=ACM -- '*.swift')
+[ -z "$files" ] && exit 0
+# shellcheck disable=SC2086
+swift format lint --strict $files || {
+  echo "swift format found problems. Run 'make format', review, and commit again."
+  exit 1
+}

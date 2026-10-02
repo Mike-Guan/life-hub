@@ -16,5 +16,6 @@ let package = Package(
             dependencies: ["HubCore"],
             resources: [.process("Resources")]
         ),
+        .testTarget(name: "CompanionKitTests", dependencies: ["CompanionKit", "HubCore"]),
     ]
 )
