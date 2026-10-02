@@ -5,10 +5,10 @@ let package = Package(
     name: "CompanionKit",
     platforms: [.iOS(.v18), .macOS(.v15)],
     products: [
-        .library(name: "CompanionKit", targets: ["CompanionKit"]),
+        .library(name: "CompanionKit", targets: ["CompanionKit"])
     ],
     dependencies: [
-        .package(path: "../HubCore"),
+        .package(path: "../HubCore")
     ],
     targets: [
         .target(

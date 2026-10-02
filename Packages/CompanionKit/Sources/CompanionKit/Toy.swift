@@ -49,7 +49,8 @@ public struct ToyCard: ViewModifier {
 }
 
 extension View {
-    public func toyCard(fill: Color = Toy.card, radius: CGFloat = Toy.radius, shadow: CGFloat = Toy.shadow) -> some View {
+    public func toyCard(fill: Color = Toy.card, radius: CGFloat = Toy.radius, shadow: CGFloat = Toy.shadow) -> some View
+    {
         modifier(ToyCard(fill: fill, radius: radius, shadow: shadow))
     }
 }

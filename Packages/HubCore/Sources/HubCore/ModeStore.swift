@@ -119,7 +119,9 @@ extension ModeStore {
         let store = ModeStore(fileURL: nil, deviceID: "preview")
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: now)
-        let plan: [(Int, Mode, ModeChange.Source)] = [(9, .work, .schedule), (19, .boxing, .location), (21, .chill, .manual)]
+        let plan: [(Int, Mode, ModeChange.Source)] = [
+            (9, .work, .schedule), (19, .boxing, .location), (21, .chill, .manual),
+        ]
         for (hour, mode, source) in plan {
             if let at = calendar.date(byAdding: .hour, value: hour, to: start), at <= now {
                 store.switchTo(mode, source: source, at: at)

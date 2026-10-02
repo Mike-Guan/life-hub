@@ -80,15 +80,16 @@ public struct ModeLog: Codable, Equatable, Sendable {
             let start = max(change.at, dayStart)
             let end = min(rawEnd, windowEnd)
             guard end > start else { continue }
-            result.append(ModeSegment(
-                id: change.id,
-                mode: change.mode,
-                source: change.source,
-                tag: change.tag,
-                start: start,
-                end: end,
-                isOngoing: next == nil && end == now
-            ))
+            result.append(
+                ModeSegment(
+                    id: change.id,
+                    mode: change.mode,
+                    source: change.source,
+                    tag: change.tag,
+                    start: start,
+                    end: end,
+                    isOngoing: next == nil && end == now
+                ))
         }
         return result
     }
