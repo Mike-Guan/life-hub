@@ -1,6 +1,6 @@
 import Foundation
 
-/// Any JSON value. Used to carry records this build can't read through a save untouched.
+/// Any JSON value. Carries records this build can't read through a save untouched.
 public enum JSONValue: Codable, Equatable, Sendable {
     case null
     case bool(Bool)

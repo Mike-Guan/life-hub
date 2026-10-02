@@ -1,10 +1,9 @@
 import HubCore
 import SwiftUI
 
+// M0 draws the static per-mode art with SwiftUI motion. When `runner.riv` exists this view
+// switches to Rive internally; callers keep passing `mode` and `cheer`.
 /// RUNNER, reacting to the current mode.
-///
-/// M0 draws the static per-mode art with SwiftUI motion. When `runner.riv` exists this view
-/// switches to Rive internally; callers keep passing `mode` and `cheer`.
 public struct CompanionView: View {
     let mode: Mode?
     /// Increment to play the cheer jump.
@@ -119,7 +118,8 @@ private struct Squash {
     var y: CGFloat = 1
 }
 
-/// Per-mode idle loop, matching the timings in the Rive build guide.
+// Timings match the Rive build guide.
+/// Per-mode idle loop.
 struct IdleMotion {
     var dy: CGFloat
     var angle: Double

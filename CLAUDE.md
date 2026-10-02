@@ -1,5 +1,8 @@
 # Life Hub
 
+This is the single rules page for agents working in this repo. Read it first. When another doc
+disagrees with it, this page wins; record rule changes in the decisions log at the bottom.
+
 Personal life hub for one user (Mike). iOS + macOS, native SwiftUI. A companion
 character (RUNNER, Rive) mirrors the current mode and energy.
 Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技术架构.md` (architecture),
@@ -30,7 +33,19 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
   Release = PROD (`com.guanshiyang.lifehub`). Separate data and, later, separate CloudKit containers.
 - SemVer in `MARKETING_VERSION` (0.x until the MVP; M0 = 0.1.0), build number +1 per upload,
   PROD releases tagged `vX.Y.Z`, `CHANGELOG.md` updated in each feature PR under [Unreleased].
-- Never commit signing team IDs, certificates or keys.
+- Never commit signing team IDs, certificates or keys. Never use `--no-verify`.
+- Plan first: a new feature starts with a short plan (GitHub issue: goal, scope, out of scope, test plan)
+  that Mike approves before any code. Fixes, chores and docs don't need one.
+- Who runs what: agents open PRs and fix CI. Mike merges to `main` (that merge is his OK for the STG
+  upload) and creates PROD tags by hand. Agents prepare a release PR titled
+  `Prepare release version X.Y.Z` (version bump + CHANGELOG) but never merge or push tags.
+- Before asking for review, check the change four ways and write the result in the PR:
+  1. it follows the patterns already in the repo; 2. it is the smallest change that works
+  (DRY, KISS, YAGNI, SOLID); 3. `make check` and CI pass; 4. a short list of exact points
+  (file:line) Mike should look at.
+- Commits: one short imperative subject line (`Add mode widget`), body only when the why isn't obvious.
+- Report progress with evidence: commit sha, PR number, CI run link. When something fails, read the
+  log and quote the exact error with file and line before drawing a conclusion.
 
 ## Current status
 - M0: local JSON persistence (`ModeLog`), no iCloud entitlements yet, runs in the simulator.
@@ -121,3 +136,14 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - UI follows style E (toy / neo-brutal: thick black outline, flat bright colors, hard shadow);
   use the `Toy` tokens in CompanionKit, no ad-hoc colors.
 - Ask before adding a dependency.
+- `///` doc comments say only what a symbol does, its parameters, return value and throws.
+  Reasons and history go in `//` comments or the PR.
+- Writing (docs, PRs, comments): short plain sentences. No filler such as "robust", "seamless",
+  "comprehensive", "it's worth noting". No em dashes.
+
+## Decisions log
+- 2026-10-02: Native SwiftUI, XcodeGen, local JSON for M0; SwiftData + CloudKit in M1b.
+- 2026-10-02: Trunk-based flow with DEV / STG / PROD configurations and SemVer 0.x until the MVP.
+- 2026-10-02: CI gates on title/branch, swift-format, tests, HubCore coverage 80%, warnings as errors.
+- 2026-10-02: Adopted from Mike's work rules: this page as the single rules page, plan first,
+  Mike runs merges and PROD tags, four review checks, doc comment scope, evidence in reports.

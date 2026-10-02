@@ -1,15 +1,14 @@
 import Foundation
 import Observation
 
+// M0 persists to a local JSON file. SwiftData + CloudKit replace the storage later; the
+// `ModeChange` contract stays the same.
 /// Owns the mode log on this device. Single writer for `ModeLog`.
-///
-/// M0 persists to a local JSON file. SwiftData + CloudKit replace the storage later; the
-/// `ModeChange` contract stays the same.
 @MainActor
 @Observable
 public final class ModeStore {
     public private(set) var log: ModeLog
-    /// Last load/save failure, shown in the UI instead of being swallowed.
+    /// Last load or save failure, for the UI to show.
     public private(set) var lastError: String?
     public let deviceID: String
 
@@ -26,7 +25,8 @@ public final class ModeStore {
     public var current: Mode? { log.current?.mode }
     public var currentSince: Date? { log.current?.at }
 
-    /// Switches mode. Returns false when already in that mode, so callers don't replay effects.
+    /// Switches mode.
+    /// - Returns: `false` when already in that mode.
     @discardableResult
     public func switchTo(
         _ mode: Mode,
@@ -93,8 +93,8 @@ public final class ModeStore {
 }
 
 extension ModeStore {
+    // Per bundle id so DEV, STG and PROD builds never share data on the Mac.
     /// The store the apps use: `Application Support/<bundle id>/mode-log.json`, with a stable device id.
-    /// The folder is per bundle id so DEV, STG and PROD builds never share data on the Mac.
     public static func live(defaults: UserDefaults = .standard, bundle: Bundle = .main) -> ModeStore {
         let key = "deviceID"
         let deviceID: String

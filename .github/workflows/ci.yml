@@ -26,10 +26,11 @@ jobs:
           BRANCH: ${{ github.head_ref }}
         run: |
           title_re='^(feat|fix|chore|docs|refactor|test|perf|ci|build|revert)(\([a-z0-9._-]+\))?!?: .+'
+          release_re='^Prepare release version [0-9]+\.[0-9]+\.[0-9]+$'
           branch_re='^(feature|fix|chore|docs|refactor|test|ci|hotfix)/[A-Za-z0-9._-]+$|^dependabot/'
           ok=true
-          if ! [[ "$TITLE" =~ $title_re ]]; then
-            echo "::error::PR title must follow Conventional Commits, e.g. 'feat: add mode widget'. Got: $TITLE"
+          if ! [[ "$TITLE" =~ $title_re || "$TITLE" =~ $release_re ]]; then
+            echo "::error::PR title must follow Conventional Commits, e.g. 'feat: add mode widget', or be 'Prepare release version X.Y.Z'. Got: $TITLE"
             ok=false
           fi
           if ! [[ "$BRANCH" =~ $branch_re ]]; then
