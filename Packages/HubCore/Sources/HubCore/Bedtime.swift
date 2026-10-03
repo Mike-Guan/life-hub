@@ -30,3 +30,17 @@ public struct BedtimeSchedule: Codable, Equatable, Sendable {
         return minute >= startMinute || minute < endMinute ? .on : .off
     }
 }
+
+extension BedtimeSchedule {
+    /// The first time after `date` at which the state flips.
+    public func nextChange(after date: Date, calendar: Calendar = .current) -> Date? {
+        var changes: [Date] = []
+        for minute in [startMinute, endMinute] {
+            let parts = DateComponents(hour: minute / 60, minute: minute % 60)
+            if let next = calendar.nextDate(after: date, matching: parts, matchingPolicy: .nextTime) {
+                changes.append(next)
+            }
+        }
+        return changes.min()
+    }
+}

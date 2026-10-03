@@ -22,8 +22,8 @@ import Testing
         let suite = "lifehub-tests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        let first = ModeStore.live(defaults: defaults)
-        let second = ModeStore.live(defaults: defaults)
+        let first = ModeStore.live(in: HubContainer(folder: nil), defaults: defaults)
+        let second = ModeStore.live(in: HubContainer(folder: nil), defaults: defaults)
         #expect(!first.deviceID.isEmpty)
         #expect(first.deviceID == second.deviceID)
     }

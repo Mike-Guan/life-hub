@@ -3,15 +3,20 @@ import HubCore
 import SwiftUI
 
 struct HomeView: View {
+    /// A setup problem from the app, shown with the store errors.
+    var extraError: String?
+
     @Environment(ModeStore.self) private var store
+    @Environment(EnergyStore.self) private var energy
     @State private var cheer = 0
 
     var body: some View {
+        let reading = energy.reading()
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
-                Header(mode: store.current, error: store.lastError)
+                Header(mode: store.current, error: store.lastError ?? energy.lastError ?? extraError)
 
-                CompanionView(mode: store.current, cheer: cheer)
+                CompanionView(mode: store.current, energy: reading?.value, cheer: cheer)
                     .frame(height: 340)
                     .toyCard()
 
@@ -19,6 +24,12 @@ struct HomeView: View {
                     Text(mode.tagline)
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
+                }
+
+                if let reading {
+                    Text("今天电量：\(reading.reasons.joined(separator: "，"))")
+                        .font(Toy.body(13, weight: .bold))
+                        .foregroundStyle(Toy.muted)
                 }
 
                 ModeSwitcher(current: store.current) { mode in
@@ -115,5 +126,7 @@ private struct Header: View {
 }
 
 #Preview {
-    HomeView().environment(ModeStore.preview())
+    HomeView()
+        .environment(ModeStore.preview())
+        .environment(EnergyStore(fileURL: nil, deviceID: "preview"))
 }

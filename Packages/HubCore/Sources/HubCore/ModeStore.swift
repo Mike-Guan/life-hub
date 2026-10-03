@@ -38,10 +38,18 @@ public final class ModeStore {
         tag: String? = nil,
         at date: Date = .now
     ) -> Bool {
-        if mode == current {
-            guard source.isManual, let latest = log.current, !latest.source.isManual else { return false }
+        apply(ModeChange(mode: mode, source: source, tag: tag, at: date, deviceID: deviceID))
+    }
+
+    /// Records `change` under the same rules as `switchTo`. A change whose id is already stored is skipped.
+    /// - Returns: `false` when nothing was recorded.
+    @discardableResult
+    public func apply(_ change: ModeChange) -> Bool {
+        guard !log.changes.contains(where: { $0.id == change.id }) else { return false }
+        if change.mode == current {
+            guard change.source.isManual, let latest = log.current, !latest.source.isManual else { return false }
         }
-        log.changes.append(ModeChange(mode: mode, source: source, tag: tag, at: date, deviceID: deviceID))
+        log.changes.append(change)
         save()
         return true
     }
@@ -78,25 +86,12 @@ public final class ModeStore {
 }
 
 extension ModeStore {
-    // Per bundle id so DEV, STG and PROD builds never share data on the Mac.
-    /// The store the apps use: `Application Support/<bundle id>/mode-log.json`, with a stable device id.
-    public static func live(defaults: UserDefaults = .standard, bundle: Bundle = .main) -> ModeStore {
-        let key = "deviceID"
-        let deviceID: String
-        if let existing = defaults.string(forKey: key) {
-            deviceID = existing
-        } else {
-            #if os(iOS)
-            deviceID = "iphone-\(UUID().uuidString)"
-            #else
-            deviceID = "mac-\(UUID().uuidString)"
-            #endif
-            defaults.set(deviceID, forKey: key)
-        }
-        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-        let folder = bundle.bundleIdentifier ?? "LifeHub"
-        let url = base?.appending(path: folder, directoryHint: .isDirectory).appending(path: "mode-log.json")
-        return ModeStore(fileURL: url, deviceID: deviceID)
+    /// The store the apps use, in `container` with this device's id from `defaults`.
+    public static func live(
+        in container: HubContainer = .applicationSupport(),
+        defaults: UserDefaults = .standard
+    ) -> ModeStore {
+        ModeStore(fileURL: container.modeLogURL, deviceID: HubDevice.id(defaults: defaults))
     }
 
     /// In-memory store with some history, for SwiftUI previews.

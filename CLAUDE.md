@@ -66,8 +66,9 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/æŠ€æœ
 - Keep the CompanionKit public API (`CompanionView`, `CompanionPortrait`) stable; app code calls it.
 
 ## Current status
-- M0 is on `main` (0.1.0 unreleased): local JSON persistence (`ModeLog`), no iCloud or App Group
-  entitlements yet, runs in the simulator. Next is M1a, the iOS passive loop (Issue #4), not sync.
+- M0 is on `main` (0.1.0 unreleased): local JSON persistence (`ModeLog`), runs in the simulator.
+  M1a (Issue #4) is in progress: energy model, then iOS widgets with an App Group (per-environment
+  group ids in `project.yml`; widgets post to an inbox the app drains). No iCloud yet.
 - Companion draws RUNNER from vector parts (`RunnerArt.swift`, generated from
   `docs/03 Product/companion/runner-v5-layers.svg` by `Packages/CompanionKit/Tools/gen-runner-art.mjs`)
   with SwiftUI motion until `runner.riv` exists; then CompanionKit switches to Rive behind the same

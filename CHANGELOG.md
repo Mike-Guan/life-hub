@@ -9,6 +9,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   chill. It switches once per period and waits 2 hours after a manual change. Rules for arriving at
   the gym (straight to boxing) and the office (work), and leaving the gym after 30+ minutes (back to
   the earlier mode), are ready for the location PR.
+- iPhone widgets. Lock Screen (round, inline, rectangular) and Home Screen small: RUNNER with the
+  current mode and today's energy, sleepy at bedtime. Home Screen buttons: switch mode (medium) and
+  pick today's energy (small) without opening the app. The app applies widget taps when it opens.
+- Home screen shows today's energy and its reason; RUNNER looks tired when energy is low.
 - Bedtime look for RUNNER: at bedtime RUNNER takes the headset off, pulls the mask down, yawns,
   stretches and leans onto a pillow ("该睡了"), then stays sleepy with slow blinks, yawns and Z z z.
   A short loop for the notification and a sleepy still portrait (full or head only) for widgets.
