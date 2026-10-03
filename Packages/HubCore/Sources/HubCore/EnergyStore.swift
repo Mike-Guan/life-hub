@@ -33,6 +33,26 @@ public final class EnergyStore {
         return true
     }
 
+    /// Stores `night` as the sleep event for its night, replacing an earlier import of the same night.
+    /// - Returns: `false` when the stored event already matches.
+    @discardableResult
+    public func record(_ night: SleepNight, now: Date = .now) -> Bool {
+        guard let index = log.events.firstIndex(where: { $0.id == night.id }) else {
+            var event = EnergyEvent.sleep(minutes: night.minutes, endedAt: night.endedAt, deviceID: deviceID)
+            event.id = night.id
+            return record(event)
+        }
+        var event = log.events[index]
+        guard event.sleepMinutes != night.minutes || event.at != night.endedAt else { return false }
+        event.sleepMinutes = night.minutes
+        event.at = night.endedAt
+        event.updatedAt = now
+        event.updatedBy = deviceID
+        log.events[index] = event
+        lastError = file.save(&log)
+        return true
+    }
+
     /// Records Mike's own rating.
     public func report(_ level: EnergyLevel, at date: Date = .now) {
         record(.selfReport(level, at: date, deviceID: deviceID))

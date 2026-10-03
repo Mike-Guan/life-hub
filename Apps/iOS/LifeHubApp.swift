@@ -11,6 +11,7 @@ struct LifeHubApp: App {
     @State private var bedtime: BedtimeSchedule
     @State private var reminderError: String?
     @State private var showsSettings = false
+    @State private var healthError: String?
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -35,13 +36,17 @@ struct LifeHubApp: App {
                 .onChange(of: scenePhase, initial: true) { _, phase in
                     guard phase == .active else { return }
                     syncWidgets()
-                    scheduleReminder()
+                    // One after the other, so the two permission prompts don't overlap.
+                    Task {
+                        await scheduleReminder()
+                        await importSleep()
+                    }
                 }
                 .onChange(of: bedtime) {
                     bedtime.store(in: AppGroup.defaults)
                     widgets.bedtime = bedtime
                     syncWidgets()
-                    scheduleReminder()
+                    Task { await scheduleReminder() }
                 }
                 .sheet(isPresented: $showsSettings) {
                     SettingsView(bedtime: $bedtime)
@@ -52,7 +57,7 @@ struct LifeHubApp: App {
     }
 
     private var firstError: String? {
-        (setupErrors + [widgets.lastError, reminderError].compactMap { $0 }).first
+        (setupErrors + [widgets.lastError, reminderError, healthError].compactMap { $0 }).first
     }
 
     // Pulls in taps made on widgets, then gives widgets the app's view of the state.
@@ -61,7 +66,19 @@ struct LifeHubApp: App {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
-    private func scheduleReminder() {
-        Task { reminderError = await BedtimeReminder.schedule(bedtime) }
+    private func scheduleReminder() async {
+        reminderError = await BedtimeReminder.schedule(bedtime)
+    }
+
+    // Re-reads each time the app becomes active, so sleep the Watch syncs later still counts.
+    private func importSleep() async {
+        do {
+            if let night = try await HealthSleep.lastNight(), energy.record(night) {
+                syncWidgets()
+            }
+            healthError = nil
+        } catch {
+            healthError = "读不到健康 App 里的睡眠：\(error.localizedDescription)"
+        }
     }
 }
