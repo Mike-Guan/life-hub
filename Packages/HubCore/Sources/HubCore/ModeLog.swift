@@ -15,7 +15,7 @@ public struct ModeSegment: Identifiable, Equatable, Sendable {
 }
 
 /// The append-only history of mode changes. This is the on-disk document.
-public struct ModeLog: Codable, Equatable, Sendable {
+public struct ModeLog: RecordLog, Equatable {
     public static let currentSchemaVersion = 1
 
     public var schemaVersion: Int
@@ -24,7 +24,14 @@ public struct ModeLog: Codable, Equatable, Sendable {
     /// Records this build can't read, for example a mode added by a newer build.
     public var unreadable: [JSONValue]
 
-    public init(changes: [ModeChange] = []) {
+    public var records: [ModeChange] {
+        get { changes }
+        set { changes = newValue }
+    }
+
+    public init() { self.init(changes: []) }
+
+    public init(changes: [ModeChange]) {
         self.schemaVersion = Self.currentSchemaVersion
         self.changes = changes
         self.unreadable = []
@@ -37,7 +44,7 @@ public struct ModeLog: Codable, Equatable, Sendable {
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try values.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
-        let items = try values.decodeIfPresent([Lossy].self, forKey: .changes) ?? []
+        let items = try values.decodeIfPresent([LossyRecord<ModeChange>].self, forKey: .changes) ?? []
         changes = items.compactMap(\.value)
         unreadable = items.filter { $0.value == nil }.map(\.raw)
     }
@@ -48,15 +55,6 @@ public struct ModeLog: Codable, Equatable, Sendable {
         var list = values.nestedUnkeyedContainer(forKey: .changes)
         for change in changes { try list.encode(change) }
         for raw in unreadable { try list.encode(raw) }
-    }
-
-    private struct Lossy: Decodable {
-        let value: ModeChange?
-        let raw: JSONValue
-        init(from decoder: Decoder) throws {
-            raw = try JSONValue(from: decoder)
-            value = try? ModeChange(from: decoder)
-        }
     }
 
     /// Non-deleted changes, oldest first.

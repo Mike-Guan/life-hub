@@ -36,8 +36,10 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
 - Never commit signing team IDs, certificates or keys. Never use `--no-verify`.
 - Plan first: a new feature starts with a short plan (GitHub issue: goal, scope, out of scope, test plan)
   that Mike approves before any code. Fixes, chores and docs don't need one.
-- Who runs what: Claude opens the PR, fixes CI, reviews its own diff (below), then squash-merges it
-  to `main` once CI is green. That merge uploads STG. Mike does not merge or review code.
+- Who runs what: the author opens the PR, fixes CI and reviews its own diff (below). The "PR 审查"
+  thread reviews it and squash-merges it to `main` once CI is green, and decides merge order.
+  Authors don't merge their own PRs. If no reviewer thread exists (a single session), the session
+  self-reviews and merges after CI is green. That merge uploads STG. Mike does not merge or review code.
   Mike creates PROD tags by hand. Claude prepares a release PR titled
   `Prepare release version X.Y.Z` (version bump + CHANGELOG) but never pushes tags.
 - Before asking for review, check the change four ways and write the result in the PR:
@@ -53,7 +55,14 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
   the current head, then squash-merge pinned to that head sha.
 - Self-review hot spots: 30 fps TimelineView/Canvas work (pause when the scene is inactive),
   data-contract decoding, and Mac App Sandbox before the Mac joins TestFlight.
-- Handoff notes, open work and next steps: `docs/交接.md`. Read it at the start of a session.
+- Several Claude threads work on this project (PM, UI, engineering, PR 审查). Ownership and progress
+  live on the shared board `/mnt/project-files/energy-bank/协作看板.md` (outside the repo). Read it at
+  the start of each turn, append a line before ending one, and ask the owner there before editing files
+  another thread owns. Companion rendering (`CompanionView.swift`, `RunnerFigure.swift`,
+  `RunnerArt.swift`, `Tools/`) belongs to the UI thread. When you open a PR, tell the PR 审查 thread.
+- When Mike must decide something: check the board first so no two threads ask the same thing, log
+  it there as `[?]`, then start the reply with "需要你：" and a question he can answer in one word.
+- Open work and next steps: `docs/交接.md`. Read it at the start of a new session.
 - Keep the CompanionKit public API (`CompanionView`, `CompanionPortrait`) stable; app code calls it.
 
 ## Current status
@@ -169,3 +178,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-03: Mike handed merging to the reviewer thread, including merge order. PROD tags stay with Mike.
 - 2026-10-03: Multi-thread setup ended. One Claude Code session does PM, UI, engineering and review,
   and merges its own PRs after CI is green. See `docs/交接.md`.
+- 2026-10-03: Reversed the same day: multi-thread stays. PR 审查 merges; single-session rules are the
+  fallback. Questions for Mike start with "需要你：" and are logged on the board as `[?]` first.
