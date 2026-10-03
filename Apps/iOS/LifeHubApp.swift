@@ -7,6 +7,7 @@ import WidgetKit
 struct LifeHubApp: App {
     @State private var store: ModeStore
     @State private var energy: EnergyStore
+    @State private var expenses: ExpenseStore
     @State private var widgets: WidgetBridge
     @State private var setupErrors: [String]
     @State private var bedtime: BedtimeSchedule
@@ -35,6 +36,7 @@ struct LifeHubApp: App {
         let needs = NeedTracker()
         _store = State(initialValue: store)
         _energy = State(initialValue: energy)
+        _expenses = State(initialValue: ExpenseStore.live(in: container, defaults: AppGroup.defaults))
         _bedtime = State(initialValue: bedtime)
         _widgets = State(initialValue: widgets)
         _setupErrors = State(initialValue: errors)
@@ -110,15 +112,17 @@ struct LifeHubApp: App {
         .onChange(of: energy.log.events.count) { syncWidgets() }
     }
 
-    // Card spending comes off the balance once email reading lands (Issue #24, PR 2).
     private var moneyCard: MoneyCard? {
-        guard let target = budget.savingsTarget, let gap = budget.savingsGap(expenses: []) else { return nil }
+        guard let target = budget.savingsTarget, let gap = budget.savingsGap(expenses: expenses.log.active) else {
+            return nil
+        }
         return MoneyCard(gap: gap, target: target)
     }
 
     private var firstError: String? {
         let errors = [
-            widgets.lastError, reminderError, healthError, placeMonitor.lastError, needs.lastError, countdownError,
+            widgets.lastError, expenses.lastError, reminderError, healthError, placeMonitor.lastError, needs.lastError,
+            countdownError,
         ]
         return (setupErrors + errors.compactMap { $0 }).first
     }
@@ -155,7 +159,7 @@ struct LifeHubApp: App {
 
     // Pulls in taps made on widgets, then gives widgets the app's view of the state.
     private func syncWidgets() {
-        widgets.sync(mode: store, energy: energy)
+        widgets.sync(mode: store, energy: energy, expenses: expenses)
         WidgetCenter.shared.reloadAllTimelines()
     }
 

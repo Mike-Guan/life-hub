@@ -17,10 +17,17 @@ public final class WidgetBridge {
         self.bedtime = bedtime
     }
 
-    /// Applies pending widget changes, then rewrites the snapshot.
+    /// Applies pending widget and shortcut changes, then rewrites the snapshot.
+    /// - Parameter expenses: where payments go; without it they stay in the inbox.
     /// - Returns: how many inbox items were applied or already stored.
     @discardableResult
-    public func sync(mode: ModeStore, energy: EnergyStore, now: Date = .now, calendar: Calendar = .current) -> Int {
+    public func sync(
+        mode: ModeStore,
+        energy: EnergyStore,
+        expenses: ExpenseStore? = nil,
+        now: Date = .now,
+        calendar: Calendar = .current
+    ) -> Int {
         let applied = container.inbox.drain { item in
             switch item {
             case .mode(let change):
@@ -29,6 +36,10 @@ public final class WidgetBridge {
             case .energy(let event):
                 energy.record(event)
                 return energy.lastError == nil
+            case .expense(let expense):
+                guard let expenses else { return false }
+                expenses.record(expense)
+                return expenses.lastError == nil
             }
         }
         writeSnapshot(mode: mode, energy: energy, now: now, calendar: calendar)

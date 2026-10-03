@@ -92,7 +92,10 @@ public struct ExpenseLog: RecordLog, Equatable {
         case .detail:
             expense.detailSource = charge.id
             expense.merchant = charge.merchant ?? expense.merchant
-            expense.category = rules.category(for: expense.merchant)
+            // A category Mike picked himself wins over the shop rules.
+            if expense.category == .unsorted {
+                expense.category = rules.category(for: expense.merchant)
+            }
         }
         expense.updatedAt = now
         expense.updatedBy = deviceID
