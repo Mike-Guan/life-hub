@@ -178,6 +178,70 @@ import Testing
         #expect(decoded.line(at: date(6, 6), calendar: calendar) == nil)
     }
 
+    @Test func needsWithAKnownEndSayWhen() throws {
+        let boxing = try #require(need(NeedSignals(), at: date(4, 9)))
+        #expect(boxing.until == date(4, 12))
+        #expect(boxing.isActive(at: date(4, 11, 59)))
+        #expect(!boxing.isActive(at: date(4, 12)))
+        let scroll = try #require(need(NeedSignals(scrollThresholdAt: date(5, 20)), at: date(5, 20, 5)))
+        #expect(scroll.until == date(5, 23))
+        let home = NeedSignals(atHomeSince: date(5, 18), stillSince: date(5, 18))
+        let still = try #require(need(home, at: date(5, 20)))
+        #expect(still.until == nil)
+        #expect(still.isActive(at: date(6, 3)))
+    }
+
+    @Test func snapshotDropsANeedThatEnded() {
+        var snapshot = WidgetSnapshot(mode: .chill, since: nil, need: .boxingWarmup, updatedAt: date(4, 9))
+        snapshot.line = "打拳"
+        snapshot.needUntil = date(4, 12)
+        snapshot.lineAfterNeed = "睡够了"
+        #expect(snapshot.need(at: date(4, 11), calendar: calendar) == .boxingWarmup)
+        #expect(snapshot.line(at: date(4, 11), calendar: calendar) == "打拳")
+        #expect(snapshot.need(at: date(4, 12), calendar: calendar) == nil)
+        #expect(snapshot.line(at: date(4, 12), calendar: calendar) == "睡够了")
+        #expect(snapshot.need(at: date(5, 9), calendar: calendar) == nil)
+    }
+
+    @Test func widgetsRedrawWhenANeedEnds() {
+        let schedule = BedtimeSchedule.standard
+        let dates = WidgetSnapshot.timelineDates(
+            after: date(4, 9),
+            bedtime: schedule,
+            needTimes: [date(4, 12)],
+            calendar: calendar
+        )
+        #expect(dates.contains(date(4, 12)))
+        let past = WidgetSnapshot.timelineDates(
+            after: date(4, 13),
+            bedtime: schedule,
+            needTimes: [date(4, 12)],
+            calendar: calendar
+        )
+        #expect(!past.contains(date(4, 12)))
+    }
+
+    @Test func nextBoxingMorningIsScheduledAhead() throws {
+        let saturday = try #require(NeedEngine.nextScheduled(after: date(3, 22), calendar: calendar))
+        #expect(saturday.need == .boxingWarmup)
+        #expect(saturday.from == date(4, 9))
+        #expect(saturday.until == date(4, 12))
+        let sundayLate = try #require(NeedEngine.nextScheduled(after: date(4, 9), calendar: calendar))
+        #expect(sundayLate.from == date(11, 9))
+    }
+
+    @Test func snapshotShowsTheScheduledNeedWithoutTheApp() throws {
+        let next = try #require(NeedEngine.nextScheduled(after: date(3, 22), calendar: calendar))
+        var snapshot = WidgetSnapshot(mode: .chill, since: nil, updatedAt: date(3, 22))
+        snapshot.nextNeed = next
+        #expect(snapshot.need(at: date(4, 8, 59), calendar: calendar) == nil)
+        #expect(snapshot.need(at: date(4, 9), calendar: calendar) == .boxingWarmup)
+        #expect(snapshot.line(at: date(4, 9), calendar: calendar) == next.line)
+        #expect(snapshot.need(at: date(4, 12), calendar: calendar) == nil)
+        #expect(snapshot.line(at: date(4, 12), calendar: calendar) == nil)
+        #expect(snapshot.needTimes == [date(4, 9), date(4, 12)])
+    }
+
     @Test func switchReplayShowsTheModeBeforeAnAutomaticChange() {
         let log = ModeLog(changes: [
             ModeChange(mode: .chill, source: .manual, at: date(5, 8), deviceID: "test"),

@@ -42,7 +42,10 @@ public final class WidgetBridge {
         let state = bedtime.state(at: now, calendar: calendar)
         var snapshot = WidgetSnapshot(log: mode.log, energy: reading?.level, bedtime: state, now: now)
         snapshot.need = need?.need
+        snapshot.needUntil = need?.until
         snapshot.line = NeedEngine.whyLine(need: need, energy: reading, bedtime: state)
+        snapshot.lineAfterNeed = NeedEngine.whyLine(need: nil, energy: reading, bedtime: state)
+        snapshot.nextNeed = NeedEngine.nextScheduled(after: now, calendar: calendar)
         do {
             try snapshot.write(to: url)
             lastError = nil

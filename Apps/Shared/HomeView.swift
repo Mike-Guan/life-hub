@@ -29,6 +29,7 @@ struct HomeView: View {
                     CompanionView(
                         mode: store.current,
                         energy: reading?.value,
+                        need: activeNeed(at: context.date)?.need,
                         cheer: cheer,
                         bedtime: bedtime.state(at: context.date)
                     )
@@ -45,7 +46,8 @@ struct HomeView: View {
                 // Why RUNNER looks the way it does: bedtime, then the need, then energy.
                 TimelineView(.everyMinute) { context in
                     let state = bedtime.state(at: context.date)
-                    if let line = NeedEngine.whyLine(need: need, energy: reading, bedtime: state) {
+                    let active = activeNeed(at: context.date)
+                    if let line = NeedEngine.whyLine(need: active, energy: reading, bedtime: state) {
                         Text(line)
                             .font(Toy.body(13, weight: .bold))
                             .foregroundStyle(Toy.muted)
@@ -68,6 +70,11 @@ struct HomeView: View {
         .background(Toy.paper.ignoresSafeArea())
         .modeSwitchHaptic(trigger: store.current)
         .scheduleAutoMode(store)
+    }
+
+    // The tracker refreshes on open and on place events, so a need can end while the app stays open.
+    private func activeNeed(at date: Date) -> NeedReading? {
+        need.flatMap { $0.isActive(at: date) ? $0 : nil }
     }
 
     private func switchTo(_ mode: Mode) {

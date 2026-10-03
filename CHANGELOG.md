@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- RUNNER acts out the need on the home screen and in widgets: lying on the couch after enough
+  scrolling or an evening still at home, gloves on on Sunday morning. The Screen Time threshold now
+  counts (debug builds). Sunday boxing ends at 12:00 and Screen Time couch after 3 hours, also on the
+  Lock Screen without opening the app. Sunday gloves show up at 9:00 even if the app hasn't run that day.
 - RUNNER celebrates a finished workout: two happy hops, a burst of sparkles and "干得漂亮！". Each
   workout plays once, never at bedtime. Not switched on in the app yet.
 - RUNNER's "why" line on the home screen and the rectangular Lock Screen widget: bedtime, then a need
