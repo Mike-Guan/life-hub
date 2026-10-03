@@ -165,4 +165,9 @@ import Testing
         manual.changes.append(ModeChange(mode: .money, source: .manual, at: date(5, 11), deviceID: "test"))
         #expect(manual.switchedFrom(since: date(5, 9)) == nil)
     }
+
+    @Test func celebrationsWithDifferentWorkoutsDiffer() {
+        #expect(CompanionEvent.celebrate(id: "a") != .celebrate(id: "b"))
+        #expect(CompanionEvent.celebrate(id: "a") == .celebrate(id: "a"))
+    }
 }

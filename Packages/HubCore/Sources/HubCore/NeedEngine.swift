@@ -8,6 +8,12 @@ public enum CompanionNeed: String, Codable, CaseIterable, Sendable {
     case boxingWarmup
 }
 
+/// A short animation RUNNER plays once, then goes back to its usual look.
+public enum CompanionEvent: Equatable, Sendable {
+    /// Celebrate a workout; `id` is the workout's id, so each one plays once.
+    case celebrate(id: String)
+}
+
 /// A workout from the Health app, reduced to what the hub uses.
 public struct WorkoutSummary: Codable, Equatable, Sendable {
     public enum Kind: String, Codable, Sendable {
