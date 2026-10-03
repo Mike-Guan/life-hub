@@ -23,6 +23,7 @@ struct HubEntry: TimelineEntry {
     /// One short line: bedtime, else today's energy.
     var detail: String {
         if bedtime == .on { return "该睡了" }
+        if let line = snapshot?.line(at: date) { return line }
         return energy.map { "电量\($0.title)" } ?? "电量未知"
     }
 }

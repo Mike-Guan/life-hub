@@ -76,7 +76,14 @@ import Testing
         #expect(snapshot.mode == .boxing)
         #expect(snapshot.energy == .full)
         #expect(snapshot.bedtime == .off)
+        #expect(snapshot.line == "你自己选了「满格」")
+        #expect(snapshot.need == nil)
         #expect(bridge.lastError == nil)
+
+        bridge.need = NeedReading(need: .couchScroll, since: date(3, 19), reasons: ["瘫着"])
+        bridge.writeSnapshot(mode: modes, energy: energy, now: date(3, 20), calendar: calendar)
+        #expect(WidgetSnapshot.read(from: url)?.need == .couchScroll)
+        #expect(WidgetSnapshot.read(from: url)?.line == "瘫着")
 
         container.inbox.drain { _ in false }
         try container.inbox.post(.mode(change))

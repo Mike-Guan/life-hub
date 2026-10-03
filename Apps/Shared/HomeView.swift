@@ -6,6 +6,8 @@ struct HomeView: View {
     /// A setup problem from the app, shown with the store errors.
     var extraError: String?
     var bedtime: BedtimeSchedule = .standard
+    /// What RUNNER acts out now, from the iOS app's need tracker.
+    var need: NeedReading?
     /// Shows a settings button that calls this, when set.
     var onSettings: (() -> Void)?
 
@@ -40,10 +42,14 @@ struct HomeView: View {
                         .foregroundStyle(Toy.ink)
                 }
 
-                if let reading {
-                    Text("今天电量：\(reading.reasons.joined(separator: "，"))")
-                        .font(Toy.body(13, weight: .bold))
-                        .foregroundStyle(Toy.muted)
+                // Why RUNNER looks the way it does: bedtime, then the need, then energy.
+                TimelineView(.everyMinute) { context in
+                    let state = bedtime.state(at: context.date)
+                    if let line = NeedEngine.whyLine(need: need, energy: reading, bedtime: state) {
+                        Text(line)
+                            .font(Toy.body(13, weight: .bold))
+                            .foregroundStyle(Toy.muted)
+                    }
                 }
 
                 ModeSwitcher(current: store.current) { mode in

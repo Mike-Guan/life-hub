@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- RUNNER's "why" line on the home screen and the rectangular Lock Screen widget: bedtime, then a need
+  (still at home for an hour in the evening, Sunday boxing from 9:00), then last night's sleep.
+  Home is a third place in settings. Workouts and recent steps are read from Health on the iPhone
+  only; only a summary is kept. Screen Time couch scrolling now only counts at home (or when home
+  isn't set) and for 3 hours, and its line doesn't name the apps. On Sunday until 10:30 boxing
+  warm-up comes before couch scrolling.
 - Boxing warm-up look for RUNNER: gloves and red headband on over any outfit, bouncing, and a look
   at the door every few seconds, with its own tap lines. The same look works in widgets and as a
   small head for the Sunday countdown. Not switched on in the app yet.

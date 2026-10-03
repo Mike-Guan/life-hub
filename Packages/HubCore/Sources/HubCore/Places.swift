@@ -1,15 +1,18 @@
 import Foundation
 
-/// A place that switches the mode when Mike arrives. Stored only on the device.
+/// A place Mike can be at: the gym and office switch the mode, home tells needs he is home.
+/// Stored only on the device.
 public struct HubPlace: Codable, Equatable, Sendable {
     public enum Kind: String, Codable, CaseIterable, Sendable {
         case gym
         case office
+        case home
 
         public var title: String {
             switch self {
             case .gym: "拳馆"
             case .office: "公司"
+            case .home: "家"
             }
         }
 
@@ -18,6 +21,7 @@ public struct HubPlace: Codable, Equatable, Sendable {
             switch self {
             case .gym: entered ? .enteredGym : .leftGym
             case .office: entered ? .enteredOffice : nil
+            case .home: nil
             }
         }
     }
@@ -66,6 +70,44 @@ public struct PlaceSettings: Codable, Equatable, Sendable {
     }
 
     /// Saves the settings in `defaults`.
+    public func store(in defaults: UserDefaults) {
+        defaults.set(try? JSONEncoder().encode(self), forKey: Self.defaultsKey)
+    }
+}
+
+/// Where Mike is now, from geofence arrivals and departures. Stored only on the device.
+public struct PlacePresence: Codable, Equatable, Sendable {
+    static let defaultsKey = "presence"
+
+    // Keyed by `HubPlace.Kind` raw value, so a kind this build doesn't know is kept, not fatal.
+    /// When Mike arrived at each place he is at now.
+    public var arrivals: [String: Date]
+
+    public init(arrivals: [String: Date] = [:]) {
+        self.arrivals = arrivals
+    }
+
+    /// When Mike arrived at `kind`, or `nil` when he isn't there.
+    public func since(_ kind: HubPlace.Kind) -> Date? {
+        arrivals[kind.rawValue]
+    }
+
+    /// Records arriving at (`entered`) or leaving `kind` at `date`. Repeated arrivals keep the first.
+    public mutating func record(_ kind: HubPlace.Kind, entered: Bool, at date: Date) {
+        if entered {
+            arrivals[kind.rawValue] = arrivals[kind.rawValue] ?? date
+        } else {
+            arrivals[kind.rawValue] = nil
+        }
+    }
+
+    /// The presence saved in `defaults`, or none when nothing is saved or it can't be read.
+    public static func stored(in defaults: UserDefaults) -> PlacePresence {
+        guard let data = defaults.data(forKey: defaultsKey) else { return PlacePresence() }
+        return (try? JSONDecoder().decode(PlacePresence.self, from: data)) ?? PlacePresence()
+    }
+
+    /// Saves the presence in `defaults`.
     public func store(in defaults: UserDefaults) {
         defaults.set(try? JSONEncoder().encode(self), forKey: Self.defaultsKey)
     }
