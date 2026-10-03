@@ -10,6 +10,11 @@ import Testing
         #expect(!RunnerArt.inks(part).isEmpty || RunnerArt.text(part) != nil)
     }
 
+    @Test(arguments: RunnerPart.allCases)
+    func cachedInksMatchTheGeneratedArt(_ part: RunnerPart) {
+        #expect(RunnerArt.cachedInks(part).count == RunnerArt.inks(part).count)
+    }
+
     @Test(arguments: Mode.allCases)
     func everyModeShowsTheBaseParts(_ mode: Mode) {
         let parts = Set(RunnerFigure.parts(for: mode, pose: RunnerPose()))

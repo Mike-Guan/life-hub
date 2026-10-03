@@ -39,6 +39,20 @@ jobs:
           fi
           $ok
 
+  companion-art:
+    name: Companion art matches the SVG
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Regenerate RunnerArt.swift and compare
+        run: |
+          node Packages/CompanionKit/Tools/gen-runner-art.mjs
+          if ! git diff --exit-code -- Packages/CompanionKit/Sources/CompanionKit/RunnerArt.swift; then
+            echo "::error::RunnerArt.swift is out of date. Run 'make art' and commit the result."
+            exit 1
+          fi
+
   lint:
     name: Format and lint
     runs-on: ubuntu-latest

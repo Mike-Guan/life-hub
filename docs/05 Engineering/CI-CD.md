@@ -19,8 +19,11 @@ tags: [engineering, ci, cd, quality]
 | 单元测试 | HubCore 和 CompanionKit 的测试，编译警告一律当错误 | Mac |
 | 覆盖率门槛 | HubCore（数据契约、mode 逻辑）的行覆盖率低于 80% | Mac |
 | App 编译 | iOS 和 Mac 两个 App 都要能编译，警告当错误 | Mac |
+| Companion 画法 | `RunnerArt.swift` 和 `runner-v5-layers.svg` 不一致（改了 SVG 没重新生成，或手改了生成文件） | Linux，几秒 |
 
 Linux 上的检查不占 Mac 额度（私有仓库 Mac 分钟按 10 倍算）。
+
+改了 RUNNER 的 SVG 之后跑 `make art` 重新生成 `RunnerArt.swift`，`make art-check` 和 CI 用同样的方式检查。需要 Node。
 
 ## 发版（`.github/workflows/release.yml`）
 
