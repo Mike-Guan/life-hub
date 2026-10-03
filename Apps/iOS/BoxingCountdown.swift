@@ -21,7 +21,7 @@ enum BoxingCountdown {
         let canStart = UIApplication.shared.applicationState == .active
         guard running.isEmpty, canStart, ActivityAuthorizationInfo().areActivitiesEnabled else { return nil }
         let state = BoxingActivityAttributes.ContentState(start: start)
-        let content = ActivityContent(state: state, staleDate: start.addingTimeInterval(30 * 60))
+        let content = ActivityContent(state: state, staleDate: start)
         do {
             _ = try Activity.request(attributes: BoxingActivityAttributes(), content: content)
             return nil

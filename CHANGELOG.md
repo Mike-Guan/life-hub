@@ -74,6 +74,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- The Sunday boxing countdown says "已开始" at 10:00 instead of stopping at 0:00.
 - The expanded notification no longer stacks a second RUNNER when the notification updates.
 - Afternoon naps no longer count toward last night's sleep.
 - Tapping the current mode after an automatic switch now records it as a manual change.
