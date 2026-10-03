@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Budget groundwork (Issue #24), not shown in the app yet: reading Rakuten Card quick-notice and
+  detail emails into expenses, pairing the two so each payment counts once, sorting shops into eating
+  out / groceries / other by keywords, and the two numbers the money card will show (eating out left
+  this month, gap to the savings target).
 - Sunday boxing countdown on the Lock Screen and in the Dynamic Island: RUNNER's head in gloves and
   the minutes to 10:00. It starts when the app is opened (or the invite tapped) during Sunday warm-up
   and ends on arriving at the gym or the next time the app sees class has started.
