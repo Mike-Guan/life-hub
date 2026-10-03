@@ -42,7 +42,11 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
 - Before asking for review, check the change four ways and write the result in the PR:
   1. it follows the patterns already in the repo; 2. it is the smallest change that works
   (DRY, KISS, YAGNI, SOLID); 3. `make check` and CI pass; 4. a short list of exact points
-  (file:line) Mike should look at.
+  (file:line) the reviewer should look at.
+- Every PR is reviewed by the "PR 审查" thread (an iOS/macOS reviewer agent) against these rules.
+  Tell it on the board and by message when a PR opens; fix its blocking findings like any review.
+  Mike does not do code review. The PR description opens with one or two plain sentences, in
+  Chinese, saying what the PR adds that Mike will notice.
 - Commits: one short imperative subject line (`Add mode widget`), body only when the why isn't obvious.
 - Report progress with evidence: commit sha, PR number, CI run link. When something fails, read the
   log and quote the exact error with file and line before drawing a conclusion.
@@ -153,3 +157,4 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-02: Adopted from Mike's work rules: this page as the single rules page, plan first,
   Mike runs merges and PROD tags, four review checks, doc comment scope, evidence in reports.
 - 2026-10-02: Threads coordinate through 协作看板.md; the UI thread owns companion rendering.
+- 2026-10-03: A dedicated reviewer thread ("PR 审查") reviews every PR; Mike only reads what each PR adds.
