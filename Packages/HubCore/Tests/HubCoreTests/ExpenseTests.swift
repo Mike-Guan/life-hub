@@ -32,7 +32,7 @@ import Testing
     let detailSubject = "カード利用お知らせメール"
     let detailBody = """
         ■利用日：2026/10/03
-        ■利用先：ＳＵＫＩＹＡ すき家 大田店
+        ■利用先：ＳＵＫＩＹＡ すき家 テスト店
         ■利用金額：1,280 円
         """
 
@@ -50,7 +50,7 @@ import Testing
 
     @Test func readsDetailEmailsWithTheShop() {
         let read = charges(detailSubject, detailBody, id: "m2")
-        let shop = "ＳＵＫＩＹＡ すき家 大田店"
+        let shop = "ＳＵＫＩＹＡ すき家 テスト店"
         #expect(read == [CardCharge(id: "m2#0", kind: .detail, day: day(10, 3), amount: 1280, merchant: shop)])
     }
 
@@ -63,7 +63,7 @@ import Testing
     @Test func sortsByShopKeywords() {
         let rules = CategoryRules.standard
         #expect(rules.category(for: nil) == .unsorted)
-        #expect(rules.category(for: "ＳＵＫＩＹＡ すき家 大田店") == .diningOut)
+        #expect(rules.category(for: "ＳＵＫＩＹＡ すき家 テスト店") == .diningOut)
         #expect(rules.category(for: "Uber Eats Japan") == .diningOut)
         #expect(rules.category(for: "まいばすけっと 駅前店") == .groceries)
         #expect(rules.category(for: "AMAZON.CO.JP") == .other)
