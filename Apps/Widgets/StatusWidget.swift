@@ -57,7 +57,13 @@ struct StatusView: View {
 
     @ViewBuilder private var head: some View {
         if let mode = entry.mode {
-            CompanionPortrait(mode: mode, energy: entry.energy?.value, bedtime: entry.bedtime, framing: .head)
+            CompanionPortrait(
+                mode: mode,
+                energy: entry.energy?.value,
+                need: entry.need,
+                bedtime: entry.bedtime,
+                framing: .head
+            )
         } else {
             Image(systemName: "circle.dashed").font(.title2)
         }
@@ -66,7 +72,7 @@ struct StatusView: View {
     private var small: some View {
         VStack(alignment: .leading, spacing: 2) {
             if let mode = entry.mode {
-                CompanionPortrait(mode: mode, energy: entry.energy?.value, bedtime: entry.bedtime)
+                CompanionPortrait(mode: mode, energy: entry.energy?.value, need: entry.need, bedtime: entry.bedtime)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Text("\(mode.code) MODE").font(Toy.display(14))
                 Text(entry.detail).font(Toy.body(12, weight: .bold))

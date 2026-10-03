@@ -14,8 +14,12 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var bedtime: Bedtime?
     /// What RUNNER acts out, `nil` when there is no need or in snapshots from older builds.
     public var need: CompanionNeed?
+    /// When `need` ends at the latest, `nil` when no time is known.
+    public var needUntil: Date?
     /// Why RUNNER looks the way it does, for the rectangular Lock Screen widget.
     public var line: String?
+    /// The line to show once `need` has ended.
+    public var lineAfterNeed: String?
     public var updatedAt: Date
 
     public init(
@@ -78,18 +82,33 @@ extension WidgetSnapshot {
         updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) ? energy : nil
     }
 
-    /// The "why" line as of `date`, `nil` when it was written before today's 05:00.
-    public func line(at date: Date, calendar: Calendar = .current) -> String? {
-        updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) ? line : nil
+    /// The need as of `date`, `nil` when it was written before today's 05:00 or has ended.
+    public func need(at date: Date, calendar: Calendar = .current) -> CompanionNeed? {
+        guard updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) else { return nil }
+        if let needUntil, date >= needUntil { return nil }
+        return need
     }
 
-    /// When widgets should redraw after `date`: now, the next bedtime change and the next day start.
+    /// The "why" line as of `date`, `nil` when it was written before today's 05:00.
+    public func line(at date: Date, calendar: Calendar = .current) -> String? {
+        guard updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) else { return nil }
+        if need != nil, need(at: date, calendar: calendar) == nil { return lineAfterNeed }
+        return line
+    }
+
+    /// When widgets should redraw after `date`: now, the next bedtime change, the next day start and
+    /// the end of a need.
+    /// - Parameter needUntil: when the snapshot's need ends, `nil` when unknown.
     public static func timelineDates(
         after date: Date,
         bedtime schedule: BedtimeSchedule,
+        needUntil: Date? = nil,
         calendar: Calendar = .current
     ) -> [Date] {
         var dates = [date]
+        if let needUntil, needUntil > date {
+            dates.append(needUntil)
+        }
         if let change = schedule.nextChange(after: date, calendar: calendar) {
             dates.append(change)
         }

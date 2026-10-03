@@ -19,8 +19,9 @@ struct HubEntry: TimelineEntry {
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
+    var need: CompanionNeed? { snapshot?.need(at: date) }
 
-    /// One short line: bedtime, else today's energy.
+    /// One short line: bedtime, else why RUNNER looks the way it does, else today's energy.
     var detail: String {
         if bedtime == .on { return "该睡了" }
         if let line = snapshot?.line(at: date) { return line }
@@ -50,7 +51,8 @@ struct HubProvider: TimelineProvider {
     private func entries(after now: Date) -> [HubEntry] {
         let snapshot = AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))
         let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
-        return WidgetSnapshot.timelineDates(after: now, bedtime: schedule).map { date in
+        let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needUntil: snapshot?.needUntil)
+        return dates.map { date in
             HubEntry(date: date, snapshot: snapshot, bedtime: schedule.state(at: date))
         }
     }

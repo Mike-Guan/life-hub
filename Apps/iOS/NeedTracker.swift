@@ -2,7 +2,7 @@ import Foundation
 import HubCore
 import Observation
 
-/// Works out what RUNNER acts out from where Mike is and what HealthKit says.
+/// Works out what RUNNER acts out from where Mike is, Screen Time and what HealthKit says.
 @MainActor
 @Observable
 final class NeedTracker {
@@ -27,6 +27,7 @@ final class NeedTracker {
     func refresh(places: PlaceSettings, now: Date = .now) {
         let presence = PlacePresence.stored(in: AppGroup.defaults)
         let signals = NeedSignals(
+            scrollThresholdAt: ScrollWatch.reachedAt,
             atHomeSince: presence.since(.home),
             homeKnown: places[.home] != nil,
             stillSince: motion?.stillSince,

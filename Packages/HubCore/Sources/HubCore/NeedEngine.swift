@@ -159,6 +159,13 @@ public struct NeedReading: Equatable, Sendable {
     public var since: Date
     /// Plain sentences, shown to Mike as the reason.
     public var reasons: [String]
+    /// When the need ends at the latest, `nil` when only a new signal can end it.
+    public var until: Date?
+
+    /// True until `until`, or always when there is no end time.
+    public func isActive(at date: Date) -> Bool {
+        until.map { date < $0 } ?? true
+    }
 }
 
 /// Rule-based needs, invites and celebrations. Same input, same output; every need says why.
@@ -239,7 +246,8 @@ public enum NeedEngine {
         let mayBeHome = signals.atHomeSince != nil || !signals.homeKnown
         if let reached = signals.scrollThresholdAt, mayBeHome, isFresh(reached, today: today, now: now, rules: rules) {
             // The Lock Screen shows this, so it doesn't name the apps.
-            return NeedReading(need: .couchScroll, since: reached, reasons: ["手机刷够久了，我也瘫着"])
+            let until = reached.addingTimeInterval(rules.scrollLasts)
+            return NeedReading(need: .couchScroll, since: reached, reasons: ["手机刷够久了，我也瘫着"], until: until)
         }
         // Fallback when Screen Time isn't available: home in the evening and still for a while.
         guard let home = signals.atHomeSince, let still = signals.stillSince else { return nil }
@@ -265,7 +273,7 @@ public enum NeedEngine {
         let midnight = calendar.startOfDay(for: now)
         let boxedToday = signals.workouts.contains { $0.kind == .boxing && $0.end >= midnight }
         guard !boxedToday else { return nil }
-        return NeedReading(need: .boxingWarmup, since: start, reasons: ["今天打拳，拳套我戴好了"])
+        return NeedReading(need: .boxingWarmup, since: start, reasons: ["今天打拳，拳套我戴好了"], until: end)
     }
 
     private static func isFresh(_ reached: Date, today: Date, now: Date, rules: NeedRules) -> Bool {
