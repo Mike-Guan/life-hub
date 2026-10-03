@@ -170,3 +170,20 @@ import Testing
         #expect(fromOldBuild.bedtime == nil)
     }
 }
+
+@Suite struct BedtimeSettingsTests {
+    @Test func storedScheduleRoundTripsAndFallsBack() throws {
+        let suite = "lifehub-tests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        #expect(BedtimeSchedule.stored(in: defaults) == .standard)
+
+        let late = BedtimeSchedule(startMinute: 23 * 60 + 45, endMinute: 5 * 60)
+        late.store(in: defaults)
+        #expect(BedtimeSchedule.stored(in: defaults) == late)
+        #expect(late.startComponents == DateComponents(hour: 23, minute: 45))
+
+        defaults.set(Data("bad".utf8), forKey: "bedtimeSchedule")
+        #expect(BedtimeSchedule.stored(in: defaults) == .standard)
+    }
+}

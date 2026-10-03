@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Bedtime reminder: one local notification a day at 23:30 (changeable in the new settings sheet).
+  Long-press it to see RUNNER yawning. From then until 05:00 RUNNER is sleepy on the home screen
+  and in widgets, and opening the app plays the good-night animation once. No second reminder.
 - Automatic mode from the weekday schedule: Monday to Friday 9:30 to 18:30 is work, other times
   chill. It switches once per period and waits 2 hours after a manual change. Rules for arriving at
   the gym (straight to boxing) and the office (work), and leaving the gym after 30+ minutes (back to

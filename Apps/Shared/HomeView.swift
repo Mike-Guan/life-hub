@@ -5,6 +5,9 @@ import SwiftUI
 struct HomeView: View {
     /// A setup problem from the app, shown with the store errors.
     var extraError: String?
+    var bedtime: BedtimeSchedule = .standard
+    /// Shows a settings button that calls this, when set.
+    var onSettings: (() -> Void)?
 
     @Environment(ModeStore.self) private var store
     @Environment(EnergyStore.self) private var energy
@@ -14,11 +17,22 @@ struct HomeView: View {
         let reading = energy.reading()
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
-                Header(mode: store.current, error: store.lastError ?? energy.lastError ?? extraError)
+                Header(
+                    mode: store.current,
+                    error: store.lastError ?? energy.lastError ?? extraError,
+                    onSettings: onSettings
+                )
 
-                CompanionView(mode: store.current, energy: reading?.value, cheer: cheer)
-                    .frame(height: 340)
-                    .toyCard()
+                TimelineView(.everyMinute) { context in
+                    CompanionView(
+                        mode: store.current,
+                        energy: reading?.value,
+                        cheer: cheer,
+                        bedtime: bedtime.state(at: context.date)
+                    )
+                }
+                .frame(height: 340)
+                .toyCard()
 
                 if let mode = store.current {
                     Text(mode.tagline)
@@ -73,6 +87,7 @@ extension View {
 private struct Header: View {
     let mode: Mode?
     let error: String?
+    let onSettings: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -97,6 +112,15 @@ private struct Header: View {
                         .frame(width: 14, height: 14)
                         .help(error)
                         .accessibilityLabel(error)
+                }
+                if let onSettings {
+                    Button(action: onSettings) {
+                        Image(systemName: "gearshape.fill")
+                            .font(Toy.body(18, weight: .heavy))
+                            .foregroundStyle(Toy.ink)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("设置")
                 }
             }
             Text(subtitle)

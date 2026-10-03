@@ -44,3 +44,23 @@ extension BedtimeSchedule {
         return changes.min()
     }
 }
+
+extension BedtimeSchedule {
+    static let defaultsKey = "bedtimeSchedule"
+
+    /// The schedule saved in `defaults`, or `.standard` when none is saved or it can't be read.
+    public static func stored(in defaults: UserDefaults) -> BedtimeSchedule {
+        guard let data = defaults.data(forKey: defaultsKey) else { return .standard }
+        return (try? JSONDecoder().decode(BedtimeSchedule.self, from: data)) ?? .standard
+    }
+
+    /// Saves the schedule in `defaults`.
+    public func store(in defaults: UserDefaults) {
+        defaults.set(try? JSONEncoder().encode(self), forKey: Self.defaultsKey)
+    }
+
+    /// The reminder time as hour and minute.
+    public var startComponents: DateComponents {
+        DateComponents(hour: startMinute / 60, minute: startMinute % 60)
+    }
+}

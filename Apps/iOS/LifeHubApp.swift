@@ -8,6 +8,9 @@ struct LifeHubApp: App {
     @State private var energy: EnergyStore
     @State private var widgets: WidgetBridge
     @State private var setupErrors: [String]
+    @State private var bedtime: BedtimeSchedule
+    @State private var reminderError: String?
+    @State private var showsSettings = false
     @State private var healthError: String?
     @Environment(\.scenePhase) private var scenePhase
 
@@ -19,23 +22,42 @@ struct LifeHubApp: App {
         }
         _store = State(initialValue: ModeStore.live(in: container, defaults: AppGroup.defaults))
         _energy = State(initialValue: EnergyStore.live(in: container, defaults: AppGroup.defaults))
-        _widgets = State(initialValue: WidgetBridge(container: container))
+        let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
+        _bedtime = State(initialValue: bedtime)
+        _widgets = State(initialValue: WidgetBridge(container: container, bedtime: bedtime))
         _setupErrors = State(initialValue: errors)
     }
 
     var body: some Scene {
         WindowGroup {
-            HomeView(extraError: (setupErrors + [widgets.lastError, healthError].compactMap { $0 }).first)
+            HomeView(extraError: firstError, bedtime: bedtime, onSettings: { showsSettings = true })
                 .environment(store)
                 .environment(energy)
                 .onChange(of: scenePhase, initial: true) { _, phase in
                     guard phase == .active else { return }
                     syncWidgets()
-                    importSleep()
+                    // One after the other, so the two permission prompts don't overlap.
+                    Task {
+                        await scheduleReminder()
+                        await importSleep()
+                    }
+                }
+                .onChange(of: bedtime) {
+                    bedtime.store(in: AppGroup.defaults)
+                    widgets.bedtime = bedtime
+                    syncWidgets()
+                    Task { await scheduleReminder() }
+                }
+                .sheet(isPresented: $showsSettings) {
+                    SettingsView(bedtime: $bedtime)
                 }
                 .onChange(of: store.log.changes.count) { syncWidgets() }
                 .onChange(of: energy.log.events.count) { syncWidgets() }
         }
+    }
+
+    private var firstError: String? {
+        (setupErrors + [widgets.lastError, reminderError, healthError].compactMap { $0 }).first
     }
 
     // Pulls in taps made on widgets, then gives widgets the app's view of the state.
@@ -44,17 +66,19 @@ struct LifeHubApp: App {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
+    private func scheduleReminder() async {
+        reminderError = await BedtimeReminder.schedule(bedtime)
+    }
+
     // Re-reads each time the app becomes active, so sleep the Watch syncs later still counts.
-    private func importSleep() {
-        Task {
-            do {
-                if let night = try await HealthSleep.lastNight(), energy.record(night) {
-                    syncWidgets()
-                }
-                healthError = nil
-            } catch {
-                healthError = "读不到健康 App 里的睡眠：\(error.localizedDescription)"
+    private func importSleep() async {
+        do {
+            if let night = try await HealthSleep.lastNight(), energy.record(night) {
+                syncWidgets()
             }
+            healthError = nil
+        } catch {
+            healthError = "读不到健康 App 里的睡眠：\(error.localizedDescription)"
         }
     }
 }
