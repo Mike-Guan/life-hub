@@ -4,11 +4,13 @@ import SwiftUI
 @main
 struct LifeHubMacApp: App {
     @State private var store = ModeStore.live()
+    @State private var energy = EnergyStore.live()
 
     var body: some Scene {
         WindowGroup("Life Hub") {
             HomeView()
                 .environment(store)
+                .environment(energy)
                 .frame(minWidth: 440, minHeight: 720)
         }
         .windowResizability(.contentMinSize)

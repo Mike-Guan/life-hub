@@ -43,3 +43,13 @@ public final class EnergyStore {
         StateEngine.energy(events: log.active, now: now, calendar: calendar)
     }
 }
+
+extension EnergyStore {
+    /// The store the apps use, in `container` with this device's id from `defaults`.
+    public static func live(
+        in container: HubContainer = .applicationSupport(),
+        defaults: UserDefaults = .standard
+    ) -> EnergyStore {
+        EnergyStore(fileURL: container.energyLogURL, deviceID: HubDevice.id(defaults: defaults))
+    }
+}

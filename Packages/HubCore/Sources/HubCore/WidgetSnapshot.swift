@@ -33,3 +33,57 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         self.init(mode: log.current?.mode, since: log.current?.at, energy: energy, bedtime: bedtime, updatedAt: now)
     }
 }
+
+extension WidgetSnapshot {
+    /// The snapshot stored at `url`, or `nil` when there is none or it can't be decoded.
+    public static func read(from url: URL) -> WidgetSnapshot? {
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? HubJSON.decoder().decode(WidgetSnapshot.self, from: data)
+    }
+
+    /// Writes the snapshot to `url`.
+    /// - Throws: file system or encoding errors.
+    public func write(to url: URL) throws {
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try HubJSON.encoder().encode(self).write(to: url, options: .atomic)
+    }
+
+    /// This snapshot with `item` applied, for widgets to show a change before the app runs.
+    public func applying(_ item: InboxItem) -> WidgetSnapshot {
+        var copy = self
+        switch item {
+        case .mode(let change) where change.mode != mode:
+            copy.mode = change.mode
+            copy.since = change.at
+        case .energy(let event) where event.kind == .selfReport:
+            copy.energy = event.level
+        default:
+            break
+        }
+        copy.updatedAt = max(updatedAt, item.at)
+        return copy
+    }
+
+    // Energy is per hub day. A snapshot from before today's 05:00 says nothing about today.
+    /// Today's energy as of `date`.
+    public func energy(at date: Date, calendar: Calendar = .current) -> EnergyLevel? {
+        updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) ? energy : nil
+    }
+
+    /// When widgets should redraw after `date`: now, the next bedtime change and the next day start.
+    public static func timelineDates(
+        after date: Date,
+        bedtime schedule: BedtimeSchedule,
+        calendar: Calendar = .current
+    ) -> [Date] {
+        var dates = [date]
+        if let change = schedule.nextChange(after: date, calendar: calendar) {
+            dates.append(change)
+        }
+        let today = StateEngine.dayStart(for: date, calendar: calendar)
+        if let next = calendar.date(byAdding: .day, value: 1, to: today) {
+            dates.append(next)
+        }
+        return Array(Set(dates)).sorted()
+    }
+}
