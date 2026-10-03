@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Couch scrolling look for RUNNER: slumped back with half-closed eyes, a lit phone in hand and a
+  thumb flick every few seconds. When the app passes today's invite, RUNNER gets up, jumps and says
+  it in the bubble.
 - RUNNER acts out the need on the home screen and in widgets: lying on the couch after enough
   scrolling or an evening still at home, gloves on on Sunday morning. The Screen Time threshold now
   counts (debug builds). Sunday boxing ends at 12:00 and Screen Time couch after 3 hours, also on the
