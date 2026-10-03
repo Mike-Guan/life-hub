@@ -61,3 +61,8 @@ make hooks    # 装 pre-commit：提交前自动 lint 改动的 Swift 文件
 - UI 截图测试：等界面稳定（M1a 之后）。
 - 小组件、HealthKit、定位相关的流程按经验 L-QA 必须真机测，不放进 CI。
 - 每次发版测一遍全新安装和升级安装（经验 L-QA）。数据层面的升级兼容已由数据契约测试覆盖。
+
+## 已知限制
+
+- 目前只有 iOS 会上传 TestFlight。Mac 要先加 App Sandbox 权限，到 M1b 再接进发布流程。
+- CI 的格式检查用 Swift 6.2 容器里的 swift-format，本地 `make format` 用的是 Xcode 自带的版本。两边版本不同时，可能本地格式没问题、CI 却报格式错误。这时以 CI 日志为准，或者把本地 Xcode 升级到和 CI 一样的 Swift 版本。
