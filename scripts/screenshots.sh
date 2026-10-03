@@ -13,6 +13,8 @@ udid=$(xcrun simctl list devices available -j |
   jq -r '[.devices[][] | select(.name | test("^iPhone [0-9]+ Pro$"))] | last | .udid')
 xcrun simctl boot "$udid" || true
 xcrun simctl bootstatus "$udid" -b
+# Reduce motion makes RUNNER hold its still pose, so every run draws the same frame.
+xcrun simctl spawn "$udid" defaults write com.apple.Accessibility ReduceMotionEnabled -bool true
 xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100
 xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-iOS -configuration Debug \
   -destination "id=$udid" -derivedDataPath build CODE_SIGNING_ALLOWED=NO
@@ -27,7 +29,9 @@ for mode in "${modes[@]}"; do
 done
 xcrun simctl terminate "$udid" "$bundle" || true
 
-# Mac: launch each mode and capture just its window.
+# Mac: launch each mode and capture just its window. The reduce motion write can be refused on
+# some Macs; then RUNNER may be caught mid-blink.
+defaults write com.apple.universalaccess reduceMotion -bool true || echo "Could not turn on reduce motion" >&2
 xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-macOS -configuration Debug \
   -destination 'platform=macOS' -derivedDataPath build CODE_SIGNING_ALLOWED=NO
 mac_app=build/Build/Products/Debug/LifeHub.app
