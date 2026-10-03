@@ -1,4 +1,4 @@
-.PHONY: project open test coverage lint format hooks check art art-check
+.PHONY: project open test coverage lint format hooks check art art-check screenshots
 
 project:
 	xcodegen generate
@@ -34,3 +34,7 @@ art:
 # Fail if RunnerArt.swift is out of date with the SVG.
 art-check: art
 	git diff --exit-code -- Packages/CompanionKit/Sources/CompanionKit/RunnerArt.swift
+
+# Redraw the README images in docs/screenshots/ (iOS simulator + Mac window, one per mode).
+screenshots:
+	scripts/screenshots.sh

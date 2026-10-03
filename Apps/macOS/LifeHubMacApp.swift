@@ -8,10 +8,16 @@ struct LifeHubMacApp: App {
 
     var body: some Scene {
         WindowGroup("Life Hub") {
-            HomeView()
-                .environment(store)
-                .environment(energy)
-                .frame(minWidth: 440, minHeight: 720)
+            Group {
+                if let mode = ScreenshotMode.mode {
+                    ScreenshotHome(mode: mode)
+                } else {
+                    HomeView()
+                        .environment(store)
+                        .environment(energy)
+                }
+            }
+            .frame(minWidth: 440, minHeight: 720)
         }
         .windowResizability(.contentMinSize)
 
