@@ -53,8 +53,9 @@ public struct ModeChange: Codable, Identifiable, Equatable, Sendable {
         case schemaVersion, id, mode, source, tag, at, createdAt, updatedAt, updatedBy, deletedAt
     }
 
-    /// Tolerant decoding: only `id`, `mode` and `at` are required, everything else has a default,
-    /// so records written by an older or newer build still load.
+    // Defaults let records written by an older or newer build still load.
+    /// Decodes a change. Only `id`, `mode` and `at` are required.
+    /// - Throws: `DecodingError` when a required field is missing or invalid.
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try values.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1

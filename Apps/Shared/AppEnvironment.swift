@@ -1,6 +1,7 @@
 /// Which build this is. Set per Xcode configuration in project.yml.
 enum AppEnvironment {
-    /// Shown in the header on non-PROD builds so they can't be mistaken for the real one.
+    // Shown so a test build can't be mistaken for the real one.
+    /// Header badge text on non-PROD builds.
     static var badge: String? {
         #if ENV_DEV
         "DEV"

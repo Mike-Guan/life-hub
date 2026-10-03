@@ -1,6 +1,7 @@
 import Foundation
 
-/// What widgets and the menu bar read. The app computes it; readers never touch the full log.
+// The app computes it; readers never touch the full log.
+/// What widgets and the menu bar read.
 public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public static let currentSchemaVersion = 1
 

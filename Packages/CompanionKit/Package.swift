@@ -5,10 +5,10 @@ let package = Package(
     name: "CompanionKit",
     platforms: [.iOS(.v18), .macOS(.v15)],
     products: [
-        .library(name: "CompanionKit", targets: ["CompanionKit"]),
+        .library(name: "CompanionKit", targets: ["CompanionKit"])
     ],
     dependencies: [
-        .package(path: "../HubCore"),
+        .package(path: "../HubCore")
     ],
     targets: [
         .target(
@@ -16,5 +16,6 @@ let package = Package(
             dependencies: ["HubCore"],
             resources: [.process("Resources")]
         ),
+        .testTarget(name: "CompanionKitTests", dependencies: ["CompanionKit", "HubCore"]),
     ]
 )
