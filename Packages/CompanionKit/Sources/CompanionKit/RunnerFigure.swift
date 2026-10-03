@@ -189,7 +189,6 @@ struct RunnerPose {
         if need == .couchScroll { scroll(time: t) }
     }
 
-    /// Gloves up and bouncing whatever the mode; a look at the door every 4 s.
     /// Slumped over the phone: a thumb flick every 2.5 s, slow blinks.
     private mutating func scroll(time t: TimeInterval) {
         headDy = 3
@@ -198,6 +197,7 @@ struct RunnerPose {
         feed = Self.ramp(CGFloat(t.truncatingRemainder(dividingBy: 2.5)), from: 0, to: 0.4)
     }
 
+    /// Gloves up and bouncing whatever the mode; a look at the door every 4 s.
     private mutating func warmUp(time t: TimeInterval, react r: CGFloat) {
         let bounce = CGFloat(sin(t * 2 * .pi / 0.6)) * 3
         gloveL = CGSize(width: 0, height: bounce)
