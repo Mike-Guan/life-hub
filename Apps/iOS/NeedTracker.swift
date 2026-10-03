@@ -8,6 +8,8 @@ import Observation
 final class NeedTracker {
     /// The current need, `nil` when there is none.
     private(set) var reading: NeedReading?
+    /// The celebration RUNNER should play, `nil` when there is none.
+    private(set) var event: CompanionEvent?
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
     @ObservationIgnored private var motion: HealthMotion.Reading?
@@ -36,4 +38,20 @@ final class NeedTracker {
         )
         reading = NeedEngine.need(signals, now: now)
     }
+
+    // Only called while the app is on screen, so a celebration isn't spent in the background.
+    /// Picks the newest workout worth celebrating that hasn't been, and remembers it.
+    func celebrate(bedtime: Bedtime, now: Date = .now) {
+        // Without a reading the remembered ids would all look stale and be dropped.
+        guard bedtime == .off, let workouts = motion?.workouts else { return }
+        let recent = Set(workouts.map(\.id))
+        // Ids of workouts that dropped out of the last two days are forgotten, so the list stays short.
+        var celebrated = Set(AppGroup.defaults.stringArray(forKey: Self.celebratedKey) ?? []).intersection(recent)
+        guard let workout = NeedEngine.celebration(workouts, celebrated: celebrated, now: now) else { return }
+        celebrated.insert(workout.id)
+        AppGroup.defaults.set(Array(celebrated), forKey: Self.celebratedKey)
+        event = .celebrate(id: workout.id)
+    }
+
+    private static let celebratedKey = "celebratedWorkouts"
 }

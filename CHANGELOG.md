@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- RUNNER celebrates a 5 km run or 30 minutes of boxing once, the next time the app is opened within
+  3 hours of the workout ending. Never at bedtime.
 - RUNNER acts out the need on the home screen and in widgets: lying on the couch after enough
   scrolling or an evening still at home, gloves on on Sunday morning. The Screen Time threshold now
   counts (debug builds). Sunday boxing ends at 12:00 and Screen Time couch after 3 hours, also on the

@@ -54,7 +54,13 @@ struct LifeHubApp: App {
     }
 
     private var home: some View {
-        HomeView(extraError: firstError, bedtime: bedtime, need: needs.reading, onSettings: { showsSettings = true })
+        HomeView(
+            extraError: firstError,
+            bedtime: bedtime,
+            need: needs.reading,
+            event: needs.event,
+            onSettings: { showsSettings = true }
+        )
             .environment(store)
             .environment(energy)
             .onChange(of: scenePhase, initial: true) { _, phase in
@@ -66,6 +72,7 @@ struct LifeHubApp: App {
                     await importSleep()
                     await needs.importMotion()
                     refreshNeeds()
+                    needs.celebrate(bedtime: bedtime.state(at: .now))
                 }
             }
             .onChange(of: bedtime) {
