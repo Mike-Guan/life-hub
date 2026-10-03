@@ -11,6 +11,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   only; only a summary is kept. Screen Time couch scrolling now only counts at home (or when home
   isn't set) and for 3 hours, and its line doesn't name the apps. On Sunday until 10:30 boxing
   warm-up comes before couch scrolling.
+- Boxing warm-up look for RUNNER: gloves and red headband on over any outfit, bouncing, and a look
+  at the door every few seconds, with its own tap lines. The same look works in widgets and as a
+  small head for the Sunday countdown. Not switched on in the app yet.
 - Screen Time watch: in settings, pick Bilibili and Xiaohongshu. When they add up to 30 minutes in a
   day, the app learns that the threshold was reached (never how long they were used). Debug builds
   only (the settings card too) until Apple approves Family Controls for TestFlight. RUNNER doesn't use it yet.

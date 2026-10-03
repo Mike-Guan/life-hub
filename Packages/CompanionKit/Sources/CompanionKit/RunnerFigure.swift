@@ -97,6 +97,8 @@ struct RunnerPose {
     var blink: CGFloat = 1
     /// Eyes looking up (work tap: eye roll).
     var eyesDy: CGFloat = 0
+    /// Eyes looking sideways; negative is toward the door on the left.
+    var eyesDx: CGFloat = 0
     var ledOpacity: Double = 1
     /// Work tap: the LED shows dots instead of the line.
     var ledDots = false
@@ -110,6 +112,8 @@ struct RunnerPose {
     var glint: CGFloat = -1
     var coinTurn: Double = 0
     var face = EnergyFace.mid
+    /// What RUNNER acts out on top of the mode's outfit.
+    var need: CompanionNeed?
     /// Brightness of the sparkles by the head on high energy, 0...1.
     var sparkle: Double = 1
     /// Bedtime overlay: sleepy eyes, mask down, the mode's outfit stays.
@@ -128,14 +132,16 @@ struct RunnerPose {
     var tired: Bool { face == .low }
 
     /// The still pose, used for reduced motion and static renders.
-    init(face: EnergyFace = .mid) {
+    init(face: EnergyFace = .mid, need: CompanionNeed? = nil) {
         self.face = face
+        self.need = need
         if tired { blink = 0.75 }
+        if need == .boxingWarmup { eyesDx = -2 }
     }
 
     /// Pose at `time` for `mode`. `react` runs 0 → 1 → 0 after a tap.
-    init(mode: Mode, time: TimeInterval, face: EnergyFace, react: Double) {
-        self.init(face: face)
+    init(mode: Mode, time: TimeInterval, face: EnergyFace, need: CompanionNeed? = nil, react: Double) {
+        self.init(face: face, need: need)
         let t = time * face.speed
         let open: CGFloat = tired ? 0.75 : 1
         let r = CGFloat(react)
@@ -170,6 +176,16 @@ struct RunnerPose {
             glint = sweep < 0.6 ? 0.28 + CGFloat(sweep / 0.6) * 0.5 : -1
             coinTurn = 360 * react
         }
+        if need == .boxingWarmup { warmUp(time: t, react: r) }
+    }
+
+    /// Gloves up and bouncing whatever the mode; a look at the door every 4 s.
+    private mutating func warmUp(time t: TimeInterval, react r: CGFloat) {
+        let bounce = CGFloat(sin(t * 2 * .pi / 0.6)) * 3
+        gloveL = CGSize(width: 0, height: bounce)
+        gloveR = CGSize(width: -14 * r, height: -bounce - 10 * r)
+        gloveRScale = 1 + 0.2 * r
+        eyesDx = -3 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 4)), from: 2.6, to: 4)
     }
 
     /// Bedtime pose at `time`.
@@ -263,6 +279,10 @@ struct RunnerFigure: View {
             visible.formUnion(moneyParts)
         }
         if pose.tired, mode != .chill { visible.insert(.eyebags) }
+        if pose.need == .boxingWarmup, !pose.bedtime {
+            visible.formUnion(warmupParts)
+            visible.remove(.monsterCan)
+        }
         if pose.face == .high {
             visible.insert(.sparkle)
             if mode != .chill { visible.insert(.eyeGlint) }
@@ -298,6 +318,7 @@ struct RunnerFigure: View {
         .eyesWork, .lidsWork, .browsWork, .eyesChill, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
         .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen,
     ]
+    nonisolated private static let warmupParts: Set<RunnerPart> = [.headband, .gloveL, .gloveR]
     nonisolated private static let sleepyParts: Set<RunnerPart> = [.eyesSleepy, .eyebags, .maskDown]
     nonisolated private static let headsetParts: Set<RunnerPart> = [.headset, .cupL, .cupR, .mic]
 
@@ -308,7 +329,10 @@ struct RunnerFigure: View {
             case .eyesWork, .lidsWork, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 1, y: pose.blink, anchor: Self.unit(x: 60, y: 65))
-                    .offset(y: pose.eyesDy * scale)
+                    .offset(x: pose.eyesDx * scale, y: pose.eyesDy * scale)
+            case .eyesChill:
+                // Closed smiling eyes don't blink, but they still look at the door while warming up.
+                RunnerPartView(part: part).offset(x: pose.eyesDx * scale)
             case .ledLine:
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
             case .headset, .cupL, .cupR, .mic:
@@ -518,12 +542,20 @@ public struct CompanionPortrait: View {
 
     let mode: Mode
     let energy: Double?
+    let need: CompanionNeed?
     let bedtime: Bedtime
     let framing: Framing
 
-    public init(mode: Mode, energy: Double? = nil, bedtime: Bedtime = .off, framing: Framing = .full) {
+    public init(
+        mode: Mode,
+        energy: Double? = nil,
+        need: CompanionNeed? = nil,
+        bedtime: Bedtime = .off,
+        framing: Framing = .full
+    ) {
         self.mode = mode
         self.energy = energy
+        self.need = need
         self.bedtime = bedtime
         self.framing = framing
     }
@@ -537,11 +569,11 @@ public struct CompanionPortrait: View {
                 HeadCrop { figure }
             }
         }
-        .accessibilityLabel(bedtime == .on ? "RUNNER，困了" : "RUNNER，\(mode.title)")
+        .accessibilityLabel(CompanionLines.accessibilityLabel(mode: mode, need: need, bedtime: bedtime))
     }
 
     private var figure: RunnerFigure {
-        let pose = bedtime == .on ? RunnerPose.bedtimeStill() : RunnerPose(face: EnergyFace(energy: energy))
+        let pose = bedtime == .on ? RunnerPose.bedtimeStill() : RunnerPose(face: EnergyFace(energy: energy), need: need)
         return RunnerFigure(mode: mode, pose: pose)
     }
 }
@@ -580,6 +612,12 @@ private struct HeadCrop<Content: View>: View {
         CompanionPortrait(mode: .work, bedtime: .on)
             .padding(8)
             .background(Mode.work.color)
+        CompanionPortrait(mode: .chill, need: .boxingWarmup)
+            .padding(8)
+            .background(Mode.chill.color)
+        CompanionPortrait(mode: .chill, need: .boxingWarmup, framing: .head)
+            .frame(width: 76)
+            .background(Mode.chill.color, in: Circle())
         CompanionPortrait(mode: .work, bedtime: .on, framing: .head)
             .frame(width: 76)
             .background(.black, in: Circle())

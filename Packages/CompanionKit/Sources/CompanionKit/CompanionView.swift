@@ -8,6 +8,8 @@ public struct CompanionView: View {
     let mode: Mode?
     /// Energy 0-100, or nil when unknown. Below 30 RUNNER looks tired; from 70 it looks bright.
     let energy: Double?
+    /// What RUNNER acts out on top of the mode, or nil.
+    let need: CompanionNeed?
     /// Increment to play the cheer jump.
     let cheer: Int
     /// `.on` turns RUNNER sleepy; each change to `.on` plays the good-night animation once.
@@ -28,6 +30,7 @@ public struct CompanionView: View {
     public init(
         mode: Mode?,
         energy: Double? = nil,
+        need: CompanionNeed? = nil,
         cheer: Int = 0,
         bedtime: Bedtime = .off,
         style: CompanionStyle = .standard,
@@ -35,6 +38,7 @@ public struct CompanionView: View {
     ) {
         self.mode = mode
         self.energy = energy
+        self.need = need
         self.cheer = cheer
         self.bedtime = bedtime
         self.style = style
@@ -131,21 +135,22 @@ public struct CompanionView: View {
     private var face: EnergyFace { EnergyFace(energy: energy) }
 
     private var accessibilityText: String {
-        if bedtime == .on { return "RUNNER，困了" }
-        return mode.map { "RUNNER，\($0.title)" } ?? "RUNNER"
+        CompanionLines.accessibilityLabel(mode: mode, need: need, bedtime: bedtime)
     }
 
     private var paused: Bool { reduceMotion || scenePhase != .active }
 
     private func idleMotion(_ mode: Mode, time: TimeInterval) -> IdleMotion {
         if bedtime == .on { return IdleMotion.sleeping(time: time) }
-        return IdleMotion(mode: mode, time: time * face.speed)
+        // Warming up hops like boxing day, whatever the outfit.
+        let motionMode = need == .boxingWarmup ? .boxing : mode
+        return IdleMotion(mode: motionMode, time: time * face.speed)
     }
 
     private func pose(_ mode: Mode, time: TimeInterval, react: Double) -> RunnerPose {
         if bedtime == .on { return bedtimePose(time: time) }
-        if reduceMotion { return RunnerPose(face: face) }
-        return RunnerPose(mode: mode, time: time, face: face, react: react)
+        if reduceMotion { return RunnerPose(face: face, need: need) }
+        return RunnerPose(mode: mode, time: time, face: face, need: need, react: react)
     }
 
     private func bedtimePose(time: TimeInterval) -> RunnerPose {
@@ -184,7 +189,7 @@ public struct CompanionView: View {
     private func react() {
         pop += 1
         taps += 1
-        let lines = CompanionLines.lines(for: mode)
+        let lines = CompanionLines.lines(for: mode, need: need)
         let candidates = lines.filter { $0 != bubble }
         say((candidates.isEmpty ? lines : candidates).randomElement())
     }
@@ -273,6 +278,7 @@ private struct SpeechBubble: View {
             }
             CompanionView(mode: .boxing, energy: 10).frame(height: 180).toyCard()
             CompanionView(mode: .money, energy: 85).frame(height: 180).toyCard()
+            CompanionView(mode: .chill, need: .boxingWarmup).frame(height: 180).toyCard()
             CompanionView(mode: .work, bedtime: .on).frame(height: 180).toyCard()
             CompanionView(mode: .chill, bedtime: .on, style: .notification, showsBubble: false)
                 .frame(height: 180)
