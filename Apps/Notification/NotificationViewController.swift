@@ -7,6 +7,8 @@ import UserNotificationsUI
 
 /// Shows RUNNER in the expanded notification: sleepy at bedtime, getting up for an invite.
 final class NotificationViewController: UIViewController, UNNotificationContentExtension {
+    private var host: UIHostingController<CompanionView>?
+
     nonisolated func didReceive(_ notification: UNNotification) {
         let content = notification.request.content
         let invite = content.categoryIdentifier == InviteReminder.category ? content.body : nil
@@ -25,7 +27,13 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
             style: .notification,
             showsBubble: false
         )
+        // didReceive runs again when the notification is updated; reuse the view then.
+        if let host {
+            host.rootView = runner
+            return
+        }
         let host = UIHostingController(rootView: runner)
+        self.host = host
         addChild(host)
         host.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(host.view)
