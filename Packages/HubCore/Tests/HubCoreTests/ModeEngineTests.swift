@@ -83,6 +83,18 @@ import Testing
         #expect(decision == ModeDecision(mode: .chill, source: .location, reason: "离开拳馆，回到「下班 Chill」"))
     }
 
+    @Test func leavingTheGymAfterWorkHoursFollowsTheSchedule() {
+        let visit = log((.work, .schedule, date(5, 9, 30)), (.boxing, .location, date(5, 18)))
+        let decision = decide(.leftGym, visit, at: date(5, 20))
+        #expect(decision?.mode == .chill)
+        let left = log(
+            (.work, .schedule, date(5, 9, 30)),
+            (.boxing, .location, date(5, 18)),
+            (.chill, .location, date(5, 20))
+        )
+        #expect(decide(.schedule, left, at: date(5, 21)) == nil)
+    }
+
     @Test func leavingTheGymWithNoHistoryUsesTheSchedule() {
         let visit = log((.boxing, .location, date(5, 7)))
         #expect(decide(.leftGym, visit, at: date(5, 10))?.mode == .work)

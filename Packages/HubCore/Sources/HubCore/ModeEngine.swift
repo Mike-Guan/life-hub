@@ -99,7 +99,10 @@ public enum ModeEngine {
             // Only undo our own switch: the gym entry must still be the latest change.
             guard let entry = current, isGymVisit(entry) else { return nil }
             guard now.timeIntervalSince(entry.at) >= rules.gymMinimumStay else { return nil }
-            let before = changes.dropLast().last?.mode ?? scheduledMode(at: now, rules: rules, calendar: calendar)
+            // A mode Mike picked comes back; anything automatic is re-decided by the schedule for now.
+            let previous = changes.dropLast().last
+            let scheduled = scheduledMode(at: now, rules: rules, calendar: calendar)
+            let before = previous.map { $0.source.isManual ? $0.mode : scheduled } ?? scheduled
             guard before != .boxing else { return nil }
             return ModeDecision(mode: before, source: .location, reason: "离开拳馆，回到「\(before.title)」")
 
