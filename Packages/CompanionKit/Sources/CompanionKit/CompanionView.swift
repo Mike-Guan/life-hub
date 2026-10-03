@@ -6,7 +6,7 @@ import SwiftUI
 /// RUNNER, reacting to the current mode and energy.
 public struct CompanionView: View {
     let mode: Mode?
-    /// Energy 0-100, or nil when unknown. Below 30 RUNNER looks tired.
+    /// Energy 0-100, or nil when unknown. Below 30 RUNNER looks tired; from 70 it looks bright.
     let energy: Double?
     /// Increment to play the cheer jump.
     let cheer: Int
@@ -128,7 +128,7 @@ public struct CompanionView: View {
         }
     }
 
-    private var tired: Bool { RunnerPose.isTired(energy) }
+    private var face: EnergyFace { EnergyFace(energy: energy) }
 
     private var accessibilityText: String {
         if bedtime == .on { return "RUNNER，困了" }
@@ -139,13 +139,13 @@ public struct CompanionView: View {
 
     private func idleMotion(_ mode: Mode, time: TimeInterval) -> IdleMotion {
         if bedtime == .on { return IdleMotion.sleeping(time: time) }
-        return IdleMotion(mode: mode, time: time * (tired ? 0.6 : 1))
+        return IdleMotion(mode: mode, time: time * face.speed)
     }
 
     private func pose(_ mode: Mode, time: TimeInterval, react: Double) -> RunnerPose {
         if bedtime == .on { return bedtimePose(time: time) }
-        if reduceMotion { return RunnerPose(tired: tired) }
-        return RunnerPose(mode: mode, time: time, tired: tired, react: react)
+        if reduceMotion { return RunnerPose(face: face) }
+        return RunnerPose(mode: mode, time: time, face: face, react: react)
     }
 
     private func bedtimePose(time: TimeInterval) -> RunnerPose {
@@ -272,6 +272,7 @@ private struct SpeechBubble: View {
                 CompanionView(mode: mode).frame(height: 180).toyCard()
             }
             CompanionView(mode: .boxing, energy: 10).frame(height: 180).toyCard()
+            CompanionView(mode: .money, energy: 85).frame(height: 180).toyCard()
             CompanionView(mode: .work, bedtime: .on).frame(height: 180).toyCard()
             CompanionView(mode: .chill, bedtime: .on, style: .notification, showsBubble: false)
                 .frame(height: 180)

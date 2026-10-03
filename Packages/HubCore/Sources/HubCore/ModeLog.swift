@@ -99,3 +99,14 @@ public struct ModeLog: RecordLog, Equatable {
             .reduce(into: [:]) { $0[$1.mode, default: 0] += $1.duration }
     }
 }
+
+extension ModeLog {
+    // Modes mostly change while the app is closed; opening it replays the last automatic switch.
+    /// The mode in effect at `date` when the latest change after it was automatic, else `nil`.
+    public func switchedFrom(since date: Date) -> Mode? {
+        let sorted = active
+        guard let latest = sorted.last, latest.at > date, !latest.source.isManual else { return nil }
+        guard let before = sorted.last(where: { $0.at <= date })?.mode, before != latest.mode else { return nil }
+        return before
+    }
+}
