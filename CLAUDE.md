@@ -36,30 +36,29 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
 - Never commit signing team IDs, certificates or keys. Never use `--no-verify`.
 - Plan first: a new feature starts with a short plan (GitHub issue: goal, scope, out of scope, test plan)
   that Mike approves before any code. Fixes, chores and docs don't need one.
-- Who runs what: agents open PRs and fix CI. The "PR 审查" reviewer thread merges to `main` (squash)
-  once a PR is reviewed and green, and decides merge order; that merge uploads STG. Authors never
-  merge their own PRs. Mike creates PROD tags by hand. Agents prepare a release PR titled
-  `Prepare release version X.Y.Z` (version bump + CHANGELOG) but never push tags.
+- Who runs what: Claude opens the PR, fixes CI, reviews its own diff (below), then squash-merges it
+  to `main` once CI is green. That merge uploads STG. Mike does not merge or review code.
+  Mike creates PROD tags by hand. Claude prepares a release PR titled
+  `Prepare release version X.Y.Z` (version bump + CHANGELOG) but never pushes tags.
 - Before asking for review, check the change four ways and write the result in the PR:
   1. it follows the patterns already in the repo; 2. it is the smallest change that works
   (DRY, KISS, YAGNI, SOLID); 3. `make check` and CI pass; 4. a short list of exact points
-  (file:line) the reviewer should look at.
-- Every PR is reviewed by the "PR 审查" thread (an iOS/macOS reviewer agent) against these rules.
-  Tell it on the board and by message when a PR opens; fix its blocking findings like any review.
-  Mike does not do code review. The PR description opens with one or two plain sentences, in
-  Chinese, saying what the PR adds that Mike will notice.
+  (file:line) worth a second look. Review as an iOS/macOS expert against this page before merging.
+- The PR description opens with one or two plain sentences, in Chinese, saying what the PR adds
+  that Mike will notice. That is all Mike reads.
 - Commits: one short imperative subject line (`Add mode widget`), body only when the why isn't obvious.
 - Report progress with evidence: commit sha, PR number, CI run link. When something fails, read the
   log and quote the exact error with file and line before drawing a conclusion.
-- Several Claude threads work on this project. Ownership and progress live on the shared board
-  `/mnt/project-files/energy-bank/协作看板.md` (outside the repo). Read it at the start of each turn,
-  append a line before ending one, and ask the owner there before editing files another thread owns.
-  Companion rendering (`CompanionView.swift`, `RunnerFigure.swift`, `RunnerArt.swift`, `Tools/`) belongs
-  to the UI thread; keep the CompanionKit public API stable.
+- Base every PR on `main`; never stack PRs. Before merging, check the base is `main`, CI is green on
+  the current head, then squash-merge pinned to that head sha.
+- Self-review hot spots: 30 fps TimelineView/Canvas work (pause when the scene is inactive),
+  data-contract decoding, and Mac App Sandbox before the Mac joins TestFlight.
+- Handoff notes, open work and next steps: `docs/交接.md`. Read it at the start of a session.
+- Keep the CompanionKit public API (`CompanionView`, `CompanionPortrait`) stable; app code calls it.
 
 ## Current status
-- M0: local JSON persistence (`ModeLog`), no iCloud entitlements yet, runs in the simulator.
-  Mike has a paid Apple Developer account, so SwiftData + CloudKit are next.
+- M0 is on `main` (0.1.0 unreleased): local JSON persistence (`ModeLog`), no iCloud or App Group
+  entitlements yet, runs in the simulator. Next is M1a, the iOS passive loop (Issue #4), not sync.
 - Companion draws RUNNER from vector parts (`RunnerArt.swift`, generated from
   `docs/03 Product/companion/runner-v5-layers.svg` by `Packages/CompanionKit/Tools/gen-runner-art.mjs`)
   with SwiftUI motion until `runner.riv` exists; then CompanionKit switches to Rive behind the same
@@ -69,8 +68,8 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
 - `Apps/iOS`, `Apps/macOS`: UI and platform glue only.
 - `Packages/HubCore`: models, ModeEngine, StateEngine, sync, App Intents, Assistant protocol.
 - `Packages/CompanionKit`: CompanionView / CompanionController wrapping Rive.
-- `Packages/SideHustleKit`: macOS-only tools and UI (content calendar, reference library, data import,
-  bookings). Side-hustle models (ContentItem, Reference, Booking) live in HubCore so iOS can show them.
+- `Packages/SideHustleKit` (planned): macOS-only side-hustle UI. P0 is a read-only board over
+  `~/副业资料/`, which Codex fills (format: `docs/05 Engineering/副业资料文件夹约定.md`), plus portals.
 Logic goes in packages, with unit tests. If iOS and macOS need the same logic, it belongs in HubCore.
 
 ## Core model rules
@@ -86,6 +85,9 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - StateEngine is rule-based and explainable. Each output carries the reasons that produced it.
 - Interventions: L0 companion expression only, L1 one line when the app is opened,
   L2 push notification max 1/day with a 3h cooldown. Low energy + low load is rest: do nothing.
+- Bedtime reminder (Mike's explicit exception, not counted in L2): one local notification a day at the
+  set time (default 23:30). `Bedtime` (off/on) is an overlay state, not a fifth mode. No follow-up,
+  nothing logged about when Mike sleeps.
 
 ## Companion
 - Data Binding only (no legacy state machine Inputs). View Model `Runner` in
@@ -162,3 +164,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-02: Threads coordinate through 协作看板.md; the UI thread owns companion rendering.
 - 2026-10-03: A dedicated reviewer thread ("PR 审查") reviews every PR; Mike only reads what each PR adds.
 - 2026-10-03: Mike handed merging to the reviewer thread, including merge order. PROD tags stay with Mike.
+- 2026-10-03: Multi-thread setup ended. One Claude Code session does PM, UI, engineering and review,
+  and merges its own PRs after CI is green. See `docs/交接.md`.
