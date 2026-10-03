@@ -34,7 +34,7 @@ public struct HubContainer: Sendable {
         let pairs = [(old.modeLogURL, modeLogURL), (old.energyLogURL, energyLogURL)]
         var errors: [String] = []
         let files = FileManager.default
-        for case let (from?, to?) in pairs where from != to {
+        for case (let from?, let to?) in pairs where from != to {
             guard files.fileExists(atPath: from.path), !files.fileExists(atPath: to.path) else { continue }
             do {
                 try files.createDirectory(at: to.deletingLastPathComponent(), withIntermediateDirectories: true)
