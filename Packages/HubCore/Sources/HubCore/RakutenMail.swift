@@ -44,7 +44,7 @@ public enum RakutenMail {
         let kind: CardCharge.Kind = subject.contains("速報") ? .quick : .detail
         var blocks: [[String: String]] = []
         for line in body.components(separatedBy: .newlines) {
-            guard case let (label, value)? = field(in: line) else { continue }
+            guard case (let label, let value)? = field(in: line) else { continue }
             if label == "利用日" { blocks.append([:]) }
             guard !blocks.isEmpty else { continue }
             blocks[blocks.count - 1][label] = value
