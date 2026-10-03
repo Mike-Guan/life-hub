@@ -12,6 +12,10 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var energy: EnergyLevel?
     /// Bedtime state when the snapshot was taken, `nil` in snapshots from older builds.
     public var bedtime: Bedtime?
+    /// What RUNNER acts out, `nil` when there is no need or in snapshots from older builds.
+    public var need: CompanionNeed?
+    /// Why RUNNER looks the way it does, for the rectangular Lock Screen widget.
+    public var line: String?
     public var updatedAt: Date
 
     public init(
@@ -19,6 +23,8 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         since: Date?,
         energy: EnergyLevel? = nil,
         bedtime: Bedtime? = nil,
+        need: CompanionNeed? = nil,
+        line: String? = nil,
         updatedAt: Date
     ) {
         self.schemaVersion = Self.currentSchemaVersion
@@ -26,6 +32,8 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         self.since = since
         self.energy = energy
         self.bedtime = bedtime
+        self.need = need
+        self.line = line
         self.updatedAt = updatedAt
     }
 
