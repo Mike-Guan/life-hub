@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Savings card on the iPhone home screen: how far the bank balance is from the savings target, with
+  a progress bar. Enter the balance on payday and the target in the new "钱" settings card. Both stay
+  on the iPhone. Card spending will come off the balance once email reading is in.
 - Budget groundwork (Issue #24), not shown in the app yet: reading Rakuten Card quick-notice and
   detail emails into expenses, pairing the two so each payment counts once, sorting shops into eating
   out / groceries / other by keywords, and the two numbers the money card will show (eating out left

@@ -12,6 +12,8 @@ struct HomeView: View {
     var event: CompanionEvent?
     /// Today's invite text while its need lasts, so RUNNER gets up and says it.
     var invite: String?
+    /// The savings card, once Mike has set a target and a balance.
+    var money: MoneyCard?
     /// Shows a settings button that calls this, when set.
     var onSettings: (() -> Void)?
 
@@ -66,6 +68,10 @@ struct HomeView: View {
 
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     TodayTimeline(segments: store.segments(on: context.date, now: context.date))
+                }
+
+                if let money {
+                    money
                 }
             }
             .padding(.horizontal, 20)

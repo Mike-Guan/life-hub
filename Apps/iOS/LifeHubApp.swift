@@ -15,6 +15,7 @@ struct LifeHubApp: App {
     @State private var healthError: String?
     @State private var countdownError: String?
     @State private var places: PlaceSettings
+    @State private var budget: BudgetSettings
     @State private var placeMonitor: PlaceMonitor
     @State private var needs: NeedTracker
     @Environment(\.scenePhase) private var scenePhase
@@ -38,6 +39,7 @@ struct LifeHubApp: App {
         _widgets = State(initialValue: widgets)
         _setupErrors = State(initialValue: errors)
         _places = State(initialValue: places)
+        _budget = State(initialValue: BudgetSettings.stored(in: AppGroup.defaults))
         _placeMonitor = State(initialValue: placeMonitor)
         _needs = State(initialValue: needs)
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
@@ -62,6 +64,7 @@ struct LifeHubApp: App {
             need: needs.reading,
             event: needs.event,
             invite: needs.invite,
+            money: moneyCard,
             onSettings: { showsSettings = true }
         )
         .environment(store)
@@ -99,11 +102,18 @@ struct LifeHubApp: App {
             Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs)
             refreshNeeds()
         }
+        .onChange(of: budget) { budget.store(in: AppGroup.defaults) }
         .sheet(isPresented: $showsSettings) {
-            SettingsView(bedtime: $bedtime, places: $places, monitor: placeMonitor)
+            SettingsView(bedtime: $bedtime, places: $places, budget: $budget, monitor: placeMonitor)
         }
         .onChange(of: store.log.changes.count) { syncWidgets() }
         .onChange(of: energy.log.events.count) { syncWidgets() }
+    }
+
+    // Card spending comes off the balance once email reading lands (Issue #24, PR 2).
+    private var moneyCard: MoneyCard? {
+        guard let target = budget.savingsTarget, let gap = budget.savingsGap(expenses: []) else { return nil }
+        return MoneyCard(gap: gap, target: target)
     }
 
     private var firstError: String? {
