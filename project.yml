@@ -54,6 +54,7 @@ targets:
       - package: HubCore
       - package: CompanionKit
       - target: LifeHub-Widgets
+      - target: LifeHub-Notification
     settings:
       base:
         CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub.entitlements
@@ -93,5 +94,25 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).widgets
         INFOPLIST_FILE: Apps/Widgets/Info.plist
         CODE_SIGN_ENTITLEMENTS: Apps/Widgets/LifeHubWidgets.entitlements
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
+  LifeHub-Notification:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Apps/Notification
+        excludes:
+          - Info.plist
+          - "*.entitlements"
+      - Apps/iOS/AppGroup.swift
+    dependencies:
+      - package: HubCore
+      - package: CompanionKit
+    settings:
+      base:
+        PRODUCT_NAME: LifeHubNotification
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).notification
+        INFOPLIST_FILE: Apps/Notification/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Apps/Notification/LifeHubNotification.entitlements
         TARGETED_DEVICE_FAMILY: "1"
         SKIP_INSTALL: YES

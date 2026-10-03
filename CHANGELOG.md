@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Bedtime reminder: one local notification a day at 23:30 (changeable in the new settings sheet).
+  Long-press it to see RUNNER yawning. From then until 05:00 RUNNER is sleepy on the home screen
+  and in widgets, and opening the app plays the good-night animation once. No second reminder.
 - iPhone widgets. Lock Screen (round, inline, rectangular) and Home Screen small: RUNNER with the
   current mode and today's energy, sleepy at bedtime. Home Screen buttons: switch mode (medium) and
   pick today's energy (small) without opening the app. The app applies widget taps when it opens.
