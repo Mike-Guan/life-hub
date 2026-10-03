@@ -20,11 +20,17 @@ public struct SleepNight: Equatable, Sendable {
 
     /// How many hours before the hub day starts the night may begin.
     static let lookback: TimeInterval = 12 * 60 * 60
+    // Sleep after 14:00 is a nap and doesn't count toward last night.
+    /// How many hours after the hub day starts the night may end.
+    static let latestEnd: TimeInterval = 9 * 60 * 60
 
-    /// The span to read sleep from for the hub day containing `now`: 17:00 the evening before until `now`.
+    /// The span to read sleep from for the hub day containing `now`: 17:00 the evening before until
+    /// `now` or 14:00, whichever is earlier.
     public static func window(for now: Date, calendar: Calendar = .current) -> DateInterval {
-        let start = StateEngine.dayStart(for: now, calendar: calendar).addingTimeInterval(-lookback)
-        return DateInterval(start: start, end: max(start, now))
+        let dayStart = StateEngine.dayStart(for: now, calendar: calendar)
+        let start = dayStart.addingTimeInterval(-lookback)
+        let end = min(now, dayStart.addingTimeInterval(latestEnd))
+        return DateInterval(start: start, end: max(start, end))
     }
 
     /// Joins overlapping intervals (Watch and iPhone both record) into one night.
