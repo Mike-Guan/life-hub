@@ -73,9 +73,10 @@ import Testing
         var log = ExpenseLog()
         let quick = charges(quickSubject, quickBody, id: "q")
         let detail = charges(detailSubject, detailBody, id: "d")
-        #expect(log.apply(quick, rules: .standard, deviceID: "t", now: day(10, 3)))
-        #expect(log.apply(detail, rules: .standard, deviceID: "t", now: day(10, 4)))
-        #expect(!log.apply(quick + detail, rules: .standard, deviceID: "t", now: day(10, 5)))
+        let first = log.apply(quick, rules: .standard, deviceID: "t", now: day(10, 3))
+        let second = log.apply(detail, rules: .standard, deviceID: "t", now: day(10, 4))
+        let again = log.apply(quick + detail, rules: .standard, deviceID: "t", now: day(10, 5))
+        #expect(first && second && !again)
 
         #expect(log.active.count == 2)
         let filled = log.expenses.filter { $0.detailSource != nil }
