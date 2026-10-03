@@ -49,6 +49,10 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
 - Commits: one short imperative subject line (`Add mode widget`), body only when the why isn't obvious.
 - Report progress with evidence: commit sha, PR number, CI run link. When something fails, read the
   log and quote the exact error with file and line before drawing a conclusion.
+- Base every PR on `main`; never stack PRs. Before merging, check the base is `main`, CI is green on
+  the current head, then squash-merge pinned to that head sha.
+- Self-review hot spots: 30 fps TimelineView/Canvas work (pause when the scene is inactive),
+  data-contract decoding, and Mac App Sandbox before the Mac joins TestFlight.
 - Handoff notes, open work and next steps: `docs/交接.md`. Read it at the start of a session.
 - Keep the CompanionKit public API (`CompanionView`, `CompanionPortrait`) stable; app code calls it.
 
