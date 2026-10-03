@@ -57,6 +57,8 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var boxingWarmupEndMinute: Int
     /// Until this, boxing warm-up outranks couch scrolling on boxing day.
     public var boxingFirstUntilMinute: Int
+    /// When boxing class starts on boxing day; the countdown runs to it.
+    public var boxingStartMinute: Int
     /// How long couch scrolling lasts before the invite.
     public var couchInviteAfter: TimeInterval
     /// How long boxing warm-up lasts before the invite.
@@ -72,7 +74,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
 
     // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses.
     /// Couch after 19:00 and 60 still minutes, or 3 h after the Screen Time threshold; boxing Sunday
-    /// 9:00 to 12:00; invites after 60 / 30 min.
+    /// 9:00 to 12:00 with class at 10:00; invites after 60 / 30 min.
     public static let standard = NeedRules(
         eveningStartMinute: 19 * 60,
         stillFor: 60 * 60,
@@ -81,6 +83,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
         boxingWarmupStartMinute: 9 * 60,
         boxingWarmupEndMinute: 12 * 60,
         boxingFirstUntilMinute: 10 * 60 + 30,
+        boxingStartMinute: 10 * 60,
         couchInviteAfter: 60 * 60,
         boxingInviteAfter: 30 * 60,
         inviteCooldown: 3 * 60 * 60,
@@ -97,6 +100,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
         boxingWarmupStartMinute: Int,
         boxingWarmupEndMinute: Int,
         boxingFirstUntilMinute: Int,
+        boxingStartMinute: Int,
         couchInviteAfter: TimeInterval,
         boxingInviteAfter: TimeInterval,
         inviteCooldown: TimeInterval,
@@ -111,6 +115,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
         self.boxingWarmupStartMinute = boxingWarmupStartMinute
         self.boxingWarmupEndMinute = boxingWarmupEndMinute
         self.boxingFirstUntilMinute = boxingFirstUntilMinute
+        self.boxingStartMinute = boxingStartMinute
         self.couchInviteAfter = couchInviteAfter
         self.boxingInviteAfter = boxingInviteAfter
         self.inviteCooldown = inviteCooldown
@@ -241,6 +246,19 @@ public enum NeedEngine {
         guard let last = lastInviteAt else { return true }
         let today = StateEngine.dayStart(for: now, calendar: calendar)
         return last < today && now.timeIntervalSince(last) >= rules.inviteCooldown
+    }
+
+    /// When boxing class starts, for the countdown: on boxing day while warm-up lasts and before class,
+    /// else `nil`.
+    public static func boxingCountdown(
+        to reading: NeedReading?,
+        now: Date,
+        rules: NeedRules = .standard,
+        calendar: Calendar = .current
+    ) -> Date? {
+        guard reading?.need == .boxingWarmup else { return nil }
+        let start = time(rules.boxingStartMinute, on: now, calendar: calendar)
+        return now < start ? start : nil
     }
 
     /// When the invite for `reading` should go out, at `now` or later, or `nil` when it shouldn't:
