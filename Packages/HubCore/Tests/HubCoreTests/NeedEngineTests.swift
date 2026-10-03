@@ -208,17 +208,38 @@ import Testing
         let dates = WidgetSnapshot.timelineDates(
             after: date(4, 9),
             bedtime: schedule,
-            needUntil: date(4, 12),
+            needTimes: [date(4, 12)],
             calendar: calendar
         )
         #expect(dates.contains(date(4, 12)))
         let past = WidgetSnapshot.timelineDates(
             after: date(4, 13),
             bedtime: schedule,
-            needUntil: date(4, 12),
+            needTimes: [date(4, 12)],
             calendar: calendar
         )
         #expect(!past.contains(date(4, 12)))
+    }
+
+    @Test func nextBoxingMorningIsScheduledAhead() throws {
+        let saturday = try #require(NeedEngine.nextScheduled(after: date(3, 22), calendar: calendar))
+        #expect(saturday.need == .boxingWarmup)
+        #expect(saturday.from == date(4, 9))
+        #expect(saturday.until == date(4, 12))
+        let sundayLate = try #require(NeedEngine.nextScheduled(after: date(4, 9), calendar: calendar))
+        #expect(sundayLate.from == date(11, 9))
+    }
+
+    @Test func snapshotShowsTheScheduledNeedWithoutTheApp() throws {
+        let next = try #require(NeedEngine.nextScheduled(after: date(3, 22), calendar: calendar))
+        var snapshot = WidgetSnapshot(mode: .chill, since: nil, updatedAt: date(3, 22))
+        snapshot.nextNeed = next
+        #expect(snapshot.need(at: date(4, 8, 59), calendar: calendar) == nil)
+        #expect(snapshot.need(at: date(4, 9), calendar: calendar) == .boxingWarmup)
+        #expect(snapshot.line(at: date(4, 9), calendar: calendar) == next.line)
+        #expect(snapshot.need(at: date(4, 12), calendar: calendar) == nil)
+        #expect(snapshot.line(at: date(4, 12), calendar: calendar) == nil)
+        #expect(snapshot.needTimes == [date(4, 9), date(4, 12)])
     }
 
     @Test func switchReplayShowsTheModeBeforeAnAutomaticChange() {

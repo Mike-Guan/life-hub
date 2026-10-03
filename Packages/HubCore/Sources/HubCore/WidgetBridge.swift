@@ -45,6 +45,7 @@ public final class WidgetBridge {
         snapshot.needUntil = need?.until
         snapshot.line = NeedEngine.whyLine(need: need, energy: reading, bedtime: state)
         snapshot.lineAfterNeed = NeedEngine.whyLine(need: nil, energy: reading, bedtime: state)
+        snapshot.nextNeed = NeedEngine.nextScheduled(after: now, calendar: calendar)
         do {
             try snapshot.write(to: url)
             lastError = nil

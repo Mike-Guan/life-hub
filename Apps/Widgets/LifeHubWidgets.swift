@@ -51,7 +51,7 @@ struct HubProvider: TimelineProvider {
     private func entries(after now: Date) -> [HubEntry] {
         let snapshot = AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))
         let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
-        let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needUntil: snapshot?.needUntil)
+        let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: snapshot?.needTimes ?? [])
         return dates.map { date in
             HubEntry(date: date, snapshot: snapshot, bedtime: schedule.state(at: date))
         }

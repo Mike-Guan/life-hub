@@ -8,7 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - RUNNER acts out the need on the home screen and in widgets: lying on the couch after enough
   scrolling or an evening still at home, gloves on on Sunday morning. The Screen Time threshold now
   counts (debug builds). Sunday boxing ends at 12:00 and Screen Time couch after 3 hours, also on the
-  Lock Screen without opening the app.
+  Lock Screen without opening the app. Sunday gloves show up at 9:00 even if the app hasn't run that day.
 - RUNNER's "why" line on the home screen and the rectangular Lock Screen widget: bedtime, then a need
   (still at home for an hour in the evening, Sunday boxing from 9:00), then last night's sleep.
   Home is a third place in settings. Workouts and recent steps are read from Health on the iPhone

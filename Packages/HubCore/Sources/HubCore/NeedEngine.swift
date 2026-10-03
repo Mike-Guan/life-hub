@@ -168,6 +168,27 @@ public struct NeedReading: Equatable, Sendable {
     }
 }
 
+/// A need that depends only on the clock, so widgets can show it without the app running.
+public struct ScheduledNeed: Codable, Equatable, Sendable {
+    public var need: CompanionNeed
+    public var from: Date
+    public var until: Date
+    /// The "why" line while it lasts.
+    public var line: String
+
+    public init(need: CompanionNeed, from: Date, until: Date, line: String) {
+        self.need = need
+        self.from = from
+        self.until = until
+        self.line = line
+    }
+
+    /// True from `from` until `until`.
+    public func contains(_ date: Date) -> Bool {
+        date >= from && date < until
+    }
+}
+
 /// Rule-based needs, invites and celebrations. Same input, same output; every need says why.
 public enum NeedEngine {
     /// The need at `now`, or `nil` when there is none. Couch scrolling comes first, except on a
@@ -183,6 +204,24 @@ public enum NeedEngine {
             return boxing
         }
         return couchScroll(signals, now: now, rules: rules, calendar: calendar) ?? boxing
+    }
+
+    /// The next boxing warm-up that starts after `now`, within a week.
+    public static func nextScheduled(
+        after now: Date,
+        rules: NeedRules = .standard,
+        calendar: Calendar = .current
+    ) -> ScheduledNeed? {
+        let midnight = calendar.startOfDay(for: now)
+        let days = (0...7).compactMap { calendar.date(byAdding: .day, value: $0, to: midnight) }
+        for day in days where calendar.component(.weekday, from: day) == rules.boxingWeekday {
+            let start = time(rules.boxingWarmupStartMinute, on: day, calendar: calendar)
+            let end = time(rules.boxingWarmupEndMinute, on: day, calendar: calendar)
+            if start > now {
+                return ScheduledNeed(need: .boxingWarmup, from: start, until: end, line: boxingReason)
+            }
+        }
+        return nil
     }
 
     /// True when the app should send today's invite for `reading` at `now`.
@@ -273,8 +312,10 @@ public enum NeedEngine {
         let midnight = calendar.startOfDay(for: now)
         let boxedToday = signals.workouts.contains { $0.kind == .boxing && $0.end >= midnight }
         guard !boxedToday else { return nil }
-        return NeedReading(need: .boxingWarmup, since: start, reasons: ["今天打拳，拳套我戴好了"], until: end)
+        return NeedReading(need: .boxingWarmup, since: start, reasons: [boxingReason], until: end)
     }
+
+    private static let boxingReason = "今天打拳，拳套我戴好了"
 
     private static func isFresh(_ reached: Date, today: Date, now: Date, rules: NeedRules) -> Bool {
         reached >= today && reached <= now && now.timeIntervalSince(reached) < rules.scrollLasts
