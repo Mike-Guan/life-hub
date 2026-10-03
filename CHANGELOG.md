@@ -10,7 +10,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Rules for what RUNNER acts out (Issue #23): couch scrolling (Screen Time threshold, or still at home
   in the evening) and Sunday boxing warm-up from 9:00, at most one invite a day after a need lasts,
   celebrating a 5 km run or 30 min of boxing once, replaying an automatic mode switch on open, and
-  the line that says why RUNNER looks the way it does. Not shown in the app yet.
+  the line that says why RUNNER looks the way it does. Not shown in the app yet. `CompanionEvent`
+  names the one-off celebration for CompanionKit.
 - Places: set the gym and the office to your current location in settings. Arriving at the gym
   switches straight to boxing; leaving after 30+ minutes goes back. Arriving at the office switches
   to work. Works with the app closed when location access is "Always". Places stay on the iPhone.
