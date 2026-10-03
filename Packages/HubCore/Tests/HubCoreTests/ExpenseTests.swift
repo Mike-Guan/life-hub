@@ -153,6 +153,14 @@ import Testing
         #expect(log.active.first?.category == .other)
     }
 
+    @Test func enteredPaymentWithoutCategoryIsSortedByTheDetailEmail() {
+        var log = ExpenseLog()
+        log.records = [Expense(amount: 1280, category: .unsorted, day: day(10, 3), deviceID: "t", now: day(10, 3))]
+        log.apply(charges(detailSubject, detailBody, id: "d"), rules: .standard, deviceID: "t", now: day(10, 4))
+        #expect(log.active.count == 1)
+        #expect(log.active.first?.category == .diningOut)
+    }
+
     @Test func budgetSettingsGapNeedsTargetAndBalance() {
         let spent = CardCharge(id: "a", kind: .quick, day: day(9, 26), amount: 4000)
         var log = ExpenseLog()

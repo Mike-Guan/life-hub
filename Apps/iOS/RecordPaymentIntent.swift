@@ -16,7 +16,7 @@ struct RecordPaymentIntent: AppIntent {
         let now = Date.now
         let expense = Expense(
             amount: amount,
-            category: diningOut ? .diningOut : .other,
+            category: diningOut ? .diningOut : .unsorted,
             day: Calendar.current.startOfDay(for: now),
             deviceID: HubDevice.id(defaults: AppGroup.defaults),
             now: now
