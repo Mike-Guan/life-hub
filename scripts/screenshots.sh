@@ -29,9 +29,11 @@ for mode in "${modes[@]}"; do
 done
 xcrun simctl terminate "$udid" "$bundle" || true
 
-# Mac: launch each mode and capture just its window. The reduce motion write can be refused on
-# some Macs; then RUNNER may be caught mid-blink.
-defaults write com.apple.universalaccess reduceMotion -bool true || echo "Could not turn on reduce motion" >&2
+# Mac: launch each mode and capture just its window. Reduce motion is a system setting on a Mac, so
+# it is only turned on in CI, never on your own Mac. The write can be refused; then RUNNER may blink.
+if [[ -n "${CI:-}" ]]; then
+  defaults write com.apple.universalaccess reduceMotion -bool true || echo "Could not turn on reduce motion" >&2
+fi
 xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-macOS -configuration Debug \
   -destination 'platform=macOS' -derivedDataPath build CODE_SIGNING_ALLOWED=NO
 mac_app=build/Build/Products/Debug/LifeHub.app
