@@ -330,6 +330,9 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .scaleEffect(x: 1, y: pose.blink, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale, y: pose.eyesDy * scale)
+            case .eyesChill:
+                // Closed smiling eyes don't blink, but they still look at the door while warming up.
+                RunnerPartView(part: part).offset(x: pose.eyesDx * scale)
             case .ledLine:
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
             case .headset, .cupL, .cupR, .mic:
