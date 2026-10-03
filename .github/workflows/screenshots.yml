@@ -1,0 +1,57 @@
+name: screenshots
+
+# Redraws docs/screenshots/ and commits them to the branch it ran on. Run it on a branch, never on
+# main, then merge the images through a PR like any other change.
+on:
+  workflow_dispatch:
+  push:
+    branches: [chore/screenshots]
+    paths: [.github/workflows/screenshots.yml, scripts/screenshots.sh]
+
+concurrency:
+  group: screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    name: Draw README screenshots
+    if: github.ref != 'refs/heads/main'
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Select Xcode 26
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Draw screenshots
+        run: scripts/screenshots.sh
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: docs/screenshots
+          if-no-files-found: ignore
+
+      - name: Commit screenshots
+        run: |
+          git add docs/screenshots
+          if git diff --cached --quiet; then
+            echo "Screenshots unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update README screenshots"
+          git push

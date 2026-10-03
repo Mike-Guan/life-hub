@@ -36,39 +36,48 @@ struct LifeHubApp: App {
         _places = State(initialValue: places)
         _placeMonitor = State(initialValue: placeMonitor)
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
+        guard ScreenshotMode.mode == nil else { return }
         Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets)
     }
 
     var body: some Scene {
         WindowGroup {
-            HomeView(extraError: firstError, bedtime: bedtime, onSettings: { showsSettings = true })
-                .environment(store)
-                .environment(energy)
-                .onChange(of: scenePhase, initial: true) { _, phase in
-                    guard phase == .active else { return }
-                    syncWidgets()
-                    // One after the other, so the two permission prompts don't overlap.
-                    Task {
-                        await scheduleReminder()
-                        await importSleep()
-                    }
-                }
-                .onChange(of: bedtime) {
-                    bedtime.store(in: AppGroup.defaults)
-                    widgets.bedtime = bedtime
-                    syncWidgets()
-                    Task { await scheduleReminder() }
-                }
-                .onChange(of: places) {
-                    places.store(in: AppGroup.defaults)
-                    Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets)
-                }
-                .sheet(isPresented: $showsSettings) {
-                    SettingsView(bedtime: $bedtime, places: $places, monitor: placeMonitor)
-                }
-                .onChange(of: store.log.changes.count) { syncWidgets() }
-                .onChange(of: energy.log.events.count) { syncWidgets() }
+            if let mode = ScreenshotMode.mode {
+                ScreenshotHome(mode: mode)
+            } else {
+                home
+            }
         }
+    }
+
+    private var home: some View {
+        HomeView(extraError: firstError, bedtime: bedtime, onSettings: { showsSettings = true })
+            .environment(store)
+            .environment(energy)
+            .onChange(of: scenePhase, initial: true) { _, phase in
+                guard phase == .active else { return }
+                syncWidgets()
+                // One after the other, so the two permission prompts don't overlap.
+                Task {
+                    await scheduleReminder()
+                    await importSleep()
+                }
+            }
+            .onChange(of: bedtime) {
+                bedtime.store(in: AppGroup.defaults)
+                widgets.bedtime = bedtime
+                syncWidgets()
+                Task { await scheduleReminder() }
+            }
+            .onChange(of: places) {
+                places.store(in: AppGroup.defaults)
+                Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets)
+            }
+            .sheet(isPresented: $showsSettings) {
+                SettingsView(bedtime: $bedtime, places: $places, monitor: placeMonitor)
+            }
+            .onChange(of: store.log.changes.count) { syncWidgets() }
+            .onChange(of: energy.log.events.count) { syncWidgets() }
     }
 
     private var firstError: String? {

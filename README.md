@@ -2,6 +2,13 @@
 
 Mike 自用的生活 hub，iOS + Mac。companion RUNNER 跟着当前 mode（上班 / Chill / 拳击日 / 副业）变。
 
+| | 上班 | Chill | 拳击日 | 副业 |
+|---|---|---|---|---|
+| iPhone | <img src="docs/screenshots/ios-work.png" width="160"> | <img src="docs/screenshots/ios-chill.png" width="160"> | <img src="docs/screenshots/ios-boxing.png" width="160"> | <img src="docs/screenshots/ios-money.png" width="160"> |
+| Mac | <img src="docs/screenshots/mac-work.png" width="160"> | <img src="docs/screenshots/mac-chill.png" width="160"> | <img src="docs/screenshots/mac-boxing.png" width="160"> | <img src="docs/screenshots/mac-money.png" width="160"> |
+
+截图由 GitHub Actions 的 `screenshots` workflow 生成（本地：`make screenshots`）。在分支上手动运行它，图会提交回那个分支，再走 PR 合进 main。
+
 ## 跑起来
 
 ```bash
