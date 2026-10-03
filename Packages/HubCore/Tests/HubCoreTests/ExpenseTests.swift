@@ -140,6 +140,37 @@ import Testing
         #expect(gap(target: 50_000, log.active) == 0)
     }
 
+    @Test func budgetSettingsGapNeedsTargetAndBalance() {
+        let spent = CardCharge(id: "a", kind: .quick, day: day(9, 26), amount: 4000)
+        var log = ExpenseLog()
+        log.apply([spent], rules: .standard, deviceID: "t", now: day(9, 27))
+        var settings = BudgetSettings()
+        #expect(settings.savingsGap(expenses: log.active, calendar: calendar) == nil)
+        settings.savingsTarget = 120_000
+        #expect(settings.savingsGap(expenses: log.active, calendar: calendar) == nil)
+        settings.enterBalance(100_000, at: day(9, 25))
+        #expect(settings.balanceEnteredAt == day(9, 25))
+        #expect(settings.savingsGap(expenses: log.active, calendar: calendar) == 24000)
+        settings.enterBalance(nil, at: day(9, 28))
+        #expect(settings.balanceEnteredAt == nil)
+        #expect(settings.savingsGap(expenses: log.active, calendar: calendar) == nil)
+    }
+
+    @Test func storedBudgetSettingsRoundTripAndFallBack() throws {
+        let suite = "lifehub-tests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        #expect(BudgetSettings.stored(in: defaults) == BudgetSettings())
+
+        var settings = BudgetSettings(savingsTarget: 50_000)
+        settings.enterBalance(20_000, at: day(10, 1))
+        settings.store(in: defaults)
+        #expect(BudgetSettings.stored(in: defaults) == settings)
+
+        defaults.set(Data("bad".utf8), forKey: "budget")
+        #expect(BudgetSettings.stored(in: defaults) == BudgetSettings())
+    }
+
     @Test func expenseRoundTripsAndToleratesMissingFields() throws {
         var log = ExpenseLog()
         log.apply(charges(detailSubject, detailBody, id: "d"), rules: .standard, deviceID: "t", now: day(10, 3))

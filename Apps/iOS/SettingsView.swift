@@ -4,10 +4,11 @@ import FamilyControls
 import HubCore
 import SwiftUI
 
-/// App settings: the bedtime reminder time, the places that switch mode and the Screen Time watch.
+/// App settings: the bedtime reminder time, the places that switch mode, money and the Screen Time watch.
 struct SettingsView: View {
     @Binding var bedtime: BedtimeSchedule
     @Binding var places: PlaceSettings
+    @Binding var budget: BudgetSettings
     let monitor: PlaceMonitor
     @Environment(\.dismiss) private var dismiss
     @State private var placeError: String?
@@ -64,6 +65,8 @@ struct SettingsView: View {
             .padding(16)
             .toyCard()
 
+            moneyCard
+
             // Debug only until Apple approves Family Controls for distribution; STG and PROD have no
             // entitlement, so the button could only fail. Remove with the CI-CD.md Screen Time step.
             #if DEBUG
@@ -71,6 +74,44 @@ struct SettingsView: View {
             #endif
         }
         .padding(20)
+    }
+
+    private var moneyCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("钱")
+                .font(Toy.body(16, weight: .heavy))
+            yenField("银行余额", text: yenText(budget.balance) { budget.enterBalance($0, at: .now) })
+            yenField("金库目标", text: yenText(budget.savingsTarget) { budget.savingsTarget = $0 })
+            Text("发薪日填一次银行余额，首页显示离金库目标还差多少。金额只存在这台 iPhone 上。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(16)
+        .toyCard()
+    }
+
+    private func yenField(_ title: String, text: Binding<String>) -> some View {
+        HStack(spacing: 10) {
+            Text(title)
+                .font(Toy.body(15, weight: .bold))
+            Spacer()
+            Text("¥")
+                .font(Toy.body(15, weight: .bold))
+            TextField("没填", text: text)
+                .keyboardType(.numberPad)
+                .multilineTextAlignment(.trailing)
+                .font(Toy.body(15, weight: .bold))
+                .frame(maxWidth: 140)
+        }
+    }
+
+    // Digits only; an empty field clears the amount.
+    private func yenText(_ amount: Int?, set: @escaping (Int?) -> Void) -> Binding<String> {
+        Binding {
+            amount.map(String.init) ?? ""
+        } set: { text in
+            set(Int(text.filter(\.isNumber)))
+        }
     }
 
     private var scrollCard: some View {
