@@ -5,7 +5,7 @@ let package = Package(
     name: "HubCore",
     platforms: [.iOS(.v18), .macOS(.v15)],
     products: [
-        .library(name: "HubCore", targets: ["HubCore"]),
+        .library(name: "HubCore", targets: ["HubCore"])
     ],
     targets: [
         .target(name: "HubCore"),

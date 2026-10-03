@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import HubCore
 
 @Suite struct ModeChangeTests {
@@ -22,7 +23,8 @@ import Testing
     }
 
     @Test func unknownSourceCountsAsInferred() throws {
-        let json = #"{"id":"6F1C2B1E-2D7A-4C1A-9E43-1B2C3D4E5F60","mode":"work","source":"telepathy","at":"2026-10-02T10:00:00Z"}"#
+        let json =
+            #"{"id":"6F1C2B1E-2D7A-4C1A-9E43-1B2C3D4E5F60","mode":"work","source":"telepathy","at":"2026-10-02T10:00:00Z"}"#
         let change = try decoder.decode(ModeChange.self, from: Data(json.utf8))
         #expect(change.source == .inferred)
     }
@@ -37,11 +39,11 @@ import Testing
 
     @Test func logSkipsUnreadableRecords() throws {
         let json = """
-        {"schemaVersion":1,"changes":[
-          {"id":"6F1C2B1E-2D7A-4C1A-9E43-1B2C3D4E5F60","mode":"work","at":"2026-10-02T09:00:00Z"},
-          {"id":"7F1C2B1E-2D7A-4C1A-9E43-1B2C3D4E5F60","mode":"sleep","at":"2026-10-02T23:00:00Z"}
-        ]}
-        """
+            {"schemaVersion":1,"changes":[
+              {"id":"6F1C2B1E-2D7A-4C1A-9E43-1B2C3D4E5F60","mode":"work","at":"2026-10-02T09:00:00Z"},
+              {"id":"7F1C2B1E-2D7A-4C1A-9E43-1B2C3D4E5F60","mode":"sleep","at":"2026-10-02T23:00:00Z"}
+            ]}
+            """
         let log = try decoder.decode(ModeLog.self, from: Data(json.utf8))
         #expect(log.changes.map(\.mode) == [.work])
         #expect(log.unreadable.count == 1)
@@ -50,10 +52,10 @@ import Testing
     /// An older build must not delete records written by a newer one when it saves.
     @MainActor @Test func unreadableRecordsSurviveASave() throws {
         let json = """
-        {"schemaVersion":1,"changes":[
-          {"id":"7F1C2B1E-2D7A-4C1A-9E43-1B2C3D4E5F60","mode":"sleep","at":"2026-10-02T23:00:00Z","futureField":[1,true,null]}
-        ]}
-        """
+            {"schemaVersion":1,"changes":[
+              {"id":"7F1C2B1E-2D7A-4C1A-9E43-1B2C3D4E5F60","mode":"sleep","at":"2026-10-02T23:00:00Z","futureField":[1,true,null]}
+            ]}
+            """
         var log = try ModeStore.decoder.decode(ModeLog.self, from: Data(json.utf8))
         log.changes.append(ModeChange(mode: .chill, at: Date(timeIntervalSince1970: 1_790_000_000), deviceID: "test"))
         let saved = try ModeStore.encoder.encode(log)

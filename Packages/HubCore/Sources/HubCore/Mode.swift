@@ -1,7 +1,7 @@
 import Foundation
 
-/// What Mike is doing right now. Mike decides; automatic sources only suggest or follow his rules.
-/// Separate from energy/state on purpose (see CLAUDE.md, "Core model rules").
+// Separate from energy/state on purpose (see CLAUDE.md, "Core model rules").
+/// What Mike is doing right now.
 public enum Mode: String, Codable, CaseIterable, Identifiable, Sendable {
     case work
     case chill

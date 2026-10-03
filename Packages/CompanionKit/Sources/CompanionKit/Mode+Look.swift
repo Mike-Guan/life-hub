@@ -21,7 +21,8 @@ extension Mode {
         }
     }
 
-    /// Value of the Rive view model `mode` enum (see Rive 搭建步骤). The only place this mapping lives.
+    // The only place the Swift-to-Rive mode mapping lives (see Rive 搭建步骤).
+    /// Value of the Rive view model `mode` enum.
     var riveValue: String {
         switch self {
         case .work: "work"

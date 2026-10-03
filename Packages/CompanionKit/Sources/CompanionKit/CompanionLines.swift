@@ -1,6 +1,7 @@
 import HubCore
 
-/// Tier 0 lines: fixed, per mode, no model. On-device generation comes later.
+// Tier 0: no model. On-device generation comes later.
+/// Fixed companion lines per mode.
 enum CompanionLines {
     static func lines(for mode: Mode?) -> [String] {
         switch mode {

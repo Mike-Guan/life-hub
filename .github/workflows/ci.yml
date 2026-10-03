@@ -1,0 +1,103 @@
+name: ci
+
+# On main, release.yml calls this workflow before uploading to TestFlight.
+on:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pr-hygiene:
+    name: PR title and branch name
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check Conventional Commits title and branch prefix
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          title_re='^(feat|fix|chore|docs|refactor|test|perf|ci|build|revert)(\([a-z0-9._-]+\))?!?: .+'
+          release_re='^Prepare release version [0-9]+\.[0-9]+\.[0-9]+$'
+          branch_re='^(feature|fix|chore|docs|refactor|test|ci|hotfix)/[A-Za-z0-9._-]+$|^dependabot/'
+          ok=true
+          if ! [[ "$TITLE" =~ $title_re || "$TITLE" =~ $release_re ]]; then
+            echo "::error::PR title must follow Conventional Commits, e.g. 'feat: add mode widget', or be 'Prepare release version X.Y.Z'. Got: $TITLE"
+            ok=false
+          fi
+          if ! [[ "$BRANCH" =~ $branch_re ]]; then
+            echo "::error::Branch must start with feature/, fix/, chore/, docs/, refactor/, test/, ci/ or hotfix/. Got: $BRANCH"
+            ok=false
+          fi
+          $ok
+
+  lint:
+    name: Format and lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container: swift:6.2-noble
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check formatting
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          swift format format --in-place --recursive Apps Packages
+          if ! git diff --exit-code; then
+            echo "::error::Code is not formatted. Run 'make format' and commit the result (diff above)."
+            exit 1
+          fi
+      - name: Lint
+        run: swift format lint --strict --recursive Apps Packages
+
+  test-and-build:
+    name: Tests, coverage and app builds
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Select Xcode 26
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: HubCore tests and coverage gate
+        run: |
+          swift test --package-path Packages/HubCore --enable-code-coverage -Xswiftc -warnings-as-errors
+          scripts/coverage-gate.py Packages/HubCore 80
+
+      - name: CompanionKit tests
+        run: swift test --package-path Packages/CompanionKit -Xswiftc -warnings-as-errors
+
+      - name: Generate project
+        run: xcodegen generate
+
+      - name: Build iOS app (simulator, warnings as errors)
+        run: >
+          xcodebuild build -quiet
+          -project LifeHub.xcodeproj -scheme LifeHub-iOS
+          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath build
+          CODE_SIGNING_ALLOWED=NO
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES
+
+      - name: Build macOS app (warnings as errors)
+        run: >
+          xcodebuild build -quiet
+          -project LifeHub.xcodeproj -scheme LifeHub-macOS
+          -destination 'generic/platform=macOS'
+          -derivedDataPath build
+          CODE_SIGNING_ALLOWED=NO
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES

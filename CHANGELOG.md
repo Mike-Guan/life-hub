@@ -9,3 +9,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Mac menu bar panel with the current mode and mode buttons.
 - Mode log data contract (`ModeChange`, `ModeLog`, `WidgetSnapshot`) stored as local JSON.
 - DEV / STG / PROD build configurations with separate bundle ids.
+- CI quality gates (PR title and branch, swift-format, lint, tests, coverage, warnings as errors) and
+  TestFlight release workflow for STG and PROD.

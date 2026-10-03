@@ -20,8 +20,8 @@ public struct ModeLog: Codable, Equatable, Sendable {
 
     public var schemaVersion: Int
     public var changes: [ModeChange]
-    /// Records this build can't read (for example a mode added by a newer build). They are kept
-    /// as-is and written back on save, so an older build never deletes newer data.
+    // Kept as-is and written back on save, so an older build never deletes newer data (DW-02).
+    /// Records this build can't read, for example a mode added by a newer build.
     public var unreadable: [JSONValue]
 
     public init(changes: [ModeChange] = []) {
@@ -32,7 +32,8 @@ public struct ModeLog: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey { case schemaVersion, changes }
 
-    /// Lossy decoding: one unreadable record is set aside instead of losing the whole history.
+    // One unreadable record is set aside instead of losing the whole history.
+    /// Decodes the log, moving records that fail to decode into `unreadable`.
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try values.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
@@ -80,15 +81,16 @@ public struct ModeLog: Codable, Equatable, Sendable {
             let start = max(change.at, dayStart)
             let end = min(rawEnd, windowEnd)
             guard end > start else { continue }
-            result.append(ModeSegment(
-                id: change.id,
-                mode: change.mode,
-                source: change.source,
-                tag: change.tag,
-                start: start,
-                end: end,
-                isOngoing: next == nil && end == now
-            ))
+            result.append(
+                ModeSegment(
+                    id: change.id,
+                    mode: change.mode,
+                    source: change.source,
+                    tag: change.tag,
+                    start: start,
+                    end: end,
+                    isOngoing: next == nil && end == now
+                ))
         }
         return result
     }
