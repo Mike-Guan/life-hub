@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- RUNNER's face follows energy in three steps. Low (under 30): eye bags and slow moves. High
+  (70 or more): bright eyes, twinkling sparkles by the head and quicker moves. Widgets show the same.
 - Places: set the gym and the office to your current location in settings. Arriving at the gym
   switches straight to boxing; leaving after 30+ minutes goes back. Arriving at the office switches
   to work. Works with the app closed when location access is "Always". Places stay on the iPhone.

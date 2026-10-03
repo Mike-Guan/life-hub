@@ -37,10 +37,35 @@ import Testing
 
     @Test func lowEnergyAddsEyeBags() {
         #expect(!RunnerFigure.parts(for: .money, pose: RunnerPose()).contains(.eyebags))
-        #expect(RunnerFigure.parts(for: .money, pose: RunnerPose(tired: true)).contains(.eyebags))
-        #expect(RunnerPose.isTired(10))
-        #expect(!RunnerPose.isTired(30))
-        #expect(!RunnerPose.isTired(nil))
+        #expect(RunnerFigure.parts(for: .money, pose: RunnerPose(face: .low)).contains(.eyebags))
+    }
+
+    @Test func energyPicksTheFace() {
+        #expect(EnergyFace(energy: 10) == .low)
+        #expect(EnergyFace(energy: 30) == .mid)
+        #expect(EnergyFace(energy: 69) == .mid)
+        #expect(EnergyFace(energy: 70) == .high)
+        #expect(EnergyFace(energy: nil) == .mid)
+        #expect(EnergyFace.low.speed < EnergyFace.mid.speed)
+        #expect(EnergyFace.high.speed > EnergyFace.mid.speed)
+    }
+
+    @Test(arguments: Mode.allCases)
+    func highEnergyAddsSparkles(_ mode: Mode) {
+        let mid = Set(RunnerFigure.parts(for: mode, pose: RunnerPose()))
+        let high = Set(RunnerFigure.parts(for: mode, pose: RunnerPose(face: .high)))
+        #expect(mid.isDisjoint(with: [.sparkle, .eyeGlint]))
+        #expect(high.contains(.sparkle))
+        // Chill's eyes are closed in a smile, so there is nothing to glint.
+        #expect(high.contains(.eyeGlint) == (mode != .chill))
+        #expect(!high.contains(.eyebags))
+    }
+
+    @Test func bedtimeHidesTheHighEnergyLook() {
+        var pose = RunnerPose.bedtimeStill()
+        pose.face = .high
+        let parts = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(parts.isDisjoint(with: [.sparkle, .eyeGlint]))
     }
 
     @Test(arguments: Mode.allCases)
@@ -48,13 +73,15 @@ import Testing
         for step in 0..<200 {
             for react in [0.0, 0.5, 1.0] {
                 let time = Double(step) * 0.05
-                let pose = RunnerPose(mode: mode, time: time, tired: step.isMultiple(of: 2), react: react)
+                let face: EnergyFace = [.low, .mid, .high][step % 3]
+                let pose = RunnerPose(mode: mode, time: time, face: face, react: react)
                 #expect((0...1).contains(pose.blink))
                 #expect((0...1).contains(pose.ledOpacity))
                 #expect(abs(pose.headDy) <= 2)
                 #expect(abs(pose.canAngle) <= 60)
                 #expect(abs(pose.gloveR.width) <= 14)
                 #expect(pose.glint <= 1)
+                #expect((0...1).contains(pose.sparkle))
             }
         }
     }
