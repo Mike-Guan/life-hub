@@ -10,6 +10,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - RUNNER drawn as 36 named vector parts instead of PNGs: per-mode idle loops (work nod and LED
   breathing, chill Monster sip, boxing guard bounce, money chain shine), a reaction on tap, and a
   tired look below 30 energy. `CompanionPortrait` gives a still version for widgets.
+- Energy data model: sleep and self-report events, a rule-based state engine that gives today's
+  energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
+
+### Fixed
+- Tapping the current mode after an automatic switch now records it as a manual change.
+- A mode log that can't be read (for example before first unlock) is no longer moved aside or
+  overwritten; saves wait until it can be read.
 - Mode log data contract (`ModeChange`, `ModeLog`, `WidgetSnapshot`) stored as local JSON.
 - DEV / STG / PROD build configurations with separate bundle ids.
 - CI quality gates (PR title and branch, swift-format, lint, tests, coverage, warnings as errors) and
