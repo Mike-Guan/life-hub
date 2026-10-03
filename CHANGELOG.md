@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Boxing warm-up look for RUNNER: gloves and red headband on over any outfit, bouncing, and a look
+  at the door every few seconds, with its own tap lines. The same look works in widgets and as a
+  small head for the Sunday countdown. Not switched on in the app yet.
 - RUNNER's face follows energy in three steps. Low (under 30): eye bags and slow moves. High
   (70 or more): bright eyes, twinkling sparkles by the head and quicker moves. Widgets show the same.
 - Rules for what RUNNER acts out (Issue #23): couch scrolling (Screen Time threshold, or still at home
