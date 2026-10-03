@@ -22,8 +22,6 @@ struct SettingsView: View {
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
-        .familyActivityPicker(isPresented: $pickingApps, selection: $scrollApps)
-        .onChange(of: scrollApps) { watchScrolling() }
     }
 
     private var content: some View {
@@ -66,7 +64,11 @@ struct SettingsView: View {
             .padding(16)
             .toyCard()
 
+            // Debug only until Apple approves Family Controls for distribution; STG and PROD have no
+            // entitlement, so the button could only fail. Remove with the CI-CD.md Screen Time step.
+            #if DEBUG
             scrollCard
+            #endif
         }
         .padding(20)
     }
@@ -96,11 +98,14 @@ struct SettingsView: View {
         }
         .padding(16)
         .toyCard()
+        .familyActivityPicker(isPresented: $pickingApps, selection: $scrollApps)
+        .onChange(of: scrollApps) { watchScrolling() }
     }
 
     private var pickedLabel: String {
-        let count = scrollApps.applicationTokens.count
-        return count == 0 ? "没选" : "已选 \(count) 个"
+        let apps = scrollApps.applicationTokens.count + scrollApps.categoryTokens.count
+        let count = apps + scrollApps.webDomainTokens.count
+        return count == 0 ? "没选" : "已选 \(count) 项"
     }
 
     // Screen Time asks once; after that the picker opens straight away.
