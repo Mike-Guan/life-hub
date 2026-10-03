@@ -118,6 +118,8 @@ struct RunnerPose {
     var sparkle: Double = 1
     /// Progress of the celebration sparkle burst, 0..<1, or -1 when none is playing.
     var burst: CGFloat = -1
+    /// Scroll position of the feed on the phone screen while couch scrolling, 0...1.
+    var feed: CGFloat = 0
     /// Bedtime overlay: sleepy eyes, mask down, the mode's outfit stays.
     var bedtime = false
     /// 0 = headset on, 1 = taken off.
@@ -139,6 +141,11 @@ struct RunnerPose {
         self.need = need
         if tired { blink = 0.75 }
         if need == .boxingWarmup { eyesDx = -2 }
+        if need == .couchScroll {
+            // Slumped, eyes down on the phone.
+            headDy = 3
+            eyesDy = 1.5
+        }
     }
 
     /// Pose at `time` for `mode`. `react` runs 0 → 1 → 0 after a tap.
@@ -179,9 +186,18 @@ struct RunnerPose {
             coinTurn = 360 * react
         }
         if need == .boxingWarmup { warmUp(time: t, react: r) }
+        if need == .couchScroll { scroll(time: t) }
     }
 
     /// Gloves up and bouncing whatever the mode; a look at the door every 4 s.
+    /// Slumped over the phone: a thumb flick every 2.5 s, slow blinks.
+    private mutating func scroll(time t: TimeInterval) {
+        headDy = 3
+        eyesDy = 1.5
+        blink = 0.85 * Self.blink(at: t * 0.6)
+        feed = Self.ramp(CGFloat(t.truncatingRemainder(dividingBy: 2.5)), from: 0, to: 0.4)
+    }
+
     private mutating func warmUp(time t: TimeInterval, react r: CGFloat) {
         let bounce = CGFloat(sin(t * 2 * .pi / 0.6)) * 3
         gloveL = CGSize(width: 0, height: bounce)
@@ -281,13 +297,17 @@ struct RunnerFigure: View {
             visible.formUnion(moneyParts)
         }
         if pose.tired, mode != .chill { visible.insert(.eyebags) }
+        if pose.need == .couchScroll, !pose.bedtime {
+            visible.subtract(couchHiddenParts)
+            visible.formUnion(couchParts)
+        }
         if pose.need == .boxingWarmup, !pose.bedtime {
             visible.formUnion(warmupParts)
             visible.remove(.monsterCan)
         }
         if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
-            if mode != .chill { visible.insert(.eyeGlint) }
+            if mode != .chill, pose.need != .couchScroll { visible.insert(.eyeGlint) }
         }
         if pose.bedtime {
             visible.subtract(awakeFaceParts)
@@ -321,6 +341,11 @@ struct RunnerFigure: View {
         .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen,
     ]
     nonisolated private static let warmupParts: Set<RunnerPart> = [.headband, .gloveL, .gloveR]
+    nonisolated private static let couchParts: Set<RunnerPart> = [.eyesSleepy, .phone, .phoneFeed, .phoneHand]
+    nonisolated private static let couchHiddenParts: Set<RunnerPart> = [
+        .eyesWork, .lidsWork, .browsWork, .eyesChill, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
+        .mouthSmile, .mouthFang, .monsterCan,
+    ]
     nonisolated private static let sleepyParts: Set<RunnerPart> = [.eyesSleepy, .eyebags, .maskDown]
     nonisolated private static let headsetParts: Set<RunnerPart> = [.headset, .cupL, .cupR, .mic]
 
@@ -348,6 +373,11 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .offset(x: 4 * pose.zzz * scale, y: -8 * pose.zzz * scale)
                     .opacity(Double(sin(pose.zzz * .pi)))
+            case .phoneFeed:
+                // The feed jumps up one post on each thumb flick.
+                RunnerPartView(part: part)
+                    .offset(y: -5 * pose.feed * scale)
+                    .opacity(Double(1 - 0.6 * pose.feed))
             case .sparkle where pose.burst >= 0:
                 // Celebration: the sparkles fly out from the head and fade.
                 RunnerPartView(part: part)

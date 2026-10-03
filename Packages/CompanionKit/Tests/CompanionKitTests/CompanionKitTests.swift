@@ -92,6 +92,40 @@ import Testing
         #expect(CompanionLines.accessibilityLabel(mode: .chill, need: .boxingWarmup, bedtime: .on) == "RUNNER，困了")
     }
 
+    @Test(arguments: Mode.allCases)
+    func couchScrollHoldsThePhone(_ mode: Mode) {
+        let parts = Set(RunnerFigure.parts(for: mode, pose: RunnerPose(need: .couchScroll)))
+        #expect(parts.isSuperset(of: [.phone, .phoneFeed, .phoneHand, .eyesSleepy]))
+        #expect(parts.isDisjoint(with: [.eyesWork, .eyesChill, .cateyeL, .eyesMoney, .mouthSmile, .monsterCan]))
+        #expect(RunnerFigure.baseParts.isSubset(of: parts))
+        let high = Set(RunnerFigure.parts(for: mode, pose: RunnerPose(face: .high, need: .couchScroll)))
+        #expect(!high.contains(.eyeGlint))
+    }
+
+    @Test func couchFeedFlicksAndStaysInRange() {
+        let feeds = (0..<100).map {
+            RunnerPose(mode: .chill, time: Double($0) * 0.05, face: .mid, need: .couchScroll, react: 0).feed
+        }
+        #expect(feeds.allSatisfy { (0...1).contains($0) })
+        #expect(feeds.contains(0) && feeds.contains(1))
+        let still = RunnerPose(need: .couchScroll)
+        #expect(still.headDy == 3 && still.eyesDy == 1.5)
+    }
+
+    @Test func bedtimePutsThePhoneDown() {
+        var pose = RunnerPose.bedtimeStill()
+        pose.need = .couchScroll
+        let parts = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(parts.isDisjoint(with: [.phone, .phoneFeed, .phoneHand]))
+    }
+
+    @Test func slumpedMotionLeansBack() {
+        let motion = IdleMotion.slumped(time: 1)
+        #expect(motion.angle < 0)
+        #expect((3...5).contains(motion.dy))
+        #expect(CompanionLines.accessibilityLabel(mode: .chill, need: .couchScroll, bedtime: .off).contains("手机"))
+    }
+
     @Test func eachCelebrationPlaysOnce() {
         #expect(CompanionView.newCelebration(.celebrate(id: "run-1"), last: "") == "run-1")
         #expect(CompanionView.newCelebration(.celebrate(id: "run-1"), last: "run-1") == nil)

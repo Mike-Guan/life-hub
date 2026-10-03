@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Couch scrolling look for RUNNER: slumped back with half-closed eyes, a lit phone in hand and a
+  thumb flick every few seconds. When the app passes today's invite, RUNNER gets up, jumps and says
+  it in the bubble.
 - RUNNER celebrates a finished workout: two happy hops, a burst of sparkles and "干得漂亮！". Each
   workout plays once, never at bedtime. Not switched on in the app yet.
 - RUNNER's "why" line on the home screen and the rectangular Lock Screen widget: bedtime, then a need

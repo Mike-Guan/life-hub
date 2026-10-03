@@ -5,6 +5,7 @@ import HubCore
 enum CompanionLines {
     static func lines(for mode: Mode?, need: CompanionNeed? = nil) -> [String] {
         if need == .boxingWarmup { return ["拳套戴好了，就差你。", "十点开练，走吧。", "先跳两下热热身。"] }
+        if need == .couchScroll { return ["再刷五分钟……", "这条好好笑。", "你也在刷吗？"] }
         return switch mode {
         case .work: ["……在听。", "耳机不摘，谁都别找我。", "再撑一会儿就下班。"]
         case .chill: ["今天辛苦了。", "Monster 第二罐不许开。", "买菜还是看剧？"]
@@ -18,6 +19,7 @@ enum CompanionLines {
     static func accessibilityLabel(mode: Mode?, need: CompanionNeed?, bedtime: Bedtime) -> String {
         if bedtime == .on { return "RUNNER，困了" }
         if need == .boxingWarmup { return "RUNNER，戴着拳套在热身" }
+        if need == .couchScroll { return "RUNNER，瘫着刷手机" }
         return mode.map { "RUNNER，\($0.title)" } ?? "RUNNER"
     }
 }

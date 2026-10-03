@@ -70,6 +70,9 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case monsterCan = "monster_can"
     case chainGold = "chain_gold"
     case coin
+    case phone
+    case phoneFeed = "phone_feed"
+    case phoneHand = "phone_hand"
     case sparkle
     case zzz
 }
@@ -120,6 +123,9 @@ enum RunnerArt {
         case .monsterCan: monsterCan()
         case .chainGold: chainGold()
         case .coin: coin()
+        case .phone: phone()
+        case .phoneFeed: phoneFeed()
+        case .phoneHand: phoneHand()
         case .sparkle: sparkle()
         case .zzz: zzz()
         }
@@ -1755,6 +1761,126 @@ enum RunnerArt {
                 stroke: RunnerPalette.ink,
                 lineWidth: 3
             )
+        ]
+    }
+
+    private static func phone() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 51, y: 84))
+                    p.addLine(to: .init(x: 67, y: 84))
+                    p.addCurve(
+                        to: .init(x: 71, y: 88),
+                        control1: .init(x: 69.21, y: 84),
+                        control2: .init(x: 71, y: 85.79)
+                    )
+                    p.addLine(to: .init(x: 71, y: 116))
+                    p.addCurve(
+                        to: .init(x: 67, y: 120),
+                        control1: .init(x: 71, y: 118.21),
+                        control2: .init(x: 69.21, y: 120)
+                    )
+                    p.addLine(to: .init(x: 51, y: 120))
+                    p.addCurve(
+                        to: .init(x: 47, y: 116),
+                        control1: .init(x: 48.79, y: 120),
+                        control2: .init(x: 47, y: 118.21)
+                    )
+                    p.addLine(to: .init(x: 47, y: 88))
+                    p.addCurve(
+                        to: .init(x: 51, y: 84),
+                        control1: .init(x: 47, y: 85.79),
+                        control2: .init(x: 48.79, y: 84)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.mask,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 52.5, y: 88))
+                    p.addLine(to: .init(x: 65.5, y: 88))
+                    p.addCurve(
+                        to: .init(x: 67.5, y: 90),
+                        control1: .init(x: 66.6, y: 88),
+                        control2: .init(x: 67.5, y: 88.9)
+                    )
+                    p.addLine(to: .init(x: 67.5, y: 113))
+                    p.addCurve(
+                        to: .init(x: 65.5, y: 115),
+                        control1: .init(x: 67.5, y: 114.1),
+                        control2: .init(x: 66.6, y: 115)
+                    )
+                    p.addLine(to: .init(x: 52.5, y: 115))
+                    p.addCurve(
+                        to: .init(x: 50.5, y: 113),
+                        control1: .init(x: 51.4, y: 115),
+                        control2: .init(x: 50.5, y: 114.1)
+                    )
+                    p.addLine(to: .init(x: 50.5, y: 90))
+                    p.addCurve(
+                        to: .init(x: 52.5, y: 88),
+                        control1: .init(x: 50.5, y: 88.9),
+                        control2: .init(x: 51.4, y: 88)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.neonCyan
+            ),
+        ]
+    }
+
+    private static func phoneFeed() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 53.5, y: 93))
+                    p.addLine(to: .init(x: 64.5, y: 93))
+                    p.move(to: .init(x: 53.5, y: 98))
+                    p.addLine(to: .init(x: 60.5, y: 98))
+                    p.move(to: .init(x: 53.5, y: 103))
+                    p.addLine(to: .init(x: 64.5, y: 103))
+                    p.move(to: .init(x: 53.5, y: 108))
+                    p.addLine(to: .init(x: 59.5, y: 108))
+                },
+                stroke: RunnerPalette.mask,
+                lineWidth: 2,
+                cap: .round,
+                opacity: 0.45
+            )
+        ]
+    }
+
+    private static func phoneHand() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 44, y: 113))
+                    p.addQuadCurve(to: .init(x: 54, y: 123), control: .init(x: 44, y: 123))
+                    p.addLine(to: .init(x: 64, y: 123))
+                    p.addQuadCurve(to: .init(x: 74, y: 113), control: .init(x: 74, y: 123))
+                    p.addQuadCurve(to: .init(x: 65, y: 112), control: .init(x: 70, y: 108))
+                    p.addLine(to: .init(x: 53, y: 112))
+                    p.addQuadCurve(to: .init(x: 44, y: 113), control: .init(x: 48, y: 108))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.skin,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 66, y: 112))
+                    p.addQuadCurve(to: .init(x: 67, y: 100), control: .init(x: 70, y: 106))
+                },
+                stroke: RunnerPalette.ink,
+                lineWidth: 3,
+                cap: .round
+            ),
         ]
     }
 
