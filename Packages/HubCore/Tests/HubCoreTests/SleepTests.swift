@@ -23,6 +23,14 @@ import Testing
         let window = SleepNight.window(for: date(4, 8), calendar: calendar)
         #expect(window.start == date(3, 17))
         #expect(window.end == date(4, 8))
+        #expect(SleepNight.window(for: date(4, 18), calendar: calendar).end == date(4, 14))
+    }
+
+    @Test func afternoonNapsAreLeftOut() throws {
+        let intervals = [asleep(date(4, 0), date(4, 7)), asleep(date(4, 15), date(4, 16))]
+        let night = try #require(SleepNight.from(intervals, now: date(4, 20), calendar: calendar))
+        #expect(night.minutes == 7 * 60)
+        #expect(night.endedAt == date(4, 7))
     }
 
     @Test func overlappingSourcesCountOnce() throws {
