@@ -1,14 +1,16 @@
 import CoreLocation
 import HubCore
+import Observation
 
 // Privacy rule: coordinates stay on the device; CoreLocation does the matching.
 /// Watches the gym and office geofences and turns arrivals and departures into mode triggers.
 @MainActor
+@Observable
 final class PlaceMonitor {
     static let name = "lifehub-places"
 
-    private let manager = CLLocationManager()
-    private var task: Task<Void, Never>?
+    @ObservationIgnored private let manager = CLLocationManager()
+    @ObservationIgnored private var task: Task<Void, Never>?
 
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
@@ -18,6 +20,7 @@ final class PlaceMonitor {
     /// Watches `settings` and calls `onTrigger` for each event.
     func start(_ settings: PlaceSettings, onTrigger: @escaping @MainActor (ModeTrigger) -> Void) {
         task?.cancel()
+        lastError = nil
         task = Task {
             let monitor = await CLMonitor(Self.name)
             let wanted = Set(settings.places.map(\.kind.rawValue))
