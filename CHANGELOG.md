@@ -7,6 +7,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - RUNNER's face follows energy in three steps. Low (under 30): eye bags and slow moves. High
   (70 or more): bright eyes, twinkling sparkles by the head and quicker moves. Widgets show the same.
+- Rules for what RUNNER acts out (Issue #23): couch scrolling (Screen Time threshold, or still at home
+  in the evening) and Sunday boxing warm-up from 9:00, at most one invite a day after a need lasts,
+  celebrating a 5 km run or 30 min of boxing once, replaying an automatic mode switch on open, and
+  the line that says why RUNNER looks the way it does. Not shown in the app yet.
 - Places: set the gym and the office to your current location in settings. Arriving at the gym
   switches straight to boxing; leaving after 30+ minutes goes back. Arriving at the office switches
   to work. Works with the app closed when location access is "Always". Places stay on the iPhone.
