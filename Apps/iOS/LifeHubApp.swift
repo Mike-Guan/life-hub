@@ -1,5 +1,6 @@
 import HubCore
 import SwiftUI
+import UIKit
 import WidgetKit
 
 @main
@@ -72,7 +73,10 @@ struct LifeHubApp: App {
                     await importSleep()
                     await needs.importMotion()
                     refreshNeeds()
-                    needs.celebrate(bedtime: bedtime.state(at: .now))
+                    // The awaits above can include a permission sheet; celebrate only if still on screen.
+                    if UIApplication.shared.applicationState == .active {
+                        needs.celebrate(bedtime: bedtime.state(at: .now))
+                    }
                 }
             }
             .onChange(of: bedtime) {
