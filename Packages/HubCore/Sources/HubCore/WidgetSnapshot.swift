@@ -14,8 +14,14 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var bedtime: Bedtime?
     /// What RUNNER acts out, `nil` when there is no need or in snapshots from older builds.
     public var need: CompanionNeed?
+    /// When `need` ends at the latest, `nil` when no time is known.
+    public var needUntil: Date?
     /// Why RUNNER looks the way it does, for the rectangular Lock Screen widget.
     public var line: String?
+    /// The line to show once `need` has ended.
+    public var lineAfterNeed: String?
+    /// The next need that depends only on the clock, shown even if the app hasn't run since.
+    public var nextNeed: ScheduledNeed?
     public var updatedAt: Date
 
     public init(
@@ -78,18 +84,40 @@ extension WidgetSnapshot {
         updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) ? energy : nil
     }
 
-    /// The "why" line as of `date`, `nil` when it was written before today's 05:00.
-    public func line(at date: Date, calendar: Calendar = .current) -> String? {
-        updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) ? line : nil
+    /// The need as of `date`: the scheduled one while it lasts, else `need` unless it was written
+    /// before today's 05:00 or has ended.
+    public func need(at date: Date, calendar: Calendar = .current) -> CompanionNeed? {
+        if let nextNeed, nextNeed.contains(date) { return nextNeed.need }
+        guard updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) else { return nil }
+        if let needUntil, date >= needUntil { return nil }
+        return need
     }
 
-    /// When widgets should redraw after `date`: now, the next bedtime change and the next day start.
+    /// The "why" line as of `date`: the scheduled need's while it lasts, else `nil` when it was
+    /// written before today's 05:00.
+    public func line(at date: Date, calendar: Calendar = .current) -> String? {
+        if let nextNeed, nextNeed.contains(date) { return nextNeed.line }
+        guard updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) else { return nil }
+        if need != nil, need(at: date, calendar: calendar) == nil { return lineAfterNeed }
+        return line
+    }
+
+    /// When the needs in this snapshot start or end.
+    public var needTimes: [Date] {
+        [needUntil, nextNeed?.from, nextNeed?.until].compactMap { $0 }
+    }
+
+    /// When widgets should redraw after `date`: now, the next bedtime change, the next day start and
+    /// when needs start or end.
+    /// - Parameter needTimes: when the snapshot's needs start or end.
     public static func timelineDates(
         after date: Date,
         bedtime schedule: BedtimeSchedule,
+        needTimes: [Date] = [],
         calendar: Calendar = .current
     ) -> [Date] {
         var dates = [date]
+        dates += needTimes.filter { $0 > date }
         if let change = schedule.nextChange(after: date, calendar: calendar) {
             dates.append(change)
         }
