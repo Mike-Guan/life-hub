@@ -13,6 +13,7 @@ struct LifeHubApp: App {
     @State private var reminderError: String?
     @State private var showsSettings = false
     @State private var healthError: String?
+    @State private var countdownError: String?
     @State private var places: PlaceSettings
     @State private var placeMonitor: PlaceMonitor
     @State private var needs: NeedTracker
@@ -78,6 +79,7 @@ struct LifeHubApp: App {
                 if UIApplication.shared.applicationState == .active {
                     needs.celebrate(bedtime: bedtime.state(at: .now))
                 }
+                countdownError = await BoxingCountdown.update(for: needs.reading)
             }
         }
         .onChange(of: bedtime) {
@@ -105,7 +107,9 @@ struct LifeHubApp: App {
     }
 
     private var firstError: String? {
-        let errors = [widgets.lastError, reminderError, healthError, placeMonitor.lastError, needs.lastError]
+        let errors = [
+            widgets.lastError, reminderError, healthError, placeMonitor.lastError, needs.lastError, countdownError,
+        ]
         return (setupErrors + errors.compactMap { $0 }).first
     }
 
@@ -128,6 +132,8 @@ struct LifeHubApp: App {
             widgets.need = needs.reading
             widgets.sync(mode: store, energy: energy)
             WidgetCenter.shared.reloadAllTimelines()
+            // Arriving at the gym ends the countdown, even with the app in the background.
+            Task { _ = await BoxingCountdown.update(for: needs.reading) }
         }
     }
 

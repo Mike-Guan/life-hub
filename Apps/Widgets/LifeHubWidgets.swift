@@ -8,6 +8,7 @@ struct LifeHubWidgets: WidgetBundle {
         StatusWidget()
         ModeWidget()
         EnergyWidget()
+        BoxingCountdownWidget()
     }
 }
 
