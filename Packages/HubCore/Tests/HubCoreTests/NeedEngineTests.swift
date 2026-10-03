@@ -153,6 +153,15 @@ import Testing
         #expect(time(boxing, date(4, 9), nil) == date(4, 9, 30))
     }
 
+    @Test func boxingCountdownRunsUntilClass() {
+        let boxing = NeedReading(need: .boxingWarmup, since: date(4, 9), reasons: [], until: date(4, 12))
+        let couch = NeedReading(need: .couchScroll, since: date(4, 9), reasons: [])
+        #expect(NeedEngine.boxingCountdown(to: boxing, now: date(4, 9, 15), calendar: calendar) == date(4, 10))
+        #expect(NeedEngine.boxingCountdown(to: boxing, now: date(4, 10), calendar: calendar) == nil)
+        #expect(NeedEngine.boxingCountdown(to: couch, now: date(4, 9, 15), calendar: calendar) == nil)
+        #expect(NeedEngine.boxingCountdown(to: nil, now: date(4, 9, 15), calendar: calendar) == nil)
+    }
+
     @Test func inviteTextsStayDiscreet() {
         for need in CompanionNeed.allCases {
             let text = NeedEngine.inviteText(for: need)
