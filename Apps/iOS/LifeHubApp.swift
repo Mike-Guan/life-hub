@@ -8,6 +8,7 @@ struct LifeHubApp: App {
     @State private var energy: EnergyStore
     @State private var widgets: WidgetBridge
     @State private var setupErrors: [String]
+    @State private var healthError: String?
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -24,11 +25,13 @@ struct LifeHubApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView(extraError: (setupErrors + [widgets.lastError].compactMap { $0 }).first)
+            HomeView(extraError: (setupErrors + [widgets.lastError, healthError].compactMap { $0 }).first)
                 .environment(store)
                 .environment(energy)
                 .onChange(of: scenePhase, initial: true) { _, phase in
-                    if phase == .active { syncWidgets() }
+                    guard phase == .active else { return }
+                    syncWidgets()
+                    importSleep()
                 }
                 .onChange(of: store.log.changes.count) { syncWidgets() }
                 .onChange(of: energy.log.events.count) { syncWidgets() }
@@ -39,5 +42,19 @@ struct LifeHubApp: App {
     private func syncWidgets() {
         widgets.sync(mode: store, energy: energy)
         WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    // Re-reads each time the app becomes active, so sleep the Watch syncs later still counts.
+    private func importSleep() {
+        Task {
+            do {
+                if let night = try await HealthSleep.lastNight(), energy.record(night) {
+                    syncWidgets()
+                }
+                healthError = nil
+            } catch {
+                healthError = "读不到健康 App 里的睡眠：\(error.localizedDescription)"
+            }
+        }
     }
 }
