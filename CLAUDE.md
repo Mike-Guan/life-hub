@@ -54,14 +54,16 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
 - Several Claude threads work on this project. Ownership and progress live on the shared board
   `/mnt/project-files/energy-bank/协作看板.md` (outside the repo). Read it at the start of each turn,
   append a line before ending one, and ask the owner there before editing files another thread owns.
-  Companion rendering (`CompanionView.swift`, `CompanionArt.swift`, `Resources/runner-*`) belongs to
-  the UI thread; keep the CompanionKit public API stable.
+  Companion rendering (`CompanionView.swift`, `RunnerFigure.swift`, `RunnerArt.swift`, `Tools/`) belongs
+  to the UI thread; keep the CompanionKit public API stable.
 
 ## Current status
 - M0: local JSON persistence (`ModeLog`), no iCloud entitlements yet, runs in the simulator.
   Mike has a paid Apple Developer account, so SwiftData + CloudKit are next.
-- Companion renders the static per-mode RUNNER art with SwiftUI motion until `runner.riv` exists;
-  then CompanionKit switches to Rive behind the same `CompanionView` API.
+- Companion draws RUNNER from vector parts (`RunnerArt.swift`, generated from
+  `docs/03 Product/companion/runner-v5-layers.svg` by `Packages/CompanionKit/Tools/gen-runner-art.mjs`)
+  with SwiftUI motion until `runner.riv` exists; then CompanionKit switches to Rive behind the same
+  `CompanionView` API. Never edit `RunnerArt.swift` by hand; change the SVG and rerun the script.
 
 ## Layout
 - `Apps/iOS`, `Apps/macOS`: UI and platform glue only.
@@ -91,7 +93,7 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   `mode` enum (work, chill, box, money), `energy` number 0-100, `tap` trigger (fired inside Rive
   by a Listener), `cheer` trigger (fired by the app). Keep names in sync with the .riv file.
 - Swift `Mode.boxing` maps to Rive `"box"`; that mapping lives only in CompanionKit.
-- Widgets, Lock Screen and Live Activities use static per-mode images, not Rive.
+- Widgets, Lock Screen and Live Activities use `CompanionPortrait` (still vector RUNNER), not Rive.
 
 ## Principles (carried over from Mike's work hub)
 - Rules before models. Tiers: T0 rules, T1 on-device Foundation Models, T2 Claude Sonnet (macOS),
