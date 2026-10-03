@@ -12,6 +12,8 @@ struct LifeHubApp: App {
     @State private var reminderError: String?
     @State private var showsSettings = false
     @State private var healthError: String?
+    @State private var places: PlaceSettings
+    @State private var placeMonitor: PlaceMonitor
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -20,12 +22,21 @@ struct LifeHubApp: App {
         if !AppGroup.isAvailable {
             errors.append("小组件连不上共享文件夹（App Group），它们会一直是空的")
         }
-        _store = State(initialValue: ModeStore.live(in: container, defaults: AppGroup.defaults))
-        _energy = State(initialValue: EnergyStore.live(in: container, defaults: AppGroup.defaults))
+        let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
+        let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
         let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
+        let widgets = WidgetBridge(container: container, bedtime: bedtime)
+        let places = PlaceSettings.stored(in: AppGroup.defaults)
+        let placeMonitor = PlaceMonitor()
+        _store = State(initialValue: store)
+        _energy = State(initialValue: energy)
         _bedtime = State(initialValue: bedtime)
-        _widgets = State(initialValue: WidgetBridge(container: container, bedtime: bedtime))
+        _widgets = State(initialValue: widgets)
         _setupErrors = State(initialValue: errors)
+        _places = State(initialValue: places)
+        _placeMonitor = State(initialValue: placeMonitor)
+        // Started here, not in a view: a geofence can launch the app in the background with no UI.
+        Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets)
     }
 
     var body: some Scene {
@@ -48,8 +59,12 @@ struct LifeHubApp: App {
                     syncWidgets()
                     Task { await scheduleReminder() }
                 }
+                .onChange(of: places) {
+                    places.store(in: AppGroup.defaults)
+                    Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets)
+                }
                 .sheet(isPresented: $showsSettings) {
-                    SettingsView(bedtime: $bedtime)
+                    SettingsView(bedtime: $bedtime, places: $places, monitor: placeMonitor)
                 }
                 .onChange(of: store.log.changes.count) { syncWidgets() }
                 .onChange(of: energy.log.events.count) { syncWidgets() }
@@ -57,7 +72,21 @@ struct LifeHubApp: App {
     }
 
     private var firstError: String? {
-        (setupErrors + [widgets.lastError, reminderError, healthError].compactMap { $0 }).first
+        (setupErrors + [widgets.lastError, reminderError, healthError, placeMonitor.lastError].compactMap { $0 }).first
+    }
+
+    private static func watch(
+        _ places: PlaceSettings,
+        with monitor: PlaceMonitor,
+        store: ModeStore,
+        energy: EnergyStore,
+        widgets: WidgetBridge
+    ) {
+        monitor.start(places) { trigger in
+            guard store.autoSwitch(trigger) != nil else { return }
+            widgets.sync(mode: store, energy: energy)
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 
     // Pulls in taps made on widgets, then gives widgets the app's view of the state.

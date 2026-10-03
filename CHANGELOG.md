@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Places: set the gym and the office to your current location in settings. Arriving at the gym
+  switches straight to boxing; leaving after 30+ minutes goes back. Arriving at the office switches
+  to work. Works with the app closed when location access is "Always". Places stay on the iPhone.
 - Bedtime reminder: one local notification a day at 23:30 (changeable in the new settings sheet).
   Long-press it to see RUNNER yawning. From then until 05:00 RUNNER is sleepy on the home screen
   and in widgets, and opening the app plays the good-night animation once. No second reminder.
