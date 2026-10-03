@@ -20,6 +20,8 @@ public struct CompanionView: View {
     @State private var pop = 0
     @State private var taps = 0
     @State private var goodnightStart: Date?
+    // Seconds since the reference date of the last good-night animation, shared by every CompanionView.
+    @AppStorage("companion.lastGoodnight") private var lastGoodnight: Double = 0
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -65,7 +67,7 @@ public struct CompanionView: View {
             say(nil)
         }
         .onAppear {
-            if bedtime == .on { startGoodnight() }
+            if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
         }
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
@@ -133,7 +135,7 @@ public struct CompanionView: View {
         return mode.map { "RUNNER，\($0.title)" } ?? "RUNNER"
     }
 
-    private var paused: Bool { reduceMotion || scenePhase == .background }
+    private var paused: Bool { reduceMotion || scenePhase != .active }
 
     private func idleMotion(_ mode: Mode, time: TimeInterval) -> IdleMotion {
         if bedtime == .on { return IdleMotion.sleeping(time: time) }
@@ -162,9 +164,15 @@ public struct CompanionView: View {
     private static let goodnightDuration = 3.2
     private static let notificationLoop = 2.4
 
+    /// Whether the good-night animation last played within the past 12 hours.
+    nonisolated static func playedTonight(last: TimeInterval, now: Date) -> Bool {
+        now.timeIntervalSinceReferenceDate - last < 12 * 60 * 60
+    }
+
     private func startGoodnight() {
         goodnightStart = .now
         guard style == .standard else { return }
+        lastGoodnight = Date.now.timeIntervalSinceReferenceDate
         bubbleTask?.cancel()
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(Self.goodnightDuration * 0.85))

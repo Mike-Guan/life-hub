@@ -1,4 +1,4 @@
-.PHONY: project open test coverage lint format hooks check
+.PHONY: project open test coverage lint format hooks check art art-check
 
 project:
 	xcodegen generate
@@ -26,3 +26,11 @@ check: lint coverage
 
 hooks:
 	git config core.hooksPath scripts/git-hooks
+
+# Regenerate RunnerArt.swift from docs/03 Product/companion/runner-v5-layers.svg.
+art:
+	node Packages/CompanionKit/Tools/gen-runner-art.mjs
+
+# Fail if RunnerArt.swift is out of date with the SVG.
+art-check: art
+	git diff --exit-code -- Packages/CompanionKit/Sources/CompanionKit/RunnerArt.swift

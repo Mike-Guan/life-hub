@@ -1,3 +1,4 @@
+import Foundation
 import HubCore
 import Testing
 
@@ -7,6 +8,11 @@ import Testing
     @Test(arguments: RunnerPart.allCases)
     func everyPartHasArt(_ part: RunnerPart) {
         #expect(!RunnerArt.inks(part).isEmpty || RunnerArt.text(part) != nil)
+    }
+
+    @Test(arguments: RunnerPart.allCases)
+    func cachedInksMatchTheGeneratedArt(_ part: RunnerPart) {
+        #expect(RunnerArt.cachedInks(part).count == RunnerArt.inks(part).count)
     }
 
     @Test(arguments: Mode.allCases)
@@ -94,6 +100,13 @@ import Testing
             #expect(pose.zzz == -1 || (0...1).contains(pose.zzz))
             #expect((0.1...1).contains(pose.blink))
         }
+    }
+
+    @Test func goodnightPlaysOncePerNight() {
+        let now = Date(timeIntervalSinceReferenceDate: 1_000_000)
+        #expect(!CompanionView.playedTonight(last: 0, now: now))
+        #expect(CompanionView.playedTonight(last: 1_000_000 - 3600, now: now))
+        #expect(!CompanionView.playedTonight(last: 1_000_000 - 13 * 3600, now: now))
     }
 
     @Test func headBoxFitsInsideTheFigure() {
