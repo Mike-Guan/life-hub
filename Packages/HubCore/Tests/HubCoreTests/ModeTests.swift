@@ -12,6 +12,12 @@ import Testing
         #expect(modes.map(\.id) == modes.map(\.rawValue))
     }
 
+    @Test func bedtimeEncodesAsItsName() throws {
+        let data = try JSONEncoder().encode([Bedtime.off, .on])
+        #expect(String(decoding: data, as: UTF8.self) == #"["off","on"]"#)
+        #expect(try JSONDecoder().decode([Bedtime].self, from: data) == [.off, .on])
+    }
+
     @MainActor @Test func liveStoreKeepsItsDeviceID() throws {
         let suite = "lifehub-tests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
