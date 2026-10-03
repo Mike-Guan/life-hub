@@ -53,6 +53,42 @@ struct RunnerText: Sendable {
     var color: Color
 }
 
+/// RUNNER's face for an energy value: low, mid or high.
+enum EnergyFace: Sendable {
+    /// Heavier eyelids, eye bags, slower moves, sweat on boxing day.
+    case low
+    case mid
+    /// Bright eyes, sparkles by the head, quicker moves.
+    case high
+
+    static let lowBelow = 30.0
+    static let highFrom = 70.0
+
+    /// The face for `energy` (0-100). Unknown energy is `.mid`.
+    init(energy: Double?) {
+        guard let energy else {
+            self = .mid
+            return
+        }
+        if energy < Self.lowBelow {
+            self = .low
+        } else if energy >= Self.highFrom {
+            self = .high
+        } else {
+            self = .mid
+        }
+    }
+
+    /// How fast idle loops run compared with `.mid`.
+    var speed: Double {
+        switch self {
+        case .low: 0.6
+        case .mid: 1
+        case .high: 1.25
+        }
+    }
+}
+
 /// Where each part of RUNNER sits and how it is posed right now. All lengths are SVG units.
 struct RunnerPose {
     /// Head nod, applied to every head part around the neck.
@@ -73,8 +109,9 @@ struct RunnerPose {
     /// Position of the shine sweeping over the gold chain, as a fraction of the figure width.
     var glint: CGFloat = -1
     var coinTurn: Double = 0
-    /// Energy below 30: heavier eyelids, eye bags, slower moves, sweat on boxing day.
-    var tired = false
+    var face = EnergyFace.mid
+    /// Brightness of the sparkles by the head on high energy, 0...1.
+    var sparkle: Double = 1
     /// Bedtime overlay: sleepy eyes, mask down, the mode's outfit stays.
     var bedtime = false
     /// 0 = headset on, 1 = taken off.
@@ -88,27 +125,23 @@ struct RunnerPose {
     /// Rise of the floating Z z z, 0...1, or -1 when hidden.
     var zzz: CGFloat = -1
 
-    static let tiredThreshold = 30.0
-
-    /// Whether `energy` (0-100, nil when unknown) counts as tired.
-    static func isTired(_ energy: Double?) -> Bool {
-        guard let energy else { return false }
-        return energy < tiredThreshold
-    }
+    var tired: Bool { face == .low }
 
     /// The still pose, used for reduced motion and static renders.
-    init(tired: Bool = false) {
-        self.tired = tired
+    init(face: EnergyFace = .mid) {
+        self.face = face
         if tired { blink = 0.75 }
     }
 
     /// Pose at `time` for `mode`. `react` runs 0 → 1 → 0 after a tap.
-    init(mode: Mode, time: TimeInterval, tired: Bool, react: Double) {
-        self.init(tired: tired)
-        let t = time * (tired ? 0.6 : 1)
+    init(mode: Mode, time: TimeInterval, face: EnergyFace, react: Double) {
+        self.init(face: face)
+        let t = time * face.speed
         let open: CGFloat = tired ? 0.75 : 1
         let r = CGFloat(react)
         blink = open * Self.blink(at: t)
+        // Sparkles twinkle out of step with the blink, 1.6 s period.
+        sparkle = 0.55 + 0.45 * sin(time * 2 * .pi / 1.6)
 
         switch mode {
         case .work:
@@ -230,9 +263,14 @@ struct RunnerFigure: View {
             visible.formUnion(moneyParts)
         }
         if pose.tired, mode != .chill { visible.insert(.eyebags) }
+        if pose.face == .high {
+            visible.insert(.sparkle)
+            if mode != .chill { visible.insert(.eyeGlint) }
+        }
         if pose.bedtime {
             visible.subtract(awakeFaceParts)
             visible.formUnion(sleepyParts)
+            visible.subtract([.sparkle, .eyeGlint])
             if pose.headsetOff >= 1 { visible.subtract(headsetParts) }
             if pose.yawn > 0.05 { visible.insert(.mouthYawn) }
             if pose.lie > 0 { visible.insert(.pillow) }
@@ -267,7 +305,7 @@ struct RunnerFigure: View {
         let isHead = Self.headParts.contains(part)
         Group {
             switch part {
-            case .eyesWork, .lidsWork, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy:
+            case .eyesWork, .lidsWork, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 1, y: pose.blink, anchor: Self.unit(x: 60, y: 65))
                     .offset(y: pose.eyesDy * scale)
@@ -284,6 +322,10 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .offset(x: 4 * pose.zzz * scale, y: -8 * pose.zzz * scale)
                     .opacity(Double(sin(pose.zzz * .pi)))
+            case .sparkle:
+                RunnerPartView(part: part)
+                    .scaleEffect(0.8 + 0.2 * pose.sparkle, anchor: Self.unit(x: 60, y: 27))
+                    .opacity(pose.sparkle)
             case .ledYen:
                 RunnerPartView(part: part)
                     .offset(x: pose.yenDx * scale)
@@ -342,7 +384,7 @@ struct RunnerFigure: View {
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .browsWork, .eyesChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
-        .eyesSleepy, .mouthYawn,
+        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle,
     ]
 
     private static func jacketColor(_ mode: Mode) -> Color {
@@ -499,7 +541,7 @@ public struct CompanionPortrait: View {
     }
 
     private var figure: RunnerFigure {
-        let pose = bedtime == .on ? RunnerPose.bedtimeStill() : RunnerPose(tired: RunnerPose.isTired(energy))
+        let pose = bedtime == .on ? RunnerPose.bedtimeStill() : RunnerPose(face: EnergyFace(energy: energy))
         return RunnerFigure(mode: mode, pose: pose)
     }
 }
@@ -532,6 +574,9 @@ private struct HeadCrop<Content: View>: View {
         CompanionPortrait(mode: .boxing, energy: 10)
             .padding(8)
             .background(Mode.boxing.color)
+        CompanionPortrait(mode: .work, energy: 85)
+            .padding(8)
+            .background(Mode.work.color)
         CompanionPortrait(mode: .work, bedtime: .on)
             .padding(8)
             .background(Mode.work.color)
