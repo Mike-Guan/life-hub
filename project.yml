@@ -55,7 +55,12 @@ targets:
       - package: CompanionKit
       - target: LifeHub-Widgets
       - target: LifeHub-Notification
+      - target: LifeHub-ScreenTime
     settings:
+      # Family Controls is only in Debug until Apple approves it for distribution; see CI-CD.md.
+      configs:
+        Debug:
+          CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-Debug.entitlements
       base:
         CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub.entitlements
         TARGETED_DEVICE_FAMILY: "1"
@@ -117,5 +122,28 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).notification
         INFOPLIST_FILE: Apps/Notification/Info.plist
         CODE_SIGN_ENTITLEMENTS: Apps/Notification/LifeHubNotification.entitlements
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
+  LifeHub-ScreenTime:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Apps/ScreenTime
+        excludes:
+          - Info.plist
+          - "*.entitlements"
+      - Apps/iOS/AppGroup.swift
+      - Apps/iOS/ScrollWatch.swift
+    dependencies:
+      - package: HubCore
+    settings:
+      configs:
+        Debug:
+          CODE_SIGN_ENTITLEMENTS: Apps/ScreenTime/LifeHubScreenTime-Debug.entitlements
+      base:
+        PRODUCT_NAME: LifeHubScreenTime
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).screentime
+        INFOPLIST_FILE: Apps/ScreenTime/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Apps/ScreenTime/LifeHubScreenTime.entitlements
         TARGETED_DEVICE_FAMILY: "1"
         SKIP_INSTALL: YES
