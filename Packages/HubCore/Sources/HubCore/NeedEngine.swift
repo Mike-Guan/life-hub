@@ -49,6 +49,8 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var boxingWarmupStartMinute: Int
     /// When boxing warm-up gives up on boxing day.
     public var boxingWarmupEndMinute: Int
+    /// Until this, boxing warm-up outranks couch scrolling on boxing day.
+    public var boxingFirstUntilMinute: Int
     /// How long couch scrolling lasts before the invite.
     public var couchInviteAfter: TimeInterval
     /// How long boxing warm-up lasts before the invite.
@@ -72,6 +74,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
         boxingWeekday: 1,
         boxingWarmupStartMinute: 9 * 60,
         boxingWarmupEndMinute: 12 * 60,
+        boxingFirstUntilMinute: 10 * 60 + 30,
         couchInviteAfter: 60 * 60,
         boxingInviteAfter: 30 * 60,
         inviteCooldown: 3 * 60 * 60,
@@ -87,6 +90,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
         boxingWeekday: Int,
         boxingWarmupStartMinute: Int,
         boxingWarmupEndMinute: Int,
+        boxingFirstUntilMinute: Int,
         couchInviteAfter: TimeInterval,
         boxingInviteAfter: TimeInterval,
         inviteCooldown: TimeInterval,
@@ -100,6 +104,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
         self.boxingWeekday = boxingWeekday
         self.boxingWarmupStartMinute = boxingWarmupStartMinute
         self.boxingWarmupEndMinute = boxingWarmupEndMinute
+        self.boxingFirstUntilMinute = boxingFirstUntilMinute
         self.couchInviteAfter = couchInviteAfter
         self.boxingInviteAfter = boxingInviteAfter
         self.inviteCooldown = inviteCooldown
@@ -152,15 +157,19 @@ public struct NeedReading: Equatable, Sendable {
 
 /// Rule-based needs, invites and celebrations. Same input, same output; every need says why.
 public enum NeedEngine {
-    /// The need at `now`, couch scrolling first, or `nil` when there is none.
+    /// The need at `now`, or `nil` when there is none. Couch scrolling comes first, except on a
+    /// boxing morning, when scrolling at home is exactly what boxing warm-up is about.
     public static func need(
         _ signals: NeedSignals,
         now: Date,
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> NeedReading? {
-        couchScroll(signals, now: now, rules: rules, calendar: calendar)
-            ?? boxingWarmup(signals, now: now, rules: rules, calendar: calendar)
+        let boxing = boxingWarmup(signals, now: now, rules: rules, calendar: calendar)
+        if boxing != nil, now < time(rules.boxingFirstUntilMinute, on: now, calendar: calendar) {
+            return boxing
+        }
+        return couchScroll(signals, now: now, rules: rules, calendar: calendar) ?? boxing
     }
 
     /// True when the app should send today's invite for `reading` at `now`.

@@ -99,9 +99,12 @@ import Testing
         #expect(need(yesterday, at: date(4, 9, 30))?.need == .boxingWarmup)
     }
 
-    @Test func couchScrollingComesBeforeBoxing() {
+    @Test func boxingComesFirstOnBoxingMorningThenCouch() {
         let signals = NeedSignals(scrollThresholdAt: date(4, 9, 15))
-        #expect(need(signals, at: date(4, 9, 30))?.need == .couchScroll)
+        #expect(need(signals, at: date(4, 9, 30))?.need == .boxingWarmup)
+        #expect(need(signals, at: date(4, 10, 29))?.need == .boxingWarmup)
+        #expect(need(signals, at: date(4, 10, 30))?.need == .couchScroll)
+        #expect(need(NeedSignals(scrollThresholdAt: date(5, 9, 15)), at: date(5, 9, 30))?.need == .couchScroll)
     }
 
     @Test func inviteWaitsForTheNeedToLast() {
