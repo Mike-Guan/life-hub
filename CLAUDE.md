@@ -181,3 +181,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   and merges its own PRs after CI is green. See `docs/交接.md`.
 - 2026-10-03: Reversed the same day: multi-thread stays. PR 审查 merges; single-session rules are the
   fallback. Questions for Mike start with "需要你：" and are logged on the board as `[?]` first.
+- 2026-10-03: The sleep event is the one exception to the append-only energy log: re-importing the
+  same night updates its event (id derived from the night) instead of adding a new one.
