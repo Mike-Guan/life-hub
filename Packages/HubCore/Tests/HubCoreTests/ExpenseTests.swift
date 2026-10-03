@@ -140,6 +140,27 @@ import Testing
         #expect(gap(target: 50_000, log.active) == 0)
     }
 
+    @Test func enteredPaymentPairsWithLaterEmailsAndKeepsItsCategory() {
+        var log = ExpenseLog()
+        log.records = [Expense(amount: 1280, category: .other, day: day(10, 3), deviceID: "t", now: day(10, 3))]
+        let quick = charges(quickSubject, quickBody, id: "q")
+        let detail = charges(detailSubject, detailBody, id: "d")
+        log.apply(Array(quick.prefix(1)), rules: .standard, deviceID: "t", now: day(10, 3))
+        log.apply(detail, rules: .standard, deviceID: "t", now: day(10, 4))
+        #expect(log.active.count == 1)
+        #expect(log.active.first?.quickSource == quick.first?.id)
+        #expect(log.active.first?.merchant == "ＳＵＫＩＹＡ すき家 テスト店")
+        #expect(log.active.first?.category == .other)
+    }
+
+    @Test func enteredPaymentWithoutCategoryIsSortedByTheDetailEmail() {
+        var log = ExpenseLog()
+        log.records = [Expense(amount: 1280, category: .unsorted, day: day(10, 3), deviceID: "t", now: day(10, 3))]
+        log.apply(charges(detailSubject, detailBody, id: "d"), rules: .standard, deviceID: "t", now: day(10, 4))
+        #expect(log.active.count == 1)
+        #expect(log.active.first?.category == .diningOut)
+    }
+
     @Test func budgetSettingsGapNeedsTargetAndBalance() {
         let spent = CardCharge(id: "a", kind: .quick, day: day(9, 26), amount: 4000)
         var log = ExpenseLog()

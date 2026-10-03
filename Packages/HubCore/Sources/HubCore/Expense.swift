@@ -48,6 +48,23 @@ public struct Expense: Codable, Identifiable, Equatable, Sendable {
         self.deletedAt = nil
     }
 
+    /// A payment Mike entered himself, for example from the Rakuten Pay shortcut. A later email for
+    /// the same day and amount pairs with it.
+    public init(amount: Int, category: ExpenseCategory, day: Date, deviceID: String, now: Date) {
+        self.schemaVersion = Self.currentSchemaVersion
+        self.id = UUID()
+        self.day = day
+        self.amount = amount
+        self.merchant = nil
+        self.category = category
+        self.quickSource = nil
+        self.detailSource = nil
+        self.createdAt = now
+        self.updatedAt = now
+        self.updatedBy = deviceID
+        self.deletedAt = nil
+    }
+
     // Derived from the email, so two devices reading the same email make the same record.
     static func id(for chargeID: String) -> UUID {
         let bytes = Array(SHA256.hash(data: Data(chargeID.utf8)).prefix(16))

@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- "记一笔乐天 Pay" in Shortcuts: enter the amount (and whether it was eating out) right after paying,
+  for example from an automation when Rakuten Pay closes. The app adds it the next time it opens and it
+  comes off the savings card. A later card email for the same day and amount pairs with it instead of
+  counting twice and sorts it by shop, unless it was marked as eating out.
 - Savings card on the iPhone home screen: how far the bank balance is from the savings target, with
   a progress bar. Enter the balance on payday and the target in the new "钱" settings card. Both stay
   on the iPhone. Card spending will come off the balance once email reading is in.
