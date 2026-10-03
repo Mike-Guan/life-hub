@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Screen Time watch: in settings, pick Bilibili and Xiaohongshu. When they add up to 30 minutes in a
+  day, the app learns that the threshold was reached (never how long they were used). Debug builds
+  only (the settings card too) until Apple approves Family Controls for TestFlight. RUNNER doesn't use it yet.
 - RUNNER's face follows energy in three steps. Low (under 30): eye bags and slow moves. High
   (70 or more): bright eyes, twinkling sparkles by the head and quicker moves. Widgets show the same.
 - Rules for what RUNNER acts out (Issue #23): couch scrolling (Screen Time threshold, or still at home
