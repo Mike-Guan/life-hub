@@ -13,8 +13,10 @@ enum BedtimeReminder {
     /// - Returns: an error message for the UI, or `nil` when the reminder is set.
     static func schedule(_ schedule: BedtimeSchedule) async -> String? {
         let center = UNUserNotificationCenter.current()
+        // This replaces every category, so the invite's is registered here too.
         center.setNotificationCategories([
-            UNNotificationCategory(identifier: category, actions: [], intentIdentifiers: [])
+            UNNotificationCategory(identifier: category, actions: [], intentIdentifiers: []),
+            UNNotificationCategory(identifier: InviteReminder.category, actions: [], intentIdentifiers: []),
         ])
         do {
             guard try await center.requestAuthorization(options: [.alert, .sound]) else {

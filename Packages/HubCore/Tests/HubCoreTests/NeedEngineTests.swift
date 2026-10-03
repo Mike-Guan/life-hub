@@ -134,6 +134,44 @@ import Testing
         #expect(invite(date(6, 7), date(6, 4)))
     }
 
+    func time(_ reading: NeedReading?, _ now: Date, _ last: Date?) -> Date? {
+        NeedEngine.inviteTime(for: reading, now: now, lastInviteAt: last, bedtime: .standard, calendar: calendar)
+    }
+
+    @Test func inviteIsScheduledWhenTheNeedHasLasted() {
+        let couch = NeedReading(need: .couchScroll, since: date(5, 20), reasons: [], until: date(5, 23))
+        #expect(time(couch, date(5, 20, 10), nil) == date(5, 21))
+        #expect(time(couch, date(5, 21, 30), nil) == date(5, 21, 30))
+        #expect(time(couch, date(5, 21), date(5, 9)) == nil)
+        #expect(time(nil, date(5, 21), nil) == nil)
+
+        let late = NeedReading(need: .couchScroll, since: date(5, 22, 45), reasons: [])
+        #expect(time(late, date(5, 22, 50), nil) == nil)
+        let ending = NeedReading(need: .couchScroll, since: date(5, 20), reasons: [], until: date(5, 20, 30))
+        #expect(time(ending, date(5, 20, 10), nil) == nil)
+        let boxing = NeedReading(need: .boxingWarmup, since: date(4, 9), reasons: [], until: date(4, 12))
+        #expect(time(boxing, date(4, 9), nil) == date(4, 9, 30))
+    }
+
+    @Test func inviteTextsStayDiscreet() {
+        for need in CompanionNeed.allCases {
+            let text = NeedEngine.inviteText(for: need)
+            #expect(!text.isEmpty && !text.contains("刷") && !text.contains("B 站"))
+        }
+    }
+
+    @Test func inviteLogCountsAPassedInviteAsSent() throws {
+        let log = InviteLog(lastSentAt: date(4, 21), pendingAt: date(5, 21))
+        #expect(log.settled(now: date(5, 20)) == log)
+        #expect(log.settled(now: date(5, 21)) == InviteLog(lastSentAt: date(5, 21)))
+
+        let defaults = try #require(UserDefaults(suiteName: "InviteLogTests"))
+        defaults.removePersistentDomain(forName: "InviteLogTests")
+        #expect(InviteLog.stored(in: defaults) == InviteLog())
+        log.store(in: defaults)
+        #expect(InviteLog.stored(in: defaults) == log)
+    }
+
     @Test func celebratesLongRunsAndBoxingOnce() throws {
         let run = workout(.running, date(5, 7), minutes: 30, meters: 5200)
         let short = workout(.running, date(5, 8), minutes: 20, meters: 3000)

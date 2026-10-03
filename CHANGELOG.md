@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- At most one invite a day: after an hour of couch scrolling (or 30 minutes into Sunday boxing
+  warm-up) a notification from RUNNER says "起来走两步？我陪你。" or "拳套戴好了，出发去拳馆？". It is
+  dropped if the need ends first and never lands at bedtime. Long-press it to see RUNNER get up.
+  The Screen Time threshold schedules it even when the app isn't running.
 - RUNNER celebrates a 5 km run or 30 minutes of boxing once, the next time the app is opened within
   3 hours of the workout ending. Never at bedtime.
 - Couch scrolling look for RUNNER: slumped back with half-closed eyes, a lit phone in hand and a

@@ -60,6 +60,7 @@ struct LifeHubApp: App {
             bedtime: bedtime,
             need: needs.reading,
             event: needs.event,
+            invite: needs.invite,
             onSettings: { showsSettings = true }
         )
         .environment(store)

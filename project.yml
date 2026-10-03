@@ -113,6 +113,7 @@ targets:
           - Info.plist
           - "*.entitlements"
       - Apps/iOS/AppGroup.swift
+      - Apps/iOS/InviteReminder.swift
     dependencies:
       - package: HubCore
       - package: CompanionKit
@@ -133,6 +134,7 @@ targets:
           - Info.plist
           - "*.entitlements"
       - Apps/iOS/AppGroup.swift
+      - Apps/iOS/InviteReminder.swift
       - Apps/iOS/ScrollWatch.swift
     dependencies:
       - package: HubCore

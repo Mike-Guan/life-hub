@@ -8,6 +8,8 @@ import Observation
 final class NeedTracker {
     /// The current need, `nil` when there is none.
     private(set) var reading: NeedReading?
+    /// Today's invite text while its need lasts, `nil` when none went out for it.
+    private(set) var invite: String?
     /// The celebration RUNNER should play, `nil` when there is none.
     private(set) var event: CompanionEvent?
     /// Last failure, for the UI to show.
@@ -25,7 +27,8 @@ final class NeedTracker {
         }
     }
 
-    /// Recomputes the need from the stored presence and the last HealthKit reading.
+    /// Recomputes the need from the stored presence and the last HealthKit reading, and reschedules
+    /// today's invite for it.
     func refresh(places: PlaceSettings, now: Date = .now) {
         let presence = PlacePresence.stored(in: AppGroup.defaults)
         let signals = NeedSignals(
@@ -37,6 +40,8 @@ final class NeedTracker {
             workouts: motion?.workouts ?? []
         )
         reading = NeedEngine.need(signals, now: now)
+        InviteReminder.plan(reading, now: now)
+        invite = InviteReminder.sent(for: reading)
     }
 
     // Only called while the app is on screen, so a celebration isn't spent in the background.
