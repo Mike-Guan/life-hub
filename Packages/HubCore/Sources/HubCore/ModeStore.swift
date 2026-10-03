@@ -46,6 +46,21 @@ public final class ModeStore {
         return true
     }
 
+    /// Applies what `ModeEngine` decides for `trigger`.
+    /// - Returns: the change made, or `nil` when the mode stays.
+    @discardableResult
+    public func autoSwitch(
+        _ trigger: ModeTrigger,
+        rules: ModeRules = .standard,
+        now: Date = .now,
+        calendar: Calendar = .current
+    ) -> ModeDecision? {
+        guard let decision = ModeEngine.decide(trigger, log: log, now: now, rules: rules, calendar: calendar) else {
+            return nil
+        }
+        return switchTo(decision.mode, source: decision.source, at: now) ? decision : nil
+    }
+
     public func segments(on day: Date, now: Date = .now) -> [ModeSegment] {
         log.segments(on: day, now: now)
     }

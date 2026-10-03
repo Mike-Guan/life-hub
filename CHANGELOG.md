@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Automatic mode from the weekday schedule: Monday to Friday 9:30 to 18:30 is work, other times
+  chill. It switches once per period and waits 2 hours after a manual change. Rules for arriving at
+  the gym (straight to boxing) and the office (work), and leaving the gym after 30+ minutes (back to
+  the earlier mode), are ready for the location PR.
 - Bedtime look for RUNNER: at bedtime RUNNER takes the headset off, pulls the mask down, yawns,
   stretches and leans onto a pillow ("该睡了"), then stays sleepy with slow blinks, yawns and Z z z.
   A short loop for the notification and a sleepy still portrait (full or head only) for widgets.
