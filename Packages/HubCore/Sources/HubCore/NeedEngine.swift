@@ -237,11 +237,46 @@ public enum NeedEngine {
         calendar: Calendar = .current
     ) -> Bool {
         guard let reading, bedtime == .off else { return false }
-        let wait = reading.need == .couchScroll ? rules.couchInviteAfter : rules.boxingInviteAfter
-        guard now.timeIntervalSince(reading.since) >= wait else { return false }
+        guard now.timeIntervalSince(reading.since) >= inviteWait(reading.need, rules: rules) else { return false }
         guard let last = lastInviteAt else { return true }
         let today = StateEngine.dayStart(for: now, calendar: calendar)
         return last < today && now.timeIntervalSince(last) >= rules.inviteCooldown
+    }
+
+    /// When the invite for `reading` should go out, at `now` or later, or `nil` when it shouldn't:
+    /// the need ends first, today's invite went out, or it would land at bedtime.
+    /// - Parameters:
+    ///   - lastInviteAt: when the last invite went out, `nil` if never.
+    ///   - bedtime: the bedtime window, checked at the time the invite would go out.
+    public static func inviteTime(
+        for reading: NeedReading?,
+        now: Date,
+        lastInviteAt: Date?,
+        bedtime: BedtimeSchedule,
+        rules: NeedRules = .standard,
+        calendar: Calendar = .current
+    ) -> Date? {
+        guard let reading else { return nil }
+        let at = max(reading.since.addingTimeInterval(inviteWait(reading.need, rules: rules)), now)
+        guard reading.isActive(at: at) else { return nil }
+        let state = bedtime.state(at: at, calendar: calendar)
+        let invite = shouldInvite(
+            reading,
+            now: at,
+            lastInviteAt: lastInviteAt,
+            bedtime: state,
+            rules: rules,
+            calendar: calendar
+        )
+        return invite ? at : nil
+    }
+
+    /// The invite's text for `need`. It goes on the Lock Screen, so it doesn't say what Mike was doing.
+    public static func inviteText(for need: CompanionNeed) -> String {
+        switch need {
+        case .couchScroll: "起来走两步？我陪你。"
+        case .boxingWarmup: "拳套戴好了，出发去拳馆？"
+        }
     }
 
     /// The newest workout worth celebrating that hasn't been, or `nil`.
@@ -264,6 +299,10 @@ public enum NeedEngine {
         if bedtime == .on { return "到点了，我先困了" }
         if let reason = need?.reasons.first { return reason }
         return energy?.reasons.first
+    }
+
+    private static func inviteWait(_ need: CompanionNeed, rules: NeedRules) -> TimeInterval {
+        need == .couchScroll ? rules.couchInviteAfter : rules.boxingInviteAfter
     }
 
     private static func isWorthCelebrating(_ workout: WorkoutSummary, rules: NeedRules) -> Bool {

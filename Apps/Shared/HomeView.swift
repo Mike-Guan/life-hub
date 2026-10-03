@@ -10,6 +10,8 @@ struct HomeView: View {
     var need: NeedReading?
     /// A one-off animation for RUNNER, such as celebrating a workout.
     var event: CompanionEvent?
+    /// Today's invite text while its need lasts, so RUNNER gets up and says it.
+    var invite: String?
     /// Shows a settings button that calls this, when set.
     var onSettings: (() -> Void)?
 
@@ -33,6 +35,7 @@ struct HomeView: View {
                         energy: reading?.value,
                         need: activeNeed(at: context.date)?.need,
                         event: event,
+                        invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
                         bedtime: bedtime.state(at: context.date)
                     )

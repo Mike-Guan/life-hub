@@ -5,13 +5,26 @@ import UIKit
 import UserNotifications
 import UserNotificationsUI
 
-/// Shows sleepy RUNNER in the expanded bedtime notification.
+/// Shows RUNNER in the expanded notification: sleepy at bedtime, getting up for an invite.
 final class NotificationViewController: UIViewController, UNNotificationContentExtension {
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    nonisolated func didReceive(_ notification: UNNotification) {
+        let content = notification.request.content
+        let invite = content.categoryIdentifier == InviteReminder.category ? content.body : nil
+        let need = (content.userInfo[InviteReminder.needKey] as? String).flatMap(CompanionNeed.init(rawValue:))
+        MainActor.assumeIsolated { show(invite: invite, need: need) }
+    }
+
+    private func show(invite: String?, need: CompanionNeed?) {
         // The app writes the snapshot; the notification only reads the current mode from it.
         let mode = AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))?.mode
-        let runner = CompanionView(mode: mode, bedtime: .on, style: .notification, showsBubble: false)
+        let runner = CompanionView(
+            mode: mode,
+            need: need,
+            invite: invite,
+            bedtime: invite == nil ? .on : .off,
+            style: .notification,
+            showsBubble: false
+        )
         let host = UIHostingController(rootView: runner)
         addChild(host)
         host.view.translatesAutoresizingMaskIntoConstraints = false
@@ -24,6 +37,4 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
         ])
         host.didMove(toParent: self)
     }
-
-    nonisolated func didReceive(_ notification: UNNotification) {}
 }
