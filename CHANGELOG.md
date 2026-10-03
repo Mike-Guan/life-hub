@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- RUNNER celebrates a finished workout: two happy hops, a burst of sparkles and "干得漂亮！". Each
+  workout plays once, never at bedtime. Not switched on in the app yet.
 - Boxing warm-up look for RUNNER: gloves and red headband on over any outfit, bouncing, and a look
   at the door every few seconds, with its own tap lines. The same look works in widgets and as a
   small head for the Sunday countdown. Not switched on in the app yet.

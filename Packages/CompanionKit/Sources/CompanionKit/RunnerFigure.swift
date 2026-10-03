@@ -116,6 +116,8 @@ struct RunnerPose {
     var need: CompanionNeed?
     /// Brightness of the sparkles by the head on high energy, 0...1.
     var sparkle: Double = 1
+    /// Progress of the celebration sparkle burst, 0..<1, or -1 when none is playing.
+    var burst: CGFloat = -1
     /// Bedtime overlay: sleepy eyes, mask down, the mode's outfit stays.
     var bedtime = false
     /// 0 = headset on, 1 = taken off.
@@ -283,7 +285,7 @@ struct RunnerFigure: View {
             visible.formUnion(warmupParts)
             visible.remove(.monsterCan)
         }
-        if pose.face == .high {
+        if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
             if mode != .chill { visible.insert(.eyeGlint) }
         }
@@ -346,6 +348,11 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .offset(x: 4 * pose.zzz * scale, y: -8 * pose.zzz * scale)
                     .opacity(Double(sin(pose.zzz * .pi)))
+            case .sparkle where pose.burst >= 0:
+                // Celebration: the sparkles fly out from the head and fade.
+                RunnerPartView(part: part)
+                    .scaleEffect(0.8 + 0.7 * pose.burst, anchor: Self.unit(x: 60, y: 40))
+                    .opacity(Double(sin(pose.burst * .pi)))
             case .sparkle:
                 RunnerPartView(part: part)
                     .scaleEffect(0.8 + 0.2 * pose.sparkle, anchor: Self.unit(x: 60, y: 27))

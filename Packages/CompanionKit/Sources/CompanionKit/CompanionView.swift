@@ -10,6 +10,8 @@ public struct CompanionView: View {
     let energy: Double?
     /// What RUNNER acts out on top of the mode, or nil.
     let need: CompanionNeed?
+    /// A one-off animation, such as celebrating a workout. Each celebration id plays once.
+    let event: CompanionEvent?
     /// Increment to play the cheer jump.
     let cheer: Int
     /// `.on` turns RUNNER sleepy; each change to `.on` plays the good-night animation once.
@@ -24,6 +26,9 @@ public struct CompanionView: View {
     @State private var goodnightStart: Date?
     // Seconds since the reference date of the last good-night animation, shared by every CompanionView.
     @AppStorage("companion.lastGoodnight") private var lastGoodnight: Double = 0
+    @State private var celebrationStart: Date?
+    // Id of the last celebrated workout, shared by every CompanionView so each plays once.
+    @AppStorage("companion.lastCelebration") private var lastCelebration = ""
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -31,6 +36,7 @@ public struct CompanionView: View {
         mode: Mode?,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
+        event: CompanionEvent? = nil,
         cheer: Int = 0,
         bedtime: Bedtime = .off,
         style: CompanionStyle = .standard,
@@ -39,6 +45,7 @@ public struct CompanionView: View {
         self.mode = mode
         self.energy = energy
         self.need = need
+        self.event = event
         self.cheer = cheer
         self.bedtime = bedtime
         self.style = style
@@ -72,7 +79,9 @@ public struct CompanionView: View {
         }
         .onAppear {
             if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
+            celebrateIfNew()
         }
+        .onChange(of: event) { _, _ in celebrateIfNew() }
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
         }
@@ -142,6 +151,7 @@ public struct CompanionView: View {
 
     private func idleMotion(_ mode: Mode, time: TimeInterval) -> IdleMotion {
         if bedtime == .on { return IdleMotion.sleeping(time: time) }
+        if let progress = celebration(at: time) { return IdleMotion.celebrating(progress: progress) }
         // Warming up hops like boxing day, whatever the outfit.
         let motionMode = need == .boxingWarmup ? .boxing : mode
         return IdleMotion(mode: motionMode, time: time * face.speed)
@@ -150,7 +160,16 @@ public struct CompanionView: View {
     private func pose(_ mode: Mode, time: TimeInterval, react: Double) -> RunnerPose {
         if bedtime == .on { return bedtimePose(time: time) }
         if reduceMotion { return RunnerPose(face: face, need: need) }
-        return RunnerPose(mode: mode, time: time, face: face, need: need, react: react)
+        var pose = RunnerPose(mode: mode, time: time, face: face, need: need, react: react)
+        if let progress = celebration(at: time) { pose.burst = CGFloat(progress) }
+        return pose
+    }
+
+    /// Progress of the celebration at `time`, 0..<1, or nil when none is playing.
+    private func celebration(at time: TimeInterval) -> Double? {
+        guard let start = celebrationStart?.timeIntervalSinceReferenceDate else { return nil }
+        let progress = (time - start) / Self.celebrationDuration
+        return (0..<1).contains(progress) ? progress : nil
     }
 
     private func bedtimePose(time: TimeInterval) -> RunnerPose {
@@ -167,6 +186,20 @@ public struct CompanionView: View {
     }
 
     private static let goodnightDuration = 3.2
+    private static let celebrationDuration = 1.6
+
+    /// The celebration id to play for `event`, or nil when there is none or it already played.
+    nonisolated static func newCelebration(_ event: CompanionEvent?, last: String) -> String? {
+        guard case .celebrate(let id) = event, id != last else { return nil }
+        return id
+    }
+
+    private func celebrateIfNew() {
+        guard bedtime == .off, let id = Self.newCelebration(event, last: lastCelebration) else { return }
+        lastCelebration = id
+        celebrationStart = .now
+        say("干得漂亮！")
+    }
     private static let notificationLoop = 2.4
 
     /// Whether the good-night animation last played within the past 12 hours.
@@ -225,6 +258,11 @@ struct IdleMotion {
     var dy: CGFloat
     var angle: Double
 
+    /// Two happy hops over a celebration; `progress` runs 0..<1.
+    static func celebrating(progress: Double) -> IdleMotion {
+        IdleMotion(dy: -CGFloat(abs(sin(progress * 2 * .pi))) * 22, angle: sin(progress * 4 * .pi) * 3)
+    }
+
     /// Slow breathing at bedtime, 4 s period.
     static func sleeping(time t: TimeInterval) -> IdleMotion {
         IdleMotion(dy: CGFloat(sin(t * 2 * .pi / 4)) * 1.5, angle: 0)
@@ -279,6 +317,7 @@ private struct SpeechBubble: View {
             CompanionView(mode: .boxing, energy: 10).frame(height: 180).toyCard()
             CompanionView(mode: .money, energy: 85).frame(height: 180).toyCard()
             CompanionView(mode: .chill, need: .boxingWarmup).frame(height: 180).toyCard()
+            CompanionView(mode: .boxing, event: .celebrate(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .work, bedtime: .on).frame(height: 180).toyCard()
             CompanionView(mode: .chill, bedtime: .on, style: .notification, showsBubble: false)
                 .frame(height: 180)

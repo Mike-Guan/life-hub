@@ -92,6 +92,29 @@ import Testing
         #expect(CompanionLines.accessibilityLabel(mode: .chill, need: .boxingWarmup, bedtime: .on) == "RUNNER，困了")
     }
 
+    @Test func eachCelebrationPlaysOnce() {
+        #expect(CompanionView.newCelebration(.celebrate(id: "run-1"), last: "") == "run-1")
+        #expect(CompanionView.newCelebration(.celebrate(id: "run-1"), last: "run-1") == nil)
+        #expect(CompanionView.newCelebration(.celebrate(id: "box-2"), last: "run-1") == "box-2")
+        #expect(CompanionView.newCelebration(nil, last: "") == nil)
+    }
+
+    @Test func celebrationBurstsSparklesButNotAtBedtime() {
+        var pose = RunnerPose()
+        pose.burst = 0.5
+        #expect(RunnerFigure.parts(for: .chill, pose: pose).contains(.sparkle))
+        var sleepy = RunnerPose.bedtimeStill()
+        sleepy.burst = 0.5
+        #expect(!RunnerFigure.parts(for: .chill, pose: sleepy).contains(.sparkle))
+    }
+
+    @Test func celebrationHopsAndLands() {
+        let hops = (0..<20).map { IdleMotion.celebrating(progress: Double($0) / 20) }
+        #expect(hops.allSatisfy { $0.dy <= 0 && $0.dy >= -22 && abs($0.angle) <= 3 })
+        #expect(hops.contains { $0.dy < -15 })
+        #expect(abs(IdleMotion.celebrating(progress: 0).dy) < 0.01)
+    }
+
     @Test func bedtimeHidesTheHighEnergyLook() {
         var pose = RunnerPose.bedtimeStill()
         pose.face = .high
