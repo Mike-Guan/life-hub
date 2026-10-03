@@ -17,9 +17,20 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
 - Package tests: `swift test --package-path Packages/HubCore`.
 - CI (`.github/workflows/build.yml`) runs the tests and builds both apps on a macOS runner.
 
+## Process (details: `docs/05 Engineering/开发流程.md`)
+- Trunk-based. Branch from `main` as `feature/<issue>-<name>`, `fix/…`, `chore/…`, `docs/…`;
+  `hotfix/<version>` from a release tag only when PROD needs a fix and `main` has unreleased work.
+- Every change goes through a PR: one thing per PR, Conventional Commits title, squash merge, CI green,
+  PR template filled in (Before / After / How, verification level).
+- Environments = Xcode configurations: Debug = DEV (`.dev`), Staging = STG (`.stg`, TestFlight internal),
+  Release = PROD (`com.guanshiyang.lifehub`). Separate data and, later, separate CloudKit containers.
+- SemVer in `MARKETING_VERSION` (0.x until the MVP; M0 = 0.1.0), build number +1 per upload,
+  PROD releases tagged `vX.Y.Z`, `CHANGELOG.md` updated in each feature PR under [Unreleased].
+- Never commit signing team IDs, certificates or keys.
+
 ## Current status
-- M0: local JSON persistence (`ModeLog`), no iCloud entitlements, runs in the simulator.
-  SwiftData + CloudKit come once Mike's Apple Developer account is confirmed.
+- M0: local JSON persistence (`ModeLog`), no iCloud entitlements yet, runs in the simulator.
+  Mike has a paid Apple Developer account, so SwiftData + CloudKit are next.
 - Companion renders the static per-mode RUNNER art with SwiftUI motion until `runner.riv` exists;
   then CompanionKit switches to Rive behind the same `CompanionView` API.
 
@@ -68,6 +79,10 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - No data from Mike's work hub or company systems enters this app.
 
 ## Lessons from Lilo and Daily Widget
+- Before each step, look up the scenario table in `docs/00 Lessons/经验索引.md` and read the matching
+  entries' gotchas (e.g. sync → DW-02, DW-06, DW-01; data model → DW-02, DW-05; widgets → DW-04;
+  first TestFlight → DW-05, L-05, L-RELEASE). Full source notes live on Mike's Mac; ask for one if
+  the gotchas aren't enough.
 - Every core feature must give value on a day Mike does nothing. Automatic mode switching and widgets
   come before anything that needs manual logging.
 - Record state and summaries (mode timeline, energy events), not task lists.
@@ -75,6 +90,9 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - The app computes; widgets read a `WidgetSnapshot` written to the App Group container.
 - Data contract first: every record has schemaVersion, id, createdAt, updatedAt, updatedBy (device id),
   deletedAt (soft delete). Decoding tolerates missing fields with defaults. Unit-test the Codable types.
+- An older build must never delete newer data on save (DW-02): `ModeLog` keeps unreadable records and
+  writes them back. Unknown fields on readable records are still dropped; fix that before two
+  builds write the same store.
 - Evidence levels: "compiles", "verified locally on two real devices", "shipped via TestFlight" are
   different claims. Sync is only verified on a real iPhone + Mac, never on simulators alone.
 - Bundle id prefix: com.guanshiyang.lifehub; App Group group.com.guanshiyang.lifehub.
