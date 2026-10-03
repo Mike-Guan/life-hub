@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Budget groundwork (Issue #24), not shown in the app yet: reading Rakuten Card quick-notice and
+  detail emails into expenses, pairing the two so each payment counts once, sorting shops into eating
+  out / groceries / other by keywords, and the two numbers the money card will show (eating out left
+  this month, gap to the savings target).
 - At most one invite a day: after an hour of couch scrolling (or 30 minutes into Sunday boxing
   warm-up) a notification from RUNNER says "起来走两步？我陪你。" or "拳套戴好了，出发去拳馆？". It is
   dropped if the need ends first and never lands at bedtime. Long-press it to see RUNNER get up.
