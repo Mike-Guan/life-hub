@@ -2,7 +2,7 @@ import HubCore
 import SwiftUI
 
 /// One filled and/or stroked shape of a `RunnerPart`, in SVG units.
-struct RunnerInk {
+struct RunnerInk: Sendable {
     var path: Path
     var fill: Color?
     var stroke: Color?
@@ -31,6 +31,17 @@ struct RunnerInk {
         self.dash = dash
         self.opacity = opacity
     }
+}
+
+extension RunnerArt {
+    /// The inks of `part`, built once instead of on every frame.
+    static func cachedInks(_ part: RunnerPart) -> [RunnerInk] {
+        inkCache[part] ?? []
+    }
+
+    private static let inkCache: [RunnerPart: [RunnerInk]] = Dictionary(
+        uniqueKeysWithValues: RunnerPart.allCases.map { ($0, inks($0)) }
+    )
 }
 
 /// Text inside a part, such as the ¥¥ on the mask LED. `y` is the baseline.
@@ -360,7 +371,7 @@ struct RunnerPartView: View {
     var body: some View {
         Canvas { context, size in
             RunnerDrawing.enterFigureSpace(&context, size: size)
-            for ink in RunnerArt.inks(part) {
+            for ink in RunnerArt.cachedInks(part) {
                 var layer = context
                 layer.opacity = ink.opacity
                 if let fill = ink.fill {
