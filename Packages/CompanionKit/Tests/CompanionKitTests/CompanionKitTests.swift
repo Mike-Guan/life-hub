@@ -1,3 +1,4 @@
+import Foundation
 import HubCore
 import Testing
 
@@ -94,6 +95,13 @@ import Testing
             #expect(pose.zzz == -1 || (0...1).contains(pose.zzz))
             #expect((0.1...1).contains(pose.blink))
         }
+    }
+
+    @Test func goodnightPlaysOncePerNight() {
+        let now = Date(timeIntervalSinceReferenceDate: 1_000_000)
+        #expect(!CompanionView.playedTonight(last: 0, now: now))
+        #expect(CompanionView.playedTonight(last: 1_000_000 - 3600, now: now))
+        #expect(!CompanionView.playedTonight(last: 1_000_000 - 13 * 3600, now: now))
     }
 
     @Test func headBoxFitsInsideTheFigure() {
