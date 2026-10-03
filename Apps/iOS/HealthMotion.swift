@@ -52,7 +52,8 @@ enum HealthMotion {
     }
 
     // Steps in 15-minute buckets over the last 4 hours; still since the end of the last busy one.
-    private static func stillSince(in store: HKHealthStore, steps: HKQuantityType, now: Date) async throws -> Date {
+    // No step data at all looks the same as denied access, so it says nothing (`nil`).
+    private static func stillSince(in store: HKHealthStore, steps: HKQuantityType, now: Date) async throws -> Date? {
         let start = now.addingTimeInterval(-4 * 60 * 60)
         let predicate = HKQuery.predicateForSamples(withStart: start, end: now)
         let query = HKStatisticsCollectionQueryDescriptor(
@@ -61,7 +62,8 @@ enum HealthMotion {
             anchorDate: start,
             intervalComponents: DateComponents(minute: 15)
         )
-        let buckets = try await query.result(for: store).statistics()
+        let buckets = try await query.result(for: store).statistics().filter { $0.sumQuantity() != nil }
+        guard !buckets.isEmpty else { return nil }
         let busy = buckets.filter { ($0.sumQuantity()?.doubleValue(for: .count()) ?? 0) >= movingSteps }
         return busy.map(\.endDate).max().map { min($0, now) } ?? start
     }
