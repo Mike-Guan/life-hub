@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Screen Time watch: in settings, pick Bilibili and Xiaohongshu. When they add up to 30 minutes in a
+  day, the app learns that the threshold was reached (never how long they were used). Debug builds
+  only until Apple approves Family Controls for TestFlight. RUNNER doesn't use it yet.
 - Places: set the gym and the office to your current location in settings. Arriving at the gym
   switches straight to boxing; leaving after 30+ minutes goes back. Arriving at the office switches
   to work. Works with the app closed when location access is "Always". Places stay on the iPhone.

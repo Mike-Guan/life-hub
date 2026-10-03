@@ -1,9 +1,10 @@
 import CompanionKit
 import CoreLocation
+import FamilyControls
 import HubCore
 import SwiftUI
 
-/// App settings: the bedtime reminder time and the places that switch mode.
+/// App settings: the bedtime reminder time, the places that switch mode and the Screen Time watch.
 struct SettingsView: View {
     @Binding var bedtime: BedtimeSchedule
     @Binding var places: PlaceSettings
@@ -11,8 +12,21 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var placeError: String?
     @State private var locating: HubPlace.Kind?
+    @State private var scrollApps = ScrollWatch.selection
+    @State private var pickingApps = false
+    @State private var screenTimeError: String?
 
     var body: some View {
+        ScrollView {
+            content
+        }
+        .foregroundStyle(Toy.ink)
+        .background(Toy.paper.ignoresSafeArea())
+        .familyActivityPicker(isPresented: $pickingApps, selection: $scrollApps)
+        .onChange(of: scrollApps) { watchScrolling() }
+    }
+
+    private var content: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
                 Text("设置")
@@ -52,11 +66,62 @@ struct SettingsView: View {
             .padding(16)
             .toyCard()
 
-            Spacer()
+            scrollCard
         }
-        .foregroundStyle(Toy.ink)
         .padding(20)
-        .background(Toy.paper.ignoresSafeArea())
+    }
+
+    private var scrollCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Text("刷手机")
+                    .font(Toy.body(16, weight: .heavy))
+                Text(pickedLabel)
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.muted)
+                Spacer()
+                Button("选 App") {
+                    Task { await pickApps() }
+                }
+                .font(Toy.body(13, weight: .heavy))
+            }
+            Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，RUNNER 也瘫在沙发上。App 只知道到没到，看不到你用了多久。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+            if let screenTimeError {
+                Text(screenTimeError)
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.alert)
+            }
+        }
+        .padding(16)
+        .toyCard()
+    }
+
+    private var pickedLabel: String {
+        let count = scrollApps.applicationTokens.count
+        return count == 0 ? "没选" : "已选 \(count) 个"
+    }
+
+    // Screen Time asks once; after that the picker opens straight away.
+    private func pickApps() async {
+        do {
+            try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
+            screenTimeError = nil
+            pickingApps = true
+        } catch {
+            screenTimeError = "Screen Time 没打开：\(error.localizedDescription)"
+        }
+    }
+
+    private func watchScrolling() {
+        ScrollWatch.selection = scrollApps
+        do {
+            try ScrollWatch.start(scrollApps)
+            screenTimeError = nil
+        } catch {
+            screenTimeError = "Screen Time 监测没启动：\(error.localizedDescription)"
+        }
     }
 
     private func placeRow(_ kind: HubPlace.Kind) -> some View {
