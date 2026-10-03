@@ -47,6 +47,7 @@ struct HomeView: View {
         }
         .background(Toy.paper.ignoresSafeArea())
         .modeSwitchHaptic(trigger: store.current)
+        .scheduleAutoMode(store)
     }
 
     private func switchTo(_ mode: Mode) {
