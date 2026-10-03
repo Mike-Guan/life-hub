@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   chill. It switches once per period and waits 2 hours after a manual change. Rules for arriving at
   the gym (straight to boxing) and the office (work), and leaving the gym after 30+ minutes (back to
   the earlier mode), are ready for the location PR.
+- Today's energy from last night's sleep in the Health app: under 6 hours is low, 6 to 7.5 okay,
+  7.5 or more full. Only the total is kept; raw sleep data stays in Health. A self-report still wins.
 - iPhone widgets. Lock Screen (round, inline, rectangular) and Home Screen small: RUNNER with the
   current mode and today's energy, sleepy at bedtime. Home Screen buttons: switch mode (medium) and
   pick today's energy (small) without opening the app. The app applies widget taps when it opens.
