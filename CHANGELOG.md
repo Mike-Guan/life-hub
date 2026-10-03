@@ -23,6 +23,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Afternoon naps no longer count toward last night's sleep.
 - Tapping the current mode after an automatic switch now records it as a manual change.
 - A mode log that can't be read (for example before first unlock) is no longer moved aside or
   overwritten; saves wait until it can be read.
