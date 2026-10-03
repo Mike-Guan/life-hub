@@ -64,6 +64,18 @@ struct RunnerPose {
     var coinTurn: Double = 0
     /// Energy below 30: heavier eyelids, eye bags, slower moves, sweat on boxing day.
     var tired = false
+    /// Bedtime overlay: sleepy eyes, mask down, the mode's outfit stays.
+    var bedtime = false
+    /// 0 = headset on, 1 = taken off.
+    var headsetOff: CGFloat = 0
+    /// 0 = mouth closed, 1 = widest yawn.
+    var yawn: CGFloat = 0
+    /// 0 = normal height, 1 = stretched up.
+    var stretch: CGFloat = 0
+    /// 0 = head upright, 1 = resting on the pillow.
+    var lie: CGFloat = 0
+    /// Rise of the floating Z z z, 0...1, or -1 when hidden.
+    var zzz: CGFloat = -1
 
     static let tiredThreshold = 30.0
 
@@ -116,6 +128,50 @@ struct RunnerPose {
         }
     }
 
+    /// Bedtime pose at `time`.
+    /// - Parameters:
+    ///   - goodnight: progress of the good-night animation, 0...1.
+    ///   - liesDown: whether the head comes to rest on the pillow at the end.
+    static func bedtime(time: TimeInterval, goodnight: Double, liesDown: Bool) -> RunnerPose {
+        var pose = RunnerPose()
+        pose.bedtime = true
+        let g = CGFloat(min(max(goodnight, 0), 1))
+        // Take the headset off, stretch while yawning, then lean onto the pillow.
+        pose.headsetOff = ramp(g, from: 0, to: 0.25)
+        pose.stretch = bump(g, from: 0.25, to: 0.55)
+        // After that, a yawn every 6 s and Z z z rising every 3 s.
+        let phase = time.truncatingRemainder(dividingBy: 6)
+        let loopYawn = g >= 1 && phase < 1.2 ? CGFloat(sin(phase / 1.2 * .pi)) : 0
+        pose.yawn = max(bump(g, from: 0.3, to: 0.65), loopYawn)
+        pose.lie = liesDown ? ramp(g, from: 0.65, to: 0.9) : 0
+        pose.zzz = g >= 0.9 ? CGFloat(time.truncatingRemainder(dividingBy: 3) / 3) : -1
+        // Slow, heavy blinks; eyes squeeze shut in a yawn.
+        pose.blink = max(0.15, (1 - 0.7 * pose.yawn) * blink(at: time * 0.5))
+        pose.headDy = 1.5 * (1 - pose.lie) + 1.5 * pose.yawn
+        return pose
+    }
+
+    /// The still bedtime pose, used for portraits and reduced motion.
+    static func bedtimeStill() -> RunnerPose {
+        var pose = bedtime(time: 2, goodnight: 1, liesDown: false)
+        pose.yawn = 0
+        pose.blink = 1
+        pose.headDy = 1.5
+        pose.zzz = 0.35
+        return pose
+    }
+
+    /// 0 before `from`, 1 after `to`, linear in between.
+    private static func ramp(_ x: CGFloat, from a: CGFloat, to b: CGFloat) -> CGFloat {
+        min(max((x - a) / (b - a), 0), 1)
+    }
+
+    /// A half sine from `from` to `to`, 0 elsewhere.
+    private static func bump(_ x: CGFloat, from a: CGFloat, to b: CGFloat) -> CGFloat {
+        guard x > a, x < b else { return 0 }
+        return sin((x - a) / (b - a) * .pi)
+    }
+
     /// A quick blink every 4.5 s.
     private static func blink(at t: TimeInterval) -> CGFloat {
         let phase = t.truncatingRemainder(dividingBy: 4.5)
@@ -138,11 +194,12 @@ struct RunnerFigure: View {
                 ForEach(Self.parts(for: mode, pose: pose), id: \.self) { part in
                     layer(part, scale: scale)
                 }
-                if pose.tired, mode == .boxing {
+                if pose.tired, mode == .boxing, !pose.bedtime {
                     SweatDrop()
                         .offset(x: 0, y: pose.headDy * scale)
                 }
             }
+            .scaleEffect(x: 1 - 0.03 * pose.stretch, y: 1 + 0.06 * pose.stretch, anchor: .bottom)
         }
         .aspectRatio(RunnerArt.bounds.width / RunnerArt.bounds.height, contentMode: .fit)
     }
@@ -162,6 +219,14 @@ struct RunnerFigure: View {
             visible.formUnion(moneyParts)
         }
         if pose.tired, mode != .chill { visible.insert(.eyebags) }
+        if pose.bedtime {
+            visible.subtract(awakeFaceParts)
+            visible.formUnion(sleepyParts)
+            if pose.headsetOff >= 1 { visible.subtract(headsetParts) }
+            if pose.yawn > 0.05 { visible.insert(.mouthYawn) }
+            if pose.lie > 0 { visible.insert(.pillow) }
+            if pose.zzz >= 0 { visible.insert(.zzz) }
+        }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
 
@@ -180,17 +245,34 @@ struct RunnerFigure: View {
     nonisolated private static let moneyParts: Set<RunnerPart> = [
         .eyesMoney, .maskUp, .panelLines, .ledYen, .earringNeon, .chainGold, .coin,
     ]
+    nonisolated private static let awakeFaceParts: Set<RunnerPart> = [
+        .eyesWork, .lidsWork, .browsWork, .eyesChill, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
+        .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen,
+    ]
+    nonisolated private static let sleepyParts: Set<RunnerPart> = [.eyesSleepy, .eyebags, .maskDown]
+    nonisolated private static let headsetParts: Set<RunnerPart> = [.headset, .cupL, .cupR, .mic]
 
     @ViewBuilder private func layer(_ part: RunnerPart, scale: CGFloat) -> some View {
-        let head = Self.headParts.contains(part) ? pose.headDy * scale : 0
+        let isHead = Self.headParts.contains(part)
         Group {
             switch part {
-            case .eyesWork, .lidsWork, .cateyeL, .cateyeR, .eyesMoney:
+            case .eyesWork, .lidsWork, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 1, y: pose.blink, anchor: Self.unit(x: 60, y: 65))
                     .offset(y: pose.eyesDy * scale)
             case .ledLine:
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
+            case .headset, .cupL, .cupR, .mic:
+                RunnerPartView(part: part)
+                    .offset(y: -24 * pose.headsetOff * scale)
+                    .opacity(Double(1 - pose.headsetOff))
+            case .mouthYawn:
+                RunnerPartView(part: part)
+                    .scaleEffect(x: 0.7 + 0.3 * pose.yawn, y: pose.yawn, anchor: Self.unit(x: 60, y: 85))
+            case .zzz:
+                RunnerPartView(part: part)
+                    .offset(x: 4 * pose.zzz * scale, y: -8 * pose.zzz * scale)
+                    .opacity(Double(sin(pose.zzz * .pi)))
             case .ledYen:
                 RunnerPartView(part: part)
                     .offset(x: pose.yenDx * scale)
@@ -232,7 +314,8 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
             }
         }
-        .offset(y: head)
+        .offset(y: isHead ? pose.headDy * scale : 0)
+        .rotationEffect(.degrees(isHead ? -14 * Double(pose.lie) : 0), anchor: Self.unit(x: 60, y: 96))
     }
 
     private static let dots = RunnerText(
@@ -248,6 +331,7 @@ struct RunnerFigure: View {
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .browsWork, .eyesChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
+        .eyesSleepy, .mouthYawn,
     ]
 
     private static func jacketColor(_ mode: Mode) -> Color {
@@ -257,6 +341,9 @@ struct RunnerFigure: View {
         case .money: RunnerPalette.jacketMoney
         }
     }
+
+    /// The head with headset and Z z z, in SVG units.
+    nonisolated static let headBox = CGRect(x: 4, y: -6, width: 112, height: 106)
 
     /// An SVG point as a unit point of the figure's frame.
     static func unit(x: CGFloat, y: CGFloat) -> UnitPoint {
@@ -368,17 +455,59 @@ private struct SweatDrop: View {
 
 /// RUNNER standing still in `mode`, for widgets, snapshots and anywhere motion isn't wanted.
 public struct CompanionPortrait: View {
+    /// How much of RUNNER to show.
+    public enum Framing: Sendable {
+        /// Head to waist.
+        case full
+        /// Head only, for small round widgets.
+        case head
+    }
+
     let mode: Mode
     let energy: Double?
+    let bedtime: Bedtime
+    let framing: Framing
 
-    public init(mode: Mode, energy: Double? = nil) {
+    public init(mode: Mode, energy: Double? = nil, bedtime: Bedtime = .off, framing: Framing = .full) {
         self.mode = mode
         self.energy = energy
+        self.bedtime = bedtime
+        self.framing = framing
     }
 
     public var body: some View {
-        RunnerFigure(mode: mode, pose: RunnerPose(tired: RunnerPose.isTired(energy)))
-            .accessibilityLabel("RUNNER，\(mode.title)")
+        Group {
+            switch framing {
+            case .full:
+                figure
+            case .head:
+                HeadCrop { figure }
+            }
+        }
+        .accessibilityLabel(bedtime == .on ? "RUNNER，困了" : "RUNNER，\(mode.title)")
+    }
+
+    private var figure: RunnerFigure {
+        let pose = bedtime == .on ? RunnerPose.bedtimeStill() : RunnerPose(tired: RunnerPose.isTired(energy))
+        return RunnerFigure(mode: mode, pose: pose)
+    }
+}
+
+/// Shows only `RunnerFigure.headBox` of the figure.
+private struct HeadCrop<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        let bounds = RunnerArt.bounds
+        let head = RunnerFigure.headBox
+        GeometryReader { geo in
+            let scale = geo.size.width / head.width
+            content
+                .frame(width: bounds.width * scale, height: bounds.height * scale)
+                .offset(x: (bounds.minX - head.minX) * scale, y: (bounds.minY - head.minY) * scale)
+        }
+        .aspectRatio(head.width / head.height, contentMode: .fit)
+        .clipped()
     }
 }
 
@@ -392,6 +521,12 @@ public struct CompanionPortrait: View {
         CompanionPortrait(mode: .boxing, energy: 10)
             .padding(8)
             .background(Mode.boxing.color)
+        CompanionPortrait(mode: .work, bedtime: .on)
+            .padding(8)
+            .background(Mode.work.color)
+        CompanionPortrait(mode: .work, bedtime: .on, framing: .head)
+            .frame(width: 76)
+            .background(.black, in: Circle())
     }
     .padding()
 }

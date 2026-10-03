@@ -105,6 +105,9 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   by a Listener), `cheer` trigger (fired by the app). Keep names in sync with the .riv file.
 - Swift `Mode.boxing` maps to Rive `"box"`; that mapping lives only in CompanionKit.
 - Widgets, Lock Screen and Live Activities use `CompanionPortrait` (still vector RUNNER), not Rive.
+- Bedtime: `CompanionView(bedtime:style:)` plays the good-night animation on each change to `.on`
+  (`.notification` style loops a short version); `CompanionPortrait(bedtime:framing:)` gives the still
+  sleepy look, `.head` for accessoryCircular. In Rive this becomes `bedtime` (Boolean) and `yawn` (Trigger).
 
 ## Principles (carried over from Mike's work hub)
 - Rules before models. Tiers: T0 rules, T1 on-device Foundation Models, T2 Claude Sonnet (macOS),
