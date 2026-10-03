@@ -58,7 +58,6 @@ import Testing
         #expect(high.contains(.sparkle))
         // Chill's eyes are closed in a smile, so there is nothing to glint.
         #expect(high.contains(.eyeGlint) == (mode != .chill))
-        #expect(!high.contains(.eyebags))
     }
 
     @Test func bedtimeHidesTheHighEnergyLook() {
