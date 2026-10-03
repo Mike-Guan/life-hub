@@ -27,14 +27,23 @@ final class PlaceMonitor {
             for identifier in await monitor.identifiers where !wanted.contains(identifier) {
                 await monitor.remove(identifier)
             }
+            // Adding a condition again resets its state and fires "entered" while Mike is still
+            // inside, so only new or moved places are added.
             for place in settings.places {
+                let existing = await monitor.record(for: place.kind.rawValue)?.condition
+                if let current = existing as? CLMonitor.CircularGeographicCondition, Self.matches(current, place) {
+                    continue
+                }
                 let center = CLLocationCoordinate2D(latitude: place.latitude, longitude: place.longitude)
                 let condition = CLMonitor.CircularGeographicCondition(center: center, radius: place.radius)
                 await monitor.add(condition, identifier: place.kind.rawValue)
             }
+            var lastState: [String: CLMonitor.Event.State] = [:]
             do {
                 for try await event in await monitor.events {
                     guard let kind = HubPlace.Kind(rawValue: event.identifier) else { continue }
+                    guard lastState[event.identifier] != event.state else { continue }
+                    lastState[event.identifier] = event.state
                     let entered: Bool
                     switch event.state {
                     case .satisfied: entered = true
@@ -57,20 +66,38 @@ final class PlaceMonitor {
         manager.requestAlwaysAuthorization()
     }
 
-    /// The device's current location.
-    /// - Throws: CoreLocation errors, or `CLError(.denied)` when access is off.
+    /// The device's current location, accurate to about 50 m.
+    /// - Throws: `CLError(.denied)` when access is off, `CLError(.locationUnknown)` when no fix is
+    ///   good enough within 15 seconds, or other CoreLocation errors.
     func currentLocation() async throws -> CLLocation {
-        if manager.authorizationStatus == .notDetermined {
-            manager.requestWhenInUseAuthorization()
-        }
+        let deadline = Date.now.addingTimeInterval(15)
+        var best: CLLocation?
         for try await update in CLLocationUpdate.liveUpdates() {
             if update.authorizationDenied || update.authorizationDeniedGlobally {
                 throw CLError(.denied)
             }
-            if let location = update.location {
-                return location
+            if let location = update.location, location.horizontalAccuracy >= 0 {
+                if location.horizontalAccuracy < best?.horizontalAccuracy ?? .infinity {
+                    best = location
+                }
+                if location.horizontalAccuracy <= Self.goodAccuracy {
+                    return location
+                }
             }
+            if Date.now >= deadline { break }
+        }
+        // A 100 m geofence still works with a fix this good.
+        if let best, best.horizontalAccuracy <= HubPlace.defaultRadius {
+            return best
         }
         throw CLError(.locationUnknown)
+    }
+
+    static let goodAccuracy: CLLocationAccuracy = 50
+
+    private static func matches(_ condition: CLMonitor.CircularGeographicCondition, _ place: HubPlace) -> Bool {
+        let center = condition.center
+        let samePoint = center.latitude == place.latitude && center.longitude == place.longitude
+        return samePoint && condition.radius == place.radius
     }
 }
