@@ -78,6 +78,11 @@ extension WidgetSnapshot {
         updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) ? energy : nil
     }
 
+    /// The "why" line as of `date`, `nil` when it was written before today's 05:00.
+    public func line(at date: Date, calendar: Calendar = .current) -> String? {
+        updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) ? line : nil
+    }
+
     /// When widgets should redraw after `date`: now, the next bedtime change and the next day start.
     public static func timelineDates(
         after date: Date,

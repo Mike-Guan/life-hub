@@ -46,7 +46,7 @@ struct StatusView: View {
                 head.frame(width: 44)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(entry.mode?.title ?? "还没有模式").font(.headline)
-                    Text(entry.mode == nil ? "打开一次 Life Hub" : entry.detail).font(.caption)
+                    Text(entry.mode == nil ? "打开一次 Life Hub" : entry.detail).font(.caption).lineLimit(2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }

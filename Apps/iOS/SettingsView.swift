@@ -40,7 +40,7 @@ struct SettingsView: View {
                 ForEach(HubPlace.Kind.allCases, id: \.self) { kind in
                     placeRow(kind)
                 }
-                Text("到拳馆直接切到拳击日，到公司切到上班。地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。")
+                Text("到拳馆直接切到拳击日，到公司切到上班，到家用来看你是不是窝在家。地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 if let placeError {

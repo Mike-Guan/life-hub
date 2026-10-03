@@ -14,6 +14,7 @@ struct LifeHubApp: App {
     @State private var healthError: String?
     @State private var places: PlaceSettings
     @State private var placeMonitor: PlaceMonitor
+    @State private var needs: NeedTracker
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -28,6 +29,7 @@ struct LifeHubApp: App {
         let widgets = WidgetBridge(container: container, bedtime: bedtime)
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
+        let needs = NeedTracker()
         _store = State(initialValue: store)
         _energy = State(initialValue: energy)
         _bedtime = State(initialValue: bedtime)
@@ -35,9 +37,10 @@ struct LifeHubApp: App {
         _setupErrors = State(initialValue: errors)
         _places = State(initialValue: places)
         _placeMonitor = State(initialValue: placeMonitor)
+        _needs = State(initialValue: needs)
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
         guard ScreenshotMode.mode == nil else { return }
-        Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets)
+        Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs)
     }
 
     var body: some Scene {
@@ -51,7 +54,7 @@ struct LifeHubApp: App {
     }
 
     private var home: some View {
-        HomeView(extraError: firstError, bedtime: bedtime, onSettings: { showsSettings = true })
+        HomeView(extraError: firstError, bedtime: bedtime, need: needs.reading, onSettings: { showsSettings = true })
             .environment(store)
             .environment(energy)
             .onChange(of: scenePhase, initial: true) { _, phase in
@@ -61,6 +64,8 @@ struct LifeHubApp: App {
                 Task {
                     await scheduleReminder()
                     await importSleep()
+                    await needs.importMotion()
+                    refreshNeeds()
                 }
             }
             .onChange(of: bedtime) {
@@ -71,7 +76,14 @@ struct LifeHubApp: App {
             }
             .onChange(of: places) {
                 places.store(in: AppGroup.defaults)
-                Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets)
+                // A cleared place can't report leaving, so forget being there.
+                var presence = PlacePresence.stored(in: AppGroup.defaults)
+                for kind in HubPlace.Kind.allCases where places[kind] == nil {
+                    presence.record(kind, entered: false, at: .now)
+                }
+                presence.store(in: AppGroup.defaults)
+                Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs)
+                refreshNeeds()
             }
             .sheet(isPresented: $showsSettings) {
                 SettingsView(bedtime: $bedtime, places: $places, monitor: placeMonitor)
@@ -81,7 +93,8 @@ struct LifeHubApp: App {
     }
 
     private var firstError: String? {
-        (setupErrors + [widgets.lastError, reminderError, healthError, placeMonitor.lastError].compactMap { $0 }).first
+        let errors = [widgets.lastError, reminderError, healthError, placeMonitor.lastError, needs.lastError]
+        return (setupErrors + errors.compactMap { $0 }).first
     }
 
     private static func watch(
@@ -89,13 +102,27 @@ struct LifeHubApp: App {
         with monitor: PlaceMonitor,
         store: ModeStore,
         energy: EnergyStore,
-        widgets: WidgetBridge
+        widgets: WidgetBridge,
+        needs: NeedTracker
     ) {
-        monitor.start(places) { trigger in
-            guard store.autoSwitch(trigger) != nil else { return }
+        monitor.start(places) { kind, entered in
+            var presence = PlacePresence.stored(in: AppGroup.defaults)
+            presence.record(kind, entered: entered, at: .now)
+            presence.store(in: AppGroup.defaults)
+            if let trigger = kind.trigger(entered: entered) {
+                store.autoSwitch(trigger)
+            }
+            needs.refresh(places: places)
+            widgets.need = needs.reading
             widgets.sync(mode: store, energy: energy)
             WidgetCenter.shared.reloadAllTimelines()
         }
+    }
+
+    private func refreshNeeds() {
+        needs.refresh(places: places)
+        widgets.need = needs.reading
+        syncWidgets()
     }
 
     // Pulls in taps made on widgets, then gives widgets the app's view of the state.

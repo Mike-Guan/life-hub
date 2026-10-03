@@ -64,7 +64,7 @@ targets:
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Life Hub 用位置判断你是不是到了拳馆或公司，然后自动切模式。位置只在这台 iPhone 上用，不会上传。"
         INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "选「始终」后，App 关着时到了拳馆或公司也能自动切模式。位置只在这台 iPhone 上用，不会上传。"
-        INFOPLIST_KEY_NSHealthShareUsageDescription: "Life Hub 只读取昨晚的睡眠时长，用来估计今天的电量。睡眠数据不会离开这台 iPhone。"
+        INFOPLIST_KEY_NSHealthShareUsageDescription: "Life Hub 只读取昨晚的睡眠时长、运动记录和最近几小时的步数，用来估计电量、判断你是不是窝在家、打完拳庆祝。健康数据不会离开这台 iPhone。"
     scheme: {}
   LifeHub-macOS:
     type: application

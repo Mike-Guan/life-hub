@@ -3,7 +3,7 @@ import HubCore
 import Observation
 
 // Privacy rule: coordinates stay on the device; CoreLocation does the matching.
-/// Watches the gym and office geofences and turns arrivals and departures into mode triggers.
+/// Watches the place geofences and reports each arrival and departure.
 @MainActor
 @Observable
 final class PlaceMonitor {
@@ -17,8 +17,8 @@ final class PlaceMonitor {
 
     // Called at launch too: after a geofence wakes the app in the background, iterating the
     // events of the monitor with the same name delivers the event that woke it.
-    /// Watches `settings` and calls `onTrigger` for each event.
-    func start(_ settings: PlaceSettings, onTrigger: @escaping @MainActor (ModeTrigger) -> Void) {
+    /// Watches `settings` and calls `onEvent` with the place and whether Mike entered it.
+    func start(_ settings: PlaceSettings, onEvent: @escaping @MainActor (HubPlace.Kind, Bool) -> Void) {
         task?.cancel()
         lastError = nil
         task = Task {
@@ -50,9 +50,7 @@ final class PlaceMonitor {
                     case .unsatisfied: entered = false
                     default: continue
                     }
-                    if let trigger = kind.trigger(entered: entered) {
-                        onTrigger(trigger)
-                    }
+                    onEvent(kind, entered)
                 }
             } catch {
                 lastError = "地点监测停了：\(error.localizedDescription)"

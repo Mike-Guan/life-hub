@@ -41,6 +41,8 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var eveningStartMinute: Int
     /// How long Mike must be still at home before the fallback says couch scrolling.
     public var stillFor: TimeInterval
+    /// How long couch scrolling lasts after the Screen Time threshold is reached.
+    public var scrollLasts: TimeInterval
     /// Boxing day as a `Calendar` weekday (1 is Sunday).
     public var boxingWeekday: Int
     /// When boxing warm-up starts on boxing day.
@@ -61,10 +63,12 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var celebrateBoxing: TimeInterval
 
     // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses.
-    /// Couch after 19:00 and 60 still minutes; boxing Sunday 9:00 to 12:00; invites after 60 / 30 min.
+    /// Couch after 19:00 and 60 still minutes, or 3 h after the Screen Time threshold; boxing Sunday
+    /// 9:00 to 12:00; invites after 60 / 30 min.
     public static let standard = NeedRules(
         eveningStartMinute: 19 * 60,
         stillFor: 60 * 60,
+        scrollLasts: 3 * 60 * 60,
         boxingWeekday: 1,
         boxingWarmupStartMinute: 9 * 60,
         boxingWarmupEndMinute: 12 * 60,
@@ -79,6 +83,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public init(
         eveningStartMinute: Int,
         stillFor: TimeInterval,
+        scrollLasts: TimeInterval,
         boxingWeekday: Int,
         boxingWarmupStartMinute: Int,
         boxingWarmupEndMinute: Int,
@@ -91,6 +96,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
     ) {
         self.eveningStartMinute = eveningStartMinute
         self.stillFor = stillFor
+        self.scrollLasts = scrollLasts
         self.boxingWeekday = boxingWeekday
         self.boxingWarmupStartMinute = boxingWarmupStartMinute
         self.boxingWarmupEndMinute = boxingWarmupEndMinute
@@ -109,6 +115,8 @@ public struct NeedSignals: Equatable, Sendable {
     public var scrollThresholdAt: Date?
     /// When Mike last arrived home, `nil` when he isn't home or it is unknown.
     public var atHomeSince: Date?
+    /// True when Mike has set his home, so not being home is known rather than unknown.
+    public var homeKnown: Bool
     /// Start of the current stretch without walking, `nil` when unknown.
     public var stillSince: Date?
     /// True while Mike is at the gym.
@@ -119,12 +127,14 @@ public struct NeedSignals: Equatable, Sendable {
     public init(
         scrollThresholdAt: Date? = nil,
         atHomeSince: Date? = nil,
+        homeKnown: Bool = false,
         stillSince: Date? = nil,
         atGym: Bool = false,
         workouts: [WorkoutSummary] = []
     ) {
         self.scrollThresholdAt = scrollThresholdAt
         self.atHomeSince = atHomeSince
+        self.homeKnown = homeKnown
         self.stillSince = stillSince
         self.atGym = atGym
         self.workouts = workouts
@@ -210,16 +220,20 @@ public enum NeedEngine {
         calendar: Calendar
     ) -> NeedReading? {
         let today = StateEngine.dayStart(for: now, calendar: calendar)
-        if let reached = signals.scrollThresholdAt, reached >= today, reached <= now {
-            let reason = "今天 B 站和小红书刷够久了，我也瘫着"
-            return NeedReading(need: .couchScroll, since: reached, reasons: [reason])
+        // Away from a known home it isn't couch scrolling, whatever Screen Time says.
+        let mayBeHome = signals.atHomeSince != nil || !signals.homeKnown
+        if let reached = signals.scrollThresholdAt, mayBeHome, isFresh(reached, today: today, now: now, rules: rules) {
+            // The Lock Screen shows this, so it doesn't name the apps.
+            return NeedReading(need: .couchScroll, since: reached, reasons: ["手机刷够久了，我也瘫着"])
         }
         // Fallback when Screen Time isn't available: home in the evening and still for a while.
         guard let home = signals.atHomeSince, let still = signals.stillSince else { return nil }
+        // Stillness only counts from arriving home.
+        let start = max(still, home)
         let evening = time(rules.eveningStartMinute, on: now, calendar: calendar)
-        let since = max(still.addingTimeInterval(rules.stillFor), home, evening)
+        let since = max(start.addingTimeInterval(rules.stillFor), evening)
         guard since <= now else { return nil }
-        let reason = "在家 \(Int(now.timeIntervalSince(still) / 60)) 分钟没怎么动了，我也瘫着"
+        let reason = "在家 \(Int(now.timeIntervalSince(start) / 60)) 分钟没怎么动了，我也瘫着"
         return NeedReading(need: .couchScroll, since: since, reasons: [reason])
     }
 
@@ -237,6 +251,10 @@ public enum NeedEngine {
         let boxedToday = signals.workouts.contains { $0.kind == .boxing && $0.end >= midnight }
         guard !boxedToday else { return nil }
         return NeedReading(need: .boxingWarmup, since: start, reasons: ["今天打拳，拳套我戴好了"])
+    }
+
+    private static func isFresh(_ reached: Date, today: Date, now: Date, rules: NeedRules) -> Bool {
+        reached >= today && reached <= now && now.timeIntervalSince(reached) < rules.scrollLasts
     }
 
     private static func time(_ minute: Int, on date: Date, calendar: Calendar) -> Date {

@@ -9,6 +9,8 @@ public final class WidgetBridge {
     public private(set) var lastError: String?
     public let container: HubContainer
     public var bedtime: BedtimeSchedule
+    /// What RUNNER acts out now; the app sets it before syncing.
+    public var need: NeedReading?
 
     public init(container: HubContainer, bedtime: BedtimeSchedule = .standard) {
         self.container = container
@@ -36,12 +38,11 @@ public final class WidgetBridge {
     /// Writes the snapshot for `now`.
     public func writeSnapshot(mode: ModeStore, energy: EnergyStore, now: Date = .now, calendar: Calendar = .current) {
         guard let url = container.snapshotURL else { return }
-        let snapshot = WidgetSnapshot(
-            log: mode.log,
-            energy: energy.reading(now: now, calendar: calendar)?.level,
-            bedtime: bedtime.state(at: now, calendar: calendar),
-            now: now
-        )
+        let reading = energy.reading(now: now, calendar: calendar)
+        let state = bedtime.state(at: now, calendar: calendar)
+        var snapshot = WidgetSnapshot(log: mode.log, energy: reading?.level, bedtime: state, now: now)
+        snapshot.need = need?.need
+        snapshot.line = NeedEngine.whyLine(need: need, energy: reading, bedtime: state)
         do {
             try snapshot.write(to: url)
             lastError = nil

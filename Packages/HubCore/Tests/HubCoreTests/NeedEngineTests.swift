@@ -36,6 +36,27 @@ import Testing
         #expect(!reading.reasons.isEmpty)
     }
 
+    @Test func screenTimeCouchNeedsHomeAndExpires() {
+        let reached = date(5, 20)
+        #expect(need(NeedSignals(scrollThresholdAt: reached, homeKnown: true), at: date(5, 20, 30)) == nil)
+        let home = NeedSignals(scrollThresholdAt: reached, atHomeSince: date(5, 19), homeKnown: true)
+        #expect(need(home, at: date(5, 22, 59))?.need == .couchScroll)
+        #expect(need(home, at: date(5, 23)) == nil)
+    }
+
+    @Test func screenTimeReasonDoesNotNameTheApps() throws {
+        let reading = try #require(need(NeedSignals(scrollThresholdAt: date(5, 20)), at: date(5, 20, 5)))
+        #expect(reading.reasons.allSatisfy { !$0.contains("B 站") && !$0.contains("小红书") })
+    }
+
+    @Test func stillnessCountsFromArrivingHome() throws {
+        let signals = NeedSignals(atHomeSince: date(5, 19, 30), stillSince: date(5, 17))
+        #expect(need(signals, at: date(5, 20, 29)) == nil)
+        let reading = try #require(need(signals, at: date(5, 20, 30)))
+        #expect(reading.since == date(5, 20, 30))
+        #expect(reading.reasons == ["在家 60 分钟没怎么动了，我也瘫着"])
+    }
+
     @Test func yesterdaysThresholdDoesNotCount() {
         #expect(need(NeedSignals(scrollThresholdAt: date(4, 22)), at: date(5, 20)) == nil)
         #expect(need(NeedSignals(scrollThresholdAt: date(5, 21)), at: date(5, 20)) == nil)
@@ -150,6 +171,8 @@ import Testing
         let decoded = try HubJSON.decoder().decode(WidgetSnapshot.self, from: data)
         #expect(decoded.need == .couchScroll)
         #expect(decoded.line == "累了")
+        #expect(decoded.line(at: date(5, 23), calendar: calendar) == "累了")
+        #expect(decoded.line(at: date(6, 6), calendar: calendar) == nil)
     }
 
     @Test func switchReplayShowsTheModeBeforeAnAutomaticChange() {
