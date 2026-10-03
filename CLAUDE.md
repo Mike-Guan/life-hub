@@ -36,9 +36,10 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技�
 - Never commit signing team IDs, certificates or keys. Never use `--no-verify`.
 - Plan first: a new feature starts with a short plan (GitHub issue: goal, scope, out of scope, test plan)
   that Mike approves before any code. Fixes, chores and docs don't need one.
-- Who runs what: agents open PRs and fix CI. Mike merges to `main` (that merge is his OK for the STG
-  upload) and creates PROD tags by hand. Agents prepare a release PR titled
-  `Prepare release version X.Y.Z` (version bump + CHANGELOG) but never merge or push tags.
+- Who runs what: agents open PRs and fix CI. The "PR 审查" reviewer thread merges to `main` (squash)
+  once a PR is reviewed and green, and decides merge order; that merge uploads STG. Authors never
+  merge their own PRs. Mike creates PROD tags by hand. Agents prepare a release PR titled
+  `Prepare release version X.Y.Z` (version bump + CHANGELOG) but never push tags.
 - Before asking for review, check the change four ways and write the result in the PR:
   1. it follows the patterns already in the repo; 2. it is the smallest change that works
   (DRY, KISS, YAGNI, SOLID); 3. `make check` and CI pass; 4. a short list of exact points
@@ -158,3 +159,4 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   Mike runs merges and PROD tags, four review checks, doc comment scope, evidence in reports.
 - 2026-10-02: Threads coordinate through 协作看板.md; the UI thread owns companion rendering.
 - 2026-10-03: A dedicated reviewer thread ("PR 审查") reviews every PR; Mike only reads what each PR adds.
+- 2026-10-03: Mike handed merging to the reviewer thread, including merge order. PROD tags stay with Mike.
