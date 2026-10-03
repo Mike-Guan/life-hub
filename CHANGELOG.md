@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- RUNNER celebrates a finished workout: two happy hops, a burst of sparkles and "干得漂亮！". Each
+  workout plays once, never at bedtime. Not switched on in the app yet.
 - RUNNER's "why" line on the home screen and the rectangular Lock Screen widget: bedtime, then a need
   (still at home for an hour in the evening, Sunday boxing from 9:00), then last night's sleep.
   Home is a third place in settings. Workouts and recent steps are read from Health on the iPhone
