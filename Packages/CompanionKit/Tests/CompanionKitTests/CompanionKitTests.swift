@@ -60,6 +60,38 @@ import Testing
         #expect(high.contains(.eyeGlint) == (mode != .chill))
     }
 
+    @Test(arguments: Mode.allCases)
+    func boxingWarmupPutsTheGlovesOn(_ mode: Mode) {
+        let parts = Set(RunnerFigure.parts(for: mode, pose: RunnerPose(need: .boxingWarmup)))
+        #expect(parts.isSuperset(of: [.headband, .gloveL, .gloveR]))
+        #expect(!parts.contains(.monsterCan))
+        #expect(RunnerFigure.baseParts.isSubset(of: parts))
+    }
+
+    @Test func warmupLooksAtTheDoorNowAndThen() {
+        let glances = (0..<80).map {
+            RunnerPose(mode: .chill, time: Double($0) * 0.05, face: .mid, need: .boxingWarmup, react: 0).eyesDx
+        }
+        #expect(glances.contains { $0 < -1 })
+        #expect(glances.contains(0))
+        #expect(glances.allSatisfy { (-3...0).contains($0) })
+        #expect(RunnerPose(mode: .chill, time: 3.3, face: .mid, react: 0).eyesDx == 0)
+    }
+
+    @Test func bedtimeTakesTheGlovesOff() {
+        var pose = RunnerPose.bedtimeStill()
+        pose.need = .boxingWarmup
+        let parts = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(parts.isDisjoint(with: [.gloveL, .gloveR, .headband]))
+        #expect(parts.contains(.monsterCan))
+    }
+
+    @Test func warmupHasItsOwnLinesAndLabel() {
+        #expect(CompanionLines.lines(for: .chill, need: .boxingWarmup) != CompanionLines.lines(for: .chill))
+        #expect(CompanionLines.accessibilityLabel(mode: .chill, need: .boxingWarmup, bedtime: .off).contains("热身"))
+        #expect(CompanionLines.accessibilityLabel(mode: .chill, need: .boxingWarmup, bedtime: .on) == "RUNNER，困了")
+    }
+
     @Test func bedtimeHidesTheHighEnergyLook() {
         var pose = RunnerPose.bedtimeStill()
         pose.face = .high
