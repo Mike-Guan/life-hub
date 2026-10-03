@@ -12,21 +12,25 @@ public final class ModeStore {
     public private(set) var lastError: String?
     public let deviceID: String
 
-    @ObservationIgnored private let fileURL: URL?
+    @ObservationIgnored private var file: LogFile<ModeLog>
 
     /// - Parameter fileURL: where the log lives; `nil` keeps everything in memory (previews, tests).
     public init(fileURL: URL?, deviceID: String) {
-        self.fileURL = fileURL
+        var file = LogFile<ModeLog>(url: fileURL, name: "mode 记录")
+        var log = ModeLog()
+        let error = file.load(into: &log)
+        self.file = file
         self.deviceID = deviceID
-        self.log = ModeLog()
-        load()
+        self.log = log
+        self.lastError = error
     }
 
     public var current: Mode? { log.current?.mode }
     public var currentSince: Date? { log.current?.at }
 
-    /// Switches mode.
-    /// - Returns: `false` when already in that mode.
+    /// Switches mode. A manual switch to the current mode is recorded when that mode was set
+    /// automatically, so it counts as Mike confirming it.
+    /// - Returns: `false` when nothing was recorded.
     @discardableResult
     public func switchTo(
         _ mode: Mode,
@@ -34,7 +38,9 @@ public final class ModeStore {
         tag: String? = nil,
         at date: Date = .now
     ) -> Bool {
-        guard mode != current else { return false }
+        if mode == current {
+            guard source.isManual, let latest = log.current, !latest.source.isManual else { return false }
+        }
         log.changes.append(ModeChange(mode: mode, source: source, tag: tag, at: date, deviceID: deviceID))
         save()
         return true
@@ -48,48 +54,12 @@ public final class ModeStore {
         WidgetSnapshot(log: log, now: now)
     }
 
-    private func load() {
-        guard let fileURL, FileManager.default.fileExists(atPath: fileURL.path) else { return }
-        do {
-            let data = try Data(contentsOf: fileURL)
-            log = try Self.decoder.decode(ModeLog.self, from: data)
-            lastError = nil
-        } catch {
-            // Keep the unreadable file aside so the next save can't overwrite it.
-            let backup = fileURL.deletingPathExtension()
-                .appendingPathExtension("corrupt-\(Int(Date.now.timeIntervalSince1970)).json")
-            try? FileManager.default.moveItem(at: fileURL, to: backup)
-            lastError = "mode 记录读不出来，已备份到 \(backup.lastPathComponent)：\(error.localizedDescription)"
-        }
-    }
-
     private func save() {
-        guard let fileURL else { return }
-        do {
-            try FileManager.default.createDirectory(
-                at: fileURL.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-            )
-            let data = try Self.encoder.encode(log)
-            try data.write(to: fileURL, options: .atomic)
-            lastError = nil
-        } catch {
-            lastError = "保存 mode 记录失败：\(error.localizedDescription)"
-        }
+        lastError = file.save(&log)
     }
 
-    static let encoder: JSONEncoder = {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        encoder.dateEncodingStrategy = .iso8601
-        return encoder
-    }()
-
-    static let decoder: JSONDecoder = {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return decoder
-    }()
+    static let encoder = HubJSON.encoder()
+    static let decoder = HubJSON.decoder()
 }
 
 extension ModeStore {
