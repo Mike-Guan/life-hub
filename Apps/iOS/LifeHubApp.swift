@@ -1,5 +1,6 @@
 import HubCore
 import SwiftUI
+import UIKit
 import WidgetKit
 
 @main
@@ -54,42 +55,52 @@ struct LifeHubApp: App {
     }
 
     private var home: some View {
-        HomeView(extraError: firstError, bedtime: bedtime, need: needs.reading, onSettings: { showsSettings = true })
-            .environment(store)
-            .environment(energy)
-            .onChange(of: scenePhase, initial: true) { _, phase in
-                guard phase == .active else { return }
-                syncWidgets()
-                // One after the other, so the two permission prompts don't overlap.
-                Task {
-                    await scheduleReminder()
-                    await importSleep()
-                    await needs.importMotion()
-                    refreshNeeds()
-                }
-            }
-            .onChange(of: bedtime) {
-                bedtime.store(in: AppGroup.defaults)
-                widgets.bedtime = bedtime
-                syncWidgets()
-                Task { await scheduleReminder() }
-            }
-            .onChange(of: places) {
-                places.store(in: AppGroup.defaults)
-                // A cleared place can't report leaving, so forget being there.
-                var presence = PlacePresence.stored(in: AppGroup.defaults)
-                for kind in HubPlace.Kind.allCases where places[kind] == nil {
-                    presence.record(kind, entered: false, at: .now)
-                }
-                presence.store(in: AppGroup.defaults)
-                Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs)
+        HomeView(
+            extraError: firstError,
+            bedtime: bedtime,
+            need: needs.reading,
+            event: needs.event,
+            onSettings: { showsSettings = true }
+        )
+        .environment(store)
+        .environment(energy)
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            guard phase == .active else { return }
+            syncWidgets()
+            // One after the other, so the two permission prompts don't overlap.
+            Task {
+                await scheduleReminder()
+                await importSleep()
+                await needs.importMotion()
                 refreshNeeds()
+                // The awaits above can include a permission sheet; celebrate only if still on screen.
+                if UIApplication.shared.applicationState == .active {
+                    needs.celebrate(bedtime: bedtime.state(at: .now))
+                }
             }
-            .sheet(isPresented: $showsSettings) {
-                SettingsView(bedtime: $bedtime, places: $places, monitor: placeMonitor)
+        }
+        .onChange(of: bedtime) {
+            bedtime.store(in: AppGroup.defaults)
+            widgets.bedtime = bedtime
+            syncWidgets()
+            Task { await scheduleReminder() }
+        }
+        .onChange(of: places) {
+            places.store(in: AppGroup.defaults)
+            // A cleared place can't report leaving, so forget being there.
+            var presence = PlacePresence.stored(in: AppGroup.defaults)
+            for kind in HubPlace.Kind.allCases where places[kind] == nil {
+                presence.record(kind, entered: false, at: .now)
             }
-            .onChange(of: store.log.changes.count) { syncWidgets() }
-            .onChange(of: energy.log.events.count) { syncWidgets() }
+            presence.store(in: AppGroup.defaults)
+            Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs)
+            refreshNeeds()
+        }
+        .sheet(isPresented: $showsSettings) {
+            SettingsView(bedtime: $bedtime, places: $places, monitor: placeMonitor)
+        }
+        .onChange(of: store.log.changes.count) { syncWidgets() }
+        .onChange(of: energy.log.events.count) { syncWidgets() }
     }
 
     private var firstError: String? {

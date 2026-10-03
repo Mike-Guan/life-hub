@@ -8,6 +8,8 @@ struct HomeView: View {
     var bedtime: BedtimeSchedule = .standard
     /// What RUNNER acts out now, from the iOS app's need tracker.
     var need: NeedReading?
+    /// A one-off animation for RUNNER, such as celebrating a workout.
+    var event: CompanionEvent?
     /// Shows a settings button that calls this, when set.
     var onSettings: (() -> Void)?
 
@@ -30,6 +32,7 @@ struct HomeView: View {
                         mode: store.current,
                         energy: reading?.value,
                         need: activeNeed(at: context.date)?.need,
+                        event: event,
                         cheer: cheer,
                         bedtime: bedtime.state(at: context.date)
                     )

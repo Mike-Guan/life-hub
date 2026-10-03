@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- RUNNER celebrates a 5 km run or 30 minutes of boxing once, the next time the app is opened within
+  3 hours of the workout ending. Never at bedtime.
 - Couch scrolling look for RUNNER: slumped back with half-closed eyes, a lit phone in hand and a
   thumb flick every few seconds. When the app passes today's invite, RUNNER gets up, jumps and says
   it in the bubble.
