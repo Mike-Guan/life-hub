@@ -753,11 +753,9 @@ public struct CompanionPortrait: View {
     let bedtime: Bedtime
     let framing: Framing
 
-    /// How long couch scrolling lasts before HAKU starts eyeing the gym bag.
-    public static let couchPeekAfter = CouchStage.peekAfter
-
+    // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
     /// - Parameters:
-    ///   - needSince: when `need` started; after `couchPeekAfter` of couch scrolling HAKU eyes the gym bag.
+    ///   - needSince: when `need` started; after 30 minutes of couch scrolling HAKU eyes the gym bag.
     ///   - date: the moment shown, such as a widget timeline entry's date.
     public init(
         mode: Mode,
