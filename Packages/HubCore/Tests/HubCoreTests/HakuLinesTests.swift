@@ -15,7 +15,7 @@ import Testing
     }
 
     @Test func dailyScenesLastAWeekAndLinesAreShort() {
-        let weekly: Set<LineScene> = [.boxing, .boxingWarmup]
+        let weekly: Set<LineScene> = [.boxing, .boxingWarmup, .gymDay]
         for scene in LineScene.allCases {
             let lines = HakuLines.library[scene] ?? []
             #expect(lines.count >= (weekly.contains(scene) ? 3 : 7), "\(scene)")

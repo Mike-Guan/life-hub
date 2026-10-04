@@ -8,6 +8,7 @@ public enum LineScene: String, CaseIterable, Sendable {
     case money
     case couchScroll
     case boxingWarmup
+    case gymDay
     case bedtime
     case lowEnergy
 }
@@ -71,6 +72,11 @@ public enum HakuLines {
             "我热身热得都快累了。",
             "拳馆在等你。",
         ],
+        .gymDay: [
+            "包我背好了。",
+            "门就在那。",
+            "去不去？我只是问问。",
+        ],
         .bedtime: [
             "我先睡了。你也别熬。",
             "晚安。别和天花板开会。",
@@ -119,6 +125,7 @@ public enum HakuLines {
         switch need {
         case .couchScroll: return .couchScroll
         case .boxingWarmup: return .boxingWarmup
+        case .gymDay: return .gymDay
         case nil: break
         }
         if energy == .low { return .lowEnergy }

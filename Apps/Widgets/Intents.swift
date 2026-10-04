@@ -1,5 +1,6 @@
 import AppIntents
 import HubCore
+import WidgetKit
 
 // Widget buttons only post to the inbox. The app applies the change next time it opens.
 /// Switches mode from a widget button.
@@ -42,6 +43,21 @@ struct ReportEnergyIntent: AppIntent {
             let event = EnergyEvent.selfReport(level, deviceID: HubDevice.id(defaults: AppGroup.defaults))
             try AppGroup.container.post(.energy(event))
         }
+        return .result()
+    }
+}
+
+// Writes only the departure; the app and the widgets read it from the shared defaults.
+/// Tells HAKU that Mike is heading to the gym now.
+struct GoToGymIntent: AppIntent {
+    static let title: LocalizedStringResource = "出发去健身"
+    static let description: IntentDescription? = "HAKU 背着包陪你走过去，最多一小时，到健身房为止。"
+
+    func perform() async throws -> some IntentResult {
+        GymDeparture(at: .now).store(in: AppGroup.defaults)
+        // Already going, so today's invite is dropped if it hasn't gone out yet.
+        InviteReminder.plan(nil)
+        WidgetCenter.shared.reloadAllTimelines()
         return .result()
     }
 }

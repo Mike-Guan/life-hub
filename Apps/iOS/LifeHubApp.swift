@@ -62,7 +62,12 @@ struct LifeHubApp: App {
         _placeMonitor = State(initialValue: placeMonitor)
         _needs = State(initialValue: needs)
         // Set during launch so a tap that opens the app is delivered too. The center keeps it weakly.
-        let taps = NotificationTaps { needs.offWork(at: $0) }
+        let taps = NotificationTaps(
+            onOffWork: { needs.offWork(at: $0) },
+            onGo: { date in
+                Self.depart(at: date, store: store, energy: energy, widgets: widgets, needs: needs)
+            }
+        )
         UNUserNotificationCenter.current().delegate = taps
         _taps = State(initialValue: taps)
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
@@ -91,6 +96,7 @@ struct LifeHubApp: App {
             need: needs.reading,
             activitySignals: needs.activitySignals,
             activityDays: .stored(in: AppGroup.defaults),
+            departure: needs.departure,
             event: needs.event,
             invite: needs.invite,
             money: moneyCard,
@@ -219,6 +225,22 @@ struct LifeHubApp: App {
             // Arriving at the gym ends the countdown, even with the app in the background.
             Task { _ = await BoxingCountdown.update(for: needs.reading) }
         }
+    }
+
+    // The invite's 走 can run with the app in the background, so this doesn't rely on a view.
+    private static func depart(
+        at date: Date,
+        store: ModeStore,
+        energy: EnergyStore,
+        widgets: WidgetBridge,
+        needs: NeedTracker
+    ) {
+        GymDeparture(at: date).store(in: AppGroup.defaults)
+        let places = PlaceSettings.stored(in: AppGroup.defaults)
+        needs.refresh(places: places, manualSince: store.log.changes.last(where: \.source.isManual)?.at)
+        widgets.need = needs.reading
+        widgets.sync(mode: store, energy: energy)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // Builds before the report ladder watched a single 30-minute event; restarting swaps in the ladder.

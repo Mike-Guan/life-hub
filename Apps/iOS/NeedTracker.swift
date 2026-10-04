@@ -10,6 +10,8 @@ final class NeedTracker {
     private(set) var reading: NeedReading?
     /// Where Mike is and his recent workouts, for what HAKU does alongside him.
     private(set) var activitySignals = ActivitySignals()
+    /// The last time Mike said he is going to the gym, `nil` when never.
+    private(set) var departure: GymDeparture?
     /// Today's invite text while its need lasts, `nil` when none went out for it.
     private(set) var invite: String?
     /// The celebration or off-work animation RUNNER should play, `nil` when there is none.
@@ -37,6 +39,7 @@ final class NeedTracker {
     /// - Parameter manualSince: when Mike last changed mode by hand.
     func refresh(places: PlaceSettings, manualSince: Date?, now: Date = .now) {
         let presence = PlacePresence.stored(in: AppGroup.defaults)
+        departure = GymDeparture.stored(in: AppGroup.defaults)
         let signals = NeedSignals(
             scrollThresholdAt: ScrollWatch.reachedAt,
             scrollSeenAt: ScrollWatch.seenAt,
@@ -45,9 +48,11 @@ final class NeedTracker {
             homeKnown: places[.home] != nil,
             stillSince: motion?.stillSince,
             atGym: presence.since(.gym) != nil,
-            workouts: motion?.workouts ?? []
+            workouts: motion?.workouts ?? [],
+            fitnessSeenAt: presence.since(.fitness) ?? presence.left(.fitness),
+            departing: departure?.isActive(at: now, presence: presence) ?? false
         )
-        reading = NeedEngine.need(signals, now: now)
+        reading = NeedEngine.need(signals, now: now, days: .stored(in: AppGroup.defaults))
         activitySignals = ActivitySignals(presence: presence, workouts: motion?.workouts ?? [])
         InviteReminder.plan(reading, now: now)
         invite = InviteReminder.sent(for: reading)

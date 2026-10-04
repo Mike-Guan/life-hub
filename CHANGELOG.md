@@ -14,6 +14,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Gym days (Tue to Thu): if you're home at 19:30 and haven't trained, HAKU waits at the door with the bag,
+  and at 20:00 the day's one invite asks "包背好了，走？". Its 走 button, or the new "出发去健身" control
+  (Lock Screen, Control Center or Action button), sends HAKU walking with the bag for up to an hour, until
+  you reach the gym. Not going changes nothing. This invite replaces the couch one on gym days.
 - HAKU looks for the new mode states (Issues #73, #74, #75): vibe coding with `</>` on the mask
 - 副业 has three states: vibe coding, 拍摄 and 运营. In 副业 mode, tap HAKU to switch; vibe coding is the
   default and stacks a can every 30 minutes, up to 3. An iOS Focus filter "副业 · vibe coding" (add it to
