@@ -122,7 +122,7 @@ struct ShopView: View {
                 .frame(width: 56, height: 56)
                 .frame(maxWidth: .infinity)
                 .frame(height: 64)
-                .toyCard(fill: item.slot.tint, radius: 12, shadow: 0)
+                .toyCard(fill: item.slot.tileColor, radius: 12, shadow: 0)
             Text(item.title)
                 .font(Toy.body(14, weight: .heavy))
             if let price = item.price {
@@ -185,7 +185,7 @@ struct ShopView: View {
                 .font(Toy.body(14, weight: .heavy))
                 if !isOwned {
                     ProgressView(value: Double(count), total: Double(goal))
-                        .tint(item.slot.tint)
+                        .tint(item.slot.tileColor)
                         .accessibilityHidden(true)
                 }
             }
@@ -218,18 +218,6 @@ extension Win {
         case .gotUp: "被叫起来出门"
         case .daylight: "晒太阳"
         case .earlySleep: "按时睡"
-        }
-    }
-}
-
-extension Slot {
-    /// The tile color for items in this slot.
-    var tint: Color {
-        switch self {
-        case .gloves: Mode.boxing.color
-        case .headband: Mode.work.color
-        case .mask: Mode.money.color
-        case .room, .celebration: Mode.chill.color
         }
     }
 }
