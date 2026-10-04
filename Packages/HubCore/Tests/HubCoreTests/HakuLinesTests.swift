@@ -14,10 +14,11 @@ import Testing
         calendar.date(from: DateComponents(year: 2026, month: 10, day: day, hour: hour)) ?? .distantPast
     }
 
-    @Test func everySceneHasThreeToFiveShortLines() {
+    @Test func dailyScenesLastAWeekAndLinesAreShort() {
+        let weekly: Set<LineScene> = [.boxing, .boxingWarmup]
         for scene in LineScene.allCases {
             let lines = HakuLines.library[scene] ?? []
-            #expect((3...5).contains(lines.count), "\(scene)")
+            #expect(lines.count >= (weekly.contains(scene) ? 3 : 7), "\(scene)")
             #expect(Set(lines).count == lines.count, "\(scene)")
             #expect(lines.allSatisfy { $0.count <= 14 }, "\(scene)")
         }
