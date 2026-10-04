@@ -60,16 +60,40 @@ import Testing
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         let store = ModeStore(fileURL: url, deviceID: "test")
         #expect(store.lastError != nil)
-        store.switchTo(.chill)
+        let at = Date(timeIntervalSince1970: 1_790_000_000)
+        store.switchTo(.chill, at: at)
         #expect(store.lastError != nil)
         let siblings = try FileManager.default.contentsOfDirectory(atPath: url.deletingLastPathComponent().path)
         #expect(siblings == ["mode-log.json"])
 
         try FileManager.default.removeItem(at: url)
-        store.switchTo(.work)
+        store.switchTo(.work, at: at.addingTimeInterval(600))
         #expect(store.lastError == nil)
         let reloaded = ModeStore(fileURL: url, deviceID: "test")
         #expect(reloaded.log.changes.map(\.mode) == [.chill, .work])
+    }
+
+    @Test func quickManualSwitchCorrectsTheLastOne() {
+        let store = ModeStore(fileURL: nil, deviceID: "test")
+        let at = Date(timeIntervalSince1970: 1_790_000_000)
+        store.switchTo(.work, source: .schedule, at: at)
+        store.switchTo(.boxing, at: at.addingTimeInterval(600))
+
+        // A mistap replaced within the window: only the new mode stays.
+        #expect(store.switchTo(.chill, at: at.addingTimeInterval(660)))
+        #expect(store.log.active.map(\.mode) == [.work, .chill])
+        #expect(store.log.changes.count == 3)
+        #expect(store.log.changes[1].deletedAt == at.addingTimeInterval(660))
+
+        // Switching back to the mode before undoes the tap; the automatic one is current again.
+        #expect(store.switchTo(.work, at: at.addingTimeInterval(700)))
+        #expect(store.log.active.map(\.mode) == [.work])
+        #expect(store.log.current?.source == .schedule)
+
+        // After the window a switch is kept.
+        store.switchTo(.money, at: at.addingTimeInterval(800))
+        store.switchTo(.chill, at: at.addingTimeInterval(800 + ModeStore.correctionWindow))
+        #expect(store.log.active.map(\.mode) == [.work, .money, .chill])
     }
 
     @Test func snapshotFollowsCurrentMode() {

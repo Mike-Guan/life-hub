@@ -25,6 +25,10 @@ public final class ModeStore {
         self.lastError = error
     }
 
+    // Long enough to fix a mistap or a curious look at another mode, short enough to keep real switches.
+    /// A manual switch this soon after the previous manual one corrects it instead of adding to the log.
+    public static let correctionWindow: TimeInterval = 2 * 60
+
     public var current: Mode? { log.current?.mode }
     public var currentSince: Date? { log.current?.at }
 
@@ -42,6 +46,8 @@ public final class ModeStore {
     }
 
     /// Records `change` under the same rules as `switchTo`. A change whose id is already stored is skipped.
+    /// A manual change within `correctionWindow` of the previous manual one replaces it; switching back
+    /// to the mode before it undoes it, so the timeline and the 2-hour auto-switch pause are as before.
     /// - Returns: `false` when nothing was recorded.
     @discardableResult
     public func apply(_ change: ModeChange) -> Bool {
@@ -49,9 +55,26 @@ public final class ModeStore {
         if change.mode == current {
             guard change.source.isManual, let latest = log.current, !latest.source.isManual else { return false }
         }
-        log.changes.append(change)
+        // Soft delete keeps the corrected change in the log (one writer, nothing lost).
+        let corrected = change.source.isManual ? correctableIndex(before: change) : nil
+        if let index = corrected {
+            log.changes[index].deletedAt = change.at
+            log.changes[index].updatedAt = change.at
+            log.changes[index].updatedBy = change.updatedBy
+        }
+        // Only an undo (back to the mode before the corrected change) adds nothing.
+        if corrected == nil || change.mode != current {
+            log.changes.append(change)
+        }
         save()
         return true
+    }
+
+    private func correctableIndex(before change: ModeChange) -> Int? {
+        guard let latest = log.current, latest.source.isManual else { return nil }
+        let gap = change.at.timeIntervalSince(latest.at)
+        guard gap >= 0, gap < Self.correctionWindow else { return nil }
+        return log.changes.firstIndex { $0.id == latest.id }
     }
 
     /// Applies what `ModeEngine` decides for `trigger`.
