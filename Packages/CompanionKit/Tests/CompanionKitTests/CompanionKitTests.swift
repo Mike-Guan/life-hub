@@ -438,7 +438,7 @@ import Testing
         #expect(Outfit(Wardrobe(equipped: [.gloves: "gloves.someday", .room: "room.someday"])) == Outfit())
     }
 
-    @Test(arguments: ShopItem.catalog.filter { $0.slot != .celebration })
+    @Test(arguments: ShopItem.catalog)
     func everyWornItemChangesTheLook(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
@@ -484,5 +484,46 @@ import Testing
 
     @Test func slotsHaveTheirOwnTileColors() {
         #expect(Set(Slot.allCases.map(\.tileColor)).count == Slot.allCases.count)
+    }
+
+    @Test func eachUnboxingPlaysOnce() {
+        #expect(CompanionView.newUnlock(.unlock(id: "e1", item: "gloves.gold"), last: "") == "e1")
+        #expect(CompanionView.newUnlock(.unlock(id: "e1", item: "gloves.gold"), last: "e1") == nil)
+        #expect(CompanionView.newUnlock(.offWork(id: "2026-10-05"), last: "") == nil)
+        #expect(CompanionView.newCelebration(.unlock(id: "e1", item: "gloves.gold"), last: "") == nil)
+    }
+
+    @Test func keepsakesAndPurchasesGetTheirOwnLine() {
+        #expect(CompanionLines.unlock("gloves.gold") == "……给你的。才不是特意挑的。")
+        #expect(CompanionLines.unlock("room.plant") != CompanionLines.unlock("gloves.gold"))
+    }
+
+    @Test func hakuPopsOutOfTheBoxAndSettles() {
+        var pose = RunnerPose()
+        #expect(pose.popOut == 1)
+        pose.unbox(progress: 0.1)
+        #expect(pose.popOut == 0)
+        #expect(pose.burst == -1)
+        pose.unbox(progress: 0.42)
+        #expect(pose.popOut > 1)
+        #expect(pose.burst >= 0)
+        pose.unbox(progress: 0.9)
+        #expect(pose.popOut == 1)
+        #expect(pose.gloveR.height < 0)
+    }
+
+    @Test func peaceSignKeepsakeJoinsEveryCelebration() {
+        let outfit = Outfit(Wardrobe(equipped: [.celebration: "celebrate.up"]))
+        var pose = RunnerPose().wearing(outfit)
+        #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
+        pose.celebrate(.boxing, progress: 0.5)
+        #expect(RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
+        pose.bedtime = true
+        #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
+    }
+
+    @Test func everySlotHasAShowcaseMode() {
+        #expect(Slot.gloves.showcaseMode == .boxing)
+        #expect(Slot.room.showcaseMode == .chill)
     }
 }

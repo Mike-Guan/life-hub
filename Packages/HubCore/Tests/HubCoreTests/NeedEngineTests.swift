@@ -331,5 +331,6 @@ import Testing
         #expect(CompanionEvent.celebrate(id: "a", kind: .running) != .celebrate(id: "b", kind: .running))
         #expect(CompanionEvent.celebrate(id: "a", kind: .boxing) == .celebrate(id: "a", kind: .boxing))
         #expect(CompanionEvent.offWork(id: "2026-10-05") != .celebrate(id: "2026-10-05", kind: .other))
+        #expect(CompanionEvent.unlock(id: "a", item: "gloves.gold") != .unlock(id: "b", item: "gloves.gold"))
     }
 }

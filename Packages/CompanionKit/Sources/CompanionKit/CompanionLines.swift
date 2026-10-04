@@ -56,6 +56,11 @@ enum CompanionLines {
         }
     }
 
+    /// What HAKU says when unboxing the item with `itemID`: a keepsake it pretends it didn't pick.
+    static func unlock(_ itemID: String) -> String {
+        ShopItem.item(itemID)?.keepsake != nil ? "……给你的。才不是特意挑的。" : "买了？……那我就勉强收下了。"
+    }
+
     /// The VoiceOver label for HAKU.
     static func accessibilityLabel(
         mode: Mode?,
