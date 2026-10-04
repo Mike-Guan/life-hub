@@ -12,6 +12,8 @@ public struct CompanionView: View {
     let need: CompanionNeed?
     /// When `need` started. After 30 minutes of couch scrolling HAKU starts eyeing the gym bag.
     let needSince: Date?
+    /// What HAKU does alongside Mike, such as heavy-bag combos at the boxing gym. It replaces the need.
+    let activity: CompanionActivity?
     /// A one-off animation: celebrating a workout or going off work. Each event id plays once.
     let event: CompanionEvent?
     /// Today's invite, written by the app. While set, RUNNER gets up, jumps and says it.
@@ -48,6 +50,7 @@ public struct CompanionView: View {
         energy: Double? = nil,
         need: CompanionNeed? = nil,
         needSince: Date? = nil,
+        activity: CompanionActivity? = nil,
         event: CompanionEvent? = nil,
         invite: String? = nil,
         cheer: Int = 0,
@@ -60,6 +63,7 @@ public struct CompanionView: View {
         self.energy = energy
         self.need = need
         self.needSince = needSince
+        self.activity = activity
         self.event = event
         self.invite = invite
         self.cheer = cheer
@@ -168,8 +172,8 @@ public struct CompanionView: View {
 
     private var face: EnergyFace { EnergyFace(energy: energy) }
 
-    /// The need RUNNER acts out: none while it is inviting, since it got up.
-    private var shownNeed: CompanionNeed? { invite == nil ? need : nil }
+    /// The need RUNNER acts out: none while it is inviting, since it got up, or busy with an activity.
+    private var shownNeed: CompanionNeed? { invite == nil && activity == nil ? need : nil }
 
     private var accessibilityText: String {
         let life = mode.flatMap { idleLife($0, at: .now) }
@@ -179,13 +183,14 @@ public struct CompanionView: View {
             need: shownNeed,
             peeking: peeking,
             life: life,
+            activity: activity,
             bedtime: bedtime
         )
     }
 
     /// The couch scrolling stage, or nil when HAKU isn't on the couch.
     private func couchStage(at date: Date) -> CouchStage? {
-        guard need == .couchScroll, bedtime == .off else { return nil }
+        guard need == .couchScroll, activity == nil, bedtime == .off else { return nil }
         return CouchStage.at(date, since: needSince, inviting: invite != nil)
     }
 
@@ -193,7 +198,7 @@ public struct CompanionView: View {
     private func idleLife(_ mode: Mode, at date: Date) -> IdleLife? {
         let time = date.timeIntervalSinceReferenceDate
         let busy = celebration(at: time) != nil || offWork(at: time) != nil
-        guard mode == .chill, need == nil, invite == nil, bedtime == .off, !busy else { return nil }
+        guard mode == .chill, need == nil, activity == nil, invite == nil, bedtime == .off, !busy else { return nil }
         return IdleLife.at(date)
     }
 
@@ -205,6 +210,9 @@ public struct CompanionView: View {
         if let progress = celebration(at: time) { return IdleMotion.celebrating(progress: progress) }
         // Warming up hops like boxing day, whatever the outfit.
         if shownNeed == .couchScroll { return IdleMotion.slumped(time: time) }
+        // Running and heavy-bag work bounce like boxing day, running a bit quicker.
+        if activity == .running { return IdleMotion(mode: .boxing, time: time * 1.6) }
+        if activity == .boxingAtGym { return IdleMotion(mode: .boxing, time: time * face.speed) }
         let motionMode = shownNeed == .boxingWarmup ? .boxing : mode
         return IdleMotion(mode: motionMode, time: time * face.speed)
     }
@@ -216,12 +224,20 @@ public struct CompanionView: View {
         }
         let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
         if reduceMotion {
-            var pose = RunnerPose(face: face, need: shownNeed, life: life)
+            var pose = RunnerPose(face: face, need: shownNeed, life: life, activity: activity)
             if stage == .peeking { pose.bagLift = 0 }
             if stage == .up { pose.bagLift = 1 }
             return pose
         }
-        var pose = RunnerPose(mode: mode, time: time, face: face, need: shownNeed, life: life, react: react)
+        var pose = RunnerPose(
+            mode: mode,
+            time: time,
+            face: face,
+            need: shownNeed,
+            life: life,
+            activity: activity,
+            react: react
+        )
         if stage == .peeking { pose.peekAtBag(time: time) }
         if stage == .up { pose.bagLift = 1 }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
@@ -316,7 +332,7 @@ public struct CompanionView: View {
         taps += 1
         let life = mode.flatMap { idleLife($0, at: .now) }
         let peeking = couchStage(at: .now) == .peeking
-        let lines = CompanionLines.lines(for: mode, need: shownNeed, peeking: peeking, life: life)
+        let lines = CompanionLines.lines(for: mode, need: shownNeed, peeking: peeking, life: life, activity: activity)
         let candidates = lines.filter { $0 != bubble }
         say((candidates.isEmpty ? lines : candidates).randomElement())
     }

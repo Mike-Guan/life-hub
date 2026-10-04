@@ -388,6 +388,39 @@ import Testing
         #expect(label.contains("运动包"))
     }
 
+    @Test func activityReplacesTheNeedAndOwnTime() {
+        let pose = RunnerPose(need: .couchScroll, life: .nap, activity: .running)
+        #expect(pose.need == nil)
+        #expect(pose.life == nil)
+        #expect(pose.activity == .running)
+    }
+
+    @Test(arguments: [
+        (CompanionActivity.boxingAtGym, RunnerPart.heavyBag),
+        (.gymSession, .dumbbell),
+        (.running, .speedLines),
+        (.gymDay, .gymBag),
+        (.runDay, .runShoe),
+    ])
+    func eachActivityShowsItsProp(_ activity: CompanionActivity, prop: RunnerPart) {
+        let parts = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(activity: activity)))
+        #expect(parts.contains(prop))
+        #expect(!parts.contains(.monsterCan))
+        #expect(!CompanionLines.lines(for: .chill, activity: activity).isEmpty)
+        #expect(CompanionLines.accessibilityLabel(mode: .chill, need: nil, activity: activity, bedtime: .off) != "HAKU")
+    }
+
+    @Test func heavyBagWorkWearsTheGloves() {
+        let parts = Set(RunnerFigure.parts(for: .boxing, pose: RunnerPose(activity: .boxingAtGym)))
+        #expect(parts.isSuperset(of: [.gloveL, .gloveR, .headband, .heavyBag]))
+    }
+
+    @Test func bedtimeHidesTheActivity() {
+        var pose = RunnerPose.bedtimeStill()
+        pose.activity = .running
+        #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.speedLines))
+    }
+
     @Test func outfitFollowsTheEquippedItems() {
         var wardrobe = Wardrobe()
         wardrobe.equipped[.gloves] = "gloves.gold"
@@ -430,6 +463,8 @@ import Testing
         #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.roomPlant))
         pose.bagLift = 0
         #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.roomPlant))
+        let running = RunnerPose(activity: .running).wearing(Outfit(wardrobe))
+        #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
     }
 
     @Test(arguments: ShopItem.catalog)
