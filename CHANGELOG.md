@@ -8,6 +8,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Rewards groundwork (Issue #49), not shown in the app yet: a can ledger that counts each real-life
   win once, a shop of five items, three keepsakes granted at milestones (never lost), and a wardrobe
   with one item per slot.
+- HAKU has its own life at home: with nothing needed it naps in the sofa corner, plays a handheld,
+  sneaks a snack, draws, shadow boxes or, on Sunday afternoons, wipes the room with a cloth. Tap it and
+  it gets caught (hides the snack, closes the sketchbook, drops the gloves). New deadpan lines, and
+  VoiceOver now says HAKU.
 - Settings: the wake time is now editable next to the bedtime. RUNNER stays sleepy until then
   (it was fixed at 05:00).
 - App icon: RUNNER's face split by a lightning crack, the side-hustle ¥ mask on one side and boxing
