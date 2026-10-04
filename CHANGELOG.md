@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- Cans have caps: Sunday boxing earns once a week; runs, the gym and other wins once a day.
 - The companion is called HAKU everywhere you see it: the widget name, notifications, Settings and
   VoiceOver. Code names stay RUNNER.
 

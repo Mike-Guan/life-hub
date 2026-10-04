@@ -42,22 +42,49 @@ public struct EarnedWin: Equatable, Sendable {
 }
 
 extension Win {
+    /// How often a win can earn cans.
+    public enum Cap: Sendable {
+        case day
+        case week
+    }
+
+    // Caps from 03 Product/奖励数值表.md (PM, 2026-10-04).
+    /// Boxing earns once a week, every other win once a day.
+    public var cap: Cap {
+        self == .boxing ? .week : .day
+    }
+
+    /// The ledger source for this win at `date`: one per day or week, so the win earns at most once in it.
+    public func source(at date: Date, calendar: Calendar = .current) -> String {
+        switch cap {
+        case .day:
+            let parts = calendar.dateComponents([.year, .month, .day], from: date)
+            let day = String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+            return "\(rawValue):\(day)"
+        case .week:
+            let parts = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+            let week = String(format: "%04d-W%02d", parts.yearForWeekOfYear ?? 0, parts.weekOfYear ?? 0)
+            return "\(rawValue):\(week)"
+        }
+    }
+
     // Same bar as the workout celebrations, so HAKU cheers exactly what earns cans.
-    /// The wins in `workouts`: each long enough boxing workout and 5 km run, and strength training
-    /// once per day.
+    /// The wins in `workouts`: long enough boxing workouts, 5 km runs and strength training, each with
+    /// the source for its cap.
     public static func wins(
         in workouts: [WorkoutSummary],
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> [EarnedWin] {
-        let day = Date.ISO8601FormatStyle(timeZone: calendar.timeZone).year().month().day()
-        return workouts.filter { NeedEngine.isWorthCelebrating($0, rules: rules) }.compactMap { workout in
+        workouts.filter { NeedEngine.isWorthCelebrating($0, rules: rules) }.compactMap { workout in
+            let win: Win
             switch workout.kind {
-            case .boxing: EarnedWin(win: .boxing, source: workout.id, at: workout.end)
-            case .running: EarnedWin(win: .run5k, source: workout.id, at: workout.end)
-            case .strength: EarnedWin(win: .gym, source: "gym:\(workout.start.formatted(day))", at: workout.end)
-            case .other: nil
+            case .boxing: win = .boxing
+            case .running: win = .run5k
+            case .strength: win = .gym
+            case .other: return nil
             }
+            return EarnedWin(win: win, source: win.source(at: workout.start, calendar: calendar), at: workout.end)
         }
     }
 }
