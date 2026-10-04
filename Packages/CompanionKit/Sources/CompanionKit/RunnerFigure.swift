@@ -134,6 +134,11 @@ struct RunnerPose {
     var zzz: CGFloat = -1
     /// The gym bag: -1 = not shown, 0 = on the floor by the door, 1 = over the shoulder.
     var bagLift: CGFloat = -1
+    /// Progress of the off-work animation, 0...1, or -1 when none is playing.
+    var offWork: CGFloat = -1
+    /// 0 = mask up, 1 = pulled down to the chin.
+    var maskDrop: CGFloat = 0
+    var canOpacity: Double = 1
     /// What HAKU does on its own at home, or nil.
     var life: IdleLife?
     /// Offset of the prop HAKU is holding in its own time (console, snack, cloth).
@@ -144,6 +149,7 @@ struct RunnerPose {
     var propHidden: CGFloat = 0
 
     var tired: Bool { face == .low }
+    var offWorking: Bool { offWork >= 0 }
 
     /// The still pose, used for reduced motion and static renders.
     init(face: EnergyFace = .mid, need: CompanionNeed? = nil, life: IdleLife? = nil) {
@@ -312,6 +318,26 @@ struct RunnerPose {
         return pose
     }
 
+    /// Off-work pose at `progress` (0...1): headset off, mask down, a big stretch, then open a Monster.
+    static func offWork(time: TimeInterval, progress: Double, face: EnergyFace) -> RunnerPose {
+        var pose = RunnerPose(face: face)
+        let p = CGFloat(min(max(progress, 0), 1))
+        pose.offWork = p
+        pose.headsetOff = ramp(p, from: 0, to: 0.15)
+        pose.maskDrop = ramp(p, from: 0.15, to: 0.3)
+        pose.stretch = bump(p, from: 0.3, to: 0.6)
+        pose.yawn = bump(p, from: 0.35, to: 0.55)
+        // The can comes up from below, then one long sip.
+        let canIn = ramp(p, from: 0.6, to: 0.75)
+        let sip = bump(p, from: 0.8, to: 1)
+        pose.canOpacity = Double(canIn)
+        pose.canOffset = CGSize(width: -6 * sip, height: 30 * (1 - canIn) - 6 * sip)
+        pose.canAngle = Double(-28 * sip)
+        pose.blink = max(0.15, (1 - 0.7 * pose.yawn) * blink(at: time))
+        pose.headDy = 1.5 * pose.yawn
+        return pose
+    }
+
     /// The still bedtime pose, used for portraits and reduced motion.
     static func bedtimeStill() -> RunnerPose {
         var pose = bedtime(time: 2, goodnight: 1, liesDown: false)
@@ -367,6 +393,7 @@ struct RunnerFigure: View {
 
     /// Visible parts in back-to-front order.
     nonisolated static func parts(for mode: Mode, pose: RunnerPose) -> [RunnerPart] {
+        if pose.offWorking { return offWorkParts(pose) }
         var visible = baseParts
         switch mode {
         case .work:
@@ -408,6 +435,18 @@ struct RunnerFigure: View {
             if pose.lie > 0 { visible.insert(.pillow) }
             if pose.zzz >= 0 { visible.insert(.zzz) }
         }
+        return RunnerPart.allCases.filter { visible.contains($0) }
+    }
+
+    /// Work look turning into the chill look as the off-work animation plays, whatever the mode.
+    nonisolated private static func offWorkParts(_ pose: RunnerPose) -> [RunnerPart] {
+        var visible = baseParts.union([.earringNeon])
+        let relaxed = pose.offWork >= 0.6
+        visible.formUnion(relaxed ? [.eyesChill, .mouthSmile, .monsterCan] : [.eyesWork, .lidsWork, .browsWork])
+        if pose.headsetOff < 1 { visible.formUnion(headsetParts) }
+        if pose.maskDrop < 1 { visible.formUnion([.maskUp, .panelLines, .ledLine]) }
+        if pose.maskDrop > 0 { visible.insert(.maskDown) }
+        if pose.yawn > 0.05 { visible.insert(.mouthYawn) }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
 
@@ -462,6 +501,13 @@ struct RunnerFigure: View {
             case .eyesChill:
                 // Closed smiling eyes don't blink, but they still look at the door while warming up.
                 RunnerPartView(part: part).offset(x: pose.eyesDx * scale)
+            case .maskUp where pose.offWorking, .panelLines where pose.offWorking, .ledLine where pose.offWorking:
+                // Off work: the mask slides down to the chin.
+                RunnerPartView(part: part)
+                    .offset(y: 12 * pose.maskDrop * scale)
+                    .opacity(Double(1 - pose.maskDrop))
+            case .maskDown where pose.offWorking:
+                RunnerPartView(part: part).opacity(Double(pose.maskDrop))
             case .ledLine:
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
             case .headset, .cupL, .cupR, .mic:
@@ -523,6 +569,7 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .rotationEffect(.degrees(pose.canAngle), anchor: Self.unit(x: 102, y: 136))
                     .offset(x: pose.canOffset.width * scale, y: pose.canOffset.height * scale)
+                    .opacity(pose.canOpacity)
             case .gloveL:
                 RunnerPartView(part: part)
                     .offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)

@@ -36,6 +36,30 @@ public struct ModeRules: Codable, Equatable, Sendable {
     }
 }
 
+extension ModeRules {
+    /// Minutes before the end of work hours that the off-work notice goes out.
+    public static let offWorkLead = 15
+
+    /// When the off-work notice goes out: one weekday, hour and minute per work day.
+    public var offWorkNotices: [DateComponents] {
+        let minute = max(workEndMinute - Self.offWorkLead, 0)
+        return workdays.sorted().map { DateComponents(hour: minute / 60, minute: minute % 60, weekday: $0) }
+    }
+
+    static let defaultsKey = "modeRules"
+
+    /// The rules saved in `defaults`, or `.standard` when none are saved or they can't be read.
+    public static func stored(in defaults: UserDefaults) -> ModeRules {
+        guard let data = defaults.data(forKey: defaultsKey) else { return .standard }
+        return (try? JSONDecoder().decode(ModeRules.self, from: data)) ?? .standard
+    }
+
+    /// Saves the rules in `defaults`.
+    public func store(in defaults: UserDefaults) {
+        defaults.set(try? JSONEncoder().encode(self), forKey: Self.defaultsKey)
+    }
+}
+
 /// Something that may change the mode without Mike tapping.
 public enum ModeTrigger: Equatable, Sendable {
     /// A periodic check against the weekday schedule.

@@ -98,6 +98,8 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - Bedtime reminder (Mike's explicit exception, not counted in L2): one local notification a day at the
   set time (default 23:30). `Bedtime` (off/on) is an overlay state, not a fifth mode. No follow-up,
   nothing logged about when Mike sleeps.
+- Off-work notice (Mike's explicit exception, not counted in L2): one local notification on each work
+  day, 15 min before the end of work hours (Settings). No follow-up. Tapping it plays the off-work animation.
 
 ## Companion
 - Data Binding only (no legacy state machine Inputs). View Model `Runner` in
@@ -183,3 +185,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   fallback. Questions for Mike start with "需要你：" and are logged on the board as `[?]` first.
 - 2026-10-03: The sleep event is the one exception to the append-only energy log: re-importing the
   same night updates its event (id derived from the night) instead of adding a new one.
+- 2026-10-04: Mike approved PRD v4.2 (Issue #49). The off-work notice is a second exception to the
+  1-push-a-day L2 limit, next to the bedtime reminder.
