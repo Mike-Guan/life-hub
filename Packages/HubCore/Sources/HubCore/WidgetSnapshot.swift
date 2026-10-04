@@ -111,9 +111,10 @@ extension WidgetSnapshot {
         return line
     }
 
-    /// When the needs in this snapshot start or end.
+    /// When the needs in this snapshot start, end or change stage (HAKU peeking during couch scrolling).
     public var needTimes: [Date] {
-        [needUntil, nextNeed?.from, nextNeed?.until].compactMap { $0 }
+        let peek = need == .couchScroll ? needSince?.addingTimeInterval(NeedEngine.couchPeekAfter) : nil
+        return [needUntil, nextNeed?.from, nextNeed?.until, peek].compactMap { $0 }
     }
 
     /// When widgets should redraw after `date`: now, the next bedtime change, the next day start and

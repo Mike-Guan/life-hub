@@ -1,4 +1,5 @@
 import Foundation
+import HubCore
 
 /// How far couch scrolling has gone: scrolling along, peeking at the gym bag, then up with the bag.
 enum CouchStage: Sendable {
@@ -10,7 +11,7 @@ enum CouchStage: Sendable {
     case up
 
     /// How long scrolling lasts before HAKU starts peeking at the bag.
-    static let peekAfter: TimeInterval = 30 * 60
+    static let peekAfter = NeedEngine.couchPeekAfter
 
     /// The stage at `now` for scrolling that started at `since`.
     /// - Parameter inviting: whether today's invite is showing, which always means `.up`.

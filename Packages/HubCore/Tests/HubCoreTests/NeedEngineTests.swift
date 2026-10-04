@@ -260,6 +260,20 @@ import Testing
         #expect(snapshot.needSince(at: date(4, 10), calendar: calendar) == date(4, 9))
     }
 
+    @Test func widgetsRedrawWhenHakuStartsPeeking() {
+        var snapshot = WidgetSnapshot(mode: .chill, since: nil, need: .couchScroll, updatedAt: date(3, 20))
+        snapshot.needSince = date(3, 20)
+        let dates = WidgetSnapshot.timelineDates(
+            after: date(3, 20, 5),
+            bedtime: .standard,
+            needTimes: snapshot.needTimes,
+            calendar: calendar
+        )
+        #expect(dates.contains(date(3, 20, 30)))
+        snapshot.need = .boxingWarmup
+        #expect(!snapshot.needTimes.contains(date(3, 20, 30)))
+    }
+
     @Test func widgetsRedrawWhenANeedEnds() {
         let schedule = BedtimeSchedule.standard
         let dates = WidgetSnapshot.timelineDates(

@@ -80,7 +80,7 @@ struct StatusView: View {
                     needSince: entry.needSince,
                     bedtime: entry.bedtime
                 )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Text("\(mode.code) MODE").font(Toy.display(14))
                 Text(entry.detail).font(Toy.body(12, weight: .bold))
             } else {
