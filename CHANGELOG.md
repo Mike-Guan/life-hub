@@ -13,6 +13,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Settings > 地点 is a list: 家, 公司, 健身房 and 拳馆, plus your own places from the + button. Each added
+  place has a name, a radius and what HAKU does when you arrive (switch to 上班, 下班 or 副业, count as the
+  gym or the boxing gym, or only note it). Up to 20 places, the iOS limit. Places stay on this iPhone.
 - New items open with an unboxing: after buying in the shop, or the next time you open the app after a
   keepsake is earned. HAKU pops out of the box wearing it; "现在戴上" puts it on, "先放衣柜" keeps it
   for later. Items owned before this update don't unbox.

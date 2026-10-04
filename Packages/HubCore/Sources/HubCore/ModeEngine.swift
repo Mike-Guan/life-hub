@@ -67,6 +67,8 @@ public enum ModeTrigger: Equatable, Sendable {
     case enteredGym
     case leftGym
     case enteredOffice
+    /// Arriving at a place Mike added that switches to `mode`.
+    case enteredPlace(Mode, name: String)
 }
 
 /// An automatic change the engine wants, with the reason to show Mike.
@@ -133,6 +135,10 @@ public enum ModeEngine {
         case .enteredOffice:
             guard !isHeld(changes, now: now, rules: rules), current?.mode != .work else { return nil }
             return ModeDecision(mode: .work, source: .location, reason: "到公司了")
+
+        case .enteredPlace(let mode, let name):
+            guard !isHeld(changes, now: now, rules: rules), current?.mode != mode else { return nil }
+            return ModeDecision(mode: mode, source: .location, reason: "到\(name)了")
 
         case .schedule:
             guard !isHeld(changes, now: now, rules: rules) else { return nil }
