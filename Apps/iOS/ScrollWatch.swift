@@ -25,9 +25,10 @@ enum ScrollWatch {
     // minutes of use tells the app that Mike is still scrolling; no report for a while means he stopped.
     /// One event per report, named by its total in minutes.
     static var events: [Int: DeviceActivityEvent.Name] {
-        Dictionary(uniqueKeysWithValues: stride(from: minutes, through: lastMinutes, by: step).map { total in
-            (total, DeviceActivityEvent.Name("lifehub.scroll.\(total)"))
-        })
+        Dictionary(
+            uniqueKeysWithValues: stride(from: minutes, through: lastMinutes, by: step).map { total in
+                (total, DeviceActivityEvent.Name("lifehub.scroll.\(total)"))
+            })
     }
 
     /// When the current stretch of reports started, as the monitor extension recorded it.
