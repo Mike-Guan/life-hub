@@ -41,14 +41,14 @@ import Testing
 
     @Test func keepsakesAreGrantedOnceAtTheirCount() throws {
         let store = GrowthStore(fileURL: nil, deviceID: "t")
-        let shoes = try item("shoes.volt")
-        #expect(store.remaining(for: shoes) == 4)
+        let headband = try item("keepsake.headband.runner")
+        #expect(store.remaining(for: headband) == 4)
         for run in 0..<3 { #expect(store.record(.run5k, source: "run-\(run)", at: at).isEmpty) }
-        #expect(store.remaining(for: shoes) == 1)
-        #expect(store.record(.run5k, source: "run-3", at: at) == [shoes])
-        #expect(store.remaining(for: shoes) == nil)
+        #expect(store.remaining(for: headband) == 1)
+        #expect(store.record(.run5k, source: "run-3", at: at) == [headband])
+        #expect(store.remaining(for: headband) == nil)
         #expect(store.record(.run5k, source: "run-4", at: at).isEmpty)
-        #expect(store.ledger.owned == ["shoes.volt"])
+        #expect(store.ledger.owned == ["keepsake.headband.runner"])
         // Keepsakes are free.
         #expect(store.ledger.balance == 5 * Win.run5k.cans)
         #expect(store.remaining(for: try item("room.plant")) == nil)

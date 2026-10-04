@@ -177,7 +177,6 @@ public struct CanLedger: RecordLog, Equatable {
 public enum Slot: String, Codable, CodingKeyRepresentable, CaseIterable, Sendable {
     case gloves
     case headband
-    case shoes
     case mask
     case room
     case celebration
@@ -202,12 +201,17 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     /// Everything HAKU can own.
     public static let catalog: [ShopItem] = [
         ShopItem(id: "headband.cyan", slot: .headband, title: "青色头带", price: 15),
-        ShopItem(id: "mask.lightning", slot: .mask, title: "闪电面罩", price: 20),
+        ShopItem(id: "mask.stripes", slot: .mask, title: "条纹面罩", price: 20),
         ShopItem(id: "gloves.pink", slot: .gloves, title: "霓虹粉拳套", price: 30),
         ShopItem(id: "room.plant", slot: .room, title: "房间绿植", price: 10),
         ShopItem(id: "room.bag", slot: .room, title: "房间小沙袋", price: 25),
         ShopItem(id: "gloves.gold", slot: .gloves, title: "金拳套", keepsake: Keepsake(win: .boxing, count: 10)),
-        ShopItem(id: "shoes.volt", slot: .shoes, title: "闪电跑鞋", keepsake: Keepsake(win: .run5k, count: 4)),
+        ShopItem(
+            id: "keepsake.headband.runner",
+            slot: .headband,
+            title: "跑者头带",
+            keepsake: Keepsake(win: .run5k, count: 4)
+        ),
         ShopItem(id: "celebrate.up", slot: .celebration, title: "起身庆祝", keepsake: Keepsake(win: .gotUp, count: 1)),
     ]
 
