@@ -149,18 +149,45 @@ struct RunnerPose {
     var pencil: CGSize = .zero
     /// 0 = prop in view, 1 = hidden because someone looked.
     var propHidden: CGFloat = 0
+    /// What HAKU does alongside Mike, which replaces the need and its own time.
+    var activity: CompanionActivity?
+    /// Swing of the heavy bag in degrees after a hit.
+    var bagSwing: Double = 0
+    /// Height of the dumbbell while lifting: 0 = down, 1 = curled up.
+    var lift: CGFloat = 0
+    /// Speed lines drifting back while running, 0...1.
+    var dash: CGFloat = 0
 
     var tired: Bool { face == .low }
     var offWorking: Bool { offWork >= 0 }
+    /// How high the dumbbell is: the celebration reps while one plays, else the lift.
+    var dumbbellRise: CGFloat { burst >= 0 ? abs(sin(burst * 2 * .pi)) : lift }
 
     /// The still pose, used for reduced motion and static renders.
-    init(face: EnergyFace = .mid, need: CompanionNeed? = nil, life: IdleLife? = nil) {
+    init(
+        face: EnergyFace = .mid,
+        need: CompanionNeed? = nil,
+        life: IdleLife? = nil,
+        activity: CompanionActivity? = nil
+    ) {
         self.face = face
-        self.need = need
-        self.life = need == nil ? life : nil
+        self.activity = activity
+        self.need = activity == nil ? need : nil
+        self.life = activity == nil && need == nil ? life : nil
         if tired { blink = 0.75 }
-        if need == .boxingWarmup { eyesDx = -2 }
-        if need == .couchScroll {
+        switch activity {
+        case .gymDay: bagLift = 1
+        case .gymSession: lift = 0.6
+        case .running:
+            headDy = 1
+            dash = 0.4
+        case .boxingAtGym:
+            gloveL = CGSize(width: -8, height: -6)
+            bagSwing = 4
+        case .runDay, nil: break
+        }
+        if self.need == .boxingWarmup { eyesDx = -2 }
+        if self.need == .couchScroll {
             // Slumped, eyes down on the phone.
             headDy = 3
             eyesDy = 1.5
@@ -186,9 +213,10 @@ struct RunnerPose {
         face: EnergyFace,
         need: CompanionNeed? = nil,
         life: IdleLife? = nil,
+        activity: CompanionActivity? = nil,
         react: Double
     ) {
-        self.init(face: face, need: need, life: life)
+        self.init(face: face, need: need, life: life, activity: activity)
         let t = time * face.speed
         let open: CGFloat = tired ? 0.75 : 1
         let r = CGFloat(react)
@@ -223,9 +251,43 @@ struct RunnerPose {
             glint = sweep < 0.6 ? 0.28 + CGFloat(sweep / 0.6) * 0.5 : -1
             coinTurn = 360 * react
         }
-        if need == .boxingWarmup { warmUp(time: t, react: r) }
-        if need == .couchScroll { scroll(time: t) }
+        if self.need == .boxingWarmup { warmUp(time: t, react: r) }
+        if self.need == .couchScroll { scroll(time: t) }
         if let life = self.life { live(life, time: t, react: r) }
+        if let activity { act(activity, time: t) }
+    }
+
+    /// Doing it alongside Mike: heavy-bag combos, curls, running, or getting ready for the gym or the run.
+    private mutating func act(_ activity: CompanionActivity, time t: TimeInterval) {
+        switch activity {
+        case .boxingAtGym:
+            // Jab, jab, cross every 1.6 s into the bag on the left; the bag swings after each hit.
+            let phase = CGFloat(t.truncatingRemainder(dividingBy: 1.6))
+            let jab = Self.bump(phase, from: 0, to: 0.25) + Self.bump(phase, from: 0.35, to: 0.6)
+            let cross = Self.bump(phase, from: 0.8, to: 1.1)
+            gloveL = CGSize(width: -14 * jab, height: -10 * jab)
+            gloveR = CGSize(width: -40 * cross, height: -12 * cross)
+            gloveRScale = 1 + 0.15 * cross
+            bagSwing = Double(5 * Self.bump(phase, from: 0.15, to: 0.75) + 9 * Self.bump(phase, from: 1, to: 1.6))
+            eyesDx = -2
+        case .gymSession:
+            // A slow curl every 2 s, the head pushing along at the top.
+            lift = CGFloat(abs(sin(t * .pi / 2)))
+            headDy = lift
+        case .running:
+            // Quick strides: the head bobs and the speed lines stream back.
+            headDy = CGFloat(abs(sin(t * 2 * .pi / 0.72))) * 2.5
+            dash = CGFloat(t.truncatingRemainder(dividingBy: 0.5) / 0.5)
+        case .gymDay:
+            // Bag over the shoulder, a look at the door every 5 s.
+            bagLift = 1
+            eyesDx = -4 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 5)), from: 3.4, to: 5)
+        case .runDay:
+            // Bouncing the running shoe, a calf stretch every 4 s.
+            let phase = CGFloat(t.truncatingRemainder(dividingBy: 4))
+            prop = CGSize(width: 0, height: -4 * CGFloat(abs(sin(t * 2 * .pi / 1))))
+            stretch = 0.4 * Self.bump(phase, from: 2.6, to: 4)
+        }
     }
 
     /// HAKU's own time. A tap catches it: it wakes, hides the snack, closes the sketchbook or
@@ -430,7 +492,11 @@ struct RunnerFigure: View {
             visible.remove(.monsterCan)
         }
         if pose.bagLift >= 0, !pose.bedtime { visible.insert(.gymBag) }
-        if let life = pose.life, pose.need == nil, !pose.bedtime {
+        if let activity = pose.activity, !pose.bedtime {
+            visible.remove(.monsterCan)
+            visible.formUnion(activityParts(activity))
+        }
+        if let life = pose.life, pose.need == nil, pose.activity == nil, !pose.bedtime {
             let added = lifeParts(life)
             visible.remove(.monsterCan)
             if !added.isDisjoint(with: [.eyesSleepy, .eyesWork]) { visible.remove(.eyesChill) }
@@ -501,6 +567,16 @@ struct RunnerFigure: View {
         .strength: [.dumbbell],
     ]
     nonisolated private static let deadpanEyes: Set<RunnerPart> = [.eyesWork, .lidsWork, .browsWork]
+
+    nonisolated private static func activityParts(_ activity: CompanionActivity) -> Set<RunnerPart> {
+        switch activity {
+        case .boxingAtGym: warmupParts.union([.heavyBag])
+        case .gymSession: [.dumbbell]
+        case .running: [.speedLines]
+        case .runDay: [.runShoe]
+        case .gymDay: []
+        }
+    }
 
     nonisolated private static func lifeParts(_ life: IdleLife) -> Set<RunnerPart> {
         switch life {
@@ -580,9 +656,15 @@ struct RunnerFigure: View {
                     .scaleEffect(min(1, max(pose.burst, 0) * 4), anchor: Self.unit(x: 96, y: 84))
                     .rotationEffect(.degrees(Double(sin(pose.burst * 6 * .pi)) * 8), anchor: Self.unit(x: 96, y: 84))
             case .dumbbell:
-                // Two quick reps.
-                RunnerPartView(part: part).offset(y: -12 * abs(sin(pose.burst * 2 * .pi)) * scale)
-            case .handheld, .cloth:
+                // Two quick reps in a celebration, or the curl at the gym.
+                RunnerPartView(part: part).offset(y: -12 * pose.dumbbellRise * scale)
+            case .heavyBag:
+                RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 12, y: -6))
+            case .speedLines:
+                RunnerPartView(part: part)
+                    .offset(x: -8 * pose.dash * scale)
+                    .opacity(Double(1 - 0.7 * pose.dash))
+            case .handheld, .cloth, .runShoe:
                 RunnerPartView(part: part).offset(x: pose.prop.width * scale, y: pose.prop.height * scale)
             case .onigiri:
                 RunnerPartView(part: part)
@@ -780,6 +862,7 @@ public struct CompanionPortrait: View {
     let energy: Double?
     let need: CompanionNeed?
     let needSince: Date?
+    let activity: CompanionActivity?
     let date: Date
     let bedtime: Bedtime
     let framing: Framing
@@ -787,12 +870,14 @@ public struct CompanionPortrait: View {
     // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
     /// - Parameters:
     ///   - needSince: when `need` started; after 30 minutes of couch scrolling HAKU eyes the gym bag.
+    ///   - activity: what HAKU does alongside Mike; it replaces the need.
     ///   - date: the moment shown, such as a widget timeline entry's date.
     public init(
         mode: Mode,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
         needSince: Date? = nil,
+        activity: CompanionActivity? = nil,
         date: Date = .now,
         bedtime: Bedtime = .off,
         framing: Framing = .full
@@ -801,6 +886,7 @@ public struct CompanionPortrait: View {
         self.energy = energy
         self.need = need
         self.needSince = needSince
+        self.activity = activity
         self.date = date
         self.bedtime = bedtime
         self.framing = framing
@@ -816,17 +902,23 @@ public struct CompanionPortrait: View {
             }
         }
         .accessibilityLabel(
-            CompanionLines.accessibilityLabel(mode: mode, need: need, peeking: peeking, bedtime: bedtime)
+            CompanionLines.accessibilityLabel(
+                mode: mode,
+                need: need,
+                peeking: peeking,
+                activity: activity,
+                bedtime: bedtime
+            )
         )
     }
 
     private var peeking: Bool {
-        need == .couchScroll && CouchStage.at(date, since: needSince, inviting: false) == .peeking
+        activity == nil && need == .couchScroll && CouchStage.at(date, since: needSince, inviting: false) == .peeking
     }
 
     private var figure: RunnerFigure {
         guard bedtime == .off else { return RunnerFigure(mode: mode, pose: RunnerPose.bedtimeStill()) }
-        var pose = RunnerPose(face: EnergyFace(energy: energy), need: need)
+        var pose = RunnerPose(face: EnergyFace(energy: energy), need: need, activity: activity)
         if peeking {
             pose.bagLift = 0
             pose.eyesDx = -3

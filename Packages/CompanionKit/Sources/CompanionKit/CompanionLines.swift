@@ -8,8 +8,10 @@ enum CompanionLines {
         for mode: Mode?,
         need: CompanionNeed? = nil,
         peeking: Bool = false,
-        life: IdleLife? = nil
+        life: IdleLife? = nil,
+        activity: CompanionActivity? = nil
     ) -> [String] {
+        if let activity { return lines(for: activity) }
         if need == .couchScroll, peeking { return ["所以……我们今天是真的不动了吗？", "那个包……算了。", "再刷五分钟。"] }
         if need == .boxingWarmup { return ["拳套我都戴好了，你随意啊。", "……我热身热得都快累了。", "先跳两下热热身。"] }
         if need == .couchScroll { return ["再刷五分钟。", "这条好好笑。", "你也在刷吗？"] }
@@ -20,6 +22,16 @@ enum CompanionLines {
         case .boxing: ["来，左右直拳。", "今天把沙袋打哭。", "头带系紧了吗？"]
         case .money: ["¥¥ 在路上。", "数罐子中。", "……"]
         case nil: ["先选一个 mode 吧。"]
+        }
+    }
+
+    private static func lines(for activity: CompanionActivity) -> [String] {
+        switch activity {
+        case .boxingAtGym: ["左、左、右。", "……别看我，看沙袋。", "今天的沙袋有点欠揍。"]
+        case .gymSession: ["再来一组。……你先。", "哑铃比我想的重。"]
+        case .running: ["呼……别跟我说话。", "腿是你的，我只是陪跑。"]
+        case .gymDay: ["包我都背好了。你随意啊。", "健身房今天也开着。……我只是说说。"]
+        case .runDay: ["鞋带我系好了。你的呢？", "今天是跑步日。……我先热个身。"]
         }
     }
 
@@ -50,17 +62,29 @@ enum CompanionLines {
         need: CompanionNeed?,
         peeking: Bool = false,
         life: IdleLife? = nil,
+        activity: CompanionActivity? = nil,
         bedtime: Bedtime
     ) -> String {
         if bedtime == .on { return "HAKU，困了" }
+        if let activity { return "HAKU，\(doing(activity))" }
         if need == .couchScroll, peeking { return "HAKU，瘫着刷手机，偷看门口的运动包" }
         if need == .boxingWarmup { return "HAKU，戴着拳套在热身" }
         if need == .couchScroll { return "HAKU，瘫着刷手机" }
-        if let life { return "HAKU，\(activity(life))" }
+        if let life { return "HAKU，\(pastime(life))" }
         return mode.map { "HAKU，\($0.title)" } ?? "HAKU"
     }
 
-    private static func activity(_ life: IdleLife) -> String {
+    private static func doing(_ activity: CompanionActivity) -> String {
+        switch activity {
+        case .boxingAtGym: "在拳馆打沙袋"
+        case .gymSession: "在健身房举哑铃"
+        case .running: "在跑步"
+        case .gymDay: "背好了运动包，等着去健身房"
+        case .runDay: "拿着跑鞋在热身"
+        }
+    }
+
+    private static func pastime(_ life: IdleLife) -> String {
         switch life {
         case .nap: "在沙发角落睡着了"
         case .handheld: "在打游戏"
