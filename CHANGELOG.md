@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Shop: tap the can count next to Settings on the home screen. Buy items with cans, see what you own,
+  and see how far each keepsake is. The home screen is otherwise unchanged.
 - Gym and run days (Issue #49): Tuesday to Thursday after work HAKU wears the gym bag until you
   train; Saturday from 17:00 it warms up for the run. At the gym it lifts, at the boxing gym it hits the
   bag. The couch invite now offers the gym or a walk. (HAKU's looks and the 健身房 place in Settings

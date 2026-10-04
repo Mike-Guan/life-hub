@@ -1,0 +1,235 @@
+import CompanionKit
+import HubCore
+import SwiftUI
+
+/// The shop: items to buy with cans, what's owned, and the keepsakes still to earn.
+struct ShopView: View {
+    let growth: GrowthStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var buyError: String?
+
+    // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
+    // promises a reward the app can't give yet. Add a win here when its source is wired.
+    static let liveWins: [Win] = [.boxing, .run5k, .gym]
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                header
+                banner
+                Text("上架")
+                    .font(Toy.body(15, weight: .heavy))
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
+                    ForEach(forSale) { item in
+                        itemCard(item)
+                    }
+                }
+                ForEach(ownedFromShop) { item in
+                    ownedRow(item)
+                }
+                if let buyError {
+                    Text(buyError)
+                        .font(Toy.body(12))
+                        .foregroundStyle(Toy.alert)
+                }
+                if !keepsakes.isEmpty {
+                    Text("纪念品 · 只能靠做到拿")
+                        .font(Toy.body(15, weight: .heavy))
+                    VStack(spacing: 0) {
+                        ForEach(keepsakes) { item in
+                            keepsakeRow(item)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+                    .toyCard(radius: 16, shadow: 4)
+                }
+                Text(footer)
+                    .font(Toy.body(12, weight: .bold))
+                    .foregroundStyle(Toy.muted)
+                    .lineSpacing(4)
+            }
+            .padding(20)
+            .frame(maxWidth: 560)
+            .frame(maxWidth: .infinity)
+        }
+        .foregroundStyle(Toy.ink)
+        .background(Toy.paper.ignoresSafeArea())
+    }
+
+    private var balance: Int { growth.ledger.balance }
+    private var owned: Set<String> { growth.ledger.owned }
+
+    private var forSale: [ShopItem] {
+        ShopItem.catalog.filter { $0.price != nil && !owned.contains($0.id) }
+    }
+
+    private var ownedFromShop: [ShopItem] {
+        ShopItem.catalog.filter { $0.price != nil && owned.contains($0.id) }
+    }
+
+    private var keepsakes: [ShopItem] {
+        ShopItem.catalog.filter { item in
+            guard let keepsake = item.keepsake else { return false }
+            return Self.liveWins.contains(keepsake.win) || owned.contains(item.id)
+        }
+    }
+
+    private var footer: String {
+        let wins = Self.liveWins.map { "\($0.shopTitle) +\($0.cans)" }.joined(separator: "，")
+        return "罐子只靠真的做到才有：\(wins)。不过期，也不会被扣。"
+    }
+
+    private var header: some View {
+        HStack(spacing: 8) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(Toy.body(20, weight: .heavy))
+                    .frame(width: 44, height: 44)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("返回")
+            Text("商店")
+                .font(Toy.display(26))
+            Spacer()
+            CanChip(count: balance)
+        }
+    }
+
+    private var banner: some View {
+        HStack(alignment: .bottom, spacing: 10) {
+            CompanionPortrait(mode: .chill)
+                .frame(width: 88, height: 112)
+            Text("看上哪个了？……我只是随便问问。")
+                .font(Toy.body(14, weight: .heavy))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .toyCard(radius: 14, shadow: 0)
+                .frame(maxHeight: .infinity)
+        }
+        .padding(.horizontal, 12)
+        .frame(height: 118)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .toyCard(fill: Mode.chill.color)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func itemCard(_ item: ShopItem) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            WardrobeItemIcon(item: item)
+                .frame(width: 56, height: 56)
+                .frame(maxWidth: .infinity)
+                .frame(height: 64)
+                .toyCard(fill: item.slot.tint, radius: 12, shadow: 0)
+            Text(item.title)
+                .font(Toy.body(14, weight: .heavy))
+            if let price = item.price {
+                if price <= balance {
+                    Button {
+                        buy(item)
+                    } label: {
+                        Text("\(price) 罐 换")
+                            .font(Toy.body(15, weight: .heavy))
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(ToyButtonStyle(fill: Toy.pink, isSelected: true))
+                } else {
+                    Text("\(price) 罐 · 还差 \(price - balance) 罐")
+                        .font(Toy.body(14, weight: .bold))
+                        .foregroundStyle(Toy.muted)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .strokeBorder(Toy.muted, style: StrokeStyle(lineWidth: Toy.outline, dash: [6, 4]))
+                        )
+                }
+            }
+        }
+        .padding(10)
+        .toyCard(radius: 16, shadow: 4)
+    }
+
+    private func ownedRow(_ item: ShopItem) -> some View {
+        HStack(spacing: 10) {
+            WardrobeItemIcon(item: item)
+                .frame(width: 32, height: 32)
+            Text(item.title)
+                .font(Toy.body(14, weight: .heavy))
+            Spacer()
+            Label("已拥有", systemImage: "checkmark")
+                .font(Toy.body(13, weight: .heavy))
+                .foregroundStyle(Toy.ink)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .toyCard(radius: 14, shadow: 0)
+    }
+
+    private func keepsakeRow(_ item: ShopItem) -> some View {
+        let isOwned = owned.contains(item.id)
+        let keepsake = item.keepsake
+        let count = keepsake.map { min(growth.ledger.count($0.win), $0.count) } ?? 0
+        let goal = keepsake?.count ?? 1
+        return HStack(spacing: 10) {
+            WardrobeItemIcon(item: item)
+                .frame(width: 32, height: 32)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(item.title)
+                    Spacer()
+                    Text(isOwned ? "已拥有" : "\(keepsake?.win.shopTitle ?? "") \(count)/\(goal)")
+                        .foregroundStyle(Toy.muted)
+                }
+                .font(Toy.body(14, weight: .heavy))
+                if !isOwned {
+                    ProgressView(value: Double(count), total: Double(goal))
+                        .tint(item.slot.tint)
+                        .accessibilityHidden(true)
+                }
+            }
+        }
+        .padding(.vertical, 8)
+    }
+
+    private func buy(_ item: ShopItem) {
+        do {
+            try growth.buy(item)
+            buyError = growth.lastError
+        } catch {
+            buyError =
+                switch error {
+                case .notForSale: "这个不卖。"
+                case .alreadyOwned: "已经有了。"
+                case .notEnoughCans: "罐子还不够。"
+                }
+        }
+    }
+}
+
+extension Win {
+    /// How the shop names the win.
+    var shopTitle: String {
+        switch self {
+        case .gym: "健身"
+        case .boxing: "周日拳击"
+        case .run5k: "跑完 5 km"
+        case .gotUp: "被叫起来出门"
+        case .daylight: "晒太阳"
+        case .earlySleep: "按时睡"
+        }
+    }
+}
+
+extension Slot {
+    /// The tile color for items in this slot.
+    var tint: Color {
+        switch self {
+        case .gloves: Mode.boxing.color
+        case .headband: Mode.work.color
+        case .mask: Mode.money.color
+        case .room, .celebration: Mode.chill.color
+        }
+    }
+}

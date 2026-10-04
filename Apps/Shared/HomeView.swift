@@ -17,6 +17,10 @@ struct HomeView: View {
     var money: MoneyCard?
     /// Shows a settings button that calls this, when set.
     var onSettings: (() -> Void)?
+    /// Cans to spend; with `onShop`, shows the can count that opens the shop.
+    var cans: Int?
+    /// Opens the shop, when set.
+    var onShop: (() -> Void)?
 
     @Environment(ModeStore.self) private var store
     @Environment(EnergyStore.self) private var energy
@@ -29,6 +33,8 @@ struct HomeView: View {
                 Header(
                     mode: store.current,
                     error: store.lastError ?? energy.lastError ?? extraError,
+                    cans: cans,
+                    onShop: onShop,
                     onSettings: onSettings
                 )
 
@@ -114,6 +120,8 @@ extension View {
 private struct Header: View {
     let mode: Mode?
     let error: String?
+    let cans: Int?
+    let onShop: (() -> Void)?
     let onSettings: (() -> Void)?
 
     var body: some View {
@@ -139,6 +147,13 @@ private struct Header: View {
                         .frame(width: 14, height: 14)
                         .help(error)
                         .accessibilityLabel(error)
+                }
+                if let cans, let onShop {
+                    Button(action: onShop) {
+                        CanChip(count: cans)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("商店，\(cans) 罐")
                 }
                 if let onSettings {
                     Button(action: onSettings) {
