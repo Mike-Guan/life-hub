@@ -7,7 +7,8 @@ import Observation
 @MainActor
 @Observable
 final class PlaceMonitor {
-    static let name = "lifehub-places"
+    // CLMonitor throws on launch if the name has anything but letters and digits.
+    static let name = "LifeHubPlaces"
 
     @ObservationIgnored private let manager = CLLocationManager()
     @ObservationIgnored private var task: Task<Void, Never>?
