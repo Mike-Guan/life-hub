@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU can wear wardrobe items: pink or gold gloves, a cyan or white runner headband, a striped mask,
+  and a plant or small punching bag next to it at home. They show once the shop and wardrobe screens exist.
 - Rewards groundwork (Issue #49), not shown in the app yet: a can ledger that counts each real-life
   win once, a shop of five items, three keepsakes granted at milestones (never lost), and a wardrobe
   with one item per slot.
