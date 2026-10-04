@@ -560,7 +560,7 @@ import Testing
         #expect(pose.need == nil)
         #expect(pose.life == nil)
         #expect(pose.bagLift == 1)
-        #expect(RunnerFigure.parts(for: .chill, pose: pose).isSuperset(of: [.door, .towel, .handWeight]))
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).isSuperset(of: [.door, .towel, .handWeight]))
         #expect(RunnerPose(activity: .running, moment: .gymInvite).moment == nil)
     }
 

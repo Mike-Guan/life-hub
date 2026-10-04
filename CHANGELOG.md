@@ -5,7 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
-- HAKU's sleeping pillow is bigger and yellow, so it no longer blends into the white hair.
+- HAKU's sleeping pillow is light blue, so it no longer blends into the white hair.
 - HAKU stops couch scrolling when you do: it gets up 20 minutes after Screen Time last saw you on the
   picked apps (it reports every 10 more minutes of use), as soon as you walk, or when you change mode by
   hand. Before, it lay on the couch for 3 hours after the daily 30 minutes.
