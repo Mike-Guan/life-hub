@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- HAKU stops couch scrolling when you do: it gets up 20 minutes after Screen Time last saw you on the
+  picked apps (it reports every 10 more minutes of use), as soon as you walk, or when you change mode by
+  hand. Before, it lay on the couch for 3 hours after the daily 30 minutes.
 - Cans have caps: Sunday boxing earns once a week; runs, the gym and other wins once a day.
 - The companion is called HAKU everywhere you see it: the widget name, notifications, Settings and
   VoiceOver. Code names stay RUNNER.
@@ -13,6 +16,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - HAKU now acts out what you're doing on the home screen and the Lock Screen: boxing at the boxing gym,
   lifting at the fitness gym, the gym bag after work on gym days and the shoe warm-up on run day.
   Settings shows the fitness gym again; staying there 30 minutes or more counts as a gym workout.
+- New items open with an unboxing: after buying in the shop, or the next time you open the app after a
+  keepsake is earned. HAKU pops out of the box wearing it; "现在戴上" puts it on, "先放衣柜" keeps it
+  for later. Items owned before this update don't unbox.
 - HAKU unboxes new items: a gift box shakes, pops open, and HAKU jumps out wearing the item and says a
   line ("……给你的。才不是特意挑的。" for keepsakes). The 起身庆祝 keepsake adds a peace sign to every
   celebration.

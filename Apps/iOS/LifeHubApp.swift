@@ -19,9 +19,11 @@ struct LifeHubApp: App {
     @State private var showsSettings = false
     @State private var showsShop = false
     @State private var showsWardrobe = false
+    @State private var unboxing: CanEntry?
     @State private var wardrobe = Wardrobe.stored(in: AppGroup.defaults)
     @State private var healthError: String?
     @State private var countdownError: String?
+    @State private var screenTimeError: String?
     @State private var places: PlaceSettings
     @State private var budget: BudgetSettings
     @State private var placeMonitor: PlaceMonitor
@@ -46,6 +48,7 @@ struct LifeHubApp: App {
         _store = State(initialValue: store)
         _energy = State(initialValue: energy)
         _expenses = State(initialValue: ExpenseStore.live(in: container, defaults: AppGroup.defaults))
+        UnboxLog.start(with: growth.ledger)
         _growth = State(initialValue: growth)
         _bedtime = State(initialValue: bedtime)
         _rules = State(initialValue: ModeRules.stored(in: AppGroup.defaults))
@@ -61,6 +64,7 @@ struct LifeHubApp: App {
         _taps = State(initialValue: taps)
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
         guard ScreenshotMode.mode == nil else { return }
+        _screenTimeError = State(initialValue: Self.restartScrollWatch())
         Self.watch(
             places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs, growth: growth
         )
@@ -108,6 +112,7 @@ struct LifeHubApp: App {
                 // The awaits above can include a permission sheet; celebrate only if still on screen.
                 if UIApplication.shared.applicationState == .active {
                     needs.celebrate(bedtime: bedtime.state(at: .now))
+                    showNextUnboxing()
                 }
                 countdownError = await BoxingCountdown.update(for: needs.reading)
             }
@@ -136,20 +141,24 @@ struct LifeHubApp: App {
             refreshNeeds()
         }
         .onChange(of: budget) { budget.store(in: AppGroup.defaults) }
-        .sheet(isPresented: $showsSettings) {
+        .sheet(isPresented: $showsSettings, onDismiss: showNextUnboxing) {
             SettingsView(bedtime: $bedtime, rules: $rules, places: $places, budget: $budget, monitor: placeMonitor)
         }
-        .fullScreenCover(isPresented: $showsShop) {
-            ShopView(growth: growth)
+        .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
+            ShopView(growth: growth, wardrobe: $wardrobe)
         }
-        .fullScreenCover(isPresented: $showsWardrobe) {
+        .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
             WardrobeView(growth: growth, wardrobe: $wardrobe, mode: store.current)
+        }
+        .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in
+            UnboxCover(entry: entry, wardrobe: $wardrobe)
         }
         .onChange(of: wardrobe) {
             wardrobe.store(in: AppGroup.defaults)
             WidgetCenter.shared.reloadAllTimelines()
         }
-        .onChange(of: store.log.changes.count) { syncWidgets() }
+        // A manual mode change ends couch scrolling, so needs are worked out again.
+        .onChange(of: store.log.changes.count) { refreshNeeds() }
         .onChange(of: energy.log.events.count) { syncWidgets() }
     }
 
@@ -167,10 +176,16 @@ struct LifeHubApp: App {
         }
     }
 
+    // Keepsakes earned while the app was closed pop open on the home screen, one after another.
+    private func showNextUnboxing() {
+        guard !showsShop, !showsWardrobe, !showsSettings else { return }
+        unboxing = UnboxLog.next(in: growth.ledger)
+    }
+
     private var firstError: String? {
         let errors = [
             widgets.lastError, expenses.lastError, growth.lastError, reminderError, offWorkError, healthError,
-            placeMonitor.lastError, needs.lastError, countdownError,
+            placeMonitor.lastError, needs.lastError, countdownError, screenTimeError,
         ]
         return (setupErrors + errors.compactMap { $0 }).first
     }
@@ -195,7 +210,7 @@ struct LifeHubApp: App {
             if let trigger = kind.trigger(entered: entered) {
                 store.autoSwitch(trigger, rules: .stored(in: AppGroup.defaults))
             }
-            needs.refresh(places: places)
+            needs.refresh(places: places, manualSince: store.log.changes.last(where: \.source.isManual)?.at)
             widgets.need = needs.reading
             widgets.workouts = needs.workouts
             widgets.sync(mode: store, energy: energy)
@@ -205,8 +220,19 @@ struct LifeHubApp: App {
         }
     }
 
+    // Builds before the report ladder watched a single 30-minute event; restarting swaps in the ladder.
+    private static func restartScrollWatch() -> String? {
+        guard ScrollWatch.hasSelection else { return nil }
+        do {
+            try ScrollWatch.start(ScrollWatch.selection)
+            return nil
+        } catch {
+            return "Screen Time 监测没启动：\(error.localizedDescription)"
+        }
+    }
+
     private func refreshNeeds() {
-        needs.refresh(places: places)
+        needs.refresh(places: places, manualSince: store.log.changes.last(where: \.source.isManual)?.at)
         widgets.need = needs.reading
         widgets.workouts = needs.workouts
         syncWidgets()

@@ -159,7 +159,7 @@ struct SettingsView: View {
                 }
                 .font(Toy.body(13, weight: .heavy))
             }
-            Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，HAKU 也瘫在沙发上。App 只知道到没到，看不到你用了多久。")
+            Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，HAKU 也瘫在沙发上；停下 20 分钟、走动或手动切模式，它就起来。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             if let screenTimeError {

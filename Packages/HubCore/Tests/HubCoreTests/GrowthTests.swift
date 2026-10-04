@@ -96,6 +96,16 @@ import Testing
         #expect(store.remaining(for: try item("room.plant")) == nil)
     }
 
+    @Test func newItemsAreUnboxedOnce() throws {
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        for run in 0..<4 { store.record(.run5k, source: "run-\(run)", at: at.addingTimeInterval(Double(run))) }
+        try store.buy(try item("room.plant"), at: at.addingTimeInterval(10))
+        let pending = store.ledger.unboxings(seen: [])
+        #expect(pending.compactMap(\.itemID) == ["keepsake.headband.runner", "room.plant"])
+        let seen = Set(pending.prefix(1).map(\.id))
+        #expect(store.ledger.unboxings(seen: seen).compactMap(\.itemID) == ["room.plant"])
+    }
+
     @Test func ledgerPersistsAndKeepsUnreadableEntries() throws {
         let url = tempURL()
         let store = GrowthStore(fileURL: url, deviceID: "t")

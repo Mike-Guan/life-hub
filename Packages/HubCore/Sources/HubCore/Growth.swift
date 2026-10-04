@@ -223,6 +223,11 @@ public struct CanLedger: RecordLog, Equatable {
         entries.filter { $0.deletedAt == nil }.sorted { $0.at < $1.at }
     }
 
+    /// Items bought or granted whose entry isn't in `seen`, oldest first, for the unboxing.
+    public func unboxings(seen: Set<UUID>) -> [CanEntry] {
+        active.filter { $0.kind != .earned && $0.itemID != nil && !seen.contains($0.id) }
+    }
+
     /// Cans earned minus cans spent.
     public var balance: Int {
         active.reduce(0) { total, entry in
