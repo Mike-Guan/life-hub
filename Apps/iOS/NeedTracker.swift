@@ -55,7 +55,7 @@ final class NeedTracker {
         guard let workout = NeedEngine.celebration(workouts, celebrated: celebrated, now: now) else { return }
         celebrated.insert(workout.id)
         AppGroup.defaults.set(Array(celebrated), forKey: Self.celebratedKey)
-        event = .celebrate(id: workout.id)
+        event = .celebrate(id: workout.id, kind: workout.kind)
     }
 
     private static let celebratedKey = "celebratedWorkouts"

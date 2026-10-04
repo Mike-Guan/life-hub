@@ -127,9 +127,9 @@ import Testing
     }
 
     @Test func eachCelebrationPlaysOnce() {
-        #expect(CompanionView.newCelebration(.celebrate(id: "run-1"), last: "") == "run-1")
-        #expect(CompanionView.newCelebration(.celebrate(id: "run-1"), last: "run-1") == nil)
-        #expect(CompanionView.newCelebration(.celebrate(id: "box-2"), last: "run-1") == "box-2")
+        #expect(CompanionView.newCelebration(.celebrate(id: "run-1", kind: .running), last: "") == "run-1")
+        #expect(CompanionView.newCelebration(.celebrate(id: "run-1", kind: .running), last: "run-1") == nil)
+        #expect(CompanionView.newCelebration(.celebrate(id: "box-2", kind: .boxing), last: "run-1") == "box-2")
         #expect(CompanionView.newCelebration(nil, last: "") == nil)
     }
 
@@ -246,5 +246,36 @@ import Testing
             #expect(!CompanionLines.lines(for: mode).isEmpty)
         }
         #expect(!CompanionLines.lines(for: nil).isEmpty)
+    }
+
+    @Test func offWorkPlaysOncePerDay() {
+        #expect(CompanionView.newOffWork(.offWork(id: "2026-10-05"), last: "") == "2026-10-05")
+        #expect(CompanionView.newOffWork(.offWork(id: "2026-10-05"), last: "2026-10-05") == nil)
+        #expect(CompanionView.newOffWork(.celebrate(id: "run-1", kind: .running), last: "") == nil)
+        #expect(CompanionView.newCelebration(.offWork(id: "2026-10-05"), last: "") == nil)
+    }
+
+    @Test(arguments: Mode.allCases)
+    func offWorkGoesFromHeadsetToMonster(_ mode: Mode) {
+        let start = Set(RunnerFigure.parts(for: mode, pose: RunnerPose.offWork(time: 0, progress: 0, face: .mid)))
+        #expect(start.isSuperset(of: [.headset, .maskUp, .eyesWork]))
+        #expect(!start.contains(.monsterCan))
+        let end = Set(RunnerFigure.parts(for: mode, pose: RunnerPose.offWork(time: 0, progress: 0.99, face: .mid)))
+        #expect(end.isSuperset(of: [.maskDown, .eyesChill, .monsterCan]))
+        #expect(end.isDisjoint(with: [.headset, .maskUp, .eyesWork, .ledLine]))
+        #expect(RunnerFigure.baseParts.isSubset(of: end))
+    }
+
+    @Test func offWorkPoseStaysInRange() {
+        for step in 0...100 {
+            let pose = RunnerPose.offWork(time: Double(step) * 0.04, progress: Double(step) / 100, face: .mid)
+            #expect((0...1).contains(pose.headsetOff))
+            #expect((0...1).contains(pose.maskDrop))
+            #expect((0...1).contains(pose.stretch))
+            #expect((0...1).contains(pose.canOpacity))
+            #expect((0.1...1).contains(pose.blink))
+        }
+        let stretching = RunnerPose.offWork(time: 0, progress: 0.45, face: .mid)
+        #expect(stretching.stretch > 0.9 && stretching.maskDrop == 1 && stretching.headsetOff == 1)
     }
 }

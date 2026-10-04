@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Off-work animation: when the off-work notification is tapped, HAKU takes the headset off, pulls the
+  mask down, stretches, opens a Monster and says "终于。". Once a day. Workout celebrations now carry
+  the workout type, ready for per-type celebrations.
 - Settings: the wake time is now editable next to the bedtime. RUNNER stays sleepy until then
   (it was fixed at 05:00).
 - App icon: RUNNER's face split by a lightning crack, the side-hustle ¥ mask on one side and boxing

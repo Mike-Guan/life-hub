@@ -10,7 +10,7 @@ public struct CompanionView: View {
     let energy: Double?
     /// What RUNNER acts out on top of the mode, or nil.
     let need: CompanionNeed?
-    /// A one-off animation, such as celebrating a workout. Each celebration id plays once.
+    /// A one-off animation: celebrating a workout or going off work. Each event id plays once.
     let event: CompanionEvent?
     /// Today's invite, written by the app. While set, RUNNER gets up, jumps and says it.
     let invite: String?
@@ -32,6 +32,9 @@ public struct CompanionView: View {
     @State private var inviteJumps = 0
     // Id of the last celebrated workout, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastCelebration") private var lastCelebration = ""
+    @State private var offWorkStart: Date?
+    // Day of the last off-work animation, shared by every CompanionView so it plays once a day.
+    @AppStorage("companion.lastOffWork") private var lastOffWork = ""
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -84,13 +87,13 @@ public struct CompanionView: View {
         }
         .onAppear {
             if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
-            celebrateIfNew()
+            playEventIfNew()
             if invite != nil { startInvite() }
         }
         .onChange(of: invite) { _, new in
             if new != nil { startInvite() }
         }
-        .onChange(of: event) { _, _ in celebrateIfNew() }
+        .onChange(of: event) { _, _ in playEventIfNew() }
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
         }
@@ -163,6 +166,7 @@ public struct CompanionView: View {
 
     private func idleMotion(_ mode: Mode, time: TimeInterval) -> IdleMotion {
         if bedtime == .on { return IdleMotion.sleeping(time: time) }
+        if offWork(at: time) != nil { return IdleMotion(dy: 0, angle: 0) }
         if let progress = celebration(at: time) { return IdleMotion.celebrating(progress: progress) }
         // Warming up hops like boxing day, whatever the outfit.
         if shownNeed == .couchScroll { return IdleMotion.slumped(time: time) }
@@ -172,6 +176,9 @@ public struct CompanionView: View {
 
     private func pose(_ mode: Mode, time: TimeInterval, react: Double) -> RunnerPose {
         if bedtime == .on { return bedtimePose(time: time) }
+        if let progress = offWork(at: time) {
+            return RunnerPose.offWork(time: time, progress: reduceMotion ? 1 : progress, face: face)
+        }
         if reduceMotion { return RunnerPose(face: face, need: shownNeed) }
         var pose = RunnerPose(mode: mode, time: time, face: face, need: shownNeed, react: react)
         if let progress = celebration(at: time) { pose.burst = CGFloat(progress) }
@@ -180,8 +187,17 @@ public struct CompanionView: View {
 
     /// Progress of the celebration at `time`, 0..<1, or nil when none is playing.
     private func celebration(at time: TimeInterval) -> Double? {
-        guard let start = celebrationStart?.timeIntervalSinceReferenceDate else { return nil }
-        let progress = (time - start) / Self.celebrationDuration
+        Self.progress(since: celebrationStart, at: time, duration: Self.celebrationDuration)
+    }
+
+    /// Progress of the off-work animation at `time`, 0..<1, or nil when none is playing.
+    private func offWork(at time: TimeInterval) -> Double? {
+        Self.progress(since: offWorkStart, at: time, duration: Self.offWorkDuration)
+    }
+
+    private static func progress(since start: Date?, at time: TimeInterval, duration: Double) -> Double? {
+        guard let start = start?.timeIntervalSinceReferenceDate else { return nil }
+        let progress = (time - start) / duration
         return (0..<1).contains(progress) ? progress : nil
     }
 
@@ -200,18 +216,37 @@ public struct CompanionView: View {
 
     private static let goodnightDuration = 3.2
     private static let celebrationDuration = 1.6
+    private static let offWorkDuration = 4.0
 
     /// The celebration id to play for `event`, or nil when there is none or it already played.
     nonisolated static func newCelebration(_ event: CompanionEvent?, last: String) -> String? {
-        guard case .celebrate(let id) = event, id != last else { return nil }
+        guard case .celebrate(let id, _) = event, id != last else { return nil }
         return id
     }
 
-    private func celebrateIfNew() {
-        guard bedtime == .off, let id = Self.newCelebration(event, last: lastCelebration) else { return }
-        lastCelebration = id
-        celebrationStart = .now
-        say("干得漂亮！")
+    /// The off-work day to play for `event`, or nil when there is none or it already played.
+    nonisolated static func newOffWork(_ event: CompanionEvent?, last: String) -> String? {
+        guard case .offWork(let day) = event, day != last else { return nil }
+        return day
+    }
+
+    private func playEventIfNew() {
+        guard bedtime == .off else { return }
+        if let id = Self.newCelebration(event, last: lastCelebration) {
+            lastCelebration = id
+            celebrationStart = .now
+            say("干得漂亮！")
+        }
+        if let day = Self.newOffWork(event, last: lastOffWork) {
+            lastOffWork = day
+            offWorkStart = .now
+            say(nil)
+            bubbleTask = Task {
+                try? await Task.sleep(for: .seconds(Self.offWorkDuration * 0.75))
+                guard !Task.isCancelled else { return }
+                say("终于。")
+            }
+        }
     }
     private static let notificationLoop = 2.4
 
@@ -344,7 +379,8 @@ private struct SpeechBubble: View {
             CompanionView(mode: .chill, need: .boxingWarmup).frame(height: 180).toyCard()
             CompanionView(mode: .chill, need: .couchScroll).frame(height: 180).toyCard()
             CompanionView(mode: .chill, need: .couchScroll, invite: "起来，下楼走 10 分钟？").frame(height: 180).toyCard()
-            CompanionView(mode: .boxing, event: .celebrate(id: "preview")).frame(height: 180).toyCard()
+            CompanionView(mode: .boxing, event: .celebrate(id: "preview", kind: .boxing)).frame(height: 180).toyCard()
+            CompanionView(mode: .work, event: .offWork(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .work, bedtime: .on).frame(height: 180).toyCard()
             CompanionView(mode: .chill, bedtime: .on, style: .notification, showsBubble: false)
                 .frame(height: 180)
