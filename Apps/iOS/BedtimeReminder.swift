@@ -17,6 +17,7 @@ enum BedtimeReminder {
         center.setNotificationCategories([
             UNNotificationCategory(identifier: category, actions: [], intentIdentifiers: []),
             UNNotificationCategory(identifier: InviteReminder.category, actions: [], intentIdentifiers: []),
+            UNNotificationCategory(identifier: OffWorkReminder.category, actions: [], intentIdentifiers: []),
         ])
         do {
             guard try await center.requestAuthorization(options: [.alert, .sound]) else {
