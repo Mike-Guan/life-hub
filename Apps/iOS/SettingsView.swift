@@ -72,7 +72,7 @@ struct SettingsView: View {
                     placeRow(kind)
                 }
                 Text(
-                    "到拳馆直接切到拳击日，到公司切到上班，到家用来看你是不是窝在家。到健身房 HAKU 陪你举铁，待满 30 分钟得一罐。"
+                    "到拳馆直接切到拳击日，到公司切到上班，到家用来看你是不是窝在家。到健身房 HAKU 陪你举铁，待满 30 分钟算一次健身，得 \(Win.gym.cans) 罐。"
                         + "地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。"
                 )
                     .font(Toy.body(12))

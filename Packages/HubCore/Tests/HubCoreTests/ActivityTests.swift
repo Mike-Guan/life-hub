@@ -29,11 +29,11 @@ import Testing
         #expect(activity(at: date(6, 23, 30)) == nil)
         #expect(activity(at: date(9, 19)) == nil)
 
-        let lifted = ActivitySignals(workouts: [workout(.other, endingAt: date(6, 19))])
+        let lifted = ActivitySignals(workouts: [workout(.other, endingAt: date(6, 19))], calendar: calendar)
         #expect(activity(lifted, at: date(6, 20)) == nil)
-        let ranOnly = ActivitySignals(workouts: [workout(.running, endingAt: date(6, 19))])
+        let ranOnly = ActivitySignals(workouts: [workout(.running, endingAt: date(6, 19))], calendar: calendar)
         #expect(activity(ranOnly, at: date(6, 20)) == .gymDay)
-        let yesterday = ActivitySignals(workouts: [workout(.other, endingAt: date(5, 19))])
+        let yesterday = ActivitySignals(workouts: [workout(.other, endingAt: date(5, 19))], calendar: calendar)
         #expect(activity(yesterday, at: date(6, 20)) == .gymDay)
     }
 
@@ -54,7 +54,7 @@ import Testing
     @Test func runDayWarmsUpUntilARun() {
         #expect(activity(at: date(10, 16)) == nil)
         #expect(activity(at: date(10, 17)) == .runDay)
-        let ran = ActivitySignals(workouts: [workout(.running, endingAt: date(10, 18))])
+        let ran = ActivitySignals(workouts: [workout(.running, endingAt: date(10, 18))], calendar: calendar)
         #expect(activity(ran, at: date(10, 19)) == nil)
     }
 

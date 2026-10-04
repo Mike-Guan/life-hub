@@ -61,15 +61,42 @@ public struct ActivityDays: Codable, Equatable, Sendable {
 /// What the app knows right now that activities depend on.
 public struct ActivitySignals: Equatable, Sendable {
     public var presence: PlacePresence
-    /// Workouts from the last few days.
-    public var workouts: [WorkoutSummary]
+    /// Start of the hub day of the last workout other than a run, `nil` when none is known.
+    public var trainedDay: Date?
+    /// Start of the hub day of the last run, `nil` when none is known.
+    public var ranDay: Date?
     /// When the current run started, `nil` when not running.
     public var runningSince: Date?
 
-    public init(presence: PlacePresence = PlacePresence(), workouts: [WorkoutSummary] = [], runningSince: Date? = nil) {
+    public init(
+        presence: PlacePresence = PlacePresence(),
+        trainedDay: Date? = nil,
+        ranDay: Date? = nil,
+        runningSince: Date? = nil
+    ) {
         self.presence = presence
-        self.workouts = workouts
+        self.trainedDay = trainedDay
+        self.ranDay = ranDay
         self.runningSince = runningSince
+    }
+
+    // Keeps only the day of each kind of workout, so nothing from HealthKit is copied when stored.
+    /// The signals with the workout days taken from `workouts`.
+    public init(
+        presence: PlacePresence = PlacePresence(),
+        workouts: [WorkoutSummary],
+        runningSince: Date? = nil,
+        calendar: Calendar = .current
+    ) {
+        func lastDay(_ kinds: [WorkoutSummary]) -> Date? {
+            kinds.map(\.end).max().map { StateEngine.dayStart(for: $0, calendar: calendar) }
+        }
+        self.init(
+            presence: presence,
+            trainedDay: lastDay(workouts.filter { $0.kind != .running }),
+            ranDay: lastDay(workouts.filter { $0.kind == .running }),
+            runningSince: runningSince
+        )
     }
 }
 
@@ -93,13 +120,12 @@ public enum ActivityEngine {
         let today = StateEngine.dayStart(for: now, calendar: calendar)
         let weekday = calendar.component(.weekday, from: today)
         let minute = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
-        let done = signals.workouts.filter { $0.end >= today }
         if days.gymWeekdays.contains(weekday), minute >= work.workEndMinute {
             let visited = (signals.presence.left(.fitness) ?? .distantPast) >= today
-            if !visited, !done.contains(where: { $0.kind != .running }) { return .gymDay }
+            if !visited, (signals.trainedDay ?? .distantPast) < today { return .gymDay }
         }
         if days.runWeekday == weekday, minute >= days.runStartMinute {
-            if !done.contains(where: { $0.kind == .running }) { return .runDay }
+            if (signals.ranDay ?? .distantPast) < today { return .runDay }
         }
         return nil
     }

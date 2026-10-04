@@ -66,7 +66,8 @@ struct HubProvider: TimelineProvider {
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
         let signals = ActivitySignals(
             presence: PlacePresence.stored(in: AppGroup.defaults),
-            workouts: snapshot?.workouts ?? []
+            trainedDay: snapshot?.trainedDay,
+            ranDay: snapshot?.ranDay
         )
         return dates.map { date in
             HubEntry(

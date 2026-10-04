@@ -24,8 +24,10 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var lineAfterNeed: String?
     /// The next need that depends only on the clock, shown even if the app hasn't run since.
     public var nextNeed: ScheduledNeed?
-    /// Workouts from the app's last HealthKit reading, so widgets know if today's gym or run is done.
-    public var workouts: [WorkoutSummary]?
+    /// Start of the hub day of the last workout other than a run, so widgets know if today's gym is done.
+    public var trainedDay: Date?
+    /// Start of the hub day of the last run.
+    public var ranDay: Date?
     public var updatedAt: Date
 
     public init(
