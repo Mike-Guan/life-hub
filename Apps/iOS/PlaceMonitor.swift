@@ -19,30 +19,30 @@ final class PlaceMonitor {
     // Called at launch too: after a geofence wakes the app in the background, iterating the
     // events of the monitor with the same name delivers the event that woke it.
     /// Watches `settings` and calls `onEvent` with the place and whether Mike entered it.
-    func start(_ settings: PlaceSettings, onEvent: @escaping @MainActor (HubPlace.Kind, Bool) -> Void) {
+    func start(_ settings: PlaceSettings, onEvent: @escaping @MainActor (HubPlace, Bool) -> Void) {
         task?.cancel()
         lastError = nil
         task = Task {
             let monitor = await CLMonitor(Self.name)
-            let wanted = Set(settings.places.map(\.kind.rawValue))
+            let wanted = Set(settings.places.map(\.id))
             for identifier in await monitor.identifiers where !wanted.contains(identifier) {
                 await monitor.remove(identifier)
             }
             // Adding a condition again resets its state and fires "entered" while Mike is still
             // inside, so only new or moved places are added.
             for place in settings.places {
-                let existing = await monitor.record(for: place.kind.rawValue)?.condition
+                let existing = await monitor.record(for: place.id)?.condition
                 if let current = existing as? CLMonitor.CircularGeographicCondition, Self.matches(current, place) {
                     continue
                 }
                 let center = CLLocationCoordinate2D(latitude: place.latitude, longitude: place.longitude)
                 let condition = CLMonitor.CircularGeographicCondition(center: center, radius: place.radius)
-                await monitor.add(condition, identifier: place.kind.rawValue)
+                await monitor.add(condition, identifier: place.id)
             }
             var lastState: [String: CLMonitor.Event.State] = [:]
             do {
                 for try await event in await monitor.events {
-                    guard let kind = HubPlace.Kind(rawValue: event.identifier) else { continue }
+                    guard let place = settings.places.first(where: { $0.id == event.identifier }) else { continue }
                     guard lastState[event.identifier] != event.state else { continue }
                     lastState[event.identifier] = event.state
                     let entered: Bool
@@ -51,7 +51,7 @@ final class PlaceMonitor {
                     case .unsatisfied: entered = false
                     default: continue
                     }
-                    onEvent(kind, entered)
+                    onEvent(place, entered)
                 }
             } catch {
                 lastError = "地点监测停了：\(error.localizedDescription)"
