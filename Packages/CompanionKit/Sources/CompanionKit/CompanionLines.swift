@@ -28,6 +28,16 @@ enum CompanionLines {
         }
     }
 
+    /// What HAKU says after a workout: plays it cool.
+    static func celebration(_ kind: WorkoutSummary.Kind) -> String {
+        switch kind {
+        case .boxing: "……其实还挺爽的。"
+        case .running: "居然真跑完了。"
+        case .strength: "不错嘛。"
+        case .other: "哦。……不错嘛。"
+        }
+    }
+
     /// The VoiceOver label for HAKU.
     static func accessibilityLabel(
         mode: Mode?,

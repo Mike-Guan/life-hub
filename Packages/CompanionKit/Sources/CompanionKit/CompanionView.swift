@@ -29,6 +29,7 @@ public struct CompanionView: View {
     // Seconds since the reference date of the last good-night animation, shared by every CompanionView.
     @AppStorage("companion.lastGoodnight") private var lastGoodnight: Double = 0
     @State private var celebrationStart: Date?
+    @State private var celebrationKind: WorkoutSummary.Kind?
     @State private var inviteJumps = 0
     // Id of the last celebrated workout, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastCelebration") private var lastCelebration = ""
@@ -191,7 +192,7 @@ public struct CompanionView: View {
         }
         if reduceMotion { return RunnerPose(face: face, need: shownNeed, life: life) }
         var pose = RunnerPose(mode: mode, time: time, face: face, need: shownNeed, life: life, react: react)
-        if let progress = celebration(at: time) { pose.burst = CGFloat(progress) }
+        if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
         return pose
     }
 
@@ -242,10 +243,11 @@ public struct CompanionView: View {
 
     private func playEventIfNew() {
         guard bedtime == .off else { return }
-        if let id = Self.newCelebration(event, last: lastCelebration) {
+        if let id = Self.newCelebration(event, last: lastCelebration), case .celebrate(_, let kind) = event {
             lastCelebration = id
+            celebrationKind = kind
             celebrationStart = .now
-            say("干得漂亮！")
+            say(CompanionLines.celebration(kind))
         }
         if let day = Self.newOffWork(event, last: lastOffWork) {
             lastOffWork = day
@@ -391,6 +393,9 @@ private struct SpeechBubble: View {
             CompanionView(mode: .chill, need: .couchScroll).frame(height: 180).toyCard()
             CompanionView(mode: .chill, need: .couchScroll, invite: "起来，下楼走 10 分钟？").frame(height: 180).toyCard()
             CompanionView(mode: .boxing, event: .celebrate(id: "preview", kind: .boxing)).frame(height: 180).toyCard()
+            CompanionView(mode: .chill, event: .celebrate(id: "preview-run", kind: .running))
+                .frame(height: 180)
+                .toyCard()
             CompanionView(mode: .work, event: .offWork(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .work, bedtime: .on).frame(height: 180).toyCard()
             CompanionView(mode: .chill, bedtime: .on, style: .notification, showsBubble: false)
