@@ -5,8 +5,10 @@ import SwiftUI
 /// The shop: items to buy with cans, what's owned, and the keepsakes still to earn.
 struct ShopView: View {
     let growth: GrowthStore
+    @Binding var wardrobe: Wardrobe
     @Environment(\.dismiss) private var dismiss
     @State private var buyError: String?
+    @State private var unboxing: CanEntry?
 
     // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
     // promises a reward the app can't give yet. Add a win here when its source is wired.
@@ -55,6 +57,9 @@ struct ShopView: View {
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
+        .fullScreenCover(item: $unboxing) { entry in
+            UnboxCover(entry: entry, wardrobe: $wardrobe)
+        }
     }
 
     private var balance: Int { growth.ledger.balance }
@@ -201,6 +206,7 @@ struct ShopView: View {
         do {
             try growth.buy(item)
             buyError = growth.lastError
+            unboxing = UnboxLog.next(in: growth.ledger)
         } catch {
             buyError =
                 switch error {

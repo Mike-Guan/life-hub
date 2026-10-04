@@ -10,6 +10,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- New items open with an unboxing: after buying in the shop, or the next time you open the app after a
+  keepsake is earned. HAKU pops out of the box wearing it; "现在戴上" puts it on, "先放衣柜" keeps it
+  for later. Items owned before this update don't unbox.
 - HAKU unboxes new items: a gift box shakes, pops open, and HAKU jumps out wearing the item and says a
   line ("……给你的。才不是特意挑的。" for keepsakes). The 起身庆祝 keepsake adds a peace sign to every
   celebration.

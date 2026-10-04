@@ -19,6 +19,7 @@ struct LifeHubApp: App {
     @State private var showsSettings = false
     @State private var showsShop = false
     @State private var showsWardrobe = false
+    @State private var unboxing: CanEntry?
     @State private var wardrobe = Wardrobe.stored(in: AppGroup.defaults)
     @State private var healthError: String?
     @State private var countdownError: String?
@@ -45,7 +46,9 @@ struct LifeHubApp: App {
         _store = State(initialValue: store)
         _energy = State(initialValue: energy)
         _expenses = State(initialValue: ExpenseStore.live(in: container, defaults: AppGroup.defaults))
-        _growth = State(initialValue: GrowthStore.live(in: container, defaults: AppGroup.defaults))
+        let growth = GrowthStore.live(in: container, defaults: AppGroup.defaults)
+        UnboxLog.start(with: growth.ledger)
+        _growth = State(initialValue: growth)
         _bedtime = State(initialValue: bedtime)
         _rules = State(initialValue: ModeRules.stored(in: AppGroup.defaults))
         _widgets = State(initialValue: widgets)
@@ -103,6 +106,7 @@ struct LifeHubApp: App {
                 // The awaits above can include a permission sheet; celebrate only if still on screen.
                 if UIApplication.shared.applicationState == .active {
                     needs.celebrate(bedtime: bedtime.state(at: .now))
+                    showNextUnboxing()
                 }
                 countdownError = await BoxingCountdown.update(for: needs.reading)
             }
@@ -133,10 +137,13 @@ struct LifeHubApp: App {
             SettingsView(bedtime: $bedtime, rules: $rules, places: $places, budget: $budget, monitor: placeMonitor)
         }
         .fullScreenCover(isPresented: $showsShop) {
-            ShopView(growth: growth)
+            ShopView(growth: growth, wardrobe: $wardrobe)
         }
         .fullScreenCover(isPresented: $showsWardrobe) {
             WardrobeView(growth: growth, wardrobe: $wardrobe, mode: store.current)
+        }
+        .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in
+            UnboxCover(entry: entry, wardrobe: $wardrobe)
         }
         .onChange(of: wardrobe) {
             wardrobe.store(in: AppGroup.defaults)
@@ -158,6 +165,12 @@ struct LifeHubApp: App {
         for earned in Win.wins(in: needs.workouts) {
             growth.record(earned.win, source: earned.source, at: earned.at)
         }
+    }
+
+    // Keepsakes earned while the app was closed pop open on the home screen, one after another.
+    private func showNextUnboxing() {
+        guard !showsShop, !showsWardrobe, !showsSettings else { return }
+        unboxing = UnboxLog.next(in: growth.ledger)
     }
 
     private var firstError: String? {
