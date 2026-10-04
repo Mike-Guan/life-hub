@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Settings: the wake time is now editable next to the bedtime. RUNNER stays sleepy until then
+  (it was fixed at 05:00).
 - App icon: RUNNER's face split by a lightning crack, the side-hustle ¥ mask on one side and boxing
   on the other, with a glitch afterimage.
 - "记一笔乐天 Pay" in Shortcuts: enter the amount (and whether it was eating out) right after paying,
