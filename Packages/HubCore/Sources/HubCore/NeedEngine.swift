@@ -302,7 +302,7 @@ public enum NeedEngine {
     /// The invite's text for `need`. It goes on the Lock Screen, so it doesn't say what Mike was doing.
     public static func inviteText(for need: CompanionNeed) -> String {
         switch need {
-        case .couchScroll: "起来走两步？我陪你。"
+        case .couchScroll: "去健身房，或者下楼走走？"
         case .boxingWarmup: "拳套戴好了，出发去拳馆？"
         }
     }
