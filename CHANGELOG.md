@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- HAKU has its own life at home: with nothing needed it naps in the sofa corner, plays a handheld,
+  sneaks a snack, draws, shadow boxes or, on Sunday afternoons, wipes the room with a cloth. Tap it and
+  it gets caught (hides the snack, closes the sketchbook, drops the gloves). New deadpan lines, and
+  VoiceOver now says HAKU.
 - Off-work animation: when the off-work notification is tapped, HAKU takes the headset off, pulls the
   mask down, stretches, opens a Monster and says "终于。". Once a day. Workout celebrations now carry
   the workout type, ready for per-type celebrations.
