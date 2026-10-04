@@ -368,4 +368,8 @@ import Testing
         let label = CompanionLines.accessibilityLabel(mode: .chill, need: .couchScroll, peeking: true, bedtime: .off)
         #expect(label.contains("运动包"))
     }
+
+    @Test func portraitPeekDelayMatchesTheCouchStage() {
+        #expect(CompanionPortrait.couchPeekAfter == CouchStage.peekAfter)
+    }
 }

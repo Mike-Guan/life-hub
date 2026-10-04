@@ -749,15 +749,22 @@ public struct CompanionPortrait: View {
     let energy: Double?
     let need: CompanionNeed?
     let needSince: Date?
+    let date: Date
     let bedtime: Bedtime
     let framing: Framing
 
-    /// - Parameter needSince: when `need` started; after 30 minutes of couch scrolling HAKU eyes the gym bag.
+    /// How long couch scrolling lasts before HAKU starts eyeing the gym bag.
+    public static let couchPeekAfter = CouchStage.peekAfter
+
+    /// - Parameters:
+    ///   - needSince: when `need` started; after `couchPeekAfter` of couch scrolling HAKU eyes the gym bag.
+    ///   - date: the moment shown, such as a widget timeline entry's date.
     public init(
         mode: Mode,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
         needSince: Date? = nil,
+        date: Date = .now,
         bedtime: Bedtime = .off,
         framing: Framing = .full
     ) {
@@ -765,6 +772,7 @@ public struct CompanionPortrait: View {
         self.energy = energy
         self.need = need
         self.needSince = needSince
+        self.date = date
         self.bedtime = bedtime
         self.framing = framing
     }
@@ -784,7 +792,7 @@ public struct CompanionPortrait: View {
     }
 
     private var peeking: Bool {
-        need == .couchScroll && CouchStage.at(.now, since: needSince, inviting: false) == .peeking
+        need == .couchScroll && CouchStage.at(date, since: needSince, inviting: false) == .peeking
     }
 
     private var figure: RunnerFigure {
