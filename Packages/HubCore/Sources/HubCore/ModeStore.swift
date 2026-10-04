@@ -56,12 +56,14 @@ public final class ModeStore {
             guard change.source.isManual, let latest = log.current, !latest.source.isManual else { return false }
         }
         // Soft delete keeps the corrected change in the log (one writer, nothing lost).
-        if change.source.isManual, let index = correctableIndex(before: change) {
+        let corrected = change.source.isManual ? correctableIndex(before: change) : nil
+        if let index = corrected {
             log.changes[index].deletedAt = change.at
             log.changes[index].updatedAt = change.at
             log.changes[index].updatedBy = change.updatedBy
         }
-        if change.mode != current {
+        // Only an undo (back to the mode before the corrected change) adds nothing.
+        if corrected == nil || change.mode != current {
             log.changes.append(change)
         }
         save()
