@@ -539,7 +539,7 @@ import Testing
     @Test func vibeCodingWearsTheHoodieAndPilesUpCans() {
         var pose = RunnerPose(moment: .vibeCoding)
         let parts = Set(RunnerFigure.parts(for: .money, pose: pose))
-        #expect(parts.isSuperset(of: [.hoodUp, .ledCode, .laptop, .typingHands]))
+        #expect(parts.isSuperset(of: [.hoodieStrings, .ledCode, .laptop, .typingHands]))
         #expect(!parts.contains(.ledYen))
         #expect(parts.isDisjoint(with: [.canStackOne, .canStackTwo, .canStackThree]))
         pose.codingCans = 2
@@ -560,7 +560,7 @@ import Testing
         #expect(pose.need == nil)
         #expect(pose.life == nil)
         #expect(pose.bagLift == 1)
-        #expect(RunnerFigure.parts(for: .chill, pose: pose).contains(.door))
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).isSuperset(of: [.door, .towel, .handWeight]))
         #expect(RunnerPose(activity: .running, moment: .gymInvite).moment == nil)
     }
 
@@ -584,7 +584,9 @@ import Testing
         var pose = RunnerPose(moment: .lateCoding)
         pose.bedtime = true
         let parts = Set(RunnerFigure.parts(for: .money, pose: pose))
-        #expect(parts.contains(.hoodUp))
+        #expect(parts.contains(.laptop))
         #expect(parts.contains(.eyesSleepy))
+        // The mask comes down at bedtime, so its </> goes with it.
+        #expect(!parts.contains(.ledCode))
     }
 }
