@@ -22,9 +22,9 @@ struct HubEntry: TimelineEntry {
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
     var need: CompanionNeed? { snapshot?.need(at: date) }
 
-    /// One short line: bedtime, else why RUNNER looks the way it does, else today's energy.
+    /// One short line from HAKU: its bedtime line, else the app's line for now, else today's energy.
     var detail: String {
-        if bedtime == .on { return "该睡了" }
+        if bedtime == .on { return HakuLines.line(.bedtime, at: date) }
         if let line = snapshot?.line(at: date) { return line }
         return energy.map { "电量\($0.title)" } ?? "电量未知"
     }

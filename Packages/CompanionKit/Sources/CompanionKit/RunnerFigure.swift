@@ -134,6 +134,8 @@ struct RunnerPose {
     var lie: CGFloat = 0
     /// Rise of the floating Z z z, 0...1, or -1 when hidden.
     var zzz: CGFloat = -1
+    /// The gym bag: -1 = not shown, 0 = on the floor by the door, 1 = over the shoulder.
+    var bagLift: CGFloat = -1
     /// Progress of the off-work animation, 0...1, or -1 when none is playing.
     var offWork: CGFloat = -1
     /// 0 = mask up, 1 = pulled down to the chin.
@@ -270,6 +272,12 @@ struct RunnerPose {
             prop = CGSize(width: CGFloat(cos(a)) * 8, height: CGFloat(sin(a)) * 5)
             headDy = CGFloat(sin(a)) * 1
         }
+    }
+
+    /// Couch scrolling with the gym bag in view, glancing at it every 5 s.
+    mutating func peekAtBag(time t: TimeInterval) {
+        bagLift = 0
+        eyesDx = -4 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 5)), from: 3.4, to: 5)
     }
 
     /// Slumped over the phone: a thumb flick every 2.5 s, slow blinks.
@@ -421,6 +429,7 @@ struct RunnerFigure: View {
             visible.formUnion(warmupParts)
             visible.remove(.monsterCan)
         }
+        if pose.bagLift >= 0, !pose.bedtime { visible.insert(.gymBag) }
         if let life = pose.life, pose.need == nil, !pose.bedtime {
             let added = lifeParts(life)
             visible.remove(.monsterCan)
@@ -560,6 +569,11 @@ struct RunnerFigure: View {
                 }
             case .jacket:
                 RunnerPartView(part: part, fillOverride: Self.jacketColor(mode))
+            case .gymBag:
+                // Lifted from the floor by the door onto the left shoulder.
+                RunnerPartView(part: part)
+                    .rotationEffect(.degrees(-10 * Double(pose.bagLift)), anchor: Self.unit(x: 24, y: 122))
+                    .offset(x: 6 * pose.bagLift * scale, y: -16 * pose.bagLift * scale)
             case .peaceHand:
                 // A sneaky peace sign pops up by the cheek and wiggles.
                 RunnerPartView(part: part)
@@ -765,19 +779,23 @@ public struct CompanionPortrait: View {
     let mode: Mode
     let energy: Double?
     let need: CompanionNeed?
+    let needSince: Date?
     let bedtime: Bedtime
     let framing: Framing
 
+    /// - Parameter needSince: when `need` started; after 30 minutes of couch scrolling HAKU eyes the gym bag.
     public init(
         mode: Mode,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
+        needSince: Date? = nil,
         bedtime: Bedtime = .off,
         framing: Framing = .full
     ) {
         self.mode = mode
         self.energy = energy
         self.need = need
+        self.needSince = needSince
         self.bedtime = bedtime
         self.framing = framing
     }
@@ -791,11 +809,22 @@ public struct CompanionPortrait: View {
                 HeadCrop { figure }
             }
         }
-        .accessibilityLabel(CompanionLines.accessibilityLabel(mode: mode, need: need, bedtime: bedtime))
+        .accessibilityLabel(
+            CompanionLines.accessibilityLabel(mode: mode, need: need, peeking: peeking, bedtime: bedtime)
+        )
+    }
+
+    private var peeking: Bool {
+        need == .couchScroll && CouchStage.at(.now, since: needSince, inviting: false) == .peeking
     }
 
     private var figure: RunnerFigure {
-        let pose = bedtime == .on ? RunnerPose.bedtimeStill() : RunnerPose(face: EnergyFace(energy: energy), need: need)
+        guard bedtime == .off else { return RunnerFigure(mode: mode, pose: RunnerPose.bedtimeStill()) }
+        var pose = RunnerPose(face: EnergyFace(energy: energy), need: need)
+        if peeking {
+            pose.bagLift = 0
+            pose.eyesDx = -3
+        }
         return RunnerFigure(mode: mode, pose: pose)
     }
 }

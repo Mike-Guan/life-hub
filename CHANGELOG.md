@@ -9,6 +9,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Couch scrolling now has steps: after 30 minutes HAKU keeps scrolling but keeps glancing at the gym
+  bag by the door; when the day's invite shows, it gets up with the bag over its shoulder.
+- HAKU talks on the Lock Screen: one short line in its own voice for the mode, the need, low energy or
+  bedtime, a different one each day; everyday scenes have at least 7 lines, so none repeats within a week.
 - Off-work notice: on work days, 15 minutes before work hours end, "快下班了" from HAKU in its chill
   outfit. Work hours (default 9:30 to 18:30) can now be changed in Settings; automatic switching and
   the notice follow them.
