@@ -11,6 +11,8 @@ struct LifeHubApp: App {
     @State private var widgets: WidgetBridge
     @State private var setupErrors: [String]
     @State private var bedtime: BedtimeSchedule
+    @State private var rules: ModeRules
+    @State private var offWorkError: String?
     @State private var reminderError: String?
     @State private var showsSettings = false
     @State private var healthError: String?
@@ -38,6 +40,7 @@ struct LifeHubApp: App {
         _energy = State(initialValue: energy)
         _expenses = State(initialValue: ExpenseStore.live(in: container, defaults: AppGroup.defaults))
         _bedtime = State(initialValue: bedtime)
+        _rules = State(initialValue: ModeRules.stored(in: AppGroup.defaults))
         _widgets = State(initialValue: widgets)
         _setupErrors = State(initialValue: errors)
         _places = State(initialValue: places)
@@ -63,6 +66,7 @@ struct LifeHubApp: App {
         HomeView(
             extraError: firstError,
             bedtime: bedtime,
+            rules: rules,
             need: needs.reading,
             event: needs.event,
             invite: needs.invite,
@@ -93,6 +97,10 @@ struct LifeHubApp: App {
             syncWidgets()
             Task { await scheduleReminder() }
         }
+        .onChange(of: rules) {
+            rules.store(in: AppGroup.defaults)
+            Task { offWorkError = await OffWorkReminder.schedule(rules) }
+        }
         .onChange(of: places) {
             places.store(in: AppGroup.defaults)
             // A cleared place can't report leaving, so forget being there.
@@ -106,7 +114,7 @@ struct LifeHubApp: App {
         }
         .onChange(of: budget) { budget.store(in: AppGroup.defaults) }
         .sheet(isPresented: $showsSettings) {
-            SettingsView(bedtime: $bedtime, places: $places, budget: $budget, monitor: placeMonitor)
+            SettingsView(bedtime: $bedtime, rules: $rules, places: $places, budget: $budget, monitor: placeMonitor)
         }
         .onChange(of: store.log.changes.count) { syncWidgets() }
         .onChange(of: energy.log.events.count) { syncWidgets() }
@@ -121,8 +129,8 @@ struct LifeHubApp: App {
 
     private var firstError: String? {
         let errors = [
-            widgets.lastError, expenses.lastError, reminderError, healthError, placeMonitor.lastError, needs.lastError,
-            countdownError,
+            widgets.lastError, expenses.lastError, reminderError, offWorkError, healthError, placeMonitor.lastError,
+            needs.lastError, countdownError,
         ]
         return (setupErrors + errors.compactMap { $0 }).first
     }
@@ -140,7 +148,7 @@ struct LifeHubApp: App {
             presence.record(kind, entered: entered, at: .now)
             presence.store(in: AppGroup.defaults)
             if let trigger = kind.trigger(entered: entered) {
-                store.autoSwitch(trigger)
+                store.autoSwitch(trigger, rules: .stored(in: AppGroup.defaults))
             }
             needs.refresh(places: places)
             widgets.need = needs.reading
@@ -165,6 +173,8 @@ struct LifeHubApp: App {
 
     private func scheduleReminder() async {
         reminderError = await BedtimeReminder.schedule(bedtime)
+        // The bedtime call asks for permission; without it this would fail the same way.
+        if reminderError == nil { offWorkError = await OffWorkReminder.schedule(rules) }
     }
 
     // Re-reads each time the app becomes active, so sleep the Watch syncs later still counts.

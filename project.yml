@@ -116,6 +116,7 @@ targets:
           - "*.entitlements"
       - Apps/iOS/AppGroup.swift
       - Apps/iOS/InviteReminder.swift
+      - Apps/iOS/OffWorkReminder.swift
     dependencies:
       - package: HubCore
       - package: CompanionKit

@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Off-work notice: on work days, 15 minutes before work hours end, "快下班了" from HAKU in its chill
+  outfit. Work hours (default 9:30 to 18:30) can now be changed in Settings; automatic switching and
+  the notice follow them.
 - Settings: the wake time is now editable next to the bedtime. RUNNER stays sleepy until then
   (it was fixed at 05:00).
 - App icon: RUNNER's face split by a lightning crack, the side-hustle ¥ mask on one side and boxing

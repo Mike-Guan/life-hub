@@ -5,7 +5,7 @@ import UIKit
 import UserNotifications
 import UserNotificationsUI
 
-/// Shows RUNNER in the expanded notification: sleepy at bedtime, getting up for an invite.
+/// Shows RUNNER in the expanded notification: sleepy at bedtime, getting up for an invite, off duty after work.
 final class NotificationViewController: UIViewController, UNNotificationContentExtension {
     private var host: UIHostingController<CompanionView>?
 
@@ -13,17 +13,20 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
         let content = notification.request.content
         let invite = content.categoryIdentifier == InviteReminder.category ? content.body : nil
         let need = (content.userInfo[InviteReminder.needKey] as? String).flatMap(CompanionNeed.init(rawValue:))
-        MainActor.assumeIsolated { show(invite: invite, need: need) }
+        let offWork = content.categoryIdentifier == OffWorkReminder.category
+        let bedtime: Bedtime = invite == nil && !offWork ? .on : .off
+        MainActor.assumeIsolated { show(invite: invite, need: need, bedtime: bedtime, offWork: offWork) }
     }
 
-    private func show(invite: String?, need: CompanionNeed?) {
+    private func show(invite: String?, need: CompanionNeed?, bedtime: Bedtime, offWork: Bool) {
         // The app writes the snapshot; the notification only reads the current mode from it.
-        let mode = AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))?.mode
+        // Off work shows the chill outfit the schedule is about to switch to.
+        let mode = offWork ? .chill : AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))?.mode
         let runner = CompanionView(
             mode: mode,
             need: need,
             invite: invite,
-            bedtime: invite == nil ? .on : .off,
+            bedtime: bedtime,
             style: .notification,
             showsBubble: false
         )

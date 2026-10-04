@@ -124,4 +124,28 @@ import Testing
         #expect(store.log.current?.source == .schedule)
         #expect(store.autoSwitch(.schedule, now: date(5, 11), calendar: calendar) == nil)
     }
+
+    @Test func offWorkNoticeIsBeforeTheEndOfEachWorkday() {
+        let notices = ModeRules.standard.offWorkNotices
+        #expect(notices.map(\.weekday) == [2, 3, 4, 5, 6])
+        #expect(notices.allSatisfy { $0.hour == 18 && $0.minute == 15 })
+
+        var early = ModeRules.standard
+        early.workdays = [3]
+        early.workEndMinute = 10
+        #expect(early.offWorkNotices == [DateComponents(hour: 0, minute: 0, weekday: 3)])
+    }
+
+    @Test func rulesRoundTripThroughDefaults() throws {
+        let suite = "lifehub-tests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        #expect(ModeRules.stored(in: defaults) == .standard)
+        var rules = ModeRules.standard
+        rules.workEndMinute = 19 * 60
+        rules.store(in: defaults)
+        #expect(ModeRules.stored(in: defaults) == rules)
+        defaults.set(Data("x".utf8), forKey: "modeRules")
+        #expect(ModeRules.stored(in: defaults) == .standard)
+    }
 }
