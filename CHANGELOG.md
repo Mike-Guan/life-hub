@@ -4,6 +4,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ## [Unreleased]
 
+### Changed
+- The companion is called HAKU everywhere you see it: the widget name, notifications, Settings and
+  VoiceOver. Code names stay RUNNER.
+
 ### Added
 - HAKU has its own life at home: with nothing needed it naps in the sofa corner, plays a handheld,
   sneaks a snack, draws, shadow boxes or, on Sunday afternoons, wipes the room with a cloth. Tap it and
