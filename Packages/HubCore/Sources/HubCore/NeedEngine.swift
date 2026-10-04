@@ -6,6 +6,8 @@ public enum CompanionNeed: String, Codable, CaseIterable, Sendable {
     case couchScroll
     /// Boxing day and not at the gym yet.
     case boxingWarmup
+    /// Gym day evening, still at home and not trained: HAKU waits at the door with the bag.
+    case gymDay
 }
 
 /// A short animation RUNNER plays once, then goes back to its usual look.
@@ -79,6 +81,12 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var celebrateBoxing: TimeInterval
     /// A strength workout at least this long is celebrated.
     public var celebrateStrength: TimeInterval
+    /// When HAKU starts waiting at the door on gym days.
+    public var gymInviteStartMinute: Int
+    /// When HAKU gives up waiting at the door on gym days.
+    public var gymInviteEndMinute: Int
+    /// How long HAKU waits at the door before the invite.
+    public var gymInviteAfter: TimeInterval
 
     // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses.
     /// Couch after 19:00 and 60 still minutes, or until 20 min after the last Screen Time report; boxing Sunday
@@ -115,7 +123,10 @@ public struct NeedRules: Codable, Equatable, Sendable {
         celebrateWithin: TimeInterval,
         celebrateRunMeters: Double,
         celebrateBoxing: TimeInterval,
-        celebrateStrength: TimeInterval = 20 * 60
+        celebrateStrength: TimeInterval = 20 * 60,
+        gymInviteStartMinute: Int = 19 * 60 + 30,
+        gymInviteEndMinute: Int = 20 * 60 + 30,
+        gymInviteAfter: TimeInterval = 30 * 60
     ) {
         self.eveningStartMinute = eveningStartMinute
         self.stillFor = stillFor
@@ -132,6 +143,9 @@ public struct NeedRules: Codable, Equatable, Sendable {
         self.celebrateRunMeters = celebrateRunMeters
         self.celebrateBoxing = celebrateBoxing
         self.celebrateStrength = celebrateStrength
+        self.gymInviteStartMinute = gymInviteStartMinute
+        self.gymInviteEndMinute = gymInviteEndMinute
+        self.gymInviteAfter = gymInviteAfter
     }
 }
 
@@ -153,6 +167,10 @@ public struct NeedSignals: Equatable, Sendable {
     public var atGym: Bool
     /// Workouts from the last few days.
     public var workouts: [WorkoutSummary]
+    /// When Mike was last at the fitness gym: his arrival while there, else when he left.
+    public var fitnessSeenAt: Date?
+    /// True while Mike is on his way to the gym after saying he is going.
+    public var departing: Bool
 
     public init(
         scrollThresholdAt: Date? = nil,
@@ -162,7 +180,9 @@ public struct NeedSignals: Equatable, Sendable {
         homeKnown: Bool = false,
         stillSince: Date? = nil,
         atGym: Bool = false,
-        workouts: [WorkoutSummary] = []
+        workouts: [WorkoutSummary] = [],
+        fitnessSeenAt: Date? = nil,
+        departing: Bool = false
     ) {
         self.scrollThresholdAt = scrollThresholdAt
         self.scrollSeenAt = scrollSeenAt
@@ -172,6 +192,8 @@ public struct NeedSignals: Equatable, Sendable {
         self.stillSince = stillSince
         self.atGym = atGym
         self.workouts = workouts
+        self.fitnessSeenAt = fitnessSeenAt
+        self.departing = departing
     }
 }
 
@@ -217,14 +239,17 @@ public enum NeedEngine {
     /// How long couch scrolling lasts before HAKU starts peeking at the gym bag.
     public static let couchPeekAfter: TimeInterval = 30 * 60
 
-    /// The need at `now`, or `nil` when there is none. Couch scrolling comes first, except on a
-    /// boxing morning, when scrolling at home is exactly what boxing warm-up is about.
+    /// The need at `now`, or `nil` when there is none. A gym-day evening at home comes first, then couch
+    /// scrolling, except on a boxing morning, when scrolling at home is exactly what boxing warm-up is about.
+    /// - Parameter days: which days are gym days.
     public static func need(
         _ signals: NeedSignals,
         now: Date,
         rules: NeedRules = .standard,
+        days: ActivityDays = .standard,
         calendar: Calendar = .current
     ) -> NeedReading? {
+        if let gym = gymDay(signals, now: now, rules: rules, days: days, calendar: calendar) { return gym }
         let boxing = boxingWarmup(signals, now: now, rules: rules, calendar: calendar)
         if boxing != nil, now < time(rules.boxingFirstUntilMinute, on: now, calendar: calendar) {
             return boxing
@@ -315,6 +340,7 @@ public enum NeedEngine {
         switch need {
         case .couchScroll: "去健身房，或者下楼走走？"
         case .boxingWarmup: "拳套戴好了，出发去拳馆？"
+        case .gymDay: "包背好了，走？"
         }
     }
 
@@ -341,7 +367,11 @@ public enum NeedEngine {
     }
 
     private static func inviteWait(_ need: CompanionNeed, rules: NeedRules) -> TimeInterval {
-        need == .couchScroll ? rules.couchInviteAfter : rules.boxingInviteAfter
+        switch need {
+        case .couchScroll: rules.couchInviteAfter
+        case .boxingWarmup: rules.boxingInviteAfter
+        case .gymDay: rules.gymInviteAfter
+        }
     }
 
     static func isWorthCelebrating(_ workout: WorkoutSummary, rules: NeedRules) -> Bool {
@@ -392,6 +422,26 @@ public enum NeedEngine {
     }
 
     private static let boxingReason = "今天打拳，拳套我戴好了"
+
+    // Needs a known home: the invite is for still being at home, so an unknown place says nothing.
+    private static func gymDay(
+        _ signals: NeedSignals,
+        now: Date,
+        rules: NeedRules,
+        days: ActivityDays,
+        calendar: Calendar
+    ) -> NeedReading? {
+        guard days.gymWeekdays.contains(calendar.component(.weekday, from: now)) else { return nil }
+        guard signals.atHomeSince != nil, !signals.departing else { return nil }
+        let start = time(rules.gymInviteStartMinute, on: now, calendar: calendar)
+        let end = time(rules.gymInviteEndMinute, on: now, calendar: calendar)
+        guard now >= start, now < end else { return nil }
+        let midnight = calendar.startOfDay(for: now)
+        if let seen = signals.fitnessSeenAt, seen >= midnight { return nil }
+        let trained = signals.workouts.contains { $0.kind != .running && $0.end >= midnight }
+        guard !trained else { return nil }
+        return NeedReading(need: .gymDay, since: start, reasons: ["健身日，包我背好了"], until: end)
+    }
 
     // Screen Time reports every few minutes of use, never when use stops. Couch scrolling lasts while
     // reports keep coming, and ends early when Mike walks or changes mode by hand after the last one.

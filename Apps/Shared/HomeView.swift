@@ -13,6 +13,8 @@ struct HomeView: View {
     var activitySignals: ActivitySignals?
     /// Gym and run days.
     var activityDays: ActivityDays = .standard
+    /// The last time Mike said he is going to the gym, from the iOS app.
+    var departure: GymDeparture?
     /// A one-off animation for RUNNER, such as celebrating a workout.
     var event: CompanionEvent?
     /// Today's invite text while its need lasts, so RUNNER gets up and says it.
@@ -52,7 +54,8 @@ struct HomeView: View {
                         energy: reading?.value,
                         need: activeNeed(at: context.date)?.need,
                         needSince: activeNeed(at: context.date)?.since,
-                        activity: activity(at: context.date),
+                        activity: shownActivity(at: context.date),
+                        moment: gymMoment(at: context.date),
                         event: event,
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
@@ -122,6 +125,16 @@ struct HomeView: View {
     // The tracker refreshes on open and on place events, so a need can end while the app stays open.
     private func activeNeed(at date: Date) -> NeedReading? {
         need.flatMap { $0.isActive(at: date) ? $0 : nil }
+    }
+
+    // On gym days HAKU waits at the door during the invite and walks after 走, instead of the plain bag.
+    private func gymMoment(at date: Date) -> CompanionMoment? {
+        let departing = activitySignals.map { departure?.isActive(at: date, presence: $0.presence) ?? false } ?? false
+        return GymDeparture.moment(activity: activity(at: date), need: activeNeed(at: date)?.need, departing: departing)
+    }
+
+    private func shownActivity(at date: Date) -> CompanionActivity? {
+        gymMoment(at: date) == nil ? activity(at: date) : nil
     }
 
     private func activity(at date: Date) -> CompanionActivity? {

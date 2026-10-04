@@ -9,6 +9,7 @@ struct LifeHubWidgets: WidgetBundle {
         ModeWidget()
         EnergyWidget()
         BoxingCountdownWidget()
+        GoToGymControl()
     }
 }
 
@@ -18,8 +19,10 @@ struct HubEntry: TimelineEntry {
     let snapshot: WidgetSnapshot?
     let bedtime: Bedtime
     var wardrobe = Wardrobe()
-    /// What HAKU does alongside Mike at `date`.
+    /// What HAKU does alongside Mike at `date`, `nil` while `moment` replaces the gym bag.
     var activity: CompanionActivity?
+    /// The gym-day state HAKU acts out at `date`: waiting at the door or walking to the gym.
+    var moment: CompanionMoment?
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
@@ -30,6 +33,7 @@ struct HubEntry: TimelineEntry {
     /// now, else today's energy.
     var detail: String {
         if let activity { return activity.reason }
+        if moment == .heading { return "出发了，包我背着" }
         if bedtime == .on { return HakuLines.line(.bedtime, at: date) }
         if let line = snapshot?.line(at: date) { return line }
         return energy.map { "电量\($0.title)" } ?? "电量未知"
@@ -61,21 +65,29 @@ struct HubProvider: TimelineProvider {
         let work = ModeRules.stored(in: AppGroup.defaults)
         let days = ActivityDays.stored(in: AppGroup.defaults)
         let starts = ActivityEngine.startTimes(on: now, days: days, work: work)
-        let needTimes = (snapshot?.needTimes ?? []) + starts
+        let departure = GymDeparture.stored(in: AppGroup.defaults)
+        let walk = [departure?.at, departure?.until].compactMap { $0 }
+        let needTimes = (snapshot?.needTimes ?? []) + starts + walk
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
+        let presence = PlacePresence.stored(in: AppGroup.defaults)
         let signals = ActivitySignals(
-            presence: PlacePresence.stored(in: AppGroup.defaults),
+            presence: presence,
             trainedDay: snapshot?.trainedDay,
             ranDay: snapshot?.ranDay
         )
         return dates.map { date in
-            HubEntry(
+            let activity = ActivityEngine.activity(signals, days: days, work: work, bedtime: schedule, now: date)
+            let departing = departure?.isActive(at: date, presence: presence) ?? false
+            let need = snapshot?.need(at: date)
+            let moment = GymDeparture.moment(activity: activity, need: need, departing: departing)
+            return HubEntry(
                 date: date,
                 snapshot: snapshot,
                 bedtime: schedule.state(at: date),
                 wardrobe: wardrobe,
-                activity: ActivityEngine.activity(signals, days: days, work: work, bedtime: schedule, now: date)
+                activity: moment == nil ? activity : nil,
+                moment: moment
             )
         }
     }

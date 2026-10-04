@@ -11,6 +11,8 @@ enum InviteReminder {
     /// Key in the notification's `userInfo` for the need's raw value.
     static let needKey = "need"
     static let requestID = "invite"
+    /// The invite's 走 button, which starts the walk to the gym.
+    static let goAction = "go"
 
     /// Replaces the scheduled invite with one for `reading`, or removes it when there should be none.
     static func plan(_ reading: NeedReading?, now: Date = .now) {

@@ -76,3 +76,16 @@ private struct EnergyButtons: View {
         }
     }
 }
+
+/// A Lock Screen, Control Center or Action button control that starts the walk to the gym.
+struct GoToGymControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: "goToGym") {
+            ControlWidgetButton(action: GoToGymIntent()) {
+                Label("出发去健身", systemImage: "figure.strengthtraining.traditional")
+            }
+        }
+        .displayName("出发去健身")
+        .description("HAKU 背着包陪你走过去。")
+    }
+}

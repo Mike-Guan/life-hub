@@ -16,7 +16,11 @@ enum BedtimeReminder {
         // This replaces every category, so the invite's is registered here too.
         center.setNotificationCategories([
             UNNotificationCategory(identifier: category, actions: [], intentIdentifiers: []),
-            UNNotificationCategory(identifier: InviteReminder.category, actions: [], intentIdentifiers: []),
+            UNNotificationCategory(
+                identifier: InviteReminder.category,
+                actions: [UNNotificationAction(identifier: InviteReminder.goAction, title: "走")],
+                intentIdentifiers: []
+            ),
             UNNotificationCategory(identifier: OffWorkReminder.category, actions: [], intentIdentifiers: []),
         ])
         do {

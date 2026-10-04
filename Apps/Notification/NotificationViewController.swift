@@ -25,6 +25,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
         let runner = CompanionView(
             mode: mode,
             need: need,
+            moment: GymDeparture.moment(activity: nil, need: need, departing: false),
             invite: invite,
             bedtime: bedtime,
             style: .notification,

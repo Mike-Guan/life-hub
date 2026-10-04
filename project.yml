@@ -95,6 +95,7 @@ targets:
           - "*.entitlements"
       - Apps/iOS/AppGroup.swift
       - Apps/iOS/BoxingActivity.swift
+      - Apps/iOS/InviteReminder.swift
     dependencies:
       - package: HubCore
       - package: CompanionKit
