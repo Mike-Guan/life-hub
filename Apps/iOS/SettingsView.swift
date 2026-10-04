@@ -68,7 +68,8 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 10) {
                 Text("地点")
                     .font(Toy.body(16, weight: .heavy))
-                ForEach(HubPlace.Kind.allCases, id: \.self) { kind in
+                // The fitness gym row appears once HAKU reacts to it (ActivityEngine wired into the app).
+                ForEach(HubPlace.Kind.allCases.filter { $0 != .fitness }, id: \.self) { kind in
                     placeRow(kind)
                 }
                 Text("到拳馆直接切到拳击日，到公司切到上班，到家用来看你是不是窝在家。地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。")

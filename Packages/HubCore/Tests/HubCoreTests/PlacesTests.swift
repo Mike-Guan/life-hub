@@ -11,7 +11,9 @@ import Testing
         #expect(HubPlace.Kind.office.trigger(entered: false) == nil)
         #expect(HubPlace.Kind.home.trigger(entered: true) == nil)
         #expect(HubPlace.Kind.home.trigger(entered: false) == nil)
-        #expect(Set(HubPlace.Kind.allCases.map(\.title)).count == 3)
+        #expect(HubPlace.Kind.fitness.trigger(entered: true) == nil)
+        #expect(HubPlace.Kind.fitness.trigger(entered: false) == nil)
+        #expect(Set(HubPlace.Kind.allCases.map(\.title)).count == 4)
     }
 
     @Test func subscriptSetsReplacesAndRemoves() {

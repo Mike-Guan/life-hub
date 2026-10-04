@@ -7,12 +7,14 @@ public struct HubPlace: Codable, Equatable, Sendable {
         case gym
         case office
         case home
+        case fitness
 
         public var title: String {
             switch self {
             case .gym: "拳馆"
             case .office: "公司"
             case .home: "家"
+            case .fitness: "健身房"
             }
         }
 
@@ -21,7 +23,7 @@ public struct HubPlace: Codable, Equatable, Sendable {
             switch self {
             case .gym: entered ? .enteredGym : .leftGym
             case .office: entered ? .enteredOffice : nil
-            case .home: nil
+            case .home, .fitness: nil
             }
         }
     }
@@ -82,9 +84,27 @@ public struct PlacePresence: Codable, Equatable, Sendable {
     // Keyed by `HubPlace.Kind` raw value, so a kind this build doesn't know is kept, not fatal.
     /// When Mike arrived at each place he is at now.
     public var arrivals: [String: Date]
+    /// When Mike last left each place.
+    public var departures: [String: Date]
 
-    public init(arrivals: [String: Date] = [:]) {
+    public init(arrivals: [String: Date] = [:], departures: [String: Date] = [:]) {
         self.arrivals = arrivals
+        self.departures = departures
+    }
+
+    private enum CodingKeys: String, CodingKey { case arrivals, departures }
+
+    /// Decodes the presence; builds before departures were kept saved only arrivals.
+    /// - Throws: `DecodingError` when a field has the wrong type.
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        arrivals = try values.decodeIfPresent([String: Date].self, forKey: .arrivals) ?? [:]
+        departures = try values.decodeIfPresent([String: Date].self, forKey: .departures) ?? [:]
+    }
+
+    /// When Mike last left `kind`, or `nil` when unknown.
+    public func left(_ kind: HubPlace.Kind) -> Date? {
+        departures[kind.rawValue]
     }
 
     /// When Mike arrived at `kind`, or `nil` when he isn't there.
@@ -97,6 +117,7 @@ public struct PlacePresence: Codable, Equatable, Sendable {
         if entered {
             arrivals[kind.rawValue] = arrivals[kind.rawValue] ?? date
         } else {
+            if arrivals[kind.rawValue] != nil { departures[kind.rawValue] = date }
             arrivals[kind.rawValue] = nil
         }
     }

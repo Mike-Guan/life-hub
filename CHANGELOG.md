@@ -11,6 +11,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU can wear wardrobe items: pink or gold gloves, a cyan or white runner headband, a striped mask,
   and a plant or small punching bag next to it at home. They show once the shop and wardrobe screens exist.
+- Gym and run days (Issue #49): Tuesday to Thursday after work HAKU wears the gym bag until you
+  train; Saturday from 17:00 it warms up for the run. At the gym it lifts, at the boxing gym it hits the
+  bag. The couch invite now offers the gym or a walk. (HAKU's looks and the 健身房 place in Settings
+  come with the UI thread's next PR.)
 - HAKU earns cans from real workouts, saved for the shop that comes next: a boxing class, a 5 km run,
   or strength training (once a day). Strength training of 20 minutes or more now gets its own
   celebration too.
