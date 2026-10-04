@@ -89,7 +89,7 @@ import Testing
     @Test func warmupHasItsOwnLinesAndLabel() {
         #expect(CompanionLines.lines(for: .chill, need: .boxingWarmup) != CompanionLines.lines(for: .chill))
         #expect(CompanionLines.accessibilityLabel(mode: .chill, need: .boxingWarmup, bedtime: .off).contains("热身"))
-        #expect(CompanionLines.accessibilityLabel(mode: .chill, need: .boxingWarmup, bedtime: .on) == "RUNNER，困了")
+        #expect(CompanionLines.accessibilityLabel(mode: .chill, need: .boxingWarmup, bedtime: .on) == "HAKU，困了")
     }
 
     @Test(arguments: Mode.allCases)
@@ -246,5 +246,68 @@ import Testing
             #expect(!CompanionLines.lines(for: mode).isEmpty)
         }
         #expect(!CompanionLines.lines(for: nil).isEmpty)
+    }
+
+    @Test func sundayAfternoonIsForTidying() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        // 2026-10-04 is a Sunday.
+        let sunday = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 4, hour: 14)))
+        #expect(IdleLife.at(sunday, calendar: calendar) == .tidying)
+        let saturday = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 3, hour: 14)))
+        #expect(IdleLife.at(saturday, calendar: calendar) != .tidying)
+    }
+
+    @Test func idleLifeHoldsForASlotAndVaries() {
+        let start = Date(timeIntervalSinceReferenceDate: IdleLife.slotLength * 1000)
+        #expect(IdleLife.at(start) == IdleLife.at(start.addingTimeInterval(IdleLife.slotLength - 1)))
+        let week = (0..<(7 * 96)).map { IdleLife.at(start.addingTimeInterval(Double($0) * IdleLife.slotLength)) }
+        for life in IdleLife.allCases { #expect(week.contains(life)) }
+        #expect(week.contains(nil))
+    }
+
+    @Test(arguments: IdleLife.allCases)
+    func idleLifeSwapsTheCanForItsProp(_ life: IdleLife) {
+        let parts = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(life: life)))
+        #expect(!parts.contains(.monsterCan))
+        #expect(RunnerFigure.baseParts.isSubset(of: parts))
+        let expected: Set<RunnerPart> =
+            switch life {
+            case .nap: [.pillow, .eyesSleepy, .zzz]
+            case .handheld: [.handheld, .eyesWork]
+            case .snack: [.onigiri, .eyesChill]
+            case .drawing: [.sketchbook, .pencil, .eyesWork]
+            case .practice: [.gloveL, .gloveR]
+            case .tidying: [.cloth]
+            }
+        #expect(parts.isSuperset(of: expected))
+        if parts.contains(.eyesWork) || parts.contains(.eyesSleepy) { #expect(!parts.contains(.eyesChill)) }
+        #expect(!CompanionLines.lines(for: .chill, life: life).isEmpty)
+        let label = CompanionLines.accessibilityLabel(mode: .chill, need: nil, life: life, bedtime: .off)
+        #expect(label.hasPrefix("HAKU，"))
+    }
+
+    @Test func needsAndBedtimeOverrideIdleLife() {
+        let needed = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(need: .couchScroll, life: .handheld)))
+        #expect(!needed.contains(.handheld))
+        var night = RunnerPose.bedtimeStill()
+        night.life = .snack
+        #expect(!RunnerFigure.parts(for: .chill, pose: night).contains(.onigiri))
+    }
+
+    @Test(arguments: IdleLife.allCases)
+    func lookingCatchesHaku(_ life: IdleLife) {
+        for step in 0..<60 {
+            let time = Double(step) * 0.05
+            let caught = RunnerPose(mode: .chill, time: time, face: .mid, life: life, react: 1)
+            #expect((0...1).contains(caught.propHidden))
+            #expect((0.1...1).contains(caught.blink))
+            switch life {
+            case .snack, .drawing: #expect(caught.propHidden == 1)
+            case .nap: #expect(caught.blink > 0.99 && caught.lie == 0)
+            case .practice: #expect(caught.gloveL.height >= 18)
+            case .handheld, .tidying: break
+            }
+        }
     }
 }
