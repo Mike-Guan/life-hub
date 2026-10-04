@@ -118,6 +118,8 @@ struct RunnerPose {
     var sparkle: Double = 1
     /// Progress of the celebration sparkle burst, 0..<1, or -1 when none is playing.
     var burst: CGFloat = -1
+    /// The workout being celebrated, which picks the move: gloves up, a peace sign or a lift.
+    var cheerKind: WorkoutSummary.Kind?
     /// Scroll position of the feed on the phone screen while couch scrolling, 0...1.
     var feed: CGFloat = 0
     /// Bedtime overlay: sleepy eyes, mask down, the mode's outfit stays.
@@ -318,6 +320,18 @@ struct RunnerPose {
         return pose
     }
 
+    /// Plays the celebration for `kind` at `progress` (0..<1) on top of the current pose.
+    mutating func celebrate(_ kind: WorkoutSummary.Kind?, progress: CGFloat) {
+        burst = progress
+        cheerKind = kind
+        guard kind == .boxing else { return }
+        // Acts cool, then the right glove pumps up twice anyway.
+        let pump = abs(sin(progress * 2 * .pi))
+        gloveL = CGSize(width: 0, height: -6 * pump)
+        gloveR = CGSize(width: -6 * pump, height: -24 * pump)
+        gloveRScale = 1
+    }
+
     /// Off-work pose at `progress` (0...1): headset off, mask down, a big stretch, then open a Monster.
     static func offWork(time: TimeInterval, progress: Double, face: EnergyFace) -> RunnerPose {
         var pose = RunnerPose(face: face)
@@ -422,6 +436,10 @@ struct RunnerFigure: View {
             if !added.isDisjoint(with: [.eyesSleepy, .eyesWork]) { visible.remove(.eyesChill) }
             visible.formUnion(added)
         }
+        if pose.burst >= 0, !pose.bedtime, let kind = pose.cheerKind, let props = cheerParts[kind] {
+            visible.remove(.monsterCan)
+            visible.formUnion(props)
+        }
         if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
             if mode != .chill, pose.need != .couchScroll { visible.insert(.eyeGlint) }
@@ -477,6 +495,11 @@ struct RunnerFigure: View {
     ]
     nonisolated private static let sleepyParts: Set<RunnerPart> = [.eyesSleepy, .eyebags, .maskDown]
     nonisolated private static let headsetParts: Set<RunnerPart> = [.headset, .cupL, .cupR, .mic]
+    nonisolated private static let cheerParts: [WorkoutSummary.Kind: Set<RunnerPart>] = [
+        .boxing: [.gloveL, .gloveR],
+        .running: [.peaceHand],
+        .strength: [.dumbbell],
+    ]
     nonisolated private static let deadpanEyes: Set<RunnerPart> = [.eyesWork, .lidsWork, .browsWork]
 
     nonisolated private static func lifeParts(_ life: IdleLife) -> Set<RunnerPart> {
@@ -551,6 +574,14 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .rotationEffect(.degrees(-10 * Double(pose.bagLift)), anchor: Self.unit(x: 24, y: 122))
                     .offset(x: 6 * pose.bagLift * scale, y: -16 * pose.bagLift * scale)
+            case .peaceHand:
+                // A sneaky peace sign pops up by the cheek and wiggles.
+                RunnerPartView(part: part)
+                    .scaleEffect(min(1, max(pose.burst, 0) * 4), anchor: Self.unit(x: 96, y: 84))
+                    .rotationEffect(.degrees(Double(sin(pose.burst * 6 * .pi)) * 8), anchor: Self.unit(x: 96, y: 84))
+            case .dumbbell:
+                // Two quick reps.
+                RunnerPartView(part: part).offset(y: -12 * abs(sin(pose.burst * 2 * .pi)) * scale)
             case .handheld, .cloth:
                 RunnerPartView(part: part).offset(x: pose.prop.width * scale, y: pose.prop.height * scale)
             case .onigiri:
