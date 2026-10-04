@@ -12,6 +12,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Rewards groundwork (Issue #49), not shown in the app yet: a can ledger that counts each real-life
   win once, a shop of five items, three keepsakes granted at milestones (never lost), and a wardrobe
   with one item per slot.
+- HAKU talks on the Lock Screen: one short line in its own voice for the mode, the need, low energy or
+  bedtime, a different one each day; everyday scenes have at least 7 lines, so none repeats within a week.
 - Off-work notice: on work days, 15 minutes before work hours end, "快下班了" from HAKU in its chill
   outfit. Work hours (default 9:30 to 18:30) can now be changed in Settings; automatic switching and
   the notice follow them.
@@ -19,6 +21,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   sneaks a snack, draws, shadow boxes or, on Sunday afternoons, wipes the room with a cloth. Tap it and
   it gets caught (hides the snack, closes the sketchbook, drops the gloves). New deadpan lines, and
   VoiceOver now says HAKU.
+- Off-work animation: when the off-work notification is tapped, HAKU takes the headset off, pulls the
+  mask down, stretches, opens a Monster and says "终于。". Once a day. Workout celebrations now carry
+  the workout type, ready for per-type celebrations.
 - Settings: the wake time is now editable next to the bedtime. RUNNER stays sleepy until then
   (it was fixed at 05:00).
 - App icon: RUNNER's face split by a lightning crack, the side-hustle ¥ mask on one side and boxing
