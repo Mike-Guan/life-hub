@@ -3,22 +3,32 @@ import Foundation
 import HubCore
 
 // Screen Time runs this in its own process. It never sees how long Mike used the apps, only that
-// the threshold was reached. The app may not run tonight, so the invite is scheduled from here.
-/// Records when today's Screen Time threshold on the picked apps is reached and schedules the invite.
+// a threshold was reached. The app may not run, so the notice is scheduled from here.
+/// Records Screen Time reports on the picked apps, for the whole day and for work hours, and schedules
+/// the day's notice.
 final class ScrollMonitor: DeviceActivityMonitor {
     override func eventDidReachThreshold(_ event: DeviceActivityEvent.Name, activity: DeviceActivityName) {
         super.eventDidReachThreshold(event, activity: activity)
-        guard ScrollWatch.events.values.contains(event) else { return }
         let now = Date.now
-        ScrollWatch.recordReport(at: now)
+        if ScrollWatch.events.values.contains(event) {
+            ScrollWatch.recordReport(at: now)
+        } else if ScrollWatch.isWorkEvent(event) {
+            ScrollWatch.recordWorkReport(at: now)
+        } else {
+            return
+        }
         let presence = PlacePresence.stored(in: AppGroup.defaults)
         let signals = NeedSignals(
             scrollThresholdAt: ScrollWatch.reachedAt,
             scrollSeenAt: ScrollWatch.seenAt,
             atHomeSince: presence.since(.home),
             homeKnown: PlaceSettings.stored(in: AppGroup.defaults)[.home] != nil,
-            atGym: presence.since(.gym) != nil
+            atGym: presence.since(.gym) != nil,
+            slackThresholdAt: ScrollWatch.workReachedAt,
+            slackSeenAt: ScrollWatch.workSeenAt
         )
-        InviteReminder.plan(NeedEngine.need(signals, now: now), now: now)
+        let days = ActivityDays.stored(in: AppGroup.defaults)
+        let work = ModeRules.stored(in: AppGroup.defaults)
+        InviteReminder.plan(NeedEngine.need(signals, now: now, days: days, work: work), now: now)
     }
 }

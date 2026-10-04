@@ -55,7 +55,7 @@ struct HomeView: View {
                         need: activeNeed(at: context.date)?.need,
                         needSince: activeNeed(at: context.date)?.since,
                         activity: shownActivity(at: context.date),
-                        moment: store.sideHustle?.moment ?? gymMoment(at: context.date),
+                        moment: moment(at: context.date),
                         codingCans: codingCans(at: context.date),
                         event: event,
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
@@ -99,7 +99,10 @@ struct HomeView: View {
                     let state = bedtime.state(at: context.date)
                     let active = activeNeed(at: context.date)
                     let why = NeedEngine.whyLine(need: active, energy: reading, bedtime: state)
-                    if let line = activity(at: context.date)?.reason ?? why {
+                    let workLine = moment(at: context.date).flatMap(HakuLines.scene(for:)).map {
+                        HakuLines.line($0, at: context.date)
+                    }
+                    if let line = activity(at: context.date)?.reason ?? workLine ?? why {
                         Text(line)
                             .font(Toy.body(13, weight: .bold))
                             .foregroundStyle(Toy.muted)
@@ -133,14 +136,23 @@ struct HomeView: View {
         need.flatMap { $0.isActive(at: date) ? $0 : nil }
     }
 
-    // On gym days HAKU waits at the door during the invite and walks after 走, instead of the plain bag.
-    private func gymMoment(at date: Date) -> CompanionMoment? {
-        let departing = activitySignals.map { departure?.isActive(at: date, presence: $0.presence) ?? false } ?? false
-        return GymDeparture.moment(activity: activity(at: date), need: activeNeed(at: date)?.need, departing: departing)
+    private func moment(at date: Date) -> CompanionMoment? {
+        let presence = activitySignals?.presence
+        return MomentEngine.moment(
+            mode: store.current,
+            sideHustle: store.sideHustle,
+            activity: activity(at: date),
+            need: activeNeed(at: date)?.need,
+            departing: presence.map { departure?.isActive(at: date, presence: $0) ?? false } ?? false,
+            officeSince: presence?.since(.office),
+            now: date
+        )
     }
 
+    // On gym days HAKU waits at the door during the invite and walks after 走, instead of the plain bag.
     private func shownActivity(at date: Date) -> CompanionActivity? {
-        gymMoment(at: date) == nil ? activity(at: date) : nil
+        let activity = activity(at: date)
+        return activity == .gymDay && moment(at: date) != nil ? nil : activity
     }
 
     private func activity(at date: Date) -> CompanionActivity? {

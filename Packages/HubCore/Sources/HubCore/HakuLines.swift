@@ -9,6 +9,9 @@ public enum LineScene: String, CaseIterable, Sendable {
     case couchScroll
     case boxingWarmup
     case gymDay
+    case slacking
+    case drowsy
+    case overtime
     case bedtime
     case lowEnergy
 }
@@ -77,6 +80,33 @@ public enum HakuLines {
             "门就在那。",
             "去不去？我只是问问。",
         ],
+        .slacking: [
+            "嘘，我帮你望风。",
+            "老板没往这边看。",
+            "我也在摸。",
+            "屏幕后面有我。",
+            "我什么都没看见。",
+            "摸鱼搭子上线。",
+            "我帮你盯着门口。",
+        ],
+        .drowsy: [
+            "眼皮好重……",
+            "来罐 Monster？",
+            "下午的魔咒。",
+            "我先闭眼五秒。",
+            "咖啡因在路上了。",
+            "哈——欠。",
+            "键盘好软，好想趴。",
+        ],
+        .overtime: [
+            "灵魂先下班了。",
+            "我先趴一会。",
+            "……还不走吗。",
+            "楼里就剩我们了。",
+            "我的电量也没了。",
+            "加班费我没有。",
+            "我在桌上化了。",
+        ],
         .bedtime: [
             "我先睡了。你也别熬。",
             "晚安。别和天花板开会。",
@@ -113,6 +143,16 @@ public enum HakuLines {
         return lines[((days % lines.count) + lines.count) % lines.count]
     }
 
+    /// The scene for a work-day state that has its own lines, `nil` for the others.
+    public static func scene(for moment: CompanionMoment) -> LineScene? {
+        switch moment {
+        case .slacking: .slacking
+        case .drowsy: .drowsy
+        case .overtime: .overtime
+        default: nil
+        }
+    }
+
     /// The scene for HAKU's state: bedtime, then the need, then low energy, then the mode.
     /// - Returns: `nil` before any mode is set and with nothing else to say.
     public static func scene(
@@ -126,6 +166,7 @@ public enum HakuLines {
         case .couchScroll: return .couchScroll
         case .boxingWarmup: return .boxingWarmup
         case .gymDay: return .gymDay
+        case .slacking: return .slacking
         case nil: break
         }
         if energy == .low { return .lowEnergy }

@@ -8,6 +8,8 @@ public enum CompanionNeed: String, Codable, CaseIterable, Sendable {
     case boxingWarmup
     /// Gym day evening, still at home and not trained: HAKU waits at the door with the bag.
     case gymDay
+    /// Scrolling the picked apps for a while during work hours: HAKU peeks over the laptop.
+    case slacking
 }
 
 /// A short animation RUNNER plays once, then goes back to its usual look.
@@ -87,6 +89,14 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var gymInviteEndMinute: Int
     /// How long HAKU waits at the door before the invite.
     public var gymInviteAfter: TimeInterval
+    /// When HAKU gets drowsy at the office at the latest.
+    public var drowsyStartMinute: Int
+    /// After this long at the office HAKU gets drowsy, if that comes before `drowsyStartMinute`.
+    public var drowsyAfterArrival: TimeInterval
+    /// How long the drowsy spell lasts.
+    public var drowsyLasts: TimeInterval
+    /// From this time, still at the office is overtime.
+    public var overtimeMinute: Int
 
     // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses.
     /// Couch after 19:00 and 60 still minutes, or until 20 min after the last Screen Time report; boxing Sunday
@@ -126,7 +136,11 @@ public struct NeedRules: Codable, Equatable, Sendable {
         celebrateStrength: TimeInterval = 20 * 60,
         gymInviteStartMinute: Int = 19 * 60 + 30,
         gymInviteEndMinute: Int = 20 * 60 + 30,
-        gymInviteAfter: TimeInterval = 30 * 60
+        gymInviteAfter: TimeInterval = 30 * 60,
+        drowsyStartMinute: Int = 14 * 60,
+        drowsyAfterArrival: TimeInterval = 3 * 60 * 60,
+        drowsyLasts: TimeInterval = 2 * 60 * 60,
+        overtimeMinute: Int = 19 * 60
     ) {
         self.eveningStartMinute = eveningStartMinute
         self.stillFor = stillFor
@@ -146,6 +160,10 @@ public struct NeedRules: Codable, Equatable, Sendable {
         self.gymInviteStartMinute = gymInviteStartMinute
         self.gymInviteEndMinute = gymInviteEndMinute
         self.gymInviteAfter = gymInviteAfter
+        self.drowsyStartMinute = drowsyStartMinute
+        self.drowsyAfterArrival = drowsyAfterArrival
+        self.drowsyLasts = drowsyLasts
+        self.overtimeMinute = overtimeMinute
     }
 }
 
@@ -171,6 +189,10 @@ public struct NeedSignals: Equatable, Sendable {
     public var fitnessSeenAt: Date?
     /// True while Mike is on his way to the gym after saying he is going.
     public var departing: Bool
+    /// When the current stretch of work-hours Screen Time reports started.
+    public var slackThresholdAt: Date?
+    /// When the last work-hours report came, `nil` when it is `slackThresholdAt`.
+    public var slackSeenAt: Date?
 
     public init(
         scrollThresholdAt: Date? = nil,
@@ -182,7 +204,9 @@ public struct NeedSignals: Equatable, Sendable {
         atGym: Bool = false,
         workouts: [WorkoutSummary] = [],
         fitnessSeenAt: Date? = nil,
-        departing: Bool = false
+        departing: Bool = false,
+        slackThresholdAt: Date? = nil,
+        slackSeenAt: Date? = nil
     ) {
         self.scrollThresholdAt = scrollThresholdAt
         self.scrollSeenAt = scrollSeenAt
@@ -194,6 +218,8 @@ public struct NeedSignals: Equatable, Sendable {
         self.workouts = workouts
         self.fitnessSeenAt = fitnessSeenAt
         self.departing = departing
+        self.slackThresholdAt = slackThresholdAt
+        self.slackSeenAt = slackSeenAt
     }
 }
 
@@ -239,17 +265,24 @@ public enum NeedEngine {
     /// How long couch scrolling lasts before HAKU starts peeking at the gym bag.
     public static let couchPeekAfter: TimeInterval = 30 * 60
 
-    /// The need at `now`, or `nil` when there is none. A gym-day evening at home comes first, then couch
-    /// scrolling, except on a boxing morning, when scrolling at home is exactly what boxing warm-up is about.
-    /// - Parameter days: which days are gym days.
+    /// The need at `now`, or `nil` when there is none. A gym-day evening at home comes first, then scrolling
+    /// in work hours, then couch scrolling, except on a boxing morning, when scrolling at home is exactly what
+    /// boxing warm-up is about.
+    /// - Parameters:
+    ///   - days: which days are gym days.
+    ///   - work: the work days and hours, for scrolling at work.
     public static func need(
         _ signals: NeedSignals,
         now: Date,
         rules: NeedRules = .standard,
         days: ActivityDays = .standard,
+        work: ModeRules = .standard,
         calendar: Calendar = .current
     ) -> NeedReading? {
         if let gym = gymDay(signals, now: now, rules: rules, days: days, calendar: calendar) { return gym }
+        if let slacking = slacking(signals, now: now, rules: rules, work: work, calendar: calendar) {
+            return slacking
+        }
         let boxing = boxingWarmup(signals, now: now, rules: rules, calendar: calendar)
         if boxing != nil, now < time(rules.boxingFirstUntilMinute, on: now, calendar: calendar) {
             return boxing
@@ -341,6 +374,7 @@ public enum NeedEngine {
         case .couchScroll: "去健身房，或者下楼走走？"
         case .boxingWarmup: "拳套戴好了，出发去拳馆？"
         case .gymDay: "包背好了，走？"
+        case .slacking: "嘘，我帮你望风。"
         }
     }
 
@@ -371,6 +405,8 @@ public enum NeedEngine {
         case .couchScroll: rules.couchInviteAfter
         case .boxingWarmup: rules.boxingInviteAfter
         case .gymDay: rules.gymInviteAfter
+        // Screen Time reports only after 30 minutes of use, so the notice goes out at once.
+        case .slacking: 0
         }
     }
 
@@ -443,21 +479,47 @@ public enum NeedEngine {
         return NeedReading(need: .gymDay, since: start, reasons: ["健身日，包我背好了"], until: end)
     }
 
-    // Screen Time reports every few minutes of use, never when use stops. Couch scrolling lasts while
-    // reports keep coming, and ends early when Mike walks or changes mode by hand after the last one.
     private static func screenTimeCouch(_ signals: NeedSignals, now: Date, rules: NeedRules) -> NeedReading? {
         guard let reached = signals.scrollThresholdAt else { return nil }
-        let seen = max(signals.scrollSeenAt ?? reached, reached)
+        // The Lock Screen shows this, so it doesn't name the apps.
+        let reading = NeedReading(need: .couchScroll, since: reached, reasons: ["手机刷够久了，我也瘫着"])
+        return ongoing(reading, seen: signals.scrollSeenAt, signals: signals, now: now, rules: rules)
+    }
+
+    // Separate Screen Time reports, limited to work hours, so they never count toward the couch.
+    private static func slacking(
+        _ signals: NeedSignals,
+        now: Date,
+        rules: NeedRules,
+        work: ModeRules,
+        calendar: Calendar
+    ) -> NeedReading? {
+        guard let reached = signals.slackThresholdAt else { return nil }
+        guard ModeEngine.scheduledMode(at: reached, rules: work, calendar: calendar) == .work else { return nil }
+        let reading = NeedReading(need: .slacking, since: reached, reasons: ["上班时间，我帮你望风"])
+        return ongoing(reading, seen: signals.slackSeenAt, signals: signals, now: now, rules: rules)
+    }
+
+    // Screen Time reports every few minutes of use, never when use stops. The need lasts while reports
+    // keep coming, and ends early when Mike walks or changes mode by hand after the last one.
+    private static func ongoing(
+        _ reading: NeedReading,
+        seen lastSeen: Date?,
+        signals: NeedSignals,
+        now: Date,
+        rules: NeedRules
+    ) -> NeedReading? {
+        let reached = reading.since
+        let seen = max(lastSeen ?? reached, reached)
         guard reached <= now, seen <= now, now.timeIntervalSince(seen) < rules.scrollQuiet else { return nil }
         if let still = signals.stillSince, still > seen { return nil }
-        var since = reached
+        var result = reading
         if let manual = signals.manualSince, manual > reached {
             guard manual < seen else { return nil }
-            since = seen
+            result.since = seen
         }
-        // The Lock Screen shows this, so it doesn't name the apps.
-        let until = seen.addingTimeInterval(rules.scrollQuiet)
-        return NeedReading(need: .couchScroll, since: since, reasons: ["手机刷够久了，我也瘫着"], until: until)
+        result.until = seen.addingTimeInterval(rules.scrollQuiet)
+        return result
     }
 
     private static func time(_ minute: Int, on date: Date, calendar: Calendar) -> Date {

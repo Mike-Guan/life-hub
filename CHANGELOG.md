@@ -14,6 +14,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Work days get three HAKU states. 摸鱼: 30+ minutes on the picked apps inside work hours (counted apart
+  from the evening couch) and HAKU peeks over the laptop; one notice goes out, as the day's one push.
+  犯困: at the office in work mode, from 3 hours after arriving or 14:00, for 2 hours, with a yawn and a
+  Monster. 加班: still at the office after 19:00, slumped on the desk. Both show a Lock Screen line and
+  send nothing.
 - Gym days (Tue to Thu): if you're home at 19:30 and haven't trained, HAKU waits at the door with the bag,
   and at 20:00 the day's one invite asks "包背好了，走？". Its 走 button, or the new "出发去健身" control
   (Lock Screen, Control Center or Action button), sends HAKU walking with the bag for up to an hour, until
