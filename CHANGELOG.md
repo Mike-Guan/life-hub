@@ -11,6 +11,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU does it with you: heavy-bag combos at the boxing gym, curls at the fitness gym, a bobbing run with
   speed lines, the gym bag on its shoulder on gym days, and a running shoe warm-up on run day.
+- HAKU can wear wardrobe items: pink or gold gloves, a cyan or white runner headband, a striped mask,
+  and a plant or small punching bag next to it at home. They show once the shop and wardrobe screens exist.
 - Gym and run days (Issue #49): Tuesday to Thursday after work HAKU wears the gym bag until you
   train; Saturday from 17:00 it warms up for the run. At the gym it lifts, at the boxing gym it hits the
   bag. The couch invite now offers the gym or a walk. (HAKU's looks and the 健身房 place in Settings

@@ -22,6 +22,8 @@ public struct CompanionView: View {
     let cheer: Int
     /// `.on` turns RUNNER sleepy; each change to `.on` plays the good-night animation once.
     let bedtime: Bedtime
+    /// What HAKU wears from the shop and keepsakes.
+    let wardrobe: Wardrobe
     let style: CompanionStyle
     let showsBubble: Bool
 
@@ -53,6 +55,7 @@ public struct CompanionView: View {
         invite: String? = nil,
         cheer: Int = 0,
         bedtime: Bedtime = .off,
+        wardrobe: Wardrobe = Wardrobe(),
         style: CompanionStyle = .standard,
         showsBubble: Bool = true
     ) {
@@ -65,6 +68,7 @@ public struct CompanionView: View {
         self.invite = invite
         self.cheer = cheer
         self.bedtime = bedtime
+        self.wardrobe = wardrobe
         self.style = style
         self.showsBubble = showsBubble
     }
@@ -118,9 +122,12 @@ public struct CompanionView: View {
                     let time = context.date.timeIntervalSinceReferenceDate
                     let life = idleLife(mode, at: context.date)
                     let motion = idleMotion(mode, life: life, time: time)
-                    RunnerFigure(mode: mode, pose: pose(mode, life: life, time: time, react: react))
-                        .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                        .offset(y: reduceMotion ? 0 : motion.dy)
+                    RunnerFigure(
+                        mode: mode,
+                        pose: pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe))
+                    )
+                    .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
+                    .offset(y: reduceMotion ? 0 : motion.dy)
                 }
             } keyframes: { _ in
                 KeyframeTrack {

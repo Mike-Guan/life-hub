@@ -419,5 +419,49 @@ import Testing
         var pose = RunnerPose.bedtimeStill()
         pose.activity = .running
         #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.speedLines))
+    @Test func outfitFollowsTheEquippedItems() {
+        var wardrobe = Wardrobe()
+        wardrobe.equipped[.gloves] = "gloves.gold"
+        wardrobe.equipped[.headband] = "keepsake.headband.runner"
+        wardrobe.equipped[.mask] = "mask.stripes"
+        wardrobe.equipped[.room] = "room.bag"
+        let outfit = Outfit(wardrobe)
+        #expect(outfit.gloves == RunnerPalette.gold)
+        #expect(outfit.headband == RunnerPalette.white)
+        #expect(outfit.stripedMask)
+        #expect(outfit.room == .roomBag)
+    }
+
+    @Test func unknownItemsKeepTheDefaultLook() {
+        #expect(Outfit(Wardrobe(equipped: [.gloves: "gloves.someday", .room: "room.someday"])) == Outfit())
+    }
+
+    @Test(arguments: ShopItem.catalog.filter { $0.slot != .celebration })
+    func everyWornItemChangesTheLook(_ item: ShopItem) {
+        var wardrobe = Wardrobe()
+        wardrobe.equip(item)
+        #expect(Outfit(wardrobe) != Outfit())
+    }
+
+    @Test func stripedMaskShowsOnBothMasks() {
+        var wardrobe = Wardrobe()
+        wardrobe.equipped[.mask] = "mask.stripes"
+        let pose = RunnerPose().wearing(Outfit(wardrobe))
+        let work = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(work.contains(.maskStripes))
+        #expect(!work.contains(.panelLines))
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).contains(.maskStripesDown))
+    }
+
+    @Test func roomItemShowsOnlyAtHome() {
+        var wardrobe = Wardrobe()
+        wardrobe.equipped[.room] = "room.plant"
+        var pose = RunnerPose().wearing(Outfit(wardrobe))
+        #expect(RunnerFigure.parts(for: .chill, pose: pose).contains(.roomPlant))
+        #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.roomPlant))
+        pose.bagLift = 0
+        #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.roomPlant))
+        let running = RunnerPose(activity: .running).wearing(Outfit(wardrobe))
+        #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
     }
 }
