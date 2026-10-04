@@ -8,6 +8,8 @@ import Observation
 final class NeedTracker {
     /// The current need, `nil` when there is none.
     private(set) var reading: NeedReading?
+    /// Where Mike is and his recent workouts, for what HAKU does alongside him.
+    private(set) var activitySignals = ActivitySignals()
     /// Today's invite text while its need lasts, `nil` when none went out for it.
     private(set) var invite: String?
     /// The celebration or off-work animation RUNNER should play, `nil` when there is none.
@@ -46,6 +48,7 @@ final class NeedTracker {
             workouts: motion?.workouts ?? []
         )
         reading = NeedEngine.need(signals, now: now)
+        activitySignals = ActivitySignals(presence: presence, workouts: motion?.workouts ?? [])
         InviteReminder.plan(reading, now: now)
         invite = InviteReminder.sent(for: reading)
     }

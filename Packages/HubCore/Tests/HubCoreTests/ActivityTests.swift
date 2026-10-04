@@ -29,11 +29,11 @@ import Testing
         #expect(activity(at: date(6, 23, 30)) == nil)
         #expect(activity(at: date(9, 19)) == nil)
 
-        let lifted = ActivitySignals(workouts: [workout(.other, endingAt: date(6, 19))])
+        let lifted = ActivitySignals(workouts: [workout(.other, endingAt: date(6, 19))], calendar: calendar)
         #expect(activity(lifted, at: date(6, 20)) == nil)
-        let ranOnly = ActivitySignals(workouts: [workout(.running, endingAt: date(6, 19))])
+        let ranOnly = ActivitySignals(workouts: [workout(.running, endingAt: date(6, 19))], calendar: calendar)
         #expect(activity(ranOnly, at: date(6, 20)) == .gymDay)
-        let yesterday = ActivitySignals(workouts: [workout(.other, endingAt: date(5, 19))])
+        let yesterday = ActivitySignals(workouts: [workout(.other, endingAt: date(5, 19))], calendar: calendar)
         #expect(activity(yesterday, at: date(6, 20)) == .gymDay)
     }
 
@@ -54,7 +54,7 @@ import Testing
     @Test func runDayWarmsUpUntilARun() {
         #expect(activity(at: date(10, 16)) == nil)
         #expect(activity(at: date(10, 17)) == .runDay)
-        let ran = ActivitySignals(workouts: [workout(.running, endingAt: date(10, 18))])
+        let ran = ActivitySignals(workouts: [workout(.running, endingAt: date(10, 18))], calendar: calendar)
         #expect(activity(ran, at: date(10, 19)) == nil)
     }
 
@@ -77,5 +77,24 @@ import Testing
         #expect(presence.since(.home) != nil)
         #expect(presence.departures.isEmpty)
         #expect(presence.left(.home) == nil)
+    }
+
+    @Test func widgetsRedrawWhenGymOrRunDayStarts() {
+        let work = ModeRules.standard.workEndMinute
+        let tuesday = ActivityEngine.startTimes(on: date(6, 12), calendar: calendar)
+        #expect(tuesday == [date(6, work / 60, work % 60)])
+        #expect(ActivityEngine.startTimes(on: date(10, 9), calendar: calendar) == [date(10, 17)])
+        #expect(ActivityEngine.startTimes(on: date(9, 12), calendar: calendar).isEmpty)
+        // Before 05:00 it is still the previous hub day.
+        #expect(ActivityEngine.startTimes(on: date(7, 2), calendar: calendar) == tuesday)
+    }
+
+    @Test func gymVisitEarnsAfterHalfAnHour() {
+        #expect(Win.gymVisit(from: date(6, 19), to: date(6, 19, 29), calendar: calendar) == nil)
+        let visit = Win.gymVisit(from: date(6, 19), to: date(6, 19, 30), calendar: calendar)
+        #expect(visit?.win == .gym)
+        #expect(visit?.at == date(6, 19, 30))
+        let lifted = WorkoutSummary(id: "w", kind: .strength, start: date(6, 19, 5), end: date(6, 19, 50))
+        #expect(visit?.source == Win.wins(in: [lifted], calendar: calendar).first?.source)
     }
 }
