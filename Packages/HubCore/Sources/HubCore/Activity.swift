@@ -8,7 +8,7 @@ public enum CompanionActivity: String, Sendable {
     case gymSession
     /// Running now.
     case running
-    /// A gym day after work, not trained yet: the gym bag is on.
+    /// A gym day after work, with no workout other than a run yet (boxing counts): the gym bag is on.
     case gymDay
     /// Run day evening, not run yet: shoe warm-up.
     case runDay
