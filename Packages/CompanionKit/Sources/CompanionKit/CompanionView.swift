@@ -122,8 +122,8 @@ public struct CompanionView: View {
                         mode: mode,
                         pose: pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe))
                     )
-                        .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                        .offset(y: reduceMotion ? 0 : motion.dy)
+                    .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
+                    .offset(y: reduceMotion ? 0 : motion.dy)
                 }
             } keyframes: { _ in
                 KeyframeTrack {
