@@ -1,25 +1,55 @@
 import HubCore
 
 // Tier 0: no model. On-device generation comes later.
-/// Fixed companion lines per mode and need.
+// Voice: HAKU, a deadpan roommate who secretly cares.
+/// Fixed companion lines per mode, need and idle bit.
 enum CompanionLines {
-    static func lines(for mode: Mode?, need: CompanionNeed? = nil) -> [String] {
-        if need == .boxingWarmup { return ["拳套戴好了，就差你。", "十点开练，走吧。", "先跳两下热热身。"] }
-        if need == .couchScroll { return ["再刷五分钟……", "这条好好笑。", "你也在刷吗？"] }
+    static func lines(for mode: Mode?, need: CompanionNeed? = nil, life: IdleLife? = nil) -> [String] {
+        if need == .boxingWarmup { return ["拳套我都戴好了，你随意啊。", "……我热身热得都快累了。", "先跳两下热热身。"] }
+        if need == .couchScroll { return ["再刷五分钟。", "这条好好笑。", "你也在刷吗？"] }
+        if let life { return lines(for: life) }
         return switch mode {
-        case .work: ["……在听。", "耳机不摘，谁都别找我。", "再撑一会儿就下班。"]
-        case .chill: ["今天辛苦了。", "Monster 第二罐不许开。", "买菜还是看剧？"]
+        case .work: ["又上班。", "人类为什么发明周一。", "……在听。"]
+        case .chill: ["回来了？", "饭呢。", "Monster 第二罐不许开。"]
         case .boxing: ["来，左右直拳。", "今天把沙袋打哭。", "头带系紧了吗？"]
-        case .money: ["¥¥ 在路上。", "这周的样片拍了吗？", "发一条，就一条。"]
+        case .money: ["¥¥ 在路上。", "数罐子中。", "……"]
         case nil: ["先选一个 mode 吧。"]
         }
     }
 
-    /// The VoiceOver label for RUNNER.
-    static func accessibilityLabel(mode: Mode?, need: CompanionNeed?, bedtime: Bedtime) -> String {
-        if bedtime == .on { return "RUNNER，困了" }
-        if need == .boxingWarmup { return "RUNNER，戴着拳套在热身" }
-        if need == .couchScroll { return "RUNNER，瘫着刷手机" }
-        return mode.map { "RUNNER，\($0.title)" } ?? "RUNNER"
+    private static func lines(for life: IdleLife) -> [String] {
+        switch life {
+        case .nap: ["……干嘛。", "再睡五分钟。"]
+        case .handheld: ["别吵，这关快过了。", "……你也想玩？不给。"]
+        case .snack: ["……没吃。", "什么零食，没看见。"]
+        case .drawing: ["没画什么。", "不许看。"]
+        case .practice: ["没在练。", "就是活动一下手。"]
+        case .tidying: ["周日了，收拾一下。", "让一让，擦到你了。"]
+        }
+    }
+
+    /// The VoiceOver label for HAKU.
+    static func accessibilityLabel(
+        mode: Mode?,
+        need: CompanionNeed?,
+        life: IdleLife? = nil,
+        bedtime: Bedtime
+    ) -> String {
+        if bedtime == .on { return "HAKU，困了" }
+        if need == .boxingWarmup { return "HAKU，戴着拳套在热身" }
+        if need == .couchScroll { return "HAKU，瘫着刷手机" }
+        if let life { return "HAKU，\(activity(life))" }
+        return mode.map { "HAKU，\($0.title)" } ?? "HAKU"
+    }
+
+    private static func activity(_ life: IdleLife) -> String {
+        switch life {
+        case .nap: "在沙发角落睡着了"
+        case .handheld: "在打游戏"
+        case .snack: "在偷吃零食"
+        case .drawing: "在偷偷画画"
+        case .practice: "在偷偷练拳"
+        case .tidying: "在拿抹布收拾房间"
+        }
     }
 }
