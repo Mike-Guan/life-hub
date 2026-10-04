@@ -16,6 +16,9 @@ final class NeedTracker {
     private(set) var lastError: String?
     @ObservationIgnored private var motion: HealthMotion.Reading?
 
+    /// Workouts from the last HealthKit reading; empty before the first one.
+    var workouts: [WorkoutSummary] { motion?.workouts ?? [] }
+
     // Re-read each time the app becomes active, so workouts the Watch syncs later still count.
     /// Reads workouts and steps from HealthKit.
     func importMotion() async {

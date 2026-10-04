@@ -39,6 +39,7 @@ enum HealthMotion {
         switch workout.workoutActivityType {
         case .boxing, .kickboxing: kind = .boxing
         case .running: kind = .running
+        case .traditionalStrengthTraining, .functionalStrengthTraining: kind = .strength
         default: kind = .other
         }
         let distance = workout.statistics(for: HKQuantityType(.distanceWalkingRunning))?.sumQuantity()

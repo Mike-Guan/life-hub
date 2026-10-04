@@ -9,6 +9,7 @@ struct LifeHubApp: App {
     @State private var store: ModeStore
     @State private var energy: EnergyStore
     @State private var expenses: ExpenseStore
+    @State private var growth: GrowthStore
     @State private var widgets: WidgetBridge
     @State private var setupErrors: [String]
     @State private var bedtime: BedtimeSchedule
@@ -41,6 +42,7 @@ struct LifeHubApp: App {
         _store = State(initialValue: store)
         _energy = State(initialValue: energy)
         _expenses = State(initialValue: ExpenseStore.live(in: container, defaults: AppGroup.defaults))
+        _growth = State(initialValue: GrowthStore.live(in: container, defaults: AppGroup.defaults))
         _bedtime = State(initialValue: bedtime)
         _rules = State(initialValue: ModeRules.stored(in: AppGroup.defaults))
         _widgets = State(initialValue: widgets)
@@ -89,6 +91,7 @@ struct LifeHubApp: App {
                 await scheduleReminder()
                 await importSleep()
                 await needs.importMotion()
+                earnWins()
                 refreshNeeds()
                 // The awaits above can include a permission sheet; celebrate only if still on screen.
                 if UIApplication.shared.applicationState == .active {
@@ -133,10 +136,17 @@ struct LifeHubApp: App {
         return MoneyCard(gap: gap, target: target)
     }
 
+    // The ledger counts each source once, so re-reading the same workouts earns nothing new.
+    private func earnWins() {
+        for earned in Win.wins(in: needs.workouts) {
+            growth.record(earned.win, source: earned.source, at: earned.at)
+        }
+    }
+
     private var firstError: String? {
         let errors = [
-            widgets.lastError, expenses.lastError, reminderError, offWorkError, healthError, placeMonitor.lastError,
-            needs.lastError, countdownError,
+            widgets.lastError, expenses.lastError, growth.lastError, reminderError, offWorkError, healthError,
+            placeMonitor.lastError, needs.lastError, countdownError,
         ]
         return (setupErrors + errors.compactMap { $0 }).first
     }
