@@ -419,6 +419,8 @@ import Testing
         var pose = RunnerPose.bedtimeStill()
         pose.activity = .running
         #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.speedLines))
+    }
+
     @Test func outfitFollowsTheEquippedItems() {
         var wardrobe = Wardrobe()
         wardrobe.equipped[.gloves] = "gloves.gold"
