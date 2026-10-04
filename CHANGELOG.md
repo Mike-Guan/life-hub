@@ -9,8 +9,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
-- Shop: tap the can count next to Settings on the home screen. Buy items with cans, see what you own,
-  and see how far each keepsake is. The home screen is otherwise unchanged.
+- Shop and wardrobe. The home screen gets two entry points and is otherwise unchanged: the can count
+  next to Settings opens the shop (buy items with cans, see what you own and how far each keepsake is),
+  and "衣柜" on HAKU's card opens the wardrobe (tap an owned item to wear it, preview each mode). What
+  HAKU wears shows on the home screen and the Lock Screen.
 - HAKU can wear wardrobe items: pink or gold gloves, a cyan or white runner headband, a striped mask,
   and a plant or small punching bag next to it at home. They show once the shop and wardrobe screens exist.
 - Gym and run days (Issue #49): Tuesday to Thursday after work HAKU wears the gym bag until you
