@@ -173,7 +173,7 @@ struct SettingsView: View {
     private func watchScrolling() {
         ScrollWatch.selection = scrollApps
         do {
-            try ScrollWatch.start(scrollApps)
+            try ScrollWatch.start(scrollApps, work: rules)
             screenTimeError = nil
         } catch {
             screenTimeError = "Screen Time 监测没启动：\(error.localizedDescription)"

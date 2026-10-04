@@ -10,6 +10,7 @@
 			<array>
 				<string>bedtime</string>
 				<string>invite</string>
+				<string>inviteWork</string>
 				<string>offWork</string>
 			</array>
 			<key>UNNotificationExtensionDefaultContentHidden</key>

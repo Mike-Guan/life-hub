@@ -8,6 +8,8 @@ import UserNotifications
 enum InviteReminder {
     /// Category the notification content extension draws RUNNER for.
     static let category = "invite"
+    /// Category of the scrolling-at-work notice, which has no 走 button.
+    static let workCategory = "inviteWork"
     /// Key in the notification's `userInfo` for the need's raw value.
     static let needKey = "need"
     static let requestID = "invite"
@@ -28,7 +30,7 @@ enum InviteReminder {
             content.title = "HAKU"
             content.body = NeedEngine.inviteText(for: reading.need)
             content.sound = .default
-            content.categoryIdentifier = category
+            content.categoryIdentifier = reading.need == .slacking ? workCategory : category
             content.userInfo = [needKey: reading.need.rawValue]
             let delay = max(at.timeIntervalSince(now), 1)
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)

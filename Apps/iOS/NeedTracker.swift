@@ -50,9 +50,12 @@ final class NeedTracker {
             atGym: presence.since(.gym) != nil,
             workouts: motion?.workouts ?? [],
             fitnessSeenAt: presence.since(.fitness) ?? presence.left(.fitness),
-            departing: departure?.isActive(at: now, presence: presence) ?? false
+            departing: departure?.isActive(at: now, presence: presence) ?? false,
+            slackThresholdAt: ScrollWatch.workReachedAt,
+            slackSeenAt: ScrollWatch.workSeenAt
         )
-        reading = NeedEngine.need(signals, now: now, days: .stored(in: AppGroup.defaults))
+        let days = ActivityDays.stored(in: AppGroup.defaults)
+        reading = NeedEngine.need(signals, now: now, days: days, work: .stored(in: AppGroup.defaults))
         activitySignals = ActivitySignals(presence: presence, workouts: motion?.workouts ?? [])
         InviteReminder.plan(reading, now: now)
         invite = InviteReminder.sent(for: reading)

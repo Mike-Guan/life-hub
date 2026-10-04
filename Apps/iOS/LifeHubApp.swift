@@ -135,6 +135,8 @@ struct LifeHubApp: App {
         .onChange(of: rules) {
             rules.store(in: AppGroup.defaults)
             Task { offWorkError = await OffWorkReminder.schedule(rules) }
+            // The work-hours Screen Time watch follows the work hours.
+            screenTimeError = Self.restartScrollWatch()
         }
         .onChange(of: places) {
             places.store(in: AppGroup.defaults)
@@ -247,7 +249,7 @@ struct LifeHubApp: App {
     private static func restartScrollWatch() -> String? {
         guard ScrollWatch.hasSelection else { return nil }
         do {
-            try ScrollWatch.start(ScrollWatch.selection)
+            try ScrollWatch.start(ScrollWatch.selection, work: .stored(in: AppGroup.defaults))
             return nil
         } catch {
             return "Screen Time 监测没启动：\(error.localizedDescription)"

@@ -21,6 +21,7 @@ enum BedtimeReminder {
                 actions: [UNNotificationAction(identifier: InviteReminder.goAction, title: "走")],
                 intentIdentifiers: []
             ),
+            UNNotificationCategory(identifier: InviteReminder.workCategory, actions: [], intentIdentifiers: []),
             UNNotificationCategory(identifier: OffWorkReminder.category, actions: [], intentIdentifiers: []),
         ])
         do {

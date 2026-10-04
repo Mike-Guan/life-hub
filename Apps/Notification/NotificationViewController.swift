@@ -11,7 +11,8 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
 
     nonisolated func didReceive(_ notification: UNNotification) {
         let content = notification.request.content
-        let invite = content.categoryIdentifier == InviteReminder.category ? content.body : nil
+        let invites = [InviteReminder.category, InviteReminder.workCategory]
+        let invite = invites.contains(content.categoryIdentifier) ? content.body : nil
         let need = (content.userInfo[InviteReminder.needKey] as? String).flatMap(CompanionNeed.init(rawValue:))
         let offWork = content.categoryIdentifier == OffWorkReminder.category
         let bedtime: Bedtime = invite == nil && !offWork ? .on : .off
@@ -25,7 +26,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
         let runner = CompanionView(
             mode: mode,
             need: need,
-            moment: GymDeparture.moment(activity: nil, need: need, departing: false),
+            moment: need == .slacking ? .slacking : GymDeparture.moment(activity: nil, need: need, departing: false),
             invite: invite,
             bedtime: bedtime,
             style: .notification,
