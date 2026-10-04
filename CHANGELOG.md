@@ -11,6 +11,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - Shop: tap the can count next to Settings on the home screen. Buy items with cans, see what you own,
   and see how far each keepsake is. The home screen is otherwise unchanged.
+- HAKU can wear wardrobe items: pink or gold gloves, a cyan or white runner headband, a striped mask,
+  and a plant or small punching bag next to it at home. They show once the shop and wardrobe screens exist.
 - Gym and run days (Issue #49): Tuesday to Thursday after work HAKU wears the gym bag until you
   train; Saturday from 17:00 it warms up for the run. At the gym it lifts, at the boxing gym it hits the
   bag. The couch invite now offers the gym or a walk. (HAKU's looks and the 健身房 place in Settings
