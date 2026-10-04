@@ -1,5 +1,4 @@
 import CompanionKit
-import CoreLocation
 import FamilyControls
 import HubCore
 import SwiftUI
@@ -12,8 +11,7 @@ struct SettingsView: View {
     @Binding var budget: BudgetSettings
     let monitor: PlaceMonitor
     @Environment(\.dismiss) private var dismiss
-    @State private var placeError: String?
-    @State private var locating: HubPlace.Kind?
+    @State private var editing: PlaceEdit?
     @State private var scrollApps = ScrollWatch.selection
     @State private var pickingApps = false
     @State private var screenTimeError: String?
@@ -65,26 +63,7 @@ struct SettingsView: View {
             .padding(16)
             .toyCard()
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("地点")
-                    .font(Toy.body(16, weight: .heavy))
-                ForEach(HubPlace.Kind.allCases, id: \.self) { kind in
-                    placeRow(kind)
-                }
-                Text(
-                    "到拳馆直接切到拳击日，到公司切到上班，到家用来看你是不是窝在家。到健身房 HAKU 陪你举铁，待满 30 分钟算一次健身，得 \(Win.gym.cans) 罐。"
-                        + "地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。"
-                )
-                .font(Toy.body(12))
-                .foregroundStyle(Toy.muted)
-                if let placeError {
-                    Text(placeError)
-                        .font(Toy.body(12))
-                        .foregroundStyle(Toy.alert)
-                }
-            }
-            .padding(16)
-            .toyCard()
+            placesCard
 
             moneyCard
 
@@ -201,38 +180,74 @@ struct SettingsView: View {
         }
     }
 
-    private func placeRow(_ kind: HubPlace.Kind) -> some View {
-        HStack(spacing: 10) {
-            Text(kind.title)
-                .font(Toy.body(15, weight: .bold))
-            Text(places[kind] == nil ? "没设" : "已设")
+    private var placesCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("地点")
+                    .font(Toy.body(16, weight: .heavy))
+                Spacer()
+                Button {
+                    editing = PlaceEdit(place: .custom(name: "", action: .recordOnly, latitude: 0, longitude: 0))
+                } label: {
+                    Image(systemName: "plus")
+                        .font(Toy.body(16, weight: .heavy))
+                        .frame(width: 44, height: 44)
+                }
+                .disabled(!places.canAdd)
+                .accessibilityLabel("添加地点")
+            }
+            ForEach(HubPlace.Kind.presets, id: \.self) { kind in
+                let place = places[kind]
+                placeRow(title: kind.title, detail: place == nil ? "没设" : "已设") {
+                    let blank = HubPlace(kind: kind, latitude: 0, longitude: 0)
+                    editing = PlaceEdit(place: place ?? blank, isNew: place == nil)
+                }
+            }
+            ForEach(places.custom) { place in
+                placeRow(title: place.title, detail: place.action.title) {
+                    editing = PlaceEdit(place: place, isNew: false)
+                }
+            }
+            Text(placesNote)
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
-            Spacer()
-            if places[kind] != nil {
-                Button("清除") { places[kind] = nil }
-                    .font(Toy.body(13, weight: .heavy))
-            }
-            Button(locating == kind ? "定位中…" : "设为当前位置") {
-                Task { await setHere(kind) }
-            }
-            .font(Toy.body(13, weight: .heavy))
-            .disabled(locating != nil)
+        }
+        .padding(16)
+        .toyCard()
+        .sheet(item: $editing) { edit in
+            PlaceEditor(
+                place: edit.place,
+                hasLocation: !edit.isNew,
+                monitor: monitor,
+                onSave: { places.save($0) },
+                onDelete: edit.isNew ? nil : { places.remove(id: edit.place.id) }
+            )
         }
     }
 
-    private func setHere(_ kind: HubPlace.Kind) async {
-        locating = kind
-        defer { locating = nil }
-        do {
-            let location = try await monitor.currentLocation()
-            let coordinate = location.coordinate
-            places[kind] = HubPlace(kind: kind, latitude: coordinate.latitude, longitude: coordinate.longitude)
-            placeError = nil
-            monitor.requestAlways()
-        } catch {
-            placeError = "拿不到当前位置：\(error.localizedDescription)"
+    private var placesNote: String {
+        let full = places.canAdd ? "" : "iOS 最多同时看 \(PlaceSettings.limit) 个地点，删掉一个才能再加。"
+        return full + "点一个地点设置位置。右上角 + 加自己的地点，选到了 HAKU 做什么。"
+            + "地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。"
+    }
+
+    private func placeRow(title: String, detail: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Text(title)
+                    .font(Toy.body(15, weight: .bold))
+                Text(detail)
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.muted)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(Toy.body(13, weight: .heavy))
+                    .foregroundStyle(Toy.muted)
+            }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
 
     // The picker edits a Date; only its hour and minute are kept.
@@ -245,4 +260,12 @@ struct SettingsView: View {
             minute.wrappedValue = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
         }
     }
+}
+
+/// A place open in the editor; `isNew` until it has a location.
+private struct PlaceEdit: Identifiable {
+    var place: HubPlace
+    var isNew = true
+
+    var id: String { place.id }
 }

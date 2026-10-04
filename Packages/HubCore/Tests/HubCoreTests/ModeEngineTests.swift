@@ -117,6 +117,15 @@ import Testing
         #expect(decide(.enteredOffice, log((.work, .schedule, date(5, 9, 30))), at: date(5, 9, 40)) == nil)
     }
 
+    @Test func addedPlacesSwitchUnlessHeld() {
+        let studio = ModeTrigger.enteredPlace(.money, name: "工作室")
+        let decision = decide(studio, log((.chill, .schedule, date(3, 14))), at: date(3, 15))
+        #expect(decision?.mode == .money)
+        #expect(decision?.reason == "到工作室了")
+        #expect(decide(studio, log((.chill, .manual, date(3, 14))), at: date(3, 15)) == nil)
+        #expect(decide(studio, log((.money, .schedule, date(3, 14))), at: date(3, 15)) == nil)
+    }
+
     @MainActor @Test func storeAppliesTheDecision() {
         let store = ModeStore(fileURL: nil, deviceID: "test")
         let decision = store.autoSwitch(.schedule, now: date(5, 10), calendar: calendar)

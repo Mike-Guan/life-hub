@@ -131,9 +131,7 @@ struct LifeHubApp: App {
             places.store(in: AppGroup.defaults)
             // A cleared place can't report leaving, so forget being there.
             var presence = PlacePresence.stored(in: AppGroup.defaults)
-            for kind in HubPlace.Kind.allCases where places[kind] == nil {
-                presence.record(kind, entered: false, at: .now)
-            }
+            presence.leaveAll(except: places.presenceKeys, at: .now)
             presence.store(in: AppGroup.defaults)
             Self.watch(
                 places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs, growth: growth
@@ -199,15 +197,15 @@ struct LifeHubApp: App {
         needs: NeedTracker,
         growth: GrowthStore
     ) {
-        monitor.start(places) { kind, entered in
+        monitor.start(places) { place, entered in
             var presence = PlacePresence.stored(in: AppGroup.defaults)
-            let arrived = presence.since(kind)
-            presence.record(kind, entered: entered, at: .now)
+            let arrived = presence.since(.fitness)
+            presence.record(place, entered: entered, at: .now)
             presence.store(in: AppGroup.defaults)
-            if kind == .fitness, !entered, let arrived, let visit = Win.gymVisit(from: arrived, to: .now) {
+            if place.action == .fitness, !entered, let arrived, let visit = Win.gymVisit(from: arrived, to: .now) {
                 growth.record(visit.win, source: visit.source, at: visit.at)
             }
-            if let trigger = kind.trigger(entered: entered) {
+            if let trigger = place.trigger(entered: entered) {
                 store.autoSwitch(trigger, rules: .stored(in: AppGroup.defaults))
             }
             needs.refresh(places: places, manualSince: store.log.changes.last(where: \.source.isManual)?.at)
