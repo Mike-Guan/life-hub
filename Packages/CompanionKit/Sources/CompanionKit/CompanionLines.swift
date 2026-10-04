@@ -17,9 +17,9 @@ enum CompanionLines {
 
     /// The VoiceOver label for RUNNER.
     static func accessibilityLabel(mode: Mode?, need: CompanionNeed?, bedtime: Bedtime) -> String {
-        if bedtime == .on { return "RUNNER，困了" }
-        if need == .boxingWarmup { return "RUNNER，戴着拳套在热身" }
-        if need == .couchScroll { return "RUNNER，瘫着刷手机" }
-        return mode.map { "RUNNER，\($0.title)" } ?? "RUNNER"
+        if bedtime == .on { return "HAKU，困了" }
+        if need == .boxingWarmup { return "HAKU，戴着拳套在热身" }
+        if need == .couchScroll { return "HAKU，瘫着刷手机" }
+        return mode.map { "HAKU，\($0.title)" } ?? "HAKU"
     }
 }

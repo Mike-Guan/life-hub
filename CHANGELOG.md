@@ -4,6 +4,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ## [Unreleased]
 
+### Changed
+- The companion is called HAKU everywhere you see it: the widget name, notifications, Settings and
+  VoiceOver. Code names stay RUNNER.
+
 ### Added
 - Settings: the wake time is now editable next to the bedtime. RUNNER stays sleepy until then
   (it was fixed at 05:00).

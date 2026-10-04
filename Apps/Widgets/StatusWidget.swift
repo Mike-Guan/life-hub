@@ -9,7 +9,7 @@ struct StatusWidget: Widget {
         StaticConfiguration(kind: "status", provider: HubProvider()) { entry in
             StatusView(entry: entry)
         }
-        .configurationDisplayName("RUNNER")
+        .configurationDisplayName("HAKU")
         .description("现在的模式和今天的电量。")
         .supportedFamilies([.accessoryCircular, .accessoryInline, .accessoryRectangular, .systemSmall])
     }
