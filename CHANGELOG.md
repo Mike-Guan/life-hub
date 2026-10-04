@@ -85,6 +85,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Settings > 钱: the amount fields now look like inputs, an outlined box with ¥ and the number
+  together on the left, thousands separators, and a 完成 button to close the number pad.
 - A mistap or a curious look at another mode no longer sticks: switching again within 2 minutes
   replaces it, and switching back undoes it, so the TODAY timeline and the 2-hour pause on automatic
   switching are as before.

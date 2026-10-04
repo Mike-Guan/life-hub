@@ -16,6 +16,7 @@ struct SettingsView: View {
     @State private var scrollApps = ScrollWatch.selection
     @State private var pickingApps = false
     @State private var screenTimeError: String?
+    @FocusState private var editingAmount: String?
 
     var body: some View {
         ScrollView {
@@ -93,24 +94,34 @@ struct SettingsView: View {
     }
 
     private func yenField(_ title: String, text: Binding<String>) -> some View {
-        HStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(title)
-                .font(Toy.body(15, weight: .bold))
-            Spacer()
-            Text("¥")
-                .font(Toy.body(15, weight: .bold))
-            TextField("没填", text: text)
-                .keyboardType(.numberPad)
-                .multilineTextAlignment(.trailing)
-                .font(Toy.body(15, weight: .bold))
-                .frame(maxWidth: 140)
+                .font(Toy.body(13, weight: .bold))
+                .foregroundStyle(Toy.muted)
+            HStack(spacing: 6) {
+                Text("¥")
+                    .font(Toy.body(22, weight: .heavy))
+                TextField("点这里输入", text: text)
+                    .keyboardType(.numberPad)
+                    .font(Toy.body(22, weight: .heavy))
+                    .focused($editingAmount, equals: title)
+                if editingAmount == title {
+                    Button("完成") { editingAmount = nil }
+                        .font(Toy.body(14, weight: .heavy))
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+            .onTapGesture { editingAmount = title }
+            .toyCard(fill: Toy.paper, radius: 12, shadow: 3)
         }
     }
 
     // Digits only; an empty field clears the amount.
     private func yenText(_ amount: Int?, set: @escaping (Int?) -> Void) -> Binding<String> {
         Binding {
-            amount.map(String.init) ?? ""
+            amount?.formatted(.number.grouping(.automatic)) ?? ""
         } set: { text in
             set(Int(text.filter(\.isNumber)))
         }
