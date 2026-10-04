@@ -132,13 +132,22 @@ struct RunnerPose {
     var lie: CGFloat = 0
     /// Rise of the floating Z z z, 0...1, or -1 when hidden.
     var zzz: CGFloat = -1
+    /// What HAKU does on its own at home, or nil.
+    var life: IdleLife?
+    /// Offset of the prop HAKU is holding in its own time (console, snack, cloth).
+    var prop: CGSize = .zero
+    /// Offset of the pencil while drawing.
+    var pencil: CGSize = .zero
+    /// 0 = prop in view, 1 = hidden because someone looked.
+    var propHidden: CGFloat = 0
 
     var tired: Bool { face == .low }
 
     /// The still pose, used for reduced motion and static renders.
-    init(face: EnergyFace = .mid, need: CompanionNeed? = nil) {
+    init(face: EnergyFace = .mid, need: CompanionNeed? = nil, life: IdleLife? = nil) {
         self.face = face
         self.need = need
+        self.life = need == nil ? life : nil
         if tired { blink = 0.75 }
         if need == .boxingWarmup { eyesDx = -2 }
         if need == .couchScroll {
@@ -146,11 +155,30 @@ struct RunnerPose {
             headDy = 3
             eyesDy = 1.5
         }
+        switch self.life {
+        case .nap:
+            blink = 0.15
+            lie = 0.6
+            zzz = 0.35
+        case .handheld, .drawing:
+            // Eyes down on the screen or the page.
+            headDy = 2
+            eyesDy = 1.5
+        default:
+            break
+        }
     }
 
     /// Pose at `time` for `mode`. `react` runs 0 → 1 → 0 after a tap.
-    init(mode: Mode, time: TimeInterval, face: EnergyFace, need: CompanionNeed? = nil, react: Double) {
-        self.init(face: face, need: need)
+    init(
+        mode: Mode,
+        time: TimeInterval,
+        face: EnergyFace,
+        need: CompanionNeed? = nil,
+        life: IdleLife? = nil,
+        react: Double
+    ) {
+        self.init(face: face, need: need, life: life)
         let t = time * face.speed
         let open: CGFloat = tired ? 0.75 : 1
         let r = CGFloat(react)
@@ -187,6 +215,53 @@ struct RunnerPose {
         }
         if need == .boxingWarmup { warmUp(time: t, react: r) }
         if need == .couchScroll { scroll(time: t) }
+        if let life = self.life { live(life, time: t, react: r) }
+    }
+
+    /// HAKU's own time. A tap catches it: it wakes, hides the snack, closes the sketchbook or
+    /// drops the gloves.
+    private mutating func live(_ life: IdleLife, time t: TimeInterval, react r: CGFloat) {
+        switch life {
+        case .nap:
+            // Breathing in the sofa corner, Z z z every 3 s; a tap half wakes it.
+            blink = 0.15 + 0.85 * r
+            lie = 0.6 * (1 - r)
+            headDy = 1.5 + CGFloat(sin(t * 2 * .pi / 4))
+            zzz = r > 0.05 ? -1 : CGFloat(t.truncatingRemainder(dividingBy: 3) / 3)
+        case .handheld:
+            // Button mashing: the console jitters, eyes glued to it.
+            headDy = 2
+            eyesDy = 1.5
+            prop = CGSize(
+                width: CGFloat(sin(t * 2 * .pi / 0.3)) * 0.8,
+                height: CGFloat(sin(t * 2 * .pi / 0.45)) * 0.6
+            )
+        case .snack:
+            // A bite every 3 s; a tap whips the snack away and the eyes slide off.
+            let bite = Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 3)), from: 0, to: 0.7)
+            prop = CGSize(width: -12 * bite, height: -8 * bite)
+            propHidden = r
+            eyesDx = -3 * r
+        case .drawing:
+            headDy = 2
+            eyesDy = 1.5
+            pencil = CGSize(width: CGFloat(sin(t * 7)) * 2, height: CGFloat(cos(t * 5)) * 1.5)
+            propHidden = r
+        case .practice:
+            // Left and right jabs every 1.2 s; a tap drops the gloves and looks away.
+            let phase = CGFloat(t.truncatingRemainder(dividingBy: 1.2))
+            let left = Self.bump(phase, from: 0, to: 0.35)
+            let right = Self.bump(phase, from: 0.6, to: 0.95)
+            gloveL = CGSize(width: 10 * left, height: -12 * left + 30 * r)
+            gloveR = CGSize(width: -10 * right, height: -12 * right + 30 * r)
+            gloveRScale = 1 + 0.2 * right
+            eyesDx = -3 * r
+        case .tidying:
+            // Wiping in small circles, 1.2 s a round, head following along.
+            let a = t * 2 * .pi / 1.2
+            prop = CGSize(width: CGFloat(cos(a)) * 8, height: CGFloat(sin(a)) * 5)
+            headDy = CGFloat(sin(a)) * 1
+        }
     }
 
     /// Slumped over the phone: a thumb flick every 2.5 s, slow blinks.
@@ -305,6 +380,12 @@ struct RunnerFigure: View {
             visible.formUnion(warmupParts)
             visible.remove(.monsterCan)
         }
+        if let life = pose.life, pose.need == nil, !pose.bedtime {
+            let added = lifeParts(life)
+            visible.remove(.monsterCan)
+            if !added.isDisjoint(with: [.eyesSleepy, .eyesWork]) { visible.remove(.eyesChill) }
+            visible.formUnion(added)
+        }
         if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
             if mode != .chill, pose.need != .couchScroll { visible.insert(.eyeGlint) }
@@ -348,6 +429,18 @@ struct RunnerFigure: View {
     ]
     nonisolated private static let sleepyParts: Set<RunnerPart> = [.eyesSleepy, .eyebags, .maskDown]
     nonisolated private static let headsetParts: Set<RunnerPart> = [.headset, .cupL, .cupR, .mic]
+    nonisolated private static let deadpanEyes: Set<RunnerPart> = [.eyesWork, .lidsWork, .browsWork]
+
+    nonisolated private static func lifeParts(_ life: IdleLife) -> Set<RunnerPart> {
+        switch life {
+        case .nap: [.pillow, .eyesSleepy, .zzz]
+        case .handheld: deadpanEyes.union([.handheld])
+        case .snack: [.onigiri]
+        case .drawing: deadpanEyes.union([.sketchbook, .pencil])
+        case .practice: [.gloveL, .gloveR]
+        case .tidying: [.cloth]
+        }
+    }
 
     @ViewBuilder private func layer(_ part: RunnerPart, scale: CGFloat) -> some View {
         let isHead = Self.headParts.contains(part)
@@ -398,6 +491,20 @@ struct RunnerFigure: View {
                 }
             case .jacket:
                 RunnerPartView(part: part, fillOverride: Self.jacketColor(mode))
+            case .handheld, .cloth:
+                RunnerPartView(part: part).offset(x: pose.prop.width * scale, y: pose.prop.height * scale)
+            case .onigiri:
+                RunnerPartView(part: part)
+                    .offset(x: pose.prop.width * scale, y: (pose.prop.height + 34 * pose.propHidden) * scale)
+                    .opacity(Double(1 - pose.propHidden))
+            case .sketchbook:
+                RunnerPartView(part: part)
+                    .offset(y: 34 * pose.propHidden * scale)
+                    .opacity(Double(1 - pose.propHidden))
+            case .pencil:
+                RunnerPartView(part: part)
+                    .offset(x: pose.pencil.width * scale, y: (pose.pencil.height + 34 * pose.propHidden) * scale)
+                    .opacity(Double(1 - pose.propHidden))
             case .monsterCan:
                 RunnerPartView(part: part)
                     .rotationEffect(.degrees(pose.canAngle), anchor: Self.unit(x: 102, y: 136))
@@ -658,6 +765,11 @@ private struct HeadCrop<Content: View>: View {
         CompanionPortrait(mode: .work, bedtime: .on, framing: .head)
             .frame(width: 76)
             .background(.black, in: Circle())
+        ForEach(IdleLife.allCases, id: \.self) { life in
+            RunnerFigure(mode: .chill, pose: RunnerPose(life: life))
+                .padding(8)
+                .background(Mode.chill.color)
+        }
     }
     .padding()
 }

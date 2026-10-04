@@ -104,8 +104,9 @@ public struct CompanionView: View {
             KeyframeAnimator(initialValue: 0.0, trigger: taps) { react in
                 TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
                     let time = context.date.timeIntervalSinceReferenceDate
-                    let motion = idleMotion(mode, time: time)
-                    RunnerFigure(mode: mode, pose: pose(mode, time: time, react: react))
+                    let life = idleLife(mode, at: context.date)
+                    let motion = idleMotion(mode, life: life, time: time)
+                    RunnerFigure(mode: mode, pose: pose(mode, life: life, time: time, react: react))
                         .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
                         .offset(y: reduceMotion ? 0 : motion.dy)
                 }
@@ -143,7 +144,7 @@ public struct CompanionView: View {
             VStack(spacing: 10) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 44, weight: .black))
-                Text("选一个 mode，RUNNER 就上线")
+                Text("选一个 mode，HAKU 就上线")
                     .font(Toy.body(15, weight: .bold))
             }
             .foregroundStyle(Toy.ink)
@@ -156,13 +157,21 @@ public struct CompanionView: View {
     private var shownNeed: CompanionNeed? { invite == nil ? need : nil }
 
     private var accessibilityText: String {
-        CompanionLines.accessibilityLabel(mode: mode, need: shownNeed, bedtime: bedtime)
+        let life = mode.flatMap { idleLife($0, at: .now) }
+        return CompanionLines.accessibilityLabel(mode: mode, need: shownNeed, life: life, bedtime: bedtime)
+    }
+
+    /// What HAKU does on its own: only at home (chill), with nothing needed, awake and not celebrating.
+    private func idleLife(_ mode: Mode, at date: Date) -> IdleLife? {
+        let celebrating = celebration(at: date.timeIntervalSinceReferenceDate) != nil
+        guard mode == .chill, shownNeed == nil, bedtime == .off, !celebrating else { return nil }
+        return IdleLife.at(date)
     }
 
     private var paused: Bool { reduceMotion || scenePhase != .active }
 
-    private func idleMotion(_ mode: Mode, time: TimeInterval) -> IdleMotion {
-        if bedtime == .on { return IdleMotion.sleeping(time: time) }
+    private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
+        if bedtime == .on || life == .nap { return IdleMotion.sleeping(time: time) }
         if let progress = celebration(at: time) { return IdleMotion.celebrating(progress: progress) }
         // Warming up hops like boxing day, whatever the outfit.
         if shownNeed == .couchScroll { return IdleMotion.slumped(time: time) }
@@ -170,10 +179,10 @@ public struct CompanionView: View {
         return IdleMotion(mode: motionMode, time: time * face.speed)
     }
 
-    private func pose(_ mode: Mode, time: TimeInterval, react: Double) -> RunnerPose {
+    private func pose(_ mode: Mode, life: IdleLife?, time: TimeInterval, react: Double) -> RunnerPose {
         if bedtime == .on { return bedtimePose(time: time) }
-        if reduceMotion { return RunnerPose(face: face, need: shownNeed) }
-        var pose = RunnerPose(mode: mode, time: time, face: face, need: shownNeed, react: react)
+        if reduceMotion { return RunnerPose(face: face, need: shownNeed, life: life) }
+        var pose = RunnerPose(mode: mode, time: time, face: face, need: shownNeed, life: life, react: react)
         if let progress = celebration(at: time) { pose.burst = CGFloat(progress) }
         return pose
     }
@@ -235,7 +244,8 @@ public struct CompanionView: View {
     private func react() {
         pop += 1
         taps += 1
-        let lines = CompanionLines.lines(for: mode, need: shownNeed)
+        let life = mode.flatMap { idleLife($0, at: .now) }
+        let lines = CompanionLines.lines(for: mode, need: shownNeed, life: life)
         let candidates = lines.filter { $0 != bubble }
         say((candidates.isEmpty ? lines : candidates).randomElement())
     }
