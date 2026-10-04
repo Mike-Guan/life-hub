@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- HAKU talks on the Lock Screen: one short line in its own voice for the mode, the need, low energy or
+  bedtime, a different one each day so lines rotate instead of repeating.
 - Settings: the wake time is now editable next to the bedtime. RUNNER stays sleepy until then
   (it was fixed at 05:00).
 - App icon: RUNNER's face split by a lightning crack, the side-hustle ¥ mask on one side and boxing

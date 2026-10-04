@@ -54,9 +54,15 @@ public final class WidgetBridge {
         var snapshot = WidgetSnapshot(log: mode.log, energy: reading?.level, bedtime: state, now: now)
         snapshot.need = need?.need
         snapshot.needUntil = need?.until
-        snapshot.line = NeedEngine.whyLine(need: need, energy: reading, bedtime: state)
-        snapshot.lineAfterNeed = NeedEngine.whyLine(need: nil, energy: reading, bedtime: state)
+        let current = mode.current
+        let scene = HakuLines.scene(mode: current, need: need?.need, energy: reading?.level, bedtime: state)
+        let after = HakuLines.scene(mode: current, need: nil, energy: reading?.level, bedtime: state)
+        snapshot.line = scene.map { HakuLines.line($0, at: now, calendar: calendar) }
+        snapshot.lineAfterNeed = after.map { HakuLines.line($0, at: now, calendar: calendar) }
         snapshot.nextNeed = NeedEngine.nextScheduled(after: now, calendar: calendar)
+        if let next = snapshot.nextNeed {
+            snapshot.nextNeed?.line = HakuLines.line(.boxingWarmup, at: next.from, calendar: calendar)
+        }
         do {
             try snapshot.write(to: url)
             lastError = nil
