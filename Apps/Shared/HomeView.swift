@@ -9,6 +9,10 @@ struct HomeView: View {
     var rules: ModeRules = .standard
     /// What RUNNER acts out now, from the iOS app's need tracker.
     var need: NeedReading?
+    /// Where Mike is and his recent workouts, for what HAKU does alongside him; `nil` when unknown.
+    var activitySignals: ActivitySignals?
+    /// Gym and run days.
+    var activityDays: ActivityDays = .standard
     /// A one-off animation for RUNNER, such as celebrating a workout.
     var event: CompanionEvent?
     /// Today's invite text while its need lasts, so RUNNER gets up and says it.
@@ -48,6 +52,7 @@ struct HomeView: View {
                         energy: reading?.value,
                         need: activeNeed(at: context.date)?.need,
                         needSince: activeNeed(at: context.date)?.since,
+                        activity: activity(at: context.date),
                         event: event,
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
@@ -80,11 +85,12 @@ struct HomeView: View {
                         .foregroundStyle(Toy.ink)
                 }
 
-                // Why RUNNER looks the way it does: bedtime, then the need, then energy.
+                // Why RUNNER looks the way it does: the activity, bedtime, then the need, then energy.
                 TimelineView(.everyMinute) { context in
                     let state = bedtime.state(at: context.date)
                     let active = activeNeed(at: context.date)
-                    if let line = NeedEngine.whyLine(need: active, energy: reading, bedtime: state) {
+                    let why = NeedEngine.whyLine(need: active, energy: reading, bedtime: state)
+                    if let line = activity(at: context.date)?.reason ?? why {
                         Text(line)
                             .font(Toy.body(13, weight: .bold))
                             .foregroundStyle(Toy.muted)
@@ -116,6 +122,12 @@ struct HomeView: View {
     // The tracker refreshes on open and on place events, so a need can end while the app stays open.
     private func activeNeed(at date: Date) -> NeedReading? {
         need.flatMap { $0.isActive(at: date) ? $0 : nil }
+    }
+
+    private func activity(at date: Date) -> CompanionActivity? {
+        activitySignals.flatMap {
+            ActivityEngine.activity($0, days: activityDays, work: rules, bedtime: bedtime, now: date)
+        }
     }
 
     private func switchTo(_ mode: Mode) {

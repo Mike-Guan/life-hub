@@ -10,6 +10,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU now acts out what you're doing on the home screen and the Lock Screen: boxing at the boxing gym,
+  lifting at the fitness gym, the gym bag after work on gym days and the shoe warm-up on run day.
+  Settings shows the fitness gym again; staying there 30 minutes or more earns the gym can.
 - HAKU does it with you: heavy-bag combos at the boxing gym, curls at the fitness gym, a bobbing run with
   speed lines, the gym bag on its shoulder on gym days, and a running shoe warm-up on run day.
 - Shop and wardrobe. The home screen gets two entry points and is otherwise unchanged: the can count

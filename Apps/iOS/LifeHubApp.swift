@@ -42,10 +42,11 @@ struct LifeHubApp: App {
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
         let needs = NeedTracker()
+        let growth = GrowthStore.live(in: container, defaults: AppGroup.defaults)
         _store = State(initialValue: store)
         _energy = State(initialValue: energy)
         _expenses = State(initialValue: ExpenseStore.live(in: container, defaults: AppGroup.defaults))
-        _growth = State(initialValue: GrowthStore.live(in: container, defaults: AppGroup.defaults))
+        _growth = State(initialValue: growth)
         _bedtime = State(initialValue: bedtime)
         _rules = State(initialValue: ModeRules.stored(in: AppGroup.defaults))
         _widgets = State(initialValue: widgets)
@@ -60,7 +61,9 @@ struct LifeHubApp: App {
         _taps = State(initialValue: taps)
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
         guard ScreenshotMode.mode == nil else { return }
-        Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs)
+        Self.watch(
+            places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs, growth: growth
+        )
     }
 
     var body: some Scene {
@@ -79,6 +82,8 @@ struct LifeHubApp: App {
             bedtime: bedtime,
             rules: rules,
             need: needs.reading,
+            activitySignals: needs.activitySignals,
+            activityDays: .stored(in: AppGroup.defaults),
             event: needs.event,
             invite: needs.invite,
             money: moneyCard,
@@ -125,7 +130,9 @@ struct LifeHubApp: App {
                 presence.record(kind, entered: false, at: .now)
             }
             presence.store(in: AppGroup.defaults)
-            Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs)
+            Self.watch(
+                places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs, growth: growth
+            )
             refreshNeeds()
         }
         .onChange(of: budget) { budget.store(in: AppGroup.defaults) }
@@ -174,17 +181,23 @@ struct LifeHubApp: App {
         store: ModeStore,
         energy: EnergyStore,
         widgets: WidgetBridge,
-        needs: NeedTracker
+        needs: NeedTracker,
+        growth: GrowthStore
     ) {
         monitor.start(places) { kind, entered in
             var presence = PlacePresence.stored(in: AppGroup.defaults)
+            let arrived = presence.since(kind)
             presence.record(kind, entered: entered, at: .now)
             presence.store(in: AppGroup.defaults)
+            if kind == .fitness, !entered, let arrived, let visit = Win.gymVisit(from: arrived, to: .now) {
+                growth.record(visit.win, source: visit.source, at: visit.at)
+            }
             if let trigger = kind.trigger(entered: entered) {
                 store.autoSwitch(trigger, rules: .stored(in: AppGroup.defaults))
             }
             needs.refresh(places: places)
             widgets.need = needs.reading
+            widgets.workouts = needs.workouts
             widgets.sync(mode: store, energy: energy)
             WidgetCenter.shared.reloadAllTimelines()
             // Arriving at the gym ends the countdown, even with the app in the background.
@@ -195,6 +208,7 @@ struct LifeHubApp: App {
     private func refreshNeeds() {
         needs.refresh(places: places)
         widgets.need = needs.reading
+        widgets.workouts = needs.workouts
         syncWidgets()
     }
 

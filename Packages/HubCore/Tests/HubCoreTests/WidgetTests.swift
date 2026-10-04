@@ -85,6 +85,10 @@ import Testing
         #expect(WidgetSnapshot.read(from: url)?.need == .couchScroll)
         let scrolling = HakuLines.line(.couchScroll, at: date(3, 20), calendar: calendar)
         #expect(WidgetSnapshot.read(from: url)?.line == scrolling)
+        let lifted = WorkoutSummary(id: "w", kind: .strength, start: date(3, 18), end: date(3, 19))
+        bridge.workouts = [lifted]
+        bridge.writeSnapshot(mode: modes, energy: energy, now: date(3, 20), calendar: calendar)
+        #expect(WidgetSnapshot.read(from: url)?.workouts == [lifted])
 
         container.inbox.drain { _ in false }
         try container.inbox.post(.mode(change))

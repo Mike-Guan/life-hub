@@ -87,6 +87,16 @@ extension Win {
             return EarnedWin(win: win, source: win.source(at: workout.start, calendar: calendar), at: workout.end)
         }
     }
+
+    /// How long a fitness gym visit must last to earn the gym win.
+    public static let gymVisitMinimum: TimeInterval = 30 * 60
+
+    // A visit and a strength workout on the same day share one source, so they earn once together.
+    /// The gym win for a fitness gym visit from `arrived` to `left`, `nil` when it was too short.
+    public static func gymVisit(from arrived: Date, to left: Date, calendar: Calendar = .current) -> EarnedWin? {
+        guard left.timeIntervalSince(arrived) >= gymVisitMinimum else { return nil }
+        return EarnedWin(win: .gym, source: Win.gym.source(at: arrived, calendar: calendar), at: left)
+    }
 }
 
 /// One line in the can ledger. Stored append-only; the balance and owned items are computed from these.

@@ -62,6 +62,7 @@ struct StatusView: View {
                 energy: entry.energy?.value,
                 need: entry.need,
                 needSince: entry.needSince,
+                activity: entry.activity,
                 date: entry.date,
                 bedtime: entry.bedtime,
                 wardrobe: entry.wardrobe,
@@ -80,6 +81,7 @@ struct StatusView: View {
                     energy: entry.energy?.value,
                     need: entry.need,
                     needSince: entry.needSince,
+                    activity: entry.activity,
                     date: entry.date,
                     bedtime: entry.bedtime,
                     wardrobe: entry.wardrobe

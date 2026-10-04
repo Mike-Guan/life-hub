@@ -12,6 +12,17 @@ public enum CompanionActivity: String, Sendable {
     case gymDay
     /// Run day evening, not run yet: shoe warm-up.
     case runDay
+
+    /// Why HAKU is doing it, for the line under HAKU and the Lock Screen.
+    public var reason: String {
+        switch self {
+        case .boxingAtGym: "你在拳馆"
+        case .gymSession: "你在健身房"
+        case .running: "你在跑步"
+        case .gymDay: "健身日，下班了"
+        case .runDay: "跑步日，傍晚了"
+        }
+    }
 }
 
 /// Which days are for the gym and for the weekly run. Times are minutes after local midnight.
@@ -91,5 +102,22 @@ public enum ActivityEngine {
             if !done.contains(where: { $0.kind == .running }) { return .runDay }
         }
         return nil
+    }
+
+    /// When activities can start on the hub day of `date` by the clock alone: the end of work on a gym
+    /// day and the run-day warm-up.
+    public static func startTimes(
+        on date: Date,
+        days: ActivityDays = .standard,
+        work: ModeRules = .standard,
+        calendar: Calendar = .current
+    ) -> [Date] {
+        let today = StateEngine.dayStart(for: date, calendar: calendar)
+        let weekday = calendar.component(.weekday, from: today)
+        var minutes: [Int] = []
+        if days.gymWeekdays.contains(weekday) { minutes.append(work.workEndMinute) }
+        if days.runWeekday == weekday { minutes.append(days.runStartMinute) }
+        let midnight = calendar.startOfDay(for: today)
+        return minutes.compactMap { calendar.date(byAdding: .minute, value: $0, to: midnight) }
     }
 }
