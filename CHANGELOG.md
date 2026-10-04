@@ -12,6 +12,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Rewards groundwork (Issue #49), not shown in the app yet: a can ledger that counts each real-life
   win once, a shop of five items, three keepsakes granted at milestones (never lost), and a wardrobe
   with one item per slot.
+- Couch scrolling now has steps: after 30 minutes HAKU keeps scrolling but keeps glancing at the gym
+  bag by the door; when the day's invite shows, it gets up with the bag over its shoulder.
 - HAKU talks on the Lock Screen: one short line in its own voice for the mode, the need, low energy or
   bedtime, a different one each day; everyday scenes have at least 7 lines, so none repeats within a week.
 - Off-work notice: on work days, 15 minutes before work hours end, "快下班了" from HAKU in its chill

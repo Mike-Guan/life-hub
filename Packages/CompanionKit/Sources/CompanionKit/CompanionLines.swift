@@ -4,7 +4,13 @@ import HubCore
 // Voice: HAKU, a deadpan roommate who secretly cares.
 /// Fixed companion lines per mode, need and idle bit.
 enum CompanionLines {
-    static func lines(for mode: Mode?, need: CompanionNeed? = nil, life: IdleLife? = nil) -> [String] {
+    static func lines(
+        for mode: Mode?,
+        need: CompanionNeed? = nil,
+        peeking: Bool = false,
+        life: IdleLife? = nil
+    ) -> [String] {
+        if need == .couchScroll, peeking { return ["所以……我们今天是真的不动了吗？", "那个包……算了。", "再刷五分钟。"] }
         if need == .boxingWarmup { return ["拳套我都戴好了，你随意啊。", "……我热身热得都快累了。", "先跳两下热热身。"] }
         if need == .couchScroll { return ["再刷五分钟。", "这条好好笑。", "你也在刷吗？"] }
         if let life { return lines(for: life) }
@@ -32,10 +38,12 @@ enum CompanionLines {
     static func accessibilityLabel(
         mode: Mode?,
         need: CompanionNeed?,
+        peeking: Bool = false,
         life: IdleLife? = nil,
         bedtime: Bedtime
     ) -> String {
         if bedtime == .on { return "HAKU，困了" }
+        if need == .couchScroll, peeking { return "HAKU，瘫着刷手机，偷看门口的运动包" }
         if need == .boxingWarmup { return "HAKU，戴着拳套在热身" }
         if need == .couchScroll { return "HAKU，瘫着刷手机" }
         if let life { return "HAKU，\(activity(life))" }

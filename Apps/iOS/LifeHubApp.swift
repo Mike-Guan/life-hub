@@ -1,6 +1,7 @@
 import HubCore
 import SwiftUI
 import UIKit
+import UserNotifications
 import WidgetKit
 
 @main
@@ -21,6 +22,7 @@ struct LifeHubApp: App {
     @State private var budget: BudgetSettings
     @State private var placeMonitor: PlaceMonitor
     @State private var needs: NeedTracker
+    @State private var taps: NotificationTaps
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -47,6 +49,10 @@ struct LifeHubApp: App {
         _budget = State(initialValue: BudgetSettings.stored(in: AppGroup.defaults))
         _placeMonitor = State(initialValue: placeMonitor)
         _needs = State(initialValue: needs)
+        // Set during launch so a tap that opens the app is delivered too. The center keeps it weakly.
+        let taps = NotificationTaps { needs.offWork(at: $0) }
+        UNUserNotificationCenter.current().delegate = taps
+        _taps = State(initialValue: taps)
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
         guard ScreenshotMode.mode == nil else { return }
         Self.watch(places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs)
