@@ -38,9 +38,11 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("睡觉提醒")
                     .font(Toy.body(16, weight: .heavy))
-                DatePicker("每天", selection: reminderTime, displayedComponents: .hourAndMinute)
+                DatePicker("睡觉", selection: time(\.startMinute), displayedComponents: .hourAndMinute)
                     .font(Toy.body(15))
-                Text("到点发一条通知，RUNNER 变困，一直到早上 5 点。只提醒一次。")
+                DatePicker("起床", selection: time(\.endMinute), displayedComponents: .hourAndMinute)
+                    .font(Toy.body(15))
+                Text("睡觉时间到了发一条通知，RUNNER 变困，一直到起床时间。只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
             }
@@ -205,12 +207,13 @@ struct SettingsView: View {
     }
 
     // The picker edits a Date; only its hour and minute are kept.
-    private var reminderTime: Binding<Date> {
+    private func time(_ field: WritableKeyPath<BedtimeSchedule, Int>) -> Binding<Date> {
         Binding {
-            Calendar.current.date(from: bedtime.startComponents) ?? .now
+            let minute = bedtime[keyPath: field]
+            return Calendar.current.date(from: DateComponents(hour: minute / 60, minute: minute % 60)) ?? .now
         } set: { date in
             let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
-            bedtime.startMinute = (parts.hour ?? 23) * 60 + (parts.minute ?? 30)
+            bedtime[keyPath: field] = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
         }
     }
 }
