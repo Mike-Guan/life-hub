@@ -24,7 +24,7 @@ public enum Mode: String, Codable, CaseIterable, Identifiable, Sendable {
         case .work: "WORK"
         case .chill: "CHILL"
         case .boxing: "BOXING"
-        case .money: "MONEY"
+        case .money: "SIDE"
         }
     }
 
@@ -33,7 +33,7 @@ public enum Mode: String, Codable, CaseIterable, Identifiable, Sendable {
         case .work: "死人眼上线，耳机戴好"
         case .chill: "面罩拉下，开一罐 Monster"
         case .boxing: "头带系紧，今天打谁"
-        case .money: "¥¥ 模式，搞钱"
+        case .money: "</> 上线，罐子摆好"
         }
     }
 }

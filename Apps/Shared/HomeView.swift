@@ -55,12 +55,14 @@ struct HomeView: View {
                         need: activeNeed(at: context.date)?.need,
                         needSince: activeNeed(at: context.date)?.since,
                         activity: shownActivity(at: context.date),
-                        moment: gymMoment(at: context.date),
+                        moment: store.sideHustle?.moment ?? gymMoment(at: context.date),
+                        codingCans: codingCans(at: context.date),
                         event: event,
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
                         bedtime: bedtime.state(at: context.date),
-                        wardrobe: wardrobe
+                        wardrobe: wardrobe,
+                        onTap: tapAction
                     )
                 }
                 .frame(height: 340)
@@ -82,7 +84,11 @@ struct HomeView: View {
                     }
                 }
 
-                if let mode = store.current {
+                if let state = store.sideHustle {
+                    Text("\(state.title) 中 · 点 HAKU 换状态")
+                        .font(Toy.body(16, weight: .bold))
+                        .foregroundStyle(Toy.ink)
+                } else if let mode = store.current {
                     Text(mode.tagline)
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
@@ -140,6 +146,21 @@ struct HomeView: View {
     private func activity(at date: Date) -> CompanionActivity? {
         activitySignals.flatMap {
             ActivityEngine.activity($0, days: activityDays, work: rules, bedtime: bedtime, now: date)
+        }
+    }
+
+    private func codingCans(at date: Date) -> Int {
+        guard store.sideHustle == .vibeCoding, let since = store.currentSince else { return 0 }
+        return SideHustle.codingCans(since: since, now: date)
+    }
+
+    // In 副业 a tap switches the state. It is manual, so it earns nothing and holds automatic switches.
+    private var tapAction: (() -> Void)? {
+        guard store.sideHustle != nil else { return nil }
+        return {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                _ = store.cycleSideHustle()
+            }
         }
     }
 

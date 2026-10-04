@@ -69,6 +69,8 @@ public enum ModeTrigger: Equatable, Sendable {
     case enteredOffice
     /// Arriving at a place Mike added that switches to `mode`.
     case enteredPlace(Mode, name: String)
+    /// An iOS Focus with the 副业 filter turned on, for vibe coding.
+    case codingFocus
 }
 
 /// An automatic change the engine wants, with the reason to show Mike.
@@ -76,6 +78,8 @@ public struct ModeDecision: Equatable, Sendable {
     public var mode: Mode
     public var source: ModeChange.Source
     public var reason: String
+    /// The 副业 state for `mode`, `nil` for none.
+    public var tag: String?
 }
 
 /// Rules for automatic mode changes. Manual changes always win, except arriving at the gym.
@@ -139,6 +143,11 @@ public enum ModeEngine {
         case .enteredPlace(let mode, let name):
             guard !isHeld(changes, now: now, rules: rules), current?.mode != mode else { return nil }
             return ModeDecision(mode: mode, source: .location, reason: "到\(name)了")
+
+        case .codingFocus:
+            guard !isHeld(changes, now: now, rules: rules), current?.sideHustle != .vibeCoding else { return nil }
+            let tag = SideHustle.vibeCoding.rawValue
+            return ModeDecision(mode: .money, source: .focus, reason: "编程专注模式开了", tag: tag)
 
         case .schedule:
             guard !isHeld(changes, now: now, rules: rules) else { return nil }

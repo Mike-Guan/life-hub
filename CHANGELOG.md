@@ -17,6 +17,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   and at 20:00 the day's one invite asks "包背好了，走？". Its 走 button, or the new "出发去健身" control
   (Lock Screen, Control Center or Action button), sends HAKU walking with the bag for up to an hour, until
   you reach the gym. Not going changes nothing. This invite replaces the couch one on gym days.
+- 副业 has three states: vibe coding, 拍摄 and 运营. In 副业 mode, tap HAKU to switch; vibe coding is the
+  default and stacks a can every 30 minutes, up to 3. An iOS Focus filter "副业 · vibe coding" (add it to
+  a Focus such as 编程 and turn it on) switches to vibe coding, but not within 2 hours of a manual change.
+  State taps earn no cans. The mode code reads SIDE instead of MONEY.
 - HAKU looks for the new mode states (Issues #73, #74, #75): vibe coding in a hoodie with `</>` on the mask
   and cans piling up, silent flow that hands over a can, sleepy late coding, shooting with the ¥¥ mask,
   peeking over the laptop at work, a drowsy yawn with a Monster, slumped on the desk at overtime, waiting
