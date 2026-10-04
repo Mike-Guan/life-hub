@@ -29,8 +29,8 @@ import Testing
         // 20 minutes without a report ends it.
         #expect(need(signals, at: date(5, 11, 40)) == nil)
         // Reports outside work hours, such as on a Sunday, are not slacking.
-        let sunday = NeedSignals(slackThresholdAt: date(4, 11))
-        #expect(need(sunday, at: date(4, 11, 5)) == nil)
+        let sunday = NeedSignals(slackThresholdAt: date(4, 15))
+        #expect(need(sunday, at: date(4, 15, 5)) == nil)
     }
 
     @Test func walkingOrAManualSwitchEndsSlacking() {
