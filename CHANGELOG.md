@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Pictures for the coming shop and wardrobe: a can icon and a small picture of each item, drawn the same
+  way as HAKU wears it.
 - HAKU can wear wardrobe items: pink or gold gloves, a cyan or white runner headband, a striped mask,
   and a plant or small punching bag next to it at home. They show once the shop and wardrobe screens exist.
 - Gym and run days (Issue #49): Tuesday to Thursday after work HAKU wears the gym bag until you
