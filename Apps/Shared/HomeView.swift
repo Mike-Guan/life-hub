@@ -17,6 +17,14 @@ struct HomeView: View {
     var money: MoneyCard?
     /// Shows a settings button that calls this, when set.
     var onSettings: (() -> Void)?
+    /// Cans to spend; with `onShop`, shows the can count that opens the shop.
+    var cans: Int?
+    /// Opens the shop, when set.
+    var onShop: (() -> Void)?
+    /// What HAKU wears.
+    var wardrobe = Wardrobe()
+    /// Shows the wardrobe button on HAKU's card that calls this, when set.
+    var onWardrobe: (() -> Void)?
 
     @Environment(ModeStore.self) private var store
     @Environment(EnergyStore.self) private var energy
@@ -29,6 +37,8 @@ struct HomeView: View {
                 Header(
                     mode: store.current,
                     error: store.lastError ?? energy.lastError ?? extraError,
+                    cans: cans,
+                    onShop: onShop,
                     onSettings: onSettings
                 )
 
@@ -41,11 +51,28 @@ struct HomeView: View {
                         event: event,
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
-                        bedtime: bedtime.state(at: context.date)
+                        bedtime: bedtime.state(at: context.date),
+                        wardrobe: wardrobe
                     )
                 }
                 .frame(height: 340)
                 .toyCard()
+                .overlay(alignment: .topTrailing) {
+                    if let onWardrobe {
+                        Button(action: onWardrobe) {
+                            Label("衣柜", systemImage: "tshirt")
+                                .font(Toy.body(15, weight: .heavy))
+                                .foregroundStyle(Toy.ink)
+                                .padding(.horizontal, 14)
+                                .frame(height: 44)
+                                .background(Capsule().fill(Toy.card))
+                                .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
+                                .background(Capsule().fill(Toy.ink).offset(x: 3, y: 3))
+                        }
+                        .buttonStyle(.plain)
+                        .padding(12)
+                    }
+                }
 
                 if let mode = store.current {
                     Text(mode.tagline)
@@ -114,6 +141,8 @@ extension View {
 private struct Header: View {
     let mode: Mode?
     let error: String?
+    let cans: Int?
+    let onShop: (() -> Void)?
     let onSettings: (() -> Void)?
 
     var body: some View {
@@ -139,6 +168,13 @@ private struct Header: View {
                         .frame(width: 14, height: 14)
                         .help(error)
                         .accessibilityLabel(error)
+                }
+                if let cans, let onShop {
+                    Button(action: onShop) {
+                        CanChip(count: cans)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("商店，\(cans) 罐")
                 }
                 if let onSettings {
                     Button(action: onSettings) {

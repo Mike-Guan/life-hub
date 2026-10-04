@@ -17,6 +17,9 @@ struct LifeHubApp: App {
     @State private var offWorkError: String?
     @State private var reminderError: String?
     @State private var showsSettings = false
+    @State private var showsShop = false
+    @State private var showsWardrobe = false
+    @State private var wardrobe = Wardrobe.stored(in: AppGroup.defaults)
     @State private var healthError: String?
     @State private var countdownError: String?
     @State private var places: PlaceSettings
@@ -79,7 +82,11 @@ struct LifeHubApp: App {
             event: needs.event,
             invite: needs.invite,
             money: moneyCard,
-            onSettings: { showsSettings = true }
+            onSettings: { showsSettings = true },
+            cans: growth.ledger.balance,
+            onShop: { showsShop = true },
+            wardrobe: wardrobe,
+            onWardrobe: { showsWardrobe = true }
         )
         .environment(store)
         .environment(energy)
@@ -124,6 +131,16 @@ struct LifeHubApp: App {
         .onChange(of: budget) { budget.store(in: AppGroup.defaults) }
         .sheet(isPresented: $showsSettings) {
             SettingsView(bedtime: $bedtime, rules: $rules, places: $places, budget: $budget, monitor: placeMonitor)
+        }
+        .fullScreenCover(isPresented: $showsShop) {
+            ShopView(growth: growth)
+        }
+        .fullScreenCover(isPresented: $showsWardrobe) {
+            WardrobeView(growth: growth, wardrobe: $wardrobe, mode: store.current)
+        }
+        .onChange(of: wardrobe) {
+            wardrobe.store(in: AppGroup.defaults)
+            WidgetCenter.shared.reloadAllTimelines()
         }
         .onChange(of: store.log.changes.count) { syncWidgets() }
         .onChange(of: energy.log.events.count) { syncWidgets() }
