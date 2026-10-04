@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Lock Screen HAKU knows how long couch scrolling has gone on, so after 30 minutes it eyes the gym bag
+  there too, like on the home screen.
 - Rewards groundwork (Issue #49), not shown in the app yet: a can ledger that counts each real-life
   win once, a shop of five items, three keepsakes granted at milestones (never lost), and a wardrobe
   with one item per slot.

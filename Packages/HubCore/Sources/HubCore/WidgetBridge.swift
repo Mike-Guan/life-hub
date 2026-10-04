@@ -53,6 +53,7 @@ public final class WidgetBridge {
         let state = bedtime.state(at: now, calendar: calendar)
         var snapshot = WidgetSnapshot(log: mode.log, energy: reading?.level, bedtime: state, now: now)
         snapshot.need = need?.need
+        snapshot.needSince = need?.since
         snapshot.needUntil = need?.until
         let current = mode.current
         let scene = HakuLines.scene(mode: current, need: need?.need, energy: reading?.level, bedtime: state)
