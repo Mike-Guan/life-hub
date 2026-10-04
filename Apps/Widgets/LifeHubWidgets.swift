@@ -17,6 +17,7 @@ struct HubEntry: TimelineEntry {
     let date: Date
     let snapshot: WidgetSnapshot?
     let bedtime: Bedtime
+    var wardrobe = Wardrobe()
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
@@ -54,8 +55,9 @@ struct HubProvider: TimelineProvider {
         let snapshot = AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))
         let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: snapshot?.needTimes ?? [])
+        let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
         return dates.map { date in
-            HubEntry(date: date, snapshot: snapshot, bedtime: schedule.state(at: date))
+            HubEntry(date: date, snapshot: snapshot, bedtime: schedule.state(at: date), wardrobe: wardrobe)
         }
     }
 }
