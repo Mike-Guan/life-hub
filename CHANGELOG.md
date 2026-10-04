@@ -12,6 +12,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - HAKU earns cans from real workouts, saved for the shop that comes next: a boxing class, a 5 km run,
   or strength training (once a day). Strength training of 20 minutes or more now gets its own
   celebration too.
+- Lock Screen HAKU knows how long couch scrolling has gone on, so after 30 minutes it eyes the gym bag
+  there too, like on the home screen.
 - Rewards groundwork (Issue #49), not shown in the app yet: a can ledger that counts each real-life
   win once, a shop of five items, three keepsakes granted at milestones (never lost), and a wardrobe
   with one item per slot.

@@ -14,6 +14,8 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var bedtime: Bedtime?
     /// What RUNNER acts out, `nil` when there is no need or in snapshots from older builds.
     public var need: CompanionNeed?
+    /// When `need` started, `nil` when unknown.
+    public var needSince: Date?
     /// When `need` ends at the latest, `nil` when no time is known.
     public var needUntil: Date?
     /// Why RUNNER looks the way it does, for the rectangular Lock Screen widget.
@@ -93,6 +95,13 @@ extension WidgetSnapshot {
         return need
     }
 
+    /// When the need shown at `date` started: the scheduled one's start while it lasts, else `needSince`
+    /// while `need` is shown.
+    public func needSince(at date: Date, calendar: Calendar = .current) -> Date? {
+        if let nextNeed, nextNeed.contains(date) { return nextNeed.from }
+        return need(at: date, calendar: calendar) == nil ? nil : needSince
+    }
+
     /// The "why" line as of `date`: the scheduled need's while it lasts, else `nil` when it was
     /// written before today's 05:00.
     public func line(at date: Date, calendar: Calendar = .current) -> String? {
@@ -102,9 +111,10 @@ extension WidgetSnapshot {
         return line
     }
 
-    /// When the needs in this snapshot start or end.
+    /// When the needs in this snapshot start, end or change stage (HAKU peeking during couch scrolling).
     public var needTimes: [Date] {
-        [needUntil, nextNeed?.from, nextNeed?.until].compactMap { $0 }
+        let peek = need == .couchScroll ? needSince?.addingTimeInterval(NeedEngine.couchPeekAfter) : nil
+        return [needUntil, nextNeed?.from, nextNeed?.until, peek].compactMap { $0 }
     }
 
     /// When widgets should redraw after `date`: now, the next bedtime change, the next day start and

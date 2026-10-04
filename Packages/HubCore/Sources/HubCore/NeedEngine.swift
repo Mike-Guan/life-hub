@@ -203,6 +203,9 @@ public struct ScheduledNeed: Codable, Equatable, Sendable {
 
 /// Rule-based needs, invites and celebrations. Same input, same output; every need says why.
 public enum NeedEngine {
+    /// How long couch scrolling lasts before HAKU starts peeking at the gym bag.
+    public static let couchPeekAfter: TimeInterval = 30 * 60
+
     /// The need at `now`, or `nil` when there is none. Couch scrolling comes first, except on a
     /// boxing morning, when scrolling at home is exactly what boxing warm-up is about.
     public static func need(
