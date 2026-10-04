@@ -31,6 +31,8 @@ public final class ModeStore {
 
     public var current: Mode? { log.current?.mode }
     public var currentSince: Date? { log.current?.at }
+    /// The 副业 state, `nil` in other modes.
+    public var sideHustle: SideHustle? { log.current?.sideHustle }
 
     /// Switches mode. A manual switch to the current mode is recorded when that mode was set
     /// automatically, so it counts as Mike confirming it.
@@ -52,7 +54,7 @@ public final class ModeStore {
     @discardableResult
     public func apply(_ change: ModeChange) -> Bool {
         guard !log.changes.contains(where: { $0.id == change.id }) else { return false }
-        if change.mode == current {
+        if change.isSameState(as: log.current) {
             guard change.source.isManual, let latest = log.current, !latest.source.isManual else { return false }
         }
         // Soft delete keeps the corrected change in the log (one writer, nothing lost).
@@ -63,7 +65,7 @@ public final class ModeStore {
             log.changes[index].updatedBy = change.updatedBy
         }
         // Only an undo (back to the mode before the corrected change) adds nothing.
-        if corrected == nil || change.mode != current {
+        if corrected == nil || !change.isSameState(as: log.current) {
             log.changes.append(change)
         }
         save()
@@ -75,6 +77,15 @@ public final class ModeStore {
         let gap = change.at.timeIntervalSince(latest.at)
         guard gap >= 0, gap < Self.correctionWindow else { return nil }
         return log.changes.firstIndex { $0.id == latest.id }
+    }
+
+    // A state change counts as a manual change, so automatic switches wait 2 hours after it too.
+    /// In 副业 mode, switches by hand to the next state. Earns no cans.
+    /// - Returns: `false` outside 副业 mode or when nothing was recorded.
+    @discardableResult
+    public func cycleSideHustle(at date: Date = .now) -> Bool {
+        guard let state = sideHustle else { return false }
+        return switchTo(.money, tag: state.next.rawValue, at: date)
     }
 
     /// Applies what `ModeEngine` decides for `trigger`.
@@ -89,7 +100,7 @@ public final class ModeStore {
         guard let decision = ModeEngine.decide(trigger, log: log, now: now, rules: rules, calendar: calendar) else {
             return nil
         }
-        return switchTo(decision.mode, source: decision.source, at: now) ? decision : nil
+        return switchTo(decision.mode, source: decision.source, tag: decision.tag, at: now) ? decision : nil
     }
 
     public func segments(on day: Date, now: Date = .now) -> [ModeSegment] {
