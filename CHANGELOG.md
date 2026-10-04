@@ -9,6 +9,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Rewards groundwork (Issue #49), not shown in the app yet: a can ledger that counts each real-life
+  win once, a shop of five items, three keepsakes granted at milestones (never lost), and a wardrobe
+  with one item per slot.
 - Couch scrolling now has steps: after 30 minutes HAKU keeps scrolling but keeps glancing at the gym
   bag by the door; when the day's invite shows, it gets up with the bag over its shoulder.
 - HAKU talks on the Lock Screen: one short line in its own voice for the mode, the need, low energy or
