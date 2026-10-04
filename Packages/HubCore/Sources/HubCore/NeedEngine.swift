@@ -74,6 +74,8 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var celebrateRunMeters: Double
     /// A boxing workout at least this long is celebrated.
     public var celebrateBoxing: TimeInterval
+    /// A strength workout at least this long is celebrated.
+    public var celebrateStrength: TimeInterval
 
     // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses.
     /// Couch after 19:00 and 60 still minutes, or 3 h after the Screen Time threshold; boxing Sunday
@@ -109,7 +111,8 @@ public struct NeedRules: Codable, Equatable, Sendable {
         inviteCooldown: TimeInterval,
         celebrateWithin: TimeInterval,
         celebrateRunMeters: Double,
-        celebrateBoxing: TimeInterval
+        celebrateBoxing: TimeInterval,
+        celebrateStrength: TimeInterval = 20 * 60
     ) {
         self.eveningStartMinute = eveningStartMinute
         self.stillFor = stillFor
@@ -125,6 +128,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
         self.celebrateWithin = celebrateWithin
         self.celebrateRunMeters = celebrateRunMeters
         self.celebrateBoxing = celebrateBoxing
+        self.celebrateStrength = celebrateStrength
     }
 }
 
@@ -329,11 +333,12 @@ public enum NeedEngine {
         need == .couchScroll ? rules.couchInviteAfter : rules.boxingInviteAfter
     }
 
-    private static func isWorthCelebrating(_ workout: WorkoutSummary, rules: NeedRules) -> Bool {
+    static func isWorthCelebrating(_ workout: WorkoutSummary, rules: NeedRules) -> Bool {
         switch workout.kind {
         case .running: (workout.meters ?? 0) >= rules.celebrateRunMeters
         case .boxing: workout.duration >= rules.celebrateBoxing
-        case .strength, .other: false
+        case .strength: workout.duration >= rules.celebrateStrength
+        case .other: false
         }
     }
 
