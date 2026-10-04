@@ -13,6 +13,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - HAKU now acts out what you're doing on the home screen and the Lock Screen: boxing at the boxing gym,
   lifting at the fitness gym, the gym bag after work on gym days and the shoe warm-up on run day.
   Settings shows the fitness gym again; staying there 30 minutes or more counts as a gym workout.
+- HAKU unboxes new items: a gift box shakes, pops open, and HAKU jumps out wearing the item and says a
+  line ("……给你的。才不是特意挑的。" for keepsakes). The 起身庆祝 keepsake adds a peace sign to every
+  celebration.
 - HAKU does it with you: heavy-bag combos at the boxing gym, curls at the fitness gym, a bobbing run with
   speed lines, the gym bag on its shoulder on gym days, and a running shoe warm-up on run day.
 - Shop and wardrobe. The home screen gets two entry points and is otherwise unchanged: the can count
