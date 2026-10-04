@@ -110,4 +110,13 @@ extension Slot {
         case .celebration: Toy.pink
         }
     }
+
+    /// The mode in which HAKU shows items of this slot, for the unboxing.
+    public var showcaseMode: Mode {
+        switch self {
+        case .gloves, .headband: .boxing
+        case .mask: .work
+        case .room, .celebration: .chill
+        }
+    }
 }

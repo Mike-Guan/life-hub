@@ -14,6 +14,9 @@ public enum CompanionEvent: Equatable, Sendable {
     case celebrate(id: String, kind: WorkoutSummary.Kind)
     /// The off-work animation after the off-work notification is tapped; `id` is the day, "yyyy-MM-dd".
     case offWork(id: String)
+    /// Unboxing a new wardrobe item; `id` is the ledger entry's id, so each one plays once, and
+    /// `item` is the `ShopItem` id.
+    case unlock(id: String, item: String)
 }
 
 /// A workout from the Health app, reduced to what the hub uses.

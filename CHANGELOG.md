@@ -10,6 +10,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU unboxes new items: a gift box shakes, pops open, and HAKU jumps out wearing the item and says a
+  line ("……给你的。才不是特意挑的。" for keepsakes). The 起身庆祝 keepsake adds a peace sign to every
+  celebration.
 - HAKU does it with you: heavy-bag combos at the boxing gym, curls at the fitness gym, a bobbing run with
   speed lines, the gym bag on its shoulder on gym days, and a running shoe warm-up on run day.
 - Shop and wardrobe. The home screen gets two entry points and is otherwise unchanged: the can count

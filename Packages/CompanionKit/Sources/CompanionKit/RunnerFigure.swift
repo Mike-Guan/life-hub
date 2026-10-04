@@ -166,11 +166,20 @@ struct RunnerPose {
     var lift: CGFloat = 0
     /// Speed lines drifting back while running, 0...1.
     var dash: CGFloat = 0
+    /// Progress of the unboxing, 0...1, or -1 when none is playing.
+    var unbox: CGFloat = -1
 
     var tired: Bool { face == .low }
     var offWorking: Bool { offWork >= 0 }
     /// How high the dumbbell is: the celebration reps while one plays, else the lift.
     var dumbbellRise: CGFloat { burst >= 0 ? abs(sin(burst * 2 * .pi)) : lift }
+    /// HAKU's height while unboxing: 0 = inside the box, then a pop past full height that settles at 1.
+    var popOut: CGFloat {
+        guard unbox >= 0 else { return 1 }
+        let x = Self.ramp(unbox, from: 0.3, to: 0.5)
+        guard x < 1 else { return 1 }
+        return x < 0.6 ? x / 0.6 * 1.15 : 1.15 - 0.15 * (x - 0.6) / 0.4
+    }
 
     /// The still pose, used for reduced motion and static renders.
     init(
@@ -403,6 +412,17 @@ struct RunnerPose {
         gloveRScale = 1
     }
 
+    /// Plays the unboxing at `progress` (0...1) on top of the current pose: the box shakes and opens,
+    /// HAKU pops out with sparkles and holds its gloves up over the box.
+    mutating func unbox(progress: CGFloat) {
+        unbox = progress
+        burst = progress >= 0.32 && progress < 0.82 ? (progress - 0.32) / 0.5 : -1
+        let up = Self.ramp(progress, from: 0.45, to: 0.6)
+        gloveL = CGSize(width: 0, height: -26 * up)
+        gloveR = CGSize(width: -4 * up, height: -30 * up)
+        gloveRScale = 1
+    }
+
     /// Off-work pose at `progress` (0...1): headset off, mask down, a big stretch, then open a Monster.
     static func offWork(time: TimeInterval, progress: Double, face: EnergyFace) -> RunnerPose {
         var pose = RunnerPose(face: face)
@@ -434,7 +454,7 @@ struct RunnerPose {
     }
 
     /// 0 before `from`, 1 after `to`, linear in between.
-    private static func ramp(_ x: CGFloat, from a: CGFloat, to b: CGFloat) -> CGFloat {
+    static func ramp(_ x: CGFloat, from a: CGFloat, to b: CGFloat) -> CGFloat {
         min(max((x - a) / (b - a), 0), 1)
     }
 
@@ -463,15 +483,24 @@ struct RunnerFigure: View {
         GeometryReader { geo in
             let scale = geo.size.width / RunnerArt.bounds.width
             ZStack {
-                ForEach(Self.parts(for: mode, pose: pose), id: \.self) { part in
-                    layer(part, scale: scale)
+                ZStack {
+                    ForEach(Self.parts(for: mode, pose: pose), id: \.self) { part in
+                        layer(part, scale: scale)
+                    }
+                    if pose.tired, mode == .boxing, !pose.bedtime {
+                        SweatDrop()
+                            .offset(x: 0, y: pose.headDy * scale)
+                    }
                 }
-                if pose.tired, mode == .boxing, !pose.bedtime {
-                    SweatDrop()
-                        .offset(x: 0, y: pose.headDy * scale)
+                .scaleEffect(
+                    x: 1 - 0.03 * pose.stretch,
+                    y: (1 + 0.06 * pose.stretch) * max(pose.popOut, 0.001),
+                    anchor: .bottom
+                )
+                if pose.unbox >= 0 {
+                    GiftBox(progress: pose.unbox)
                 }
             }
-            .scaleEffect(x: 1 - 0.03 * pose.stretch, y: 1 + 0.06 * pose.stretch, anchor: .bottom)
         }
         .aspectRatio(RunnerArt.bounds.width / RunnerArt.bounds.height, contentMode: .fit)
     }
@@ -479,12 +508,13 @@ struct RunnerFigure: View {
     /// Visible parts in back-to-front order.
     nonisolated static func parts(for mode: Mode, pose: RunnerPose) -> [RunnerPart] {
         var visible = pose.offWorking ? offWorkParts(pose) : modeParts(for: mode, pose: pose)
-        wear(pose.outfit, mode: mode, on: &visible)
+        wear(pose, mode: mode, on: &visible)
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
 
     /// Wardrobe items over the visible parts: striped masks and, at home, the room item.
-    nonisolated private static func wear(_ outfit: Outfit, mode: Mode, on visible: inout Set<RunnerPart>) {
+    nonisolated private static func wear(_ pose: RunnerPose, mode: Mode, on visible: inout Set<RunnerPart>) {
+        let outfit = pose.outfit
         if outfit.stripedMask, visible.contains(.maskUp) {
             visible.remove(.panelLines)
             visible.insert(.maskStripes)
@@ -492,6 +522,7 @@ struct RunnerFigure: View {
         if outfit.stripedMask, visible.contains(.maskDown) { visible.insert(.maskStripesDown) }
         // The room item stays home: hidden while HAKU carries the gym bag or is out boxing, lifting or running.
         if mode == .chill, let room = outfit.room, visible.isDisjoint(with: awayParts) { visible.insert(room) }
+        if outfit.peaceSign, pose.burst >= 0, !pose.bedtime { visible.insert(.peaceHand) }
     }
 
     nonisolated private static let awayParts: Set<RunnerPart> = [.gymBag, .heavyBag, .dumbbell, .speedLines]
@@ -880,6 +911,42 @@ private struct SweatDrop: View {
             drop.closeSubpath()
             context.fill(drop, with: .color(RunnerPalette.neonCyan))
             context.stroke(drop, with: .color(RunnerPalette.ink), lineWidth: 2)
+        }
+    }
+}
+
+// Drawn in code rather than the SVG because it only exists for the unboxing.
+/// The gift box HAKU pops out of; `progress` runs 0...1.
+private struct GiftBox: View {
+    var progress: CGFloat
+
+    var body: some View {
+        Canvas { context, size in
+            RunnerDrawing.enterFigureSpace(&context, size: size)
+            // Shakes twice, the flaps fly open, and once HAKU is out the box drops away.
+            let shake = progress < 0.25 ? sin(progress / 0.25 * 6 * .pi) * 6 : 0
+            let open = RunnerPose.ramp(progress, from: 0.22, to: 0.32)
+            let drop = RunnerPose.ramp(progress, from: 0.85, to: 1)
+            context.opacity = Double(1 - drop)
+            context.translateBy(x: 60.5, y: 142 + 40 * drop)
+            context.rotate(by: .degrees(Double(shake)))
+            context.translateBy(x: -60.5, y: -142)
+            let ink = GraphicsContext.Shading.color(RunnerPalette.ink)
+            for side in [CGFloat(-1), 1] {
+                var flap = context
+                flap.translateBy(x: 60.5 + 36.5 * side, y: 104)
+                flap.rotate(by: .degrees(Double(120 * open * side)))
+                let rect = CGRect(x: side < 0 ? 0 : -36.5, y: -9, width: 36.5, height: 9)
+                let path = Path(roundedRect: rect, cornerRadius: 2)
+                flap.fill(path, with: .color(Toy.pink))
+                flap.stroke(path, with: ink, lineWidth: 3)
+            }
+            let box = Path(roundedRect: CGRect(x: 24, y: 104, width: 73, height: 38), cornerRadius: 4)
+            context.fill(box, with: .color(Toy.pink))
+            let ribbon = Path(CGRect(x: 55, y: 104, width: 11, height: 38))
+            context.fill(ribbon, with: .color(RunnerPalette.gold))
+            context.stroke(ribbon, with: ink, lineWidth: 2)
+            context.stroke(box, with: ink, lineWidth: 3)
         }
     }
 }

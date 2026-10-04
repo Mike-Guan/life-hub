@@ -14,7 +14,8 @@ public struct CompanionView: View {
     let needSince: Date?
     /// What HAKU does alongside Mike, such as heavy-bag combos at the boxing gym. It replaces the need.
     let activity: CompanionActivity?
-    /// A one-off animation: celebrating a workout or going off work. Each event id plays once.
+    // To show a new item after its unboxing, pass a `wardrobe` with it equipped and its slot's `showcaseMode`.
+    /// A one-off animation: celebrating a workout, going off work or unboxing an item. Each event id plays once.
     let event: CompanionEvent?
     /// Today's invite, written by the app. While set, RUNNER gets up, jumps and says it.
     let invite: String?
@@ -42,6 +43,9 @@ public struct CompanionView: View {
     @State private var offWorkStart: Date?
     // Day of the last off-work animation, shared by every CompanionView so it plays once a day.
     @AppStorage("companion.lastOffWork") private var lastOffWork = ""
+    @State private var unlockStart: Date?
+    // Id of the last unboxing, shared by every CompanionView so each plays once.
+    @AppStorage("companion.lastUnlock") private var lastUnlock = ""
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -197,7 +201,7 @@ public struct CompanionView: View {
     /// What HAKU does on its own: only at home (chill), with nothing needed, awake and no event playing.
     private func idleLife(_ mode: Mode, at date: Date) -> IdleLife? {
         let time = date.timeIntervalSinceReferenceDate
-        let busy = celebration(at: time) != nil || offWork(at: time) != nil
+        let busy = celebration(at: time) != nil || offWork(at: time) != nil || unlock(at: time) != nil
         guard mode == .chill, need == nil, activity == nil, invite == nil, bedtime == .off, !busy else { return nil }
         return IdleLife.at(date)
     }
@@ -206,7 +210,7 @@ public struct CompanionView: View {
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
         if bedtime == .on || life == .nap { return IdleMotion.sleeping(time: time) }
-        if offWork(at: time) != nil { return IdleMotion(dy: 0, angle: 0) }
+        if offWork(at: time) != nil || unlock(at: time) != nil { return IdleMotion(dy: 0, angle: 0) }
         if let progress = celebration(at: time) { return IdleMotion.celebrating(progress: progress) }
         // Warming up hops like boxing day, whatever the outfit.
         if shownNeed == .couchScroll { return IdleMotion.slumped(time: time) }
@@ -241,6 +245,7 @@ public struct CompanionView: View {
         if stage == .peeking { pose.peekAtBag(time: time) }
         if stage == .up { pose.bagLift = 1 }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
+        if let progress = unlock(at: time) { pose.unbox(progress: CGFloat(progress)) }
         return pose
     }
 
@@ -252,6 +257,11 @@ public struct CompanionView: View {
     /// Progress of the off-work animation at `time`, 0..<1, or nil when none is playing.
     private func offWork(at time: TimeInterval) -> Double? {
         Self.progress(since: offWorkStart, at: time, duration: Self.offWorkDuration)
+    }
+
+    /// Progress of the unboxing at `time`, 0..<1, or nil when none is playing.
+    private func unlock(at time: TimeInterval) -> Double? {
+        Self.progress(since: unlockStart, at: time, duration: Self.unlockDuration)
     }
 
     private static func progress(since start: Date?, at time: TimeInterval, duration: Double) -> Double? {
@@ -276,6 +286,7 @@ public struct CompanionView: View {
     private static let goodnightDuration = 3.2
     private static let celebrationDuration = 1.6
     private static let offWorkDuration = 4.0
+    private static let unlockDuration = 2.8
 
     /// The celebration id to play for `event`, or nil when there is none or it already played.
     nonisolated static func newCelebration(_ event: CompanionEvent?, last: String) -> String? {
@@ -287,6 +298,12 @@ public struct CompanionView: View {
     nonisolated static func newOffWork(_ event: CompanionEvent?, last: String) -> String? {
         guard case .offWork(let day) = event, day != last else { return nil }
         return day
+    }
+
+    /// The unboxing id to play for `event`, or nil when there is none or it already played.
+    nonisolated static func newUnlock(_ event: CompanionEvent?, last: String) -> String? {
+        guard case .unlock(let id, _) = event, id != last else { return nil }
+        return id
     }
 
     private func playEventIfNew() {
@@ -305,6 +322,16 @@ public struct CompanionView: View {
                 try? await Task.sleep(for: .seconds(Self.offWorkDuration * 0.75))
                 guard !Task.isCancelled else { return }
                 say("终于。")
+            }
+        }
+        if let id = Self.newUnlock(event, last: lastUnlock), case .unlock(_, let item) = event {
+            lastUnlock = id
+            unlockStart = .now
+            say(nil)
+            bubbleTask = Task {
+                try? await Task.sleep(for: .seconds(Self.unlockDuration * 0.5))
+                guard !Task.isCancelled else { return }
+                say(CompanionLines.unlock(item), for: 4)
             }
         }
     }
@@ -449,6 +476,13 @@ private struct SpeechBubble: View {
                 .frame(height: 180)
                 .toyCard()
             CompanionView(mode: .work, event: .offWork(id: "preview")).frame(height: 180).toyCard()
+            CompanionView(
+                mode: .boxing,
+                event: .unlock(id: "preview", item: "gloves.gold"),
+                wardrobe: Wardrobe(equipped: [.gloves: "gloves.gold"])
+            )
+            .frame(height: 180)
+            .toyCard()
             CompanionView(mode: .work, bedtime: .on).frame(height: 180).toyCard()
             CompanionView(mode: .chill, bedtime: .on, style: .notification, showsBubble: false)
                 .frame(height: 180)

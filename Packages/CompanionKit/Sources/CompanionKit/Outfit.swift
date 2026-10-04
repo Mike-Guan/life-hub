@@ -13,6 +13,8 @@ struct Outfit: Equatable, Sendable {
     var stripedMask = false
     /// The room item next to HAKU at home, or `nil` for none.
     var room: RunnerPart?
+    /// A sneaky peace sign in every celebration and unboxing.
+    var peaceSign = false
 
     /// The default look.
     init() {}
@@ -39,5 +41,6 @@ struct Outfit: Equatable, Sendable {
             case "room.bag": .roomBag
             default: nil
             }
+        peaceSign = worn[.celebration] == "celebrate.up"
     }
 }
