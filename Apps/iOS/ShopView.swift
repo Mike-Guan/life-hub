@@ -149,6 +149,8 @@ struct ShopView: View {
         }
         .padding(10)
         .toyCard(radius: 16, shadow: 4)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(item.title)
     }
 
     private func ownedRow(_ item: ShopItem) -> some View {
@@ -165,6 +167,7 @@ struct ShopView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .toyCard(radius: 14, shadow: 0)
+        .accessibilityElement(children: .combine)
     }
 
     private func keepsakeRow(_ item: ShopItem) -> some View {
@@ -191,6 +194,7 @@ struct ShopView: View {
             }
         }
         .padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
     }
 
     private func buy(_ item: ShopItem) {
