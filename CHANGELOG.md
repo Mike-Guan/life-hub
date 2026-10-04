@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Rewards groundwork (Issue #49), not shown in the app yet: a can ledger that counts each real-life
+  win once, a shop of five items, three keepsakes granted at milestones (never lost), and a wardrobe
+  with one item per slot.
 - Settings: the wake time is now editable next to the bedtime. RUNNER stays sleepy until then
   (it was fixed at 05:00).
 - App icon: RUNNER's face split by a lightning crack, the side-hustle ¥ mask on one side and boxing

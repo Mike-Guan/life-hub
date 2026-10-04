@@ -25,6 +25,7 @@ public struct HubContainer: Sendable {
     public var modeLogURL: URL? { file("mode-log.json") }
     public var energyLogURL: URL? { file("energy-log.json") }
     public var expenseLogURL: URL? { file("expense-log.json") }
+    public var canLedgerURL: URL? { file("can-ledger.json") }
     public var snapshotURL: URL? { file("widget-snapshot.json") }
     public var inbox: EventInbox { EventInbox(folder: folder?.appending(path: "inbox", directoryHint: .isDirectory)) }
 
