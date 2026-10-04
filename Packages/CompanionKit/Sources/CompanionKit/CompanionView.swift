@@ -402,6 +402,9 @@ public struct CompanionView: View {
         )
         let candidates = lines.filter { $0 != bubble }
         say((candidates.isEmpty ? lines : candidates).randomElement())
+        // Taps during a one-off animation only get HAKU's reaction.
+        let time = Date.now.timeIntervalSinceReferenceDate
+        guard celebration(at: time) == nil, offWork(at: time) == nil, unlock(at: time) == nil else { return }
         onTap?()
     }
 

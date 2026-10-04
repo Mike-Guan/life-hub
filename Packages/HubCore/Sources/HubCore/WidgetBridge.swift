@@ -11,6 +11,9 @@ public final class WidgetBridge {
     public var bedtime: BedtimeSchedule
     /// What RUNNER acts out now; the app sets it before syncing.
     public var need: NeedReading?
+    // Kept in memory; only the day of the last workout of each kind goes into the snapshot.
+    /// Workouts from the last HealthKit reading; the app sets it before syncing.
+    public var workouts: [WorkoutSummary] = []
 
     public init(container: HubContainer, bedtime: BedtimeSchedule = .standard) {
         self.container = container
@@ -55,6 +58,9 @@ public final class WidgetBridge {
         snapshot.need = need?.need
         snapshot.needSince = need?.since
         snapshot.needUntil = need?.until
+        let done = ActivitySignals(workouts: workouts, calendar: calendar)
+        snapshot.trainedDay = done.trainedDay
+        snapshot.ranDay = done.ranDay
         let current = mode.current
         let scene = HakuLines.scene(mode: current, need: need?.need, energy: reading?.level, bedtime: state)
         let after = HakuLines.scene(mode: current, need: nil, energy: reading?.level, bedtime: state)

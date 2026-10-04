@@ -17,6 +17,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   and cans piling up, silent flow that hands over a can, sleepy late coding, shooting with the ¥¥ mask,
   peeking over the laptop at work, a drowsy yawn with a Monster, slumped on the desk at overtime, waiting
   at the door with the gym bag, and walking to the gym. Switching state plays a short squash and sparkle.
+- HAKU now acts out what you're doing on the home screen and the Lock Screen: boxing at the boxing gym,
+  lifting at the fitness gym, the gym bag after work on gym days and the shoe warm-up on run day.
+  Settings shows the fitness gym again; staying there 30 minutes or more counts as a gym workout.
 - New items open with an unboxing: after buying in the shop, or the next time you open the app after a
   keepsake is earned. HAKU pops out of the box wearing it; "现在戴上" puts it on, "先放衣柜" keeps it
   for later. Items owned before this update don't unbox.
