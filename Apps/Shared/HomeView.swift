@@ -36,6 +36,7 @@ struct HomeView: View {
                         mode: store.current,
                         energy: reading?.value,
                         need: activeNeed(at: context.date)?.need,
+                        needSince: activeNeed(at: context.date)?.since,
                         event: event,
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,

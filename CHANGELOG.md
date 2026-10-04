@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Couch scrolling now has steps: after 30 minutes HAKU keeps scrolling but keeps glancing at the gym
+  bag by the door; when the day's invite shows, it gets up with the bag over its shoulder.
 - HAKU has its own life at home: with nothing needed it naps in the sofa corner, plays a handheld,
   sneaks a snack, draws, shadow boxes or, on Sunday afternoons, wipes the room with a cloth. Tap it and
   it gets caught (hides the snack, closes the sketchbook, drops the gloves). New deadpan lines, and

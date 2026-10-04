@@ -310,4 +310,31 @@ import Testing
             }
         }
     }
+
+    @Test func couchStagesFollowTimeAndInvite() {
+        let start = Date(timeIntervalSinceReferenceDate: 1_000_000)
+        #expect(CouchStage.at(start.addingTimeInterval(10 * 60), since: start, inviting: false) == .scrolling)
+        let later = start.addingTimeInterval(CouchStage.peekAfter)
+        #expect(CouchStage.at(later, since: start, inviting: false) == .peeking)
+        #expect(CouchStage.at(start, since: nil, inviting: false) == .scrolling)
+        #expect(CouchStage.at(start, since: start, inviting: true) == .up)
+    }
+
+    @Test func gymBagShowsWhilePeekingAndCarrying() {
+        var peeking = RunnerPose(need: .couchScroll)
+        #expect(!RunnerFigure.parts(for: .chill, pose: peeking).contains(.gymBag))
+        peeking.peekAtBag(time: 4.2)
+        #expect(peeking.bagLift == 0 && peeking.eyesDx < 0)
+        #expect(RunnerFigure.parts(for: .chill, pose: peeking).contains(.gymBag))
+        var up = RunnerPose()
+        up.bagLift = 1
+        #expect(RunnerFigure.parts(for: .work, pose: up).contains(.gymBag))
+        var night = RunnerPose.bedtimeStill()
+        night.bagLift = 1
+        #expect(!RunnerFigure.parts(for: .chill, pose: night).contains(.gymBag))
+        let peekLines = CompanionLines.lines(for: .chill, need: .couchScroll, peeking: true)
+        #expect(peekLines != CompanionLines.lines(for: .chill, need: .couchScroll))
+        let label = CompanionLines.accessibilityLabel(mode: .chill, need: .couchScroll, peeking: true, bedtime: .off)
+        #expect(label.contains("运动包"))
+    }
 }

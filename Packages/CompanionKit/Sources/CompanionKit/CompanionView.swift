@@ -10,6 +10,8 @@ public struct CompanionView: View {
     let energy: Double?
     /// What RUNNER acts out on top of the mode, or nil.
     let need: CompanionNeed?
+    /// When `need` started. After 30 minutes of couch scrolling HAKU starts eyeing the gym bag.
+    let needSince: Date?
     /// A one-off animation, such as celebrating a workout. Each celebration id plays once.
     let event: CompanionEvent?
     /// Today's invite, written by the app. While set, RUNNER gets up, jumps and says it.
@@ -39,6 +41,7 @@ public struct CompanionView: View {
         mode: Mode?,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
+        needSince: Date? = nil,
         event: CompanionEvent? = nil,
         invite: String? = nil,
         cheer: Int = 0,
@@ -49,6 +52,7 @@ public struct CompanionView: View {
         self.mode = mode
         self.energy = energy
         self.need = need
+        self.needSince = needSince
         self.event = event
         self.invite = invite
         self.cheer = cheer
@@ -158,13 +162,26 @@ public struct CompanionView: View {
 
     private var accessibilityText: String {
         let life = mode.flatMap { idleLife($0, at: .now) }
-        return CompanionLines.accessibilityLabel(mode: mode, need: shownNeed, life: life, bedtime: bedtime)
+        let peeking = couchStage(at: .now) == .peeking
+        return CompanionLines.accessibilityLabel(
+            mode: mode,
+            need: shownNeed,
+            peeking: peeking,
+            life: life,
+            bedtime: bedtime
+        )
+    }
+
+    /// The couch scrolling stage, or nil when HAKU isn't on the couch.
+    private func couchStage(at date: Date) -> CouchStage? {
+        guard need == .couchScroll, bedtime == .off else { return nil }
+        return CouchStage.at(date, since: needSince, inviting: invite != nil)
     }
 
     /// What HAKU does on its own: only at home (chill), with nothing needed, awake and not celebrating.
     private func idleLife(_ mode: Mode, at date: Date) -> IdleLife? {
         let celebrating = celebration(at: date.timeIntervalSinceReferenceDate) != nil
-        guard mode == .chill, shownNeed == nil, bedtime == .off, !celebrating else { return nil }
+        guard mode == .chill, need == nil, invite == nil, bedtime == .off, !celebrating else { return nil }
         return IdleLife.at(date)
     }
 
@@ -181,8 +198,16 @@ public struct CompanionView: View {
 
     private func pose(_ mode: Mode, life: IdleLife?, time: TimeInterval, react: Double) -> RunnerPose {
         if bedtime == .on { return bedtimePose(time: time) }
-        if reduceMotion { return RunnerPose(face: face, need: shownNeed, life: life) }
+        let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
+        if reduceMotion {
+            var pose = RunnerPose(face: face, need: shownNeed, life: life)
+            if stage == .peeking { pose.bagLift = 0 }
+            if stage == .up { pose.bagLift = 1 }
+            return pose
+        }
         var pose = RunnerPose(mode: mode, time: time, face: face, need: shownNeed, life: life, react: react)
+        if stage == .peeking { pose.peekAtBag(time: time) }
+        if stage == .up { pose.bagLift = 1 }
         if let progress = celebration(at: time) { pose.burst = CGFloat(progress) }
         return pose
     }
@@ -245,7 +270,8 @@ public struct CompanionView: View {
         pop += 1
         taps += 1
         let life = mode.flatMap { idleLife($0, at: .now) }
-        let lines = CompanionLines.lines(for: mode, need: shownNeed, life: life)
+        let peeking = couchStage(at: .now) == .peeking
+        let lines = CompanionLines.lines(for: mode, need: shownNeed, peeking: peeking, life: life)
         let candidates = lines.filter { $0 != bubble }
         say((candidates.isEmpty ? lines : candidates).randomElement())
     }
@@ -353,6 +379,9 @@ private struct SpeechBubble: View {
             CompanionView(mode: .money, energy: 85).frame(height: 180).toyCard()
             CompanionView(mode: .chill, need: .boxingWarmup).frame(height: 180).toyCard()
             CompanionView(mode: .chill, need: .couchScroll).frame(height: 180).toyCard()
+            CompanionView(mode: .chill, need: .couchScroll, needSince: .now.addingTimeInterval(-45 * 60))
+                .frame(height: 180)
+                .toyCard()
             CompanionView(mode: .chill, need: .couchScroll, invite: "起来，下楼走 10 分钟？").frame(height: 180).toyCard()
             CompanionView(mode: .boxing, event: .celebrate(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .work, bedtime: .on).frame(height: 180).toyCard()
