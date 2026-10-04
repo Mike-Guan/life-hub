@@ -25,6 +25,29 @@ public enum CompanionActivity: String, Sendable {
     }
 }
 
+// PRD section 16. The state logic picks one; CompanionKit draws it.
+/// A state within a mode that HAKU acts out, such as dozing off at work or vibe coding.
+public enum CompanionMoment: String, Codable, CaseIterable, Sendable {
+    /// Work: scrolling at work, HAKU peeks over the laptop screen.
+    case slacking
+    /// Work, afternoon: a yawn and a Monster.
+    case drowsy
+    /// Work, still there after 19:00: slumped on the desk while its soul floats off.
+    case overtime
+    /// Chill, gym day evening: standing at the door with the gym bag.
+    case gymInvite
+    /// On the way to the gym with the bag.
+    case heading
+    /// 副业: hoodie, `</>` on the mask, typing, cans piling up.
+    case vibeCoding
+    /// 副业, vibe coding for 45 minutes: silent, now and then hands over a can.
+    case flow
+    /// 副业, still vibe coding after 23:30: sleepy at the laptop.
+    case lateCoding
+    /// 副业: shooting or running the accounts, the ¥¥ mask look.
+    case shooting
+}
+
 /// Which days are for the gym and for the weekly run. Times are minutes after local midnight.
 public struct ActivityDays: Codable, Equatable, Sendable {
     /// Gym days as `Calendar` weekdays (1 is Sunday).

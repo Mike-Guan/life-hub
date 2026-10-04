@@ -168,6 +168,20 @@ struct RunnerPose {
     var dash: CGFloat = 0
     /// Progress of the unboxing, 0...1, or -1 when none is playing.
     var unbox: CGFloat = -1
+    /// The state within the mode HAKU acts out; it replaces the need and its own time.
+    var moment: CompanionMoment?
+    /// Monster cans piled up while vibe coding; up to 3 are drawn.
+    var codingCans = 0
+    /// Offset of the hands on the keyboard while typing.
+    var typing: CGSize = .zero
+    /// 0 = laptop on the desk, 1 = held up to peek over.
+    var peek: CGFloat = 0
+    /// 0 = upright, 1 = head down on the desk.
+    var slump: CGFloat = 0
+    /// Rise of the soul leaving while slumped, 0...1, or -1 when hidden.
+    var soulRise: CGFloat = -1
+    /// Brightness of the floating code brackets in flow, 0...1.
+    var codeGlow: Double = 1
 
     var tired: Bool { face == .low }
     var offWorking: Bool { offWork >= 0 }
@@ -186,13 +200,39 @@ struct RunnerPose {
         face: EnergyFace = .mid,
         need: CompanionNeed? = nil,
         life: IdleLife? = nil,
-        activity: CompanionActivity? = nil
+        activity: CompanionActivity? = nil,
+        moment: CompanionMoment? = nil
     ) {
         self.face = face
         self.activity = activity
-        self.need = activity == nil ? need : nil
-        self.life = activity == nil && need == nil ? life : nil
+        self.moment = activity == nil ? moment : nil
+        self.need = activity == nil && moment == nil ? need : nil
+        self.life = self.need == nil && self.moment == nil && activity == nil ? life : nil
         if tired { blink = 0.75 }
+        switch self.moment {
+        case .slacking:
+            peek = 1
+            eyesDx = -3
+        case .drowsy:
+            yawn = 0.7
+            blink = 0.5
+        case .overtime:
+            slump = 1
+            soulRise = 0.4
+        case .gymInvite:
+            bagLift = 1
+            eyesDx = -3
+        case .heading:
+            bagLift = 1
+            headDy = 1
+        case .vibeCoding, .flow, .lateCoding:
+            // Eyes down on the screen.
+            headDy = 2
+            eyesDy = 1.5
+            if self.moment == .flow { canOpacity = 0 }
+        case .shooting, nil:
+            break
+        }
         switch activity {
         case .gymDay: bagLift = 1
         case .gymSession: lift = 0.6
@@ -232,9 +272,10 @@ struct RunnerPose {
         need: CompanionNeed? = nil,
         life: IdleLife? = nil,
         activity: CompanionActivity? = nil,
+        moment: CompanionMoment? = nil,
         react: Double
     ) {
-        self.init(face: face, need: need, life: life, activity: activity)
+        self.init(face: face, need: need, life: life, activity: activity, moment: moment)
         let t = time * face.speed
         let open: CGFloat = tired ? 0.75 : 1
         let r = CGFloat(react)
@@ -242,7 +283,8 @@ struct RunnerPose {
         // Sparkles twinkle out of step with the blink, 1.6 s period.
         sparkle = 0.55 + 0.45 * sin(time * 2 * .pi / 1.6)
 
-        switch mode {
+        // Shooting keeps the ¥¥ look of the old money mode, motion included.
+        switch self.moment == .shooting ? .money : mode {
         case .work:
             // Nod to the music every 0.5 s; LED breathes over 2.4 s; tap = eye roll + "•••".
             headDy = CGFloat(abs(sin(t * .pi / 0.5))) * 1.5
@@ -272,7 +314,59 @@ struct RunnerPose {
         if self.need == .boxingWarmup { warmUp(time: t, react: r) }
         if self.need == .couchScroll { scroll(time: t) }
         if let life = self.life { live(life, time: t, react: r) }
+        if let moment = self.moment { play(moment, time: t) }
         if let activity { act(activity, time: t) }
+    }
+
+    /// The state within the mode: peeking, dozing, slumped, at the door, walking, or vibe coding.
+    private mutating func play(_ moment: CompanionMoment, time t: TimeInterval) {
+        switch moment {
+        case .slacking:
+            // Laptop up to the eyes, ducking down every 3 s; the eyes dart left and right.
+            peek = 1 - 0.3 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 3)), from: 2.2, to: 3)
+            eyesDx = CGFloat(sin(t * 2 * .pi / 2.4)) * 3
+            eyesDy = 0
+        case .drowsy:
+            // A yawn every 6 s, then a sip of the Monster.
+            let phase = CGFloat(t.truncatingRemainder(dividingBy: 6))
+            yawn = Self.bump(phase, from: 0, to: 1.4)
+            let sip = Self.bump(phase, from: 3.6, to: 4.8)
+            canAngle = Double(-28 * sip)
+            canOffset = CGSize(width: -6 * sip, height: -6 * sip)
+            blink = max(0.15, (1 - 0.7 * yawn) * 0.55 * Self.blink(at: t))
+            headDy = 1.5 * yawn
+        case .overtime:
+            // Head on the desk, slow breaths, the soul drifting up every 4 s.
+            slump = 1
+            blink = 0.15
+            headDy = CGFloat(sin(t * 2 * .pi / 4))
+            soulRise = CGFloat(t.truncatingRemainder(dividingBy: 4) / 4)
+        case .gymInvite:
+            // Bag on, tapping a foot, looking at the door and back every 4 s.
+            bagLift = 1
+            headDy = CGFloat(abs(sin(t * .pi / 0.5))) * 1.5
+            eyesDx = -4 + 4 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 4)), from: 2.8, to: 4)
+        case .heading:
+            // Walking: the head bobs with each step.
+            bagLift = 1
+            headDy = CGFloat(abs(sin(t * 2 * .pi / 0.9))) * 2
+        case .vibeCoding, .flow, .lateCoding:
+            // Fast typing, slower when it's late; in flow a can is handed over every 10 s.
+            let period = moment == .lateCoding ? 0.6 : moment == .flow ? 0.2 : 0.28
+            typing = CGSize(width: 0, height: -1.5 * CGFloat(abs(sin(t * .pi / period))))
+            headDy = 2
+            eyesDy = 1.5
+            ledOpacity = 1
+            if moment == .lateCoding { blink = max(0.15, 0.5 * Self.blink(at: t * 0.5)) }
+            guard moment == .flow else { return }
+            codeGlow = 0.5 + 0.5 * sin(t * 2 * .pi / 2)
+            let hand = Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 10)), from: 8, to: 10)
+            canOpacity = hand > 0 ? 1 : 0
+            canOffset = CGSize(width: -14 * hand, height: 24 * (1 - hand) - 6)
+            canAngle = Double(-12 * hand)
+        case .shooting:
+            break
+        }
     }
 
     /// Doing it alongside Mike: heavy-bag combos, curls, running, or getting ready for the gym or the run.
@@ -529,16 +623,20 @@ struct RunnerFigure: View {
 
     nonisolated private static func modeParts(for mode: Mode, pose: RunnerPose) -> Set<RunnerPart> {
         var visible = baseParts
-        switch mode {
-        case .work:
-            visible.formUnion(workParts)
-            if !pose.ledDots { visible.insert(.ledLine) }
-        case .chill:
-            visible.formUnion(chillParts)
-        case .boxing:
-            visible.formUnion(boxingParts)
-        case .money:
-            visible.formUnion(moneyParts)
+        if let moment = pose.moment {
+            visible = momentParts(moment, pose: pose)
+        } else {
+            switch mode {
+            case .work:
+                visible.formUnion(workParts)
+                if !pose.ledDots { visible.insert(.ledLine) }
+            case .chill:
+                visible.formUnion(chillParts)
+            case .boxing:
+                visible.formUnion(boxingParts)
+            case .money:
+                visible.formUnion(moneyParts)
+            }
         }
         if pose.tired, mode != .chill { visible.insert(.eyebags) }
         if pose.need == .couchScroll, !pose.bedtime {
@@ -579,6 +677,46 @@ struct RunnerFigure: View {
         }
         return visible
     }
+
+    /// The base parts with the look of `moment`, whatever the mode.
+    nonisolated private static func momentParts(_ moment: CompanionMoment, pose: RunnerPose) -> Set<RunnerPart> {
+        var visible = baseParts
+        switch moment {
+        case .slacking:
+            visible.formUnion(workParts.union([.ledLine, .laptop, .typingHands]))
+        case .drowsy:
+            visible.formUnion(headsetParts.union([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .monsterCan]))
+            if pose.yawn > 0.05 { visible.insert(.mouthYawn) }
+        case .overtime:
+            visible.formUnion(headsetParts.union([.eyesSleepy, .eyebags, .maskDown, .desk]))
+            if pose.soulRise >= 0 { visible.insert(.soul) }
+        case .gymInvite:
+            visible.formUnion(chillParts.subtracting([.monsterCan]).union([.door]))
+        case .heading:
+            visible.formUnion(chillParts.subtracting([.monsterCan]))
+        case .vibeCoding, .flow, .lateCoding:
+            visible.remove(.stripeNeon)
+            visible.formUnion(codingParts)
+            let stacks: [RunnerPart] = [.canStackOne, .canStackTwo, .canStackThree]
+            visible.formUnion(stacks.prefix(max(0, min(pose.codingCans, stacks.count))))
+            if moment == .flow {
+                visible.subtract([.eyesWork, .lidsWork])
+                visible.formUnion([.eyesMoney, .eyeGlint, .codeBits, .monsterCan])
+            }
+            if moment == .lateCoding {
+                visible.subtract([.eyesWork, .lidsWork])
+                visible.formUnion([.eyesSleepy, .eyebags])
+            }
+        case .shooting:
+            visible.formUnion(moneyParts)
+        }
+        return visible
+    }
+
+    nonisolated private static let codingParts: Set<RunnerPart> = [
+        .hoodUp, .hoodieStrings, .eyesWork, .lidsWork, .maskUp, .panelLines, .ledCode, .earringNeon, .laptop,
+        .typingHands,
+    ]
 
     /// Work look turning into the chill look as the off-work animation plays, whatever the mode.
     nonisolated private static func offWorkParts(_ pose: RunnerPose) -> Set<RunnerPart> {
@@ -751,6 +889,17 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part, red: pose.outfit.gloves)
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
                     .offset(x: pose.gloveR.width * scale, y: pose.gloveR.height * scale)
+            case .laptop:
+                RunnerPartView(part: part).offset(y: -24 * pose.peek * scale)
+            case .typingHands:
+                RunnerPartView(part: part)
+                    .offset(x: pose.typing.width * scale, y: (pose.typing.height - 24 * pose.peek) * scale)
+            case .soul:
+                RunnerPartView(part: part)
+                    .offset(y: -12 * pose.soulRise * scale)
+                    .opacity(Double(sin(pose.soulRise * .pi)))
+            case .codeBits:
+                RunnerPartView(part: part).opacity(pose.codeGlow)
             case .chainGold:
                 RunnerPartView(part: part)
                     .overlay {
@@ -770,7 +919,8 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
             }
         }
-        .offset(y: isHead ? pose.headDy * scale : 0)
+        .offset(y: (isHead ? pose.headDy : 0) * scale)
+        .offset(y: isHead || Self.chinParts.contains(part) ? 30 * pose.slump * scale : 0)
         .rotationEffect(.degrees(isHead ? -14 * Double(pose.lie) : 0), anchor: Self.unit(x: 60, y: 96))
     }
 
@@ -787,8 +937,11 @@ struct RunnerFigure: View {
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .browsWork, .eyesChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
-        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle,
+        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .hoodUp, .ledCode,
     ]
+
+    /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
+    private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown]
 
     private static func jacketColor(_ mode: Mode) -> Color {
         switch mode {
@@ -966,6 +1119,8 @@ public struct CompanionPortrait: View {
     let need: CompanionNeed?
     let needSince: Date?
     let activity: CompanionActivity?
+    let moment: CompanionMoment?
+    let codingCans: Int
     let date: Date
     let bedtime: Bedtime
     let wardrobe: Wardrobe
@@ -975,6 +1130,8 @@ public struct CompanionPortrait: View {
     /// - Parameters:
     ///   - needSince: when `need` started; after 30 minutes of couch scrolling HAKU eyes the gym bag.
     ///   - activity: what HAKU does alongside Mike; it replaces the need.
+    ///   - moment: the state within the mode, such as vibe coding; it replaces the need.
+    ///   - codingCans: Monster cans piled up while vibe coding.
     ///   - date: the moment shown, such as a widget timeline entry's date.
     ///   - wardrobe: what HAKU wears from the shop and keepsakes.
     public init(
@@ -983,6 +1140,8 @@ public struct CompanionPortrait: View {
         need: CompanionNeed? = nil,
         needSince: Date? = nil,
         activity: CompanionActivity? = nil,
+        moment: CompanionMoment? = nil,
+        codingCans: Int = 0,
         date: Date = .now,
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
@@ -993,6 +1152,8 @@ public struct CompanionPortrait: View {
         self.need = need
         self.needSince = needSince
         self.activity = activity
+        self.moment = moment
+        self.codingCans = codingCans
         self.date = date
         self.bedtime = bedtime
         self.wardrobe = wardrobe
@@ -1014,13 +1175,15 @@ public struct CompanionPortrait: View {
                 need: need,
                 peeking: peeking,
                 activity: activity,
+                moment: activity == nil ? moment : nil,
                 bedtime: bedtime
             )
         )
     }
 
     private var peeking: Bool {
-        activity == nil && need == .couchScroll && CouchStage.at(date, since: needSince, inviting: false) == .peeking
+        guard activity == nil, moment == nil, need == .couchScroll else { return false }
+        return CouchStage.at(date, since: needSince, inviting: false) == .peeking
     }
 
     private var figure: RunnerFigure {
@@ -1028,7 +1191,9 @@ public struct CompanionPortrait: View {
         guard bedtime == .off else {
             return RunnerFigure(mode: mode, pose: RunnerPose.bedtimeStill().wearing(outfit))
         }
-        var pose = RunnerPose(face: EnergyFace(energy: energy), need: need, activity: activity).wearing(outfit)
+        var pose = RunnerPose(face: EnergyFace(energy: energy), need: need, activity: activity, moment: moment)
+            .wearing(outfit)
+        pose.codingCans = codingCans
         if peeking {
             pose.bagLift = 0
             pose.eyesDx = -3
