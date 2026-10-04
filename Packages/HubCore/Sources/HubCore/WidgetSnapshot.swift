@@ -8,6 +8,8 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var schemaVersion: Int
     public var mode: Mode?
     public var since: Date?
+    /// The 副业 state, `nil` in other modes or in snapshots from older builds.
+    public var sideHustle: SideHustle?
     /// Today's energy, `nil` when unknown.
     public var energy: EnergyLevel?
     /// Bedtime state when the snapshot was taken, `nil` in snapshots from older builds.
@@ -51,6 +53,7 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
 
     public init(log: ModeLog, energy: EnergyLevel? = nil, bedtime: Bedtime? = nil, now: Date = .now) {
         self.init(mode: log.current?.mode, since: log.current?.at, energy: energy, bedtime: bedtime, updatedAt: now)
+        sideHustle = log.current?.sideHustle
     }
 }
 
@@ -72,9 +75,10 @@ extension WidgetSnapshot {
     public func applying(_ item: InboxItem) -> WidgetSnapshot {
         var copy = self
         switch item {
-        case .mode(let change) where change.mode != mode:
+        case .mode(let change) where change.mode != mode || change.sideHustle != sideHustle:
             copy.mode = change.mode
             copy.since = change.at
+            copy.sideHustle = change.sideHustle
         case .energy(let event) where event.kind == .selfReport:
             copy.energy = event.level
         default:
