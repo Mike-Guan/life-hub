@@ -10,11 +10,14 @@ final class NeedTracker {
     private(set) var reading: NeedReading?
     /// Today's invite text while its need lasts, `nil` when none went out for it.
     private(set) var invite: String?
-    /// The celebration RUNNER should play, `nil` when there is none.
+    /// The celebration or off-work animation RUNNER should play, `nil` when there is none.
     private(set) var event: CompanionEvent?
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
     @ObservationIgnored private var motion: HealthMotion.Reading?
+
+    /// Workouts from the last HealthKit reading; empty before the first one.
+    var workouts: [WorkoutSummary] { motion?.workouts ?? [] }
 
     // Re-read each time the app becomes active, so workouts the Watch syncs later still count.
     /// Reads workouts and steps from HealthKit.
@@ -58,5 +61,12 @@ final class NeedTracker {
         event = .celebrate(id: workout.id, kind: workout.kind)
     }
 
+    /// Plays the off-work animation for the day of `date`; HAKU plays it once per day.
+    func offWork(at date: Date) {
+        event = .offWork(id: date.formatted(Self.day))
+    }
+
     private static let celebratedKey = "celebratedWorkouts"
+    // "yyyy-MM-dd" in local time, the id format of `CompanionEvent.offWork`.
+    private static let day = Date.ISO8601FormatStyle(timeZone: .current).year().month().day()
 }

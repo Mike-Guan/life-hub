@@ -118,6 +118,8 @@ struct RunnerPose {
     var sparkle: Double = 1
     /// Progress of the celebration sparkle burst, 0..<1, or -1 when none is playing.
     var burst: CGFloat = -1
+    /// The workout being celebrated, which picks the move: gloves up, a peace sign or a lift.
+    var cheerKind: WorkoutSummary.Kind?
     /// Scroll position of the feed on the phone screen while couch scrolling, 0...1.
     var feed: CGFloat = 0
     /// Bedtime overlay: sleepy eyes, mask down, the mode's outfit stays.
@@ -132,6 +134,8 @@ struct RunnerPose {
     var lie: CGFloat = 0
     /// Rise of the floating Z z z, 0...1, or -1 when hidden.
     var zzz: CGFloat = -1
+    /// The gym bag: -1 = not shown, 0 = on the floor by the door, 1 = over the shoulder.
+    var bagLift: CGFloat = -1
     /// Progress of the off-work animation, 0...1, or -1 when none is playing.
     var offWork: CGFloat = -1
     /// 0 = mask up, 1 = pulled down to the chin.
@@ -270,6 +274,12 @@ struct RunnerPose {
         }
     }
 
+    /// Couch scrolling with the gym bag in view, glancing at it every 5 s.
+    mutating func peekAtBag(time t: TimeInterval) {
+        bagLift = 0
+        eyesDx = -4 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 5)), from: 3.4, to: 5)
+    }
+
     /// Slumped over the phone: a thumb flick every 2.5 s, slow blinks.
     private mutating func scroll(time t: TimeInterval) {
         headDy = 3
@@ -308,6 +318,18 @@ struct RunnerPose {
         pose.blink = max(0.15, (1 - 0.7 * pose.yawn) * blink(at: time * 0.5))
         pose.headDy = 1.5 * (1 - pose.lie) + 1.5 * pose.yawn
         return pose
+    }
+
+    /// Plays the celebration for `kind` at `progress` (0..<1) on top of the current pose.
+    mutating func celebrate(_ kind: WorkoutSummary.Kind?, progress: CGFloat) {
+        burst = progress
+        cheerKind = kind
+        guard kind == .boxing else { return }
+        // Acts cool, then the right glove pumps up twice anyway.
+        let pump = abs(sin(progress * 2 * .pi))
+        gloveL = CGSize(width: 0, height: -6 * pump)
+        gloveR = CGSize(width: -6 * pump, height: -24 * pump)
+        gloveRScale = 1
     }
 
     /// Off-work pose at `progress` (0...1): headset off, mask down, a big stretch, then open a Monster.
@@ -407,11 +429,16 @@ struct RunnerFigure: View {
             visible.formUnion(warmupParts)
             visible.remove(.monsterCan)
         }
+        if pose.bagLift >= 0, !pose.bedtime { visible.insert(.gymBag) }
         if let life = pose.life, pose.need == nil, !pose.bedtime {
             let added = lifeParts(life)
             visible.remove(.monsterCan)
             if !added.isDisjoint(with: [.eyesSleepy, .eyesWork]) { visible.remove(.eyesChill) }
             visible.formUnion(added)
+        }
+        if pose.burst >= 0, !pose.bedtime, let kind = pose.cheerKind, let props = cheerParts[kind] {
+            visible.remove(.monsterCan)
+            visible.formUnion(props)
         }
         if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
@@ -468,6 +495,11 @@ struct RunnerFigure: View {
     ]
     nonisolated private static let sleepyParts: Set<RunnerPart> = [.eyesSleepy, .eyebags, .maskDown]
     nonisolated private static let headsetParts: Set<RunnerPart> = [.headset, .cupL, .cupR, .mic]
+    nonisolated private static let cheerParts: [WorkoutSummary.Kind: Set<RunnerPart>] = [
+        .boxing: [.gloveL, .gloveR],
+        .running: [.peaceHand],
+        .strength: [.dumbbell],
+    ]
     nonisolated private static let deadpanEyes: Set<RunnerPart> = [.eyesWork, .lidsWork, .browsWork]
 
     nonisolated private static func lifeParts(_ life: IdleLife) -> Set<RunnerPart> {
@@ -537,6 +569,19 @@ struct RunnerFigure: View {
                 }
             case .jacket:
                 RunnerPartView(part: part, fillOverride: Self.jacketColor(mode))
+            case .gymBag:
+                // Lifted from the floor by the door onto the left shoulder.
+                RunnerPartView(part: part)
+                    .rotationEffect(.degrees(-10 * Double(pose.bagLift)), anchor: Self.unit(x: 24, y: 122))
+                    .offset(x: 6 * pose.bagLift * scale, y: -16 * pose.bagLift * scale)
+            case .peaceHand:
+                // A sneaky peace sign pops up by the cheek and wiggles.
+                RunnerPartView(part: part)
+                    .scaleEffect(min(1, max(pose.burst, 0) * 4), anchor: Self.unit(x: 96, y: 84))
+                    .rotationEffect(.degrees(Double(sin(pose.burst * 6 * .pi)) * 8), anchor: Self.unit(x: 96, y: 84))
+            case .dumbbell:
+                // Two quick reps.
+                RunnerPartView(part: part).offset(y: -12 * abs(sin(pose.burst * 2 * .pi)) * scale)
             case .handheld, .cloth:
                 RunnerPartView(part: part).offset(x: pose.prop.width * scale, y: pose.prop.height * scale)
             case .onigiri:
@@ -734,19 +779,29 @@ public struct CompanionPortrait: View {
     let mode: Mode
     let energy: Double?
     let need: CompanionNeed?
+    let needSince: Date?
+    let date: Date
     let bedtime: Bedtime
     let framing: Framing
 
+    // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
+    /// - Parameters:
+    ///   - needSince: when `need` started; after 30 minutes of couch scrolling HAKU eyes the gym bag.
+    ///   - date: the moment shown, such as a widget timeline entry's date.
     public init(
         mode: Mode,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
+        needSince: Date? = nil,
+        date: Date = .now,
         bedtime: Bedtime = .off,
         framing: Framing = .full
     ) {
         self.mode = mode
         self.energy = energy
         self.need = need
+        self.needSince = needSince
+        self.date = date
         self.bedtime = bedtime
         self.framing = framing
     }
@@ -760,11 +815,22 @@ public struct CompanionPortrait: View {
                 HeadCrop { figure }
             }
         }
-        .accessibilityLabel(CompanionLines.accessibilityLabel(mode: mode, need: need, bedtime: bedtime))
+        .accessibilityLabel(
+            CompanionLines.accessibilityLabel(mode: mode, need: need, peeking: peeking, bedtime: bedtime)
+        )
+    }
+
+    private var peeking: Bool {
+        need == .couchScroll && CouchStage.at(date, since: needSince, inviting: false) == .peeking
     }
 
     private var figure: RunnerFigure {
-        let pose = bedtime == .on ? RunnerPose.bedtimeStill() : RunnerPose(face: EnergyFace(energy: energy), need: need)
+        guard bedtime == .off else { return RunnerFigure(mode: mode, pose: RunnerPose.bedtimeStill()) }
+        var pose = RunnerPose(face: EnergyFace(energy: energy), need: need)
+        if peeking {
+            pose.bagLift = 0
+            pose.eyesDx = -3
+        }
         return RunnerFigure(mode: mode, pose: pose)
     }
 }

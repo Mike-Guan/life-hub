@@ -21,6 +21,7 @@ struct HubEntry: TimelineEntry {
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
     var need: CompanionNeed? { snapshot?.need(at: date) }
+    var needSince: Date? { snapshot?.needSince(at: date) }
 
     /// One short line from HAKU: its bedtime line, else the app's line for now, else today's energy.
     var detail: String {

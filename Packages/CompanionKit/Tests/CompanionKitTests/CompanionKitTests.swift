@@ -341,4 +341,50 @@ import Testing
             }
         }
     }
+
+    @Test func eachWorkoutHasItsOwnCelebration() {
+        func cheering(_ kind: WorkoutSummary.Kind, mode: Mode = .chill) -> Set<RunnerPart> {
+            var pose = RunnerPose()
+            pose.celebrate(kind, progress: 0.25)
+            return Set(RunnerFigure.parts(for: mode, pose: pose))
+        }
+        #expect(cheering(.running).contains(.peaceHand))
+        #expect(cheering(.strength).contains(.dumbbell))
+        #expect(cheering(.boxing).isSuperset(of: [.gloveL, .gloveR]))
+        #expect(!cheering(.running).contains(.monsterCan))
+        #expect(cheering(.other).isDisjoint(with: [.peaceHand, .dumbbell]))
+        #expect(cheering(.other).contains(.sparkle))
+        var boxing = RunnerPose()
+        boxing.celebrate(.boxing, progress: 0.25)
+        #expect(boxing.gloveR.height < -20)
+        let lines = Set([WorkoutSummary.Kind.boxing, .running, .strength, .other].map(CompanionLines.celebration))
+        #expect(lines.count == 4)
+    }
+
+    @Test func couchStagesFollowTimeAndInvite() {
+        let start = Date(timeIntervalSinceReferenceDate: 1_000_000)
+        #expect(CouchStage.at(start.addingTimeInterval(10 * 60), since: start, inviting: false) == .scrolling)
+        let later = start.addingTimeInterval(CouchStage.peekAfter)
+        #expect(CouchStage.at(later, since: start, inviting: false) == .peeking)
+        #expect(CouchStage.at(start, since: nil, inviting: false) == .scrolling)
+        #expect(CouchStage.at(start, since: start, inviting: true) == .up)
+    }
+
+    @Test func gymBagShowsWhilePeekingAndCarrying() {
+        var peeking = RunnerPose(need: .couchScroll)
+        #expect(!RunnerFigure.parts(for: .chill, pose: peeking).contains(.gymBag))
+        peeking.peekAtBag(time: 4.2)
+        #expect(peeking.bagLift == 0 && peeking.eyesDx < 0)
+        #expect(RunnerFigure.parts(for: .chill, pose: peeking).contains(.gymBag))
+        var up = RunnerPose()
+        up.bagLift = 1
+        #expect(RunnerFigure.parts(for: .work, pose: up).contains(.gymBag))
+        var night = RunnerPose.bedtimeStill()
+        night.bagLift = 1
+        #expect(!RunnerFigure.parts(for: .chill, pose: night).contains(.gymBag))
+        let peekLines = CompanionLines.lines(for: .chill, need: .couchScroll, peeking: true)
+        #expect(peekLines != CompanionLines.lines(for: .chill, need: .couchScroll))
+        let label = CompanionLines.accessibilityLabel(mode: .chill, need: .couchScroll, peeking: true, bedtime: .off)
+        #expect(label.contains("运动包"))
+    }
 }
