@@ -222,6 +222,7 @@ struct RunnerPose {
         case .gymInvite:
             bagLift = 1
             eyesDx = -3
+            lift = 0.3
         case .heading:
             bagLift = 1
             headDy = 1
@@ -342,8 +343,9 @@ struct RunnerPose {
             headDy = CGFloat(sin(t * 2 * .pi / 4))
             soulRise = CGFloat(t.truncatingRemainder(dividingBy: 4) / 4)
         case .gymInvite:
-            // Bag on, tapping a foot, looking at the door and back every 4 s.
+            // Bag on, a lazy curl of the hand weight, looking at the door and back every 4 s.
             bagLift = 1
+            lift = CGFloat(abs(sin(t * .pi / 2.4)))
             headDy = CGFloat(abs(sin(t * .pi / 0.5))) * 1.5
             eyesDx = -4 + 4 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 4)), from: 2.8, to: 4)
         case .heading:
@@ -691,9 +693,9 @@ struct RunnerFigure: View {
             visible.formUnion(headsetParts.union([.eyesSleepy, .eyebags, .maskDown, .desk]))
             if pose.soulRise >= 0 { visible.insert(.soul) }
         case .gymInvite:
-            visible.formUnion(chillParts.subtracting([.monsterCan]).union([.door]))
+            visible.formUnion(chillParts.subtracting([.monsterCan]).union([.door, .towel, .handWeight]))
         case .heading:
-            visible.formUnion(chillParts.subtracting([.monsterCan]))
+            visible.formUnion(chillParts.subtracting([.monsterCan]).union([.towel]))
         case .vibeCoding, .flow, .lateCoding:
             visible.remove(.stripeNeon)
             visible.formUnion(codingParts)
@@ -714,7 +716,7 @@ struct RunnerFigure: View {
     }
 
     nonisolated private static let codingParts: Set<RunnerPart> = [
-        .hoodUp, .hoodieStrings, .eyesWork, .lidsWork, .maskUp, .panelLines, .ledCode, .earringNeon, .laptop,
+        .hoodieStrings, .eyesWork, .lidsWork, .maskUp, .panelLines, .ledCode, .earringNeon, .laptop,
         .typingHands,
     ]
 
@@ -747,7 +749,7 @@ struct RunnerFigure: View {
     ]
     nonisolated private static let awakeFaceParts: Set<RunnerPart> = [
         .eyesWork, .lidsWork, .browsWork, .eyesChill, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
-        .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen,
+        .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen, .ledCode,
     ]
     nonisolated private static let warmupParts: Set<RunnerPart> = [.headband, .gloveL, .gloveR]
     nonisolated private static let couchParts: Set<RunnerPart> = [.eyesSleepy, .phone, .phoneFeed, .phoneHand]
@@ -852,6 +854,8 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .scaleEffect(min(1, max(pose.burst, 0) * 4), anchor: Self.unit(x: 96, y: 84))
                     .rotationEffect(.degrees(Double(sin(pose.burst * 6 * .pi)) * 8), anchor: Self.unit(x: 96, y: 84))
+            case .handWeight:
+                RunnerPartView(part: part).offset(y: -8 * pose.lift * scale)
             case .dumbbell:
                 // Two quick reps in a celebration, or the curl at the gym.
                 RunnerPartView(part: part).offset(y: -12 * pose.dumbbellRise * scale)
@@ -937,7 +941,7 @@ struct RunnerFigure: View {
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .browsWork, .eyesChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
-        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .hoodUp, .ledCode,
+        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.

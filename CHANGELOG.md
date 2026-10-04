@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- HAKU's sleeping pillow is light blue, so it no longer blends into the white hair.
 - HAKU stops couch scrolling when you do: it gets up 20 minutes after Screen Time last saw you on the
   picked apps (it reports every 10 more minutes of use), as soon as you walk, or when you change mode by
   hand. Before, it lay on the couch for 3 hours after the daily 30 minutes.
@@ -17,6 +18,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   and at 20:00 the day's one invite asks "包背好了，走？". Its 走 button, or the new "出发去健身" control
   (Lock Screen, Control Center or Action button), sends HAKU walking with the bag for up to an hour, until
   you reach the gym. Not going changes nothing. This invite replaces the couch one on gym days.
+- HAKU looks for the new mode states (Issues #73, #74, #75): vibe coding with `</>` on the mask
 - 副业 has three states: vibe coding, 拍摄 and 运营. In 副业 mode, tap HAKU to switch; vibe coding is the
   default and stacks a can every 30 minutes, up to 3. An iOS Focus filter "副业 · vibe coding" (add it to
   a Focus such as 编程 and turn it on) switches to vibe coding, but not within 2 hours of a manual change.
@@ -24,7 +26,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - HAKU looks for the new mode states (Issues #73, #74, #75): vibe coding in a hoodie with `</>` on the mask
   and cans piling up, silent flow that hands over a can, sleepy late coding, shooting with the ¥¥ mask,
   peeking over the laptop at work, a drowsy yawn with a Monster, slumped on the desk at overtime, waiting
-  at the door with the gym bag, and walking to the gym. Switching state plays a short squash and sparkle.
+  at the door with the gym bag, a towel and a hand weight, and walking to the gym. Switching state plays a
+  short squash and sparkle.
 - Settings > 地点 is a list: 家, 公司, 健身房 and 拳馆, plus your own places from the + button. Each added
   place has a name, a radius and what HAKU does when you arrive (switch to 上班, 下班 or 副业, count as the
   gym or the boxing gym, or only note it). Up to 20 places, the iOS limit. Places stay on this iPhone.
