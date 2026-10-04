@@ -304,7 +304,8 @@ import Testing
     }
 
     @Test func celebrationsWithDifferentWorkoutsDiffer() {
-        #expect(CompanionEvent.celebrate(id: "a") != .celebrate(id: "b"))
-        #expect(CompanionEvent.celebrate(id: "a") == .celebrate(id: "a"))
+        #expect(CompanionEvent.celebrate(id: "a", kind: .running) != .celebrate(id: "b", kind: .running))
+        #expect(CompanionEvent.celebrate(id: "a", kind: .boxing) == .celebrate(id: "a", kind: .boxing))
+        #expect(CompanionEvent.offWork(id: "2026-10-05") != .celebrate(id: "2026-10-05", kind: .other))
     }
 }
