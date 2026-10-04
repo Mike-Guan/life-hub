@@ -787,26 +787,7 @@ struct RunnerPartView: View {
     var body: some View {
         Canvas { context, size in
             RunnerDrawing.enterFigureSpace(&context, size: size)
-            for ink in RunnerArt.cachedInks(part) {
-                var layer = context
-                layer.opacity = ink.opacity
-                if let fill = ink.fill {
-                    let swapped = fill == RunnerPalette.boxingRed ? red ?? fill : fill
-                    layer.fill(ink.path, with: .color(fillOverride ?? swapped))
-                }
-                if let stroke = ink.stroke {
-                    let style = StrokeStyle(
-                        lineWidth: ink.lineWidth,
-                        lineCap: ink.cap,
-                        lineJoin: ink.join,
-                        dash: ink.dash
-                    )
-                    layer.stroke(ink.path, with: .color(stroke), style: style)
-                }
-            }
-            if let text = RunnerArt.text(part) {
-                RunnerDrawing.draw(text, in: context)
-            }
+            RunnerDrawing.draw(part, in: context, red: red, fillOverride: fillOverride)
         }
     }
 }
@@ -831,6 +812,28 @@ enum RunnerDrawing {
         let scale = size.width / bounds.width
         context.scaleBy(x: scale, y: scale)
         context.translateBy(x: -bounds.minX, y: -bounds.minY)
+    }
+
+    /// Draws `part` in figure space.
+    /// - Parameters:
+    ///   - red: replaces boxing red fills.
+    ///   - fillOverride: replaces every fill.
+    static func draw(_ part: RunnerPart, in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil) {
+        for ink in RunnerArt.cachedInks(part) {
+            var layer = context
+            layer.opacity = ink.opacity
+            if let fill = ink.fill {
+                let swapped = fill == RunnerPalette.boxingRed ? red ?? fill : fill
+                layer.fill(ink.path, with: .color(fillOverride ?? swapped))
+            }
+            if let stroke = ink.stroke {
+                let style = StrokeStyle(lineWidth: ink.lineWidth, lineCap: ink.cap, lineJoin: ink.join, dash: ink.dash)
+                layer.stroke(ink.path, with: .color(stroke), style: style)
+            }
+        }
+        if let text = RunnerArt.text(part) {
+            draw(text, in: context)
+        }
     }
 
     static func draw(_ text: RunnerText, in context: GraphicsContext) {

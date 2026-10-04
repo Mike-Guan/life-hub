@@ -466,4 +466,23 @@ import Testing
         let running = RunnerPose(activity: .running).wearing(Outfit(wardrobe))
         #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
     }
+
+    @Test(arguments: ShopItem.catalog)
+    func everyItemIconDrawsSomething(_ item: ShopItem) {
+        var wardrobe = Wardrobe()
+        wardrobe.equip(item)
+        let picture = ItemPicture(slot: item.slot, outfit: Outfit(wardrobe), itemID: item.id)
+        #expect(!picture.parts.isEmpty)
+        #expect(picture != ItemPicture(slot: item.slot, outfit: Outfit(), itemID: nil))
+    }
+
+    @Test func defaultIconsShowTheStandardLook() {
+        #expect(ItemPicture(slot: .gloves, outfit: Outfit(), itemID: nil).red == nil)
+        #expect(ItemPicture(slot: .mask, outfit: Outfit(), itemID: nil).parts.contains(.panelLines))
+        #expect(ItemPicture(slot: .room, outfit: Outfit(), itemID: nil).parts.isEmpty)
+    }
+
+    @Test func slotsHaveTheirOwnTileColors() {
+        #expect(Set(Slot.allCases.map(\.tileColor)).count == Slot.allCases.count)
+    }
 }
