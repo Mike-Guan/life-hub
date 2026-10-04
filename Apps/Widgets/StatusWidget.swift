@@ -61,6 +61,7 @@ struct StatusView: View {
                 mode: mode,
                 energy: entry.energy?.value,
                 need: entry.need,
+                needSince: entry.needSince,
                 bedtime: entry.bedtime,
                 framing: .head
             )
@@ -72,7 +73,13 @@ struct StatusView: View {
     private var small: some View {
         VStack(alignment: .leading, spacing: 2) {
             if let mode = entry.mode {
-                CompanionPortrait(mode: mode, energy: entry.energy?.value, need: entry.need, bedtime: entry.bedtime)
+                CompanionPortrait(
+                    mode: mode,
+                    energy: entry.energy?.value,
+                    need: entry.need,
+                    needSince: entry.needSince,
+                    bedtime: entry.bedtime
+                )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Text("\(mode.code) MODE").font(Toy.display(14))
                 Text(entry.detail).font(Toy.body(12, weight: .bold))

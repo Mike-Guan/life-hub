@@ -14,6 +14,8 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var bedtime: Bedtime?
     /// What RUNNER acts out, `nil` when there is no need or in snapshots from older builds.
     public var need: CompanionNeed?
+    /// When `need` started, `nil` when unknown.
+    public var needSince: Date?
     /// When `need` ends at the latest, `nil` when no time is known.
     public var needUntil: Date?
     /// Why RUNNER looks the way it does, for the rectangular Lock Screen widget.
@@ -91,6 +93,13 @@ extension WidgetSnapshot {
         guard updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) else { return nil }
         if let needUntil, date >= needUntil { return nil }
         return need
+    }
+
+    /// When the need shown at `date` started: the scheduled one's start while it lasts, else `needSince`
+    /// while `need` is shown.
+    public func needSince(at date: Date, calendar: Calendar = .current) -> Date? {
+        if let nextNeed, nextNeed.contains(date) { return nextNeed.from }
+        return need(at: date, calendar: calendar) == nil ? nil : needSince
     }
 
     /// The "why" line as of `date`: the scheduled need's while it lasts, else `nil` when it was
