@@ -271,14 +271,15 @@ import Testing
         let parts = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(life: life)))
         #expect(!parts.contains(.monsterCan))
         #expect(RunnerFigure.baseParts.isSubset(of: parts))
-        let expected: Set<RunnerPart> = switch life {
-        case .nap: [.pillow, .eyesSleepy, .zzz]
-        case .handheld: [.handheld, .eyesWork]
-        case .snack: [.onigiri, .eyesChill]
-        case .drawing: [.sketchbook, .pencil, .eyesWork]
-        case .practice: [.gloveL, .gloveR]
-        case .tidying: [.cloth]
-        }
+        let expected: Set<RunnerPart> =
+            switch life {
+            case .nap: [.pillow, .eyesSleepy, .zzz]
+            case .handheld: [.handheld, .eyesWork]
+            case .snack: [.onigiri, .eyesChill]
+            case .drawing: [.sketchbook, .pencil, .eyesWork]
+            case .practice: [.gloveL, .gloveR]
+            case .tidying: [.cloth]
+            }
         #expect(parts.isSuperset(of: expected))
         if parts.contains(.eyesWork) || parts.contains(.eyesSleepy) { #expect(!parts.contains(.eyesChill)) }
         #expect(!CompanionLines.lines(for: .chill, life: life).isEmpty)
