@@ -26,6 +26,33 @@ import Testing
         #expect(store.ledger.count(.gym) == 1)
     }
 
+    func workout(_ id: String, _ kind: WorkoutSummary.Kind, minutes: Double, meters: Double? = nil) -> WorkoutSummary {
+        WorkoutSummary(id: id, kind: kind, start: at, end: at + minutes * 60, meters: meters)
+    }
+
+    @Test func workoutsEarnTheWinsHakuCheers() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo") ?? .gmt
+        let workouts = [
+            workout("box", .boxing, minutes: 60),
+            workout("box-short", .boxing, minutes: 10),
+            workout("run", .running, minutes: 30, meters: 5200),
+            workout("jog", .running, minutes: 15, meters: 2000),
+            workout("lift-1", .strength, minutes: 45),
+            workout("lift-2", .strength, minutes: 25),
+            workout("lift-short", .strength, minutes: 5),
+            workout("walk", .other, minutes: 90),
+        ]
+        let wins = Win.wins(in: workouts, calendar: calendar)
+        #expect(wins.map(\.win) == [.boxing, .run5k, .gym, .gym])
+        #expect(wins[0] == EarnedWin(win: .boxing, source: "box", at: at + 3600))
+        // Two lifts on one day share a source, so the ledger counts the gym once.
+        #expect(wins[2].source == wins[3].source)
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        for win in wins { store.record(win.win, source: win.source, at: win.at) }
+        #expect(store.ledger.count(.gym) == 1)
+    }
+
     @Test func buyingSpendsCansOnce() throws {
         let store = GrowthStore(fileURL: nil, deviceID: "t")
         let plant = try item("room.plant")

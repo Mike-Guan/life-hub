@@ -27,6 +27,41 @@ public enum Win: String, Codable, CaseIterable, Sendable {
     }
 }
 
+/// A win found in what the app reads, with the id of what it came from.
+public struct EarnedWin: Equatable, Sendable {
+    public var win: Win
+    /// What the win came from; the ledger counts each source once.
+    public var source: String
+    public var at: Date
+
+    public init(win: Win, source: String, at: Date) {
+        self.win = win
+        self.source = source
+        self.at = at
+    }
+}
+
+extension Win {
+    // Same bar as the workout celebrations, so HAKU cheers exactly what earns cans.
+    /// The wins in `workouts`: each long enough boxing workout and 5 km run, and strength training
+    /// once per day.
+    public static func wins(
+        in workouts: [WorkoutSummary],
+        rules: NeedRules = .standard,
+        calendar: Calendar = .current
+    ) -> [EarnedWin] {
+        let day = Date.ISO8601FormatStyle(timeZone: calendar.timeZone).year().month().day()
+        return workouts.filter { NeedEngine.isWorthCelebrating($0, rules: rules) }.compactMap { workout in
+            switch workout.kind {
+            case .boxing: EarnedWin(win: .boxing, source: workout.id, at: workout.end)
+            case .running: EarnedWin(win: .run5k, source: workout.id, at: workout.end)
+            case .strength: EarnedWin(win: .gym, source: "gym:\(workout.start.formatted(day))", at: workout.end)
+            case .other: nil
+            }
+        }
+    }
+}
+
 /// One line in the can ledger. Stored append-only; the balance and owned items are computed from these.
 public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
     public static let currentSchemaVersion = 1
