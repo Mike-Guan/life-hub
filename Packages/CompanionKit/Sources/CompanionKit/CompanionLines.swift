@@ -9,9 +9,11 @@ enum CompanionLines {
         need: CompanionNeed? = nil,
         peeking: Bool = false,
         life: IdleLife? = nil,
-        activity: CompanionActivity? = nil
+        activity: CompanionActivity? = nil,
+        moment: CompanionMoment? = nil
     ) -> [String] {
         if let activity { return lines(for: activity) }
+        if let moment { return lines(for: moment) }
         if need == .couchScroll, peeking { return ["所以……我们今天是真的不动了吗？", "那个包……算了。", "再刷五分钟。"] }
         if need == .boxingWarmup { return ["拳套我都戴好了，你随意啊。", "……我热身热得都快累了。", "先跳两下热热身。"] }
         if need == .couchScroll { return ["再刷五分钟。", "这条好好笑。", "你也在刷吗？"] }
@@ -32,6 +34,21 @@ enum CompanionLines {
         case .running: ["呼……别跟我说话。", "腿是你的，我只是陪跑。"]
         case .gymDay: ["包我都背好了。你随意啊。", "健身房今天也开着。……我只是说说。"]
         case .runDay: ["鞋带我系好了。你的呢？", "今天是跑步日。……我先热个身。"]
+        }
+    }
+
+    private static func lines(for moment: CompanionMoment) -> [String] {
+        switch moment {
+        case .slacking: ["老板在看。我也在看。", "嘘。"]
+        case .drowsy: ["来一罐？", "眼皮有点重……"]
+        case .overtime: ["灵魂已经下班了。", "……我只是趴一下。"]
+        case .gymInvite: ["去不去？我包都背好了。", "门就在这。……我只是说说。"]
+        case .heading: ["走了走了。", "包我背着，你走路就行。"]
+        case .vibeCoding: ["能跑。别问为什么。", "这个 bug 不是我写的。", "再一罐。"]
+        // In flow HAKU stays silent.
+        case .flow: ["……"]
+        case .lateCoding: ["代码明天还在。"]
+        case .shooting: ["光线不错。", "这张可以。", "¥¥ 在路上。"]
         }
     }
 
@@ -68,10 +85,12 @@ enum CompanionLines {
         peeking: Bool = false,
         life: IdleLife? = nil,
         activity: CompanionActivity? = nil,
+        moment: CompanionMoment? = nil,
         bedtime: Bedtime
     ) -> String {
         if bedtime == .on { return "HAKU，困了" }
         if let activity { return "HAKU，\(doing(activity))" }
+        if let moment { return "HAKU，\(state(moment))" }
         if need == .couchScroll, peeking { return "HAKU，瘫着刷手机，偷看门口的运动包" }
         if need == .boxingWarmup { return "HAKU，戴着拳套在热身" }
         if need == .couchScroll { return "HAKU，瘫着刷手机" }
@@ -86,6 +105,20 @@ enum CompanionLines {
         case .running: "在跑步"
         case .gymDay: "背好了运动包，等着去健身房"
         case .runDay: "拿着跑鞋在热身"
+        }
+    }
+
+    private static func state(_ moment: CompanionMoment) -> String {
+        switch moment {
+        case .slacking: "从电脑屏幕后面探头"
+        case .drowsy: "犯困，开了一罐 Monster"
+        case .overtime: "加班，趴在桌上"
+        case .gymInvite: "背着运动包站在门口"
+        case .heading: "背着运动包出发了"
+        case .vibeCoding: "穿着连帽衫在写代码"
+        case .flow: "写代码写进了心流"
+        case .lateCoding: "熬夜写代码，很困"
+        case .shooting: "在忙副业的拍摄"
         }
     }
 

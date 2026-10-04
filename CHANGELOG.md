@@ -13,6 +13,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU looks for the new mode states (Issues #73, #74, #75): vibe coding in a hoodie with `</>` on the mask
+  and cans piling up, silent flow that hands over a can, sleepy late coding, shooting with the ¥¥ mask,
+  peeking over the laptop at work, a drowsy yawn with a Monster, slumped on the desk at overtime, waiting
+  at the door with the gym bag, and walking to the gym. Switching state plays a short squash and sparkle.
 - New items open with an unboxing: after buying in the shop, or the next time you open the app after a
   keepsake is earned. HAKU pops out of the box wearing it; "现在戴上" puts it on, "先放衣柜" keeps it
   for later. Items owned before this update don't unbox.

@@ -14,6 +14,10 @@ public struct CompanionView: View {
     let needSince: Date?
     /// What HAKU does alongside Mike, such as heavy-bag combos at the boxing gym. It replaces the need.
     let activity: CompanionActivity?
+    /// The state within the mode HAKU acts out, such as vibe coding. It replaces the need.
+    let moment: CompanionMoment?
+    /// Monster cans piled up next to HAKU while vibe coding.
+    let codingCans: Int
     // To show a new item after its unboxing, pass a `wardrobe` with it equipped and its slot's `showcaseMode`.
     /// A one-off animation: celebrating a workout, going off work or unboxing an item. Each event id plays once.
     let event: CompanionEvent?
@@ -27,6 +31,8 @@ public struct CompanionView: View {
     let wardrobe: Wardrobe
     let style: CompanionStyle
     let showsBubble: Bool
+    /// Called after HAKU reacts to a tap, for example to switch the 副业 state.
+    let onTap: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -46,6 +52,7 @@ public struct CompanionView: View {
     @State private var unlockStart: Date?
     // Id of the last unboxing, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastUnlock") private var lastUnlock = ""
+    @State private var swapStart: Date?
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -55,19 +62,24 @@ public struct CompanionView: View {
         need: CompanionNeed? = nil,
         needSince: Date? = nil,
         activity: CompanionActivity? = nil,
+        moment: CompanionMoment? = nil,
+        codingCans: Int = 0,
         event: CompanionEvent? = nil,
         invite: String? = nil,
         cheer: Int = 0,
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
         style: CompanionStyle = .standard,
-        showsBubble: Bool = true
+        showsBubble: Bool = true,
+        onTap: (() -> Void)? = nil
     ) {
         self.mode = mode
         self.energy = energy
         self.need = need
         self.needSince = needSince
         self.activity = activity
+        self.moment = moment
+        self.codingCans = codingCans
         self.event = event
         self.invite = invite
         self.cheer = cheer
@@ -75,6 +87,7 @@ public struct CompanionView: View {
         self.wardrobe = wardrobe
         self.style = style
         self.showsBubble = showsBubble
+        self.onTap = onTap
     }
 
     public var body: some View {
@@ -111,6 +124,11 @@ public struct CompanionView: View {
             if new != nil { startInvite() }
         }
         .onChange(of: event) { _, _ in playEventIfNew() }
+        .onChange(of: moment) { _, _ in
+            pop += 1
+            swapStart = .now
+            say(nil)
+        }
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
         }
@@ -176,8 +194,11 @@ public struct CompanionView: View {
 
     private var face: EnergyFace { EnergyFace(energy: energy) }
 
-    /// The need RUNNER acts out: none while it is inviting, since it got up, or busy with an activity.
-    private var shownNeed: CompanionNeed? { invite == nil && activity == nil ? need : nil }
+    /// The need RUNNER acts out: none while it is inviting, since it got up, or busy with an activity or moment.
+    private var shownNeed: CompanionNeed? { invite == nil && activity == nil && moment == nil ? need : nil }
+
+    /// The moment HAKU acts out: an activity takes precedence.
+    private var shownMoment: CompanionMoment? { activity == nil ? moment : nil }
 
     private var accessibilityText: String {
         let life = mode.flatMap { idleLife($0, at: .now) }
@@ -188,13 +209,14 @@ public struct CompanionView: View {
             peeking: peeking,
             life: life,
             activity: activity,
+            moment: shownMoment,
             bedtime: bedtime
         )
     }
 
     /// The couch scrolling stage, or nil when HAKU isn't on the couch.
     private func couchStage(at date: Date) -> CouchStage? {
-        guard need == .couchScroll, activity == nil, bedtime == .off else { return nil }
+        guard need == .couchScroll, activity == nil, moment == nil, bedtime == .off else { return nil }
         return CouchStage.at(date, since: needSince, inviting: invite != nil)
     }
 
@@ -202,7 +224,9 @@ public struct CompanionView: View {
     private func idleLife(_ mode: Mode, at date: Date) -> IdleLife? {
         let time = date.timeIntervalSinceReferenceDate
         let busy = celebration(at: time) != nil || offWork(at: time) != nil || unlock(at: time) != nil
-        guard mode == .chill, need == nil, activity == nil, invite == nil, bedtime == .off, !busy else { return nil }
+        guard mode == .chill, need == nil, activity == nil, moment == nil, invite == nil, bedtime == .off, !busy else {
+            return nil
+        }
         return IdleLife.at(date)
     }
 
@@ -212,6 +236,7 @@ public struct CompanionView: View {
         if bedtime == .on || life == .nap { return IdleMotion.sleeping(time: time) }
         if offWork(at: time) != nil || unlock(at: time) != nil { return IdleMotion(dy: 0, angle: 0) }
         if let progress = celebration(at: time) { return IdleMotion.celebrating(progress: progress) }
+        if let moment = shownMoment { return IdleMotion(moment: moment, mode: mode, time: time * face.speed) }
         // Warming up hops like boxing day, whatever the outfit.
         if shownNeed == .couchScroll { return IdleMotion.slumped(time: time) }
         // Running and heavy-bag work bounce like boxing day, running a bit quicker.
@@ -228,7 +253,8 @@ public struct CompanionView: View {
         }
         let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
         if reduceMotion {
-            var pose = RunnerPose(face: face, need: shownNeed, life: life, activity: activity)
+            var pose = RunnerPose(face: face, need: shownNeed, life: life, activity: activity, moment: shownMoment)
+            pose.codingCans = codingCans
             if stage == .peeking { pose.bagLift = 0 }
             if stage == .up { pose.bagLift = 1 }
             return pose
@@ -240,10 +266,16 @@ public struct CompanionView: View {
             need: shownNeed,
             life: life,
             activity: activity,
+            moment: shownMoment,
             react: react
         )
+        pose.codingCans = codingCans
         if stage == .peeking { pose.peekAtBag(time: time) }
         if stage == .up { pose.bagLift = 1 }
+        if let progress = Self.progress(since: swapStart, at: time, duration: Self.swapDuration) {
+            // Switching state: a quick burst of sparkles over the squash.
+            pose.burst = CGFloat(progress)
+        }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
         if let progress = unlock(at: time) { pose.unbox(progress: CGFloat(progress)) }
         return pose
@@ -287,6 +319,7 @@ public struct CompanionView: View {
     private static let celebrationDuration = 1.6
     private static let offWorkDuration = 4.0
     private static let unlockDuration = 2.8
+    private static let swapDuration = 0.5
 
     /// The celebration id to play for `event`, or nil when there is none or it already played.
     nonisolated static func newCelebration(_ event: CompanionEvent?, last: String) -> String? {
@@ -359,9 +392,17 @@ public struct CompanionView: View {
         taps += 1
         let life = mode.flatMap { idleLife($0, at: .now) }
         let peeking = couchStage(at: .now) == .peeking
-        let lines = CompanionLines.lines(for: mode, need: shownNeed, peeking: peeking, life: life, activity: activity)
+        let lines = CompanionLines.lines(
+            for: mode,
+            need: shownNeed,
+            peeking: peeking,
+            life: life,
+            activity: activity,
+            moment: shownMoment
+        )
         let candidates = lines.filter { $0 != bubble }
         say((candidates.isEmpty ? lines : candidates).randomElement())
+        onTap?()
     }
 
     private func startInvite() {
@@ -420,6 +461,28 @@ struct IdleMotion {
     init(dy: CGFloat, angle: Double) {
         self.dy = dy
         self.angle = angle
+    }
+
+    /// The idle loop for `moment`: walking bob, a slumped breath, or the mode's own loop.
+    init(moment: CompanionMoment, mode: Mode, time t: TimeInterval) {
+        switch moment {
+        case .heading:
+            // A step every 0.45 s, leaning into the walk.
+            self.init(dy: -CGFloat(abs(sin(t * .pi / 0.45))) * 4, angle: 3)
+        case .overtime:
+            let breath = IdleMotion.sleeping(time: t)
+            self.init(dy: breath.dy, angle: breath.angle)
+        case .slacking:
+            self.init(dy: 0, angle: 0)
+        case .drowsy:
+            self.init(dy: CGFloat(sin(t * 2 * .pi / 4)) * 1.5, angle: sin(t * 2 * .pi / 6) * 1.5)
+        case .gymInvite:
+            self.init(mode: .chill, time: t)
+        case .vibeCoding, .flow, .lateCoding:
+            self.init(mode: .work, time: t)
+        case .shooting:
+            self.init(mode: .money, time: t)
+        }
     }
 
     init(mode: Mode, time t: TimeInterval) {
@@ -483,6 +546,9 @@ private struct SpeechBubble: View {
             )
             .frame(height: 180)
             .toyCard()
+            ForEach(CompanionMoment.allCases, id: \.self) { moment in
+                CompanionView(mode: .money, moment: moment, codingCans: 3).frame(height: 180).toyCard()
+            }
             CompanionView(mode: .work, bedtime: .on).frame(height: 180).toyCard()
             CompanionView(mode: .chill, bedtime: .on, style: .notification, showsBubble: false)
                 .frame(height: 180)

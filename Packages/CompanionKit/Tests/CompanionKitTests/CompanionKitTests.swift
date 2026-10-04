@@ -526,4 +526,65 @@ import Testing
         #expect(Slot.gloves.showcaseMode == .boxing)
         #expect(Slot.room.showcaseMode == .chill)
     }
+
+    @Test(arguments: CompanionMoment.allCases)
+    func everyMomentHasALookLinesAndALabel(_ moment: CompanionMoment) {
+        let parts = Set(RunnerFigure.parts(for: .money, pose: RunnerPose(moment: moment)))
+        #expect(parts != Set(RunnerFigure.parts(for: .money, pose: RunnerPose())) || moment == .shooting)
+        #expect(!CompanionLines.lines(for: .money, moment: moment).isEmpty)
+        let label = CompanionLines.accessibilityLabel(mode: .money, need: nil, moment: moment, bedtime: .off)
+        #expect(label != "HAKU，\(Mode.money.title)")
+    }
+
+    @Test func vibeCodingWearsTheHoodieAndPilesUpCans() {
+        var pose = RunnerPose(moment: .vibeCoding)
+        let parts = Set(RunnerFigure.parts(for: .money, pose: pose))
+        #expect(parts.isSuperset(of: [.hoodUp, .ledCode, .laptop, .typingHands]))
+        #expect(!parts.contains(.ledYen))
+        #expect(parts.isDisjoint(with: [.canStackOne, .canStackTwo, .canStackThree]))
+        pose.codingCans = 2
+        let two = Set(RunnerFigure.parts(for: .money, pose: pose))
+        #expect(two.isSuperset(of: [.canStackOne, .canStackTwo]))
+        #expect(!two.contains(.canStackThree))
+        pose.codingCans = 9
+        #expect(Set(RunnerFigure.parts(for: .money, pose: pose)).contains(.canStackThree))
+    }
+
+    @Test func shootingKeepsTheMoneyLookInAnyMode() {
+        let shooting = RunnerPose(moment: .shooting)
+        #expect(RunnerFigure.parts(for: .chill, pose: shooting) == RunnerFigure.parts(for: .money, pose: RunnerPose()))
+    }
+
+    @Test func momentReplacesTheNeedButNotTheActivity() {
+        let pose = RunnerPose(need: .couchScroll, life: .snack, moment: .gymInvite)
+        #expect(pose.need == nil)
+        #expect(pose.life == nil)
+        #expect(pose.bagLift == 1)
+        #expect(RunnerFigure.parts(for: .chill, pose: pose).contains(.door))
+        #expect(RunnerPose(activity: .running, moment: .gymInvite).moment == nil)
+    }
+
+    @Test func overtimeSlumpsOntoTheDeskAndTheSoulLeaves() {
+        let pose = RunnerPose(mode: .work, time: 1, face: .mid, moment: .overtime, react: 0)
+        #expect(pose.slump == 1)
+        #expect((0..<1).contains(pose.soulRise))
+        let parts = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(parts.isSuperset(of: [.desk, .soul, .eyesSleepy]))
+        #expect(!parts.contains(.laptop))
+    }
+
+    @Test func flowHandsOverACanNowAndThen() {
+        let typing = RunnerPose(mode: .money, time: 2, face: .mid, moment: .flow, react: 0)
+        #expect(typing.canOpacity == 0)
+        let handing = RunnerPose(mode: .money, time: 9, face: .mid, moment: .flow, react: 0)
+        #expect(handing.canOpacity == 1)
+    }
+
+    @Test func bedtimeStillOverlaysTheMoment() {
+        var pose = RunnerPose(moment: .lateCoding)
+        pose.bedtime = true
+        let parts = Set(RunnerFigure.parts(for: .money, pose: pose))
+        #expect(parts.contains(.hoodUp))
+        #expect(parts.contains(.eyesSleepy))
+    }
 }
