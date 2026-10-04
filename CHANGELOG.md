@@ -13,10 +13,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
-- HAKU looks for the new mode states (Issues #73, #74, #75): vibe coding in a hoodie with `</>` on the mask
+- HAKU looks for the new mode states (Issues #73, #74, #75): vibe coding with `</>` on the mask
   and cans piling up, silent flow that hands over a can, sleepy late coding, shooting with the ¥¥ mask,
   peeking over the laptop at work, a drowsy yawn with a Monster, slumped on the desk at overtime, waiting
-  at the door with the gym bag, and walking to the gym. Switching state plays a short squash and sparkle.
+  at the door with the gym bag, a towel and a hand weight, and walking to the gym. Switching state plays a
+  short squash and sparkle.
 - Settings > 地点 is a list: 家, 公司, 健身房 and 拳馆, plus your own places from the + button. Each added
   place has a name, a radius and what HAKU does when you arrive (switch to 上班, 下班 or 副业, count as the
   gym or the boxing gym, or only note it). Up to 20 places, the iOS limit. Places stay on this iPhone.

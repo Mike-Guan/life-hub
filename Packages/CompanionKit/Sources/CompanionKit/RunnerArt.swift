@@ -40,8 +40,8 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case stripeNeon = "stripe_neon"
     case hoodCollar = "hood_collar"
     case hoodieStrings = "hoodie_strings"
+    case towel
     case hairBack = "hair_back"
-    case hoodUp = "hood_up"
     case earL = "ear_L"
     case earR = "ear_R"
     case faceBase = "face_base"
@@ -98,6 +98,7 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case pencil
     case cloth
     case gymBag = "gym_bag"
+    case handWeight = "hand_weight"
     case peaceHand = "peace_hand"
     case dumbbell
     case sparkle
@@ -120,8 +121,8 @@ enum RunnerArt {
         case .stripeNeon: stripeNeon()
         case .hoodCollar: hoodCollar()
         case .hoodieStrings: hoodieStrings()
+        case .towel: towel()
         case .hairBack: hairBack()
-        case .hoodUp: hoodUp()
         case .earL: earL()
         case .earR: earR()
         case .faceBase: faceBase()
@@ -178,6 +179,7 @@ enum RunnerArt {
         case .pencil: pencil()
         case .cloth: cloth()
         case .gymBag: gymBag()
+        case .handWeight: handWeight()
         case .peaceHand: peaceHand()
         case .dumbbell: dumbbell()
         case .sparkle: sparkle()
@@ -648,6 +650,53 @@ enum RunnerArt {
         ]
     }
 
+    private static func towel() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 36, y: 104))
+                    p.addQuadCurve(to: .init(x: 84, y: 104), control: .init(x: 60, y: 92))
+                    p.addLine(to: .init(x: 80, y: 111))
+                    p.addQuadCurve(to: .init(x: 40, y: 111), control: .init(x: 60, y: 101))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.neonCyan,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 37, y: 105))
+                    p.addLine(to: .init(x: 46, y: 108))
+                    p.addLine(to: .init(x: 44, y: 130))
+                    p.addLine(to: .init(x: 35, y: 130))
+                    p.closeSubpath()
+                    p.move(to: .init(x: 83, y: 105))
+                    p.addLine(to: .init(x: 74, y: 108))
+                    p.addLine(to: .init(x: 76, y: 130))
+                    p.addLine(to: .init(x: 85, y: 130))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.neonCyan,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 36.5, y: 124))
+                    p.addLine(to: .init(x: 45, y: 124))
+                    p.move(to: .init(x: 75, y: 124))
+                    p.addLine(to: .init(x: 83.5, y: 124))
+                },
+                stroke: RunnerPalette.white,
+                lineWidth: 2.2,
+                cap: .round
+            ),
+        ]
+    }
+
     private static func hairBack() -> [RunnerInk] {
         [
             RunnerInk(
@@ -691,33 +740,6 @@ enum RunnerArt {
                     p.addLine(to: .init(x: 88, y: 44))
                 },
                 stroke: RunnerPalette.hairShade,
-                lineWidth: 2.5,
-                cap: .round
-            ),
-        ]
-    }
-
-    private static func hoodUp() -> [RunnerInk] {
-        [
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 22, y: 100))
-                    p.addQuadCurve(to: .init(x: 60, y: 18), control: .init(x: 10, y: 34))
-                    p.addQuadCurve(to: .init(x: 98, y: 100), control: .init(x: 110, y: 34))
-                    p.addQuadCurve(to: .init(x: 22, y: 100), control: .init(x: 60, y: 88))
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.hood,
-                stroke: RunnerPalette.ink,
-                lineWidth: 3.5,
-                join: .round
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 30, y: 90))
-                    p.addQuadCurve(to: .init(x: 58, y: 30), control: .init(x: 24, y: 46))
-                },
-                stroke: RunnerPalette.maskLine,
                 lineWidth: 2.5,
                 cap: .round
             ),
@@ -3505,6 +3527,139 @@ enum RunnerArt {
                     p.closeSubpath()
                 },
                 fill: RunnerPalette.neonCyan
+            ),
+        ]
+    }
+
+    private static func handWeight() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 90, y: 114))
+                    p.addLine(to: .init(x: 108, y: 114))
+                    p.addCurve(
+                        to: .init(x: 110, y: 116),
+                        control1: .init(x: 109.1, y: 114),
+                        control2: .init(x: 110, y: 114.9)
+                    )
+                    p.addLine(to: .init(x: 110, y: 117))
+                    p.addCurve(
+                        to: .init(x: 108, y: 119),
+                        control1: .init(x: 110, y: 118.1),
+                        control2: .init(x: 109.1, y: 119)
+                    )
+                    p.addLine(to: .init(x: 90, y: 119))
+                    p.addCurve(
+                        to: .init(x: 88, y: 117),
+                        control1: .init(x: 88.9, y: 119),
+                        control2: .init(x: 88, y: 118.1)
+                    )
+                    p.addLine(to: .init(x: 88, y: 116))
+                    p.addCurve(
+                        to: .init(x: 90, y: 114),
+                        control1: .init(x: 88, y: 114.9),
+                        control2: .init(x: 88.9, y: 114)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.maskLine,
+                stroke: RunnerPalette.ink,
+                lineWidth: 2.5
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 87, y: 107))
+                    p.addLine(to: .init(x: 90, y: 107))
+                    p.addCurve(
+                        to: .init(x: 92, y: 109),
+                        control1: .init(x: 91.1, y: 107),
+                        control2: .init(x: 92, y: 107.9)
+                    )
+                    p.addLine(to: .init(x: 92, y: 124))
+                    p.addCurve(
+                        to: .init(x: 90, y: 126),
+                        control1: .init(x: 92, y: 125.1),
+                        control2: .init(x: 91.1, y: 126)
+                    )
+                    p.addLine(to: .init(x: 87, y: 126))
+                    p.addCurve(
+                        to: .init(x: 85, y: 124),
+                        control1: .init(x: 85.9, y: 126),
+                        control2: .init(x: 85, y: 125.1)
+                    )
+                    p.addLine(to: .init(x: 85, y: 109))
+                    p.addCurve(
+                        to: .init(x: 87, y: 107),
+                        control1: .init(x: 85, y: 107.9),
+                        control2: .init(x: 85.9, y: 107)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.mask,
+                stroke: RunnerPalette.ink,
+                lineWidth: 2.6
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 108, y: 107))
+                    p.addLine(to: .init(x: 111, y: 107))
+                    p.addCurve(
+                        to: .init(x: 113, y: 109),
+                        control1: .init(x: 112.1, y: 107),
+                        control2: .init(x: 113, y: 107.9)
+                    )
+                    p.addLine(to: .init(x: 113, y: 124))
+                    p.addCurve(
+                        to: .init(x: 111, y: 126),
+                        control1: .init(x: 113, y: 125.1),
+                        control2: .init(x: 112.1, y: 126)
+                    )
+                    p.addLine(to: .init(x: 108, y: 126))
+                    p.addCurve(
+                        to: .init(x: 106, y: 124),
+                        control1: .init(x: 106.9, y: 126),
+                        control2: .init(x: 106, y: 125.1)
+                    )
+                    p.addLine(to: .init(x: 106, y: 109))
+                    p.addCurve(
+                        to: .init(x: 108, y: 107),
+                        control1: .init(x: 106, y: 107.9),
+                        control2: .init(x: 106.9, y: 107)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.mask,
+                stroke: RunnerPalette.ink,
+                lineWidth: 2.6
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 104, y: 116.5))
+                    p.addCurve(
+                        to: .init(x: 99, y: 121.5),
+                        control1: .init(x: 104, y: 119.26),
+                        control2: .init(x: 101.76, y: 121.5)
+                    )
+                    p.addCurve(
+                        to: .init(x: 94, y: 116.5),
+                        control1: .init(x: 96.24, y: 121.5),
+                        control2: .init(x: 94, y: 119.26)
+                    )
+                    p.addCurve(
+                        to: .init(x: 99, y: 111.5),
+                        control1: .init(x: 94, y: 113.74),
+                        control2: .init(x: 96.24, y: 111.5)
+                    )
+                    p.addCurve(
+                        to: .init(x: 104, y: 116.5),
+                        control1: .init(x: 101.76, y: 111.5),
+                        control2: .init(x: 104, y: 113.74)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.skin,
+                stroke: RunnerPalette.ink,
+                lineWidth: 2.5
             ),
         ]
     }
