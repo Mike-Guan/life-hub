@@ -32,10 +32,13 @@ final class NeedTracker {
 
     /// Recomputes the need from the stored presence and the last HealthKit reading, and reschedules
     /// today's invite for it.
-    func refresh(places: PlaceSettings, now: Date = .now) {
+    /// - Parameter manualSince: when Mike last changed mode by hand.
+    func refresh(places: PlaceSettings, manualSince: Date?, now: Date = .now) {
         let presence = PlacePresence.stored(in: AppGroup.defaults)
         let signals = NeedSignals(
             scrollThresholdAt: ScrollWatch.reachedAt,
+            scrollSeenAt: ScrollWatch.seenAt,
+            manualSince: manualSince,
             atHomeSince: presence.since(.home),
             homeKnown: places[.home] != nil,
             stillSince: motion?.stillSince,

@@ -8,12 +8,13 @@ import HubCore
 final class ScrollMonitor: DeviceActivityMonitor {
     override func eventDidReachThreshold(_ event: DeviceActivityEvent.Name, activity: DeviceActivityName) {
         super.eventDidReachThreshold(event, activity: activity)
-        guard event == ScrollWatch.event else { return }
+        guard ScrollWatch.events.values.contains(event) else { return }
         let now = Date.now
-        ScrollWatch.reachedAt = now
+        ScrollWatch.recordReport(at: now)
         let presence = PlacePresence.stored(in: AppGroup.defaults)
         let signals = NeedSignals(
-            scrollThresholdAt: now,
+            scrollThresholdAt: ScrollWatch.reachedAt,
+            scrollSeenAt: ScrollWatch.seenAt,
             atHomeSince: presence.since(.home),
             homeKnown: PlaceSettings.stored(in: AppGroup.defaults)[.home] != nil,
             atGym: presence.since(.gym) != nil

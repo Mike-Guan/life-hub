@@ -30,7 +30,7 @@ import Testing
 
     @Test func screenTimeThresholdIsCouchScrolling() throws {
         let reached = date(5, 20, 10)
-        let reading = try #require(need(NeedSignals(scrollThresholdAt: reached), at: date(5, 20, 30)))
+        let reading = try #require(need(NeedSignals(scrollThresholdAt: reached), at: date(5, 20, 25)))
         #expect(reading.need == .couchScroll)
         #expect(reading.since == reached)
         #expect(!reading.reasons.isEmpty)
@@ -40,8 +40,35 @@ import Testing
         let reached = date(5, 20)
         #expect(need(NeedSignals(scrollThresholdAt: reached, homeKnown: true), at: date(5, 20, 30)) == nil)
         let home = NeedSignals(scrollThresholdAt: reached, atHomeSince: date(5, 19), homeKnown: true)
-        #expect(need(home, at: date(5, 22, 59))?.need == .couchScroll)
-        #expect(need(home, at: date(5, 23)) == nil)
+        #expect(need(home, at: date(5, 20, 19))?.need == .couchScroll)
+        #expect(need(home, at: date(5, 20, 20)) == nil)
+    }
+
+    @Test func couchScrollingLastsWhileReportsKeepComing() throws {
+        let scrolling = NeedSignals(scrollThresholdAt: date(5, 20), scrollSeenAt: date(5, 21, 10))
+        let reading = try #require(need(scrolling, at: date(5, 21, 25)))
+        #expect(reading.since == date(5, 20))
+        #expect(reading.until == date(5, 21, 30))
+        #expect(need(scrolling, at: date(5, 21, 30)) == nil)
+    }
+
+    @Test func walkingOrAManualSwitchEndsCouchScrolling() throws {
+        var signals = NeedSignals(scrollThresholdAt: date(5, 20), scrollSeenAt: date(5, 20, 40))
+        signals.stillSince = date(5, 20, 45)
+        #expect(need(signals, at: date(5, 20, 50)) == nil)
+        signals.stillSince = date(5, 19)
+        #expect(need(signals, at: date(5, 20, 50))?.need == .couchScroll)
+
+        signals.manualSince = date(5, 20, 45)
+        #expect(need(signals, at: date(5, 20, 50)) == nil)
+        // A report after the switch means scrolling again, counted from that report.
+        signals.scrollSeenAt = date(5, 20, 55)
+        let again = try #require(need(signals, at: date(5, 21)))
+        #expect(again.since == date(5, 20, 55))
+
+        let home = NeedSignals(manualSince: date(5, 20), atHomeSince: date(5, 18), stillSince: date(5, 18))
+        #expect(need(home, at: date(5, 20, 59)) == nil)
+        #expect(try #require(need(home, at: date(5, 21))).since == date(5, 21))
     }
 
     @Test func screenTimeReasonDoesNotNameTheApps() throws {
@@ -100,7 +127,7 @@ import Testing
     }
 
     @Test func boxingComesFirstOnBoxingMorningThenCouch() {
-        let signals = NeedSignals(scrollThresholdAt: date(4, 9, 15))
+        let signals = NeedSignals(scrollThresholdAt: date(4, 9, 15), scrollSeenAt: date(4, 10, 25))
         #expect(need(signals, at: date(4, 9, 30))?.need == .boxingWarmup)
         #expect(need(signals, at: date(4, 10, 29))?.need == .boxingWarmup)
         #expect(need(signals, at: date(4, 10, 30))?.need == .couchScroll)
@@ -231,7 +258,7 @@ import Testing
         #expect(boxing.isActive(at: date(4, 11, 59)))
         #expect(!boxing.isActive(at: date(4, 12)))
         let scroll = try #require(need(NeedSignals(scrollThresholdAt: date(5, 20)), at: date(5, 20, 5)))
-        #expect(scroll.until == date(5, 23))
+        #expect(scroll.until == date(5, 20, 20))
         let home = NeedSignals(atHomeSince: date(5, 18), stillSince: date(5, 18))
         let still = try #require(need(home, at: date(5, 20)))
         #expect(still.until == nil)
