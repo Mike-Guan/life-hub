@@ -342,6 +342,25 @@ import Testing
         }
     }
 
+    @Test func eachWorkoutHasItsOwnCelebration() {
+        func cheering(_ kind: WorkoutSummary.Kind, mode: Mode = .chill) -> Set<RunnerPart> {
+            var pose = RunnerPose()
+            pose.celebrate(kind, progress: 0.25)
+            return Set(RunnerFigure.parts(for: mode, pose: pose))
+        }
+        #expect(cheering(.running).contains(.peaceHand))
+        #expect(cheering(.strength).contains(.dumbbell))
+        #expect(cheering(.boxing).isSuperset(of: [.gloveL, .gloveR]))
+        #expect(!cheering(.running).contains(.monsterCan))
+        #expect(cheering(.other).isDisjoint(with: [.peaceHand, .dumbbell]))
+        #expect(cheering(.other).contains(.sparkle))
+        var boxing = RunnerPose()
+        boxing.celebrate(.boxing, progress: 0.25)
+        #expect(boxing.gloveR.height < -20)
+        let lines = Set([WorkoutSummary.Kind.boxing, .running, .strength, .other].map(CompanionLines.celebration))
+        #expect(lines.count == 4)
+    }
+
     @Test func couchStagesFollowTimeAndInvite() {
         let start = Date(timeIntervalSinceReferenceDate: 1_000_000)
         #expect(CouchStage.at(start.addingTimeInterval(10 * 60), since: start, inviting: false) == .scrolling)

@@ -21,6 +21,7 @@ public struct WorkoutSummary: Codable, Equatable, Sendable {
     public enum Kind: String, Codable, Sendable {
         case boxing
         case running
+        case strength
         case other
     }
 
@@ -332,7 +333,7 @@ public enum NeedEngine {
         switch workout.kind {
         case .running: (workout.meters ?? 0) >= rules.celebrateRunMeters
         case .boxing: workout.duration >= rules.celebrateBoxing
-        case .other: false
+        case .strength, .other: false
         }
     }
 

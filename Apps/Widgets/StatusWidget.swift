@@ -62,6 +62,7 @@ struct StatusView: View {
                 energy: entry.energy?.value,
                 need: entry.need,
                 needSince: entry.needSince,
+                date: entry.date,
                 bedtime: entry.bedtime,
                 framing: .head
             )
@@ -78,6 +79,7 @@ struct StatusView: View {
                     energy: entry.energy?.value,
                     need: entry.need,
                     needSince: entry.needSince,
+                    date: entry.date,
                     bedtime: entry.bedtime
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
