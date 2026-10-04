@@ -45,12 +45,27 @@ import Testing
         ]
         let wins = Win.wins(in: workouts, calendar: calendar)
         #expect(wins.map(\.win) == [.boxing, .run5k, .gym, .gym])
-        #expect(wins[0] == EarnedWin(win: .boxing, source: "box", at: at + 3600))
+        let boxingSource = Win.boxing.source(at: at, calendar: calendar)
+        #expect(wins[0] == EarnedWin(win: .boxing, source: boxingSource, at: at + 3600))
         // Two lifts on one day share a source, so the ledger counts the gym once.
         #expect(wins[2].source == wins[3].source)
         let store = GrowthStore(fileURL: nil, deviceID: "t")
         for win in wins { store.record(win.win, source: win.source, at: win.at) }
         #expect(store.ledger.count(.gym) == 1)
+    }
+
+    @Test func boxingEarnsOnceAWeekAndTheRestOnceADay() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo") ?? .gmt
+        let day: TimeInterval = 24 * 60 * 60
+        let boxing = { Win.boxing.source(at: $0, calendar: calendar) }
+        #expect(Win.boxing.cap == .week)
+        #expect(boxing(at) != boxing(at + 7 * day))
+        for win in Win.allCases where win != .boxing {
+            #expect(win.cap == .day)
+            #expect(win.source(at: at, calendar: calendar) != win.source(at: at + day, calendar: calendar))
+        }
+        #expect(Win.run5k.source(at: at, calendar: calendar) != Win.gym.source(at: at, calendar: calendar))
     }
 
     @Test func buyingSpendsCansOnce() throws {
