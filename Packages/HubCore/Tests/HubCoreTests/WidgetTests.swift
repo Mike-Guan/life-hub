@@ -85,6 +85,18 @@ import Testing
         #expect(WidgetSnapshot.read(from: url)?.need == .couchScroll)
         let scrolling = HakuLines.line(.couchScroll, at: date(3, 20), calendar: calendar)
         #expect(WidgetSnapshot.read(from: url)?.line == scrolling)
+        let lifted = WorkoutSummary(id: "lift-7f3a", kind: .strength, start: date(3, 18, 7), end: date(3, 19, 13))
+        bridge.workouts = [lifted]
+        bridge.writeSnapshot(mode: modes, energy: energy, now: date(3, 20), calendar: calendar)
+        let written = try #require(WidgetSnapshot.read(from: url))
+        #expect(written.trainedDay == StateEngine.dayStart(for: date(3, 19), calendar: calendar))
+        #expect(written.ranDay == nil)
+        // Only the day goes into the App Group: no HealthKit id or workout times.
+        let json = try String(contentsOf: url, encoding: .utf8)
+        #expect(!json.contains("lift-7f3a"))
+        let encoded = try HubJSON.encoder().encode([lifted.start, lifted.end])
+        let times = try JSONDecoder().decode([String].self, from: encoded)
+        #expect(times.allSatisfy { !json.contains($0) })
 
         container.inbox.drain { _ in false }
         try container.inbox.post(.mode(change))
