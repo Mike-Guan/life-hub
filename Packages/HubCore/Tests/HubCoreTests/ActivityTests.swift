@@ -98,4 +98,3 @@ import Testing
         #expect(visit?.source == Win.wins(in: [lifted], calendar: calendar).first?.source)
     }
 }
-
