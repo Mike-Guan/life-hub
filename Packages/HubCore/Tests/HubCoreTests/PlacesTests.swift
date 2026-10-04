@@ -55,13 +55,16 @@ import Testing
     @Test func addedPlacesStopAtTheRegionLimit() {
         var settings = PlaceSettings()
         for index in 0..<PlaceSettings.limit {
-            #expect(settings.save(.custom(name: "\(index)", action: .recordOnly, latitude: 0, longitude: 0)))
+            let saved = settings.save(.custom(name: "\(index)", action: .recordOnly, latitude: 0, longitude: 0))
+            #expect(saved)
         }
         #expect(!settings.canAdd)
-        #expect(!settings.save(.custom(name: "多一个", action: .recordOnly, latitude: 0, longitude: 0)))
+        let extra = settings.save(.custom(name: "多一个", action: .recordOnly, latitude: 0, longitude: 0))
+        #expect(!extra)
         var first = settings.places[0]
         first.name = "改名"
-        #expect(settings.save(first))
+        let renamed = settings.save(first)
+        #expect(renamed)
         #expect(settings.places[0].title == "改名")
         settings.remove(id: first.id)
         #expect(settings.canAdd)
