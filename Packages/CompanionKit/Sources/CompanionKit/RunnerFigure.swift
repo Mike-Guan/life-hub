@@ -138,6 +138,15 @@ struct RunnerPose {
     var bagLift: CGFloat = -1
     /// Progress of the off-work animation, 0...1, or -1 when none is playing.
     var offWork: CGFloat = -1
+    /// What HAKU wears from the wardrobe.
+    var outfit = Outfit()
+
+    /// The same pose in `outfit`.
+    func wearing(_ outfit: Outfit) -> RunnerPose {
+        var pose = self
+        pose.outfit = outfit
+        return pose
+    }
     /// 0 = mask up, 1 = pulled down to the chin.
     var maskDrop: CGFloat = 0
     var canOpacity: Double = 1
@@ -407,7 +416,22 @@ struct RunnerFigure: View {
 
     /// Visible parts in back-to-front order.
     nonisolated static func parts(for mode: Mode, pose: RunnerPose) -> [RunnerPart] {
-        if pose.offWorking { return offWorkParts(pose) }
+        var visible = pose.offWorking ? offWorkParts(pose) : modeParts(for: mode, pose: pose)
+        wear(pose.outfit, mode: mode, on: &visible)
+        return RunnerPart.allCases.filter { visible.contains($0) }
+    }
+
+    /// Wardrobe items over the visible parts: striped masks and, at home, the room item.
+    nonisolated private static func wear(_ outfit: Outfit, mode: Mode, on visible: inout Set<RunnerPart>) {
+        if outfit.stripedMask, visible.contains(.maskUp) {
+            visible.remove(.panelLines)
+            visible.insert(.maskStripes)
+        }
+        if outfit.stripedMask, visible.contains(.maskDown) { visible.insert(.maskStripesDown) }
+        if mode == .chill, let room = outfit.room, !visible.contains(.gymBag) { visible.insert(room) }
+    }
+
+    nonisolated private static func modeParts(for mode: Mode, pose: RunnerPose) -> Set<RunnerPart> {
         var visible = baseParts
         switch mode {
         case .work:
@@ -453,11 +477,11 @@ struct RunnerFigure: View {
             if pose.lie > 0 { visible.insert(.pillow) }
             if pose.zzz >= 0 { visible.insert(.zzz) }
         }
-        return RunnerPart.allCases.filter { visible.contains($0) }
+        return visible
     }
 
     /// Work look turning into the chill look as the off-work animation plays, whatever the mode.
-    nonisolated private static func offWorkParts(_ pose: RunnerPose) -> [RunnerPart] {
+    nonisolated private static func offWorkParts(_ pose: RunnerPose) -> Set<RunnerPart> {
         var visible = baseParts.union([.earringNeon])
         let relaxed = pose.offWork >= 0.6
         visible.formUnion(relaxed ? [.eyesChill, .mouthSmile, .monsterCan] : [.eyesWork, .lidsWork, .browsWork])
@@ -465,7 +489,7 @@ struct RunnerFigure: View {
         if pose.maskDrop < 1 { visible.formUnion([.maskUp, .panelLines, .ledLine]) }
         if pose.maskDrop > 0 { visible.insert(.maskDown) }
         if pose.yawn > 0.05 { visible.insert(.mouthYawn) }
-        return RunnerPart.allCases.filter { visible.contains($0) }
+        return visible
     }
 
     nonisolated static let baseParts: Set<RunnerPart> = [
@@ -524,12 +548,13 @@ struct RunnerFigure: View {
             case .eyesChill:
                 // Closed smiling eyes don't blink, but they still look at the door while warming up.
                 RunnerPartView(part: part).offset(x: pose.eyesDx * scale)
-            case .maskUp where pose.offWorking, .panelLines where pose.offWorking, .ledLine where pose.offWorking:
+            case .maskUp where pose.offWorking, .panelLines where pose.offWorking, .ledLine where pose.offWorking,
+                .maskStripes where pose.offWorking:
                 // Off work: the mask slides down to the chin.
                 RunnerPartView(part: part)
                     .offset(y: 12 * pose.maskDrop * scale)
                     .opacity(Double(1 - pose.maskDrop))
-            case .maskDown where pose.offWorking:
+            case .maskDown where pose.offWorking, .maskStripesDown where pose.offWorking:
                 RunnerPartView(part: part).opacity(Double(pose.maskDrop))
             case .ledLine:
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
@@ -601,11 +626,13 @@ struct RunnerFigure: View {
                     .rotationEffect(.degrees(pose.canAngle), anchor: Self.unit(x: 102, y: 136))
                     .offset(x: pose.canOffset.width * scale, y: pose.canOffset.height * scale)
                     .opacity(pose.canOpacity)
+            case .headband:
+                RunnerPartView(part: part, red: pose.outfit.headband)
             case .gloveL:
-                RunnerPartView(part: part)
+                RunnerPartView(part: part, red: pose.outfit.gloves)
                     .offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)
             case .gloveR:
-                RunnerPartView(part: part)
+                RunnerPartView(part: part, red: pose.outfit.gloves)
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
                     .offset(x: pose.gloveR.width * scale, y: pose.gloveR.height * scale)
             case .chainGold:
@@ -642,7 +669,7 @@ struct RunnerFigure: View {
     /// Parts that move with the head.
     private static let headParts: Set<RunnerPart> = [
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .browsWork, .eyesChill,
-        .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines,
+        .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle,
     ]
@@ -669,6 +696,8 @@ struct RunnerFigure: View {
 struct RunnerPartView: View {
     let part: RunnerPart
     var fillOverride: Color?
+    /// Replaces boxing red fills, for wardrobe gloves and headbands.
+    var red: Color?
 
     var body: some View {
         Canvas { context, size in
@@ -677,7 +706,8 @@ struct RunnerPartView: View {
                 var layer = context
                 layer.opacity = ink.opacity
                 if let fill = ink.fill {
-                    layer.fill(ink.path, with: .color(fillOverride ?? fill))
+                    let swapped = fill == RunnerPalette.boxingRed ? red ?? fill : fill
+                    layer.fill(ink.path, with: .color(fillOverride ?? swapped))
                 }
                 if let stroke = ink.stroke {
                     let style = StrokeStyle(
@@ -782,12 +812,14 @@ public struct CompanionPortrait: View {
     let needSince: Date?
     let date: Date
     let bedtime: Bedtime
+    let wardrobe: Wardrobe
     let framing: Framing
 
     // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
     /// - Parameters:
     ///   - needSince: when `need` started; after 30 minutes of couch scrolling HAKU eyes the gym bag.
     ///   - date: the moment shown, such as a widget timeline entry's date.
+    ///   - wardrobe: what HAKU wears from the shop and keepsakes.
     public init(
         mode: Mode,
         energy: Double? = nil,
@@ -795,6 +827,7 @@ public struct CompanionPortrait: View {
         needSince: Date? = nil,
         date: Date = .now,
         bedtime: Bedtime = .off,
+        wardrobe: Wardrobe = Wardrobe(),
         framing: Framing = .full
     ) {
         self.mode = mode
@@ -803,6 +836,7 @@ public struct CompanionPortrait: View {
         self.needSince = needSince
         self.date = date
         self.bedtime = bedtime
+        self.wardrobe = wardrobe
         self.framing = framing
     }
 
@@ -825,8 +859,11 @@ public struct CompanionPortrait: View {
     }
 
     private var figure: RunnerFigure {
-        guard bedtime == .off else { return RunnerFigure(mode: mode, pose: RunnerPose.bedtimeStill()) }
-        var pose = RunnerPose(face: EnergyFace(energy: energy), need: need)
+        let outfit = Outfit(wardrobe)
+        guard bedtime == .off else {
+            return RunnerFigure(mode: mode, pose: RunnerPose.bedtimeStill().wearing(outfit))
+        }
+        var pose = RunnerPose(face: EnergyFace(energy: energy), need: need).wearing(outfit)
         if peeking {
             pose.bagLift = 0
             pose.eyesDx = -3
