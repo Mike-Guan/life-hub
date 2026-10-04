@@ -6,6 +6,7 @@ struct HomeView: View {
     /// A setup problem from the app, shown with the store errors.
     var extraError: String?
     var bedtime: BedtimeSchedule = .standard
+    var rules: ModeRules = .standard
     /// What RUNNER acts out now, from the iOS app's need tracker.
     var need: NeedReading?
     /// A one-off animation for RUNNER, such as celebrating a workout.
@@ -81,7 +82,7 @@ struct HomeView: View {
         }
         .background(Toy.paper.ignoresSafeArea())
         .modeSwitchHaptic(trigger: store.current)
-        .scheduleAutoMode(store)
+        .scheduleAutoMode(store, rules: rules)
     }
 
     // The tracker refreshes on open and on place events, so a need can end while the app stays open.

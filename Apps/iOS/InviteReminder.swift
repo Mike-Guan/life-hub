@@ -23,7 +23,7 @@ enum InviteReminder {
         let at = NeedEngine.inviteTime(for: reading, now: now, lastInviteAt: log.lastSentAt, bedtime: bedtime)
         if let reading, let at {
             let content = UNMutableNotificationContent()
-            content.title = "RUNNER"
+            content.title = "HAKU"
             content.body = NeedEngine.inviteText(for: reading.need)
             content.sound = .default
             content.categoryIdentifier = category

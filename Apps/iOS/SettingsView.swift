@@ -7,6 +7,7 @@ import SwiftUI
 /// App settings: the bedtime reminder time, the places that switch mode, money and the Screen Time watch.
 struct SettingsView: View {
     @Binding var bedtime: BedtimeSchedule
+    @Binding var rules: ModeRules
     @Binding var places: PlaceSettings
     @Binding var budget: BudgetSettings
     let monitor: PlaceMonitor
@@ -39,11 +40,25 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("睡觉提醒")
                     .font(Toy.body(16, weight: .heavy))
-                DatePicker("睡觉", selection: time(\.startMinute), displayedComponents: .hourAndMinute)
+                DatePicker("睡觉", selection: time($bedtime.startMinute), displayedComponents: .hourAndMinute)
                     .font(Toy.body(15))
-                DatePicker("起床", selection: time(\.endMinute), displayedComponents: .hourAndMinute)
+                DatePicker("起床", selection: time($bedtime.endMinute), displayedComponents: .hourAndMinute)
                     .font(Toy.body(15))
-                Text("睡觉时间到了发一条通知，RUNNER 变困，一直到起床时间。只提醒一次。")
+                Text("睡觉时间到了发一条通知，HAKU 变困，一直到起床时间。只提醒一次。")
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.muted)
+            }
+            .padding(16)
+            .toyCard()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("上班时段")
+                    .font(Toy.body(16, weight: .heavy))
+                DatePicker("上班", selection: time($rules.workStartMinute), displayedComponents: .hourAndMinute)
+                    .font(Toy.body(15))
+                DatePicker("下班", selection: time($rules.workEndMinute), displayedComponents: .hourAndMinute)
+                    .font(Toy.body(15))
+                Text("工作日这段时间自动切到上班。下班前 \(ModeRules.offWorkLead) 分钟提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
             }
@@ -141,7 +156,7 @@ struct SettingsView: View {
                 }
                 .font(Toy.body(13, weight: .heavy))
             }
-            Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，RUNNER 也瘫在沙发上。App 只知道到没到，看不到你用了多久。")
+            Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，HAKU 也瘫在沙发上。App 只知道到没到，看不到你用了多久。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             if let screenTimeError {
@@ -218,13 +233,13 @@ struct SettingsView: View {
     }
 
     // The picker edits a Date; only its hour and minute are kept.
-    private func time(_ field: WritableKeyPath<BedtimeSchedule, Int>) -> Binding<Date> {
+    private func time(_ minute: Binding<Int>) -> Binding<Date> {
         Binding {
-            let minute = bedtime[keyPath: field]
-            return Calendar.current.date(from: DateComponents(hour: minute / 60, minute: minute % 60)) ?? .now
+            let value = minute.wrappedValue
+            return Calendar.current.date(from: DateComponents(hour: value / 60, minute: value % 60)) ?? .now
         } set: { date in
             let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
-            bedtime[keyPath: field] = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+            minute.wrappedValue = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
         }
     }
 }

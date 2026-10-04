@@ -17,6 +17,7 @@ enum BedtimeReminder {
         center.setNotificationCategories([
             UNNotificationCategory(identifier: category, actions: [], intentIdentifiers: []),
             UNNotificationCategory(identifier: InviteReminder.category, actions: [], intentIdentifiers: []),
+            UNNotificationCategory(identifier: OffWorkReminder.category, actions: [], intentIdentifiers: []),
         ])
         do {
             guard try await center.requestAuthorization(options: [.alert, .sound]) else {
@@ -24,7 +25,7 @@ enum BedtimeReminder {
             }
             let content = UNMutableNotificationContent()
             content.title = "该睡了"
-            content.body = "RUNNER 已经在打哈欠了。"
+            content.body = "HAKU 已经在打哈欠了。"
             content.sound = .default
             content.categoryIdentifier = category
             let trigger = UNCalendarNotificationTrigger(dateMatching: schedule.startComponents, repeats: true)
