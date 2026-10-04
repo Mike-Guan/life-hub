@@ -133,13 +133,13 @@ struct LifeHubApp: App {
             refreshNeeds()
         }
         .onChange(of: budget) { budget.store(in: AppGroup.defaults) }
-        .sheet(isPresented: $showsSettings) {
+        .sheet(isPresented: $showsSettings, onDismiss: showNextUnboxing) {
             SettingsView(bedtime: $bedtime, rules: $rules, places: $places, budget: $budget, monitor: placeMonitor)
         }
-        .fullScreenCover(isPresented: $showsShop) {
+        .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
             ShopView(growth: growth, wardrobe: $wardrobe)
         }
-        .fullScreenCover(isPresented: $showsWardrobe) {
+        .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
             WardrobeView(growth: growth, wardrobe: $wardrobe, mode: store.current)
         }
         .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in

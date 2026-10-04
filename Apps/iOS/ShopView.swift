@@ -206,7 +206,7 @@ struct ShopView: View {
         do {
             try growth.buy(item)
             buyError = growth.lastError
-            unboxing = UnboxLog.next(in: growth.ledger)
+            unboxing = growth.ledger.unboxings(seen: UnboxLog.seen).last { $0.itemID == item.id }
         } catch {
             buyError =
                 switch error {

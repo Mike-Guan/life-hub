@@ -35,7 +35,7 @@ struct UnboxSheet: View {
                 showsBubble: true
             )
             .frame(height: 380)
-            .toyCard(fill: item.slot.tileColor)
+            .toyCard()
 
             Spacer(minLength: 0)
             Button {
