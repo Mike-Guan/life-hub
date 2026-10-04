@@ -9,6 +9,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Gym and run days (Issue #49): Tuesday to Thursday after work HAKU wears the gym bag until you
+  train; Saturday from 17:00 it warms up for the run. A new 健身房 place in Settings; at the gym it lifts,
+  at the boxing gym it hits the bag. The couch invite now offers the gym or a walk. (HAKU's looks for
+  these come in the UI thread's next PR.)
 - Off-work notice: on work days, 15 minutes before work hours end, "快下班了" from HAKU in its chill
   outfit. Work hours (default 9:30 to 18:30) can now be changed in Settings; automatic switching and
   the notice follow them.
