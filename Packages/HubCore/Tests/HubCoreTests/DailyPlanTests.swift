@@ -107,4 +107,10 @@ import Testing
         DailyPlan.clear(in: defaults)
         #expect(DailyPlan.stored(in: defaults) == nil)
     }
+
+    @Test func eachTaskLinksToItsDayInDaily() throws {
+        let task = DailyTask(id: "A B", date: "2026-10-05", start: 600, end: 660, recurrence: .daily)
+        let occurrence = try #require(task.occurrence(on: date(6, 9), calendar: calendar))
+        #expect(occurrence.link?.absoluteString == "dailywidget://task?date=2026-10-06&id=A%20B")
+    }
 }

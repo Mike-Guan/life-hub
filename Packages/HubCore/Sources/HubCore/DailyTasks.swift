@@ -135,6 +135,8 @@ public struct DailyOccurrence: Codable, Equatable, Sendable {
     /// Whether the task was created before it starts, not added on the spot.
     public var planned: Bool
     public var prop: DailyProp
+    /// Opens Daily Widget on this task's day, `nil` when the link can't be built.
+    public var link: URL?
 
     public init(
         id: String,
@@ -144,9 +146,11 @@ public struct DailyOccurrence: Codable, Equatable, Sendable {
         done: Bool,
         focus: Bool,
         planned: Bool,
-        prop: DailyProp = .note
+        prop: DailyProp = .note,
+        link: URL? = nil
     ) {
         self.prop = prop
+        self.link = link
         self.id = id
         self.title = title
         self.start = start
@@ -175,7 +179,8 @@ extension DailyTask {
             done: repeating ? completedDates.contains(key) : done,
             focus: repeating ? focusDates.contains(key) : focus,
             planned: createdAt.map { $0 < at(start) } ?? false,
-            prop: DailyProp(category: category)
+            prop: DailyProp(category: category),
+            link: DailyAgenda.link(id: id, day: key)
         )
     }
 
@@ -314,8 +319,8 @@ public struct DailyPlan: Codable, Equatable, Sendable {
 
     /// When the cues start or end, for widget timelines.
     public var times: [Date] {
-        occurrences.flatMap {
-            [$0.start.addingTimeInterval(-DailyAgenda.soonLead), $0.start, $0.start.addingTimeInterval(DailyAgenda.nowLasts)]
+        occurrences.flatMap { task in
+            [-DailyAgenda.soonLead, 0, DailyAgenda.nowLasts].map { task.start.addingTimeInterval($0) }
         }
     }
 
@@ -347,6 +352,16 @@ extension DailyAgenda {
     public static let inviteLead: TimeInterval = 60 * 60
 
     // The Lock Screen shows only the time: others can see it (PRD section 15).
+    // Daily reads only the date for now; the id is there for when it opens the task itself.
+    /// Daily Widget's link to task `id` on `day` ("yyyy-MM-dd").
+    public static func link(id: String, day: String) -> URL? {
+        var parts = URLComponents()
+        parts.scheme = "dailywidget"
+        parts.host = "task"
+        parts.queryItems = [URLQueryItem(name: "date", value: day), URLQueryItem(name: "id", value: id)]
+        return parts.url
+    }
+
     /// "下一件 18:00", with the title after it when `title` is true.
     public static func nextLine(_ task: DailyOccurrence, title: Bool, calendar: Calendar = .current) -> String {
         let parts = calendar.dateComponents([.hour, .minute], from: task.start)

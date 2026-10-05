@@ -67,12 +67,19 @@ struct HomeView: View {
 
                 // PRD section 15: the title shows here only, never on the Lock Screen.
                 TimelineView(.everyMinute) { context in
-                    if let next = daily?.next(after: context.date) {
-                        Text(DailyAgenda.nextLine(next, title: true))
+                    if let next = daily?.next(after: context.date), let link = next.link {
+                        Link(destination: link) {
+                            HStack {
+                                Text(DailyAgenda.nextLine(next, title: true))
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                            }
                             .font(Toy.body(15, weight: .heavy))
+                            .foregroundStyle(Toy.ink)
                             .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
+                            .frame(minHeight: 44)
                             .toyCard(radius: 12, shadow: 3)
+                        }
                     }
                 }
 
