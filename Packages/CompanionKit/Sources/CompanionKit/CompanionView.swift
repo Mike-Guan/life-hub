@@ -942,6 +942,12 @@ private struct SpeechBubble: View {
                     .frame(height: 180)
                     .toyCard()
             }
+            ForEach(DailyScene.allCases, id: \.self) { scene in
+                let cue = DailyCue(stage: .now, prop: .note, scene: scene, id: "preview-\(scene)")
+                CompanionView(mode: .chill, daily: cue)
+                    .frame(height: 180)
+                    .toyCard()
+            }
             CompanionView(mode: .work, daily: DailyCue(stage: .now, prop: .note, id: "preview-now"))
                 .frame(height: 180)
                 .toyCard()

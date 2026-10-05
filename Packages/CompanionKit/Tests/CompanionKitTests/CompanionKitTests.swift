@@ -491,6 +491,27 @@ import Testing
         #expect(CompanionView.newCue(soon, stage: .now, last: "") == nil)
     }
 
+    @Test func hakuActsOutTheTasksScene() {
+        var call = RunnerPose(mode: .work, time: 0, face: .mid, react: 0)
+        call.cue(DailyCue(stage: .soon, prop: .note, scene: .call, id: "a"), time: 5, slap: nil)
+        let callParts = Set(RunnerFigure.parts(for: .work, pose: call))
+        #expect(callParts.isSuperset(of: [.phoneEar, .talkDots]))
+        #expect(callParts.isDisjoint(with: [.stickyNote, .headset, .cupR]))
+        var tapping = RunnerPose(mode: .chill, time: 0, face: .mid, react: 0)
+        tapping.cue(DailyCue(stage: .soon, prop: .bag, scene: .grocery, id: "a"), time: 1, slap: nil)
+        #expect(!RunnerFigure.parts(for: .chill, pose: tapping).contains(.toteBag))
+        var run = RunnerPose(mode: .chill, time: 0, face: .mid, react: 0)
+        run.cue(DailyCue(stage: .now, prop: .gymBag, scene: .run, id: "b"), time: 0.3, slap: nil)
+        #expect(run.lean == 8 && run.bounce < 0)
+        for scene in DailyScene.allCases {
+            for part in scene.parts {
+                #expect(SceneMove.of(part, in: scene, at: 1.3) != nil)
+            }
+            #expect(scene.parts.isDisjoint(with: scene.hides))
+        }
+        #expect(SceneMove.of(.camera, in: .coffee, at: 0) == nil)
+    }
+
     @Test func hakuCheersAPlannedTaskDone() {
         var focus = RunnerPose(mode: .work, time: 0, face: .mid, react: 0)
         focus.cheerFocus(progress: 0.1)

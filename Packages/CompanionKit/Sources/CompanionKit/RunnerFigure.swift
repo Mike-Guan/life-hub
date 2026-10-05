@@ -230,6 +230,14 @@ struct RunnerPose {
     var lidClose: CGFloat = 0
     /// What HAKU holds up for a planned Daily Widget task, or nil.
     var dailyProp: DailyProp?
+    /// What HAKU acts out instead of holding up the prop, or nil.
+    var dailyScene: DailyScene?
+    /// Seconds into the scene's loop.
+    var sceneTime: CGFloat = 0
+    /// Forward lean of the whole figure in degrees, around the feet.
+    var lean: Double = 0
+    /// Vertical hop of the whole figure, in SVG units; negative is up.
+    var bounce: CGFloat = 0
     /// 0 = the planned task's prop down (bag on the floor, note out of view), 1 = held up.
     var propRaise: CGFloat = 0
     /// Tapping the watch before a planned task.
@@ -599,6 +607,8 @@ struct RunnerPose {
     /// prop held up, with the sticky note slapped on the screen at `slap` (0..<1), or nil when it isn't.
     mutating func cue(_ cue: DailyCue, time t: TimeInterval, slap: Double?) {
         dailyProp = cue.prop
+        dailyScene = cue.scene
+        sceneTime = CGFloat(t)
         noteSlap = slap.map { CGFloat($0) } ?? -1
         propRaise = 1
         if cue.stage == .soon {
@@ -611,7 +621,11 @@ struct RunnerPose {
             }
             propRaise = Self.ramp(c, from: 2.4, to: 2.9) * (1 - Self.ramp(c, from: 9.4, to: 10))
         }
-        if cue.prop == .gymBag { bagLift = max(bagLift, propRaise) }
+        if let scene = cue.scene {
+            playScene(scene, time: CGFloat(t))
+        } else if cue.prop == .gymBag {
+            bagLift = max(bagLift, propRaise)
+        }
     }
 
     /// Cheering the day's focus done at `progress` (0..<1): the mask LED flares, then three fist pumps with the
@@ -1016,7 +1030,8 @@ struct RunnerFigure: View {
                         StretchArms(raise: pose.armsUp, sleeve: Self.jacketColor(mode))
                     }
                 }
-                .offset(x: pose.shift * scale)
+                .rotationEffect(.degrees(pose.lean), anchor: Self.unit(x: 60, y: 140))
+                .offset(x: pose.shift * scale, y: pose.bounce * scale)
                 .scaleEffect(
                     x: (1 - 0.03 * pose.stretch) * pose.turnSqueeze,
                     y: (1 + 0.06 * pose.stretch) * max(pose.popOut, 0.001),
@@ -1087,6 +1102,14 @@ struct RunnerFigure: View {
     /// The planned task's prop, and the watch while HAKU taps it.
     nonisolated private static func holdUp(_ prop: DailyProp, pose: RunnerPose, on visible: inout Set<RunnerPart>) {
         if pose.watchTap { visible.formUnion([.watchWrist, .tapHand]) }
+        if let scene = pose.dailyScene {
+            if pose.propRaise > 0 {
+                visible.subtract(scene.hides)
+                visible.formUnion(scene.parts)
+            }
+            visible.remove(.monsterCan)
+            return
+        }
         switch prop {
         case .headphones: visible.formUnion(headsetParts)
         case .gymBag: visible.insert(.gymBag)
@@ -1318,6 +1341,28 @@ struct RunnerFigure: View {
     @ViewBuilder private func layer(_ part: RunnerPart, scale: CGFloat) -> some View {
         let isHead = Self.headParts.contains(part)
         Group {
+            if pose.propRaise > 0, let scene = pose.dailyScene,
+                let move = SceneMove.of(part, in: scene, at: pose.sceneTime)
+            {
+                RunnerPartView(part: part)
+                    .scaleEffect(move.scale, anchor: move.anchor)
+                    .rotationEffect(.degrees(move.angle), anchor: move.anchor)
+                    .offset(x: move.offset.width * scale, y: move.offset.height * scale)
+                    .opacity(move.opacity * Double(pose.propRaise))
+            } else {
+                partView(part, scale: scale)
+            }
+        }
+        .offset(y: (isHead ? pose.headDy : 0) * scale)
+        .offset(y: isHead || Self.chinParts.contains(part) ? 30 * pose.slump * scale : 0)
+        .rotationEffect(
+            .degrees(isHead ? -14 * Double(pose.lie) + pose.headTilt : 0),
+            anchor: Self.unit(x: 60, y: 96)
+        )
+    }
+
+    @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat) -> some View {
+        Group {
             switch part {
             case .eyesWork, .lidsWork, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
                 RunnerPartView(part: part)
@@ -1515,12 +1560,6 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
             }
         }
-        .offset(y: (isHead ? pose.headDy : 0) * scale)
-        .offset(y: isHead || Self.chinParts.contains(part) ? 30 * pose.slump * scale : 0)
-        .rotationEffect(
-            .degrees(isHead ? -14 * Double(pose.lie) + pose.headTilt : 0),
-            anchor: Self.unit(x: 60, y: 96)
-        )
     }
 
     private static let dots = RunnerText(
@@ -1545,7 +1584,7 @@ struct RunnerFigure: View {
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
-        .scratchHand, .hairTuft, .eyesClosed,
+        .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
