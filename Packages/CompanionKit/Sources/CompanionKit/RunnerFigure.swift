@@ -205,6 +205,10 @@ struct RunnerPose {
     var rubEye: CGFloat = -1
     /// Rise of a hummed music note, 0...1, or -1 when hidden.
     var hum: CGFloat = -1
+    /// Progress of scratching the head, 0...1, or -1 when not scratching.
+    var scratch: CGFloat = -1
+    /// Height of the tuft of hair left sticking up after a scratch, 0 = settled, 1 = upright.
+    var tuft: CGFloat = 0
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -360,6 +364,12 @@ struct RunnerPose {
                 canOffset = CGSize(width: -6, height: -10)
                 emptyCan = phase >= 1.2
                 eyesDx = emptyCan ? 3 : 0
+            }
+            // Every 18 s: a scratch of the head, then a tuft of hair that settles slowly.
+            let itch = t.truncatingRemainder(dividingBy: 18)
+            if plain, r == 0, !emptyCan, itch >= 5, itch < 12 {
+                if itch < 7 { scratch = CGFloat((itch - 5) / 2) }
+                tuft = Self.ramp(CGFloat(itch), from: 5.5, to: 7) * (1 - Self.ramp(CGFloat(itch), from: 7, to: 12))
             }
         case .boxing:
             // Guard bounce every 0.6 s, gloves alternate; tap = right jab.
@@ -866,6 +876,8 @@ struct RunnerFigure: View {
                     visible.subtract([.eyesChill, .mouthSmile])
                     visible.formUnion(deadpanEyes)
                 }
+                if pose.scratch >= 0 { visible.insert(.scratchHand) }
+                if pose.tuft > 0 { visible.insert(.hairTuft) }
             case .boxing:
                 visible.formUnion(boxingParts)
             case .money:
@@ -1072,6 +1084,12 @@ struct RunnerFigure: View {
             case .mouthYawn:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 0.7 + 0.3 * pose.yawn, y: pose.yawn, anchor: Self.unit(x: 60, y: 85))
+            case .scratchHand:
+                RunnerPartView(part: part)
+                    .offset(x: 1.5 * sin(pose.scratch * 8 * .pi) * scale, y: -scale)
+            case .hairTuft:
+                RunnerPartView(part: part)
+                    .scaleEffect(x: 1, y: max(pose.tuft, 0.001), anchor: Self.unit(x: 51, y: 31))
             case .musicNote:
                 // Floats up and sways a little as it fades.
                 RunnerPartView(part: part)
@@ -1227,6 +1245,7 @@ struct RunnerFigure: View {
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
+        .scratchHand, .hairTuft,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.

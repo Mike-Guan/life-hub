@@ -20,6 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- At home HAKU now and then scratches its head and a tuft of hair sticks up, then slowly settles.
 - When HAKU's 元气 is high (good sleep, sunlight) a little music note now and then floats up as it hums.
 - When HAKU's 元气 is low (short sleep, no sun) it now and then rubs an eye with its fist.
 - Tap HAKU three times within 30 seconds and it says "……干嘛。" and turns its back on you for a moment.
