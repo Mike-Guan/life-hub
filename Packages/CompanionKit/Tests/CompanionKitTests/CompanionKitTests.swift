@@ -318,6 +318,18 @@ import Testing
         #expect(peeking.eyesDx != plain.eyesDx)
     }
 
+    @Test func noticeTurnsToYouHalfABeatLate() {
+        var start = RunnerPose()
+        start.notice(progress: 0.3)
+        #expect(start.eyesDx == 3 && start.headDy == 0)
+        var turning = RunnerPose()
+        turning.notice(progress: 0.75)
+        #expect(turning.eyesDx == 0 && turning.headDy < 0)
+        var done = RunnerPose()
+        done.notice(progress: 1)
+        #expect(done.eyesDx == 0 && done.headDy == 0)
+    }
+
     @Test func sundayAfternoonIsForTidying() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))

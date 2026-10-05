@@ -59,6 +59,7 @@ public struct CompanionView: View {
     // Day HAKU last gave up on leaving, shared by every CompanionView so it plays once a day.
     @AppStorage("companion.lastStayHome") private var lastStayHome = ""
     @State private var swapStart: Date?
+    @State private var noticeStart: Date?
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -124,6 +125,7 @@ public struct CompanionView: View {
             say(nil)
         }
         .onAppear {
+            noticeStart = .now
             if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
             playEventIfNew()
             if invite != nil { startInvite() }
@@ -132,6 +134,9 @@ public struct CompanionView: View {
             if new != nil { startInvite() }
         }
         .onChange(of: event) { _, _ in playEventIfNew() }
+        .onChange(of: scenePhase) { _, new in
+            if new == .active { noticeStart = .now }
+        }
         .onChange(of: moment) { _, _ in
             pop += 1
             swapStart = .now
@@ -289,6 +294,11 @@ public struct CompanionView: View {
         }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
         if let progress = unlock(at: time) { pose.unbox(progress: CGFloat(progress)) }
+        if let progress = Self.progress(since: noticeStart, at: time, duration: Self.noticeDuration),
+            life != .nap, !stillOneOff(at: time), celebration(at: time) == nil
+        {
+            pose.notice(progress: progress)
+        }
         return pose
     }
 
@@ -342,6 +352,7 @@ public struct CompanionView: View {
     private static let unlockDuration = 2.8
     private static let stayHomeDuration = 3.2
     private static let swapDuration = 0.5
+    private static let noticeDuration = 0.9
 
     /// The celebration id to play for `event`, or nil when there is none or it already played.
     nonisolated static func newCelebration(_ event: CompanionEvent?, last: String) -> String? {

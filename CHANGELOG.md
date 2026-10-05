@@ -21,6 +21,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU's eyes drift off to one side now and then and come back, so it looks like it has its own
   thoughts.
+- When you open the app, HAKU is looking elsewhere and turns to you half a beat late. A napping HAKU
+  doesn't.
 - When HAKU has waited at the door long enough on a work-day morning, it gives up once: headphones off,
   back on the sofa, "……今天在家？". It plays when the 90-minute wait ends with you still at home, the
   next time you open the app during work hours.
