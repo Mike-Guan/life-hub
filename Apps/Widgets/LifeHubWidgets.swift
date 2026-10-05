@@ -35,6 +35,8 @@ struct HubEntry: TimelineEntry {
     var nextTask: String?
     /// The Daily task starting soon or now at `date`, whose prop HAKU holds up.
     var daily: DailyCue?
+    /// The place Mike just left, while HAKU walks from it.
+    var walking: HubPlace.Kind?
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
@@ -91,7 +93,8 @@ struct HubProvider: TimelineProvider {
         let slots = WidgetSnapshot.slotDates(after: now)
         let daily = DailyPlan.stored(in: AppGroup.defaults)
         let dailyTimes = daily?.times ?? []
-        let groups: [[Date]] = [snapshot?.needTimes ?? [], starts, walk, office, home, slots, dailyTimes]
+        let placeWalk = [PlaceWalk.walk(in: presence, now: now)?.until].compactMap { $0 }
+        let groups: [[Date]] = [snapshot?.needTimes ?? [], starts, walk, office, home, slots, dailyTimes, placeWalk]
         let needTimes = groups.flatMap { $0 }
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
@@ -139,7 +142,8 @@ struct HubProvider: TimelineProvider {
                 weekLine: ChangeEngine.sundayLine(times: changes, now: date),
                 offWork: snapshot?.offWorkLine(at: date),
                 nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false, now: date) },
-                daily: daily?.cue(at: date)
+                daily: daily?.cue(at: date),
+                walking: PlaceWalk.walk(in: presence, now: date)?.from
             )
         }
     }

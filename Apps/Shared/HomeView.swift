@@ -96,6 +96,7 @@ struct HomeView: View {
                         vitals: VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: context.date),
                         event: event ?? sit?.stretched(at: context.date) ?? stayHome(at: context.date) ?? dailyDone,
                         daily: daily?.cue(at: context.date),
+                        walking: activitySignals.flatMap { PlaceWalk.walk(in: $0.presence, now: context.date)?.from },
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
                         bedtime: bedtime.state(at: context.date),

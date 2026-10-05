@@ -70,6 +70,7 @@ struct StatusView: View {
                 bedtime: entry.bedtime,
                 wardrobe: entry.wardrobe,
                 daily: entry.daily,
+                walking: entry.walking,
                 framing: .head
             )
         } else {
@@ -92,7 +93,8 @@ struct StatusView: View {
                     date: entry.date,
                     bedtime: entry.bedtime,
                     wardrobe: entry.wardrobe,
-                    daily: entry.daily
+                    daily: entry.daily,
+                    walking: entry.walking
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Text("\(mode.code) MODE").font(Toy.display(14))
