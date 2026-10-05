@@ -97,6 +97,13 @@ import Testing
         #expect(decide(.leftOffice, log((.money, .manual, date(5, 9))), at: date(5, 18, 40)) == nil)
     }
 
+    @Test func leavingTheOfficeBefore1730KeepsWork() {
+        let day = log((.work, .location, date(5, 9)))
+        #expect(decide(.leftOffice, day, at: date(5, 12, 30)) == nil)
+        #expect(decide(.leftOffice, day, at: date(5, 17, 29)) == nil)
+        #expect(decide(.leftOffice, day, at: date(5, 17, 30))?.mode == .chill)
+    }
+
     @Test func addedPlacesSwitchUnlessHeld() {
         let studio = ModeTrigger.enteredPlace(.money, name: "工作室")
         let decision = decide(studio, log((.chill, .schedule, date(3, 14))), at: date(3, 15))

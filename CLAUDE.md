@@ -88,7 +88,7 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   are separate types. Never derive one by overloading the other.
 - Manual mode changes always win. Automatic sources (Focus filter, calendar, geofence)
   may suggest, or switch only under rules Mike enabled; no auto-switch for 2h after a manual change.
-  The clock never switches the mode: work starts by arriving at the office, ends by leaving it.
+  The clock never switches the mode: work starts by arriving at the office, ends by leaving it from 17:30.
 - Every ModeChange is stored with its source.
 - Exception: entering the boxing gym geofence (CLMonitor, ~100 m) switches straight to boxing with no
   prompt, even within the 2h window. Leaving after 30+ min restores the previous mode unless Mike
@@ -196,3 +196,4 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   batch, 2 to 4 weeks with no new features, only HAKU-aliveness work and device bugs.
 - 2026-10-05: Mike approved the nudge back-off: an invite ignored 3 times in a row pauses for 7 days,
   with one line and no catch-up; uncertain signals are never counted as ignored.
+- 2026-10-05: Mike: leaving the office ends work only from 17:30; an earlier leave (lunch) keeps 上班.

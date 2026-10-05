@@ -223,6 +223,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Leaving the office switches to 下班 Chill only from 17:30. Stepping out earlier, such as for lunch,
+  keeps 上班.
 - Walking past a place no longer leaves HAKU in that mode: leaving within 3 minutes of arriving puts
   the earlier mode back. A GPS blip that leaves and returns within 3 minutes keeps the stay going, so
   gym time and office time aren't cut short.

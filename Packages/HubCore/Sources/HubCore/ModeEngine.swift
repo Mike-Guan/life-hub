@@ -137,6 +137,9 @@ public enum ModeEngine {
 
         case .leftOffice:
             guard !isHeld(changes, now: now, rules: rules), current?.mode == .work else { return nil }
+            // Mike, 2026-10-05: stepping out for lunch isn't the end of work; only a leave from 17:30 is.
+            let parts = calendar.dateComponents([.hour, .minute], from: now)
+            guard (parts.hour ?? 0) * 60 + (parts.minute ?? 0) >= offWorkFromMinute else { return nil }
             return ModeDecision(mode: .chill, source: .location, reason: "离开公司了")
 
         case .enteredPlace(let mode, let name):
@@ -158,6 +161,9 @@ public enum ModeEngine {
             return ModeDecision(mode: mode, source: .location, reason: "只是路过", tag: before?.tag)
         }
     }
+
+    /// Leaving the office ends work only from this minute after midnight.
+    public static let offWorkFromMinute = 17 * 60 + 30
 
     private static func isGymVisit(_ change: ModeChange) -> Bool {
         change.mode == .boxing && change.source == .location
