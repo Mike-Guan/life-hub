@@ -24,6 +24,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU acts out a Daily Widget task by its title in the 15 minutes before it starts: sipping coffee, eating,
+  typing on a laptop for a meeting, a phone call, a grocery tote, shopping bags, cooking, lifting, running, a
+  stroll in the sun, a camera, a wave for friends, hair clippers and a sore cheek for the doctor. Titles that
+  match none keep the category prop.
 - HAKU reacts to planned Daily Widget tasks: 15 minutes before, it taps its watch and holds up the task's prop
   (headphones, shopping bag, gym bag or a sticky note); at the start it slaps a sticky note on the screen; when a
   task is done it gives a peace sign, or for the day's focus flares its mask and pumps its fist.

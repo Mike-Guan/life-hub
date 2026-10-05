@@ -275,12 +275,15 @@ public struct DailyCue: Equatable, Sendable {
 
     public var stage: Stage
     public var prop: DailyProp
+    /// What HAKU acts out instead of holding up the prop, when the title names one.
+    public var scene: DailyScene?
     /// The occurrence id, so the start plays once.
     public var id: String
 
-    public init(stage: Stage, prop: DailyProp, id: String) {
+    public init(stage: Stage, prop: DailyProp, scene: DailyScene? = nil, id: String) {
         self.stage = stage
         self.prop = prop
+        self.scene = scene
         self.id = id
     }
 }
@@ -305,10 +308,10 @@ public struct DailyPlan: Codable, Equatable, Sendable {
     public func cue(at now: Date) -> DailyCue? {
         for task in occurrences where !task.done {
             if now >= task.start.addingTimeInterval(-DailyAgenda.soonLead), now < task.start {
-                return DailyCue(stage: .soon, prop: task.prop, id: task.id)
+                return DailyCue(stage: .soon, prop: task.prop, scene: DailyScene(title: task.title), id: task.id)
             }
             if now >= task.start, now < task.start.addingTimeInterval(DailyAgenda.nowLasts) {
-                return DailyCue(stage: .now, prop: task.prop, id: task.id)
+                return DailyCue(stage: .now, prop: task.prop, scene: DailyScene(title: task.title), id: task.id)
             }
         }
         return nil
