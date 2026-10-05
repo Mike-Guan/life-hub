@@ -54,6 +54,23 @@ import Testing
         #expect(home(since: night, mode: .money, at: date(5, 8)) == nil)
     }
 
+    @Test func hakuGivesUpWaitingOnceTheWaitEnds() {
+        func event(since: Date, manualAt: Date? = nil, mode: Mode? = .chill, at now: Date) -> CompanionEvent? {
+            let signals = HomeSignals(since: since, workedToday: 0, manualAt: manualAt)
+            return MomentEngine.stayHome(mode: mode, signals: signals, now: now, calendar: calendar)
+        }
+        let night = date(4, 22)
+        #expect(event(since: night, at: date(5, 10, 59)) == nil)
+        #expect(event(since: night, at: date(5, 11)) == .stayHome(id: "2026-10-05"))
+        #expect(event(since: night, at: date(5, 15)) == .stayHome(id: "2026-10-05"))
+        // Not after work hours, on a day off, in another mode, or when Mike only got home later.
+        #expect(event(since: night, at: date(5, 18, 30)) == nil)
+        #expect(event(since: night, manualAt: date(5, 8), at: date(5, 12)) == nil)
+        #expect(event(since: night, mode: .work, at: date(5, 12)) == nil)
+        #expect(event(since: date(5, 11, 30), at: date(5, 12)) == nil)
+        #expect(event(since: date(3, 22), at: date(4, 12)) == nil)
+    }
+
     @Test func aLongWorkDayComesHomeCollapsed() {
         let arrived = date(5, 19)
         let long = MomentEngine.longWorkDay
