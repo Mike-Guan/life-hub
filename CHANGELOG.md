@@ -20,6 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- A napping HAKU now and then mumbles in its sleep: a small "…" floats up instead of the Z z z.
 - While vibe coding HAKU now and then stops typing, stretches with its hands up and goes back to the keys.
 - At work HAKU now and then nods twice to the music, stops for a beat and pushes its headset back into place.
 - Open the app after half a day away and HAKU looks up at you slowly, as if to say "oh, you're here". No line.

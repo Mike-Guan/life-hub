@@ -380,6 +380,15 @@ import Testing
         #expect(done.eyesDy == 0 && done.headDy == 0)
     }
 
+    @Test func aNapMumblesNowAndThen() {
+        let snoring = RunnerPose(mode: .chill, time: 1.5, face: .mid, life: .nap, react: 0)
+        #expect(snoring.zzz >= 0 && snoring.sleepTalk < 0)
+        let mumbling = RunnerPose(mode: .chill, time: 10.5, face: .mid, life: .nap, react: 0)
+        #expect(mumbling.zzz < 0 && mumbling.sleepTalk > 0.4)
+        let woken = RunnerPose(mode: .chill, time: 10.5, face: .mid, life: .nap, react: 0.5)
+        #expect(woken.sleepTalk < 0)
+    }
+
     @Test func aNapNeedsTwoTapsToWake() {
         let roll = Date(timeIntervalSinceReferenceDate: 1000)
         #expect(!CompanionView.napWakes(lastTap: nil, now: roll))
