@@ -21,7 +21,7 @@ public final class GrowthStore {
 
     /// - Parameter fileURL: where the ledger lives; `nil` keeps everything in memory (previews, tests).
     public init(fileURL: URL?, deviceID: String) {
-        var file = LogFile<CanLedger>(url: fileURL, name: "罐子记录")
+        var file = LogFile<CanLedger>(url: fileURL, name: "能量罐记录")
         var ledger = CanLedger()
         let error = file.load(into: &ledger)
         self.file = file

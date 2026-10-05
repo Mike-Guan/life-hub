@@ -1,5 +1,7 @@
 # Life Hub
 
+> 你认真活过的每一天，都不该白白消失。
+
 Mike 自用的生活 hub，iOS + Mac。companion HAKU 跟着当前 mode（上班 / Chill / 拳击日 / 副业）变。
 
 | | 上班 | Chill | 拳击日 | 副业 |

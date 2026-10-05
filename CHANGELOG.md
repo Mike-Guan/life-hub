@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- The currency is called 能量罐 everywhere you read it: the shop, unboxing, places and VoiceOver. HAKU
+  still drinks Monster. The home screen shows "你认真活过的每一天，都不该白白消失。" before any mode is set.
 - The clock no longer switches the mode. Work starts when you arrive at the office and ends when you
   leave it (or by hand); before, the app switched to 上班 at 9:30 even if you were still at home. The
   off-work notice now goes out only on days you're in 上班 mode or at the office.
@@ -24,6 +26,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   a quiet evening at home is the blanket. Today's traces: a bandage after 30+ minutes of boxing or a
   boxing workout, the monitor on after 30+ minutes of vibe coding, sunlight after a full night's sleep.
   Traces fade at 05:00 and earn no cans. Widgets and the Lock Screen show them too.
+- The wardrobe has a 人生收藏 section: each keepsake you earned, with the day and how, such as
+  "2026-11-02 · 累计 10 次周日拳击".
 - HAKU's world keeps traces of the day (Issue #83): a bandage after boxing, the monitor still glowing at home
   after vibe coding, sunlight through the window after good sleep. New states: collapsed on the sofa arm
   after a long work day, wrapped in a blanket on lazy evenings, brushing teeth on weekday mornings, and

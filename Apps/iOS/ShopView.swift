@@ -82,7 +82,7 @@ struct ShopView: View {
 
     private var footer: String {
         let wins = Self.liveWins.map { "\($0.shopTitle) +\($0.cans)" }.joined(separator: "，")
-        return "罐子只靠真的做到才有：\(wins)。不过期，也不会被扣。"
+        return "能量罐只靠真的做到才有：\(wins)。不过期，也不会被扣。"
     }
 
     private var header: some View {
@@ -135,13 +135,13 @@ struct ShopView: View {
                     Button {
                         buy(item)
                     } label: {
-                        Text("\(price) 罐 换")
+                        Text("\(price) 能量罐 换")
                             .font(Toy.body(15, weight: .heavy))
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(ToyButtonStyle(fill: Toy.pink, isSelected: true))
                 } else {
-                    Text("\(price) 罐 · 还差 \(price - balance) 罐")
+                    Text("\(price) 能量罐 · 还差 \(price - balance)")
                         .font(Toy.body(14, weight: .bold))
                         .foregroundStyle(Toy.muted)
                         .frame(maxWidth: .infinity, minHeight: 44)
@@ -212,7 +212,7 @@ struct ShopView: View {
                 switch error {
                 case .notForSale: "这个不卖。"
                 case .alreadyOwned: "已经有了。"
-                case .notEnoughCans: "罐子还不够。"
+                case .notEnoughCans: "能量罐还不够。"
                 }
         }
     }

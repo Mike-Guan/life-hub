@@ -36,6 +36,9 @@ struct WardrobeView: View {
                 Text("点一下就换上。拿到的东西永远在这，不会丢。")
                     .font(Toy.body(13, weight: .bold))
                     .foregroundStyle(Toy.muted)
+                if !collection.isEmpty {
+                    lifeCollection
+                }
             }
             .padding(20)
             .frame(maxWidth: 560)
@@ -56,6 +59,48 @@ struct WardrobeView: View {
             guard item.slot == slot, let keepsake = item.keepsake, !owned.contains(item.id) else { return false }
             return ShopView.liveWins.contains(keepsake.win)
         }
+    }
+
+    // Keepsakes from every slot, in the order they were earned.
+    private var collection: [(item: ShopItem, at: Date)] {
+        ShopItem.catalog
+            .compactMap { item in
+                guard item.keepsake != nil, let at = growth.ledger.ownedAt(item.id) else { return nil }
+                return (item, at)
+            }
+            .sorted { $0.at < $1.at }
+    }
+
+    private var lifeCollection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("人生收藏")
+                .font(Toy.display(22))
+            ForEach(collection, id: \.item.id) { entry in
+                HStack(spacing: 12) {
+                    WardrobeItemIcon(item: entry.item)
+                        .frame(width: 44, height: 44)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(entry.item.title)
+                            .font(Toy.body(15, weight: .heavy))
+                        Text(Self.earnedLine(entry.item, at: entry.at))
+                            .font(Toy.body(12, weight: .bold))
+                            .foregroundStyle(Toy.muted)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(10)
+                .toyCard(radius: 16, shadow: 2)
+                .accessibilityElement(children: .combine)
+            }
+        }
+        .padding(.top, 8)
+    }
+
+    /// "2026-11-02 · 累计 10 次周日拳击": when and how a keepsake was earned.
+    private static func earnedLine(_ item: ShopItem, at date: Date) -> String {
+        let day = date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
+        guard let keepsake = item.keepsake else { return day }
+        return "\(day) · 累计 \(keepsake.count) 次\(keepsake.win.shopTitle)"
     }
 
     private var header: some View {

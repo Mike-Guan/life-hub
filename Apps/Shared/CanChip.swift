@@ -20,6 +20,6 @@ struct CanChip: View {
         .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
         .background(Capsule().fill(Toy.ink).offset(x: 3, y: 3))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(count) 罐")
+        .accessibilityLabel("\(count) 个能量罐")
     }
 }
