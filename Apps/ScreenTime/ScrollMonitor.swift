@@ -27,7 +27,7 @@ final class ScrollMonitor: DeviceActivityMonitor {
             slackThresholdAt: ScrollWatch.workReachedAt,
             slackSeenAt: ScrollWatch.workSeenAt
         )
-        let days = ActivityDays.stored(in: AppGroup.defaults)
+        let days = AppGroup.activityDays(now: now)
         let work = ModeRules.stored(in: AppGroup.defaults)
         let reading = NeedEngine.need(signals, now: now, days: days, work: work)
         InviteReminder.plan(reading, signals: signals, now: now)

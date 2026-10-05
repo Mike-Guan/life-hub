@@ -106,4 +106,29 @@ import Testing
         #expect(visit?.source == Win.wins(in: [boxed], calendar: calendar).first?.source)
         #expect(Win.visit(.work, from: date(6, 9), to: date(6, 18), calendar: calendar) == nil)
     }
+    func gymWins(_ dates: [Date]) -> CanLedger {
+        CanLedger(entries: dates.map { CanEntry.earned(.gym, source: "\($0)", at: $0, deviceID: "t") })
+    }
+
+    @Test func gymDaysStayUntilThereIsAGymWin() {
+        let now = date(31, 12)
+        #expect(ActivityDays.standard.learningGym(from: CanLedger(), now: now, calendar: calendar) == .standard)
+        // A win older than 4 weeks doesn't count either.
+        let old = gymWins([date(1, 20)])
+        #expect(ActivityDays.standard.learningGym(from: old, now: now, calendar: calendar) == .standard)
+    }
+
+    @Test func gymDaysAreWeekdaysWonInTwoOfFourWeeks() {
+        // Tuesdays 13th and 20th, one Thursday on the 22nd, Saturday 31st before 05:00 is Friday the 30th.
+        let ledger = gymWins([date(13, 20), date(20, 20), date(22, 20), date(31, 1)])
+        let days = ActivityDays.standard.learningGym(from: ledger, now: date(31, 12), calendar: calendar)
+        #expect(days.gymWeekdays == [3])
+        #expect(days.runWeekday == ActivityDays.standard.runWeekday)
+    }
+
+    @Test func twoWinsInOneWeekCountOnce() {
+        let ledger = gymWins([date(27, 20), date(27, 21)])
+        let days = ActivityDays.standard.learningGym(from: ledger, now: date(31, 12), calendar: calendar)
+        #expect(days.gymWeekdays.isEmpty)
+    }
 }

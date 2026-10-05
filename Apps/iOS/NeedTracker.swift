@@ -54,7 +54,7 @@ final class NeedTracker {
             slackThresholdAt: ScrollWatch.workReachedAt,
             slackSeenAt: ScrollWatch.workSeenAt
         )
-        let days = ActivityDays.stored(in: AppGroup.defaults)
+        let days = AppGroup.activityDays(now: now)
         reading = NeedEngine.need(signals, now: now, days: days, work: .stored(in: AppGroup.defaults))
         activitySignals = ActivitySignals(presence: presence, workouts: motion?.workouts ?? [])
         InviteReminder.plan(reading, signals: signals, now: now)

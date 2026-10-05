@@ -23,6 +23,12 @@ enum AppGroup {
         HubContainer.appGroup(identifier) ?? .applicationSupport()
     }
 
+    /// The gym and run days now, with the gym days learned from the can ledger.
+    static func activityDays(now: Date = .now) -> ActivityDays {
+        let ledger = CanLedger.read(from: container.canLedgerURL)
+        return ActivityDays.stored(in: defaults).learningGym(from: ledger, now: now)
+    }
+
     /// User defaults both processes read, so they share one device id.
     static var defaults: UserDefaults {
         UserDefaults(suiteName: identifier) ?? .standard

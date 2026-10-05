@@ -73,7 +73,7 @@ struct HubProvider: TimelineProvider {
         let snapshot = AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))
         let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
         let work = ModeRules.stored(in: AppGroup.defaults)
-        let days = ActivityDays.stored(in: AppGroup.defaults)
+        let days = AppGroup.activityDays(now: now)
         let starts = ActivityEngine.startTimes(on: now, days: days, work: work)
         let departure = GymDeparture.stored(in: AppGroup.defaults)
         let walk = [departure?.at, departure?.until].compactMap { $0 }
