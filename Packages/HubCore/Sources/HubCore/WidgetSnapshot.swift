@@ -32,6 +32,8 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var ranDay: Date?
     /// What today left in HAKU's world as of `updatedAt`, `nil` in snapshots from older builds.
     public var traces: Set<CompanionTrace>?
+    /// Traces that never fade, `nil` in snapshots from older builds.
+    public var lasting: Set<CompanionTrace>?
     /// Time in work mode since 05:00 as of `updatedAt`, `nil` in snapshots from older builds.
     public var workedToday: TimeInterval?
     /// When Mike last changed the mode by hand, `nil` when never or unknown.
@@ -126,9 +128,10 @@ extension WidgetSnapshot {
         return line
     }
 
-    /// Today's traces as of `date`, none when the snapshot was written before today's 05:00.
+    /// The traces at `date`: the lasting ones, plus today's unless the snapshot was written before today's 05:00.
     public func traces(at date: Date, calendar: Calendar = .current) -> Set<CompanionTrace> {
-        updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) ? traces ?? [] : []
+        let today = updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) ? traces ?? [] : []
+        return today.union(lasting ?? [])
     }
 
     /// The signals for the states at home at `date`.

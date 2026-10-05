@@ -106,6 +106,7 @@ struct LifeHubApp: App {
             cans: growth.ledger.balance,
             onShop: { showsShop = true },
             wardrobe: wardrobe,
+            ledger: growth.ledger,
             onWardrobe: { showsWardrobe = true }
         )
         .environment(store)

@@ -20,6 +20,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Traces that stay: after 5 boxing cans HAKU's gloves look worn, after 2 runs of 5 km the running shoes
+  stay by the door, and after 10 hours of vibe coding in all a second monitor sits by the laptop. They
+  show at home, on widgets and on the Lock Screen, and never go away.
 - Debug builds keep a local dogfood log of automatic decisions (each geofence arrival or departure and
   whether it switched the mode, and the 编程 Focus), so wrong switches can be found after a few weeks of use.
   It stays on the iPhone and isn't shown in the app.

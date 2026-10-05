@@ -68,6 +68,7 @@ public final class WidgetBridge {
             now: now,
             calendar: calendar
         )
+        snapshot.lasting = MomentEngine.lastingTraces(log: mode.log, ledger: storedLedger(), now: now)
         snapshot.workedToday = MomentEngine.workedToday(mode.log, now: now, calendar: calendar)
         snapshot.manualAt = mode.log.active.last(where: \.source.isManual)?.at
         let current = mode.current
@@ -85,5 +86,11 @@ public final class WidgetBridge {
         } catch {
             lastError = "小组件数据没写进去：\(error.localizedDescription)"
         }
+    }
+
+    // GrowthStore is the ledger's single writer, so this only reads the file and never moves it aside.
+    private func storedLedger() -> CanLedger {
+        guard let url = container.canLedgerURL, let data = try? Data(contentsOf: url) else { return CanLedger() }
+        return (try? HubJSON.decoder().decode(CanLedger.self, from: data)) ?? CanLedger()
     }
 }

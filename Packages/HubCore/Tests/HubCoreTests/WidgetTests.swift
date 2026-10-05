@@ -105,6 +105,26 @@ import Testing
         #expect(WidgetSnapshot.read(from: url)?.bedtime == .on)
     }
 
+    @Test func snapshotReadsLastingTracesWithoutTouchingTheLedger() throws {
+        let container = tempContainer()
+        let modes = ModeStore(fileURL: container.modeLogURL, deviceID: "iphone")
+        let energy = EnergyStore(fileURL: container.energyLogURL, deviceID: "iphone")
+        let growth = GrowthStore(fileURL: container.canLedgerURL, deviceID: "iphone")
+        for day in 1...5 {
+            growth.record(.boxing, source: "boxing-\(day)", at: date(day, 12))
+        }
+        let bridge = WidgetBridge(container: container)
+        bridge.sync(mode: modes, energy: energy, now: date(5, 13), calendar: calendar)
+        let url = try #require(container.snapshotURL)
+        #expect(WidgetSnapshot.read(from: url)?.lasting == [.wornGloves])
+
+        let ledgerURL = try #require(container.canLedgerURL)
+        try Data("not json".utf8).write(to: ledgerURL)
+        bridge.sync(mode: modes, energy: energy, now: date(5, 14), calendar: calendar)
+        #expect(WidgetSnapshot.read(from: url)?.lasting == [])
+        #expect(try Data(contentsOf: ledgerURL) == Data("not json".utf8))
+    }
+
     @Test func syncAppliesPaymentsOnlyWithAnExpenseStore() throws {
         let container = tempContainer()
         let modes = ModeStore(fileURL: container.modeLogURL, deviceID: "iphone")
