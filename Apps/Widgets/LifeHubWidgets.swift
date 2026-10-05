@@ -40,17 +40,17 @@ struct HubEntry: TimelineEntry {
     var need: CompanionNeed? { snapshot?.need(at: date) }
     var needSince: Date? { snapshot?.needSince(at: date) }
 
-    /// One short line from HAKU: leaving work, what it does alongside Mike, its bedtime line, else the app's
-    /// line for now, else today's energy.
+    /// One short line from HAKU: leaving work, what it does alongside Mike, its bedtime line, the next Daily
+    /// task, else the app's line for now, else today's energy.
     var detail: String {
         if let offWork { return offWork }
-        if let nextTask { return nextTask }
         if let activity { return activity.reason }
         if moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) { return HakuLines.line(scene, at: date) }
         if bedtime == .on { return HakuLines.line(.bedtime, at: date) }
         if let notice { return notice }
         if let weekLine { return weekLine }
+        if let nextTask { return nextTask }
         if let line = snapshot?.line(at: date) { return line }
         return energy.map { "电量\($0.title)" } ?? "电量未知"
     }

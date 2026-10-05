@@ -94,7 +94,7 @@ struct HomeView: View {
                         codingCans: codingCans(at: context.date),
                         traces: traces(at: context.date, energy: reading?.level),
                         vitals: VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: context.date),
-                        event: event ?? dailyDone ?? sit?.stretched(at: context.date) ?? stayHome(at: context.date),
+                        event: event ?? sit?.stretched(at: context.date) ?? stayHome(at: context.date) ?? dailyDone,
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
                         bedtime: bedtime.state(at: context.date),

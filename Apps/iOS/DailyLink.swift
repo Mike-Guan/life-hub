@@ -14,7 +14,7 @@ final class DailyLink {
     private(set) var tasks: [DailyTask] = []
     /// The timed tasks from yesterday to tomorrow as of the last read, `nil` while not linked.
     private(set) var plan: DailyPlan?
-    /// The celebration for the newest task ticked done since the read before, `nil` when none.
+    /// The celebration for the newest task ticked done since the read before; cleared by a read with nothing new.
     private(set) var done: CompanionEvent?
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
@@ -84,7 +84,7 @@ final class DailyLink {
         let seen = defaults.stringArray(forKey: Self.seenKey).map(Set.init)
         let result = DailyAgenda.newlyDone(in: occurrences, seen: seen)
         defaults.set(Array(result.seen), forKey: Self.seenKey)
-        if let event = result.event { done = event }
+        done = result.event
     }
 
     private static func bookmark(for folder: URL) throws -> Data {
