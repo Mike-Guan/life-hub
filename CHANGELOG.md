@@ -22,6 +22,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- When HAKU is stiff in work hours, it sends "起来。我先起了。" once. This shares the one work-time
+  notice a day with the scrolling-at-work notice. Ignored 3 days in a row, it pauses for a week.
 - HAKU gets stiff when your Apple Watch logs two idle stand hours in a row in 上班 or 副业: it twists
   and thumps its back, and stretches when you open the app. When you stand after that, it rolls its
   shoulders once. No Watch or no recent data: nothing. Health access now also asks for stand hours.

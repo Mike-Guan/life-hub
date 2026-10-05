@@ -99,6 +99,14 @@ public struct NudgeBackoff: Codable, Equatable, Sendable {
             // Reports come every 10 minutes of use, so none after the window means Mike stopped.
             guard fresh, let seen = signals.slackSeenAt ?? signals.slackThresholdAt else { return nil }
             return seen < end
+        case .sitting:
+            // Stand hours come late; stood in or after the hour of the invite, or still the same stiff stretch.
+            guard let sit = signals.sit else { return nil }
+            if let stood = sit.stoodAt, stood.addingTimeInterval(60 * 60) > sentAt { return true }
+            guard let stiff = sit.stiffSince, stiff <= sentAt, sit.checkedAt >= end.addingTimeInterval(60 * 60) else {
+                return nil
+            }
+            return false
         case .boxingWarmup:
             return nil
         }

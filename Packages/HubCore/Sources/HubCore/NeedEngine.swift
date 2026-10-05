@@ -10,6 +10,8 @@ public enum CompanionNeed: String, Codable, CaseIterable, Sendable {
     case gymDay
     /// Scrolling the picked apps for a while during work hours: HAKU peeks over the laptop.
     case slacking
+    /// Sat too long in work hours, in 工作 or 副业: HAKU is stiff.
+    case sitting
 }
 
 /// A short animation RUNNER plays once, then goes back to its usual look.
@@ -197,6 +199,10 @@ public struct NeedSignals: Equatable, Sendable {
     public var slackThresholdAt: Date?
     /// When the last work-hours report came, `nil` when it is `slackThresholdAt`.
     public var slackSeenAt: Date?
+    /// What the stand hours say about sitting, `nil` when unknown.
+    public var sit: SitState?
+    /// The current mode, for the needs that depend on it.
+    public var mode: Mode?
 
     public init(
         scrollThresholdAt: Date? = nil,
@@ -210,7 +216,9 @@ public struct NeedSignals: Equatable, Sendable {
         fitnessSeenAt: Date? = nil,
         departing: Bool = false,
         slackThresholdAt: Date? = nil,
-        slackSeenAt: Date? = nil
+        slackSeenAt: Date? = nil,
+        sit: SitState? = nil,
+        mode: Mode? = nil
     ) {
         self.scrollThresholdAt = scrollThresholdAt
         self.scrollSeenAt = scrollSeenAt
@@ -224,6 +232,8 @@ public struct NeedSignals: Equatable, Sendable {
         self.departing = departing
         self.slackThresholdAt = slackThresholdAt
         self.slackSeenAt = slackSeenAt
+        self.sit = sit
+        self.mode = mode
     }
 }
 
@@ -270,8 +280,8 @@ public enum NeedEngine {
     public static let couchPeekAfter: TimeInterval = 30 * 60
 
     /// The need at `now`, or `nil` when there is none. A gym-day evening at home comes first, then scrolling
-    /// in work hours, then couch scrolling, except on a boxing morning, when scrolling at home is exactly what
-    /// boxing warm-up is about.
+    /// in work hours, then sitting too long in work hours, then couch scrolling, except on a boxing morning,
+    /// when scrolling at home is exactly what boxing warm-up is about.
     /// - Parameters:
     ///   - days: which days are gym days.
     ///   - work: the work days and hours, for scrolling at work.
@@ -287,6 +297,7 @@ public enum NeedEngine {
         if let slacking = slacking(signals, now: now, rules: rules, work: work, calendar: calendar) {
             return slacking
         }
+        if let sitting = sitting(signals, now: now, work: work, calendar: calendar) { return sitting }
         let boxing = boxingWarmup(signals, now: now, rules: rules, calendar: calendar)
         if boxing != nil, now < time(rules.boxingFirstUntilMinute, on: now, calendar: calendar) {
             return boxing
@@ -379,6 +390,7 @@ public enum NeedEngine {
         case .boxingWarmup: "拳套戴好了，出发去拳馆？"
         case .gymDay: "包背好了，走？"
         case .slacking: "嘘，我帮你望风。"
+        case .sitting: "起来。我先起了。"
         }
     }
 
@@ -411,6 +423,8 @@ public enum NeedEngine {
         case .gymDay: rules.gymInviteAfter
         // Screen Time reports only after 30 minutes of use, so the notice goes out at once.
         case .slacking: 0
+        // The stand hours already show two idle hours, and they arrive late, so it goes out at once.
+        case .sitting: 0
         }
     }
 
@@ -502,6 +516,22 @@ public enum NeedEngine {
         guard ModeEngine.scheduledMode(at: reached, rules: work, calendar: calendar) == .work else { return nil }
         let reading = NeedReading(need: .slacking, since: reached, reasons: ["上班时间，我帮你望风"])
         return ongoing(reading, seen: signals.slackSeenAt, signals: signals, now: now, rules: rules)
+    }
+
+    // Issue #126: only in work hours and in 工作 or 副业, and only while the stand hours are fresh.
+    private static func sitting(
+        _ signals: NeedSignals,
+        now: Date,
+        work: ModeRules,
+        calendar: Calendar
+    ) -> NeedReading? {
+        guard let sit = signals.sit, sit.isStiff(mode: signals.mode, at: now), let stiff = sit.stiffSince else {
+            return nil
+        }
+        guard ModeEngine.scheduledMode(at: now, rules: work, calendar: calendar) == .work else { return nil }
+        let since = stiff.addingTimeInterval(TimeInterval(SitEngine.idleHours) * 60 * 60)
+        let until = sit.checkedAt.addingTimeInterval(SitEngine.freshFor)
+        return NeedReading(need: .sitting, since: since, reasons: ["坐了好久，我腰先不行了"], until: until)
     }
 
     // Screen Time reports every few minutes of use, never when use stops. The need lasts while reports

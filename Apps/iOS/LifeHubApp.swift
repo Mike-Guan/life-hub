@@ -263,7 +263,11 @@ struct LifeHubApp: App {
             }
             let outcome = decision.map { "切到\($0.mode.title)" } ?? "不切"
             Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
-            needs.refresh(places: places, manualSince: store.log.changes.last(where: \.source.isManual)?.at)
+            needs.refresh(
+                places: places,
+                manualSince: store.log.changes.last(where: \.source.isManual)?.at,
+                mode: store.current
+            )
             widgets.need = needs.reading
             widgets.workouts = needs.workouts
             widgets.sync(mode: store, energy: energy)
@@ -297,7 +301,11 @@ struct LifeHubApp: App {
     ) {
         GymDeparture(at: date).store(in: AppGroup.defaults)
         let places = PlaceSettings.stored(in: AppGroup.defaults)
-        needs.refresh(places: places, manualSince: store.log.changes.last(where: \.source.isManual)?.at)
+        needs.refresh(
+            places: places,
+            manualSince: store.log.changes.last(where: \.source.isManual)?.at,
+            mode: store.current
+        )
         widgets.need = needs.reading
         widgets.sync(mode: store, energy: energy)
         WidgetCenter.shared.reloadAllTimelines()
@@ -323,7 +331,11 @@ struct LifeHubApp: App {
     }
 
     private func refreshNeeds() {
-        needs.refresh(places: places, manualSince: store.log.changes.last(where: \.source.isManual)?.at)
+        needs.refresh(
+            places: places,
+            manualSince: store.log.changes.last(where: \.source.isManual)?.at,
+            mode: store.current
+        )
         widgets.need = needs.reading
         widgets.workouts = needs.workouts
         syncWidgets()
