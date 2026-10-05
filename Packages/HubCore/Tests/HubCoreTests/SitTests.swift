@@ -103,6 +103,7 @@ import Testing
         state.store(in: defaults)
         #expect(SitState.stored(in: defaults) == state)
     }
+
     // 2026-10-06 is a Tuesday, a work day; default work hours are 9:30 to 18:30.
     func stiff() -> SitState {
         SitState(checkedAt: date(13, 10), stiffSince: date(11))
