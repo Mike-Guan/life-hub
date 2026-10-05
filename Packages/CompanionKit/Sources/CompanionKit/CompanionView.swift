@@ -188,7 +188,10 @@ public struct CompanionView: View {
             if bath { say(Self.bathLine, for: 3) }
         }
         .onChange(of: bath) { _, new in
-            if new { say(Self.bathLine, for: 3) }
+            guard new else { return }
+            // The view lives for days, so each evening's bath time starts with dry hair.
+            dryStart = nil
+            say(Self.bathLine, for: 3)
         }
         .onChange(of: invite) { _, new in
             if new != nil { startInvite() }
