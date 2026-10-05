@@ -105,7 +105,7 @@ import Testing
 
     @Test func widgetsShowTheOffWorkLineFromTheSnapshot() {
         let left = log([(.work, .location, date(5, 9)), (.chill, .location, date(5, 18, 40))])
-        let snapshot = WidgetSnapshot(log: left, now: date(5, 18, 41))
+        let snapshot = WidgetSnapshot(log: left, now: date(5, 18, 41), calendar: calendar)
         #expect(snapshot.offWorkLine(at: date(5, 18, 50)) == HakuLines.offWorkLine)
         #expect(snapshot.offWorkLine(at: date(5, 19, 10)) == nil)
         #expect(snapshot.needTimes.contains(date(5, 19, 10)))
