@@ -628,6 +628,14 @@ struct RunnerPose {
         }
     }
 
+    /// Noticing you at `progress` (0...1) after the app opens: eyes elsewhere, then a half-beat late turn
+    /// to you with a small lift of the head.
+    mutating func notice(progress: Double) {
+        let p = CGFloat(min(max(progress, 0), 1))
+        eyesDx += 3 * (1 - Self.ramp(p, from: 0.55, to: 0.75))
+        headDy -= 1.5 * Self.bump(p, from: 0.6, to: 0.9)
+    }
+
     /// The still bedtime pose, used for portraits and reduced motion.
     static func bedtimeStill() -> RunnerPose {
         var pose = bedtime(time: 2, goodnight: 1, liesDown: false)

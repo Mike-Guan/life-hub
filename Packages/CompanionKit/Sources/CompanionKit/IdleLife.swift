@@ -15,6 +15,7 @@ enum IdleLife: CaseIterable, Sendable {
     /// Wiping the room with a cloth, Sunday afternoons.
     case tidying
 
+    // WidgetSnapshot.slotDates in HubCore uses the same 15 minutes for widget entries; change both together.
     /// How long one bit lasts before HAKU picks another, in seconds.
     static let slotLength: TimeInterval = 15 * 60
 
