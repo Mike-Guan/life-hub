@@ -238,6 +238,10 @@ struct RunnerPose {
     var lean: Double = 0
     /// Vertical hop of the whole figure, in SVG units; negative is up.
     var bounce: CGFloat = 0
+    /// The place HAKU is walking away from, or nil when it isn't walking.
+    var walkFrom: HubPlace.Kind?
+    /// Seconds into the walk.
+    var walkTime: CGFloat = 0
     /// 0 = the planned task's prop down (bag on the floor, note out of view), 1 = held up.
     var propRaise: CGFloat = 0
     /// Tapping the watch before a planned task.
@@ -1061,6 +1065,7 @@ struct RunnerFigure: View {
         if pose.thump >= 0 || pose.fistPump >= 0 { visible.insert(.backFist) }
         if pose.thumpHit { visible.insert(.thumpLines) }
         if let prop = pose.dailyProp, !pose.bedtime { holdUp(prop, pose: pose, on: &visible) }
+        if let place = pose.walkFrom, pose.dailyScene == nil, !pose.bedtime { visible.formUnion(walkParts(place)) }
         if pose.noteSlap >= 0 {
             visible.insert(.bigNote)
             let t = pose.noteSlap * CGFloat(RunnerPose.noteSlapLength)
@@ -1097,6 +1102,18 @@ struct RunnerFigure: View {
         }
         if pose.traces.contains(.deskMonitor), visible.contains(.ledCode) { visible.insert(.deskMonitor) }
         if home, pose.traces.contains(.runningShoes) { visible.insert(.runningShoes) }
+    }
+
+    // The bag from the office comes with `bagLift`.
+    /// Speed lines and dust while walking, with what HAKU carries away from `place`: earbuds from home, a towel
+    /// from the gym, a bandage from boxing.
+    nonisolated private static func walkParts(_ place: HubPlace.Kind) -> Set<RunnerPart> {
+        switch place {
+        case .home: [.speedLines, .walkDust, .earbud]
+        case .fitness: [.speedLines, .walkDust, .towel]
+        case .gym: [.speedLines, .walkDust, .bandage]
+        case .office, .custom: [.speedLines, .walkDust]
+        }
     }
 
     /// The planned task's prop, and the watch while HAKU taps it.
@@ -1344,11 +1361,9 @@ struct RunnerFigure: View {
             if pose.propRaise > 0, let scene = pose.dailyScene,
                 let move = SceneMove.of(part, in: scene, at: pose.sceneTime)
             {
-                RunnerPartView(part: part)
-                    .scaleEffect(move.scale, anchor: move.anchor)
-                    .rotationEffect(.degrees(move.angle), anchor: move.anchor)
-                    .offset(x: move.offset.width * scale, y: move.offset.height * scale)
-                    .opacity(move.opacity * Double(pose.propRaise))
+                moved(part, move, scale: scale).opacity(Double(pose.propRaise))
+            } else if part == .walkDust, pose.walkFrom != nil {
+                moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
             } else {
                 partView(part, scale: scale)
             }
@@ -1359,6 +1374,14 @@ struct RunnerFigure: View {
             .degrees(isHead ? -14 * Double(pose.lie) + pose.headTilt : 0),
             anchor: Self.unit(x: 60, y: 96)
         )
+    }
+
+    private func moved(_ part: RunnerPart, _ move: SceneMove, scale: CGFloat) -> some View {
+        RunnerPartView(part: part)
+            .scaleEffect(move.scale, anchor: move.anchor)
+            .rotationEffect(.degrees(move.angle), anchor: move.anchor)
+            .offset(x: move.offset.width * scale, y: move.offset.height * scale)
+            .opacity(move.opacity)
     }
 
     @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat) -> some View {
@@ -1818,6 +1841,7 @@ public struct CompanionPortrait: View {
     let bedtime: Bedtime
     let wardrobe: Wardrobe
     let daily: DailyCue?
+    let walking: HubPlace.Kind?
     let framing: Framing
 
     // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
@@ -1831,6 +1855,7 @@ public struct CompanionPortrait: View {
     ///   - date: the moment shown, such as a widget timeline entry's date.
     ///   - wardrobe: what HAKU wears from the shop and keepsakes.
     ///   - daily: a planned Daily Widget task starting soon or now; HAKU holds up its prop.
+    ///   - walking: the place Mike just left; HAKU walks with what it carries from there.
     public init(
         mode: Mode,
         energy: Double? = nil,
@@ -1845,6 +1870,7 @@ public struct CompanionPortrait: View {
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
         daily: DailyCue? = nil,
+        walking: HubPlace.Kind? = nil,
         framing: Framing = .full
     ) {
         self.mode = mode
@@ -1860,6 +1886,7 @@ public struct CompanionPortrait: View {
         self.bedtime = bedtime
         self.wardrobe = wardrobe
         self.daily = daily
+        self.walking = walking
         self.framing = framing
     }
 
@@ -1899,7 +1926,7 @@ public struct CompanionPortrait: View {
     /// thing on its own as in the app.
     var pose: RunnerPose {
         guard bedtime == .off else { return RunnerPose.bedtimeStill() }
-        let plain = need == nil && activity == nil && moment == nil && daily == nil
+        let plain = need == nil && activity == nil && moment == nil && daily == nil && walking == nil
         let life = plain && mode == .chill ? IdleLife.at(date, stamina: vitals.stamina) : nil
         var pose = RunnerPose(
             face: EnergyFace(energy: energy),
@@ -1915,6 +1942,7 @@ public struct CompanionPortrait: View {
             pose.bagLift = 0
             pose.eyesDx = -3
         }
+        if let walking, daily?.scene == nil, activity == nil { pose.walk(from: walking, time: 0.2) }
         if let daily { pose.cue(daily, time: 5, slap: nil) }
         return pose
     }

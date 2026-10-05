@@ -29,6 +29,9 @@ public struct CompanionView: View {
     /// A planned Daily Widget task starting soon or now: HAKU holds up its prop, and slaps a sticky note on the
     /// screen once as it starts.
     let daily: DailyCue?
+    /// The place Mike just left: HAKU walks with what it carries from there, unless a task scene or an activity
+    /// shows.
+    let walking: HubPlace.Kind?
     /// Today's invite, written by the app. While set, RUNNER gets up, jumps and says it.
     let invite: String?
     /// Increment to play the cheer jump.
@@ -110,6 +113,7 @@ public struct CompanionView: View {
         vitals: HakuVitals = HakuVitals(),
         event: CompanionEvent? = nil,
         daily: DailyCue? = nil,
+        walking: HubPlace.Kind? = nil,
         invite: String? = nil,
         cheer: Int = 0,
         bedtime: Bedtime = .off,
@@ -129,6 +133,7 @@ public struct CompanionView: View {
         self.vitals = vitals
         self.event = event
         self.daily = daily
+        self.walking = walking
         self.invite = invite
         self.cheer = cheer
         self.bedtime = bedtime
@@ -289,7 +294,7 @@ public struct CompanionView: View {
     private func idleLife(_ mode: Mode, at date: Date) -> IdleLife? {
         let time = date.timeIntervalSinceReferenceDate
         let busy = celebration(at: time) != nil || taskDone(at: time) != nil || stillOneOff(at: time)
-        let free = need == nil && activity == nil && moment == nil && daily == nil && invite == nil
+        let free = need == nil && activity == nil && moment == nil && daily == nil && invite == nil && walking == nil
         guard mode == .chill, free, bedtime == .off, !busy else {
             return nil
         }
@@ -339,6 +344,7 @@ public struct CompanionView: View {
             if stage == .up { pose.bagLift = 1 }
             pose.headDy += vitals.slouch
             if turnAway(at: time) != nil { pose.turnedAway = true }
+            if let walking, daily?.scene == nil, activity == nil { pose.walk(from: walking, time: 0.2) }
             if let daily { pose.cue(daily, time: 5, slap: nil) }
             return pose
         }
@@ -360,6 +366,7 @@ public struct CompanionView: View {
             // Switching state: a quick burst of sparkles over the squash.
             pose.burst = CGFloat(progress)
         }
+        if let walking, daily?.scene == nil, activity == nil { pose.walk(from: walking, time: CGFloat(time)) }
         if let daily { pose.cue(daily, time: time, slap: slap(at: time)) }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
         if let progress = taskDone(at: time) {
@@ -941,6 +948,9 @@ private struct SpeechBubble: View {
                 CompanionView(mode: .work, daily: DailyCue(stage: .soon, prop: prop, id: "preview-\(prop)"))
                     .frame(height: 180)
                     .toyCard()
+            }
+            ForEach([HubPlace.Kind.home, .office, .fitness, .gym], id: \.self) { place in
+                CompanionView(mode: place == .office ? .work : .chill, walking: place).frame(height: 180).toyCard()
             }
             ForEach(DailyScene.allCases, id: \.self) { scene in
                 let cue = DailyCue(stage: .now, prop: .note, scene: scene, id: "preview-\(scene)")

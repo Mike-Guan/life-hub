@@ -100,11 +100,7 @@ struct SceneMove {
             move.offset.width = -8 * d
             move.opacity = Double(1 - 0.6 * d)
         case (.run, .walkDust), (.walk, .walkDust):
-            let p = frac(t * (scene == .run ? 1.9 : 0.6) / 0.9)
-            move.offset = CGSize(width: -10 * p, height: -4 * p)
-            move.scale = 0.6 + 0.6 * p
-            move.anchor = anchor(22, 128)
-            move.opacity = Double(1 - p)
+            move = dust(at: t * (scene == .run ? 1.9 : 0.6))
         case (.walk, .sunIcon):
             move.angle = Double(t) * 20
             move.anchor = anchor(20, 8)
@@ -139,7 +135,33 @@ struct SceneMove {
     }
 }
 
+extension SceneMove {
+    /// The puff of dust kicked up behind HAKU's feet at `time` seconds of walking at normal pace.
+    static func dust(at time: CGFloat) -> SceneMove {
+        let p = frac(time / 0.9)
+        let box = RunnerArt.bounds
+        return SceneMove(
+            offset: CGSize(width: -10 * p, height: -4 * p),
+            scale: 0.6 + 0.6 * p,
+            anchor: UnitPoint(x: (22 - box.minX) / box.width, y: (128 - box.minY) / box.height),
+            opacity: Double(1 - p)
+        )
+    }
+}
+
 extension RunnerPose {
+    /// Walking away from `place` at `time` seconds: leaning in, hopping each step, with speed lines behind.
+    mutating func walk(from place: HubPlace.Kind, time t: CGFloat) {
+        walkFrom = place
+        walkTime = t
+        let step = abs(sin(t * .pi / 0.45))
+        lean = 4
+        bounce = -1.5 * step
+        headDy += 2 * step
+        dash = frac(t / 0.5)
+        if place == .office { bagLift = 1 }
+    }
+
     /// HAKU's head and body in `scene` at `time` seconds, eased in by `propRaise`.
     mutating func playScene(_ scene: DailyScene, time t: CGFloat) {
         let r = propRaise

@@ -512,6 +512,21 @@ import Testing
         #expect(SceneMove.of(.camera, in: .coffee, at: 0) == nil)
     }
 
+    @Test @MainActor func hakuWalksAwayFromAPlace() {
+        var home = RunnerPose(mode: .chill, time: 0, face: .mid, react: 0)
+        home.walk(from: .home, time: 0.2)
+        let homeParts = Set(RunnerFigure.parts(for: .chill, pose: home))
+        #expect(home.lean == 4 && home.bounce < 0)
+        #expect(homeParts.isSuperset(of: [.speedLines, .walkDust, .earbud]))
+        let office = CompanionPortrait(mode: .work, walking: .office).pose
+        #expect(office.bagLift == 1 && RunnerFigure.parts(for: .work, pose: office).contains(.gymBag))
+        let boxing = CompanionPortrait(mode: .chill, walking: .gym).pose
+        #expect(RunnerFigure.parts(for: .chill, pose: boxing).contains(.bandage))
+        let scene = DailyCue(stage: .now, prop: .note, scene: .coffee, id: "a")
+        let busy = CompanionPortrait(mode: .chill, daily: scene, walking: .fitness).pose
+        #expect(busy.walkFrom == nil && !RunnerFigure.parts(for: .chill, pose: busy).contains(.towel))
+    }
+
     @Test func hakuCheersAPlannedTaskDone() {
         var focus = RunnerPose(mode: .work, time: 0, face: .mid, react: 0)
         focus.cheerFocus(progress: 0.1)
