@@ -20,6 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- At home, every fourth sip HAKU finds the can empty, shakes it by its ear and stares at it.
 - Lasting traces in HAKU's world: taped, scuffed gloves after 5 boxing sessions, a second monitor by
   the laptop after 10 hours of vibe coding, running shoes at home after 2 runs. The app decides when
   they are earned.
