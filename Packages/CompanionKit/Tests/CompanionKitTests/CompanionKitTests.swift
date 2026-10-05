@@ -345,6 +345,23 @@ import Testing
         #expect(done.eyesDx == 0 && done.headDy == 0)
     }
 
+    @Test func afterHalfADayHakuLooksUp() {
+        let now = Date(timeIntervalSinceReferenceDate: 100_000)
+        let seen = now.timeIntervalSinceReferenceDate
+        #expect(!CompanionView.backAfterLongAway(lastSeen: 0, now: now))
+        #expect(!CompanionView.backAfterLongAway(lastSeen: seen - 3600, now: now))
+        #expect(CompanionView.backAfterLongAway(lastSeen: seen - CompanionView.longAwayGap, now: now))
+        var down = RunnerPose()
+        down.notice(progress: 0.2, lookUp: true)
+        #expect(down.eyesDy == 2 && down.headDy == 1.5 && down.eyesDx == 0)
+        var up = RunnerPose()
+        up.notice(progress: 0.7, lookUp: true)
+        #expect(up.eyesDy == 0 && up.headDy < -2)
+        var done = RunnerPose()
+        done.notice(progress: 1, lookUp: true)
+        #expect(done.eyesDy == 0 && done.headDy == 0)
+    }
+
     @Test func aNapNeedsTwoTapsToWake() {
         let roll = Date(timeIntervalSinceReferenceDate: 1000)
         #expect(!CompanionView.napWakes(lastTap: nil, now: roll))
