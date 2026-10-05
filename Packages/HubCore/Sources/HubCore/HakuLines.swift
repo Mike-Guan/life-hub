@@ -12,6 +12,10 @@ public enum LineScene: String, CaseIterable, Sendable {
     case slacking
     case drowsy
     case overtime
+    case comeHome
+    case lazyEvening
+    case morning
+    case timeToLeave
     case bedtime
     case lowEnergy
 }
@@ -107,6 +111,42 @@ public enum HakuLines {
             "加班费我没有。",
             "我在桌上化了。",
         ],
+        .comeHome: [
+            "你也活着回来了啊。",
+            "先让我趴五分钟。",
+            "今天的我已经关机。",
+            "鞋都懒得脱了。",
+            "八小时，够了。",
+            "沙发扶手最懂我。",
+            "……回来了就好。",
+        ],
+        .lazyEvening: [
+            "今天就这样吧。",
+            "毯子分你一半。",
+            "什么都不做也行。",
+            "今晚不营业。",
+            "躺着也算活着。",
+            "我是一团毯子。",
+            "明天的事明天说。",
+        ],
+        .morning: [
+            "又要上班了。",
+            "耳机……耳机呢。",
+            "牙刷了，魂没醒。",
+            "外套在哪来着。",
+            "早上好。大概吧。",
+            "今天也得出门啊。",
+            "再给我一分钟。",
+        ],
+        .timeToLeave: [
+            "……公司还在等你。",
+            "唉。我也不想去。",
+            "表在走，我们没走。",
+            "我耳机都戴好了。",
+            "……要不，出发？",
+            "门就在这儿。",
+            "我先叹口气。",
+        ],
         .bedtime: [
             "我先睡了。你也别熬。",
             "晚安。别和天花板开会。",
@@ -143,12 +183,16 @@ public enum HakuLines {
         return lines[((days % lines.count) + lines.count) % lines.count]
     }
 
-    /// The scene for a work-day state that has its own lines, `nil` for the others.
+    /// The scene for a state that has its own lines, `nil` for the others.
     public static func scene(for moment: CompanionMoment) -> LineScene? {
         switch moment {
         case .slacking: .slacking
         case .drowsy: .drowsy
         case .overtime: .overtime
+        case .collapsed: .comeHome
+        case .blanket: .lazyEvening
+        case .morning: .morning
+        case .timeToLeave: .timeToLeave
         default: nil
         }
     }

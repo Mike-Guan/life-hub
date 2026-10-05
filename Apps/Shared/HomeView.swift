@@ -11,6 +11,8 @@ struct HomeView: View {
     var need: NeedReading?
     /// Where Mike is and his recent workouts, for what HAKU does alongside him; `nil` when unknown.
     var activitySignals: ActivitySignals?
+    /// Recent workouts from the Health app, for today's traces.
+    var workouts: [WorkoutSummary] = []
     /// Gym and run days.
     var activityDays: ActivityDays = .standard
     /// The last time Mike said he is going to the gym, from the iOS app.
@@ -57,6 +59,12 @@ struct HomeView: View {
                         activity: shownActivity(at: context.date),
                         moment: moment(at: context.date),
                         codingCans: codingCans(at: context.date),
+                        traces: MomentEngine.traces(
+                            log: store.log,
+                            workouts: workouts,
+                            energy: reading?.level,
+                            now: context.date
+                        ),
                         event: event,
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
@@ -149,7 +157,15 @@ struct HomeView: View {
             need: activeNeed(at: date)?.need,
             departing: presence.map { departure?.isActive(at: date, presence: $0) ?? false } ?? false,
             officeSince: presence?.since(.office),
-            now: date
+            home: presence?.since(.home).map {
+                HomeSignals(
+                    since: $0,
+                    workedToday: MomentEngine.workedToday(store.log, now: date),
+                    manualAt: store.log.active.last(where: \.source.isManual)?.at
+                )
+            },
+            now: date,
+            work: rules
         )
     }
 

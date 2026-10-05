@@ -61,6 +61,15 @@ public final class WidgetBridge {
         let done = ActivitySignals(workouts: workouts, calendar: calendar)
         snapshot.trainedDay = done.trainedDay
         snapshot.ranDay = done.ranDay
+        snapshot.traces = MomentEngine.traces(
+            log: mode.log,
+            workouts: workouts,
+            energy: reading?.level,
+            now: now,
+            calendar: calendar
+        )
+        snapshot.workedToday = MomentEngine.workedToday(mode.log, now: now, calendar: calendar)
+        snapshot.manualAt = mode.log.active.last(where: \.source.isManual)?.at
         let current = mode.current
         let scene = HakuLines.scene(mode: current, need: need?.need, energy: reading?.level, bedtime: state)
         let after = HakuLines.scene(mode: current, need: nil, energy: reading?.level, bedtime: state)
