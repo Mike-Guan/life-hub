@@ -185,6 +185,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Walking past a place no longer leaves HAKU in that mode: leaving within 3 minutes of arriving puts
+  the earlier mode back. A GPS blip that leaves and returns within 3 minutes keeps the stay going, so
+  gym time and office time aren't cut short.
 - Settings > 钱: the amount fields now look like inputs, an outlined box with ¥ and the number
   together on the left, thousands separators, and a 完成 button to close the number pad.
 - A mistap or a curious look at another mode no longer sticks: switching again within 2 minutes
