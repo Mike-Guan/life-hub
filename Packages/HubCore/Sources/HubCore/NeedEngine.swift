@@ -21,6 +21,8 @@ public enum CompanionEvent: Equatable, Sendable {
     /// Unboxing a new wardrobe item; `id` is the ledger entry's id, so each one plays once, and
     /// `item` is the `ShopItem` id.
     case unlock(id: String, item: String)
+    /// Giving up on leaving for work: headphones off, back on the sofa; `id` is the day, "yyyy-MM-dd".
+    case stayHome(id: String)
 }
 
 /// A workout from the Health app, reduced to what the hub uses.

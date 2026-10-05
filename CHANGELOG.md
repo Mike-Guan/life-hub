@@ -19,6 +19,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- When HAKU has waited at the door long enough on a work-day morning, it gives up once: headphones off,
+  back on the sofa, "……今天在家？". The app decides when to play it.
 - HAKU picks the new home looks by itself (Issue #83, PRD sections 16 and 18). On work days at home in
   下班 mode: brushing teeth until work starts ("又要上班了。"), then waiting at the door tapping its watch
   ("……公司还在等你。") for up to 90 minutes, with no notification and not on days you changed the mode by
