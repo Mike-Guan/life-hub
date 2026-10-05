@@ -345,6 +345,21 @@ import Testing
         #expect(done.eyesDx == 0 && done.headDy == 0)
     }
 
+    @Test func atWorkHakuPausesAndPushesTheHeadset() {
+        // Cycle 2 of 12 s starts at 24 s; the pause runs from 32 s to 35 s.
+        let nod = RunnerPose(mode: .work, time: 32.25, face: .mid, react: 0)
+        #expect(nod.headDy > 2.4)
+        let still = RunnerPose(mode: .work, time: 33.5, face: .mid, react: 0)
+        #expect(still.headDy == 0 && still.headsetOff == 0)
+        let push = RunnerPose(mode: .work, time: 34.5, face: .mid, react: 0)
+        #expect(push.headsetOff > 0.09 && push.headsetOff < 1)
+        #expect(RunnerFigure.parts(for: .work, pose: push) == RunnerFigure.parts(for: .work, pose: still))
+        let otherCycle = RunnerPose(mode: .work, time: 22.5, face: .mid, react: 0)
+        #expect(otherCycle.headsetOff == 0)
+        let slacking = RunnerPose(mode: .work, time: 34.5, face: .mid, moment: .slacking, react: 0)
+        #expect(slacking.headsetOff == 0)
+    }
+
     @Test func afterHalfADayHakuLooksUp() {
         let now = Date(timeIntervalSinceReferenceDate: 100_000)
         let seen = now.timeIntervalSinceReferenceDate
