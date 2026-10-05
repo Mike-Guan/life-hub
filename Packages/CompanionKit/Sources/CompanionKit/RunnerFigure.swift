@@ -752,12 +752,14 @@ struct RunnerPose {
     }
 
     /// Whistling innocently at `progress` (0...1) after a tap made HAKU hide its snack or sketchbook: the prop
-    /// stays hidden, the eyes look away, and a note floats from the mouth once the hiding is done.
+    /// gets hidden, the eyes look away, and a note floats from the mouth once the hiding is done.
     mutating func whistle(progress: Double) {
         let p = CGFloat(min(max(progress, 0), 1))
-        propHidden = 1
-        eyesDx = 3
-        eyesDy = -1
+        // The tap's own snatch-away plays first; this only takes over once it is under way.
+        let k = Self.ramp(p, from: 0.15, to: 0.3)
+        propHidden = max(propHidden, k)
+        eyesDx += (3 - eyesDx) * k
+        eyesDy += (-1 - eyesDy) * k
         whistle = p < 0.3 ? -1 : (p - 0.3) / 0.7
     }
 
