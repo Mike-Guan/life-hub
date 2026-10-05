@@ -514,12 +514,12 @@ struct IdleMotion {
         IdleMotion(dy: -CGFloat(abs(sin(progress * 2 * .pi))) * 22, angle: sin(progress * 4 * .pi) * 3)
     }
 
-    /// Slow breathing at bedtime, 4 s period.
     /// The same motion with its bounce scaled by `factor`.
     func bouncing(_ factor: CGFloat) -> IdleMotion {
         IdleMotion(dy: dy * factor, angle: angle)
     }
 
+    /// Slow breathing at bedtime, 4 s period.
     static func sleeping(time t: TimeInterval) -> IdleMotion {
         IdleMotion(dy: CGFloat(sin(t * 2 * .pi / 4)) * 1.5, angle: 0)
     }
