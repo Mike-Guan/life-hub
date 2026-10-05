@@ -59,6 +59,10 @@ enum InviteReminder {
         guard let followed else { return backoff }
         backoff.record(need, followed: followed, sentAt: sent, now: now)
         backoff.store(in: defaults)
+        let deviceID = HubDevice.id(defaults: defaults)
+        if let moment = ChangeEngine.gotUp(need, followed: followed, sentAt: sent, deviceID: deviceID) {
+            ChangeLog.note(moment, in: defaults)
+        }
         return backoff
     }
 

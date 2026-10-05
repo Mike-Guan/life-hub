@@ -25,6 +25,8 @@ struct HomeView: View {
     var invite: String?
     /// HAKU's line on a day it stopped an invite Mike kept ignoring, from the iOS app.
     var notice: String?
+    /// When each change moment happened, for HAKU's Sunday line.
+    var changes: [Date] = []
     /// The savings card, once Mike has set a target and a balance.
     var money: MoneyCard?
     /// Shows a settings button that calls this, when set.
@@ -118,7 +120,8 @@ struct HomeView: View {
                     let workLine = moment(at: context.date).flatMap(HakuLines.scene(for:)).map {
                         HakuLines.line($0, at: context.date)
                     }
-                    if let line = activity(at: context.date)?.reason ?? workLine ?? notice ?? why {
+                    let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
+                    if let line = activity(at: context.date)?.reason ?? workLine ?? notice ?? sunday ?? why {
                         Text(line)
                             .font(Toy.body(13, weight: .bold))
                             .foregroundStyle(Toy.muted)

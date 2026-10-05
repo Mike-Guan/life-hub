@@ -357,3 +357,12 @@ extension UUID {
         )
     }
 }
+
+extension CanLedger {
+    // GrowthStore is the ledger's single writer, so this only reads the file and never moves it aside.
+    /// The ledger in the file at `url`, or an empty one when there is none or it can't be read.
+    public static func read(from url: URL?) -> CanLedger {
+        guard let url, let data = try? Data(contentsOf: url) else { return CanLedger() }
+        return (try? HubJSON.decoder().decode(CanLedger.self, from: data)) ?? CanLedger()
+    }
+}
