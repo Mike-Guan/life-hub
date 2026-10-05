@@ -20,6 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Open the app between midnight and 5:00 and HAKU squints at you and says "还不睡。" once a night. No notification.
 - A napping HAKU now and then mumbles in its sleep: a small "…" floats up instead of the Z z z.
 - While vibe coding HAKU now and then stops typing, stretches with its hands up and goes back to the keys.
 - At work HAKU now and then nods twice to the music, stops for a beat and pushes its headset back into place.

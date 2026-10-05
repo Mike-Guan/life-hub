@@ -360,6 +360,20 @@ import Testing
         #expect(slacking.headsetOff == 0)
     }
 
+    @Test func afterMidnightHakuSaysItOnceANight() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        let late = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 6, hour: 0, minute: 40)))
+        #expect(CompanionView.newLateNight(at: late, last: "", calendar: calendar) == "2026-10-05")
+        #expect(CompanionView.newLateNight(at: late, last: "2026-10-05", calendar: calendar) == nil)
+        let evening = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 10, day: 5, hour: 23, minute: 50))
+        )
+        #expect(CompanionView.newLateNight(at: evening, last: "", calendar: calendar) == nil)
+        let morning = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 6, hour: 5)))
+        #expect(CompanionView.newLateNight(at: morning, last: "", calendar: calendar) == nil)
+    }
+
     @Test func afterHalfADayHakuLooksUp() {
         let now = Date(timeIntervalSinceReferenceDate: 100_000)
         let seen = now.timeIntervalSinceReferenceDate

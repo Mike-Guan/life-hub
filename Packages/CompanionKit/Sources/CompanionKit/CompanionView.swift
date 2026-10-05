@@ -65,6 +65,10 @@ public struct CompanionView: View {
     // Seconds since the reference date when the app was last open, shared by every CompanionView.
     @AppStorage("companion.lastSeen") private var lastSeen: Double = 0
     @State private var noticeLookUp = false
+    // Night (day of its evening) HAKU last said "还不睡。", shared by every CompanionView so it is said once a
+    // night.
+    @AppStorage("companion.lastLateNight") private var lastLateNight = ""
+    @State private var lateNightStart: Date?
     // A napping HAKU only rolls over on the first tap; a second tap soon after half wakes it.
     @State private var rollStart: Date?
     @State private var bubble: String?
@@ -319,6 +323,10 @@ public struct CompanionView: View {
         {
             pose.notice(progress: progress, lookUp: noticeLookUp)
         }
+        if Self.progress(since: lateNightStart, at: time, duration: Self.lateNightDuration) != nil {
+            // Opened after midnight: a squint at you.
+            pose.blink = min(pose.blink, 0.4)
+        }
         return pose
     }
 
@@ -330,6 +338,16 @@ public struct CompanionView: View {
         noticeLookUp = Self.backAfterLongAway(lastSeen: lastSeen, now: now)
         lastSeen = now.timeIntervalSinceReferenceDate
         noticeStart = now
+        if let night = Self.newLateNight(at: now, last: lastLateNight) {
+            lastLateNight = night
+            lateNightStart = now
+            bubbleTask?.cancel()
+            bubbleTask = Task {
+                try? await Task.sleep(for: .seconds(noticeDuration))
+                guard !Task.isCancelled else { return }
+                say("还不睡。", for: 3)
+            }
+        }
     }
 
     /// Progress of the celebration at `time`, 0..<1, or nil when none is playing.
@@ -383,6 +401,19 @@ public struct CompanionView: View {
     private static let stayHomeDuration = 3.2
     private static let swapDuration = 0.5
     private var noticeDuration: TimeInterval { noticeLookUp ? 1.6 : 0.9 }
+    private static let lateNightDuration = 2.6
+
+    /// The night to say "还不睡。" for when the app opens at `date`, or nil outside 0:00 to 5:00 or when it was
+    /// already said that night. A night is named by the day of its evening, as `yyyy-MM-dd`.
+    nonisolated static func newLateNight(at date: Date, last: String, calendar: Calendar = .current) -> String? {
+        guard calendar.component(.hour, from: date) < 5,
+            let evening = calendar.date(byAdding: .day, value: -1, to: date)
+        else { return nil }
+        let day = calendar.dateComponents([.year, .month, .day], from: evening)
+        let night = String(format: "%04d-%02d-%02d", day.year ?? 0, day.month ?? 0, day.day ?? 0)
+        return night == last ? nil : night
+    }
+
     /// How long the app must have been closed for HAKU to look up with "oh, you're here", in seconds.
     nonisolated static let longAwayGap: TimeInterval = 12 * 3600
 
