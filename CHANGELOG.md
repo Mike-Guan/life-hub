@@ -227,6 +227,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Leaving the office switches to 下班 Chill only from 17:30. Stepping out earlier, such as for lunch,
+  keeps 上班.
 - Staying 30 minutes at the boxing gym counts as boxing, like the fitness gym: 5 cans once a week and
   a step toward the worn and gold gloves. Before, boxing counted only with a watch workout.
 - When location access isn't "Always", home shows how to fix it. Without it the app only learns you left
