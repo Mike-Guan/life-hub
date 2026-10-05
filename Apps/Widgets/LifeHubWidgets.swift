@@ -31,6 +31,8 @@ struct HubEntry: TimelineEntry {
     var weekLine: String?
     /// HAKU's line right after leaving the office ended work.
     var offWork: String?
+    /// "下一件 18:00" for today's next Daily task, without its title.
+    var nextTask: String?
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
@@ -42,6 +44,7 @@ struct HubEntry: TimelineEntry {
     /// line for now, else today's energy.
     var detail: String {
         if let offWork { return offWork }
+        if let nextTask { return nextTask }
         if let activity { return activity.reason }
         if moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) { return HakuLines.line(scene, at: date) }
@@ -84,7 +87,9 @@ struct HubProvider: TimelineProvider {
         let office = MomentEngine.officeTimes(since: presence.since(.office), now: now, work: work)
         let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work)
         let slots = WidgetSnapshot.slotDates(after: now)
-        let needTimes = (snapshot?.needTimes ?? []) + starts + walk + office + home + slots
+        let daily = DailyPlan.stored(in: AppGroup.defaults)
+        let dailyTimes = daily?.occurrences.map(\.start) ?? []
+        let needTimes = (snapshot?.needTimes ?? []) + starts + walk + office + home + slots + dailyTimes
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
         let backoff = NudgeBackoff.stored(in: AppGroup.defaults)
@@ -122,7 +127,8 @@ struct HubProvider: TimelineProvider {
                 traces: snapshot?.traces(at: date) ?? [],
                 notice: backoff.notice(at: date),
                 weekLine: ChangeEngine.sundayLine(times: changes, now: date),
-                offWork: snapshot?.offWorkLine(at: date)
+                offWork: snapshot?.offWorkLine(at: date),
+                nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false) }
             )
         }
     }

@@ -31,7 +31,7 @@ enum InviteReminder {
         if let reading, let at, !backoff.isPaused(reading.need, at: at) {
             let content = UNMutableNotificationContent()
             content.title = "HAKU"
-            content.body = NeedEngine.inviteText(for: reading.need)
+            content.body = NeedEngine.inviteText(for: reading.need, taskSoon: taskSoon(after: at))
             content.sound = .default
             // Work-time notices have no 走 button.
             let atWork = reading.need == .slacking || reading.need == .sitting
@@ -71,6 +71,11 @@ enum InviteReminder {
     /// The text of the invite sent for `reading`, or `nil` when none went out for it.
     static func sent(for reading: NeedReading?) -> String? {
         guard let reading, let sent = InviteLog.stored(in: AppGroup.defaults).lastSentAt else { return nil }
-        return sent >= reading.since ? NeedEngine.inviteText(for: reading.need) : nil
+        return sent >= reading.since ? NeedEngine.inviteText(for: reading.need, taskSoon: taskSoon(after: sent)) : nil
+    }
+
+    /// Whether a Daily task starts within the hour after `date`.
+    private static func taskSoon(after date: Date) -> Bool {
+        DailyPlan.stored(in: AppGroup.defaults)?.hasTask(within: DailyAgenda.inviteLead, after: date) ?? false
     }
 }

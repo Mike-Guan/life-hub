@@ -24,6 +24,8 @@ public struct DailyTask: Decodable, Equatable, Sendable {
     /// Minutes after midnight of the day; above 1440 ends on the next day.
     public var end: Int?
     public var recurrence: Recurrence
+    /// Daily's category, such as "health" or "errands".
+    public var category: String
     /// Whether a one-off task is done.
     public var done: Bool
     /// Days a repeating task was done, as "yyyy-MM-dd".
@@ -42,6 +44,7 @@ public struct DailyTask: Decodable, Equatable, Sendable {
         start: Int?,
         end: Int?,
         recurrence: Recurrence = .none,
+        category: String = "personal",
         done: Bool = false,
         completedDates: [String] = [],
         focus: Bool = false,
@@ -55,6 +58,7 @@ public struct DailyTask: Decodable, Equatable, Sendable {
         self.start = start
         self.end = end
         self.recurrence = recurrence
+        self.category = category
         self.done = done
         self.completedDates = completedDates
         self.focus = focus
@@ -64,7 +68,8 @@ public struct DailyTask: Decodable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, title, date, start, end, recurrence, done, completedDates, focus, focusDates, createdAt, deletedAt
+        case id, title, date, start, end, recurrence, category, done, completedDates, focus, focusDates, createdAt
+        case deletedAt
     }
 
     // Every field but the id falls back to a default, so a file from a newer Daily still reads.
@@ -81,6 +86,7 @@ public struct DailyTask: Decodable, Equatable, Sendable {
         start = value(.start)
         end = value(.end)
         recurrence = (value(.recurrence) as String?).flatMap(Recurrence.init(rawValue:)) ?? .none
+        category = value(.category) ?? "personal"
         done = value(.done) ?? false
         completedDates = value(.completedDates) ?? []
         focus = value(.focus) ?? false
@@ -97,8 +103,28 @@ public struct DailyTask: Decodable, Equatable, Sendable {
     }
 }
 
+/// What HAKU holds up for a Daily task.
+public enum DailyProp: String, Codable, Sendable {
+    case headphones
+    case bag
+    case gymBag
+    case note
+
+    // PM, 2026-10-05 (PRD section 15).
+    /// The prop for one of Daily's categories: learning gets the headphones, health the gym bag, errands
+    /// and home the shopping bag, anything else a sticky note.
+    public init(category: String) {
+        switch category {
+        case "learning": self = .headphones
+        case "health": self = .gymBag
+        case "errands", "home": self = .bag
+        default: self = .note
+        }
+    }
+}
+
 /// One time a Daily task happens.
-public struct DailyOccurrence: Equatable, Sendable {
+public struct DailyOccurrence: Codable, Equatable, Sendable {
     /// The task id, plus the day for a repeating task.
     public var id: String
     public var title: String
@@ -108,8 +134,19 @@ public struct DailyOccurrence: Equatable, Sendable {
     public var focus: Bool
     /// Whether the task was created before it starts, not added on the spot.
     public var planned: Bool
+    public var prop: DailyProp
 
-    public init(id: String, title: String, start: Date, end: Date, done: Bool, focus: Bool, planned: Bool) {
+    public init(
+        id: String,
+        title: String,
+        start: Date,
+        end: Date,
+        done: Bool,
+        focus: Bool,
+        planned: Bool,
+        prop: DailyProp = .note
+    ) {
+        self.prop = prop
         self.id = id
         self.title = title
         self.start = start
@@ -137,7 +174,8 @@ extension DailyTask {
             end: at(max(end, start)),
             done: repeating ? completedDates.contains(key) : done,
             focus: repeating ? focusDates.contains(key) : focus,
-            planned: createdAt.map { $0 < at(start) } ?? false
+            planned: createdAt.map { $0 < at(start) } ?? false,
+            prop: DailyProp(category: category)
         )
     }
 
@@ -216,5 +254,118 @@ public enum DailyAgenda {
         let parts = key.split(separator: "-").compactMap { Int($0) }
         guard parts.count == 3 else { return nil }
         return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
+    }
+}
+
+/// What HAKU does about a Daily task around its start.
+public struct DailyCue: Equatable, Sendable {
+    public enum Stage: Sendable {
+        /// From `DailyAgenda.soonLead` before the start: looks at its watch and holds up the prop.
+        case soon
+        /// For `DailyAgenda.nowLasts` from the start: slaps a sticky note on the screen once.
+        case now
+    }
+
+    public var stage: Stage
+    public var prop: DailyProp
+    /// The occurrence id, so the start plays once.
+    public var id: String
+
+    public init(stage: Stage, prop: DailyProp, id: String) {
+        self.stage = stage
+        self.prop = prop
+        self.id = id
+    }
+}
+
+// Written by the app after each read, so widgets and the Screen Time extension, which can't open
+// Daily's folder, see the same tasks.
+/// The Daily tasks from yesterday to tomorrow, as last read.
+public struct DailyPlan: Codable, Equatable, Sendable {
+    public var occurrences: [DailyOccurrence]
+
+    public init(occurrences: [DailyOccurrence]) {
+        self.occurrences = occurrences
+    }
+
+    /// The next task not done yet that starts at or after `now` on the same calendar day.
+    public func next(after now: Date, calendar: Calendar = .current) -> DailyOccurrence? {
+        let next = DailyAgenda.next(in: occurrences, after: now)
+        return next.flatMap { calendar.isDate($0.start, inSameDayAs: now) ? $0 : nil }
+    }
+
+    /// What HAKU does at `now` about the first task not done that is about to start or just started.
+    public func cue(at now: Date) -> DailyCue? {
+        for task in occurrences where !task.done {
+            if now >= task.start.addingTimeInterval(-DailyAgenda.soonLead), now < task.start {
+                return DailyCue(stage: .soon, prop: task.prop, id: task.id)
+            }
+            if now >= task.start, now < task.start.addingTimeInterval(DailyAgenda.nowLasts) {
+                return DailyCue(stage: .now, prop: task.prop, id: task.id)
+            }
+        }
+        return nil
+    }
+
+    /// Whether a task not done starts within `interval` after `date`.
+    public func hasTask(within interval: TimeInterval, after date: Date) -> Bool {
+        occurrences.contains { !$0.done && $0.start >= date && $0.start <= date.addingTimeInterval(interval) }
+    }
+
+    /// When the cues start or end, for widget timelines.
+    public var times: [Date] {
+        occurrences.flatMap {
+            [$0.start.addingTimeInterval(-DailyAgenda.soonLead), $0.start, $0.start.addingTimeInterval(DailyAgenda.nowLasts)]
+        }
+    }
+
+    static let defaultsKey = "dailyPlan"
+
+    /// The plan saved in `defaults`, `nil` when there is none or it can't be read.
+    public static func stored(in defaults: UserDefaults) -> DailyPlan? {
+        guard let data = defaults.data(forKey: defaultsKey) else { return nil }
+        return try? JSONDecoder().decode(DailyPlan.self, from: data)
+    }
+
+    /// Saves the plan in `defaults`.
+    public func store(in defaults: UserDefaults) {
+        defaults.set(try? JSONEncoder().encode(self), forKey: Self.defaultsKey)
+    }
+
+    /// Removes the saved plan from `defaults`.
+    public static func clear(in defaults: UserDefaults) {
+        defaults.removeObject(forKey: defaultsKey)
+    }
+}
+
+extension DailyAgenda {
+    /// How long before a task starts HAKU looks at its watch.
+    public static let soonLead: TimeInterval = 15 * 60
+    /// How long after a task starts the sticky note can still play.
+    public static let nowLasts: TimeInterval = 10 * 60
+    /// A task this close turns the couch invite into a getting-ready line.
+    public static let inviteLead: TimeInterval = 60 * 60
+
+    // The Lock Screen shows only the time: others can see it (PRD section 15).
+    /// "下一件 18:00", with the title after it when `title` is true.
+    public static func nextLine(_ task: DailyOccurrence, title: Bool, calendar: Calendar = .current) -> String {
+        let parts = calendar.dateComponents([.hour, .minute], from: task.start)
+        let time = String(format: "%02d:%02d", parts.hour ?? 0, parts.minute ?? 0)
+        return title && !task.title.isEmpty ? "下一件 \(time) \(task.title)" : "下一件 \(time)"
+    }
+
+    // The first read after linking only notes what is done already, so old tasks don't all celebrate.
+    // Only ids still in the window are kept, so the list stays small.
+    /// The newest task that became done since `seen`, as a celebration, and the done ids to remember.
+    /// - Parameter seen: done ids from the last read, `nil` on the first read.
+    public static func newlyDone(
+        in occurrences: [DailyOccurrence],
+        seen: Set<String>?
+    ) -> (event: CompanionEvent?, seen: Set<String>) {
+        let done = occurrences.filter(\.done)
+        let ids = Set(done.map(\.id))
+        guard let seen else { return (nil, ids) }
+        let fresh = done.filter { !seen.contains($0.id) }.max { $0.start < $1.start }
+        return (fresh.map { CompanionEvent.taskDone(id: $0.id, focus: $0.focus) }, ids)
     }
 }

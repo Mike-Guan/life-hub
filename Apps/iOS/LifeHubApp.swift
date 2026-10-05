@@ -106,6 +106,8 @@ struct LifeHubApp: App {
             replayFrom: replayFrom,
             invite: needs.invite,
             sit: needs.sit,
+            daily: daily.plan,
+            dailyDone: daily.done,
             notice: NudgeBackoff.stored(in: AppGroup.defaults).notice(at: .now),
             changes: ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: growth.ledger),
             money: moneyCard,
@@ -137,6 +139,7 @@ struct LifeHubApp: App {
                 await importSleep()
                 await needs.importMotion()
                 await daily.read()
+                syncWidgets()
                 earnWins()
                 refreshNeeds()
                 // The awaits above can include a permission sheet; celebrate only if still on screen.
