@@ -398,6 +398,18 @@ import Testing
         #expect(CompanionView.newLateNight(at: morning, last: "", calendar: calendar) == nil)
     }
 
+    @Test func highSpiritHumsANote() throws {
+        #expect(CompanionView.hum(at: 5) == nil)
+        #expect(abs(try #require(CompanionView.hum(at: 25.6)) - 0.25) < 0.001)
+        #expect(CompanionView.hum(at: 11.4) == nil)
+        var pose = RunnerPose(mode: .chill, time: 3, face: .high, react: 0)
+        #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.musicNote))
+        pose.hum = 0.5
+        #expect(RunnerFigure.parts(for: .chill, pose: pose).contains(.musicNote))
+        pose.turnedAway = true
+        #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.musicNote))
+    }
+
     @Test func lowSpiritRubsAnEye() {
         #expect(CompanionView.rubEyes(at: 10, mode: .work) == nil)
         #expect(CompanionView.rubEyes(at: 35.25, mode: .work) == 0.5)
