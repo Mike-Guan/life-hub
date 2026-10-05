@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- The currency is called 能量罐 everywhere you read it: the shop, unboxing, places and VoiceOver. HAKU
+  still drinks Monster. The home screen shows "你认真活过的每一天，都不该白白消失。" before any mode is set.
 - HAKU's sleeping pillow is light blue, so it no longer blends into the white hair.
 - HAKU stops couch scrolling when you do: it gets up 20 minutes after Screen Time last saw you on the
   picked apps (it reports every 10 more minutes of use), as soon as you walk, or when you change mode by

@@ -92,6 +92,11 @@ struct HomeView: View {
                     Text(mode.tagline)
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
+                } else {
+                    // First launch, before any mode: the app's promise (PRD §18).
+                    Text("你认真活过的每一天，都不该白白消失。")
+                        .font(Toy.body(16, weight: .bold))
+                        .foregroundStyle(Toy.ink)
                 }
 
                 // Why RUNNER looks the way it does: the activity, bedtime, then the need, then energy.
@@ -232,7 +237,7 @@ private struct Header: View {
                         CanChip(count: cans)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("商店，\(cans) 罐")
+                    .accessibilityLabel("商店，\(cans) 个能量罐")
                 }
                 if let onSettings {
                     Button(action: onSettings) {

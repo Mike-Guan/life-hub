@@ -177,7 +177,7 @@ extension HubPlace.Kind {
         case .gym: "直接切到拳击日。"
         case .office: "切到上班。"
         case .home: "不切换，用来看你是不是窝在家。"
-        case .fitness: "HAKU 陪你举铁，待满 30 分钟算一次健身，得 \(Win.gym.cans) 罐。"
+        case .fitness: "HAKU 陪你举铁，待满 30 分钟算一次健身，得 \(Win.gym.cans) 个能量罐。"
         case .custom: action.title
         }
     }
