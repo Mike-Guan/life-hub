@@ -146,6 +146,19 @@ extension WidgetSnapshot {
         return [needUntil, nextNeed?.from, nextNeed?.until, peek].compactMap { $0 }
     }
 
+    // HAKU's idle bits change every 15 minutes, counted from the reference date. A widget only redraws at
+    // an entry, so each boundary needs one.
+    /// The 15-minute boundaries after `date` for the next `span`, for widget timelines.
+    public static func slotDates(
+        after date: Date,
+        every slot: TimeInterval = 15 * 60,
+        span: TimeInterval = 6 * 60 * 60
+    ) -> [Date] {
+        let first = (date.timeIntervalSinceReferenceDate / slot).rounded(.down) + 1
+        let count = Int(span / slot)
+        return (0..<count).map { Date(timeIntervalSinceReferenceDate: (first + Double($0)) * slot) }
+    }
+
     /// When widgets should redraw after `date`: now, the next bedtime change, the next day start and
     /// when needs start or end.
     /// - Parameter needTimes: when the snapshot's needs start or end.
