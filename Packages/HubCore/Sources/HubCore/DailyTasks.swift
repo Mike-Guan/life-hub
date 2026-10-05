@@ -220,9 +220,10 @@ public enum DailyAgenda {
         return all.sorted { ($0.start, $0.id) < ($1.start, $1.id) }
     }
 
-    /// The next task not done yet that starts at or after `now`, today or tomorrow.
+    // A task under way still shows until it ends (Mike 2026-10-05: nothing showed during a 23:00 task).
+    /// The first task not done yet that hasn't ended at `now`, today or tomorrow.
     public static func next(in occurrences: [DailyOccurrence], after now: Date) -> DailyOccurrence? {
-        occurrences.first { !$0.done && $0.start >= now }
+        occurrences.first { !$0.done && $0.end > now }
     }
 
     // Daily keeps no time of finishing, so a finish counts on the hub day Life Hub first reads it.
@@ -293,7 +294,7 @@ public struct DailyPlan: Codable, Equatable, Sendable {
         self.occurrences = occurrences
     }
 
-    /// The next task not done yet that starts at or after `now` on the same calendar day.
+    /// The first task not done yet that hasn't ended at `now` and starts on the same calendar day.
     public func next(after now: Date, calendar: Calendar = .current) -> DailyOccurrence? {
         let next = DailyAgenda.next(in: occurrences, after: now)
         return next.flatMap { calendar.isDate($0.start, inSameDayAs: now) ? $0 : nil }
@@ -317,10 +318,10 @@ public struct DailyPlan: Codable, Equatable, Sendable {
         occurrences.contains { !$0.done && $0.start >= date && $0.start <= date.addingTimeInterval(interval) }
     }
 
-    /// When the cues start or end, for widget timelines.
+    /// When the cues or the next-task line change, for widget timelines.
     public var times: [Date] {
         occurrences.flatMap { task in
-            [-DailyAgenda.soonLead, 0, DailyAgenda.nowLasts].map { task.start.addingTimeInterval($0) }
+            [-DailyAgenda.soonLead, 0, DailyAgenda.nowLasts].map { task.start.addingTimeInterval($0) } + [task.end]
         }
     }
 

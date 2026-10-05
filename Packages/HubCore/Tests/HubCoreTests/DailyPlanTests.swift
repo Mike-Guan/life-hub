@@ -51,8 +51,9 @@ import Testing
             task("tomorrow", at: date(6, 9)),
         ])
         #expect(plan.next(after: date(5, 16), calendar: calendar)?.id == "later")
-        // Tomorrow's task doesn't show tonight.
-        #expect(plan.next(after: date(5, 18, 30), calendar: calendar) == nil)
+        // A task under way shows until it ends; tomorrow's task doesn't show tonight.
+        #expect(plan.next(after: date(5, 18, 30), calendar: calendar)?.id == "later")
+        #expect(plan.next(after: date(5, 19), calendar: calendar) == nil)
         #expect(plan.next(after: date(6, 8), calendar: calendar)?.id == "tomorrow")
     }
 
@@ -74,6 +75,7 @@ import Testing
         let done = DailyPlan(occurrences: [task("t", at: date(5, 18), done: true)])
         #expect(done.cue(at: date(5, 17, 50)) == nil)
         #expect(plan.times.contains(date(5, 17, 45)) && plan.times.contains(date(5, 18, 10)))
+        #expect(plan.times.contains(date(5, 19)))
     }
 
     @Test func aTaskWithinTheHourChangesTheCouchInvite() {
