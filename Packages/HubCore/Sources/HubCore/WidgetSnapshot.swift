@@ -40,6 +40,8 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var workedToday: TimeInterval?
     /// When Mike last changed the mode by hand, `nil` when never or unknown.
     public var manualAt: Date?
+    /// When HAKU's off-work line stops, `nil` when leaving the office didn't just end work.
+    public var offWorkUntil: Date?
     public var updatedAt: Date
 
     public init(
@@ -64,6 +66,7 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public init(log: ModeLog, energy: EnergyLevel? = nil, bedtime: Bedtime? = nil, now: Date = .now) {
         self.init(mode: log.current?.mode, since: log.current?.at, energy: energy, bedtime: bedtime, updatedAt: now)
         sideHustle = log.current?.sideHustle
+        offWorkUntil = HakuLines.offWorkUntil(log, now: now)
     }
 }
 
@@ -148,7 +151,12 @@ extension WidgetSnapshot {
     /// When the needs in this snapshot start, end or change stage (HAKU peeking during couch scrolling).
     public var needTimes: [Date] {
         let peek = need == .couchScroll ? needSince?.addingTimeInterval(NeedEngine.couchPeekAfter) : nil
-        return [needUntil, nextNeed?.from, nextNeed?.until, peek].compactMap { $0 }
+        return [needUntil, nextNeed?.from, nextNeed?.until, peek, offWorkUntil].compactMap { $0 }
+    }
+
+    /// HAKU's off-work line while it lasts at `date`, else `nil`.
+    public func offWorkLine(at date: Date) -> String? {
+        offWorkUntil.flatMap { date < $0 ? HakuLines.offWorkLine : nil }
     }
 
     // HAKU's idle bits change every 15 minutes, counted from the reference date. A widget only redraws at

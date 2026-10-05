@@ -183,6 +183,26 @@ public enum HakuLines {
         return lines[((days % lines.count) + lines.count) % lines.count]
     }
 
+    /// HAKU's one line when leaving the office ends work.
+    public static let offWorkLine = "……收工。"
+    /// How long the off-work line stays after Mike leaves the office.
+    public static let offWorkLasts: TimeInterval = 30 * 60
+
+    // PRD section 16, Mike 2026-10-05: no line while packing up, one line the moment he leaves.
+    // Leaving the office is the only automatic change from work to chill from 17:30 that isn't a pass-by.
+    /// When the off-work line stops showing, if leaving the office ended work within `offWorkLasts` of `now`.
+    /// - Returns: `nil` when the latest change isn't that leave or the line has run its time.
+    public static func offWorkUntil(_ log: ModeLog, now: Date, calendar: Calendar = .current) -> Date? {
+        let changes = log.active.filter { $0.at <= now }
+        guard let left = changes.last, let before = changes.dropLast().last else { return nil }
+        guard left.mode == .chill, left.source == .location, before.mode == .work else { return nil }
+        guard left.at.timeIntervalSince(before.at) >= PlacePresence.bounce else { return nil }
+        let parts = calendar.dateComponents([.hour, .minute], from: left.at)
+        guard (parts.hour ?? 0) * 60 + (parts.minute ?? 0) >= ModeEngine.offWorkFromMinute else { return nil }
+        let until = left.at.addingTimeInterval(offWorkLasts)
+        return now < until ? until : nil
+    }
+
     /// The scene for a state that has its own lines, `nil` for the others.
     public static func scene(for moment: CompanionMoment) -> LineScene? {
         switch moment {
