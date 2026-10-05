@@ -398,6 +398,20 @@ import Testing
         #expect(CompanionView.newLateNight(at: morning, last: "", calendar: calendar) == nil)
     }
 
+    @Test func atHomeHakuScratchesItsHead() {
+        let scratching = RunnerPose(mode: .chill, time: 6, face: .mid, react: 0)
+        #expect(scratching.scratch == 0.5 && scratching.tuft > 0)
+        let parts = Set(RunnerFigure.parts(for: .chill, pose: scratching))
+        #expect(parts.isSuperset(of: [.scratchHand, .hairTuft]))
+        let settling = RunnerPose(mode: .chill, time: 9, face: .mid, react: 0)
+        #expect(settling.scratch < 0 && settling.tuft > 0 && settling.tuft < 1)
+        #expect(!RunnerFigure.parts(for: .chill, pose: settling).contains(.scratchHand))
+        let calm = RunnerPose(mode: .chill, time: 14, face: .mid, react: 0)
+        #expect(calm.tuft == 0 && !RunnerFigure.parts(for: .chill, pose: calm).contains(.hairTuft))
+        let napping = RunnerPose(mode: .chill, time: 6, face: .mid, life: .nap, react: 0)
+        #expect(napping.scratch < 0)
+    }
+
     @Test func highSpiritHumsANote() throws {
         #expect(CompanionView.hum(at: 5) == nil)
         #expect(abs(try #require(CompanionView.hum(at: 25.6)) - 0.25) < 0.001)
