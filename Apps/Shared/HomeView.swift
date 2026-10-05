@@ -47,6 +47,10 @@ struct HomeView: View {
     var ledger = CanLedger()
     /// Shows the wardrobe button on HAKU's card that calls this, when set.
     var onWardrobe: (() -> Void)?
+    /// When Mike last tapped HAKU's bath away.
+    var bathDoneAt: Date?
+    /// Records that Mike tapped HAKU's bath away.
+    var onBathDone: (() -> Void)?
 
     @Environment(ModeStore.self) private var store
     @Environment(EnergyStore.self) private var energy
@@ -97,11 +101,13 @@ struct HomeView: View {
                         event: event ?? sit?.stretched(at: context.date) ?? stayHome(at: context.date) ?? dailyDone,
                         daily: daily?.cue(at: context.date),
                         walking: activitySignals.flatMap { PlaceWalk.walk(in: $0.presence, now: context.date)?.from },
+                        bath: bath(at: context.date),
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
                         bedtime: bedtime.state(at: context.date),
                         wardrobe: wardrobe,
-                        onTap: tapAction
+                        onTap: tapAction,
+                        onBathDone: onBathDone
                     )
                 }
                 .frame(height: 340)
@@ -226,6 +232,16 @@ struct HomeView: View {
     private func shownActivity(at date: Date) -> CompanionActivity? {
         let activity = activity(at: date)
         return activity == .gymDay && moment(at: date) != nil ? nil : activity
+    }
+
+    private func bath(at date: Date) -> Bool {
+        BathTime.isOn(
+            at: date,
+            bedtime: bedtime,
+            mode: store.current,
+            atHome: activitySignals?.presence.since(.home) != nil,
+            doneAt: bathDoneAt
+        )
     }
 
     private func activity(at date: Date) -> CompanionActivity? {

@@ -34,6 +34,7 @@ struct LifeHubApp: App {
     @State private var needs: NeedTracker
     @State private var taps: NotificationTaps
     @State private var daily = DailyLink()
+    @State private var bathDoneAt = BathTime.doneAt(in: AppGroup.defaults)
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -116,7 +117,13 @@ struct LifeHubApp: App {
             onShop: { showsShop = true },
             wardrobe: wardrobe,
             ledger: growth.ledger,
-            onWardrobe: { showsWardrobe = true }
+            onWardrobe: { showsWardrobe = true },
+            bathDoneAt: bathDoneAt,
+            onBathDone: {
+                BathTime.markDone(at: .now, in: AppGroup.defaults)
+                bathDoneAt = .now
+                WidgetCenter.shared.reloadAllTimelines()
+            }
         )
         .environment(store)
         .environment(energy)
