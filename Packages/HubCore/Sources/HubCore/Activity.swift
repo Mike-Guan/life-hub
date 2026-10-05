@@ -110,10 +110,10 @@ public struct ActivityDays: Codable, Equatable, Sendable {
     /// In how many of those weeks a weekday needs a gym win to count as a gym day.
     public static let learnMinWeeks = 2
 
-    // Mike 2026-10-05: gym days follow the days he actually goes, with no setting. Until there is a gym
-    // win in the last 4 weeks, the stored days stay.
+    // Mike 2026-10-05: gym days follow the days he actually goes, with no setting. Until a weekday
+    // qualifies, the stored days stay, so the first visit doesn't stop the gym-day invite.
     /// These days with the gym days learned from the gym wins in `ledger`: each weekday with a gym win in
-    /// at least `learnMinWeeks` of the last `learnWeeks` weeks.
+    /// at least `learnMinWeeks` of the last `learnWeeks` weeks, or these days when none has.
     public func learningGym(from ledger: CanLedger, now: Date, calendar: Calendar = .current) -> ActivityDays {
         let today = StateEngine.dayStart(for: now, calendar: calendar)
         var weeks: [Int: Set<Int>] = [:]
@@ -123,9 +123,10 @@ public struct ActivityDays: Codable, Equatable, Sendable {
             guard (0..<Self.learnWeeks * 7).contains(age) else { continue }
             weeks[calendar.component(.weekday, from: day), default: []].insert(age / 7)
         }
-        guard !weeks.isEmpty else { return self }
+        let learnedDays = Set(weeks.filter { $0.value.count >= Self.learnMinWeeks }.keys)
+        guard !learnedDays.isEmpty else { return self }
         var learned = self
-        learned.gymWeekdays = Set(weeks.filter { $0.value.count >= Self.learnMinWeeks }.keys)
+        learned.gymWeekdays = learnedDays
         return learned
     }
 }

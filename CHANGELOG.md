@@ -6,7 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - Gym days follow the days you actually go: a weekday with a gym visit or strength workout in 2 of the
-  last 4 weeks. Until there is one, gym days stay Tuesday to Thursday. There is no setting for it.
+  last 4 weeks. Until a weekday qualifies, gym days stay Tuesday to Thursday. There is no setting for it.
 - Widgets redraw every 15 minutes for the next 6 hours, so HAKU's idle bits on the Lock Screen change too.
 - The currency is called 能量罐 everywhere you read it: the shop, unboxing, places and VoiceOver. HAKU
   still drinks Monster. The home screen shows "你认真活过的每一天，都不该白白消失。" before any mode is set.

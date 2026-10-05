@@ -126,9 +126,9 @@ import Testing
         #expect(days.runWeekday == ActivityDays.standard.runWeekday)
     }
 
-    @Test func twoWinsInOneWeekCountOnce() {
+    @Test func twoWinsInOneWeekCountOnceAndKeepTheStoredDays() {
         let ledger = gymWins([date(27, 20), date(27, 21)])
         let days = ActivityDays.standard.learningGym(from: ledger, now: date(31, 12), calendar: calendar)
-        #expect(days.gymWeekdays.isEmpty)
+        #expect(days == .standard)
     }
 }
