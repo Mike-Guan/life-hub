@@ -101,6 +101,7 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case canStackTwo = "can_stack_two"
     case canStackThree = "can_stack_three"
     case laptop
+    case laptopClosed = "laptop_closed"
     case typingHands = "typing_hands"
     case soul
     case codeBits = "code_bits"
@@ -202,6 +203,7 @@ enum RunnerArt {
         case .canStackTwo: canStackTwo()
         case .canStackThree: canStackThree()
         case .laptop: laptop()
+        case .laptopClosed: laptopClosed()
         case .typingHands: typingHands()
         case .soul: soul()
         case .codeBits: codeBits()
@@ -3469,6 +3471,57 @@ enum RunnerArt {
                 stroke: RunnerPalette.ink,
                 lineWidth: 1.5,
                 join: .round
+            ),
+        ]
+    }
+
+    private static func laptopClosed() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 28, y: 132))
+                    p.addLine(to: .init(x: 92, y: 132))
+                    p.addLine(to: .init(x: 96, y: 138))
+                    p.addLine(to: .init(x: 24, y: 138))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.canLid,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 32, y: 126))
+                    p.addLine(to: .init(x: 88, y: 126))
+                    p.addCurve(
+                        to: .init(x: 90, y: 128),
+                        control1: .init(x: 89.1, y: 126),
+                        control2: .init(x: 90, y: 126.9)
+                    )
+                    p.addLine(to: .init(x: 90, y: 131))
+                    p.addCurve(
+                        to: .init(x: 88, y: 133),
+                        control1: .init(x: 90, y: 132.1),
+                        control2: .init(x: 89.1, y: 133)
+                    )
+                    p.addLine(to: .init(x: 32, y: 133))
+                    p.addCurve(
+                        to: .init(x: 30, y: 131),
+                        control1: .init(x: 30.9, y: 133),
+                        control2: .init(x: 30, y: 132.1)
+                    )
+                    p.addLine(to: .init(x: 30, y: 128))
+                    p.addCurve(
+                        to: .init(x: 32, y: 126),
+                        control1: .init(x: 30, y: 126.9),
+                        control2: .init(x: 30.9, y: 126)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.hood,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3
             ),
         ]
     }

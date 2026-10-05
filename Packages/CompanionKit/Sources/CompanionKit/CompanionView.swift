@@ -80,6 +80,9 @@ public struct CompanionView: View {
     @State private var limberStart: Date?
     // Id of the last shoulder roll after standing up, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastStretched") private var lastStretched = ""
+    @State private var packUpStart: Date?
+    // Seconds since the reference date HAKU last started packing up, shared by every CompanionView.
+    @AppStorage("companion.lastPackUp") private var lastPackUp: Double = 0
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -149,6 +152,7 @@ public struct CompanionView: View {
         .onAppear {
             startNotice()
             startStretchUp()
+            startPackUp()
             if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
             playEventIfNew()
             if invite != nil { startInvite() }
@@ -161,10 +165,12 @@ public struct CompanionView: View {
             if new == .active {
                 startNotice()
                 startStretchUp()
+                startPackUp()
             }
             if new == .background { lastSeen = Date.now.timeIntervalSinceReferenceDate }
         }
         .onChange(of: moment) { _, _ in
+            startPackUp()
             pop += 1
             swapStart = .now
             say(nil)
@@ -342,6 +348,11 @@ public struct CompanionView: View {
         }
         if let progress = turnAway(at: time) { pose.turnAway(progress: progress) }
         if shownMoment == .stiff, let progress = stretchUp(at: time) { pose.stretchUp(progress: progress) }
+        if shownMoment == .packingUp, let start = packUpStart?.timeIntervalSinceReferenceDate,
+            time - start < RunnerPose.packUpLength
+        {
+            pose.packUp(elapsed: max(0, time - start))
+        }
         if life == .snack || life == .drawing,
             let progress = Self.progress(since: whistleStart, at: time, duration: Self.whistleDuration)
         {
@@ -396,6 +407,20 @@ public struct CompanionView: View {
             guard !Task.isCancelled else { return }
             say("……我腰要断了。你呢？", for: 3)
         }
+    }
+
+    /// Starts packing up from closing the laptop, unless it started within the past 20 minutes; then HAKU is
+    /// already packed and just watches the clock.
+    private func startPackUp() {
+        let now = Date.now
+        guard shownMoment == .packingUp, bedtime == .off, Self.packUpDue(last: lastPackUp, now: now) else { return }
+        lastPackUp = now.timeIntervalSinceReferenceDate
+        packUpStart = now
+    }
+
+    /// Whether packing up plays from the start again, 20 minutes after the `last` time.
+    nonisolated static func packUpDue(last: TimeInterval, now: Date) -> Bool {
+        now.timeIntervalSinceReferenceDate - last >= 20 * 60
     }
 
     /// Whether the stretch on opening may play again, 30 minutes after the `last` one.
@@ -769,6 +794,8 @@ struct IdleMotion {
         case .stiff:
             let sway = RunnerPose.stiffSway(at: t)
             self.init(dy: sway.dy, angle: sway.angle)
+        case .packingUp:
+            self.init(dy: 0, angle: 0)
         }
     }
 

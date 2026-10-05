@@ -22,6 +22,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Near the end of a work day at the office, HAKU packs up: it closes the laptop, wipes the desk, takes
+  the headset off, shoulders the bag and watches the clock.
 - HAKU gets stiff when your Apple Watch logs two idle stand hours in a row in 上班 or 副业: it twists
   and thumps its back, and stretches when you open the app. When you stand after that, it rolls its
   shoulders once. No Watch or no recent data: nothing. Health access now also asks for stand hours.

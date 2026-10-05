@@ -223,6 +223,11 @@ struct RunnerPose {
     var armsUp: CGFloat = 0
     /// Sideways shift of the whole figure, for rolling the shoulders.
     var shift: CGFloat = 0
+    /// Packing up before the end of work: 0 = closing the laptop, 1 = wiping the desk, 2 = headset off and
+    /// bag on, 3 = watching the clock.
+    var packStep = 3
+    /// 0 = laptop open, 1 = closed.
+    var lidClose: CGFloat = 0
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -287,6 +292,13 @@ struct RunnerPose {
             blink = 0.6
         case .timeToLeave:
             eyesDx = -3
+        case .packingUp:
+            // The Lock Screen frame: laptop shut, bag on, eyes on the watch.
+            lidClose = 1
+            headsetOff = 1
+            bagLift = 1
+            eyesDx = 3
+            eyesDy = 1.5
         case .stiff:
             // The Lock Screen frame: fist landing on the shoulder, head tilted, eyes squeezed.
             thump = 1
@@ -514,6 +526,51 @@ struct RunnerPose {
             eyesDx = -3 + 3 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 4)), from: 3, to: 4)
         case .stiff:
             stiffen(time: t)
+        case .packingUp:
+            // Packed and waiting: tapping the watch, a look at the door every 4 s.
+            headDy = 0
+            let k = CGFloat(t.truncatingRemainder(dividingBy: 4))
+            prop = CGSize(width: 0, height: 3 * abs(sin(k * .pi / 0.4)))
+            eyesDx = 3 - 6 * Self.bump(k, from: 3, to: 4)
+            eyesDy = 1.5 * (1 - Self.bump(k, from: 3, to: 4))
+        }
+    }
+
+    /// How long closing the laptop, wiping the desk and putting the bag on take, in seconds.
+    static let packUpLength: TimeInterval = 6.6
+
+    /// Packing up `elapsed` seconds after it started: closing the laptop, wiping the desk, headset off and bag
+    /// on. From `packUpLength` on, the moment's own loop of watching the clock plays.
+    mutating func packUp(elapsed: TimeInterval) {
+        let t = CGFloat(elapsed)
+        if t < 2.2 {
+            packStep = 0
+            lidClose = Self.ramp(t, from: 0.9, to: 2)
+            headsetOff = 0
+            bagLift = -1
+            // Last few keys, then the hands lift off the keyboard.
+            let lift = t < 0.7 ? -1.5 * abs(sin(t * .pi / 0.28)) : -6 * Self.ramp(t, from: 0.7, to: 1.2)
+            typing = CGSize(width: 0, height: lift)
+            eyesDx = 0
+            eyesDy = 1.5
+            headDy = 2
+        } else if t < 4.6 {
+            packStep = 1
+            headsetOff = 0
+            bagLift = -1
+            let sweep = sin((t - 2.2) / 1.2 * 2 * .pi)
+            prop = CGSize(width: -26 + 22 * sweep, height: 6)
+            eyesDx = -2 + 2.5 * sweep
+            eyesDy = 2
+            headDy = 2
+        } else if t < CGFloat(Self.packUpLength) {
+            packStep = 2
+            let k = t - 4.6
+            headsetOff = Self.ramp(k, from: 0, to: 0.7)
+            bagLift = Self.ramp(k, from: 0.8, to: 1.7)
+            eyesDx = -3 * Self.bump(k, from: 0.8, to: 1.9)
+            eyesDy = -Self.bump(k, from: 0, to: 0.7)
+            headDy = 0
         }
     }
 
@@ -1077,6 +1134,20 @@ struct RunnerFigure: View {
             visible.formUnion(workParts.union([.ledLine, .door, .watchWrist, .tapHand]))
         case .stiff:
             visible.formUnion(workParts.union([.ledLine]))
+        case .packingUp:
+            visible.formUnion(workParts.union([.ledLine, .desk]))
+            if pose.headsetOff >= 1 { visible.subtract(headsetParts) }
+            visible.insert(pose.lidClose >= 1 ? .laptopClosed : .laptop)
+            switch pose.packStep {
+            case 0:
+                if pose.typing.height > -6 { visible.insert(.typingHands) }
+            case 1:
+                visible.insert(.cloth)
+            case 2:
+                break
+            default:
+                visible.formUnion([.watchWrist, .tapHand])
+            }
         }
         return visible
     }
@@ -1312,6 +1383,10 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
                     .offset(x: pose.gloveR.width * scale, y: pose.gloveR.height * scale)
+            case .laptop where pose.lidClose > 0:
+                // The lid folds down toward the desk.
+                RunnerPartView(part: part)
+                    .scaleEffect(x: 1, y: 1 - 0.8 * pose.lidClose, anchor: Self.unit(x: 60, y: 138))
             case .laptop:
                 RunnerPartView(part: part).offset(y: -24 * pose.peek * scale)
             case .typingHands:

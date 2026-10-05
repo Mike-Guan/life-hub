@@ -447,6 +447,27 @@ import Testing
         #expect(CompanionView.newStretched(.stayHome(id: "10"), last: "") == nil)
     }
 
+    @Test func hakuPacksUpBeforeTheEndOfWork() {
+        let still = Set(RunnerFigure.parts(for: .work, pose: RunnerPose(moment: .packingUp)))
+        #expect(still.isSuperset(of: [.laptopClosed, .gymBag, .watchWrist, .tapHand, .desk]))
+        #expect(!still.contains(.headset) && !still.contains(.laptop))
+        var closing = RunnerPose(mode: .work, time: 0, face: .mid, moment: .packingUp, react: 0)
+        closing.packUp(elapsed: 1.5)
+        let closingParts = Set(RunnerFigure.parts(for: .work, pose: closing))
+        #expect(closing.lidClose > 0 && closing.lidClose < 1 && closingParts.contains(.laptop))
+        #expect(closingParts.contains(.headset) && !closingParts.contains(.gymBag))
+        var wiping = RunnerPose(mode: .work, time: 0, face: .mid, moment: .packingUp, react: 0)
+        wiping.packUp(elapsed: 3)
+        let wipingParts = Set(RunnerFigure.parts(for: .work, pose: wiping))
+        #expect(wipingParts.isSuperset(of: [.cloth, .laptopClosed]) && !wipingParts.contains(.watchWrist))
+        var bagging = RunnerPose(mode: .work, time: 0, face: .mid, moment: .packingUp, react: 0)
+        bagging.packUp(elapsed: 5.5)
+        #expect(bagging.headsetOff == 1 && bagging.bagLift > 0 && bagging.bagLift < 1)
+        let now = Date(timeIntervalSinceReferenceDate: 100_000)
+        #expect(CompanionView.packUpDue(last: 0, now: now))
+        #expect(!CompanionView.packUpDue(last: 100_000 - 19 * 60, now: now))
+    }
+
     @Test func atHomeHakuScratchesItsHead() {
         let scratching = RunnerPose(mode: .chill, time: 6, face: .mid, react: 0)
         #expect(scratching.scratch == 0.5 && scratching.tuft > 0)
