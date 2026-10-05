@@ -34,6 +34,8 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var traces: Set<CompanionTrace>?
     /// Traces that never fade, `nil` in snapshots from older builds.
     public var lasting: Set<CompanionTrace>?
+    /// HAKU's hidden params as of `updatedAt`, `nil` in snapshots from older builds.
+    public var vitals: HakuVitals?
     /// Time in work mode since 05:00 as of `updatedAt`, `nil` in snapshots from older builds.
     public var workedToday: TimeInterval?
     /// When Mike last changed the mode by hand, `nil` when never or unknown.

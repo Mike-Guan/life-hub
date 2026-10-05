@@ -117,6 +117,7 @@ import Testing
         bridge.sync(mode: modes, energy: energy, now: date(5, 13), calendar: calendar)
         let url = try #require(container.snapshotURL)
         #expect(WidgetSnapshot.read(from: url)?.lasting == [.wornGloves])
+        #expect(WidgetSnapshot.read(from: url)?.vitals == HakuVitals(stamina: .high, spirit: .mid))
 
         let ledgerURL = try #require(container.canLedgerURL)
         try Data("not json".utf8).write(to: ledgerURL)

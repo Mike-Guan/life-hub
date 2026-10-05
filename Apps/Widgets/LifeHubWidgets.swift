@@ -30,6 +30,7 @@ struct HubEntry: TimelineEntry {
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
+    var vitals: HakuVitals { snapshot?.vitals ?? HakuVitals() }
     var need: CompanionNeed? { snapshot?.need(at: date) }
     var needSince: Date? { snapshot?.needSince(at: date) }
 

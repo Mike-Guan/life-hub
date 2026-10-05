@@ -65,6 +65,7 @@ struct StatusView: View {
                 activity: entry.activity,
                 moment: entry.moment,
                 traces: entry.traces,
+                vitals: entry.vitals,
                 date: entry.date,
                 bedtime: entry.bedtime,
                 wardrobe: entry.wardrobe,
@@ -86,6 +87,7 @@ struct StatusView: View {
                     activity: entry.activity,
                     moment: entry.moment,
                     traces: entry.traces,
+                    vitals: entry.vitals,
                     date: entry.date,
                     bedtime: entry.bedtime,
                     wardrobe: entry.wardrobe

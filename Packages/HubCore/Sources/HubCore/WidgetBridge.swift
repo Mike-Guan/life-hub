@@ -68,7 +68,9 @@ public final class WidgetBridge {
             now: now,
             calendar: calendar
         )
-        snapshot.lasting = MomentEngine.lastingTraces(log: mode.log, ledger: storedLedger(), now: now)
+        let ledger = storedLedger()
+        snapshot.lasting = MomentEngine.lastingTraces(log: mode.log, ledger: ledger, now: now)
+        snapshot.vitals = VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: now, calendar: calendar)
         snapshot.workedToday = MomentEngine.workedToday(mode.log, now: now, calendar: calendar)
         snapshot.manualAt = mode.log.active.last(where: \.source.isManual)?.at
         let current = mode.current

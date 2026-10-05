@@ -21,6 +21,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Added
 - Open the app after half a day away and HAKU looks up at you slowly, as if to say "oh, you're here". No line.
+- HAKU's hidden 体能 and 元气 now show on the home screen, widgets and the Lock Screen: weeks of training make
+  it stand straighter and bounce more, good sleep and daylight make it brighter. They never show as numbers.
 - HAKU's hidden 体能 and 元气 show in how it moves, never as a number: fit means upright, bouncier and
   shadow boxing instead of napping; low 元气 means slower, half a beat late, and a little washed out.
 - Tapping a napping HAKU makes it roll over in its sleep. Tap again soon after and it half wakes
