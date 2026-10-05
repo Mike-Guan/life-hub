@@ -220,10 +220,11 @@ public enum DailyAgenda {
         return all.sorted { ($0.start, $0.id) < ($1.start, $1.id) }
     }
 
-    // A task under way still shows until it ends (Mike 2026-10-05: nothing showed during a 23:00 task).
-    /// The first task not done yet that hasn't ended at `now`, today or tomorrow.
+    // PM 2026-10-05: a task just started stays for the first `nowLasts`, the same as HAKU's sticky note,
+    // so it doesn't vanish at its start; after that it never lingers or shows as missed.
+    /// The first task not done yet that starts after `now` or started less than `nowLasts` before it.
     public static func next(in occurrences: [DailyOccurrence], after now: Date) -> DailyOccurrence? {
-        occurrences.first { !$0.done && $0.end > now }
+        occurrences.first { !$0.done && $0.start.addingTimeInterval(nowLasts) > now }
     }
 
     // Daily keeps no time of finishing, so a finish counts on the hub day Life Hub first reads it.
@@ -294,7 +295,7 @@ public struct DailyPlan: Codable, Equatable, Sendable {
         self.occurrences = occurrences
     }
 
-    /// The first task not done yet that hasn't ended at `now` and starts on the same calendar day.
+    /// The task `DailyAgenda.next(in:after:)` picks, when it starts on the same calendar day as `now`.
     public func next(after now: Date, calendar: Calendar = .current) -> DailyOccurrence? {
         let next = DailyAgenda.next(in: occurrences, after: now)
         return next.flatMap { calendar.isDate($0.start, inSameDayAs: now) ? $0 : nil }
@@ -318,10 +319,10 @@ public struct DailyPlan: Codable, Equatable, Sendable {
         occurrences.contains { !$0.done && $0.start >= date && $0.start <= date.addingTimeInterval(interval) }
     }
 
-    /// When the cues or the next-task line change, for widget timelines.
+    /// When the cues start or end, for widget timelines.
     public var times: [Date] {
         occurrences.flatMap { task in
-            [-DailyAgenda.soonLead, 0, DailyAgenda.nowLasts].map { task.start.addingTimeInterval($0) } + [task.end]
+            [-DailyAgenda.soonLead, 0, DailyAgenda.nowLasts].map { task.start.addingTimeInterval($0) }
         }
     }
 
