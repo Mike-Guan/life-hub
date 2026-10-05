@@ -14,6 +14,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- The wardrobe has a 人生收藏 section: each keepsake you earned, with the day and how, such as
+  "2026-11-02 · 累计 10 次周日拳击".
 - Work days get three HAKU states. 摸鱼: 30+ minutes on the picked apps inside work hours (counted apart
   from the evening couch) and HAKU peeks over the laptop; one notice goes out, as the day's one push.
   犯困: at the office in work mode, from 3 hours after arriving or 14:00, for 2 hours, with a yawn and a
