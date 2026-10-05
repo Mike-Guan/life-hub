@@ -104,6 +104,7 @@ struct LifeHubApp: App {
             event: needs.event,
             replayFrom: replayFrom,
             invite: needs.invite,
+            sit: needs.sit,
             notice: NudgeBackoff.stored(in: AppGroup.defaults).notice(at: .now),
             changes: ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: growth.ledger),
             money: moneyCard,

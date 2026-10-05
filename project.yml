@@ -70,7 +70,7 @@ targets:
         INFOPLIST_KEY_NSSupportsLiveActivities: YES
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Life Hub 用位置判断你是不是到了拳馆、公司或家：到拳馆和公司自动切模式，在家用来看你是不是窝着。位置只在这台 iPhone 上用，不会上传。"
         INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "选「始终」后，App 关着时到了拳馆、公司或家也能知道。位置只在这台 iPhone 上用，不会上传。"
-        INFOPLIST_KEY_NSHealthShareUsageDescription: "Life Hub 只读取昨晚的睡眠时长、运动记录和最近几小时的步数，用来估计电量、判断你是不是窝在家、打完拳庆祝。健康数据不会离开这台 iPhone。"
+        INFOPLIST_KEY_NSHealthShareUsageDescription: "Life Hub 只读取昨晚的睡眠时长、运动记录、最近几小时的步数和今天的站立小时，用来估计电量、判断你是不是窝在家、打完拳庆祝、坐太久时陪你伸懒腰。健康数据不会离开这台 iPhone。"
     scheme: {}
   LifeHub-macOS:
     type: application

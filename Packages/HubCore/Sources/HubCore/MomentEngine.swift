@@ -35,9 +35,10 @@ public enum MomentEngine {
     /// 5 km run cans earned before the running shoes stay out.
     public static let shoesAfter = 2
 
-    /// The state HAKU acts out at `now`: the 副业 state, then the gym-day states, then scrolling at work,
-    /// then drowsy or overtime at the office, then the states at home.
+    /// The state HAKU acts out at `now`: stiff from sitting, the 副业 state, then the gym-day states, then
+    /// scrolling at work, then drowsy or overtime at the office, then the states at home.
     /// - Parameters:
+    ///   - stiff: whether Mike has sat too long, from `SitState.isStiff(mode:at:)`.
     ///   - activity: what HAKU does alongside Mike; only the gym bag gives way to a gym-day state.
     ///   - need: the current need.
     ///   - departing: whether Mike said he is going to the gym.
@@ -53,11 +54,13 @@ public enum MomentEngine {
         departing: Bool,
         officeSince: Date?,
         home: HomeSignals? = nil,
+        stiff: Bool = false,
         now: Date,
         work: ModeRules = .standard,
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> CompanionMoment? {
+        if stiff, need != .slacking { return .stiff }
         if let sideHustle { return sideHustle.moment }
         if let gym = GymDeparture.moment(activity: activity, need: need, departing: departing) { return gym }
         if need == .slacking { return .slacking }
