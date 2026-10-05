@@ -16,6 +16,8 @@ final class NeedTracker {
     private(set) var invite: String?
     /// The celebration or off-work animation RUNNER should play, `nil` when there is none.
     private(set) var event: CompanionEvent?
+    /// Whether Mike sat too long or just stood up, from the last stand hours; `nil` before the first reading.
+    private(set) var sit: SitState?
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
     @ObservationIgnored private var motion: HealthMotion.Reading?
@@ -57,6 +59,12 @@ final class NeedTracker {
         let days = AppGroup.activityDays(now: now)
         reading = NeedEngine.need(signals, now: now, days: days, work: .stored(in: AppGroup.defaults))
         activitySignals = ActivitySignals(presence: presence, workouts: motion?.workouts ?? [])
+        // Kept for the widgets, which can't read HealthKit.
+        if let motion {
+            let state = SitEngine.state(motion.standHours, now: now)
+            sit = state
+            state.store(in: AppGroup.defaults)
+        }
         InviteReminder.plan(reading, signals: signals, now: now)
         invite = InviteReminder.sent(for: reading)
     }

@@ -23,6 +23,8 @@ struct HomeView: View {
     var replayFrom: Mode?
     /// Today's invite text while its need lasts, so RUNNER gets up and says it.
     var invite: String?
+    /// Whether Mike sat too long or just stood up, from the iOS app.
+    var sit: SitState?
     /// HAKU's line on a day it stopped an invite Mike kept ignoring, from the iOS app.
     var notice: String?
     /// When each change moment happened, for HAKU's Sunday line.
@@ -70,7 +72,7 @@ struct HomeView: View {
                         codingCans: codingCans(at: context.date),
                         traces: traces(at: context.date, energy: reading?.level),
                         vitals: VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: context.date),
-                        event: event ?? stayHome(at: context.date),
+                        event: event ?? sit?.stretched(at: context.date) ?? stayHome(at: context.date),
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
                         bedtime: bedtime.state(at: context.date),
@@ -171,6 +173,7 @@ struct HomeView: View {
             departing: presence.map { departure?.isActive(at: date, presence: $0) ?? false } ?? false,
             officeSince: presence?.since(.office),
             home: home(at: date),
+            stiff: sit?.isStiff(mode: store.current, at: date) ?? false,
             now: date,
             work: rules
         )

@@ -22,6 +22,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU gets stiff when your Apple Watch logs two idle stand hours in a row in 上班 or 副业: it twists
+  and thumps its back, and stretches when you open the app. When you stand after that, it rolls its
+  shoulders once. No Watch or no recent data: nothing. Health access now also asks for stand hours.
 - When you sit too long at work, HAKU twists and thumps its back (also its Lock Screen look), stretches
   when you open the app, and rolls its shoulders after you stand up.
 - Change moments (Issue #91): the app notes by itself when you got up after an invite, reached the gym

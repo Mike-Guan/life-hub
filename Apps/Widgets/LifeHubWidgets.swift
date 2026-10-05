@@ -87,6 +87,7 @@ struct HubProvider: TimelineProvider {
         let backoff = NudgeBackoff.stored(in: AppGroup.defaults)
         let ledger = CanLedger.read(from: AppGroup.container.canLedgerURL)
         let changes = ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: ledger)
+        let sit = SitState.stored(in: AppGroup.defaults)
         let signals = ActivitySignals(
             presence: presence,
             trainedDay: snapshot?.trainedDay,
@@ -104,6 +105,7 @@ struct HubProvider: TimelineProvider {
                 departing: departing,
                 officeSince: presence.since(.office),
                 home: snapshot?.home(since: presence.since(.home), at: date),
+                stiff: sit?.isStiff(mode: snapshot?.mode, at: date) ?? false,
                 now: date,
                 work: work
             )

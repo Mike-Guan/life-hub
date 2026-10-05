@@ -1,7 +1,8 @@
 import HealthKit
 import HubCore
 
-// Privacy rule: raw samples stay in HealthKit. Only workout summaries and one time leave this file.
+// Privacy rule: raw samples stay in HealthKit. Only workout summaries, one time and today's stand hours
+// (in memory, reduced to `SitState`) leave this file.
 /// Reads recent workouts and steps from HealthKit for RUNNER's needs.
 enum HealthMotion {
     /// What needs use from HealthKit.
@@ -9,6 +10,8 @@ enum HealthMotion {
         var workouts: [WorkoutSummary]
         /// Start of the current stretch without walking, within the last few hours.
         var stillSince: Date?
+        /// Today's Apple Watch stand hours; empty without a Watch.
+        var standHours: [StandHour] = []
     }
 
     /// Steps in 15 minutes that count as moving.
@@ -21,10 +24,25 @@ enum HealthMotion {
         guard HKHealthStore.isHealthDataAvailable() else { return nil }
         let store = HKHealthStore()
         let steps = HKQuantityType(.stepCount)
-        try await store.requestAuthorization(toShare: [], read: [HKObjectType.workoutType(), steps])
+        let stand = HKCategoryType(.appleStandHour)
+        try await store.requestAuthorization(toShare: [], read: [HKObjectType.workoutType(), steps, stand])
         let recent = try await workouts(in: store, now: now)
         let still = try await stillSince(in: store, steps: steps, now: now)
-        return Reading(workouts: recent, stillSince: still)
+        let hours = try await standHours(in: store, type: stand, now: now)
+        return Reading(workouts: recent, stillSince: still, standHours: hours)
+    }
+
+    private static func standHours(
+        in store: HKHealthStore,
+        type: HKCategoryType,
+        now: Date
+    ) async throws -> [StandHour] {
+        let predicate = HKQuery.predicateForSamples(withStart: StateEngine.dayStart(for: now), end: now)
+        let samples = HKSamplePredicate.categorySample(type: type, predicate: predicate)
+        let query = HKSampleQueryDescriptor(predicates: [samples], sortDescriptors: [])
+        return try await query.result(for: store).map {
+            StandHour(start: $0.startDate, stood: $0.value == HKCategoryValueAppleStandHour.stood.rawValue)
+        }
     }
 
     private static func workouts(in store: HKHealthStore, now: Date) async throws -> [WorkoutSummary] {
