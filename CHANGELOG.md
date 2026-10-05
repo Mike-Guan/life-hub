@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Arriving at the gym in Work or 副业 switches to Chill, unless you picked the mode in the last 2 hours.
   HAKU lifts only in Chill; switch to another mode at the gym and HAKU follows it. The gym can still
   comes after 30 minutes there, whatever the mode. Leaving the gym keeps the mode.
+- A Daily Widget task that just started shows as "现在 18:00" for 10 minutes, then the line moves on to
+  "下一件". Tasks past that never show.
 - Gym days follow the days you actually go: a weekday with a gym visit or strength workout in 2 of the
   last 4 weeks. Until a weekday qualifies, gym days stay Tuesday to Thursday. There is no setting for it.
 - Widgets redraw every 15 minutes for the next 6 hours, so HAKU's idle bits on the Lock Screen change too.
