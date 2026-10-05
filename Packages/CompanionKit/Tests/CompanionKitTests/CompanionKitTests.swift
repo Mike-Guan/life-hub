@@ -345,6 +345,16 @@ import Testing
         #expect(done.eyesDx == 0 && done.headDy == 0)
     }
 
+    @Test func aNapNeedsTwoTapsToWake() {
+        let roll = Date(timeIntervalSinceReferenceDate: 1000)
+        #expect(!CompanionView.napWakes(lastTap: nil, now: roll))
+        #expect(CompanionView.napWakes(lastTap: roll, now: roll.addingTimeInterval(3)))
+        #expect(!CompanionView.napWakes(lastTap: roll, now: roll.addingTimeInterval(CompanionView.napWakeWindow)))
+        let rolling = IdleMotion.rollingOver(time: 0, progress: 0.5)
+        #expect(rolling.angle > 7.9)
+        #expect(IdleMotion.rollingOver(time: 0, progress: 0).angle == 0)
+    }
+
     @Test func everyFourthSipTheCanIsEmpty() {
         // Cycle 4 (32 s) follows the fourth sip: shake, then stare.
         let shaking = RunnerPose(mode: .chill, time: 32.5, face: .mid, react: 0)

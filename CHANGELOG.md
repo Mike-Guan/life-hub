@@ -20,6 +20,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Tapping a napping HAKU makes it roll over in its sleep. Tap again soon after and it half wakes
+  and grumbles.
 - Traces that stay: after 5 boxing cans HAKU's gloves look worn, after 2 runs of 5 km the running shoes
   stay by the door, and after 10 hours of vibe coding in all a second monitor sits by the laptop. They
   show at home, on widgets and on the Lock Screen, and never go away.

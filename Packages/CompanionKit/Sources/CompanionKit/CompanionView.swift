@@ -60,6 +60,8 @@ public struct CompanionView: View {
     @AppStorage("companion.lastStayHome") private var lastStayHome = ""
     @State private var swapStart: Date?
     @State private var noticeStart: Date?
+    // A napping HAKU only rolls over on the first tap; a second tap soon after half wakes it.
+    @State private var rollStart: Date?
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -246,6 +248,11 @@ public struct CompanionView: View {
     private var paused: Bool { reduceMotion || scenePhase != .active }
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
+        if bedtime == .off, life == .nap,
+            let progress = Self.progress(since: rollStart, at: time, duration: Self.rollDuration)
+        {
+            return IdleMotion.rollingOver(time: time, progress: progress)
+        }
         if bedtime == .on || life == .nap { return IdleMotion.sleeping(time: time) }
         if stillOneOff(at: time) { return IdleMotion(dy: 0, angle: 0) }
         if let progress = celebration(at: time) { return IdleMotion.celebrating(progress: progress) }
@@ -353,6 +360,15 @@ public struct CompanionView: View {
     private static let stayHomeDuration = 3.2
     private static let swapDuration = 0.5
     private static let noticeDuration = 0.9
+    private static let rollDuration = 1.2
+    /// How soon after rolling over a second tap half wakes a napping HAKU, in seconds.
+    nonisolated static let napWakeWindow: TimeInterval = 8
+
+    /// Whether a tap now half wakes a napping HAKU: only within `napWakeWindow` of the tap that rolled it over.
+    nonisolated static func napWakes(lastTap: Date?, now: Date) -> Bool {
+        guard let lastTap else { return false }
+        return now.timeIntervalSince(lastTap) < napWakeWindow
+    }
 
     /// The celebration id to play for `event`, or nil when there is none or it already played.
     nonisolated static func newCelebration(_ event: CompanionEvent?, last: String) -> String? {
@@ -437,9 +453,16 @@ public struct CompanionView: View {
     }
 
     private func react() {
+        let life = mode.flatMap { idleLife($0, at: .now) }
+        if bedtime == .off, life == .nap, !Self.napWakes(lastTap: rollStart, now: .now) {
+            rollStart = .now
+            say(nil)
+            onTap?()
+            return
+        }
+        rollStart = nil
         pop += 1
         taps += 1
-        let life = mode.flatMap { idleLife($0, at: .now) }
         let peeking = couchStage(at: .now) == .peeking
         let lines = CompanionLines.lines(
             for: mode,
@@ -508,6 +531,12 @@ struct IdleMotion {
     /// Slow breathing at bedtime, 4 s period.
     static func sleeping(time t: TimeInterval) -> IdleMotion {
         IdleMotion(dy: CGFloat(sin(t * 2 * .pi / 4)) * 1.5, angle: 0)
+    }
+
+    /// Rolling over in its sleep at `progress` (0..<1): a slow lean one way and back.
+    static func rollingOver(time t: TimeInterval, progress: Double) -> IdleMotion {
+        let breath = sleeping(time: t)
+        return IdleMotion(dy: breath.dy + 2 * CGFloat(sin(progress * .pi)), angle: 8 * sin(progress * .pi))
     }
 
     init(dy: CGFloat, angle: Double) {
