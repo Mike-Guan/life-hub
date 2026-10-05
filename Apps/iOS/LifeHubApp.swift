@@ -216,13 +216,19 @@ struct LifeHubApp: App {
         monitor.start(places) { place, entered in
             var presence = PlacePresence.stored(in: AppGroup.defaults)
             let arrived = presence.since(.fitness)
+            let stayStart = presence.since(place)
             presence.record(place, entered: entered, at: .now)
             presence.store(in: AppGroup.defaults)
             if place.action == .fitness, !entered, let arrived, let visit = Win.gymVisit(from: arrived, to: .now) {
                 growth.record(visit.win, source: visit.source, at: visit.at)
             }
-            if let trigger = place.trigger(entered: entered) {
-                store.autoSwitch(trigger, rules: .stored(in: AppGroup.defaults))
+            let rules = ModeRules.stored(in: AppGroup.defaults)
+            if !entered, let stayStart, Date.now.timeIntervalSince(stayStart) < PlacePresence.bounce {
+                // Walking past a fence takes back the switch the arrival made.
+                store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules)
+            } else if let trigger = place.trigger(entered: entered) {
+                // After a GPS-drift return the stay continues; this puts back a mode the leave changed.
+                store.autoSwitch(trigger, rules: rules)
             }
             needs.refresh(places: places, manualSince: store.log.changes.last(where: \.source.isManual)?.at)
             widgets.need = needs.reading
@@ -233,7 +239,6 @@ struct LifeHubApp: App {
             Task { _ = await BoxingCountdown.update(for: needs.reading) }
             // Arriving at or leaving the office decides today's off-work notice.
             let atOffice = presence.since(.office) != nil
-            let rules = ModeRules.stored(in: AppGroup.defaults)
             Task { _ = await OffWorkReminder.schedule(rules, mode: store.current, atOffice: atOffice) }
         }
     }

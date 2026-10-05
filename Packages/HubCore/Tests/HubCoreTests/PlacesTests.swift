@@ -124,6 +124,25 @@ import Testing
         #expect(presence.since(.home) == nil)
     }
 
+    @Test func aQuickReturnContinuesTheStay() {
+        let arrived = Date(timeIntervalSince1970: 1_790_000_000)
+        let gym = HubPlace.custom(name: "健身", action: .fitness, latitude: 0, longitude: 0, id: "customA")
+        var presence = PlacePresence()
+        presence.record(gym, entered: true, at: arrived)
+        presence.record(gym, entered: false, at: arrived.addingTimeInterval(1800))
+        presence.record(gym, entered: true, at: arrived.addingTimeInterval(1900))
+        #expect(presence.since(.fitness) == arrived)
+        #expect(presence.since(gym) == arrived)
+        presence.record(gym, entered: false, at: arrived.addingTimeInterval(3600))
+        presence.record(gym, entered: true, at: arrived.addingTimeInterval(3600 + PlacePresence.bounce))
+        #expect(presence.since(gym) == arrived.addingTimeInterval(3600 + PlacePresence.bounce))
+    }
+
+    @Test func presenceSavedBeforeLastArrivalsStillDecodes() throws {
+        let old = Data(#"{"arrivals":{},"departures":{}}"#.utf8)
+        #expect(try JSONDecoder().decode(PlacePresence.self, from: old).lastArrivals.isEmpty)
+    }
+
     @Test func storedPresenceRoundTripsAndFallsBack() throws {
         let suite = "lifehub-tests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
