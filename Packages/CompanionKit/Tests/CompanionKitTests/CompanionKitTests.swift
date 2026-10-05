@@ -307,6 +307,32 @@ import Testing
         }
     }
 
+    @Test func lastingTracesFollowTheirProps() {
+        let all: Set<CompanionTrace> = [.wornGloves, .deskMonitor, .runningShoes]
+        let boxing = Set(RunnerFigure.parts(for: .boxing, pose: RunnerPose().leaving(all)))
+        #expect(boxing.isSuperset(of: [.gloveTapeLeft, .gloveTapeRight]))
+        #expect(boxing.isDisjoint(with: [.deskMonitor, .runningShoes]))
+        let coding = Set(RunnerFigure.parts(for: .money, pose: RunnerPose(moment: .vibeCoding).leaving(all)))
+        #expect(coding.contains(.deskMonitor))
+        #expect(coding.isDisjoint(with: [.gloveTapeLeft, .runningShoes]))
+        let home = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose().leaving(all)))
+        #expect(home.contains(.runningShoes))
+        #expect(home.isDisjoint(with: [.gloveTapeLeft, .deskMonitor]))
+        let plain = Set(RunnerFigure.parts(for: .boxing, pose: RunnerPose()))
+        #expect(plain.isDisjoint(with: [.gloveTapeLeft, .gloveTapeRight]))
+    }
+
+    @Test func eyesDriftNowAndThenAndComeBack() {
+        #expect(RunnerPose.drift(at: 5) == 0)
+        #expect(RunnerPose.drift(at: 9.7) > 2.9)
+        #expect(RunnerPose.drift(at: 13 + 9.7) < -2.9)
+        #expect(RunnerPose.drift(at: 11) == 0)
+        let plain = RunnerPose(mode: .work, time: 9.7, face: .mid, react: 0)
+        #expect(plain.eyesDx > 2.9)
+        let peeking = RunnerPose(mode: .work, time: 9.7, face: .mid, moment: .slacking, react: 0)
+        #expect(peeking.eyesDx != plain.eyesDx)
+    }
+
     @Test func noticeTurnsToYouHalfABeatLate() {
         var start = RunnerPose()
         start.notice(progress: 0.3)
@@ -317,6 +343,20 @@ import Testing
         var done = RunnerPose()
         done.notice(progress: 1)
         #expect(done.eyesDx == 0 && done.headDy == 0)
+    }
+
+    @Test func everyFourthSipTheCanIsEmpty() {
+        // Cycle 4 (32 s) follows the fourth sip: shake, then stare.
+        let shaking = RunnerPose(mode: .chill, time: 32.5, face: .mid, react: 0)
+        #expect(!shaking.emptyCan && shaking.canOffset.height == -10)
+        let staring = RunnerPose(mode: .chill, time: 34, face: .mid, react: 0)
+        #expect(staring.emptyCan)
+        let parts = Set(RunnerFigure.parts(for: .chill, pose: staring))
+        #expect(parts.isSuperset(of: [.eyesWork, .monsterCan]))
+        #expect(!parts.contains(.eyesChill))
+        #expect(!RunnerPose(mode: .chill, time: 36, face: .mid, react: 0).emptyCan)
+        #expect(!RunnerPose(mode: .chill, time: 2, face: .mid, react: 0).emptyCan)
+        #expect(!RunnerPose(mode: .chill, time: 34, face: .mid, life: .snack, react: 0).emptyCan)
     }
 
     @Test func sundayAfternoonIsForTidying() throws {
@@ -335,6 +375,39 @@ import Testing
         let week = (0..<(7 * 96)).map { IdleLife.at(start.addingTimeInterval(Double($0) * IdleLife.slotLength)) }
         for life in IdleLife.allCases { #expect(week.contains(life)) }
         #expect(week.contains(nil))
+    }
+
+    @Test func portraitStillHoldsForASlotAndVaries() {
+        let start = Date(timeIntervalSinceReferenceDate: IdleLife.slotLength * 1000)
+        #expect(PortraitStill.at(start) == PortraitStill.at(start.addingTimeInterval(IdleLife.slotLength - 1)))
+        let day = (0..<96).map { PortraitStill.at(start.addingTimeInterval(Double($0) * IdleLife.slotLength)) }
+        for still in PortraitStill.allCases { #expect(day.contains(still)) }
+    }
+
+    @Test @MainActor func portraitAtHomeDoesWhatTheAppDoes() throws {
+        let start = Date(timeIntervalSinceReferenceDate: IdleLife.slotLength * 1000)
+        let slots = (0..<96).map { start.addingTimeInterval(Double($0) * IdleLife.slotLength) }
+        let nap = try #require(slots.first { IdleLife.at($0) == .nap })
+        let napping = CompanionPortrait(mode: .chill, date: nap).pose
+        #expect(napping.life == .nap)
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: napping)).contains(.zzz))
+        // Anything else HAKU is doing replaces its own time.
+        #expect(CompanionPortrait(mode: .chill, need: .couchScroll, date: nap).pose.life == nil)
+        #expect(CompanionPortrait(mode: .work, date: nap).pose.life == nil)
+    }
+
+    @Test(arguments: Mode.allCases)
+    func portraitStillsDiffer(_ mode: Mode) {
+        var glance = RunnerPose()
+        glance.show(.glance, mode: mode)
+        var alt = RunnerPose()
+        alt.show(.alt, mode: mode)
+        let plain = RunnerPose()
+        #expect(glance.eyesDx != plain.eyesDx || glance.canAngle != plain.canAngle)
+        #expect(
+            alt.headDy != plain.headDy || alt.eyesDx != plain.eyesDx || alt.gloveL != plain.gloveL
+                || alt.eyesDy != plain.eyesDy
+        )
     }
 
     @Test(arguments: IdleLife.allCases)
