@@ -54,6 +54,8 @@ public enum CompanionMoment: String, Codable, CaseIterable, Sendable {
     case morning
     /// Weekday, past 9:30 and still at home: headphones on at the door, tapping the watch.
     case timeToLeave
+    /// Work or 副业, sitting for too long: HAKU twists and thumps its own back.
+    case stiff
 }
 
 // PRD section 18. Traces fade the next day; the state logic decides which are on.

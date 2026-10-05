@@ -410,6 +410,43 @@ import Testing
         #expect(RunnerFigure.parts(for: .chill, pose: whistling).contains(.musicNote))
     }
 
+    @Test func stiffHakuTwistsThenThumpsItsBack() {
+        let still = Set(RunnerFigure.parts(for: .work, pose: RunnerPose(moment: .stiff)))
+        #expect(still.isSuperset(of: [.backFist, .thumpLines, .eyesWork]))
+        let twisting = RunnerPose(mode: .work, time: 0.4, face: .mid, moment: .stiff, react: 0)
+        #expect(twisting.thump < 0 && !twisting.thumpHit && abs(twisting.headTilt + 3) < 0.001)
+        #expect(!RunnerFigure.parts(for: .work, pose: twisting).contains(.backFist))
+        let thumping = RunnerPose(mode: .work, time: 1.9, face: .mid, moment: .stiff, react: 0)
+        #expect(thumping.thump > 0.99 && thumping.thumpHit && thumping.blink <= 0.4)
+        #expect(abs(RunnerPose.stiffSway(at: 0.4).angle - 4) < 0.001)
+        #expect(RunnerPose.stiffSway(at: 1.9).angle == 0 && RunnerPose.stiffSway(at: 1.9).dy > 1.49)
+    }
+
+    @Test func openingOnAStiffHakuStretches() {
+        var arms = RunnerPose(mode: .work, time: 1.9, face: .mid, moment: .stiff, react: 0)
+        arms.stretchUp(progress: 2.0 / 6)
+        #expect(arms.armsUp == 1 && arms.eyesShut && arms.thump < 0 && arms.headTilt == 0)
+        let parts = Set(RunnerFigure.parts(for: .work, pose: arms))
+        #expect(parts.contains(.eyesClosed) && !parts.contains(.eyesWork) && !parts.contains(.backFist))
+        var look = RunnerPose(mode: .work, time: 1.9, face: .mid, moment: .stiff, react: 0)
+        look.stretchUp(progress: 3.6 / 6)
+        #expect(look.armsUp == 0 && !look.eyesShut && look.blink == 1)
+        let now = Date(timeIntervalSinceReferenceDate: 100_000)
+        #expect(CompanionView.stretchUpDue(last: 0, now: now))
+        #expect(!CompanionView.stretchUpDue(last: 100_000 - 29 * 60, now: now))
+    }
+
+    @Test func standingUpLetsHakuRollItsShoulders() {
+        let rolling = RunnerPose.limber(time: 0, progress: 0.2, face: .mid)
+        #expect(rolling.eyesShut && rolling.stretch > 0)
+        #expect(RunnerFigure.parts(for: .work, pose: rolling).contains(.eyesClosed))
+        let done = RunnerPose.limber(time: 0, progress: 0.9, face: .mid)
+        #expect(!done.eyesShut && done.shift == 0 && done.blink <= 0.7)
+        #expect(CompanionView.newStretched(.stretched(id: "10"), last: "") == "10")
+        #expect(CompanionView.newStretched(.stretched(id: "10"), last: "10") == nil)
+        #expect(CompanionView.newStretched(.stayHome(id: "10"), last: "") == nil)
+    }
+
     @Test func atHomeHakuScratchesItsHead() {
         let scratching = RunnerPose(mode: .chill, time: 6, face: .mid, react: 0)
         #expect(scratching.scratch == 0.5 && scratching.tuft > 0)

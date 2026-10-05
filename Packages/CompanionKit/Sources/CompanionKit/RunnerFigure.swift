@@ -211,6 +211,18 @@ struct RunnerPose {
     var tuft: CGFloat = 0
     /// Rise of the note whistled after hiding a snack or sketchbook, 0...1, or -1 when not whistling.
     var whistle: CGFloat = -1
+    /// Fist on the right shoulder while stiff: 0 = resting, 1 = thumped down, or -1 when hidden.
+    var thump: CGFloat = -1
+    /// Impact lines by the fist as it lands.
+    var thumpHit = false
+    /// Head tilt in degrees around the neck; negative leans left.
+    var headTilt: Double = 0
+    /// Eyes shut in comfort, replacing the open eyes.
+    var eyesShut = false
+    /// 0 = arms down, 1 = raised over the head with the hands clasped.
+    var armsUp: CGFloat = 0
+    /// Sideways shift of the whole figure, for rolling the shoulders.
+    var shift: CGFloat = 0
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -275,6 +287,12 @@ struct RunnerPose {
             blink = 0.6
         case .timeToLeave:
             eyesDx = -3
+        case .stiff:
+            // The Lock Screen frame: fist landing on the shoulder, head tilted, eyes squeezed.
+            thump = 1
+            thumpHit = true
+            headTilt = -6
+            blink = 0.4
         case .shooting, nil:
             break
         }
@@ -494,7 +512,72 @@ struct RunnerPose {
             // Tapping the watch, a look at the door every 4 s.
             prop = CGSize(width: 0, height: 3 * CGFloat(abs(sin(t * .pi / 0.4))))
             eyesDx = -3 + 3 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 4)), from: 3, to: 4)
+        case .stiff:
+            stiffen(time: t)
         }
+    }
+
+    /// Sitting too long, a 4 s loop: two twists of the waist, then three thumps on the right shoulder.
+    private mutating func stiffen(time t: TimeInterval) {
+        headDy = 0
+        thump = -1
+        thumpHit = false
+        let c = t.truncatingRemainder(dividingBy: 4)
+        guard c >= 1.6 else {
+            // The twist itself is the figure's sway; the head leans against it.
+            headTilt = -3 * sin(c / 1.6 * 2 * .pi)
+            blink = min(blink, 0.55)
+            return
+        }
+        let k = CGFloat(c - 1.6)
+        let beat = k.truncatingRemainder(dividingBy: 0.6) / 0.6
+        let thumping = k < 1.8
+        if k < 2.2 { thump = thumping ? abs(sin(beat * .pi)) : 0 }
+        thumpHit = thumping && beat > 0.35 && beat < 0.7
+        headTilt = Double(-6 * Self.ramp(k, from: 0, to: 0.2) * (1 - Self.ramp(k, from: 2.1, to: 2.4)))
+        blink = min(blink, 0.4)
+    }
+
+    /// Sway of the whole figure while stiff at `t`: the waist twist, then a dip with each thump.
+    static func stiffSway(at t: TimeInterval) -> (angle: Double, dy: CGFloat) {
+        let c = t.truncatingRemainder(dividingBy: 4)
+        guard c >= 1.6 else { return (4 * sin(c / 1.6 * 2 * .pi), 0) }
+        let k = CGFloat(c - 1.6)
+        let down = k < 1.8 ? abs(sin(k.truncatingRemainder(dividingBy: 0.6) / 0.6 * .pi)) : 0
+        return (0, 1.5 * down)
+    }
+
+    /// Standing up from a long sit at `progress` (0...1): up, the arms swing over the head with the eyes shut,
+    /// the arms come down, then a straight look.
+    mutating func stretchUp(progress: Double) {
+        let t = CGFloat(min(max(progress, 0), 1)) * 6
+        thump = -1
+        thumpHit = false
+        headTilt = 0
+        stretch = Self.smooth(Self.ramp(t, from: 0, to: 0.7)) * (1 - Self.smooth(Self.ramp(t, from: 5.4, to: 6)))
+        armsUp = Self.ramp(t, from: 0.7, to: 1.6) * (1 - Self.ramp(t, from: 2.8, to: 3.4))
+        headDy = -2 * Self.bump(t, from: 0.9, to: 2.9)
+        eyesShut = t > 1 && t < 3
+        if t >= 3 {
+            blink = 1
+            eyesDx = 0
+            eyesDy = 0
+        }
+    }
+
+    /// Rolling the shoulders at `progress` (0...1) after Mike stood up: two rolls with the eyes shut, then a
+    /// pleased squint.
+    static func limber(time: TimeInterval, progress: Double, face: EnergyFace) -> RunnerPose {
+        var pose = RunnerPose(face: face)
+        let t = CGFloat(min(max(progress, 0), 1)) * 4.6
+        let angle = t / 1.2 * 2 * .pi
+        let r = t < 2.4 ? 2.4 * ramp(t, from: 0, to: 0.3) * (1 - ramp(t, from: 2.1, to: 2.4)) : 0
+        pose.shift = r * cos(angle)
+        pose.stretch = 0.5 * r / 2.4 * abs(sin(angle))
+        pose.headDy = -0.8 * r * abs(sin(angle - 0.5))
+        pose.eyesShut = t > 0.2 && t < 2.6
+        if !pose.eyesShut { pose.blink = min(0.7, blink(at: time)) }
+        return pose
     }
 
     /// How long the empty-can shake and stare lasts, in seconds of the chill cycle.
@@ -778,6 +861,11 @@ struct RunnerPose {
         min(max((x - a) / (b - a), 0), 1)
     }
 
+    /// `x` (0...1) eased in and out.
+    private static func smooth(_ x: CGFloat) -> CGFloat {
+        x * x * (3 - 2 * x)
+    }
+
     /// A half sine from `from` to `to`, 0 elsewhere.
     private static func bump(_ x: CGFloat, from a: CGFloat, to b: CGFloat) -> CGFloat {
         guard x > a, x < b else { return 0 }
@@ -816,7 +904,11 @@ struct RunnerFigure: View {
                         SweatDrop()
                             .offset(x: 0, y: pose.headDy * scale)
                     }
+                    if pose.armsUp > 0 {
+                        StretchArms(raise: pose.armsUp, sleeve: Self.jacketColor(mode))
+                    }
                 }
+                .offset(x: pose.shift * scale)
                 .scaleEffect(
                     x: (1 - 0.03 * pose.stretch) * pose.turnSqueeze,
                     y: (1 + 0.06 * pose.stretch) * max(pose.popOut, 0.001),
@@ -843,6 +935,12 @@ struct RunnerFigure: View {
         wear(pose, mode: mode, on: &visible)
         if pose.rubEye >= 0 { visible.insert(.rubHand) }
         if pose.hum >= 0 || pose.whistle >= 0 { visible.insert(.musicNote) }
+        if pose.thump >= 0 { visible.insert(.backFist) }
+        if pose.thumpHit { visible.insert(.thumpLines) }
+        if pose.eyesShut {
+            visible.subtract(openEyes)
+            visible.insert(.eyesClosed)
+        }
         if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
@@ -977,6 +1075,8 @@ struct RunnerFigure: View {
             visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .toothbrush])
         case .timeToLeave:
             visible.formUnion(workParts.union([.ledLine, .door, .watchWrist, .tapHand]))
+        case .stiff:
+            visible.formUnion(workParts.union([.ledLine]))
         }
         return visible
     }
@@ -1034,6 +1134,9 @@ struct RunnerFigure: View {
         .door, .sunlight, .roomPc, .deskMonitor, .pillow, .roomPlant, .roomBag, .runningShoes, .heavyBag,
         .speedLines, .desk, .canStackOne, .canStackTwo, .canStackThree, .sofaArm,
         .jacket, .hoodCollar, .hairBack, .earL, .earR, .headset, .cupL, .cupR, .headband,
+    ]
+    nonisolated private static let openEyes: Set<RunnerPart> = [
+        .eyesWork, .lidsWork, .eyesChill, .cateyeL, .cateyeR, .eyesMoney, .eyeGlint, .eyesSleepy,
     ]
     nonisolated private static let couchParts: Set<RunnerPart> = [.eyesSleepy, .phone, .phoneFeed, .phoneHand]
     nonisolated private static let couchHiddenParts: Set<RunnerPart> = [
@@ -1098,6 +1201,8 @@ struct RunnerFigure: View {
             case .mouthYawn:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 0.7 + 0.3 * pose.yawn, y: pose.yawn, anchor: Self.unit(x: 60, y: 85))
+            case .backFist, .thumpLines:
+                RunnerPartView(part: part).offset(y: (4 * pose.thump - 2) * scale)
             case .scratchHand:
                 RunnerPartView(part: part)
                     .offset(x: 1.5 * sin(pose.scratch * 8 * .pi) * scale, y: -scale)
@@ -1239,7 +1344,10 @@ struct RunnerFigure: View {
         }
         .offset(y: (isHead ? pose.headDy : 0) * scale)
         .offset(y: isHead || Self.chinParts.contains(part) ? 30 * pose.slump * scale : 0)
-        .rotationEffect(.degrees(isHead ? -14 * Double(pose.lie) : 0), anchor: Self.unit(x: 60, y: 96))
+        .rotationEffect(
+            .degrees(isHead ? -14 * Double(pose.lie) + pose.headTilt : 0),
+            anchor: Self.unit(x: 60, y: 96)
+        )
     }
 
     private static let dots = RunnerText(
@@ -1264,7 +1372,7 @@ struct RunnerFigure: View {
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
-        .scratchHand, .hairTuft,
+        .scratchHand, .hairTuft, .eyesClosed,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
@@ -1391,6 +1499,50 @@ private struct SweatDrop: View {
             drop.closeSubpath()
             context.fill(drop, with: .color(RunnerPalette.neonCyan))
             context.stroke(drop, with: .color(RunnerPalette.ink), lineWidth: 2)
+        }
+    }
+}
+
+// Drawn in code rather than the SVG because the arms bend all along the swing.
+/// Both arms swinging out to the sides and over the head; `raise` runs 0...1.
+private struct StretchArms: View {
+    var raise: CGFloat
+    var sleeve: Color
+
+    var body: some View {
+        Canvas { context, size in
+            RunnerDrawing.enterFigureSpace(&context, size: size)
+            let a = raise * raise * (3 - 2 * raise)
+            // The left hand's path: out to the side, then over the head. The right hand mirrors it.
+            func bezier(_ p0: CGFloat, _ p1: CGFloat, _ p2: CGFloat, _ p3: CGFloat) -> CGFloat {
+                let u = 1 - a
+                return u * u * u * p0 + 3 * u * u * a * p1 + 3 * u * a * a * p2 + a * a * a * p3
+            }
+            let left = CGPoint(x: bezier(36, -14, -2, 55), y: bezier(104, 84, 0, -6))
+            let ink = GraphicsContext.Shading.color(RunnerPalette.ink)
+            let skin = GraphicsContext.Shading.color(RunnerPalette.skin)
+            var hands: [CGPoint] = []
+            for side in [CGFloat(-1), 1] {
+                let shoulder = CGPoint(x: 60 + 24 * side, y: 104)
+                let hand = CGPoint(x: side < 0 ? left.x : 120 - left.x, y: left.y)
+                let elbow = CGPoint(
+                    x: (shoulder.x + hand.x) / 2 + (16 + 36 * a) * side,
+                    y: (shoulder.y + hand.y) / 2
+                )
+                var arm = Path()
+                arm.move(to: shoulder)
+                arm.addQuadCurve(to: hand, control: elbow)
+                context.stroke(arm, with: ink, style: StrokeStyle(lineWidth: 13, lineCap: .round))
+                context.stroke(arm, with: .color(sleeve), style: StrokeStyle(lineWidth: 7.5, lineCap: .round))
+                hands.append(hand)
+            }
+            // Two fists on the way up, clasped together at the top.
+            let clasped = Path(ellipseIn: CGRect(x: 51, y: left.y - 8, width: 18, height: 12))
+            let fists = hands.map { Path(ellipseIn: CGRect(x: $0.x - 5.5, y: $0.y - 5.5, width: 11, height: 11)) }
+            for shape in a > 0.9 ? [clasped] : fists {
+                context.fill(shape, with: skin)
+                context.stroke(shape, with: ink, lineWidth: 2.5)
+            }
         }
     }
 }

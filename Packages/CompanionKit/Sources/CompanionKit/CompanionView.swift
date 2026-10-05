@@ -74,6 +74,12 @@ public struct CompanionView: View {
     @State private var tapTimes: [Date] = []
     @State private var turnAwayStart: Date?
     @State private var whistleStart: Date?
+    @State private var stretchUpStart: Date?
+    // Seconds since the reference date of the last stretch on opening while stiff, shared by every CompanionView.
+    @AppStorage("companion.lastStretchUp") private var lastStretchUp: Double = 0
+    @State private var limberStart: Date?
+    // Id of the last shoulder roll after standing up, shared by every CompanionView so each plays once.
+    @AppStorage("companion.lastStretched") private var lastStretched = ""
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -142,6 +148,7 @@ public struct CompanionView: View {
         }
         .onAppear {
             startNotice()
+            startStretchUp()
             if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
             playEventIfNew()
             if invite != nil { startInvite() }
@@ -151,7 +158,10 @@ public struct CompanionView: View {
         }
         .onChange(of: event) { _, _ in playEventIfNew() }
         .onChange(of: scenePhase) { _, new in
-            if new == .active { startNotice() }
+            if new == .active {
+                startNotice()
+                startStretchUp()
+            }
             if new == .background { lastSeen = Date.now.timeIntervalSinceReferenceDate }
         }
         .onChange(of: moment) { _, _ in
@@ -292,6 +302,9 @@ public struct CompanionView: View {
         if let progress = stayHome(at: time) {
             return RunnerPose.stayHome(time: time, progress: reduceMotion ? 1 : progress, face: face)
         }
+        if let progress = limber(at: time) {
+            return RunnerPose.limber(time: time, progress: reduceMotion ? 1 : progress, face: face)
+        }
         let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
         if reduceMotion {
             var pose = RunnerPose(face: face, need: shownNeed, life: life, activity: activity, moment: shownMoment)
@@ -328,6 +341,7 @@ public struct CompanionView: View {
             pose.notice(progress: progress, lookUp: noticeLookUp)
         }
         if let progress = turnAway(at: time) { pose.turnAway(progress: progress) }
+        if shownMoment == .stiff, let progress = stretchUp(at: time) { pose.stretchUp(progress: progress) }
         if life == .snack || life == .drawing,
             let progress = Self.progress(since: whistleStart, at: time, duration: Self.whistleDuration)
         {
@@ -370,6 +384,35 @@ public struct CompanionView: View {
         }
     }
 
+    /// Starts the stretch as the app opens while HAKU is stiff, at most once every 30 minutes.
+    private func startStretchUp() {
+        let now = Date.now
+        guard shownMoment == .stiff, bedtime == .off, Self.stretchUpDue(last: lastStretchUp, now: now) else { return }
+        lastStretchUp = now.timeIntervalSinceReferenceDate
+        stretchUpStart = now
+        bubbleTask?.cancel()
+        bubbleTask = Task {
+            try? await Task.sleep(for: .seconds(Self.stretchUpDuration * 0.57))
+            guard !Task.isCancelled else { return }
+            say("……我腰要断了。你呢？", for: 3)
+        }
+    }
+
+    /// Whether the stretch on opening may play again, 30 minutes after the `last` one.
+    nonisolated static func stretchUpDue(last: TimeInterval, now: Date) -> Bool {
+        now.timeIntervalSinceReferenceDate - last >= 30 * 60
+    }
+
+    /// Progress of the stretch on opening at `time`, 0..<1, or nil when none is playing.
+    private func stretchUp(at time: TimeInterval) -> Double? {
+        Self.progress(since: stretchUpStart, at: time, duration: Self.stretchUpDuration)
+    }
+
+    /// Progress of rolling the shoulders at `time`, 0..<1, or nil when none is playing.
+    private func limber(at time: TimeInterval) -> Double? {
+        Self.progress(since: limberStart, at: time, duration: Self.limberDuration)
+    }
+
     /// Progress of turning away after being tapped too often at `time`, 0..<1, or nil when not turned away.
     private func turnAway(at time: TimeInterval) -> Double? {
         Self.progress(since: turnAwayStart, at: time, duration: Self.turnAwayDuration)
@@ -395,9 +438,11 @@ public struct CompanionView: View {
         Self.progress(since: stayHomeStart, at: time, duration: Self.stayHomeDuration)
     }
 
-    /// Whether a one-off animation that holds HAKU still is playing: off work, unboxing or staying home.
+    /// Whether a one-off animation that holds HAKU still is playing: off work, unboxing, staying home,
+    /// stretching or rolling the shoulders.
     private func stillOneOff(at time: TimeInterval) -> Bool {
         offWork(at: time) != nil || unlock(at: time) != nil || stayHome(at: time) != nil
+            || stretchUp(at: time) != nil || limber(at: time) != nil
     }
 
     private static func progress(since start: Date?, at time: TimeInterval, duration: Double) -> Double? {
@@ -429,6 +474,8 @@ public struct CompanionView: View {
     private static let lateNightDuration = 2.6
     private static let turnAwayDuration = 2.2
     private static let whistleDuration = 2.6
+    private static let stretchUpDuration = 6.0
+    private static let limberDuration = 4.6
 
     /// Progress of a hummed note at `time` when 元气 is high: 2.4 s in every 16 s, or nil in between.
     nonisolated static func hum(at time: TimeInterval) -> Double? {
@@ -512,6 +559,12 @@ public struct CompanionView: View {
         return day
     }
 
+    /// The stand-up id to play for `event`, or nil when there is none or it already played.
+    nonisolated static func newStretched(_ event: CompanionEvent?, last: String) -> String? {
+        guard case .stretched(let id) = event, id != last else { return nil }
+        return id
+    }
+
     private func playEventIfNew() {
         guard bedtime == .off else { return }
         if let id = Self.newCelebration(event, last: lastCelebration), case .celebrate(_, let kind) = event {
@@ -548,6 +601,16 @@ public struct CompanionView: View {
                 try? await Task.sleep(for: .seconds(Self.stayHomeDuration * 0.65))
                 guard !Task.isCancelled else { return }
                 say("……今天在家？", for: 4)
+            }
+        }
+        if let id = Self.newStretched(event, last: lastStretched) {
+            lastStretched = id
+            limberStart = .now
+            say(nil)
+            bubbleTask = Task {
+                try? await Task.sleep(for: .seconds(Self.limberDuration * 0.52))
+                guard !Task.isCancelled else { return }
+                say("嗯，活过来了。", for: 3)
             }
         }
     }
@@ -703,6 +766,9 @@ struct IdleMotion {
             self.init(mode: .chill, time: t)
         case .timeToLeave:
             self.init(dy: -CGFloat(abs(sin(t * .pi / 0.5))) * 1.5, angle: 0)
+        case .stiff:
+            let sway = RunnerPose.stiffSway(at: t)
+            self.init(dy: sway.dy, angle: sway.angle)
         }
     }
 
@@ -761,6 +827,7 @@ private struct SpeechBubble: View {
                 .toyCard()
             CompanionView(mode: .work, event: .offWork(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .chill, event: .stayHome(id: "preview")).frame(height: 180).toyCard()
+            CompanionView(mode: .work, event: .stretched(id: "preview")).frame(height: 180).toyCard()
             CompanionView(
                 mode: .boxing,
                 event: .unlock(id: "preview", item: "gloves.gold"),

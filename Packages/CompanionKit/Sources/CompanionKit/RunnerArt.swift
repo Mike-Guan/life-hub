@@ -64,6 +64,7 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case eyesMoney = "eyes_money"
     case eyeGlint = "eye_glint"
     case eyesSleepy = "eyes_sleepy"
+    case eyesClosed = "eyes_closed"
     case mouthSmile = "mouth_smile"
     case mouthFang = "mouth_fang"
     case mouthYawn = "mouth_yawn"
@@ -107,6 +108,8 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case toothbrush
     case watchWrist = "watch_wrist"
     case tapHand = "tap_hand"
+    case backFist = "back_fist"
+    case thumpLines = "thump_lines"
     case phone
     case phoneFeed = "phone_feed"
     case phoneHand = "phone_hand"
@@ -162,6 +165,7 @@ enum RunnerArt {
         case .eyesMoney: eyesMoney()
         case .eyeGlint: eyeGlint()
         case .eyesSleepy: eyesSleepy()
+        case .eyesClosed: eyesClosed()
         case .mouthSmile: mouthSmile()
         case .mouthFang: mouthFang()
         case .mouthYawn: mouthYawn()
@@ -205,6 +209,8 @@ enum RunnerArt {
         case .toothbrush: toothbrush()
         case .watchWrist: watchWrist()
         case .tapHand: tapHand()
+        case .backFist: backFist()
+        case .thumpLines: thumpLines()
         case .phone: phone()
         case .phoneFeed: phoneFeed()
         case .phoneHand: phoneHand()
@@ -1887,6 +1893,22 @@ enum RunnerArt {
                 lineWidth: 3.2,
                 cap: .round
             ),
+        ]
+    }
+
+    private static func eyesClosed() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 38, y: 65))
+                    p.addQuadCurve(to: .init(x: 53, y: 65), control: .init(x: 45.5, y: 69))
+                    p.move(to: .init(x: 82, y: 65))
+                    p.addQuadCurve(to: .init(x: 67, y: 65), control: .init(x: 74.5, y: 69))
+                },
+                stroke: RunnerPalette.ink,
+                lineWidth: 3.2,
+                cap: .round
+            )
         ]
     }
 
@@ -3941,6 +3963,75 @@ enum RunnerArt {
                 lineWidth: 2.5,
                 cap: .round
             ),
+        ]
+    }
+
+    private static func backFist() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 83, y: 92))
+                    p.addLine(to: .init(x: 91, y: 92))
+                    p.addCurve(
+                        to: .init(x: 96, y: 97),
+                        control1: .init(x: 93.76, y: 92),
+                        control2: .init(x: 96, y: 94.24)
+                    )
+                    p.addLine(to: .init(x: 96, y: 101))
+                    p.addCurve(
+                        to: .init(x: 91, y: 106),
+                        control1: .init(x: 96, y: 103.76),
+                        control2: .init(x: 93.76, y: 106)
+                    )
+                    p.addLine(to: .init(x: 83, y: 106))
+                    p.addCurve(
+                        to: .init(x: 78, y: 101),
+                        control1: .init(x: 80.24, y: 106),
+                        control2: .init(x: 78, y: 103.76)
+                    )
+                    p.addLine(to: .init(x: 78, y: 97))
+                    p.addCurve(
+                        to: .init(x: 83, y: 92),
+                        control1: .init(x: 78, y: 94.24),
+                        control2: .init(x: 80.24, y: 92)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.skin,
+                stroke: RunnerPalette.ink,
+                lineWidth: 2.5
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 83, y: 93))
+                    p.addLine(to: .init(x: 83, y: 99))
+                    p.move(to: .init(x: 88, y: 93))
+                    p.addLine(to: .init(x: 88, y: 99))
+                    p.move(to: .init(x: 93, y: 93))
+                    p.addLine(to: .init(x: 93, y: 99))
+                },
+                stroke: RunnerPalette.ink,
+                lineWidth: 1.8,
+                cap: .round
+            ),
+        ]
+    }
+
+    private static func thumpLines() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 99, y: 88))
+                    p.addLine(to: .init(x: 104, y: 85))
+                    p.move(to: .init(x: 100, y: 95))
+                    p.addLine(to: .init(x: 106, y: 95))
+                    p.move(to: .init(x: 99, y: 102))
+                    p.addLine(to: .init(x: 104, y: 105))
+                },
+                stroke: RunnerPalette.ink,
+                lineWidth: 2.2,
+                cap: .round
+            )
         ]
     }
 

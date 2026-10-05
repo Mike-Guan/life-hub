@@ -22,6 +22,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- When you sit too long at work, HAKU twists and thumps its back (also its Lock Screen look), stretches
+  when you open the app, and rolls its shoulders after you stand up.
 - Change moments (Issue #91): the app notes by itself when you got up after an invite, reached the gym
   after 走, or earned a keepsake within a day of being one win away. On Sunday HAKU says one line about
   the week's moments on the home screen and widgets; a week with none gets no line. Getting up after an
