@@ -97,6 +97,7 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - StateEngine is rule-based and explainable. Each output carries the reasons that produced it.
 - Interventions: L0 companion expression only, L1 one line when the app is opened,
   L2 push notification max 1/day with a 3h cooldown. Low energy + low load is rest: do nothing.
+  An invite ignored 3 times in a row pauses for 7 days (`NudgeBackoff`); when signals can't tell, no judgement.
 - Bedtime reminder (Mike's explicit exception, not counted in L2): one local notification a day at the
   set time (default 23:30). `Bedtime` (off/on) is an overlay state, not a fifth mode. No follow-up,
   nothing logged about when Mike sleeps.
@@ -193,3 +194,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   places) or by hand; the off-work notice goes out only on days he is at work.
 - 2026-10-05: Mike set the product principles (`PRODUCT_PRINCIPLES.md`) and a scope freeze: after the current
   batch, 2 to 4 weeks with no new features, only HAKU-aliveness work and device bugs.
+- 2026-10-05: Mike approved the nudge back-off: an invite ignored 3 times in a row pauses for 7 days,
+  with one line and no catch-up; uncertain signals are never counted as ignored.
