@@ -182,6 +182,14 @@ import Testing
         #expect(night == [date(4, 1), date(4, 5)])
     }
 
+    @Test func slotDatesFollowTheQuarterHour() {
+        let dates = WidgetSnapshot.slotDates(after: date(3, 20).addingTimeInterval(7 * 60))
+        #expect(dates.count == 24)
+        #expect(dates.first == date(3, 20, 15))
+        #expect(dates.last == date(4, 2))
+        #expect(WidgetSnapshot.slotDates(after: date(3, 20)).first == date(3, 20, 15))
+    }
+
     @Test func bedtimeNextChange() {
         let schedule = BedtimeSchedule.standard
         #expect(schedule.nextChange(after: date(3, 12), calendar: calendar) == date(3, 23, 30))

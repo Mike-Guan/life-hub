@@ -29,6 +29,7 @@ final class ScrollMonitor: DeviceActivityMonitor {
         )
         let days = ActivityDays.stored(in: AppGroup.defaults)
         let work = ModeRules.stored(in: AppGroup.defaults)
-        InviteReminder.plan(NeedEngine.need(signals, now: now, days: days, work: work), now: now)
+        let reading = NeedEngine.need(signals, now: now, days: days, work: work)
+        InviteReminder.plan(reading, signals: signals, now: now)
     }
 }
