@@ -12,9 +12,13 @@ final class PlaceMonitor {
 
     @ObservationIgnored private let manager = CLLocationManager()
     @ObservationIgnored private var task: Task<Void, Never>?
+    // Held while places are set, so Core Location knows the geofences need "Always" in the background.
+    @ObservationIgnored private var session: CLServiceSession?
 
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
+    /// Why geofences only work while the app is open, for the UI to show; `nil` when they work.
+    private(set) var accessWarning: String?
 
     // Called at launch too: after a geofence wakes the app in the background, iterating the
     // events of the monitor with the same name delivers the event that woke it.
@@ -22,6 +26,8 @@ final class PlaceMonitor {
     func start(_ settings: PlaceSettings, onEvent: @escaping @MainActor (HubPlace, Bool) -> Void) {
         task?.cancel()
         lastError = nil
+        session = settings.places.isEmpty ? nil : CLServiceSession(authorization: .always)
+        checkAccess(settings)
         task = Task {
             let monitor = await CLMonitor(Self.name)
             let wanted = Set(settings.places.map(\.id))
@@ -42,6 +48,7 @@ final class PlaceMonitor {
             var lastState: [String: CLMonitor.Event.State] = [:]
             do {
                 for try await event in await monitor.events {
+                    Self.noteDiagnostics(event)
                     guard let place = settings.places.first(where: { $0.id == event.identifier }) else { continue }
                     guard lastState[event.identifier] != event.state else { continue }
                     lastState[event.identifier] = event.state
@@ -57,6 +64,24 @@ final class PlaceMonitor {
                 lastError = "地点监测停了：\(error.localizedDescription)"
             }
         }
+    }
+
+    /// Sets `accessWarning` when places are set but location access isn't "Always".
+    func checkAccess(_ settings: PlaceSettings) {
+        let always = manager.authorizationStatus == .authorizedAlways
+        accessWarning = settings.places.isEmpty || always ? nil : Self.notAlways
+    }
+
+    private static let notAlways = "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。到 设置 > Life Hub > 位置 选「始终」"
+
+    // The background delivery problem Mike hit on 2026-10-05 left no trace; these flags say why.
+    private static func noteDiagnostics(_ event: CLMonitor.Event) {
+        var flags: [String] = []
+        if event.authorizationDenied { flags.append("没授权") }
+        if event.insufficientlyInUse { flags.append("不在使用中") }
+        if event.serviceSessionRequired { flags.append("要会话") }
+        guard !flags.isEmpty else { return }
+        Dogfood.note("geofence", "\(event.identifier) 送达受限：\(flags.joined(separator: "、"))", at: event.date)
     }
 
     // iOS first grants "While Using" with provisional Always, then asks to keep Always later.

@@ -123,6 +123,8 @@ struct LifeHubApp: App {
             guard phase == .active else { return }
             let away = AppGroup.defaults.object(forKey: Self.lastBackgroundKey) as? Date
             replayFrom = OpenReplay.switchFrom(log: store.log, lastSeen: away, now: .now)
+            // Mike may have changed location access in Settings while away.
+            placeMonitor.checkAccess(places)
             syncWidgets()
             // One after the other, so the two permission prompts don't overlap.
             Task {
@@ -212,7 +214,7 @@ struct LifeHubApp: App {
     private var firstError: String? {
         let errors = [
             widgets.lastError, expenses.lastError, growth.lastError, reminderError, offWorkError, healthError,
-            placeMonitor.lastError, needs.lastError, countdownError, screenTimeError,
+            placeMonitor.lastError, placeMonitor.accessWarning, needs.lastError, countdownError, screenTimeError,
         ]
         return (setupErrors + errors.compactMap { $0 }).first
     }
