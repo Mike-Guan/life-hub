@@ -37,6 +37,8 @@ struct HubEntry: TimelineEntry {
     var daily: DailyCue?
     /// The place Mike just left, while HAKU walks from it.
     var walking: HubPlace.Kind?
+    /// Whether HAKU is off to take its bath.
+    var bath = false
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
@@ -48,6 +50,7 @@ struct HubEntry: TimelineEntry {
     /// task, else the app's line for now, else today's energy.
     var detail: String {
         if let offWork { return offWork }
+        if bath { return "去洗澡" }
         if let activity { return activity.reason }
         if moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) { return HakuLines.line(scene, at: date) }
@@ -94,7 +97,11 @@ struct HubProvider: TimelineProvider {
         let daily = DailyPlan.stored(in: AppGroup.defaults)
         let dailyTimes = daily?.times ?? []
         let placeWalk = [PlaceWalk.walk(in: presence, now: now)?.until].compactMap { $0 }
-        let groups: [[Date]] = [snapshot?.needTimes ?? [], starts, walk, office, home, slots, dailyTimes, placeWalk]
+        let bathTimes = BathTime.times(after: now, bedtime: schedule)
+        let bathDone = BathTime.doneAt(in: AppGroup.defaults)
+        let groups: [[Date]] = [
+            snapshot?.needTimes ?? [], starts, walk, office, home, slots, dailyTimes, placeWalk, bathTimes,
+        ]
         let needTimes = groups.flatMap { $0 }
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
@@ -143,7 +150,14 @@ struct HubProvider: TimelineProvider {
                 offWork: snapshot?.offWorkLine(at: date),
                 nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false, now: date) },
                 daily: daily?.cue(at: date),
-                walking: PlaceWalk.walk(in: presence, now: date)?.from
+                walking: PlaceWalk.walk(in: presence, now: date)?.from,
+                bath: BathTime.isOn(
+                    at: date,
+                    bedtime: schedule,
+                    mode: snapshot?.mode,
+                    atHome: presence.since(.home) != nil,
+                    doneAt: bathDone
+                )
             )
         }
     }
