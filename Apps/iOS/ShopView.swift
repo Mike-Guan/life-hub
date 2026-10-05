@@ -228,6 +228,7 @@ extension Win {
         case .gotUp: "被叫起来出门"
         case .daylight: "晒太阳"
         case .earlySleep: "按时睡"
+        case .plannedTask: "做完定好的事"
         }
     }
 }

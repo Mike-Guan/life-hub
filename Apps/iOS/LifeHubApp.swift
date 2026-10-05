@@ -33,6 +33,7 @@ struct LifeHubApp: App {
     @State private var placeMonitor: PlaceMonitor
     @State private var needs: NeedTracker
     @State private var taps: NotificationTaps
+    @State private var daily = DailyLink()
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -135,6 +136,7 @@ struct LifeHubApp: App {
                 await scheduleReminder()
                 await importSleep()
                 await needs.importMotion()
+                await daily.read()
                 earnWins()
                 refreshNeeds()
                 // The awaits above can include a permission sheet; celebrate only if still on screen.
@@ -170,7 +172,14 @@ struct LifeHubApp: App {
         }
         .onChange(of: budget) { budget.store(in: AppGroup.defaults) }
         .sheet(isPresented: $showsSettings, onDismiss: showNextUnboxing) {
-            SettingsView(bedtime: $bedtime, rules: $rules, places: $places, budget: $budget, monitor: placeMonitor)
+            SettingsView(
+                bedtime: $bedtime,
+                rules: $rules,
+                places: $places,
+                budget: $budget,
+                monitor: placeMonitor,
+                daily: daily
+            )
         }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
             ShopView(growth: growth, wardrobe: $wardrobe)
@@ -209,6 +218,10 @@ struct LifeHubApp: App {
         for moment in ChangeLog.stored(in: AppGroup.defaults).moments where moment.kind == .gotUp {
             growth.record(.gotUp, source: Win.gotUp.source(at: moment.at), at: moment.at)
         }
+        let tasks = DailyAgenda.occurrences(daily.tasks, now: .now)
+        for earned in DailyAgenda.wins(in: tasks, ledger: growth.ledger, now: .now) {
+            growth.record(earned.win, source: earned.source, at: earned.at)
+        }
     }
 
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.
@@ -221,6 +234,7 @@ struct LifeHubApp: App {
         let errors = [
             widgets.lastError, expenses.lastError, growth.lastError, reminderError, offWorkError, healthError,
             placeMonitor.lastError, placeMonitor.accessWarning, needs.lastError, countdownError, screenTimeError,
+            daily.lastError,
         ]
         return (setupErrors + errors.compactMap { $0 }).first
     }

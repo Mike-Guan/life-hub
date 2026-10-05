@@ -2,15 +2,19 @@ import CompanionKit
 import FamilyControls
 import HubCore
 import SwiftUI
+import UniformTypeIdentifiers
 
-/// App settings: the bedtime reminder time, the places that switch mode, money and the Screen Time watch.
+/// App settings: the bedtime reminder time, the places that switch mode, money, the Daily Widget link and
+/// the Screen Time watch.
 struct SettingsView: View {
     @Binding var bedtime: BedtimeSchedule
     @Binding var rules: ModeRules
     @Binding var places: PlaceSettings
     @Binding var budget: BudgetSettings
     let monitor: PlaceMonitor
+    let daily: DailyLink
     @Environment(\.dismiss) private var dismiss
+    @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
     @State private var scrollApps = ScrollWatch.selection
     @State private var pickingApps = false
@@ -67,6 +71,8 @@ struct SettingsView: View {
 
             moneyCard
 
+            dailyCard
+
             // Debug only until Apple approves Family Controls for distribution; STG and PROD have no
             // entitlement, so the button could only fail. Remove with the CI-CD.md Screen Time step.
             #if DEBUG
@@ -89,6 +95,38 @@ struct SettingsView: View {
         }
         .padding(16)
         .toyCard()
+    }
+
+    private var dailyCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle(isOn: dailyBinding) {
+                Text("联动 Daily Widget")
+                    .font(Toy.body(16, weight: .heavy))
+            }
+            Text("打开后选一次 iCloud Drive 里的 Daily Widget 文件夹。只读不写；提前定好的事做完 +1 能量罐，一天最多 3 个。关掉就不再读，已拿的罐子保留。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+            if let error = daily.lastError {
+                Text(error)
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.alert)
+            }
+        }
+        .padding(16)
+        .toyCard()
+        .fileImporter(isPresented: $pickingDaily, allowedContentTypes: [.folder]) { result in
+            guard case .success(let folder) = result else { return }
+            Task { await daily.link(folder) }
+        }
+    }
+
+    // Turning it on opens the folder picker; it shows as on only once a folder is linked.
+    private var dailyBinding: Binding<Bool> {
+        Binding {
+            daily.isOn
+        } set: { on in
+            if on { pickingDaily = true } else { daily.unlink() }
+        }
     }
 
     private func yenField(_ title: String, text: Binding<String>) -> some View {
