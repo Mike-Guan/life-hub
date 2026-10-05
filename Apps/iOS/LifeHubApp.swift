@@ -1,4 +1,5 @@
 import AppIntents
+import FamilyControls
 import HubCore
 import SwiftUI
 import UIKit
@@ -266,11 +267,19 @@ struct LifeHubApp: App {
 
     // Builds before the report ladder watched a single 30-minute event; restarting swaps in the ladder.
     private static func restartScrollWatch() -> String? {
-        guard ScrollWatch.hasSelection else { return nil }
+        // Without Screen Time HAKU never sees couch scrolling; the dogfood log says why.
+        guard ScrollWatch.hasSelection else {
+            Dogfood.note("screenTime", "没选 App，不判断刷手机")
+            return nil
+        }
+        if AuthorizationCenter.shared.authorizationStatus != .approved {
+            Dogfood.note("screenTime", "没授权，不判断刷手机")
+        }
         do {
             try ScrollWatch.start(ScrollWatch.selection, work: .stored(in: AppGroup.defaults))
             return nil
         } catch {
+            Dogfood.note("screenTime", "监测没启动：\(error.localizedDescription)")
             return "Screen Time 监测没启动：\(error.localizedDescription)"
         }
     }
