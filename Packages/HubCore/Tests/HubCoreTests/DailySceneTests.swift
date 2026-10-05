@@ -63,9 +63,8 @@ import Testing
 
     @Test func aStoredPlanWithoutScenesStillReads() throws {
         let json =
-            #"{"occurrences":[{"id":"a","title":"","start":0,"end":60,"done":false,"#
-            + #""focus":false,"planned":true,"prop":"note"}]}"#
-        let plan = try JSONDecoder().decode(DailyPlan.self, from: Data(json.utf8))
-        #expect(plan.occurrences.first?.scene == nil)
+            #"{"id":"a","title":"","start":0,"end":60,"done":false,"focus":false,"planned":true,"prop":"note"}"#
+        let occurrence = try JSONDecoder().decode(DailyOccurrence.self, from: Data(json.utf8))
+        #expect(occurrence.scene == nil)
     }
 }
