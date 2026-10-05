@@ -222,18 +222,16 @@ struct LifeHubApp: App {
             if place.action == .fitness, !entered, let arrived, let visit = Win.gymVisit(from: arrived, to: .now) {
                 growth.record(visit.win, source: visit.source, at: visit.at)
             }
-<<<<<<< HEAD
-            let decision = place.trigger(entered: entered).flatMap {
-                store.autoSwitch($0, rules: .stored(in: AppGroup.defaults))
-=======
             let rules = ModeRules.stored(in: AppGroup.defaults)
+            let decision: ModeDecision?
             if !entered, let stayStart, Date.now.timeIntervalSince(stayStart) < PlacePresence.bounce {
                 // Walking past a fence takes back the switch the arrival made.
-                store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules)
+                decision = store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules)
             } else if let trigger = place.trigger(entered: entered) {
                 // After a GPS-drift return the stay continues; this puts back a mode the leave changed.
-                store.autoSwitch(trigger, rules: rules)
->>>>>>> origin/main
+                decision = store.autoSwitch(trigger, rules: rules)
+            } else {
+                decision = nil
             }
             let outcome = decision.map { "切到\($0.mode.title)" } ?? "不切"
             Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
