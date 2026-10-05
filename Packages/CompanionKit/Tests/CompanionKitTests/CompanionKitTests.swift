@@ -337,6 +337,39 @@ import Testing
         #expect(week.contains(nil))
     }
 
+    @Test func portraitStillHoldsForASlotAndVaries() {
+        let start = Date(timeIntervalSinceReferenceDate: IdleLife.slotLength * 1000)
+        #expect(PortraitStill.at(start) == PortraitStill.at(start.addingTimeInterval(IdleLife.slotLength - 1)))
+        let day = (0..<96).map { PortraitStill.at(start.addingTimeInterval(Double($0) * IdleLife.slotLength)) }
+        for still in PortraitStill.allCases { #expect(day.contains(still)) }
+    }
+
+    @Test @MainActor func portraitAtHomeDoesWhatTheAppDoes() throws {
+        let start = Date(timeIntervalSinceReferenceDate: IdleLife.slotLength * 1000)
+        let slots = (0..<96).map { start.addingTimeInterval(Double($0) * IdleLife.slotLength) }
+        let nap = try #require(slots.first { IdleLife.at($0) == .nap })
+        let napping = CompanionPortrait(mode: .chill, date: nap).pose
+        #expect(napping.life == .nap)
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: napping)).contains(.zzz))
+        // Anything else HAKU is doing replaces its own time.
+        #expect(CompanionPortrait(mode: .chill, need: .couchScroll, date: nap).pose.life == nil)
+        #expect(CompanionPortrait(mode: .work, date: nap).pose.life == nil)
+    }
+
+    @Test(arguments: Mode.allCases)
+    func portraitStillsDiffer(_ mode: Mode) {
+        var glance = RunnerPose()
+        glance.show(.glance, mode: mode)
+        var alt = RunnerPose()
+        alt.show(.alt, mode: mode)
+        let plain = RunnerPose()
+        #expect(glance.eyesDx != plain.eyesDx || glance.canAngle != plain.canAngle)
+        #expect(
+            alt.headDy != plain.headDy || alt.eyesDx != plain.eyesDx || alt.gloveL != plain.gloveL
+                || alt.eyesDy != plain.eyesDy
+        )
+    }
+
     @Test(arguments: IdleLife.allCases)
     func idleLifeSwapsTheCanForItsProp(_ life: IdleLife) {
         let parts = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(life: life)))
