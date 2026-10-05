@@ -310,7 +310,8 @@ public struct CompanionView: View {
     private func idleLife(_ mode: Mode, at date: Date) -> IdleLife? {
         let time = date.timeIntervalSinceReferenceDate
         let busy = celebration(at: time) != nil || taskDone(at: time) != nil || stillOneOff(at: time)
-        let free = need == nil && activity == nil && moment == nil && daily == nil && invite == nil && walking == nil
+        let free =
+            need == nil && activity == nil && moment == nil && daily == nil && invite == nil && walking == nil
             && !bath
         guard mode == .chill, free, bedtime == .off, !busy else {
             return nil
