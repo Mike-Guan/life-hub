@@ -195,6 +195,8 @@ struct RunnerPose {
     var codeGlow: Double = 1
     /// Staring at an empty can: deadpan eyes instead of the smile.
     var emptyCan = false
+    /// A quick look at the phone at work, held low in front.
+    var phoneGlance = false
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -328,6 +330,12 @@ struct RunnerPose {
             if plain, r == 0, cycle.truncatingRemainder(dividingBy: 3) == 2, phase >= 8, phase < 11 {
                 headDy = phase < 9 ? CGFloat(abs(sin(phase * .pi / 0.5))) * 2.5 : 0
                 headsetOff = 0.1 * Self.bump(CGFloat(phase), from: 10, to: 11)
+            }
+            // Every third cycle, offset from the headset push: a quick look at the phone, then it's away.
+            if plain, r == 0, cycle > 0, cycle.truncatingRemainder(dividingBy: 3) == 0, phase >= 4.3, phase < 5.5 {
+                phoneGlance = true
+                eyesDy = 2
+                headDy = 1
             }
         case .chill:
             // A sip every 8 s; tap = raise the can.
@@ -825,6 +833,7 @@ struct RunnerFigure: View {
             case .work:
                 visible.formUnion(workParts)
                 if !pose.ledDots { visible.insert(.ledLine) }
+                if pose.phoneGlance { visible.formUnion([.phone, .phoneHand]) }
             case .chill:
                 visible.formUnion(chillParts)
                 if pose.emptyCan {

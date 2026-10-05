@@ -357,6 +357,18 @@ import Testing
         #expect(jab.gloveR.height > -69)
     }
 
+    @Test func atWorkHakuSneaksALookAtThePhone() {
+        // Cycle 3 of 12 s starts at 36 s; the glance runs from 40.3 s to 41.5 s.
+        let glance = RunnerPose(mode: .work, time: 41, face: .mid, react: 0)
+        #expect(glance.phoneGlance && glance.eyesDy == 2)
+        let parts = Set(RunnerFigure.parts(for: .work, pose: glance))
+        #expect(parts.isSuperset(of: [.phone, .phoneHand]) && !parts.contains(.phoneFeed))
+        let after = RunnerPose(mode: .work, time: 42, face: .mid, react: 0)
+        #expect(!after.phoneGlance && !RunnerFigure.parts(for: .work, pose: after).contains(.phone))
+        #expect(!RunnerPose(mode: .work, time: 5, face: .mid, react: 0).phoneGlance)
+        #expect(!RunnerPose(mode: .work, time: 41, face: .mid, moment: .drowsy, react: 0).phoneGlance)
+    }
+
     @Test func atWorkHakuPausesAndPushesTheHeadset() {
         // Cycle 2 of 12 s starts at 24 s; the pause runs from 32 s to 35 s.
         let nod = RunnerPose(mode: .work, time: 32.25, face: .mid, react: 0)
