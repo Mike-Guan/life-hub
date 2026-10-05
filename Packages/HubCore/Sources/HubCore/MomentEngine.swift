@@ -22,6 +22,8 @@ public enum MomentEngine {
     public static let longWorkDay: TimeInterval = 8 * 60 * 60
     /// How long HAKU stays collapsed after Mike gets home.
     public static let collapsedLasts: TimeInterval = 30 * 60
+    /// How many minutes after work start HAKU waits at the door before giving up for the day.
+    public static let leaveWaitMinutes = 90
     /// From this minute after midnight a quiet evening at home is the blanket.
     public static let blanketMinute = 21 * 60
     /// Time boxing or vibe coding today that leaves a trace.
@@ -63,8 +65,8 @@ public enum MomentEngine {
 
     // Mike, 2026-10-05: the clock never switches to work, so a weekday morning at home is chill with
     // HAKU getting ready, then waiting at the door. A manual change today means a day off: no nudge.
-    /// The state at home in chill: collapsed after a long work day, the weekday morning, then the blanket
-    /// in the evening.
+    /// The state at home in chill: collapsed after a long work day, the weekday morning and the wait at the
+    /// door, then the blanket in the evening.
     /// - Returns: `nil` in other modes or with nothing going on.
     public static func home(
         mode: Mode?,
@@ -85,7 +87,8 @@ public enum MomentEngine {
         let lateNight = midnight > dayStart
         let dayOff = signals.manualAt.map { $0 >= dayStart } ?? false
         let workday = work.workdays.contains(calendar.component(.weekday, from: now))
-        if workday, !lateNight, !dayOff, minute < work.workEndMinute {
+        // PM, 2026-10-05: the door wait ends 90 minutes after work start, so a sick day isn't nagged.
+        if workday, !lateNight, !dayOff, minute < work.workStartMinute + leaveWaitMinutes {
             return minute < work.workStartMinute ? .morning : .timeToLeave
         }
         return lateNight || minute >= blanketMinute ? .blanket : nil
@@ -101,7 +104,7 @@ public enum MomentEngine {
         guard let since else { return [] }
         let midnight = calendar.startOfDay(for: now)
         let minute = { (value: Int) in calendar.date(byAdding: .minute, value: value, to: midnight) ?? midnight }
-        let minutes = [work.workStartMinute, work.workEndMinute, blanketMinute]
+        let minutes = [work.workStartMinute, work.workStartMinute + leaveWaitMinutes, blanketMinute]
         return [since.addingTimeInterval(collapsedLasts)] + minutes.map(minute)
     }
 

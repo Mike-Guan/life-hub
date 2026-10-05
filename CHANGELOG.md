@@ -21,9 +21,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU picks the new home looks by itself (Issue #83, PRD sections 16 and 18). On work days at home in
   下班 mode: brushing teeth until work starts ("又要上班了。"), then waiting at the door tapping its watch
-  ("……公司还在等你。"), with no notification and not on days you changed the mode by hand. After 8+ hours
-  in 上班 mode, the first 30 minutes home are collapsed on the sofa arm ("你也活着回来了啊。"). From 21:00
-  a quiet evening at home is the blanket. Today's traces: a bandage after 30+ minutes of boxing or a
+  ("……公司还在等你。") for up to 90 minutes, with no notification and not on days you changed the mode by
+  hand. After 8+ hours in 上班 mode, the first 30 minutes home are collapsed on the sofa arm
+  ("你也活着回来了啊。"). From 21:00 a quiet evening at home is the blanket. Today's traces: a bandage after 30+ minutes of boxing or a
   boxing workout, the monitor on after 30+ minutes of vibe coding, sunlight after a full night's sleep.
   Traces fade at 05:00 and earn no cans. Widgets and the Lock Screen show them too.
 - The wardrobe has a 人生收藏 section: each keepsake you earned, with the day and how, such as

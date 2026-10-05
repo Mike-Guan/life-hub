@@ -36,7 +36,9 @@ import Testing
         #expect(home(since: night, at: date(5, 7, 30)) == .morning)
         #expect(home(since: night, at: date(5, 9, 29)) == .morning)
         #expect(home(since: night, at: date(5, 9, 30)) == .timeToLeave)
-        #expect(home(since: night, at: date(5, 18, 29)) == .timeToLeave)
+        #expect(home(since: night, at: date(5, 10, 59)) == .timeToLeave)
+        // HAKU gives up after 90 minutes, so a sick day at home isn't nagged.
+        #expect(home(since: night, at: date(5, 11)) == nil)
         #expect(home(since: night, mode: nil, at: date(5, 10)) == .timeToLeave)
         // Not on a Sunday, and before 05:00 still belongs to the night before.
         #expect(home(since: date(3, 22), at: date(4, 10)) == nil)
