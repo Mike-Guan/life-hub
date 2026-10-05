@@ -20,6 +20,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Lasting traces in HAKU's world: taped, scuffed gloves after 5 boxing sessions, a second monitor by
+  the laptop after 10 hours of vibe coding, running shoes at home after 2 runs. The app decides when
+  they are earned.
 - HAKU's eyes drift off to one side now and then and come back, so it looks like it has its own
   thoughts.
 - HAKU on the widgets and Lock Screen changes a little every 15 minutes: a glance, a sip, gloves up.
