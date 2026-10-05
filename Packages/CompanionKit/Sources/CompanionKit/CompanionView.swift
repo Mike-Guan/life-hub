@@ -20,6 +20,8 @@ public struct CompanionView: View {
     let codingCans: Int
     /// What today left in HAKU's world, such as a bandage after boxing.
     let traces: Set<CompanionTrace>
+    /// HAKU's hidden params; they change only how it moves and looks.
+    let vitals: HakuVitals
     // To show a new item after its unboxing, pass a `wardrobe` with it equipped and its slot's `showcaseMode`.
     /// A one-off animation: celebrating a workout, going off work, unboxing an item or staying home.
     /// Each event id plays once.
@@ -72,6 +74,7 @@ public struct CompanionView: View {
         moment: CompanionMoment? = nil,
         codingCans: Int = 0,
         traces: Set<CompanionTrace> = [],
+        vitals: HakuVitals = HakuVitals(),
         event: CompanionEvent? = nil,
         invite: String? = nil,
         cheer: Int = 0,
@@ -89,6 +92,7 @@ public struct CompanionView: View {
         self.moment = moment
         self.codingCans = codingCans
         self.traces = traces
+        self.vitals = vitals
         self.event = event
         self.invite = invite
         self.cheer = cheer
@@ -161,6 +165,8 @@ public struct CompanionView: View {
                         mode: mode,
                         pose: pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe)).leaving(traces)
                     )
+                    .saturation(vitals.saturation)
+                    .brightness(vitals.brightness)
                     .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
                     .offset(y: reduceMotion ? 0 : motion.dy)
                 }
@@ -240,7 +246,7 @@ public struct CompanionView: View {
         guard mode == .chill, need == nil, activity == nil, moment == nil, invite == nil, bedtime == .off, !busy else {
             return nil
         }
-        return IdleLife.at(date)
+        return IdleLife.at(date, stamina: vitals.stamina)
     }
 
     private var paused: Bool { reduceMotion || scenePhase != .active }
@@ -249,14 +255,15 @@ public struct CompanionView: View {
         if bedtime == .on || life == .nap { return IdleMotion.sleeping(time: time) }
         if stillOneOff(at: time) { return IdleMotion(dy: 0, angle: 0) }
         if let progress = celebration(at: time) { return IdleMotion.celebrating(progress: progress) }
-        if let moment = shownMoment { return IdleMotion(moment: moment, mode: mode, time: time * face.speed) }
+        let pace = face.speed * vitals.motionSpeed
+        if let moment = shownMoment { return IdleMotion(moment: moment, mode: mode, time: time * pace) }
         // Warming up hops like boxing day, whatever the outfit.
         if shownNeed == .couchScroll { return IdleMotion.slumped(time: time) }
         // Running and heavy-bag work bounce like boxing day, running a bit quicker.
         if activity == .running { return IdleMotion(mode: .boxing, time: time * 1.6) }
-        if activity == .boxingAtGym { return IdleMotion(mode: .boxing, time: time * face.speed) }
+        if activity == .boxingAtGym { return IdleMotion(mode: .boxing, time: time * pace) }
         let motionMode = shownNeed == .boxingWarmup ? .boxing : mode
-        return IdleMotion(mode: motionMode, time: time * face.speed)
+        return IdleMotion(mode: motionMode, time: time * pace).bouncing(vitals.bounce)
     }
 
     private func pose(_ mode: Mode, life: IdleLife?, time: TimeInterval, react: Double) -> RunnerPose {
@@ -273,11 +280,12 @@ public struct CompanionView: View {
             pose.codingCans = codingCans
             if stage == .peeking { pose.bagLift = 0 }
             if stage == .up { pose.bagLift = 1 }
+            pose.headDy += vitals.slouch
             return pose
         }
         var pose = RunnerPose(
             mode: mode,
-            time: time,
+            time: time * vitals.motionSpeed,
             face: face,
             need: shownNeed,
             life: life,
@@ -286,6 +294,7 @@ public struct CompanionView: View {
             react: react
         )
         pose.codingCans = codingCans
+        pose.headDy += vitals.slouch
         if stage == .peeking { pose.peekAtBag(time: time) }
         if stage == .up { pose.bagLift = 1 }
         if let progress = Self.progress(since: swapStart, at: time, duration: Self.swapDuration) {
@@ -506,6 +515,11 @@ struct IdleMotion {
     }
 
     /// Slow breathing at bedtime, 4 s period.
+    /// The same motion with its bounce scaled by `factor`.
+    func bouncing(_ factor: CGFloat) -> IdleMotion {
+        IdleMotion(dy: dy * factor, angle: angle)
+    }
+
     static func sleeping(time t: TimeInterval) -> IdleMotion {
         IdleMotion(dy: CGFloat(sin(t * 2 * .pi / 4)) * 1.5, angle: 0)
     }

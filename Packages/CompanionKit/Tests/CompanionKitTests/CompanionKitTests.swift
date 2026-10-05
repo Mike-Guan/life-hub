@@ -359,6 +359,27 @@ import Testing
         #expect(!RunnerPose(mode: .chill, time: 34, face: .mid, life: .snack, react: 0).emptyCan)
     }
 
+    @Test func staminaNudgesWhatHakuDoesOnItsOwn() {
+        let start = Date(timeIntervalSinceReferenceDate: IdleLife.slotLength * 1000)
+        let slots = (0..<(7 * 96)).map { start.addingTimeInterval(Double($0) * IdleLife.slotLength) }
+        let fit = slots.map { IdleLife.at($0, stamina: .high) }
+        let lazy = slots.map { IdleLife.at($0, stamina: .low) }
+        #expect(!fit.contains(.nap) && fit.contains(.practice))
+        #expect(!lazy.contains(.practice) && lazy.contains(.nap))
+        #expect(slots.map { IdleLife.at($0, stamina: .mid) } == slots.map { IdleLife.at($0) })
+    }
+
+    @Test func vitalsOnlyChangeTheLook() {
+        let tired = HakuVitals(stamina: .low, spirit: .low)
+        let fit = HakuVitals(stamina: .high, spirit: .high)
+        let usual = HakuVitals()
+        #expect(tired.motionSpeed < usual.motionSpeed && usual.motionSpeed < fit.motionSpeed)
+        #expect(tired.bounce < usual.bounce && usual.bounce < fit.bounce)
+        #expect(tired.slouch > 0 && usual.slouch == 0 && fit.slouch < 0)
+        #expect(tired.saturation < 1 && usual.saturation == 1 && usual.brightness == 0 && fit.brightness > 0)
+        #expect(IdleMotion(dy: 2, angle: 1).bouncing(1.5).dy == 3)
+    }
+
     @Test func sundayAfternoonIsForTidying() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))

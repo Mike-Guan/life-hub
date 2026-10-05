@@ -1295,6 +1295,7 @@ public struct CompanionPortrait: View {
     let moment: CompanionMoment?
     let codingCans: Int
     let traces: Set<CompanionTrace>
+    let vitals: HakuVitals
     let date: Date
     let bedtime: Bedtime
     let wardrobe: Wardrobe
@@ -1307,6 +1308,7 @@ public struct CompanionPortrait: View {
     ///   - moment: the state within the mode, such as vibe coding; it replaces the need.
     ///   - codingCans: Monster cans piled up while vibe coding.
     ///   - traces: what today left in HAKU's world, such as a bandage after boxing.
+    ///   - vitals: HAKU's hidden params; they change only how it looks.
     ///   - date: the moment shown, such as a widget timeline entry's date.
     ///   - wardrobe: what HAKU wears from the shop and keepsakes.
     public init(
@@ -1318,6 +1320,7 @@ public struct CompanionPortrait: View {
         moment: CompanionMoment? = nil,
         codingCans: Int = 0,
         traces: Set<CompanionTrace> = [],
+        vitals: HakuVitals = HakuVitals(),
         date: Date = .now,
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
@@ -1331,6 +1334,7 @@ public struct CompanionPortrait: View {
         self.moment = moment
         self.codingCans = codingCans
         self.traces = traces
+        self.vitals = vitals
         self.date = date
         self.bedtime = bedtime
         self.wardrobe = wardrobe
@@ -1346,6 +1350,8 @@ public struct CompanionPortrait: View {
                 HeadCrop { figure }
             }
         }
+        .saturation(vitals.saturation)
+        .brightness(vitals.brightness)
         .accessibilityLabel(
             CompanionLines.accessibilityLabel(
                 mode: mode,
@@ -1372,7 +1378,7 @@ public struct CompanionPortrait: View {
     var pose: RunnerPose {
         guard bedtime == .off else { return RunnerPose.bedtimeStill() }
         let plain = need == nil && activity == nil && moment == nil
-        let life = plain && mode == .chill ? IdleLife.at(date) : nil
+        let life = plain && mode == .chill ? IdleLife.at(date, stamina: vitals.stamina) : nil
         var pose = RunnerPose(
             face: EnergyFace(energy: energy),
             need: need,
@@ -1381,6 +1387,7 @@ public struct CompanionPortrait: View {
             moment: moment
         )
         pose.codingCans = codingCans
+        pose.headDy += vitals.slouch
         if plain, life == nil { pose.show(PortraitStill.at(date), mode: mode) }
         if peeking {
             pose.bagLift = 0

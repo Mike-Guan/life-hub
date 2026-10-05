@@ -20,6 +20,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU's hidden 体能 and 元气 show in how it moves, never as a number: fit means upright, bouncier and
+  shadow boxing instead of napping; low 元气 means slower, half a beat late, and a little washed out.
 - HAKU has two hidden params, worked out by rules: 体能 from the last four weeks of boxing, gym and 5 km
   runs, and 元气 from the last three nights' sleep plus daylight. They rise fast and fall slowly and never go
   below tired. HAKU's moves will use them once the looks exist. No numbers or bars anywhere, and no cans.
