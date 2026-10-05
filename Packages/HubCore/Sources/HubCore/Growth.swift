@@ -15,6 +15,8 @@ public enum Win: String, Codable, CaseIterable, Sendable {
     case daylight
     /// Fell asleep soon after bedtime.
     case earlySleep
+    /// Finished a task planned ahead in Daily Widget.
+    case plannedTask
 
     /// Cans this win earns.
     public var cans: Int {
@@ -22,7 +24,7 @@ public enum Win: String, Codable, CaseIterable, Sendable {
         case .boxing, .run5k: 5
         case .gym: 3
         case .gotUp: 2
-        case .daylight, .earlySleep: 1
+        case .daylight, .earlySleep, .plannedTask: 1
         }
     }
 }
@@ -48,7 +50,8 @@ extension Win {
         case week
     }
 
-    // Caps from 03 Product/奖励数值表.md (PM, 2026-10-04).
+    // Caps from 03 Product/奖励数值表.md (PM, 2026-10-04). Planned tasks earn per task, up to
+    // `DailyAgenda.dailyCanLimit` a day.
     /// Boxing earns once a week, every other win once a day.
     public var cap: Cap {
         self == .boxing ? .week : .day
