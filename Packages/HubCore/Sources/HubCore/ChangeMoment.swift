@@ -140,9 +140,12 @@ public enum ChangeEngine {
         }
     }
 
-    /// Every moment's time: the noted ones and the near unlocks in `ledger`.
-    public static func times(log: ChangeLog, ledger: CanLedger) -> [Date] {
-        log.moments.filter { $0.deletedAt == nil }.map(\.at) + nearUnlocks(in: ledger)
+    // A followed gym-day invite and the walk after 走 are one evening, so the Sunday count is per day.
+    /// The first moment of each hub day: the noted ones and the near unlocks in `ledger`.
+    public static func times(log: ChangeLog, ledger: CanLedger, calendar: Calendar = .current) -> [Date] {
+        let all = log.moments.filter { $0.deletedAt == nil }.map(\.at) + nearUnlocks(in: ledger)
+        var days = Set<Date>()
+        return all.sorted().filter { days.insert(StateEngine.dayStart(for: $0, calendar: calendar)).inserted }
     }
 
     private static func source(_ date: Date) -> String {

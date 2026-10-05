@@ -68,6 +68,15 @@ import Testing
         #expect(ChangeEngine.nearUnlocks(in: slow.ledger).isEmpty)
     }
 
+    @Test func oneDayCountsOnceEvenWithTwoMoments() {
+        let gotUp = ChangeEngine.gotUp(.gymDay, followed: true, sentAt: date(6, 20), deviceID: "t")
+        let departure = GymDeparture(at: date(6, 20))
+        let went = ChangeEngine.wentAfterGo(departure: departure, arrivedAt: date(6, 20, 25), deviceID: "t")
+        let next = ChangeEngine.gotUp(.couchScroll, followed: true, sentAt: date(7, 21), deviceID: "t")
+        let log = ChangeLog(moments: [gotUp, went, next].compactMap { $0 })
+        #expect(ChangeEngine.times(log: log, ledger: CanLedger(), calendar: calendar) == [date(6, 20), date(7, 21)])
+    }
+
     @Test func sundayLineCountsTheWeekAndStaysQuietOtherwise() {
         let sunday = date(11, 10)
         #expect(ChangeEngine.sundayLine(times: [], now: sunday, calendar: calendar) == nil)
