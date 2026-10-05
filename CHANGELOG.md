@@ -22,6 +22,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- With Daily Widget linked, the home screen shows "下一件 18:00 <title>" for today's next timed task, and
+  the Lock Screen shows "下一件 18:00" without the title. Tapping the line opens Daily on that day. A
+  couch-scrolling invite within an hour of a task says "等下还有事，先起来收拾？" instead. HAKU's task
+  animations follow in the companion package.
 - Settings has a "联动 Daily Widget" switch, off by default. Turned on, you pick Daily's iCloud Drive
   folder once and Life Hub reads its tasks (never writes). A task planned ahead in Daily and done earns
   1 能量罐, at most 3 a day. Turning it off forgets the folder; cans stay.

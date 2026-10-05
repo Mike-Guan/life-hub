@@ -31,6 +31,8 @@ struct HubEntry: TimelineEntry {
     var weekLine: String?
     /// HAKU's line right after leaving the office ended work.
     var offWork: String?
+    /// "下一件 18:00" for today's next Daily task, without its title.
+    var nextTask: String?
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
@@ -38,8 +40,8 @@ struct HubEntry: TimelineEntry {
     var need: CompanionNeed? { snapshot?.need(at: date) }
     var needSince: Date? { snapshot?.needSince(at: date) }
 
-    /// One short line from HAKU: leaving work, what it does alongside Mike, its bedtime line, else the app's
-    /// line for now, else today's energy.
+    /// One short line from HAKU: leaving work, what it does alongside Mike, its bedtime line, the next Daily
+    /// task, else the app's line for now, else today's energy.
     var detail: String {
         if let offWork { return offWork }
         if let activity { return activity.reason }
@@ -48,6 +50,7 @@ struct HubEntry: TimelineEntry {
         if bedtime == .on { return HakuLines.line(.bedtime, at: date) }
         if let notice { return notice }
         if let weekLine { return weekLine }
+        if let nextTask { return nextTask }
         if let line = snapshot?.line(at: date) { return line }
         return energy.map { "电量\($0.title)" } ?? "电量未知"
     }
@@ -84,7 +87,10 @@ struct HubProvider: TimelineProvider {
         let office = MomentEngine.officeTimes(since: presence.since(.office), now: now, work: work)
         let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work)
         let slots = WidgetSnapshot.slotDates(after: now)
-        let needTimes = (snapshot?.needTimes ?? []) + starts + walk + office + home + slots
+        let daily = DailyPlan.stored(in: AppGroup.defaults)
+        let dailyTimes = daily?.times ?? []
+        let groups: [[Date]] = [snapshot?.needTimes ?? [], starts, walk, office, home, slots, dailyTimes]
+        let needTimes = groups.flatMap { $0 }
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
         let backoff = NudgeBackoff.stored(in: AppGroup.defaults)
@@ -122,7 +128,8 @@ struct HubProvider: TimelineProvider {
                 traces: snapshot?.traces(at: date) ?? [],
                 notice: backoff.notice(at: date),
                 weekLine: ChangeEngine.sundayLine(times: changes, now: date),
-                offWork: snapshot?.offWorkLine(at: date)
+                offWork: snapshot?.offWorkLine(at: date),
+                nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false) }
             )
         }
     }

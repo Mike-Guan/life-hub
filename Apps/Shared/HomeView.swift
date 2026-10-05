@@ -25,6 +25,10 @@ struct HomeView: View {
     var invite: String?
     /// Whether Mike sat too long or just stood up, from the iOS app.
     var sit: SitState?
+    /// Daily Widget's timed tasks, from the iOS app; `nil` while not linked.
+    var daily: DailyPlan?
+    /// The celebration for a Daily task just ticked done, from the iOS app.
+    var dailyDone: CompanionEvent?
     /// HAKU's line on a day it stopped an invite Mike kept ignoring, from the iOS app.
     var notice: String?
     /// When each change moment happened, for HAKU's Sunday line.
@@ -61,6 +65,24 @@ struct HomeView: View {
                     onSettings: onSettings
                 )
 
+                // PRD section 15: the title shows here only, never on the Lock Screen.
+                TimelineView(.everyMinute) { context in
+                    if let next = daily?.next(after: context.date), let link = next.link {
+                        Link(destination: link) {
+                            HStack {
+                                Text(DailyAgenda.nextLine(next, title: true))
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                            }
+                            .font(Toy.body(15, weight: .heavy))
+                            .foregroundStyle(Toy.ink)
+                            .padding(.horizontal, 12)
+                            .frame(minHeight: 44)
+                            .toyCard(radius: 12, shadow: 3)
+                        }
+                    }
+                }
+
                 TimelineView(.everyMinute) { context in
                     CompanionView(
                         mode: replaying ? replayFrom : store.current,
@@ -72,7 +94,7 @@ struct HomeView: View {
                         codingCans: codingCans(at: context.date),
                         traces: traces(at: context.date, energy: reading?.level),
                         vitals: VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: context.date),
-                        event: event ?? sit?.stretched(at: context.date) ?? stayHome(at: context.date),
+                        event: event ?? sit?.stretched(at: context.date) ?? stayHome(at: context.date) ?? dailyDone,
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
                         bedtime: bedtime.state(at: context.date),
