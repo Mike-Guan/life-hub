@@ -75,7 +75,7 @@ struct UnboxSheet: View {
         if let keepsake = item.keepsake {
             return "\(keepsake.count) 次\(keepsake.win.shopTitle)"
         }
-        return "用 \(entry.cans) 罐换的"
+        return "用 \(entry.cans) 个能量罐换的"
     }
 }
 
