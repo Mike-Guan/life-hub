@@ -57,7 +57,7 @@ final class NeedTracker {
         let days = ActivityDays.stored(in: AppGroup.defaults)
         reading = NeedEngine.need(signals, now: now, days: days, work: .stored(in: AppGroup.defaults))
         activitySignals = ActivitySignals(presence: presence, workouts: motion?.workouts ?? [])
-        InviteReminder.plan(reading, now: now)
+        InviteReminder.plan(reading, signals: signals, now: now)
         invite = InviteReminder.sent(for: reading)
     }
 
