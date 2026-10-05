@@ -64,6 +64,7 @@ struct HomeView: View {
                         moment: moment(at: context.date),
                         codingCans: codingCans(at: context.date),
                         traces: traces(at: context.date, energy: reading?.level),
+                        vitals: VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: context.date),
                         event: event ?? stayHome(at: context.date),
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
