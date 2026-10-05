@@ -27,6 +27,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU can call you to the bath: a towel on its head, shampoo and a rubber duck, "……去洗澡。我先占浴室了。",
+  then it walks off. A tap makes it dry its hair, flicking water off. The app decides when bath time is.
 - HubCore knows when HAKU takes its bath: from 45 minutes before bedtime for 30 minutes, only at home in
   Chill, and not again that evening once you tap it away. No push, no cans.
 - HAKU walks for up to 30 minutes after you leave home, the office or a gym, until you arrive somewhere:

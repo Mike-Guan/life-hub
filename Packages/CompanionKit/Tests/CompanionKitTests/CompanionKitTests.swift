@@ -527,6 +527,25 @@ import Testing
         #expect(busy.walkFrom == nil && !RunnerFigure.parts(for: .chill, pose: busy).contains(.towel))
     }
 
+    @Test @MainActor func hakuCallsMikeToTheBathThenDriesItsHair() {
+        let calling = CompanionPortrait(mode: .chill, bath: true).pose
+        let callParts = Set(RunnerFigure.parts(for: .chill, pose: calling))
+        #expect(callParts.isSuperset(of: [.bathTowel, .shampoo, .rubberDuck]) && !callParts.contains(.monsterCan))
+        var leaving = RunnerPose(mode: .chill, time: 0, face: .mid, react: 0)
+        leaving.callToBath(time: 3)
+        #expect(leaving.shift > 0 && leaving.lean == 5)
+        var gone = RunnerPose(mode: .chill, time: 0, face: .mid, react: 0)
+        gone.callToBath(time: 5.8)
+        #expect(gone.shift == 0 && gone.presence < 1)
+        var drying = RunnerPose(mode: .chill, time: 0, face: .mid, react: 0)
+        drying.dryHair(time: 0.3)
+        let dryParts = Set(RunnerFigure.parts(for: .chill, pose: drying))
+        #expect(dryParts.isSuperset(of: [.rubTowelL, .rubTowelR, .dropsL, .dropsR]) && !dryParts.contains(.shampoo))
+        #expect(SceneMove.bath(.dropsL, call: -1, dry: 0.3, shift: 0)?.opacity ?? 0 > 0)
+        #expect(SceneMove.bath(.dropsR, call: -1, dry: 0.3, shift: 0)?.opacity == 0)
+        #expect(SceneMove.bath(.camera, call: 1, dry: -1, shift: 0) == nil)
+    }
+
     @Test func hakuCheersAPlannedTaskDone() {
         var focus = RunnerPose(mode: .work, time: 0, face: .mid, react: 0)
         focus.cheerFocus(progress: 0.1)
