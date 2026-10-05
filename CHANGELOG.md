@@ -20,6 +20,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU backs off: if you ignore the same invite (couch, gym day or scrolling at work) three times in a row,
+  it stops that invite for a week and says "行，我不念了。" that day. Nothing is made up afterwards. An
+  invite is only counted as ignored when the app can tell; when it can't, it isn't counted.
 - When you open the app, HAKU is looking elsewhere and turns to you half a beat late. A napping HAKU
   doesn't.
 - When HAKU has waited at the door long enough on a work-day morning, it gives up once: headphones off,

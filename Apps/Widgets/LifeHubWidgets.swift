@@ -25,6 +25,8 @@ struct HubEntry: TimelineEntry {
     var moment: CompanionMoment?
     /// What today left in HAKU's world, such as a bandage after boxing.
     var traces: Set<CompanionTrace> = []
+    /// HAKU's line on a day it stopped an invite Mike kept ignoring.
+    var notice: String?
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
@@ -38,6 +40,7 @@ struct HubEntry: TimelineEntry {
         if moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) { return HakuLines.line(scene, at: date) }
         if bedtime == .on { return HakuLines.line(.bedtime, at: date) }
+        if let notice { return notice }
         if let line = snapshot?.line(at: date) { return line }
         return energy.map { "电量\($0.title)" } ?? "电量未知"
     }
@@ -77,6 +80,7 @@ struct HubProvider: TimelineProvider {
         let needTimes = (snapshot?.needTimes ?? []) + starts + walk + office + home + slots
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
+        let backoff = NudgeBackoff.stored(in: AppGroup.defaults)
         let signals = ActivitySignals(
             presence: presence,
             trainedDay: snapshot?.trainedDay,
@@ -104,7 +108,8 @@ struct HubProvider: TimelineProvider {
                 wardrobe: wardrobe,
                 activity: activity == .gymDay && moment != nil ? nil : activity,
                 moment: moment,
-                traces: snapshot?.traces(at: date) ?? []
+                traces: snapshot?.traces(at: date) ?? [],
+                notice: backoff.notice(at: date)
             )
         }
     }
