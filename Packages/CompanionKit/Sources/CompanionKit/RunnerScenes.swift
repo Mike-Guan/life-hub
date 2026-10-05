@@ -208,3 +208,72 @@ private func frac(_ x: CGFloat) -> CGFloat {
 private func bump(_ x: CGFloat, from a: CGFloat, to b: CGFloat) -> CGFloat {
     sin(min(max((x - a) / (b - a), 0), 1) * .pi)
 }
+
+// Bath call (Mike approved the preview 2026-10-05): before bedtime HAKU carries shampoo and a rubber duck
+// out of the frame; a tap switches to drying its hair.
+extension RunnerPose {
+    /// How long one bath call loop lasts: the line, the walk out and a short wait off screen.
+    static let bathCallLength: CGFloat = 6
+    /// How long drying the hair lasts after a tap.
+    static let bathDryLength: TimeInterval = 4
+
+    /// Calling Mike to the bath at `time` seconds: stands for the line, walks off to the right, then comes back.
+    mutating func callToBath(time t: CGFloat) {
+        let c = loop(t, Self.bathCallLength)
+        bathCall = c
+        let w = max(0, c - 1.8)
+        let away = min(w / 2.4, 1)
+        let walking = c > 1.8 && c < 4.2
+        let step = walking ? abs(sin(w * .pi / 0.4)) : 0
+        shift = 90 * away * away
+        lean = walking ? 5 : 0
+        bounce = -2 * step
+        headDy += 2 * step
+        presence = c > 5.6 ? Double((c - 5.6) / 0.4) : 1
+        if c > 5.6 { shift = 0 }
+    }
+
+    /// Drying the hair `time` seconds after the tap: both hands rub the towel and water flicks off.
+    mutating func dryHair(time t: CGFloat) {
+        bathDry = t
+        headDy += abs(sin(t * 9))
+    }
+}
+
+extension SceneMove {
+    /// The move of a bath part while calling (`call` seconds into the loop) or drying (`dry` seconds after the
+    /// tap), or nil when `part` isn't one or neither plays.
+    static func bath(_ part: RunnerPart, call: CGFloat, dry: CGFloat, shift: CGFloat) -> SceneMove? {
+        var move = SceneMove()
+        if call >= 0, part == .bathBubbles {
+            let b = frac(call / 1.5)
+            // The bubbles stay behind as HAKU walks off.
+            move.offset = CGSize(width: -0.6 * shift, height: -14 * b)
+            move.opacity = call > 1.8 ? Double(1 - b) : 0
+            return move
+        }
+        guard dry >= 0 else { return nil }
+        let a = sin(dry * 9)
+        let box = RunnerArt.bounds
+        let towelAnchor = UnitPoint(x: (60 - box.minX) / box.width, y: (40 - box.minY) / box.height)
+        switch part {
+        case .rubTowelL: move.offset.height = 3 * a
+        case .rubTowelR: move.offset.height = -3 * a
+        case .bathTowel:
+            move.angle = 2.5 * Double(a)
+            move.anchor = towelAnchor
+        case .headSteam:
+            let s = frac(dry / 1.6)
+            move.offset.height = -4 * s
+            move.opacity = Double(sin(s * .pi))
+        case .dropsL, .dropsR:
+            let f = frac(dry / 0.9)
+            let left = Int(dry / 0.9) % 2 == 0
+            move.offset = CGSize(width: (part == .dropsL ? -8 : 8) * f, height: -3 * f)
+            move.opacity = left == (part == .dropsL) ? Double(1 - f) : 0
+        default:
+            return nil
+        }
+        return move
+    }
+}

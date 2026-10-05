@@ -242,6 +242,12 @@ struct RunnerPose {
     var walkFrom: HubPlace.Kind?
     /// Seconds into the walk.
     var walkTime: CGFloat = 0
+    /// Seconds into the bath call loop, or -1 when HAKU isn't calling Mike to the bath.
+    var bathCall: CGFloat = -1
+    /// Seconds into drying the hair after the bath, or -1.
+    var bathDry: CGFloat = -1
+    /// Opacity of the whole figure, 0...1.
+    var presence = 1.0
     /// 0 = the planned task's prop down (bag on the floor, note out of view), 1 = held up.
     var propRaise: CGFloat = 0
     /// Tapping the watch before a planned task.
@@ -1035,6 +1041,7 @@ struct RunnerFigure: View {
                     }
                 }
                 .rotationEffect(.degrees(pose.lean), anchor: Self.unit(x: 60, y: 140))
+                .opacity(pose.presence)
                 .offset(x: pose.shift * scale, y: pose.bounce * scale)
                 .scaleEffect(
                     x: (1 - 0.03 * pose.stretch) * pose.turnSqueeze,
@@ -1066,6 +1073,13 @@ struct RunnerFigure: View {
         if pose.thumpHit { visible.insert(.thumpLines) }
         if let prop = pose.dailyProp, !pose.bedtime { holdUp(prop, pose: pose, on: &visible) }
         if let place = pose.walkFrom, pose.dailyScene == nil, !pose.bedtime { visible.formUnion(walkParts(place)) }
+        if pose.bathDry >= 0 {
+            visible.subtract(bathHides)
+            visible.formUnion([.bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .rubTowelL, .rubTowelR])
+        } else if pose.bathCall >= 0 {
+            visible.subtract(bathHides)
+            visible.formUnion([.bathBubbles, .bathTowel, .shampoo, .rubberDuck])
+        }
         if pose.noteSlap >= 0 {
             visible.insert(.bigNote)
             let t = pose.noteSlap * CGFloat(RunnerPose.noteSlapLength)
@@ -1115,6 +1129,10 @@ struct RunnerFigure: View {
         case .office, .custom: [.speedLines, .walkDust]
         }
     }
+
+    nonisolated private static let bathHides: Set<RunnerPart> = [
+        .monsterCan, .headset, .cupL, .cupR, .mic, .phone, .phoneFeed, .phoneHand, .handheld, .onigiri,
+    ]
 
     /// The planned task's prop, and the watch while HAKU taps it.
     nonisolated private static func holdUp(_ prop: DailyProp, pose: RunnerPose, on visible: inout Set<RunnerPart>) {
@@ -1362,6 +1380,8 @@ struct RunnerFigure: View {
                 let move = SceneMove.of(part, in: scene, at: pose.sceneTime)
             {
                 moved(part, move, scale: scale).opacity(Double(pose.propRaise))
+            } else if let move = SceneMove.bath(part, call: pose.bathCall, dry: pose.bathDry, shift: pose.shift) {
+                moved(part, move, scale: scale)
             } else if part == .walkDust, pose.walkFrom != nil {
                 moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
             } else {
@@ -1608,6 +1628,7 @@ struct RunnerFigure: View {
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
+        .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
@@ -1842,6 +1863,7 @@ public struct CompanionPortrait: View {
     let wardrobe: Wardrobe
     let daily: DailyCue?
     let walking: HubPlace.Kind?
+    let bath: Bool
     let framing: Framing
 
     // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
@@ -1856,6 +1878,7 @@ public struct CompanionPortrait: View {
     ///   - wardrobe: what HAKU wears from the shop and keepsakes.
     ///   - daily: a planned Daily Widget task starting soon or now; HAKU holds up its prop.
     ///   - walking: the place Mike just left; HAKU walks with what it carries from there.
+    ///   - bath: bath time before bed; HAKU carries shampoo and a rubber duck.
     public init(
         mode: Mode,
         energy: Double? = nil,
@@ -1871,6 +1894,7 @@ public struct CompanionPortrait: View {
         wardrobe: Wardrobe = Wardrobe(),
         daily: DailyCue? = nil,
         walking: HubPlace.Kind? = nil,
+        bath: Bool = false,
         framing: Framing = .full
     ) {
         self.mode = mode
@@ -1887,6 +1911,7 @@ public struct CompanionPortrait: View {
         self.wardrobe = wardrobe
         self.daily = daily
         self.walking = walking
+        self.bath = bath
         self.framing = framing
     }
 
@@ -1926,7 +1951,7 @@ public struct CompanionPortrait: View {
     /// thing on its own as in the app.
     var pose: RunnerPose {
         guard bedtime == .off else { return RunnerPose.bedtimeStill() }
-        let plain = need == nil && activity == nil && moment == nil && daily == nil && walking == nil
+        let plain = need == nil && activity == nil && moment == nil && daily == nil && walking == nil && !bath
         let life = plain && mode == .chill ? IdleLife.at(date, stamina: vitals.stamina) : nil
         var pose = RunnerPose(
             face: EnergyFace(energy: energy),
@@ -1943,6 +1968,7 @@ public struct CompanionPortrait: View {
             pose.eyesDx = -3
         }
         if let walking, daily?.scene == nil, activity == nil { pose.walk(from: walking, time: 0.2) }
+        if bath { pose.callToBath(time: 0.5) }
         if let daily { pose.cue(daily, time: 5, slap: nil) }
         return pose
     }

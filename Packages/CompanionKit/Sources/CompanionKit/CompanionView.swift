@@ -32,6 +32,10 @@ public struct CompanionView: View {
     /// The place Mike just left: HAKU walks with what it carries from there, unless a task scene or an activity
     /// shows.
     let walking: HubPlace.Kind?
+    /// Bath time before bed: HAKU carries shampoo and a rubber duck out of the frame; a tap dries its hair.
+    let bath: Bool
+    /// Called after HAKU dries its hair on a tap during bath time.
+    let onBathDone: (() -> Void)?
     /// Today's invite, written by the app. While set, RUNNER gets up, jumps and says it.
     let invite: String?
     /// Increment to play the cheer jump.
@@ -98,6 +102,7 @@ public struct CompanionView: View {
     @State private var doneFocus = false
     // Id of the last planned task cheered as done, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastTaskDone") private var lastTaskDone = ""
+    @State private var dryStart: Date?
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -114,13 +119,15 @@ public struct CompanionView: View {
         event: CompanionEvent? = nil,
         daily: DailyCue? = nil,
         walking: HubPlace.Kind? = nil,
+        bath: Bool = false,
         invite: String? = nil,
         cheer: Int = 0,
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
         style: CompanionStyle = .standard,
         showsBubble: Bool = true,
-        onTap: (() -> Void)? = nil
+        onTap: (() -> Void)? = nil,
+        onBathDone: (() -> Void)? = nil
     ) {
         self.mode = mode
         self.energy = energy
@@ -134,6 +141,7 @@ public struct CompanionView: View {
         self.event = event
         self.daily = daily
         self.walking = walking
+        self.bath = bath
         self.invite = invite
         self.cheer = cheer
         self.bedtime = bedtime
@@ -141,6 +149,7 @@ public struct CompanionView: View {
         self.style = style
         self.showsBubble = showsBubble
         self.onTap = onTap
+        self.onBathDone = onBathDone
     }
 
     public var body: some View {
@@ -176,6 +185,10 @@ public struct CompanionView: View {
             if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
             playEventIfNew()
             if invite != nil { startInvite() }
+            if bath { say(Self.bathLine, for: 3) }
+        }
+        .onChange(of: bath) { _, new in
+            if new { say(Self.bathLine, for: 3) }
         }
         .onChange(of: invite) { _, new in
             if new != nil { startInvite() }
@@ -295,6 +308,7 @@ public struct CompanionView: View {
         let time = date.timeIntervalSinceReferenceDate
         let busy = celebration(at: time) != nil || taskDone(at: time) != nil || stillOneOff(at: time)
         let free = need == nil && activity == nil && moment == nil && daily == nil && invite == nil && walking == nil
+            && !bath
         guard mode == .chill, free, bedtime == .off, !busy else {
             return nil
         }
@@ -345,6 +359,7 @@ public struct CompanionView: View {
             pose.headDy += vitals.slouch
             if turnAway(at: time) != nil { pose.turnedAway = true }
             if let walking, daily?.scene == nil, activity == nil { pose.walk(from: walking, time: 0.2) }
+            if bath { pose.callToBath(time: 0.5) }
             if let daily { pose.cue(daily, time: 5, slap: nil) }
             return pose
         }
@@ -367,6 +382,11 @@ public struct CompanionView: View {
             pose.burst = CGFloat(progress)
         }
         if let walking, daily?.scene == nil, activity == nil { pose.walk(from: walking, time: CGFloat(time)) }
+        if let progress = Self.progress(since: dryStart, at: time, duration: RunnerPose.bathDryLength) {
+            pose.dryHair(time: CGFloat(progress * RunnerPose.bathDryLength))
+        } else if bath {
+            pose.callToBath(time: CGFloat(time))
+        }
         if let daily { pose.cue(daily, time: time, slap: slap(at: time)) }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
         if let progress = taskDone(at: time) {
@@ -747,7 +767,19 @@ public struct CompanionView: View {
         }
     }
 
+    static let bathLine = "……去洗澡。我先占浴室了。"
+
     private func react() {
+        if bath, dryStart == nil {
+            dryStart = .now
+            pop += 1
+            say(nil)
+            Task {
+                try? await Task.sleep(for: .seconds(RunnerPose.bathDryLength))
+                onBathDone?()
+            }
+            return
+        }
         let life = mode.flatMap { idleLife($0, at: .now) }
         if bedtime == .off, life == .nap, !Self.napWakes(lastTap: rollStart, now: .now) {
             rollStart = .now
@@ -949,6 +981,7 @@ private struct SpeechBubble: View {
                     .frame(height: 180)
                     .toyCard()
             }
+            CompanionView(mode: .chill, bath: true).frame(height: 180).toyCard()
             ForEach([HubPlace.Kind.home, .office, .fitness, .gym], id: \.self) { place in
                 CompanionView(mode: place == .office ? .work : .chill, walking: place).frame(height: 180).toyCard()
             }
