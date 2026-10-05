@@ -1,4 +1,5 @@
 import Foundation
+import HubCore
 
 /// What HAKU does on its own at home when nothing is needed.
 enum IdleLife: CaseIterable, Sendable {
@@ -19,17 +20,23 @@ enum IdleLife: CaseIterable, Sendable {
     /// How long one bit lasts before HAKU picks another, in seconds.
     static let slotLength: TimeInterval = 15 * 60
 
-    /// The bit for `date`, or nil for plain chilling.
+    /// The bit for `date`, or nil for plain chilling, nudged by `stamina`.
     ///
     /// Sunday 13:00-17:00 is always tidying. Other times pick from the rest, changing every
     /// `slotLength`; the same slot always gives the same bit.
-    static func at(_ date: Date, calendar: Calendar = .current) -> IdleLife? {
+    static func at(_ date: Date, calendar: Calendar = .current, stamina: VitalBand = .mid) -> IdleLife? {
         let parts = calendar.dateComponents([.weekday, .hour], from: date)
         if parts.weekday == 1, let hour = parts.hour, (13..<17).contains(hour) { return .tidying }
         let slot = UInt64(bitPattern: Int64(floor(date.timeIntervalSinceReferenceDate / slotLength)))
         // A multiplicative hash so neighbouring slots don't step through the list in order.
         let mixed = (slot &* 0x9E37_79B9_7F4A_7C15) >> 33
-        return rotation[Int(mixed % UInt64(rotation.count))]
+        let life = rotation[Int(mixed % UInt64(rotation.count))]
+        // High stamina trains instead of napping; low stamina naps instead of training.
+        switch (stamina, life) {
+        case (.high, .nap?): return .practice
+        case (.low, .practice?): return .nap
+        default: return life
+        }
     }
 
     // Plain chilling (nil) comes up as often as any bit, so the Monster sip still shows.
