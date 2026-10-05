@@ -332,7 +332,7 @@ import Testing
         for still in PortraitStill.allCases { #expect(day.contains(still)) }
     }
 
-    @Test func portraitAtHomeDoesWhatTheAppDoes() throws {
+    @Test @MainActor func portraitAtHomeDoesWhatTheAppDoes() throws {
         let start = Date(timeIntervalSinceReferenceDate: IdleLife.slotLength * 1000)
         let slots = (0..<96).map { start.addingTimeInterval(Double($0) * IdleLife.slotLength) }
         let nap = try #require(slots.first { IdleLife.at($0) == .nap })
