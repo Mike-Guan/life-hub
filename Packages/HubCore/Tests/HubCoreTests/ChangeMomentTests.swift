@@ -76,7 +76,8 @@ import Testing
         #expect(one == "这周有一次，你真的起来了。我记着。")
         let two = ChangeEngine.sundayLine(times: [date(6, 21), date(9, 20)], now: sunday, calendar: calendar)
         #expect(two == "这周你被我叫起来两次。还行。")
-        let three = ChangeEngine.sundayLine(times: [date(5, 6), date(6, 21), date(9, 20)], now: sunday, calendar: calendar)
+        let times = [date(5, 6), date(6, 21), date(9, 20)]
+        let three = ChangeEngine.sundayLine(times: times, now: sunday, calendar: calendar)
         #expect(three == "这周你起来了 3 次。……我可没在数。")
         // Monday 05:00 starts the week; the Sunday before belongs to last week.
         #expect(ChangeEngine.sundayLine(times: [date(4, 20)], now: sunday, calendar: calendar) == nil)
