@@ -88,14 +88,27 @@ extension Win {
         }
     }
 
-    /// How long a fitness gym visit must last to earn the gym win.
-    public static let gymVisitMinimum: TimeInterval = 30 * 60
+    /// How long a gym or boxing gym visit must last to earn its win.
+    public static let visitMinimum: TimeInterval = 30 * 60
 
-    // A visit and a strength workout on the same day share one source, so they earn once together.
-    /// The gym win for a fitness gym visit from `arrived` to `left`, `nil` when it was too short.
-    public static func gymVisit(from arrived: Date, to left: Date, calendar: Calendar = .current) -> EarnedWin? {
-        guard left.timeIntervalSince(arrived) >= gymVisitMinimum else { return nil }
-        return EarnedWin(win: .gym, source: Win.gym.source(at: arrived, calendar: calendar), at: left)
+    // Mike boxes without a watch, so the boxing gym counts like the fitness gym. A visit and a workout
+    // in the same day or week share one source, so they earn once together.
+    /// The win for a visit to a place with `action` from `arrived` to `left`: the gym win for the fitness
+    /// gym, boxing for the boxing gym; `nil` for other places or when the visit was too short.
+    public static func visit(
+        _ action: HubPlace.Action,
+        from arrived: Date,
+        to left: Date,
+        calendar: Calendar = .current
+    ) -> EarnedWin? {
+        let win: Win
+        switch action {
+        case .fitness: win = .gym
+        case .boxing: win = .boxing
+        default: return nil
+        }
+        guard left.timeIntervalSince(arrived) >= visitMinimum else { return nil }
+        return EarnedWin(win: win, source: win.source(at: arrived, calendar: calendar), at: left)
     }
 }
 
