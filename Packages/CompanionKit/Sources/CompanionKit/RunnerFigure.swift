@@ -319,6 +319,14 @@ struct RunnerPose {
             ledOpacity = (0.6 + 0.4 * breath) * (tired ? 0.5 : 1)
             eyesDy = -2 * r
             ledDots = react > 0.05
+            // Every third 12 s cycle: two bigger nods, a still beat, then a push of the headset.
+            let cycle = (t / 12).rounded(.down)
+            let phase = t - cycle * 12
+            let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
+            if plain, r == 0, cycle.truncatingRemainder(dividingBy: 3) == 2, phase >= 8, phase < 11 {
+                headDy = phase < 9 ? CGFloat(abs(sin(phase * .pi / 0.5))) * 2.5 : 0
+                headsetOff = 0.1 * Self.bump(CGFloat(phase), from: 10, to: 11)
+            }
         case .chill:
             // A sip every 8 s; tap = raise the can.
             let phase = t.truncatingRemainder(dividingBy: 8)
