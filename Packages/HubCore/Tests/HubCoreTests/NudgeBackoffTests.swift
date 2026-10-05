@@ -95,6 +95,12 @@ import Testing
         #expect(warmup == nil)
     }
 
+    @Test func decodingToleratesMissingFields() throws {
+        let partial = try JSONDecoder().decode(NudgeBackoff.self, from: Data(#"{"pausedAt":{"gymDay":0}}"#.utf8))
+        #expect(partial.pausedAt["gymDay"] == Date(timeIntervalSinceReferenceDate: 0))
+        #expect(partial.ignored.isEmpty && partial.judgedSentAt == nil)
+    }
+
     @Test func settlingTheLogKeepsWhichInviteWentOut() {
         let log = InviteLog(pendingAt: date(5, 21), pendingNeed: .couchScroll).settled(now: date(5, 21, 1))
         #expect(log.lastSentAt == date(5, 21))

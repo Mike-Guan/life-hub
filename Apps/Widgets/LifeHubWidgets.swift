@@ -39,8 +39,8 @@ struct HubEntry: TimelineEntry {
         if let activity { return activity.reason }
         if moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) { return HakuLines.line(scene, at: date) }
-        if let notice { return notice }
         if bedtime == .on { return HakuLines.line(.bedtime, at: date) }
+        if let notice { return notice }
         if let line = snapshot?.line(at: date) { return line }
         return energy.map { "电量\($0.title)" } ?? "电量未知"
     }

@@ -25,6 +25,17 @@ public struct NudgeBackoff: Codable, Equatable, Sendable {
         self.judgedSentAt = judgedSentAt
     }
 
+    private enum CodingKeys: String, CodingKey { case ignored, pausedAt, judgedSentAt }
+
+    /// Decodes the state; missing fields fall back to empty, so an active pause survives other builds.
+    /// - Throws: `DecodingError` when a field has the wrong type.
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        ignored = try values.decodeIfPresent([String: Int].self, forKey: .ignored) ?? [:]
+        pausedAt = try values.decodeIfPresent([String: Date].self, forKey: .pausedAt) ?? [:]
+        judgedSentAt = try values.decodeIfPresent(Date.self, forKey: .judgedSentAt)
+    }
+
     /// Whether the invite for `need` is paused at `date`.
     public func isPaused(_ need: CompanionNeed, at date: Date) -> Bool {
         guard let at = pausedAt[need.rawValue] else { return false }

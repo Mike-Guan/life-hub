@@ -194,3 +194,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   places) or by hand; the off-work notice goes out only on days he is at work.
 - 2026-10-05: Mike set the product principles (`PRODUCT_PRINCIPLES.md`) and a scope freeze: after the current
   batch, 2 to 4 weeks with no new features, only HAKU-aliveness work and device bugs.
+- 2026-10-05: Mike approved the nudge back-off: an invite ignored 3 times in a row pauses for 7 days,
+  with one line and no catch-up; uncertain signals are never counted as ignored.
