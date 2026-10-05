@@ -19,6 +19,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU has two hidden params, worked out by rules: 体能 from the last four weeks of boxing, gym and 5 km
+  runs, and 元气 from the last three nights' sleep plus daylight. They rise fast and fall slowly and never go
+  below tired. HAKU's moves will use them once the looks exist. No numbers or bars anywhere, and no cans.
 - When HAKU has waited at the door long enough on a work-day morning, it gives up once: headphones off,
   back on the sofa, "……今天在家？". It plays when the 90-minute wait ends with you still at home, the
   next time you open the app during work hours.
