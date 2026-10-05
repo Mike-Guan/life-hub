@@ -68,6 +68,11 @@ public final class WidgetBridge {
             now: now,
             calendar: calendar
         )
+        // GrowthStore is the ledger's single writer; this only reads its file.
+        var ledgerFile = LogFile<CanLedger>(url: container.canLedgerURL, name: "能量罐记录")
+        var ledger = CanLedger()
+        _ = ledgerFile.load(into: &ledger)
+        snapshot.lasting = MomentEngine.lastingTraces(log: mode.log, ledger: ledger, now: now)
         snapshot.workedToday = MomentEngine.workedToday(mode.log, now: now, calendar: calendar)
         snapshot.manualAt = mode.log.active.last(where: \.source.isManual)?.at
         let current = mode.current
