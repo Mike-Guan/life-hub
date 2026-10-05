@@ -85,8 +85,9 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 ## Core model rules
 - Mode (what Mike is doing: work, chill, boxing, money) and State (energy 0-100, load, confidence)
   are separate types. Never derive one by overloading the other.
-- Manual mode changes always win. Automatic sources (Focus filter, calendar, geofence, schedule)
+- Manual mode changes always win. Automatic sources (Focus filter, calendar, geofence)
   may suggest, or switch only under rules Mike enabled; no auto-switch for 2h after a manual change.
+  The clock never switches the mode: work starts by arriving at the office, ends by leaving it.
 - Every ModeChange is stored with its source.
 - Exception: entering the boxing gym geofence (CLMonitor, ~100 m) switches straight to boxing with no
   prompt, even within the 2h window. Leaving after 30+ min restores the previous mode unless Mike
@@ -99,7 +100,7 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   set time (default 23:30). `Bedtime` (off/on) is an overlay state, not a fifth mode. No follow-up,
   nothing logged about when Mike sleeps.
 - Off-work notice (Mike's explicit exception, not counted in L2): one local notification on each work
-  day, 15 min before the end of work hours (Settings). No follow-up. Tapping it plays the off-work animation.
+  day Mike is in work mode or at the office, 15 min before the end of work hours (Settings). No follow-up. Tapping it plays the off-work animation.
 
 ## Companion
 - Data Binding only (no legacy state machine Inputs). View Model `Runner` in
@@ -187,3 +188,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   same night updates its event (id derived from the night) instead of adding a new one.
 - 2026-10-04: Mike approved PRD v4.2 (Issue #49). The off-work notice is a second exception to the
   1-push-a-day L2 limit, next to the bedtime reminder.
+- 2026-10-05: Mike turned off clock-based mode switching. Modes change by place (office, gyms, added
+  places) or by hand; the off-work notice goes out only on days he is at work.

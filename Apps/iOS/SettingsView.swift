@@ -56,7 +56,7 @@ struct SettingsView: View {
                     .font(Toy.body(15))
                 DatePicker("下班", selection: time($rules.workEndMinute), displayedComponents: .hourAndMinute)
                     .font(Toy.body(15))
-                Text("工作日这段时间自动切到上班。下班前 \(ModeRules.offWorkLead) 分钟提醒一次。")
+                Text("到公司才切到上班。在上班的日子，下班前 \(ModeRules.offWorkLead) 分钟提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
             }
