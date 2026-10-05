@@ -101,6 +101,17 @@ public struct ModeLog: RecordLog, Equatable {
 }
 
 extension ModeLog {
+    /// How long changes matching `match` were in effect between `start` and `end`.
+    public func time(from start: Date, to end: Date, where match: (ModeChange) -> Bool) -> TimeInterval {
+        let sorted = active
+        var total: TimeInterval = 0
+        for (index, change) in sorted.enumerated() where match(change) {
+            let next = index + 1 < sorted.count ? sorted[index + 1].at : end
+            total += max(min(next, end).timeIntervalSince(max(change.at, start)), 0)
+        }
+        return total
+    }
+
     // Modes mostly change while the app is closed; opening it replays the last automatic switch.
     /// The mode in effect at `date` when the latest change after it was automatic, else `nil`.
     public func switchedFrom(since date: Date) -> Mode? {

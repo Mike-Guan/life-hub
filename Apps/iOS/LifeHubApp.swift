@@ -95,6 +95,7 @@ struct LifeHubApp: App {
             rules: rules,
             need: needs.reading,
             activitySignals: needs.activitySignals,
+            workouts: needs.workouts,
             activityDays: .stored(in: AppGroup.defaults),
             departure: needs.departure,
             event: needs.event,

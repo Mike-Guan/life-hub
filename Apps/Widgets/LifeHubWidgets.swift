@@ -23,6 +23,8 @@ struct HubEntry: TimelineEntry {
     var activity: CompanionActivity?
     /// The state within the mode HAKU acts out at `date`, such as vibe coding or walking to the gym.
     var moment: CompanionMoment?
+    /// What today left in HAKU's world, such as a bandage after boxing.
+    var traces: Set<CompanionTrace> = []
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
@@ -70,7 +72,8 @@ struct HubProvider: TimelineProvider {
         let walk = [departure?.at, departure?.until].compactMap { $0 }
         let presence = PlacePresence.stored(in: AppGroup.defaults)
         let office = MomentEngine.officeTimes(since: presence.since(.office), now: now)
-        let needTimes = (snapshot?.needTimes ?? []) + starts + walk + office
+        let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work)
+        let needTimes = (snapshot?.needTimes ?? []) + starts + walk + office + home
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
         let signals = ActivitySignals(
@@ -89,7 +92,9 @@ struct HubProvider: TimelineProvider {
                 need: need,
                 departing: departing,
                 officeSince: presence.since(.office),
-                now: date
+                home: snapshot?.home(since: presence.since(.home), at: date),
+                now: date,
+                work: work
             )
             return HubEntry(
                 date: date,
@@ -97,7 +102,8 @@ struct HubProvider: TimelineProvider {
                 bedtime: schedule.state(at: date),
                 wardrobe: wardrobe,
                 activity: activity == .gymDay && moment != nil ? nil : activity,
-                moment: moment
+                moment: moment,
+                traces: snapshot?.traces(at: date) ?? []
             )
         }
     }
