@@ -19,6 +19,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU on the widgets and Lock Screen changes a little every 15 minutes: a glance, a sip, gloves up.
+  At home it shows what it is doing in the app, such as napping (just zzz) or playing the handheld.
 - When HAKU has waited at the door long enough on a work-day morning, it gives up once: headphones off,
   back on the sofa, "……今天在家？". It plays when the 90-minute wait ends with you still at home, the
   next time you open the app during work hours.

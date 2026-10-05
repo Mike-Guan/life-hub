@@ -34,3 +34,21 @@ enum IdleLife: CaseIterable, Sendable {
     // Plain chilling (nil) comes up as often as any bit, so the Monster sip still shows.
     private static let rotation: [IdleLife?] = [nil, .handheld, .snack, nil, .drawing, .nap, nil, .practice]
 }
+
+/// Which still a widget or Lock Screen portrait shows for a plain mode, so it isn't the same picture all day.
+enum PortraitStill: CaseIterable, Sendable {
+    /// The usual look.
+    case plain
+    /// Eyes off to one side, or a sip at home.
+    case glance
+    /// A second look of the mode: zoning out at work, gloves up, scheming.
+    case alt
+
+    /// The still for `date`; it changes every `IdleLife.slotLength`, and the same slot always gives the same still.
+    static func at(_ date: Date) -> PortraitStill {
+        let slot = UInt64(bitPattern: Int64(floor(date.timeIntervalSinceReferenceDate / IdleLife.slotLength)))
+        // A different multiplier from IdleLife, so the two don't move in step.
+        let mixed = (slot &* 0xD6E8_FEB8_6659_FD93) >> 33
+        return allCases[Int(mixed % UInt64(allCases.count))]
+    }
+}
