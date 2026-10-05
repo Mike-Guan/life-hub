@@ -134,6 +134,8 @@ struct RunnerPose {
     var lie: CGFloat = 0
     /// Rise of the floating Z z z, 0...1, or -1 when hidden.
     var zzz: CGFloat = -1
+    /// Rise of the sleep-talk "…" while napping, 0...1, or -1 when hidden.
+    var sleepTalk: CGFloat = -1
     /// The gym bag: -1 = not shown, 0 = on the floor by the door, 1 = over the shoulder.
     var bagLift: CGFloat = -1
     /// Progress of the off-work animation, 0...1, or -1 when none is playing.
@@ -500,6 +502,11 @@ struct RunnerPose {
             lie = 0.6 * (1 - r)
             headDy = 1.5 + CGFloat(sin(t * 2 * .pi / 4))
             zzz = r > 0.05 ? -1 : CGFloat(t.truncatingRemainder(dividingBy: 3) / 3)
+            // Every fourth Z z z is a mumbled "…" instead.
+            if zzz >= 0, (t / 3).rounded(.down).truncatingRemainder(dividingBy: 4) == 3 {
+                sleepTalk = zzz
+                zzz = -1
+            }
         case .handheld:
             // Button mashing: the console jitters, eyes glued to it.
             headDy = 2
@@ -728,6 +735,11 @@ struct RunnerFigure: View {
                 ZStack {
                     ForEach(Self.parts(for: mode, pose: pose), id: \.self) { part in
                         layer(part, scale: scale)
+                    }
+                    if pose.sleepTalk >= 0, pose.life == .nap, !pose.bedtime {
+                        RunnerTextView(text: Self.sleepTalkText)
+                            .offset(x: 3 * pose.sleepTalk * scale, y: (pose.headDy - 6 * pose.sleepTalk) * scale)
+                            .opacity(Double(sin(pose.sleepTalk * .pi)))
                     }
                     if pose.tired, mode == .boxing, !pose.bedtime {
                         SweatDrop()
@@ -1128,6 +1140,14 @@ struct RunnerFigure: View {
         y: 86,
         size: 9,
         color: RunnerPalette.neonCyan
+    )
+
+    private static let sleepTalkText = RunnerText(
+        string: "…",
+        x: 96,
+        y: 46,
+        size: 16,
+        color: RunnerPalette.ink
     )
 
     /// Parts that move with the head.
