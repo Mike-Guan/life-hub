@@ -60,7 +60,7 @@ public enum MomentEngine {
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> CompanionMoment? {
-        if stiff, need != .slacking { return .stiff }
+        if stiff || need == .sitting, need != .slacking { return .stiff }
         if let sideHustle { return sideHustle.moment }
         if let gym = GymDeparture.moment(activity: activity, need: need, departing: departing) { return gym }
         if need == .slacking { return .slacking }

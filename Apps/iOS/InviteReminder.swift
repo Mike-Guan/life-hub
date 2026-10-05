@@ -33,7 +33,9 @@ enum InviteReminder {
             content.title = "HAKU"
             content.body = NeedEngine.inviteText(for: reading.need)
             content.sound = .default
-            content.categoryIdentifier = reading.need == .slacking ? workCategory : category
+            // Work-time notices have no 走 button.
+            let atWork = reading.need == .slacking || reading.need == .sitting
+            content.categoryIdentifier = atWork ? workCategory : category
             content.userInfo = [needKey: reading.need.rawValue]
             let delay = max(at.timeIntervalSince(now), 1)
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)

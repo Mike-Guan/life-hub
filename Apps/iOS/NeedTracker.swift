@@ -29,7 +29,14 @@ final class NeedTracker {
     /// Reads workouts and steps from HealthKit.
     func importMotion() async {
         do {
-            motion = try await HealthMotion.recent()
+            let now = Date.now
+            motion = try await HealthMotion.recent(now: now)
+            // Kept for the widgets and the Screen Time extension, which can't read HealthKit.
+            if let motion {
+                let state = SitEngine.state(motion.standHours, now: now)
+                sit = state
+                state.store(in: AppGroup.defaults)
+            }
             lastError = nil
         } catch {
             lastError = "读不到健康 App 里的运动和步数：\(error.localizedDescription)"
@@ -38,8 +45,10 @@ final class NeedTracker {
 
     /// Recomputes the need from the stored presence and the last HealthKit reading, and reschedules
     /// today's invite for it.
-    /// - Parameter manualSince: when Mike last changed mode by hand.
-    func refresh(places: PlaceSettings, manualSince: Date?, now: Date = .now) {
+    /// - Parameters:
+    ///   - manualSince: when Mike last changed mode by hand.
+    ///   - mode: the current mode.
+    func refresh(places: PlaceSettings, manualSince: Date?, mode: Mode?, now: Date = .now) {
         let presence = PlacePresence.stored(in: AppGroup.defaults)
         departure = GymDeparture.stored(in: AppGroup.defaults)
         let signals = NeedSignals(
@@ -54,17 +63,13 @@ final class NeedTracker {
             fitnessSeenAt: presence.since(.fitness) ?? presence.left(.fitness),
             departing: departure?.isActive(at: now, presence: presence) ?? false,
             slackThresholdAt: ScrollWatch.workReachedAt,
-            slackSeenAt: ScrollWatch.workSeenAt
+            slackSeenAt: ScrollWatch.workSeenAt,
+            sit: sit,
+            mode: mode
         )
         let days = AppGroup.activityDays(now: now)
         reading = NeedEngine.need(signals, now: now, days: days, work: .stored(in: AppGroup.defaults))
         activitySignals = ActivitySignals(presence: presence, workouts: motion?.workouts ?? [])
-        // Kept for the widgets, which can't read HealthKit.
-        if let motion {
-            let state = SitEngine.state(motion.standHours, now: now)
-            sit = state
-            state.store(in: AppGroup.defaults)
-        }
         InviteReminder.plan(reading, signals: signals, now: now)
         invite = InviteReminder.sent(for: reading)
     }

@@ -23,10 +23,16 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
         // The app writes the snapshot; the notification only reads the current mode from it.
         // Off work shows the chill outfit the schedule is about to switch to.
         let mode = offWork ? .chill : AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))?.mode
+        let moment: CompanionMoment? =
+            switch need {
+            case .slacking: .slacking
+            case .sitting: .stiff
+            default: GymDeparture.moment(activity: nil, need: need, departing: false)
+            }
         let runner = CompanionView(
             mode: mode,
             need: need,
-            moment: need == .slacking ? .slacking : GymDeparture.moment(activity: nil, need: need, departing: false),
+            moment: moment,
             invite: invite,
             bedtime: bedtime,
             style: .notification,

@@ -211,7 +211,7 @@ public enum HakuLines {
         case .boxingWarmup: return .boxingWarmup
         case .gymDay: return .gymDay
         case .slacking: return .slacking
-        case nil: break
+        case .sitting, nil: break
         }
         if energy == .low { return .lowEnergy }
         switch mode {
