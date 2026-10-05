@@ -25,7 +25,10 @@ final class ScrollMonitor: DeviceActivityMonitor {
             homeKnown: PlaceSettings.stored(in: AppGroup.defaults)[.home] != nil,
             atGym: presence.since(.gym) != nil,
             slackThresholdAt: ScrollWatch.workReachedAt,
-            slackSeenAt: ScrollWatch.workSeenAt
+            slackSeenAt: ScrollWatch.workSeenAt,
+            // Without these the plan below would drop a pending sitting notice.
+            sit: SitState.stored(in: AppGroup.defaults),
+            mode: AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))?.mode
         )
         let days = AppGroup.activityDays(now: now)
         let work = ModeRules.stored(in: AppGroup.defaults)
