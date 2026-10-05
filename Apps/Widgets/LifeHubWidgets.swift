@@ -89,7 +89,7 @@ struct HubProvider: TimelineProvider {
         let slots = WidgetSnapshot.slotDates(after: now)
         let daily = DailyPlan.stored(in: AppGroup.defaults)
         let dailyTimes = daily?.times ?? []
-        let needTimes = (snapshot?.needTimes ?? []) + starts + walk + office + home + slots + dailyTimes
+        let needTimes: [Date] = [snapshot?.needTimes ?? [], starts, walk, office, home, slots, dailyTimes].flatMap { $0 }
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
         let backoff = NudgeBackoff.stored(in: AppGroup.defaults)
