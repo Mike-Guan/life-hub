@@ -53,6 +53,7 @@ enum CompanionLines {
         case .blanket: ["今天就这样吧。", "毯子分你一半。"]
         case .morning: ["又要上班了。", "耳机……耳机去哪了。"]
         case .timeToLeave: ["……公司还在等你。", "唉。"]
+        case .stiff: ["……我腰要断了。", "起来。我先起了。", "ちょっと休憩。"]
         }
     }
 
@@ -127,6 +128,7 @@ enum CompanionLines {
         case .blanket: "裹着毯子瘫在沙发上"
         case .morning: "早上起来在刷牙"
         case .timeToLeave: "戴好耳机站在门口，敲着手表"
+        case .stiff: "坐太久了，扭扭腰，捶捶背"
         }
     }
 

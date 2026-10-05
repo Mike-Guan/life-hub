@@ -23,6 +23,8 @@ public enum CompanionEvent: Equatable, Sendable {
     case unlock(id: String, item: String)
     /// Giving up on leaving for work: headphones off, back on the sofa; `id` is the day, "yyyy-MM-dd".
     case stayHome(id: String)
+    /// Rolling the shoulders after Mike stood up from a long sit; `id` is the hour he stood, so it plays once.
+    case stretched(id: String)
 }
 
 /// A workout from the Health app, reduced to what the hub uses.
