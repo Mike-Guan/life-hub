@@ -15,9 +15,10 @@ import Testing
     }
 
     func ledger(_ wins: (Win, Date)...) -> CanLedger {
-        CanLedger(entries: wins.enumerated().map { index, win in
-            CanEntry.earned(win.0, source: "s\(index)", at: win.1, deviceID: "t")
-        })
+        CanLedger(
+            entries: wins.enumerated().map { index, win in
+                CanEntry.earned(win.0, source: "s\(index)", at: win.1, deviceID: "t")
+            })
     }
 
     func nights(_ nights: (Int, Int)...) -> EnergyLog {
