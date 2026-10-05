@@ -229,7 +229,14 @@ struct HomeView: View {
 
     private func activity(at date: Date) -> CompanionActivity? {
         activitySignals.flatMap {
-            ActivityEngine.activity($0, days: activityDays, work: rules, bedtime: bedtime, now: date)
+            ActivityEngine.activity(
+                $0,
+                mode: store.current,
+                days: activityDays,
+                work: rules,
+                bedtime: bedtime,
+                now: date
+            )
         }
     }
 

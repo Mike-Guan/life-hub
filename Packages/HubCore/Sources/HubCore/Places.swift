@@ -39,7 +39,8 @@ public struct HubPlace: Codable, Equatable, Identifiable, Sendable {
             switch self {
             case .gym: entered ? .enteredGym : .leftGym
             case .office: entered ? .enteredOffice : .leftOffice
-            case .home, .fitness, .custom: nil
+            case .fitness: entered ? .enteredFitness : nil
+            case .home, .custom: nil
             }
         }
     }
@@ -150,7 +151,8 @@ public struct HubPlace: Codable, Equatable, Identifiable, Sendable {
         case .work: return entered ? .enteredOffice : .leftOffice
         case .chill: return entered ? .enteredPlace(.chill, name: title) : nil
         case .sideHustle: return entered ? .enteredPlace(.money, name: title) : nil
-        case .recordOnly, .fitness: return nil
+        case .fitness: return HubPlace.Kind.fitness.trigger(entered: entered)
+        case .recordOnly: return nil
         }
     }
 }

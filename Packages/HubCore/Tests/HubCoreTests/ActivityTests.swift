@@ -15,8 +15,12 @@ import Testing
         calendar.date(from: DateComponents(year: 2026, month: 10, day: day, hour: hour, minute: minute)) ?? .distantPast
     }
 
-    func activity(_ signals: ActivitySignals = ActivitySignals(), at now: Date) -> CompanionActivity? {
-        ActivityEngine.activity(signals, now: now, calendar: calendar)
+    func activity(
+        _ signals: ActivitySignals = ActivitySignals(),
+        mode: Mode? = .chill,
+        at now: Date
+    ) -> CompanionActivity? {
+        ActivityEngine.activity(signals, mode: mode, now: now, calendar: calendar)
     }
 
     func workout(_ kind: WorkoutSummary.Kind, endingAt end: Date) -> WorkoutSummary {
@@ -41,6 +45,9 @@ import Testing
         var presence = PlacePresence()
         presence.record(.fitness, entered: true, at: date(6, 19))
         #expect(activity(ActivitySignals(presence: presence), at: date(6, 19, 30)) == .gymSession)
+        // Lifting is for Chill: in another mode at the gym, HAKU just follows the mode.
+        #expect(activity(ActivitySignals(presence: presence), mode: .work, at: date(6, 19, 30)) == nil)
+        #expect(activity(ActivitySignals(presence: presence), mode: .money, at: date(6, 19, 30)) == nil)
         presence.record(.fitness, entered: false, at: date(6, 20))
         #expect(presence.left(.fitness) == date(6, 20))
         #expect(activity(ActivitySignals(presence: presence), at: date(6, 21)) == nil)
@@ -66,7 +73,14 @@ import Testing
         let days = ActivityDays(gymWeekdays: [2], runWeekday: nil, runStartMinute: 0)
         days.store(in: defaults)
         #expect(ActivityDays.stored(in: defaults) == days)
-        #expect(ActivityEngine.activity(ActivitySignals(), days: days, now: date(10, 18), calendar: calendar) == nil)
+        let none = ActivityEngine.activity(
+            ActivitySignals(),
+            mode: .chill,
+            days: days,
+            now: date(10, 18),
+            calendar: calendar
+        )
+        #expect(none == nil)
     }
 
     @Test func oldPresenceWithoutDeparturesStillLoads() throws {

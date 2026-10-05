@@ -105,7 +105,14 @@ struct HubProvider: TimelineProvider {
             ranDay: snapshot?.ranDay
         )
         return dates.map { date in
-            let activity = ActivityEngine.activity(signals, days: days, work: work, bedtime: schedule, now: date)
+            let activity = ActivityEngine.activity(
+                signals,
+                mode: snapshot?.mode,
+                days: days,
+                work: work,
+                bedtime: schedule,
+                now: date
+            )
             let departing = departure?.isActive(at: date, presence: presence) ?? false
             let need = snapshot?.need(at: date)
             let moment = MomentEngine.moment(
