@@ -20,6 +20,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Change moments (Issue #91): the app notes by itself when you got up after an invite, reached the gym
+  after 走, or earned a keepsake within a day of being one win away. On Sunday HAKU says one line about
+  the week's moments on the home screen and widgets; a week with none gets no line. Getting up after an
+  invite now also earns its can and the 起身庆祝 keepsake.
 - Tap HAKU while it snacks or draws: after it hides the snack or sketchbook, it looks away and whistles a little note.
 - At home HAKU now and then scratches its head and a tuft of hair sticks up, then slowly settles.
 - When HAKU's 元气 is high (good sleep, sunlight) a little music note now and then floats up as it hums.
