@@ -223,6 +223,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- When location access isn't "Always", home shows how to fix it. Without it the app only learns you left
+  the office or got home when you open it. The Debug log notes why a place event was held back.
 - Opening the app now plays what you missed in the last 3 hours: a mode switch made while the app was
   closed (HAKU starts in the old outfit and changes), and the off-work animation if you didn't tap the
   notice and aren't back in 上班. Before, these only played with the app on screen, so HAKU looked idle.
