@@ -25,6 +25,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Settings has a "联动 Daily Widget" switch, off by default. Turned on, you pick Daily's iCloud Drive
   folder once and Life Hub reads its tasks (never writes). A task planned ahead in Daily and done earns
   1 能量罐, at most 3 a day. Turning it off forgets the folder; cans stay.
+- HAKU packs up at the office from 15 minutes before the end of work hours: closes the laptop, wipes
+  the desk, takes the bag, then looks at its watch for up to 30 minutes after. Only on work days in
+  上班 mode at the office. When leaving the office ends work, HAKU says "……收工。" for 30 minutes.
 - Near the end of a work day at the office, HAKU packs up: it closes the laptop, wipes the desk, takes
   the headset off, shoulders the bag and watches the clock.
 - When HAKU is stiff in work hours, it sends "起来。我先起了。" once. This shares the one work-time

@@ -77,7 +77,7 @@ import Testing
     }
 
     @Test func overtimeAfterSevenAtTheOffice() {
-        #expect(office(date(5, 9, 30), at: date(5, 18, 59)) == nil)
+        #expect(office(date(5, 9, 30), at: date(5, 18, 14)) == nil)
         #expect(office(date(5, 9, 30), at: date(5, 19)) == .overtime)
         // Both need the office and work mode.
         #expect(office(nil, at: date(5, 19)) == nil)
@@ -106,7 +106,7 @@ import Testing
 
     @Test func officeTimesCoverTheDay() {
         let times = MomentEngine.officeTimes(since: date(5, 9, 30), now: date(5, 10), calendar: calendar)
-        #expect(times == [date(5, 12, 30), date(5, 14, 30), date(5, 19)])
+        #expect(times == [date(5, 12, 30), date(5, 14, 30), date(5, 19), date(5, 18, 15), date(5, 19)])
         #expect(MomentEngine.officeTimes(since: nil, now: date(5, 10)).isEmpty)
     }
 

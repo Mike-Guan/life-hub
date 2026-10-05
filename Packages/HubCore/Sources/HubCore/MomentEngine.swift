@@ -34,9 +34,13 @@ public enum MomentEngine {
     public static let monitorAfter: TimeInterval = 10 * 60 * 60
     /// 5 km run cans earned before the running shoes stay out.
     public static let shoesAfter = 2
+    /// Minutes before the end of work hours that HAKU starts packing up, the same as the off-work notice.
+    public static let packUpLead = ModeRules.offWorkLead
+    /// Minutes after the end of work hours that HAKU stops looking at its watch.
+    public static let packUpAfter = 30
 
     /// The state HAKU acts out at `now`: stiff from sitting, the 副业 state, then the gym-day states, then
-    /// scrolling at work, then drowsy or overtime at the office, then the states at home.
+    /// scrolling at work, then overtime, packing up or drowsy at the office, then the states at home.
     /// - Parameters:
     ///   - stiff: whether Mike has sat too long, from `SitState.isStiff(mode:at:)`.
     ///   - activity: what HAKU does alongside Mike; only the gym bag gives way to a gym-day state.
@@ -64,9 +68,8 @@ public enum MomentEngine {
         if let sideHustle { return sideHustle.moment }
         if let gym = GymDeparture.moment(activity: activity, need: need, departing: departing) { return gym }
         if need == .slacking { return .slacking }
-        if let atOffice = office(mode: mode, since: officeSince, now: now, rules: rules, calendar: calendar) {
-            return atOffice
-        }
+        let atOffice = office(mode: mode, since: officeSince, now: now, work: work, rules: rules, calendar: calendar)
+        if let atOffice { return atOffice }
         // At home the bag, the couch and the other needs come first.
         guard activity == nil, need == nil, let home else { return nil }
         return self.home(mode: mode, signals: home, now: now, work: work, calendar: calendar)
@@ -197,11 +200,14 @@ public enum MomentEngine {
     }
 
     // One drowsy spell a day: from 3 hours after arriving or 14:00, whichever comes first.
-    /// Drowsy or overtime while in work mode at the office, else `nil`.
+    // PRD section 16, Mike 2026-10-05: packing up runs from 15 minutes before the end of work hours to
+    // 30 minutes after, on work days only. Overtime still wins.
+    /// Overtime, packing up or drowsy while in work mode at the office, else `nil`.
     public static func office(
         mode: Mode?,
         since: Date?,
         now: Date,
+        work: ModeRules = .standard,
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> CompanionMoment? {
@@ -211,6 +217,9 @@ public enum MomentEngine {
             calendar.date(byAdding: .minute, value: minute, to: midnight) ?? midnight
         }
         if now >= time(rules.overtimeMinute) { return .overtime }
+        let workday = work.workdays.contains(calendar.component(.weekday, from: now))
+        let packing = now >= time(work.workEndMinute - packUpLead) && now < time(work.workEndMinute + packUpAfter)
+        if workday && packing { return .packingUp }
         let start = min(time(rules.drowsyStartMinute), since.addingTimeInterval(rules.drowsyAfterArrival))
         return now >= start && now < start.addingTimeInterval(rules.drowsyLasts) ? .drowsy : nil
     }
@@ -219,6 +228,7 @@ public enum MomentEngine {
     public static func officeTimes(
         since: Date?,
         now: Date,
+        work: ModeRules = .standard,
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> [Date] {
@@ -226,6 +236,7 @@ public enum MomentEngine {
         let midnight = calendar.startOfDay(for: now)
         let minute = { (value: Int) in calendar.date(byAdding: .minute, value: value, to: midnight) ?? midnight }
         let start = min(minute(rules.drowsyStartMinute), since.addingTimeInterval(rules.drowsyAfterArrival))
-        return [start, start.addingTimeInterval(rules.drowsyLasts), minute(rules.overtimeMinute)]
+        let packing = [minute(work.workEndMinute - packUpLead), minute(work.workEndMinute + packUpAfter)]
+        return [start, start.addingTimeInterval(rules.drowsyLasts), minute(rules.overtimeMinute)] + packing
     }
 }

@@ -29,6 +29,8 @@ struct HubEntry: TimelineEntry {
     var notice: String?
     /// HAKU's Sunday line about the week's change moments.
     var weekLine: String?
+    /// HAKU's line right after leaving the office ended work.
+    var offWork: String?
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
@@ -36,9 +38,10 @@ struct HubEntry: TimelineEntry {
     var need: CompanionNeed? { snapshot?.need(at: date) }
     var needSince: Date? { snapshot?.needSince(at: date) }
 
-    /// One short line from HAKU: what it does alongside Mike, its bedtime line, else the app's line for
-    /// now, else today's energy.
+    /// One short line from HAKU: leaving work, what it does alongside Mike, its bedtime line, else the app's
+    /// line for now, else today's energy.
     var detail: String {
+        if let offWork { return offWork }
         if let activity { return activity.reason }
         if moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) { return HakuLines.line(scene, at: date) }
@@ -78,7 +81,7 @@ struct HubProvider: TimelineProvider {
         let departure = GymDeparture.stored(in: AppGroup.defaults)
         let walk = [departure?.at, departure?.until].compactMap { $0 }
         let presence = PlacePresence.stored(in: AppGroup.defaults)
-        let office = MomentEngine.officeTimes(since: presence.since(.office), now: now)
+        let office = MomentEngine.officeTimes(since: presence.since(.office), now: now, work: work)
         let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work)
         let slots = WidgetSnapshot.slotDates(after: now)
         let needTimes = (snapshot?.needTimes ?? []) + starts + walk + office + home + slots
@@ -118,7 +121,8 @@ struct HubProvider: TimelineProvider {
                 moment: moment,
                 traces: snapshot?.traces(at: date) ?? [],
                 notice: backoff.notice(at: date),
-                weekLine: ChangeEngine.sundayLine(times: changes, now: date)
+                weekLine: ChangeEngine.sundayLine(times: changes, now: date),
+                offWork: snapshot?.offWorkLine(at: date)
             )
         }
     }
