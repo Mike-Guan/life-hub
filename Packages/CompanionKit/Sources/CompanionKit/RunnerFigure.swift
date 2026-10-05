@@ -413,6 +413,16 @@ struct RunnerPose {
             eyesDy = 1.5
             ledOpacity = 1
             if moment == .lateCoding { blink = max(0.15, 0.5 * Self.blink(at: t * 0.5)) }
+            if moment == .vibeCoding {
+                // Every 14 s: stop typing, a stretch with the hands up, then back to the keys.
+                let rest = Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 14)), from: 11, to: 13.5)
+                if rest > 0 {
+                    stretch = 0.6 * rest
+                    typing = CGSize(width: 0, height: -4 * rest)
+                    headDy = 2 - 3 * rest
+                    eyesDy = 1.5 - 2.5 * rest
+                }
+            }
             guard moment == .flow else { return }
             codeGlow = 0.5 + 0.5 * sin(t * 2 * .pi / 2)
             let hand = Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 10)), from: 8, to: 10)
