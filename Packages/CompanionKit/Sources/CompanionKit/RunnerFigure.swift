@@ -191,6 +191,8 @@ struct RunnerPose {
     var soulRise: CGFloat = -1
     /// Brightness of the floating code brackets in flow, 0...1.
     var codeGlow: Double = 1
+    /// Staring at an empty can: deadpan eyes instead of the smile.
+    var emptyCan = false
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -323,6 +325,16 @@ struct RunnerPose {
             let sip = CGFloat(phase > 6.8 ? sin((phase - 6.8) / 1.2 * .pi) : 0)
             canAngle = Double(-28 * sip - 22 * r + (tired ? 14 : 0))
             canOffset = CGSize(width: -6 * sip, height: -6 * sip - 10 * r + (tired ? 4 : 0))
+            // After every fourth sip the can is empty: a shake by the ear, then a deadpan stare at it.
+            let cycle = (t / 8).rounded(.down)
+            let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
+            if plain, cycle > 0, cycle.truncatingRemainder(dividingBy: 4) == 0, phase < Self.emptyCanLength {
+                let shake = max(0, 1 - phase / 1.2)
+                canAngle = Double(-8 + 10 * sin(phase * 2 * .pi / 0.3) * shake)
+                canOffset = CGSize(width: -6, height: -10)
+                emptyCan = phase >= 1.2
+                eyesDx = emptyCan ? 3 : 0
+            }
         case .boxing:
             // Guard bounce every 0.6 s, gloves alternate; tap = right jab.
             let bounce = CGFloat(sin(t * 2 * .pi / 0.6)) * 3
@@ -411,6 +423,9 @@ struct RunnerPose {
             eyesDx = -3 + 3 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 4)), from: 3, to: 4)
         }
     }
+
+    /// How long the empty-can shake and stare lasts, in seconds of the chill cycle.
+    static let emptyCanLength: TimeInterval = 3.2
 
     /// How far the head drops onto the sofa arm when collapsed, as a fraction of the desk slump.
     private static let collapse: CGFloat = 0.85
@@ -743,6 +758,10 @@ struct RunnerFigure: View {
                 if !pose.ledDots { visible.insert(.ledLine) }
             case .chill:
                 visible.formUnion(chillParts)
+                if pose.emptyCan {
+                    visible.subtract([.eyesChill, .mouthSmile])
+                    visible.formUnion(deadpanEyes)
+                }
             case .boxing:
                 visible.formUnion(boxingParts)
             case .money:
