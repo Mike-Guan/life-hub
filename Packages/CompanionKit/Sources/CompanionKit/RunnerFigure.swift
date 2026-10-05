@@ -351,6 +351,22 @@ struct RunnerPose {
             gloveL = CGSize(width: 0, height: bounce)
             gloveR = CGSize(width: -14 * r, height: -bounce - 10 * r)
             gloveRScale = 1 + 0.2 * r
+            // Every third 10 s cycle: shake the wrists out, then a glove up to fix the headband.
+            let cycle = (t / 10).rounded(.down)
+            let phase = t - cycle * 10
+            let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
+            if plain, r == 0, cycle.truncatingRemainder(dividingBy: 3) == 1, phase >= 6, phase < 9.5 {
+                if phase < 7.5 {
+                    let shake = CGFloat(sin(phase * 2 * .pi / 0.15)) * 3
+                    gloveL = CGSize(width: shake, height: 8)
+                    gloveR = CGSize(width: -shake, height: 8)
+                } else {
+                    let fix = Self.bump(CGFloat(phase), from: 7.5, to: 9.5)
+                    gloveL = .zero
+                    gloveR = CGSize(width: 10 * fix, height: -70 * fix)
+                    eyesDx = 3 * fix
+                }
+            }
         case .money:
             // ¥¥ drifts on the LED, a shine runs along the chain every 3 s; tap = coin flip.
             yenDx = CGFloat(sin(t * 2 * .pi / 4)) * 2
