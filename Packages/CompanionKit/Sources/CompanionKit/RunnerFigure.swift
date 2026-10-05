@@ -691,6 +691,13 @@ struct RunnerFigure: View {
         let home = mode == .chill && visible.isDisjoint(with: awayParts.union([.door]))
         if home, pose.traces.contains(.pcGlow) { visible.insert(.roomPc) }
         if home, pose.traces.contains(.sunlight) { visible.insert(.sunlight) }
+        // Lasting traces: worn gloves wherever the gloves are, the monitor while vibe coding, shoes at home.
+        if pose.traces.contains(.wornGloves) {
+            if visible.contains(.gloveL) { visible.insert(.gloveTapeLeft) }
+            if visible.contains(.gloveR) { visible.insert(.gloveTapeRight) }
+        }
+        if pose.traces.contains(.deskMonitor), visible.contains(.ledCode) { visible.insert(.deskMonitor) }
+        if home, pose.traces.contains(.runningShoes) { visible.insert(.runningShoes) }
     }
 
     nonisolated private static let awayParts: Set<RunnerPart> = [.gymBag, .heavyBag, .dumbbell, .speedLines]
@@ -982,6 +989,12 @@ struct RunnerFigure: View {
                     .offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)
             case .gloveR:
                 RunnerPartView(part: part, red: pose.outfit.gloves)
+                    .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
+                    .offset(x: pose.gloveR.width * scale, y: pose.gloveR.height * scale)
+            case .gloveTapeLeft:
+                RunnerPartView(part: part).offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)
+            case .gloveTapeRight:
+                RunnerPartView(part: part)
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
                     .offset(x: pose.gloveR.width * scale, y: pose.gloveR.height * scale)
             case .laptop:

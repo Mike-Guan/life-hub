@@ -307,6 +307,21 @@ import Testing
         }
     }
 
+    @Test func lastingTracesFollowTheirProps() {
+        let all: Set<CompanionTrace> = [.wornGloves, .deskMonitor, .runningShoes]
+        let boxing = Set(RunnerFigure.parts(for: .boxing, pose: RunnerPose().leaving(all)))
+        #expect(boxing.isSuperset(of: [.gloveTapeLeft, .gloveTapeRight]))
+        #expect(boxing.isDisjoint(with: [.deskMonitor, .runningShoes]))
+        let coding = Set(RunnerFigure.parts(for: .money, pose: RunnerPose(moment: .vibeCoding).leaving(all)))
+        #expect(coding.contains(.deskMonitor))
+        #expect(coding.isDisjoint(with: [.gloveTapeLeft, .runningShoes]))
+        let home = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose().leaving(all)))
+        #expect(home.contains(.runningShoes))
+        #expect(home.isDisjoint(with: [.gloveTapeLeft, .deskMonitor]))
+        let plain = Set(RunnerFigure.parts(for: .boxing, pose: RunnerPose()))
+        #expect(plain.isDisjoint(with: [.gloveTapeLeft, .gloveTapeRight]))
+    }
+
     @Test func sundayAfternoonIsForTidying() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))

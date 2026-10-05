@@ -19,6 +19,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Lasting traces in HAKU's world: taped, scuffed gloves after 5 boxing sessions, a second monitor by
+  the laptop after 10 hours of vibe coding, running shoes at home after 2 runs. The app decides when
+  they are earned.
 - When HAKU has waited at the door long enough on a work-day morning, it gives up once: headphones off,
   back on the sofa, "……今天在家？". It plays when the 90-minute wait ends with you still at home, the
   next time you open the app during work hours.
