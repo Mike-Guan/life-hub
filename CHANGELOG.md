@@ -20,6 +20,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Tapping a napping HAKU makes it roll over in its sleep. Tap again soon after and it half wakes
+  and grumbles.
 - Lasting traces in HAKU's world: taped, scuffed gloves after 5 boxing sessions, a second monitor by
   the laptop after 10 hours of vibe coding, running shoes at home after 2 runs. The app decides when
   they are earned.
