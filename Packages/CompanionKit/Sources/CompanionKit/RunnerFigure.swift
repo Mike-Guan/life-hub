@@ -201,6 +201,8 @@ struct RunnerPose {
     var turnedAway = false
     /// Horizontal squeeze while turning around, 1 = full width.
     var turnSqueeze: CGFloat = 1
+    /// Progress of rubbing an eye with the fist, 0...1, or -1 when not rubbing.
+    var rubEye: CGFloat = -1
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -728,6 +730,13 @@ struct RunnerPose {
         turnSqueeze = max(0.05, min(1, abs(p - 0.12) / 0.12, abs(p - 0.88) / 0.12))
     }
 
+    /// Rubbing an eye at `progress` (0...1): the fist comes up, rubs, and goes down; eyes nearly shut.
+    mutating func rubEyes(progress: Double) {
+        rubEye = CGFloat(min(max(progress, 0), 1))
+        blink = min(blink, 0.25)
+        headDy += 1
+    }
+
     /// The still bedtime pose, used for portraits and reduced motion.
     static func bedtimeStill() -> RunnerPose {
         var pose = bedtime(time: 2, goodnight: 1, liesDown: false)
@@ -806,6 +815,7 @@ struct RunnerFigure: View {
             visible = modeParts(for: mode, pose: pose)
         }
         wear(pose, mode: mode, on: &visible)
+        if pose.rubEye >= 0 { visible.insert(.rubHand) }
         if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
@@ -1059,6 +1069,15 @@ struct RunnerFigure: View {
             case .mouthYawn:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 0.7 + 0.3 * pose.yawn, y: pose.yawn, anchor: Self.unit(x: 60, y: 85))
+            case .rubHand:
+                // Up from below, a few small rubs, back down.
+                let up = min(
+                    RunnerPose.ramp(pose.rubEye, from: 0, to: 0.15),
+                    1 - RunnerPose.ramp(pose.rubEye, from: 0.85, to: 1)
+                )
+                RunnerPartView(part: part)
+                    .offset(x: 1.5 * sin(pose.rubEye * 6 * .pi) * scale, y: 12 * (1 - up) * scale)
+                    .opacity(Double(up))
             case .zzz:
                 RunnerPartView(part: part)
                     .offset(x: 4 * pose.zzz * scale, y: -8 * pose.zzz * scale)
@@ -1199,7 +1218,7 @@ struct RunnerFigure: View {
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .browsWork, .eyesChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
-        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack,
+        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
