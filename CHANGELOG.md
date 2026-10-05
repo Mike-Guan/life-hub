@@ -22,6 +22,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU's eyes drift off to one side now and then and come back, so it looks like it has its own
   thoughts.
+- HAKU on the widgets and Lock Screen changes a little every 15 minutes: a glance, a sip, gloves up.
+  At home it shows what it is doing in the app, such as napping (just zzz) or playing the handheld.
 - HAKU backs off: if you ignore the same invite (couch, gym day or scrolling at work) three times in a row,
   it stops that invite for a week and says "行，我不念了。" that day. Nothing is made up afterwards. An
   invite is only counted as ignored when the app can tell; when it can't, it isn't counted.
