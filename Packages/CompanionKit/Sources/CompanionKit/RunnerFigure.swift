@@ -191,6 +191,8 @@ struct RunnerPose {
     var soulRise: CGFloat = -1
     /// Brightness of the floating code brackets in flow, 0...1.
     var codeGlow: Double = 1
+    /// Staring at an empty can: deadpan eyes instead of the smile.
+    var emptyCan = false
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -323,6 +325,16 @@ struct RunnerPose {
             let sip = CGFloat(phase > 6.8 ? sin((phase - 6.8) / 1.2 * .pi) : 0)
             canAngle = Double(-28 * sip - 22 * r + (tired ? 14 : 0))
             canOffset = CGSize(width: -6 * sip, height: -6 * sip - 10 * r + (tired ? 4 : 0))
+            // After every fourth sip the can is empty: a shake by the ear, then a deadpan stare at it.
+            let cycle = (t / 8).rounded(.down)
+            let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
+            if plain, cycle > 0, cycle.truncatingRemainder(dividingBy: 4) == 0, phase < Self.emptyCanLength {
+                let shake = max(0, 1 - phase / 1.2)
+                canAngle = Double(-8 + 10 * sin(phase * 2 * .pi / 0.3) * shake)
+                canOffset = CGSize(width: -6, height: -10)
+                emptyCan = phase >= 1.2
+                eyesDx = emptyCan ? 3 : 0
+            }
         case .boxing:
             // Guard bounce every 0.6 s, gloves alternate; tap = right jab.
             let bounce = CGFloat(sin(t * 2 * .pi / 0.6)) * 3
@@ -341,6 +353,15 @@ struct RunnerPose {
         if let life = self.life { live(life, time: t, react: r) }
         if let moment = self.moment { play(moment, time: t) }
         if let activity { act(activity, time: t) }
+        // Choreographed eyes (needs, moments, its own time, activities) keep their own look.
+        if self.need == nil, self.moment == nil, self.life == nil, activity == nil { eyesDx += Self.drift(at: t) }
+    }
+
+    /// Now and then the eyes drift off to one side and come back: every 13 s, left and right in turn.
+    static func drift(at t: TimeInterval) -> CGFloat {
+        let cycle = (t / 13).rounded(.down)
+        let side: CGFloat = cycle.truncatingRemainder(dividingBy: 2) == 0 ? 1 : -1
+        return 3 * side * bump(CGFloat(t - cycle * 13), from: 9, to: 10.4)
     }
 
     /// The state within the mode: peeking, dozing, slumped, at the door, walking, or vibe coding.
@@ -411,6 +432,9 @@ struct RunnerPose {
             eyesDx = -3 + 3 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 4)), from: 3, to: 4)
         }
     }
+
+    /// How long the empty-can shake and stare lasts, in seconds of the chill cycle.
+    static let emptyCanLength: TimeInterval = 3.2
 
     /// How far the head drops onto the sofa arm when collapsed, as a fraction of the desk slump.
     private static let collapse: CGFloat = 0.85
@@ -599,6 +623,35 @@ struct RunnerPose {
         return pose
     }
 
+    /// Applies `still` to a plain `mode` pose, for portraits.
+    mutating func show(_ still: PortraitStill, mode: Mode) {
+        switch (still, mode) {
+        case (.plain, _):
+            break
+        case (.glance, .chill):
+            // Mid-sip.
+            canAngle = -28
+            canOffset = CGSize(width: -6, height: -6)
+        case (.glance, .money):
+            eyesDx = 3
+        case (.glance, _):
+            eyesDx = -3
+        case (.alt, .work):
+            // Zoned out in the music.
+            headDy = 1.5
+            blink = 0.55
+        case (.alt, .chill):
+            eyesDx = 3
+            headDy = 1
+        case (.alt, .boxing):
+            gloveL = CGSize(width: 0, height: -10)
+            gloveR = CGSize(width: 0, height: -12)
+        case (.alt, .money):
+            eyesDy = -1.5
+            eyesDx = -2
+        }
+    }
+
     /// Noticing you at `progress` (0...1) after the app opens: eyes elsewhere, then a half-beat late turn
     /// to you with a small lift of the head.
     mutating func notice(progress: Double) {
@@ -699,6 +752,13 @@ struct RunnerFigure: View {
         let home = mode == .chill && visible.isDisjoint(with: awayParts.union([.door]))
         if home, pose.traces.contains(.pcGlow) { visible.insert(.roomPc) }
         if home, pose.traces.contains(.sunlight) { visible.insert(.sunlight) }
+        // Lasting traces: worn gloves wherever the gloves are, the monitor while vibe coding, shoes at home.
+        if pose.traces.contains(.wornGloves) {
+            if visible.contains(.gloveL) { visible.insert(.gloveTapeLeft) }
+            if visible.contains(.gloveR) { visible.insert(.gloveTapeRight) }
+        }
+        if pose.traces.contains(.deskMonitor), visible.contains(.ledCode) { visible.insert(.deskMonitor) }
+        if home, pose.traces.contains(.runningShoes) { visible.insert(.runningShoes) }
     }
 
     nonisolated private static let awayParts: Set<RunnerPart> = [.gymBag, .heavyBag, .dumbbell, .speedLines]
@@ -714,6 +774,10 @@ struct RunnerFigure: View {
                 if !pose.ledDots { visible.insert(.ledLine) }
             case .chill:
                 visible.formUnion(chillParts)
+                if pose.emptyCan {
+                    visible.subtract([.eyesChill, .mouthSmile])
+                    visible.formUnion(deadpanEyes)
+                }
             case .boxing:
                 visible.formUnion(boxingParts)
             case .money:
@@ -990,6 +1054,12 @@ struct RunnerFigure: View {
                     .offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)
             case .gloveR:
                 RunnerPartView(part: part, red: pose.outfit.gloves)
+                    .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
+                    .offset(x: pose.gloveR.width * scale, y: pose.gloveR.height * scale)
+            case .gloveTapeLeft:
+                RunnerPartView(part: part).offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)
+            case .gloveTapeRight:
+                RunnerPartView(part: part)
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
                     .offset(x: pose.gloveR.width * scale, y: pose.gloveR.height * scale)
             case .laptop:
@@ -1294,19 +1364,29 @@ public struct CompanionPortrait: View {
     }
 
     private var figure: RunnerFigure {
-        let outfit = Outfit(wardrobe)
-        guard bedtime == .off else {
-            return RunnerFigure(mode: mode, pose: RunnerPose.bedtimeStill().wearing(outfit).leaving(traces))
-        }
-        var pose = RunnerPose(face: EnergyFace(energy: energy), need: need, activity: activity, moment: moment)
-            .wearing(outfit)
-            .leaving(traces)
+        RunnerFigure(mode: mode, pose: pose.wearing(Outfit(wardrobe)).leaving(traces))
+    }
+
+    /// The pose shown at `date`. A plain mode changes still every 15 minutes; at home HAKU does the same
+    /// thing on its own as in the app.
+    var pose: RunnerPose {
+        guard bedtime == .off else { return RunnerPose.bedtimeStill() }
+        let plain = need == nil && activity == nil && moment == nil
+        let life = plain && mode == .chill ? IdleLife.at(date) : nil
+        var pose = RunnerPose(
+            face: EnergyFace(energy: energy),
+            need: need,
+            life: life,
+            activity: activity,
+            moment: moment
+        )
         pose.codingCans = codingCans
+        if plain, life == nil { pose.show(PortraitStill.at(date), mode: mode) }
         if peeking {
             pose.bagLift = 0
             pose.eyesDx = -3
         }
-        return RunnerFigure(mode: mode, pose: pose)
+        return pose
     }
 }
 

@@ -72,6 +72,18 @@ import Testing
         #expect(decide(.leftGym, boxedByHand, at: date(5, 21)) == nil)
     }
 
+    @Test func walkingPastAPlaceTakesBackItsSwitch() {
+        let passBy = ModeTrigger.passedBy(arrivedAt: date(5, 19))
+        let passed = log((.money, .manual, date(5, 18)), (.boxing, .location, date(5, 19)))
+        let back = ModeDecision(mode: .money, source: .location, reason: "只是路过")
+        #expect(decide(passBy, passed, at: date(5, 19, 2)) == back)
+        #expect(decide(passBy, passed, at: date(5, 19, 3)) == nil)
+        #expect(decide(passBy, log((.boxing, .location, date(5, 19))), at: date(5, 19, 1))?.mode == .chill)
+        let changedThere = log((.boxing, .location, date(5, 19)), (.work, .manual, date(5, 19, 1)))
+        #expect(decide(passBy, changedThere, at: date(5, 19, 2)) == nil)
+        #expect(decide(passBy, log((.chill, .manual, date(5, 18))), at: date(5, 19, 1)) == nil)
+    }
+
     @Test func officeSwitchesToWorkUnlessHeld() {
         #expect(decide(.enteredOffice, log((.chill, .schedule, date(5, 8))), at: date(5, 9))?.mode == .work)
         #expect(decide(.enteredOffice, log((.money, .manual, date(5, 8))), at: date(5, 9)) == nil)

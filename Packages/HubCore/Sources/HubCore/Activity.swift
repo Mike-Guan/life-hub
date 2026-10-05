@@ -65,6 +65,12 @@ public enum CompanionTrace: String, Codable, CaseIterable, Sendable {
     case pcGlow
     /// Slept well: sunlight through the window at home.
     case sunlight
+    /// Boxed 5 times: taped, scuffed gloves. It stays.
+    case wornGloves
+    /// Vibe coded 10 hours in all: a second monitor by the laptop. It stays.
+    case deskMonitor
+    /// Ran twice: running shoes on the floor at home. They stay.
+    case runningShoes
 }
 
 /// Which days are for the gym and for the weekly run. Times are minutes after local midnight.
