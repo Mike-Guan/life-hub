@@ -22,7 +22,7 @@ const PALETTE = {
   '#6C7A89': 'deadPupil', '#1FB8C9': 'iris', '#FFE14D': 'catYellow', '#FF8FA3': 'blush',
   '#15161F': 'mask', '#3A3D52': 'maskLine', '#3EF0FF': 'neonCyan', '#FF3EA5': 'neonPink',
   '#2D3250': 'hood', '#1B1C26': 'jacket', '#FF3B4E': 'boxingRed', '#FFD23F': 'gold',
-  '#C3C8D2': 'canLid', '#7CFF4F': 'monsterGreen',
+  '#C3C8D2': 'canLid', '#7CFF4F': 'monsterGreen', '#EADCC2': 'beige', '#C9B794': 'beigeShade',
   // Not in the SVG: per-mode jacket colors from the RUNNER v5 sheet.
   '#3A6B58': 'jacketChill', '#121219': 'jacketMoney',
 };

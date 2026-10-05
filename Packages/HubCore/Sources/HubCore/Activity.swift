@@ -46,6 +46,25 @@ public enum CompanionMoment: String, Codable, CaseIterable, Sendable {
     case lateCoding
     /// 副业: shooting or running the accounts, the ¥¥ mask look.
     case shooting
+    /// Home after a long work day: head down on the sofa arm.
+    case collapsed
+    /// Chill, doing nothing much: wrapped in a blanket on the couch.
+    case blanket
+    /// Weekday morning at home after waking up: brushing teeth.
+    case morning
+    /// Weekday, past 9:30 and still at home: headphones on at the door, tapping the watch.
+    case timeToLeave
+}
+
+// PRD section 18. Traces fade the next day; the state logic decides which are on.
+/// Something left in HAKU's world by what Mike did today.
+public enum CompanionTrace: String, Codable, CaseIterable, Sendable {
+    /// Boxed today: a bandage on HAKU's cheek.
+    case bandage
+    /// Vibe coded today: the monitor on the shelf at home is still on.
+    case pcGlow
+    /// Slept well: sunlight through the window at home.
+    case sunlight
 }
 
 /// Which days are for the gym and for the weekly run. Times are minutes after local midnight.
