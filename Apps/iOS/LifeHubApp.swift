@@ -99,7 +99,7 @@ struct LifeHubApp: App {
             need: needs.reading,
             activitySignals: needs.activitySignals,
             workouts: needs.workouts,
-            activityDays: .stored(in: AppGroup.defaults),
+            activityDays: ActivityDays.stored(in: AppGroup.defaults).learningGym(from: growth.ledger, now: .now),
             departure: needs.departure,
             event: needs.event,
             replayFrom: replayFrom,

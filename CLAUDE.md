@@ -196,4 +196,6 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   batch, 2 to 4 weeks with no new features, only HAKU-aliveness work and device bugs.
 - 2026-10-05: Mike approved the nudge back-off: an invite ignored 3 times in a row pauses for 7 days,
   with one line and no catch-up; uncertain signals are never counted as ignored.
+- 2026-10-05: Gym is an off-work activity inside Chill, not a mode. Gym days are learned from gym wins
+  (a weekday won in 2 of the last 4 weeks; Tue-Thu until one qualifies), with no setting.
 - 2026-10-05: Mike: leaving the office ends work only from 17:30; an earlier leave (lunch) keeps 上班.
