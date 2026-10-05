@@ -29,6 +29,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HubCore knows when HAKU should walk: for 30 minutes after you leave home, the office or a gym, until
   you arrive somewhere. The mode stays as it was. The walking art comes in a UI change.
+- Daily Widget tasks whose title names one of 15 scenes (coffee, a meeting, groceries, the gym and more)
+  carry that scene, so HAKU can act it out around the start. Titles are matched on the phone only.
 - HAKU reacts to planned Daily Widget tasks: 15 minutes before, it taps its watch and holds up the task's prop
   (headphones, shopping bag, gym bag or a sticky note); at the start it slaps a sticky note on the screen; when a
   task is done it gives a peace sign, or for the day's focus flares its mask and pumps its fist.
