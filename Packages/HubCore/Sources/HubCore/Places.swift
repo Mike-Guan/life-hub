@@ -226,13 +226,20 @@ public struct PlacePresence: Codable, Equatable, Sendable {
     public var arrivals: [String: Date]
     /// When Mike last left each place.
     public var departures: [String: Date]
+    /// When the stay that ended at each departure began.
+    public var lastArrivals: [String: Date]
 
-    public init(arrivals: [String: Date] = [:], departures: [String: Date] = [:]) {
+    // GPS drift near a fence edge reports a quick leave and return. Shorter gaps count as one stay.
+    /// A return this soon after leaving continues the stay; a leave this soon after arriving was a pass-by.
+    public static let bounce: TimeInterval = 3 * 60
+
+    public init(arrivals: [String: Date] = [:], departures: [String: Date] = [:], lastArrivals: [String: Date] = [:]) {
         self.arrivals = arrivals
         self.departures = departures
+        self.lastArrivals = lastArrivals
     }
 
-    private enum CodingKeys: String, CodingKey { case arrivals, departures }
+    private enum CodingKeys: String, CodingKey { case arrivals, departures, lastArrivals }
 
     /// Decodes the presence; builds before departures were kept saved only arrivals.
     /// - Throws: `DecodingError` when a field has the wrong type.
@@ -240,6 +247,7 @@ public struct PlacePresence: Codable, Equatable, Sendable {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         arrivals = try values.decodeIfPresent([String: Date].self, forKey: .arrivals) ?? [:]
         departures = try values.decodeIfPresent([String: Date].self, forKey: .departures) ?? [:]
+        lastArrivals = try values.decodeIfPresent([String: Date].self, forKey: .lastArrivals) ?? [:]
     }
 
     /// When Mike last left `kind`, or `nil` when unknown.
@@ -264,6 +272,11 @@ public struct PlacePresence: Codable, Equatable, Sendable {
         }
     }
 
+    /// When Mike arrived at `place`, or `nil` when he isn't there.
+    public func since(_ place: HubPlace) -> Date? {
+        place.presenceKeys.compactMap { arrivals[$0] }.min()
+    }
+
     /// When Mike arrived at the place with presence key `key`, or `nil` when he isn't there.
     public func since(key: String) -> Date? {
         arrivals[key]
@@ -278,9 +291,12 @@ public struct PlacePresence: Codable, Equatable, Sendable {
 
     private mutating func record(key: String, entered: Bool, at date: Date) {
         if entered {
-            arrivals[key] = arrivals[key] ?? date
-        } else {
-            if arrivals[key] != nil { departures[key] = date }
+            guard arrivals[key] == nil else { return }
+            let returned = departures[key].map { date.timeIntervalSince($0) < Self.bounce } ?? false
+            arrivals[key] = returned ? (lastArrivals[key] ?? date) : date
+        } else if let stay = arrivals[key] {
+            departures[key] = date
+            lastArrivals[key] = stay
             arrivals[key] = nil
         }
     }
