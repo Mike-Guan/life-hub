@@ -147,7 +147,7 @@ extension WidgetSnapshot {
     }
 
     // HAKU's idle bits change every 15 minutes, counted from the reference date. A widget only redraws at
-    // an entry, so each boundary needs one.
+    // an entry, so each boundary needs one. Keep `slot` equal to `IdleLife.slotLength` in CompanionKit.
     /// The 15-minute boundaries after `date` for the next `span`, for widget timelines.
     public static func slotDates(
         after date: Date,
