@@ -20,6 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Tap HAKU three times within 30 seconds and it says "……干嘛。" and turns its back on you for a moment.
 - At work HAKU now and then sneaks a look at its phone and puts it straight away.
 - On boxing day HAKU now and then shakes out its wrists and lifts a glove to fix its headband.
 - Open the app between midnight and 5:00 and HAKU squints at you and says "还不睡。" once a night. No notification.

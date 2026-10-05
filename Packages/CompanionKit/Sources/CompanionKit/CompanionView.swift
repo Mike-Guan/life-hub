@@ -71,6 +71,8 @@ public struct CompanionView: View {
     @State private var lateNightStart: Date?
     // A napping HAKU only rolls over on the first tap; a second tap soon after half wakes it.
     @State private var rollStart: Date?
+    @State private var tapTimes: [Date] = []
+    @State private var turnAwayStart: Date?
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -296,6 +298,7 @@ public struct CompanionView: View {
             if stage == .peeking { pose.bagLift = 0 }
             if stage == .up { pose.bagLift = 1 }
             pose.headDy += vitals.slouch
+            if turnAway(at: time) != nil { pose.turnedAway = true }
             return pose
         }
         var pose = RunnerPose(
@@ -323,6 +326,7 @@ public struct CompanionView: View {
         {
             pose.notice(progress: progress, lookUp: noticeLookUp)
         }
+        if let progress = turnAway(at: time) { pose.turnAway(progress: progress) }
         if Self.progress(since: lateNightStart, at: time, duration: Self.lateNightDuration) != nil {
             // Opened after midnight: a squint at you.
             pose.blink = min(pose.blink, 0.4)
@@ -348,6 +352,11 @@ public struct CompanionView: View {
                 say("还不睡。", for: 3)
             }
         }
+    }
+
+    /// Progress of turning away after being tapped too often at `time`, 0..<1, or nil when not turned away.
+    private func turnAway(at time: TimeInterval) -> Double? {
+        Self.progress(since: turnAwayStart, at: time, duration: Self.turnAwayDuration)
     }
 
     /// Progress of the celebration at `time`, 0..<1, or nil when none is playing.
@@ -402,6 +411,14 @@ public struct CompanionView: View {
     private static let swapDuration = 0.5
     private var noticeDuration: TimeInterval { noticeLookUp ? 1.6 : 0.9 }
     private static let lateNightDuration = 2.6
+    private static let turnAwayDuration = 2.2
+    /// How far back taps count towards pestering HAKU, in seconds.
+    nonisolated static let pesterWindow: TimeInterval = 30
+
+    /// Whether `taps` hold 3 or more taps within `pesterWindow` before `now`.
+    nonisolated static func pestered(_ taps: [Date], now: Date) -> Bool {
+        taps.filter { now.timeIntervalSince($0) < pesterWindow }.count >= 3
+    }
 
     /// The night to say "还不睡。" for when the app opens at `date`, or nil outside 0:00 to 5:00 or when it was
     /// already said that night. A night is named by the day of its evening, as `yyyy-MM-dd`.
@@ -528,6 +545,15 @@ public struct CompanionView: View {
             return
         }
         rollStart = nil
+        tapTimes = tapTimes.filter { Date.now.timeIntervalSince($0) < Self.pesterWindow } + [.now]
+        if bedtime == .off, Self.pestered(tapTimes, now: .now) {
+            tapTimes = []
+            turnAwayStart = .now
+            pop += 1
+            say("……干嘛。")
+            onTap?()
+            return
+        }
         pop += 1
         taps += 1
         let peeking = couchStage(at: .now) == .peeking

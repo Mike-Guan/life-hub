@@ -398,6 +398,29 @@ import Testing
         #expect(CompanionView.newLateNight(at: morning, last: "", calendar: calendar) == nil)
     }
 
+    @Test func tappedTooOftenHakuTurnsItsBack() {
+        let now = Date(timeIntervalSinceReferenceDate: 1000)
+        let two = [now.addingTimeInterval(-10), now]
+        #expect(!CompanionView.pestered(two, now: now))
+        #expect(CompanionView.pestered([now.addingTimeInterval(-20)] + two, now: now))
+        #expect(!CompanionView.pestered([now.addingTimeInterval(-CompanionView.pesterWindow)] + two, now: now))
+        var turning = RunnerPose()
+        turning.turnAway(progress: 0.12)
+        #expect(!turning.turnedAway && turning.turnSqueeze == 0.05)
+        var away = RunnerPose()
+        away.turnAway(progress: 0.5)
+        #expect(away.turnedAway && away.turnSqueeze == 1)
+        var back = RunnerPose()
+        back.turnAway(progress: 1)
+        #expect(!back.turnedAway && back.turnSqueeze > 0.99)
+        var pose = RunnerPose()
+        pose.turnedAway = true
+        let parts = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(parts.isSuperset(of: [.headBack, .hairBack, .headset, .jacket]))
+        #expect(parts.isDisjoint(with: [.faceBase, .eyesWork, .maskUp, .hairFringe, .mic, .stripeNeon]))
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: RunnerPose())).contains(.headBack) == false)
+    }
+
     @Test func afterHalfADayHakuLooksUp() {
         let now = Date(timeIntervalSinceReferenceDate: 100_000)
         let seen = now.timeIntervalSinceReferenceDate

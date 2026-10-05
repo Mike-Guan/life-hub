@@ -52,6 +52,7 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case earL = "ear_L"
     case earR = "ear_R"
     case faceBase = "face_base"
+    case headBack = "head_back"
     case eyesWork = "eyes_work"
     case lidsWork = "lids_work"
     case eyebags
@@ -145,6 +146,7 @@ enum RunnerArt {
         case .earL: earL()
         case .earR: earR()
         case .faceBase: faceBase()
+        case .headBack: headBack()
         case .eyesWork: eyesWork()
         case .lidsWork: lidsWork()
         case .eyebags: eyebags()
@@ -1185,6 +1187,63 @@ enum RunnerArt {
                 stroke: RunnerPalette.ink,
                 lineWidth: 3.5
             )
+        ]
+    }
+
+    private static func headBack() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 46, y: 82))
+                    p.addLine(to: .init(x: 74, y: 82))
+                    p.addLine(to: .init(x: 74, y: 98))
+                    p.addLine(to: .init(x: 46, y: 98))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.skin,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 30, y: 66))
+                    p.addQuadCurve(to: .init(x: 60, y: 32), control: .init(x: 30, y: 34))
+                    p.addQuadCurve(to: .init(x: 90, y: 66), control: .init(x: 90, y: 34))
+                    p.addLine(to: .init(x: 88, y: 80))
+                    p.addLine(to: .init(x: 83, y: 74))
+                    p.addLine(to: .init(x: 79, y: 88))
+                    p.addLine(to: .init(x: 72, y: 80))
+                    p.addLine(to: .init(x: 66, y: 92))
+                    p.addLine(to: .init(x: 60, y: 82))
+                    p.addLine(to: .init(x: 54, y: 92))
+                    p.addLine(to: .init(x: 48, y: 80))
+                    p.addLine(to: .init(x: 41, y: 88))
+                    p.addLine(to: .init(x: 37, y: 74))
+                    p.addLine(to: .init(x: 32, y: 80))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.hair,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3.5,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 45, y: 46))
+                    p.addLine(to: .init(x: 50, y: 60))
+                    p.move(to: .init(x: 60, y: 40))
+                    p.addLine(to: .init(x: 60, y: 58))
+                    p.move(to: .init(x: 75, y: 46))
+                    p.addLine(to: .init(x: 70, y: 60))
+                    p.move(to: .init(x: 52, y: 70))
+                    p.addLine(to: .init(x: 55, y: 80))
+                    p.move(to: .init(x: 68, y: 70))
+                    p.addLine(to: .init(x: 65, y: 80))
+                },
+                stroke: RunnerPalette.hairShade,
+                lineWidth: 2.5,
+                cap: .round
+            ),
         ]
     }
 

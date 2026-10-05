@@ -197,6 +197,10 @@ struct RunnerPose {
     var emptyCan = false
     /// A quick look at the phone at work, held low in front.
     var phoneGlance = false
+    /// Turned away from you: only the back of the head and the room show.
+    var turnedAway = false
+    /// Horizontal squeeze while turning around, 1 = full width.
+    var turnSqueeze: CGFloat = 1
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -716,6 +720,14 @@ struct RunnerPose {
         headDy += 1.5 * (1 - up) - 3 * Self.bump(p, from: 0.45, to: 0.95)
     }
 
+    /// Turning its back on you at `progress` (0...1): a squeeze to turn around, the back of the head, then a
+    /// squeeze back.
+    mutating func turnAway(progress: Double) {
+        let p = CGFloat(min(max(progress, 0), 1))
+        turnedAway = p > 0.12 && p < 0.88
+        turnSqueeze = max(0.05, min(1, abs(p - 0.12) / 0.12, abs(p - 0.88) / 0.12))
+    }
+
     /// The still bedtime pose, used for portraits and reduced motion.
     static func bedtimeStill() -> RunnerPose {
         var pose = bedtime(time: 2, goodnight: 1, liesDown: false)
@@ -771,7 +783,7 @@ struct RunnerFigure: View {
                     }
                 }
                 .scaleEffect(
-                    x: 1 - 0.03 * pose.stretch,
+                    x: (1 - 0.03 * pose.stretch) * pose.turnSqueeze,
                     y: (1 + 0.06 * pose.stretch) * max(pose.popOut, 0.001),
                     anchor: .bottom
                 )
@@ -794,6 +806,7 @@ struct RunnerFigure: View {
             visible = modeParts(for: mode, pose: pose)
         }
         wear(pose, mode: mode, on: &visible)
+        if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
 
@@ -977,6 +990,12 @@ struct RunnerFigure: View {
         .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen, .ledCode,
     ]
     nonisolated private static let warmupParts: Set<RunnerPart> = [.headband, .gloveL, .gloveR]
+    /// What still shows from behind: the room, the jacket, the back of the head and the headset or headband.
+    nonisolated private static let backParts: Set<RunnerPart> = [
+        .door, .sunlight, .roomPc, .deskMonitor, .pillow, .roomPlant, .roomBag, .runningShoes, .heavyBag,
+        .speedLines, .desk, .canStackOne, .canStackTwo, .canStackThree, .sofaArm,
+        .jacket, .hoodCollar, .hairBack, .earL, .earR, .headset, .cupL, .cupR, .headband,
+    ]
     nonisolated private static let couchParts: Set<RunnerPart> = [.eyesSleepy, .phone, .phoneFeed, .phoneHand]
     nonisolated private static let couchHiddenParts: Set<RunnerPart> = [
         .eyesWork, .lidsWork, .browsWork, .eyesChill, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
@@ -1180,7 +1199,7 @@ struct RunnerFigure: View {
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .browsWork, .eyesChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
-        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage,
+        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
