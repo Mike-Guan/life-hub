@@ -244,6 +244,11 @@ public struct CanLedger: RecordLog, Equatable {
         Set(active.filter { $0.kind != .earned }.compactMap(\.itemID))
     }
 
+    /// When the item with `id` was bought or granted, `nil` if it isn't owned.
+    public func ownedAt(_ id: String) -> Date? {
+        active.first { $0.kind != .earned && $0.itemID == id }?.at
+    }
+
     /// How many times `win` was earned.
     public func count(_ win: Win) -> Int {
         active.filter { $0.kind == .earned && $0.win == win }.count

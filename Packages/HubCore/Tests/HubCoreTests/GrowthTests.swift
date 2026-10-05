@@ -87,7 +87,10 @@ import Testing
         #expect(store.remaining(for: headband) == 4)
         for run in 0..<3 { #expect(store.record(.run5k, source: "run-\(run)", at: at).isEmpty) }
         #expect(store.remaining(for: headband) == 1)
-        #expect(store.record(.run5k, source: "run-3", at: at) == [headband])
+        #expect(store.ledger.ownedAt(headband.id) == nil)
+        let fourth = at.addingTimeInterval(3_600)
+        #expect(store.record(.run5k, source: "run-3", at: fourth) == [headband])
+        #expect(store.ledger.ownedAt(headband.id) == fourth)
         #expect(store.remaining(for: headband) == nil)
         #expect(store.record(.run5k, source: "run-4", at: at).isEmpty)
         #expect(store.ledger.owned == ["keepsake.headband.runner"])

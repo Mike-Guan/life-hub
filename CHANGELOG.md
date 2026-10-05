@@ -19,6 +19,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- The wardrobe has a 人生收藏 section: each keepsake you earned, with the day and how, such as
+  "2026-11-02 · 累计 10 次周日拳击".
 - HAKU's world keeps traces of the day (Issue #83): a bandage after boxing, the monitor still glowing at home
   after vibe coding, sunlight through the window after good sleep. New states: collapsed on the sofa arm
   after a long work day, wrapped in a blanket on lazy evenings, brushing teeth on weekday mornings, and
