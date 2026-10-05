@@ -27,8 +27,8 @@ public enum CompanionEvent: Equatable, Sendable {
     case stayHome(id: String)
     /// Rolling the shoulders after Mike stood up from a long sit; `id` is the hour he stood, so it plays once.
     case stretched(id: String)
-    /// A planned Daily Widget task was done; `id` is the task's id (with the day for a repeating task), so it
-    /// plays once, and `focus` marks the day's focus.
+    /// A Daily task was ticked done; `id` is the occurrence id, so it plays once, and `focus` picks the
+    /// bigger celebration.
     case taskDone(id: String, focus: Bool)
 }
 
@@ -387,8 +387,10 @@ public enum NeedEngine {
     }
 
     /// The invite's text for `need`. It goes on the Lock Screen, so it doesn't say what Mike was doing.
-    public static func inviteText(for need: CompanionNeed) -> String {
+    /// - Parameter taskSoon: whether a Daily task starts within `DailyAgenda.inviteLead`.
+    public static func inviteText(for need: CompanionNeed, taskSoon: Bool = false) -> String {
         switch need {
+        case .couchScroll where taskSoon: "等下还有事，先起来收拾？"
         case .couchScroll: "去健身房，或者下楼走走？"
         case .boxingWarmup: "拳套戴好了，出发去拳馆？"
         case .gymDay: "包背好了，走？"

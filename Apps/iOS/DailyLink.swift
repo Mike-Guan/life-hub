@@ -12,13 +12,19 @@ final class DailyLink {
     private(set) var isOn: Bool
     /// The tasks from the last read; empty while not linked.
     private(set) var tasks: [DailyTask] = []
+    /// The timed tasks from yesterday to tomorrow as of the last read, `nil` while not linked.
+    private(set) var plan: DailyPlan?
+    /// The celebration for the newest task ticked done since the read before; cleared by a read with nothing new.
+    private(set) var done: CompanionEvent?
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
 
     private static let bookmarkKey = "dailyFolderBookmark"
+    private static let seenKey = "dailySeenDone"
 
     init() {
         isOn = AppGroup.defaults.data(forKey: Self.bookmarkKey) != nil
+        plan = DailyPlan.stored(in: AppGroup.defaults)
     }
 
     /// Links the folder Mike picked and reads it.
@@ -38,8 +44,12 @@ final class DailyLink {
     /// Unlinks: forgets the folder and the tasks read. Cans already earned stay.
     func unlink() {
         AppGroup.defaults.removeObject(forKey: Self.bookmarkKey)
+        AppGroup.defaults.removeObject(forKey: Self.seenKey)
+        DailyPlan.clear(in: AppGroup.defaults)
         isOn = false
         tasks = []
+        plan = nil
+        done = nil
         lastError = nil
     }
 
@@ -55,6 +65,7 @@ final class DailyLink {
         switch result {
         case .success(let read):
             tasks = read
+            noteDone(DailyAgenda.occurrences(read, now: .now))
             lastError = nil
         case .failure(let error):
             lastError = "读不到 Daily 的文件夹：\(error.localizedDescription)"
@@ -62,6 +73,18 @@ final class DailyLink {
         if stale, let fresh = try? Self.bookmark(for: folder) {
             AppGroup.defaults.set(fresh, forKey: Self.bookmarkKey)
         }
+    }
+
+    // Saved for the widgets and the Screen Time extension, which can't open Daily's folder.
+    private func noteDone(_ occurrences: [DailyOccurrence]) {
+        let defaults = AppGroup.defaults
+        let plan = DailyPlan(occurrences: occurrences)
+        plan.store(in: defaults)
+        self.plan = plan
+        let seen = defaults.stringArray(forKey: Self.seenKey).map(Set.init)
+        let result = DailyAgenda.newlyDone(in: occurrences, seen: seen)
+        defaults.set(Array(result.seen), forKey: Self.seenKey)
+        done = result.event
     }
 
     private static func bookmark(for folder: URL) throws -> Data {
