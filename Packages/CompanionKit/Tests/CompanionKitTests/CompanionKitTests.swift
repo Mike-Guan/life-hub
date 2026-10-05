@@ -589,4 +589,30 @@ import Testing
         // The mask comes down at bedtime, so its </> goes with it.
         #expect(!parts.contains(.ledCode))
     }
+
+    @Test func bandageGoesEverywhereButTheRoomTracesStayHome() {
+        let pose = RunnerPose().leaving(Set(CompanionTrace.allCases))
+        let boxing = Set(RunnerFigure.parts(for: .boxing, pose: pose))
+        #expect(boxing.contains(.bandage))
+        #expect(boxing.isDisjoint(with: [.roomPc, .sunlight]))
+        let home = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(home.isSuperset(of: [.bandage, .roomPc, .sunlight]))
+        let heading = RunnerPose(moment: .heading).leaving([.sunlight])
+        #expect(!RunnerFigure.parts(for: .chill, pose: heading).contains(.sunlight))
+        #expect(RunnerFigure.parts(for: .chill, pose: RunnerPose()).contains(.roomPc) == false)
+    }
+
+    @Test func collapsedDropsTheHeadOntoTheSofaArm() {
+        let pose = RunnerPose(moment: .collapsed)
+        #expect(pose.slump > 0.5)
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).isSuperset(of: [.sofaArm, .eyesSleepy]))
+    }
+
+    @Test func morningBrushesAndTimeToLeaveTapsTheWatch() {
+        let brushing = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(moment: .morning)))
+        #expect(brushing.contains(.toothbrush))
+        let leaving = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(moment: .timeToLeave)))
+        #expect(leaving.isSuperset(of: [.headset, .door, .watchWrist, .tapHand]))
+        #expect(CompanionLines.lines(for: .chill, moment: .timeToLeave).contains("……公司还在等你。"))
+    }
 }

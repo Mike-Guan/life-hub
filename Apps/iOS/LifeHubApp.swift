@@ -134,7 +134,7 @@ struct LifeHubApp: App {
         }
         .onChange(of: rules) {
             rules.store(in: AppGroup.defaults)
-            Task { offWorkError = await OffWorkReminder.schedule(rules) }
+            Task { await scheduleOffWork() }
             // The work-hours Screen Time watch follows the work hours.
             screenTimeError = Self.restartScrollWatch()
         }
@@ -167,7 +167,10 @@ struct LifeHubApp: App {
             WidgetCenter.shared.reloadAllTimelines()
         }
         // A manual mode change ends couch scrolling, so needs are worked out again.
-        .onChange(of: store.log.changes.count) { refreshNeeds() }
+        .onChange(of: store.log.changes.count) {
+            refreshNeeds()
+            Task { await scheduleOffWork() }
+        }
         .onChange(of: energy.log.events.count) { syncWidgets() }
     }
 
@@ -226,6 +229,10 @@ struct LifeHubApp: App {
             WidgetCenter.shared.reloadAllTimelines()
             // Arriving at the gym ends the countdown, even with the app in the background.
             Task { _ = await BoxingCountdown.update(for: needs.reading) }
+            // Arriving at or leaving the office decides today's off-work notice.
+            let atOffice = presence.since(.office) != nil
+            let rules = ModeRules.stored(in: AppGroup.defaults)
+            Task { _ = await OffWorkReminder.schedule(rules, mode: store.current, atOffice: atOffice) }
         }
     }
 
@@ -269,10 +276,15 @@ struct LifeHubApp: App {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
+    private func scheduleOffWork() async {
+        let atOffice = PlacePresence.stored(in: AppGroup.defaults).since(.office) != nil
+        offWorkError = await OffWorkReminder.schedule(rules, mode: store.current, atOffice: atOffice)
+    }
+
     private func scheduleReminder() async {
         reminderError = await BedtimeReminder.schedule(bedtime)
         // The bedtime call asks for permission; without it this would fail the same way.
-        if reminderError == nil { offWorkError = await OffWorkReminder.schedule(rules) }
+        if reminderError == nil { await scheduleOffWork() }
     }
 
     // Re-reads each time the app becomes active, so sleep the Watch syncs later still counts.

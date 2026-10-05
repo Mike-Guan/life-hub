@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- The clock no longer switches the mode. Work starts when you arrive at the office and ends when you
+  leave it (or by hand); before, the app switched to 上班 at 9:30 even if you were still at home. The
+  off-work notice now goes out only on days you're in 上班 mode or at the office.
 - HAKU's sleeping pillow is light blue, so it no longer blends into the white hair.
 - HAKU stops couch scrolling when you do: it gets up 20 minutes after Screen Time last saw you on the
   picked apps (it reports every 10 more minutes of use), as soon as you walk, or when you change mode by
@@ -16,6 +19,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - The wardrobe has a 人生收藏 section: each keepsake you earned, with the day and how, such as
   "2026-11-02 · 累计 10 次周日拳击".
+- HAKU's world keeps traces of the day (Issue #83): a bandage after boxing, the monitor still glowing at home
+  after vibe coding, sunlight through the window after good sleep. New states: collapsed on the sofa arm
+  after a long work day, wrapped in a blanket on lazy evenings, brushing teeth on weekday mornings, and
+  tapping its watch at the door when it's past 9:30 and you're still home.
 - Work days get three HAKU states. 摸鱼: 30+ minutes on the picked apps inside work hours (counted apart
   from the evening couch) and HAKU peeks over the laptop; one notice goes out, as the day's one push.
   犯困: at the office in work mode, from 3 hours after arriving or 14:00, for 2 hours, with a yawn and a
