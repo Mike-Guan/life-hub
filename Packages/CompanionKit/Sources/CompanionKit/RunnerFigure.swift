@@ -341,6 +341,15 @@ struct RunnerPose {
         if let life = self.life { live(life, time: t, react: r) }
         if let moment = self.moment { play(moment, time: t) }
         if let activity { act(activity, time: t) }
+        // Choreographed eyes (needs, moments, its own time, activities) keep their own look.
+        if self.need == nil, self.moment == nil, self.life == nil, activity == nil { eyesDx += Self.drift(at: t) }
+    }
+
+    /// Now and then the eyes drift off to one side and come back: every 13 s, left and right in turn.
+    static func drift(at t: TimeInterval) -> CGFloat {
+        let cycle = (t / 13).rounded(.down)
+        let side: CGFloat = cycle.truncatingRemainder(dividingBy: 2) == 0 ? 1 : -1
+        return 3 * side * bump(CGFloat(t - cycle * 13), from: 9, to: 10.4)
     }
 
     /// The state within the mode: peeking, dozing, slumped, at the door, walking, or vibe coding.
@@ -597,6 +606,35 @@ struct RunnerPose {
         pose.stretch = -0.5 * sigh
         pose.blink = max(0.15, (1 - 0.5 * sigh) * blink(at: time))
         return pose
+    }
+
+    /// Applies `still` to a plain `mode` pose, for portraits.
+    mutating func show(_ still: PortraitStill, mode: Mode) {
+        switch (still, mode) {
+        case (.plain, _):
+            break
+        case (.glance, .chill):
+            // Mid-sip.
+            canAngle = -28
+            canOffset = CGSize(width: -6, height: -6)
+        case (.glance, .money):
+            eyesDx = 3
+        case (.glance, _):
+            eyesDx = -3
+        case (.alt, .work):
+            // Zoned out in the music.
+            headDy = 1.5
+            blink = 0.55
+        case (.alt, .chill):
+            eyesDx = 3
+            headDy = 1
+        case (.alt, .boxing):
+            gloveL = CGSize(width: 0, height: -10)
+            gloveR = CGSize(width: 0, height: -12)
+        case (.alt, .money):
+            eyesDy = -1.5
+            eyesDx = -2
+        }
     }
 
     /// Noticing you at `progress` (0...1) after the app opens: eyes elsewhere, then a half-beat late turn
@@ -1307,19 +1345,29 @@ public struct CompanionPortrait: View {
     }
 
     private var figure: RunnerFigure {
-        let outfit = Outfit(wardrobe)
-        guard bedtime == .off else {
-            return RunnerFigure(mode: mode, pose: RunnerPose.bedtimeStill().wearing(outfit).leaving(traces))
-        }
-        var pose = RunnerPose(face: EnergyFace(energy: energy), need: need, activity: activity, moment: moment)
-            .wearing(outfit)
-            .leaving(traces)
+        RunnerFigure(mode: mode, pose: pose.wearing(Outfit(wardrobe)).leaving(traces))
+    }
+
+    /// The pose shown at `date`. A plain mode changes still every 15 minutes; at home HAKU does the same
+    /// thing on its own as in the app.
+    var pose: RunnerPose {
+        guard bedtime == .off else { return RunnerPose.bedtimeStill() }
+        let plain = need == nil && activity == nil && moment == nil
+        let life = plain && mode == .chill ? IdleLife.at(date) : nil
+        var pose = RunnerPose(
+            face: EnergyFace(energy: energy),
+            need: need,
+            life: life,
+            activity: activity,
+            moment: moment
+        )
         pose.codingCans = codingCans
+        if plain, life == nil { pose.show(PortraitStill.at(date), mode: mode) }
         if peeking {
             pose.bagLift = 0
             pose.eyesDx = -3
         }
-        return RunnerFigure(mode: mode, pose: pose)
+        return pose
     }
 }
 

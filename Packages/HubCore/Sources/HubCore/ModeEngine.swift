@@ -80,6 +80,8 @@ public enum ModeTrigger: Equatable, Sendable {
     case enteredPlace(Mode, name: String)
     /// An iOS Focus with the 副业 filter turned on, for vibe coding.
     case codingFocus
+    /// Leaving a place within `PlacePresence.bounce` of arriving at `arrivedAt`.
+    case passedBy(arrivedAt: Date)
 }
 
 /// An automatic change the engine wants, with the reason to show Mike.
@@ -145,6 +147,15 @@ public enum ModeEngine {
             guard !isHeld(changes, now: now, rules: rules), current?.sideHustle != .vibeCoding else { return nil }
             let tag = SideHustle.vibeCoding.rawValue
             return ModeDecision(mode: .money, source: .focus, reason: "编程专注模式开了", tag: tag)
+
+        case .passedBy(let arrived):
+            // Only undo a switch this visit made: it must still be the latest change.
+            guard let entry = current, entry.source == .location, entry.at >= arrived else { return nil }
+            guard now.timeIntervalSince(arrived) < PlacePresence.bounce else { return nil }
+            let before = changes.dropLast().last
+            let mode = before?.mode ?? .chill
+            guard mode != entry.mode || before?.tag != entry.tag else { return nil }
+            return ModeDecision(mode: mode, source: .location, reason: "只是路过", tag: before?.tag)
         }
     }
 

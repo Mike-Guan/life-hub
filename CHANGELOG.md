@@ -23,6 +23,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Lasting traces in HAKU's world: taped, scuffed gloves after 5 boxing sessions, a second monitor by
   the laptop after 10 hours of vibe coding, running shoes at home after 2 runs. The app decides when
   they are earned.
+- HAKU's eyes drift off to one side now and then and come back, so it looks like it has its own
+  thoughts.
+- HAKU on the widgets and Lock Screen changes a little every 15 minutes: a glance, a sip, gloves up.
+  At home it shows what it is doing in the app, such as napping (just zzz) or playing the handheld.
 - HAKU backs off: if you ignore the same invite (couch, gym day or scrolling at work) three times in a row,
   it stops that invite for a week and says "行，我不念了。" that day. Nothing is made up afterwards. An
   invite is only counted as ignored when the app can tell; when it can't, it isn't counted.
@@ -191,6 +195,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Walking past a place no longer leaves HAKU in that mode: leaving within 3 minutes of arriving puts
+  the earlier mode back. A GPS blip that leaves and returns within 3 minutes keeps the stay going, so
+  gym time and office time aren't cut short.
 - Settings > 钱: the amount fields now look like inputs, an outlined box with ¥ and the number
   together on the left, thousands separators, and a 完成 button to close the number pad.
 - A mistap or a curious look at another mode no longer sticks: switching again within 2 minutes
