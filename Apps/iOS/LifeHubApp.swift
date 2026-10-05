@@ -100,6 +100,7 @@ struct LifeHubApp: App {
             departure: needs.departure,
             event: needs.event,
             invite: needs.invite,
+            notice: NudgeBackoff.stored(in: AppGroup.defaults).notice(at: .now),
             money: moneyCard,
             onSettings: { showsSettings = true },
             cans: growth.ledger.balance,
