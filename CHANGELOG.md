@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- Widgets redraw every 15 minutes for the next 6 hours, so HAKU's idle bits on the Lock Screen change too.
 - The currency is called 能量罐 everywhere you read it: the shop, unboxing, places and VoiceOver. HAKU
   still drinks Monster. The home screen shows "你认真活过的每一天，都不该白白消失。" before any mode is set.
 - The clock no longer switches the mode. Work starts when you arrive at the office and ends when you
