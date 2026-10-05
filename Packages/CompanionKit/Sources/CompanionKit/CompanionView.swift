@@ -325,6 +325,8 @@ public struct CompanionView: View {
     /// Starts the notice turn as the app opens, as a slow look up when the app was closed for half a day.
     private func startNotice() {
         let now = Date.now
+        // Cold launch calls this on appear and again on .active; keep the first, which knows how long the app was away.
+        guard !Self.noticePlaying(since: noticeStart, now: now, duration: noticeDuration) else { return }
         noticeLookUp = Self.backAfterLongAway(lastSeen: lastSeen, now: now)
         lastSeen = now.timeIntervalSinceReferenceDate
         noticeStart = now
@@ -383,6 +385,12 @@ public struct CompanionView: View {
     private var noticeDuration: TimeInterval { noticeLookUp ? 1.6 : 0.9 }
     /// How long the app must have been closed for HAKU to look up with "oh, you're here", in seconds.
     nonisolated static let longAwayGap: TimeInterval = 12 * 3600
+
+    /// Whether a notice that started at `start` is still playing at `now`.
+    nonisolated static func noticePlaying(since start: Date?, now: Date, duration: TimeInterval) -> Bool {
+        guard let start else { return false }
+        return now.timeIntervalSince(start) < duration
+    }
 
     /// Whether the app was closed for at least `longAwayGap` before `now`. False on the first launch.
     nonisolated static func backAfterLongAway(lastSeen: Double, now: Date) -> Bool {
