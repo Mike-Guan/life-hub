@@ -19,6 +19,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- When HAKU has waited at the door long enough on a work-day morning, it gives up once: headphones off,
+  back on the sofa, "……今天在家？". The app decides when to play it.
 - The wardrobe has a 人生收藏 section: each keepsake you earned, with the day and how, such as
   "2026-11-02 · 累计 10 次周日拳击".
 - HAKU's world keeps traces of the day (Issue #83): a bandage after boxing, the monitor still glowing at home

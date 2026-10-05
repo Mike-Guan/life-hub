@@ -21,7 +21,8 @@ public struct CompanionView: View {
     /// What today left in HAKU's world, such as a bandage after boxing.
     let traces: Set<CompanionTrace>
     // To show a new item after its unboxing, pass a `wardrobe` with it equipped and its slot's `showcaseMode`.
-    /// A one-off animation: celebrating a workout, going off work or unboxing an item. Each event id plays once.
+    /// A one-off animation: celebrating a workout, going off work, unboxing an item or staying home.
+    /// Each event id plays once.
     let event: CompanionEvent?
     /// Today's invite, written by the app. While set, RUNNER gets up, jumps and says it.
     let invite: String?
@@ -54,6 +55,9 @@ public struct CompanionView: View {
     @State private var unlockStart: Date?
     // Id of the last unboxing, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastUnlock") private var lastUnlock = ""
+    @State private var stayHomeStart: Date?
+    // Day HAKU last gave up on leaving, shared by every CompanionView so it plays once a day.
+    @AppStorage("companion.lastStayHome") private var lastStayHome = ""
     @State private var swapStart: Date?
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
@@ -227,7 +231,7 @@ public struct CompanionView: View {
     /// What HAKU does on its own: only at home (chill), with nothing needed, awake and no event playing.
     private func idleLife(_ mode: Mode, at date: Date) -> IdleLife? {
         let time = date.timeIntervalSinceReferenceDate
-        let busy = celebration(at: time) != nil || offWork(at: time) != nil || unlock(at: time) != nil
+        let busy = celebration(at: time) != nil || stillOneOff(at: time)
         guard mode == .chill, need == nil, activity == nil, moment == nil, invite == nil, bedtime == .off, !busy else {
             return nil
         }
@@ -238,7 +242,7 @@ public struct CompanionView: View {
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
         if bedtime == .on || life == .nap { return IdleMotion.sleeping(time: time) }
-        if offWork(at: time) != nil || unlock(at: time) != nil { return IdleMotion(dy: 0, angle: 0) }
+        if stillOneOff(at: time) { return IdleMotion(dy: 0, angle: 0) }
         if let progress = celebration(at: time) { return IdleMotion.celebrating(progress: progress) }
         if let moment = shownMoment { return IdleMotion(moment: moment, mode: mode, time: time * face.speed) }
         // Warming up hops like boxing day, whatever the outfit.
@@ -254,6 +258,9 @@ public struct CompanionView: View {
         if bedtime == .on { return bedtimePose(time: time) }
         if let progress = offWork(at: time) {
             return RunnerPose.offWork(time: time, progress: reduceMotion ? 1 : progress, face: face)
+        }
+        if let progress = stayHome(at: time) {
+            return RunnerPose.stayHome(time: time, progress: reduceMotion ? 1 : progress, face: face)
         }
         let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
         if reduceMotion {
@@ -300,6 +307,16 @@ public struct CompanionView: View {
         Self.progress(since: unlockStart, at: time, duration: Self.unlockDuration)
     }
 
+    /// Progress of giving up on leaving at `time`, 0..<1, or nil when none is playing.
+    private func stayHome(at time: TimeInterval) -> Double? {
+        Self.progress(since: stayHomeStart, at: time, duration: Self.stayHomeDuration)
+    }
+
+    /// Whether a one-off animation that holds HAKU still is playing: off work, unboxing or staying home.
+    private func stillOneOff(at time: TimeInterval) -> Bool {
+        offWork(at: time) != nil || unlock(at: time) != nil || stayHome(at: time) != nil
+    }
+
     private static func progress(since start: Date?, at time: TimeInterval, duration: Double) -> Double? {
         guard let start = start?.timeIntervalSinceReferenceDate else { return nil }
         let progress = (time - start) / duration
@@ -323,6 +340,7 @@ public struct CompanionView: View {
     private static let celebrationDuration = 1.6
     private static let offWorkDuration = 4.0
     private static let unlockDuration = 2.8
+    private static let stayHomeDuration = 3.2
     private static let swapDuration = 0.5
 
     /// The celebration id to play for `event`, or nil when there is none or it already played.
@@ -341,6 +359,12 @@ public struct CompanionView: View {
     nonisolated static func newUnlock(_ event: CompanionEvent?, last: String) -> String? {
         guard case .unlock(let id, _) = event, id != last else { return nil }
         return id
+    }
+
+    /// The staying-home day to play for `event`, or nil when there is none or it already played.
+    nonisolated static func newStayHome(_ event: CompanionEvent?, last: String) -> String? {
+        guard case .stayHome(let day) = event, day != last else { return nil }
+        return day
     }
 
     private func playEventIfNew() {
@@ -369,6 +393,16 @@ public struct CompanionView: View {
                 try? await Task.sleep(for: .seconds(Self.unlockDuration * 0.5))
                 guard !Task.isCancelled else { return }
                 say(CompanionLines.unlock(item), for: 4)
+            }
+        }
+        if let day = Self.newStayHome(event, last: lastStayHome) {
+            lastStayHome = day
+            stayHomeStart = .now
+            say(nil)
+            bubbleTask = Task {
+                try? await Task.sleep(for: .seconds(Self.stayHomeDuration * 0.65))
+                guard !Task.isCancelled else { return }
+                say("……今天在家？", for: 4)
             }
         }
     }
@@ -408,7 +442,7 @@ public struct CompanionView: View {
         say((candidates.isEmpty ? lines : candidates).randomElement())
         // Taps during a one-off animation only get HAKU's reaction.
         let time = Date.now.timeIntervalSinceReferenceDate
-        guard celebration(at: time) == nil, offWork(at: time) == nil, unlock(at: time) == nil else { return }
+        guard celebration(at: time) == nil, !stillOneOff(at: time) else { return }
         onTap?()
     }
 
@@ -553,6 +587,7 @@ private struct SpeechBubble: View {
                 .frame(height: 180)
                 .toyCard()
             CompanionView(mode: .work, event: .offWork(id: "preview")).frame(height: 180).toyCard()
+            CompanionView(mode: .chill, event: .stayHome(id: "preview")).frame(height: 180).toyCard()
             CompanionView(
                 mode: .boxing,
                 event: .unlock(id: "preview", item: "gloves.gold"),

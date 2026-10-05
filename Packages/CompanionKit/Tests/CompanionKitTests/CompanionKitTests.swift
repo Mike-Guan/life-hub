@@ -279,6 +279,34 @@ import Testing
         #expect(stretching.stretch > 0.9 && stretching.maskDrop == 1 && stretching.headsetOff == 1)
     }
 
+    @Test func stayHomePlaysOncePerDay() {
+        #expect(CompanionView.newStayHome(.stayHome(id: "2026-10-05"), last: "") == "2026-10-05")
+        #expect(CompanionView.newStayHome(.stayHome(id: "2026-10-05"), last: "2026-10-05") == nil)
+        #expect(CompanionView.newStayHome(.offWork(id: "2026-10-05"), last: "") == nil)
+        #expect(CompanionView.newOffWork(.stayHome(id: "2026-10-05"), last: "") == nil)
+    }
+
+    @Test(arguments: Mode.allCases)
+    func stayHomeGoesFromDoorToSofa(_ mode: Mode) {
+        let start = Set(RunnerFigure.parts(for: mode, pose: RunnerPose.stayHome(time: 0, progress: 0, face: .mid)))
+        #expect(start.isSuperset(of: [.door, .watchWrist, .headset, .maskUp, .eyesWork]))
+        #expect(!start.contains(.sofaArm))
+        let end = Set(RunnerFigure.parts(for: mode, pose: RunnerPose.stayHome(time: 0, progress: 0.99, face: .mid)))
+        #expect(end.isSuperset(of: [.sofaArm, .maskDown, .eyesSleepy]))
+        #expect(end.isDisjoint(with: [.door, .watchWrist, .headset, .maskUp, .eyesWork, .ledLine]))
+        #expect(RunnerFigure.baseParts.isSubset(of: end))
+    }
+
+    @Test func stayHomePoseStaysInRange() {
+        for step in 0...100 {
+            let pose = RunnerPose.stayHome(time: Double(step) * 0.04, progress: Double(step) / 100, face: .mid)
+            #expect((0...1).contains(pose.headsetOff))
+            #expect((0...1).contains(pose.maskDrop))
+            #expect((-0.5...0).contains(pose.stretch))
+            #expect((0.1...1).contains(pose.blink))
+        }
+    }
+
     @Test func sundayAfternoonIsForTidying() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))

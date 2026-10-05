@@ -138,6 +138,8 @@ struct RunnerPose {
     var bagLift: CGFloat = -1
     /// Progress of the off-work animation, 0...1, or -1 when none is playing.
     var offWork: CGFloat = -1
+    /// Progress of giving up on leaving for work, 0...1, or -1 when none is playing.
+    var stayHome: CGFloat = -1
     /// What HAKU wears from the wardrobe.
     var outfit = Outfit()
 
@@ -194,6 +196,9 @@ struct RunnerPose {
 
     var tired: Bool { face == .low }
     var offWorking: Bool { offWork >= 0 }
+    var stayingHome: Bool { stayHome >= 0 }
+    /// Whether the mask slides down to the chin: going off work or staying home.
+    var unmasking: Bool { offWorking || stayingHome }
     /// How high the dumbbell is: the celebration reps while one plays, else the lift.
     var dumbbellRise: CGFloat { burst >= 0 ? abs(sin(burst * 2 * .pi)) : lift }
     /// HAKU's height while unboxing: 0 = inside the box, then a pop past full height that settles at 1.
@@ -578,6 +583,22 @@ struct RunnerPose {
         return pose
     }
 
+    /// Staying-home pose at `progress` (0...1): a last look at the door, headset and mask off, then back on the
+    /// sofa with a sigh.
+    static func stayHome(time: TimeInterval, progress: Double, face: EnergyFace) -> RunnerPose {
+        var pose = RunnerPose(face: face)
+        let p = CGFloat(min(max(progress, 0), 1))
+        pose.stayHome = p
+        pose.eyesDx = -3 * (1 - ramp(p, from: 0.1, to: 0.2))
+        pose.headsetOff = ramp(p, from: 0.15, to: 0.35)
+        pose.maskDrop = ramp(p, from: 0.3, to: 0.45)
+        let sigh = bump(p, from: 0.6, to: 0.85)
+        pose.headDy = 2 * ramp(p, from: 0.5, to: 0.6) + 1.5 * sigh
+        pose.stretch = -0.5 * sigh
+        pose.blink = max(0.15, (1 - 0.5 * sigh) * blink(at: time))
+        return pose
+    }
+
     /// The still bedtime pose, used for portraits and reduced motion.
     static func bedtimeStill() -> RunnerPose {
         var pose = bedtime(time: 2, goodnight: 1, liesDown: false)
@@ -642,7 +663,14 @@ struct RunnerFigure: View {
 
     /// Visible parts in back-to-front order.
     nonisolated static func parts(for mode: Mode, pose: RunnerPose) -> [RunnerPart] {
-        var visible = pose.offWorking ? offWorkParts(pose) : modeParts(for: mode, pose: pose)
+        var visible: Set<RunnerPart>
+        if pose.offWorking {
+            visible = offWorkParts(pose)
+        } else if pose.stayingHome {
+            visible = stayHomeParts(pose)
+        } else {
+            visible = modeParts(for: mode, pose: pose)
+        }
         wear(pose, mode: mode, on: &visible)
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
@@ -784,6 +812,17 @@ struct RunnerFigure: View {
         return visible
     }
 
+    /// The waiting-at-the-door look turning into sitting on the sofa, whatever the mode.
+    nonisolated private static func stayHomeParts(_ pose: RunnerPose) -> Set<RunnerPart> {
+        var visible = baseParts.union([.earringNeon])
+        let seated = pose.stayHome >= 0.5
+        visible.formUnion(seated ? [.eyesSleepy, .sofaArm] : [.eyesWork, .lidsWork, .browsWork, .door, .watchWrist])
+        if pose.headsetOff < 1 { visible.formUnion(headsetParts) }
+        if pose.maskDrop < 1 { visible.formUnion([.maskUp, .panelLines, .ledLine]) }
+        if pose.maskDrop > 0 { visible.insert(.maskDown) }
+        return visible
+    }
+
     nonisolated static let baseParts: Set<RunnerPart> = [
         .jacket, .stripeNeon, .hoodCollar, .hairBack, .earL, .earR, .faceBase, .hairFringe,
     ]
@@ -850,13 +889,13 @@ struct RunnerFigure: View {
             case .eyesChill:
                 // Closed smiling eyes don't blink, but they still look at the door while warming up.
                 RunnerPartView(part: part).offset(x: pose.eyesDx * scale)
-            case .maskUp where pose.offWorking, .panelLines where pose.offWorking, .ledLine where pose.offWorking,
-                .maskStripes where pose.offWorking:
-                // Off work: the mask slides down to the chin.
+            case .maskUp where pose.unmasking, .panelLines where pose.unmasking, .ledLine where pose.unmasking,
+                .maskStripes where pose.unmasking:
+                // Off work or staying home: the mask slides down to the chin.
                 RunnerPartView(part: part)
                     .offset(y: 12 * pose.maskDrop * scale)
                     .opacity(Double(1 - pose.maskDrop))
-            case .maskDown where pose.offWorking, .maskStripesDown where pose.offWorking:
+            case .maskDown where pose.unmasking, .maskStripesDown where pose.unmasking:
                 RunnerPartView(part: part).opacity(Double(pose.maskDrop))
             case .ledLine:
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
