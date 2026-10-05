@@ -398,6 +398,19 @@ import Testing
         #expect(CompanionView.newLateNight(at: morning, last: "", calendar: calendar) == nil)
     }
 
+    @Test func lowSpiritRubsAnEye() {
+        #expect(CompanionView.rubEyes(at: 10, mode: .work) == nil)
+        #expect(CompanionView.rubEyes(at: 35.25, mode: .work) == 0.5)
+        #expect(CompanionView.rubEyes(at: 16.5, mode: .chill) == nil)
+        #expect(CompanionView.rubEyes(at: 35.25, mode: .boxing) == nil)
+        var pose = RunnerPose(mode: .work, time: 3, face: .mid, react: 0)
+        let headDy = pose.headDy
+        #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.rubHand))
+        pose.rubEyes(progress: 0.5)
+        #expect(pose.rubEye == 0.5 && pose.blink <= 0.25 && pose.headDy == headDy + 1)
+        #expect(RunnerFigure.parts(for: .work, pose: pose).contains(.rubHand))
+    }
+
     @Test func tappedTooOftenHakuTurnsItsBack() {
         let now = Date(timeIntervalSinceReferenceDate: 1000)
         let two = [now.addingTimeInterval(-10), now]

@@ -327,6 +327,11 @@ public struct CompanionView: View {
             pose.notice(progress: progress, lookUp: noticeLookUp)
         }
         if let progress = turnAway(at: time) { pose.turnAway(progress: progress) }
+        if vitals.spirit == .low, shownNeed == nil, shownMoment == nil, life == nil, activity == nil,
+            let progress = Self.rubEyes(at: time * vitals.motionSpeed, mode: mode)
+        {
+            pose.rubEyes(progress: progress)
+        }
         if Self.progress(since: lateNightStart, at: time, duration: Self.lateNightDuration) != nil {
             // Opened after midnight: a squint at you.
             pose.blink = min(pose.blink, 0.4)
@@ -412,6 +417,16 @@ public struct CompanionView: View {
     private var noticeDuration: TimeInterval { noticeLookUp ? 1.6 : 0.9 }
     private static let lateNightDuration = 2.6
     private static let turnAwayDuration = 2.2
+
+    /// Progress of rubbing an eye at `time` when 元气 is low: 2.5 s in every 20 s, or nil in between and on
+    /// boxing day.
+    nonisolated static func rubEyes(at time: TimeInterval, mode: Mode) -> Double? {
+        // Boxing gloves stay on, so a bare fist would be a third hand.
+        guard mode != .boxing else { return nil }
+        let phase = time.truncatingRemainder(dividingBy: 20)
+        guard phase >= 14, phase < 16.5 else { return nil }
+        return (phase - 14) / 2.5
+    }
     /// How far back taps count towards pestering HAKU, in seconds.
     nonisolated static let pesterWindow: TimeInterval = 30
 

@@ -20,6 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- When HAKU's 元气 is low (short sleep, no sun) it now and then rubs an eye with its fist.
 - Tap HAKU three times within 30 seconds and it says "……干嘛。" and turns its back on you for a moment.
 - At work HAKU now and then sneaks a look at its phone and puts it straight away.
 - On boxing day HAKU now and then shakes out its wrists and lifts a glove to fix its headband.
