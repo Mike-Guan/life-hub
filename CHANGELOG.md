@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- Widgets redraw every 15 minutes for the next 6 hours, so HAKU's idle bits on the Lock Screen change too.
 - The currency is called 能量罐 everywhere you read it: the shop, unboxing, places and VoiceOver. HAKU
   still drinks Monster. The home screen shows "你认真活过的每一天，都不该白白消失。" before any mode is set.
 - The clock no longer switches the mode. Work starts when you arrive at the office and ends when you
@@ -22,6 +23,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Debug builds keep a local dogfood log of automatic decisions (each geofence arrival or departure and
   whether it switched the mode, and the 编程 Focus), so wrong switches can be found after a few weeks of use.
   It stays on the iPhone and isn't shown in the app.
+- HAKU backs off: if you ignore the same invite (couch, gym day or scrolling at work) three times in a row,
+  it stops that invite for a week and says "行，我不念了。" that day. Nothing is made up afterwards. An
+  invite is only counted as ignored when the app can tell; when it can't, it isn't counted.
 - When you open the app, HAKU is looking elsewhere and turns to you half a beat late. A napping HAKU
   doesn't.
 - When HAKU has waited at the door long enough on a work-day morning, it gives up once: headphones off,
