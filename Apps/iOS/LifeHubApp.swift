@@ -235,7 +235,7 @@ struct LifeHubApp: App {
     ) {
         monitor.start(places) { place, entered in
             var presence = PlacePresence.stored(in: AppGroup.defaults)
-            let arrived = presence.since(.fitness)
+            let arrived = presence.since(place.action == .boxing ? .gym : .fitness)
             let stayStart = presence.since(place)
             if entered, place.action == .fitness, presence.since(.fitness) == nil {
                 let departure = GymDeparture.stored(in: AppGroup.defaults)
@@ -246,7 +246,7 @@ struct LifeHubApp: App {
             }
             presence.record(place, entered: entered, at: .now)
             presence.store(in: AppGroup.defaults)
-            if place.action == .fitness, !entered, let arrived, let visit = Win.gymVisit(from: arrived, to: .now) {
+            if !entered, let arrived, let visit = Win.visit(place.action, from: arrived, to: .now) {
                 growth.record(visit.win, source: visit.source, at: visit.at)
             }
             let rules = ModeRules.stored(in: AppGroup.defaults)

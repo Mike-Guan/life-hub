@@ -227,6 +227,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Staying 30 minutes at the boxing gym counts as boxing, like the fitness gym: 5 cans once a week and
+  a step toward the worn and gold gloves. Before, boxing counted only with a watch workout.
 - When location access isn't "Always", home shows how to fix it. Without it the app only learns you left
   the office or got home when you open it. The Debug log notes why a place event was held back.
 - Opening the app now plays what you missed in the last 3 hours: a mode switch made while the app was
