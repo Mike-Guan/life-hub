@@ -90,11 +90,20 @@ import Testing
     }
 
     @Test func gymVisitEarnsAfterHalfAnHour() {
-        #expect(Win.gymVisit(from: date(6, 19), to: date(6, 19, 29), calendar: calendar) == nil)
-        let visit = Win.gymVisit(from: date(6, 19), to: date(6, 19, 30), calendar: calendar)
+        #expect(Win.visit(.fitness, from: date(6, 19), to: date(6, 19, 29), calendar: calendar) == nil)
+        let visit = Win.visit(.fitness, from: date(6, 19), to: date(6, 19, 30), calendar: calendar)
         #expect(visit?.win == .gym)
         #expect(visit?.at == date(6, 19, 30))
         let lifted = WorkoutSummary(id: "w", kind: .strength, start: date(6, 19, 5), end: date(6, 19, 50))
         #expect(visit?.source == Win.wins(in: [lifted], calendar: calendar).first?.source)
+    }
+
+    @Test func boxingGymVisitEarnsBoxingOncePerWeekWithTheWorkout() {
+        #expect(Win.visit(.boxing, from: date(11, 10), to: date(11, 10, 29), calendar: calendar) == nil)
+        let visit = Win.visit(.boxing, from: date(11, 10), to: date(11, 11), calendar: calendar)
+        #expect(visit?.win == .boxing)
+        let boxed = WorkoutSummary(id: "b", kind: .boxing, start: date(11, 10, 5), end: date(11, 10, 50))
+        #expect(visit?.source == Win.wins(in: [boxed], calendar: calendar).first?.source)
+        #expect(Win.visit(.work, from: date(6, 9), to: date(6, 18), calendar: calendar) == nil)
     }
 }

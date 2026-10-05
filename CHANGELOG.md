@@ -223,6 +223,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Staying 30 minutes at the boxing gym counts as boxing, like the fitness gym: 5 cans once a week and
+  a step toward the worn and gold gloves. Before, boxing counted only with a watch workout.
 - Opening the app now plays what you missed in the last 3 hours: a mode switch made while the app was
   closed (HAKU starts in the old outfit and changes), and the off-work animation if you didn't tap the
   notice and aren't back in 上班. Before, these only played with the app on screen, so HAKU looked idle.
