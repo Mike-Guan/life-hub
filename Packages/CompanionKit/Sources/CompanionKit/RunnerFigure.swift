@@ -653,11 +653,18 @@ struct RunnerPose {
     }
 
     /// Noticing you at `progress` (0...1) after the app opens: eyes elsewhere, then a half-beat late turn
-    /// to you with a small lift of the head.
-    mutating func notice(progress: Double) {
+    /// to you with a small lift of the head. With `lookUp`, HAKU starts with its head down and looks up
+    /// at you higher and slower.
+    mutating func notice(progress: Double, lookUp: Bool = false) {
         let p = CGFloat(min(max(progress, 0), 1))
-        eyesDx += 3 * (1 - Self.ramp(p, from: 0.55, to: 0.75))
-        headDy -= 1.5 * Self.bump(p, from: 0.6, to: 0.9)
+        guard lookUp else {
+            eyesDx += 3 * (1 - Self.ramp(p, from: 0.55, to: 0.75))
+            headDy -= 1.5 * Self.bump(p, from: 0.6, to: 0.9)
+            return
+        }
+        let up = Self.ramp(p, from: 0.35, to: 0.6)
+        eyesDy += 2 * (1 - up)
+        headDy += 1.5 * (1 - up) - 3 * Self.bump(p, from: 0.45, to: 0.95)
     }
 
     /// The still bedtime pose, used for portraits and reduced motion.

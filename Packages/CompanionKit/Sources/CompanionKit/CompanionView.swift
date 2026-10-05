@@ -62,6 +62,9 @@ public struct CompanionView: View {
     @AppStorage("companion.lastStayHome") private var lastStayHome = ""
     @State private var swapStart: Date?
     @State private var noticeStart: Date?
+    // Seconds since the reference date when the app was last open, shared by every CompanionView.
+    @AppStorage("companion.lastSeen") private var lastSeen: Double = 0
+    @State private var noticeLookUp = false
     // A napping HAKU only rolls over on the first tap; a second tap soon after half wakes it.
     @State private var rollStart: Date?
     @State private var bubble: String?
@@ -131,7 +134,7 @@ public struct CompanionView: View {
             say(nil)
         }
         .onAppear {
-            noticeStart = .now
+            startNotice()
             if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
             playEventIfNew()
             if invite != nil { startInvite() }
@@ -141,7 +144,8 @@ public struct CompanionView: View {
         }
         .onChange(of: event) { _, _ in playEventIfNew() }
         .onChange(of: scenePhase) { _, new in
-            if new == .active { noticeStart = .now }
+            if new == .active { startNotice() }
+            if new == .background { lastSeen = Date.now.timeIntervalSinceReferenceDate }
         }
         .onChange(of: moment) { _, _ in
             pop += 1
@@ -310,12 +314,22 @@ public struct CompanionView: View {
         }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
         if let progress = unlock(at: time) { pose.unbox(progress: CGFloat(progress)) }
-        if let progress = Self.progress(since: noticeStart, at: time, duration: Self.noticeDuration),
+        if let progress = Self.progress(since: noticeStart, at: time, duration: noticeDuration),
             life != .nap, !stillOneOff(at: time), celebration(at: time) == nil
         {
-            pose.notice(progress: progress)
+            pose.notice(progress: progress, lookUp: noticeLookUp)
         }
         return pose
+    }
+
+    /// Starts the notice turn as the app opens, as a slow look up when the app was closed for half a day.
+    private func startNotice() {
+        let now = Date.now
+        // Cold launch calls this on appear and again on .active; keep the first, which knows how long the app was away.
+        guard !Self.noticePlaying(since: noticeStart, now: now, duration: noticeDuration) else { return }
+        noticeLookUp = Self.backAfterLongAway(lastSeen: lastSeen, now: now)
+        lastSeen = now.timeIntervalSinceReferenceDate
+        noticeStart = now
     }
 
     /// Progress of the celebration at `time`, 0..<1, or nil when none is playing.
@@ -368,7 +382,20 @@ public struct CompanionView: View {
     private static let unlockDuration = 2.8
     private static let stayHomeDuration = 3.2
     private static let swapDuration = 0.5
-    private static let noticeDuration = 0.9
+    private var noticeDuration: TimeInterval { noticeLookUp ? 1.6 : 0.9 }
+    /// How long the app must have been closed for HAKU to look up with "oh, you're here", in seconds.
+    nonisolated static let longAwayGap: TimeInterval = 12 * 3600
+
+    /// Whether a notice that started at `start` is still playing at `now`.
+    nonisolated static func noticePlaying(since start: Date?, now: Date, duration: TimeInterval) -> Bool {
+        guard let start else { return false }
+        return now.timeIntervalSince(start) < duration
+    }
+
+    /// Whether the app was closed for at least `longAwayGap` before `now`. False on the first launch.
+    nonisolated static func backAfterLongAway(lastSeen: Double, now: Date) -> Bool {
+        lastSeen > 0 && now.timeIntervalSinceReferenceDate - lastSeen >= longAwayGap
+    }
     private static let rollDuration = 1.2
     /// How soon after rolling over a second tap half wakes a napping HAKU, in seconds.
     nonisolated static let napWakeWindow: TimeInterval = 8
