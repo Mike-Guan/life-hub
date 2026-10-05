@@ -1,7 +1,7 @@
 import Foundation
 
 // PRD section 19: during the 2 to 4 weeks of use, wrong geofence switches and unsure calls should be
-// visible afterwards. Debug builds only, stored on the device, never shown in the app.
+// visible afterwards. Debug builds only, stored on the device, read from Settings in Debug builds.
 /// A short local list of automatic decisions, newest last.
 public struct DogfoodLog: Codable, Equatable, Sendable {
     /// One automatic decision.
@@ -32,6 +32,13 @@ public struct DogfoodLog: Codable, Equatable, Sendable {
     public mutating func append(_ entry: Entry) {
         entries.append(entry)
         if entries.count > Self.limit { entries.removeFirst(entries.count - Self.limit) }
+    }
+
+    /// The entries as plain text, one per line, newest last, with times in `timeZone`.
+    public func text(in timeZone: TimeZone = .current) -> String {
+        let format = Date.ISO8601FormatStyle(timeZone: timeZone).year().month().day()
+            .time(includingFractionalSeconds: false)
+        return entries.map { "\($0.at.formatted(format)) [\($0.kind)] \($0.detail)" }.joined(separator: "\n")
     }
 
     /// The log saved in `defaults`, or an empty one when nothing is saved or it can't be read.
