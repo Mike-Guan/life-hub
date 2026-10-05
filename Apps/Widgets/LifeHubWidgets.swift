@@ -88,7 +88,7 @@ struct HubProvider: TimelineProvider {
         let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work)
         let slots = WidgetSnapshot.slotDates(after: now)
         let daily = DailyPlan.stored(in: AppGroup.defaults)
-        let dailyTimes = daily?.occurrences.map(\.start) ?? []
+        let dailyTimes = daily?.times ?? []
         let needTimes = (snapshot?.needTimes ?? []) + starts + walk + office + home + slots + dailyTimes
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
