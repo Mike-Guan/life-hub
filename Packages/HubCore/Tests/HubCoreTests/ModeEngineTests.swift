@@ -33,40 +33,12 @@ import Testing
         #expect(ModeEngine.scheduledMode(at: date(3, 12), rules: rules, calendar: calendar) == .chill)
     }
 
-    @Test func lastScheduleChangeSkipsTheWeekend() {
-        let rules = ModeRules.standard
-        #expect(ModeEngine.lastScheduleChange(before: date(5, 12), rules: rules, calendar: calendar) == date(5, 9, 30))
-        #expect(ModeEngine.lastScheduleChange(before: date(5, 8), rules: rules, calendar: calendar) == date(2, 18, 30))
-        let none = ModeRules(workdays: [], workStartMinute: 0, workEndMinute: 0, manualHold: 0, gymMinimumStay: 0)
-        #expect(ModeEngine.lastScheduleChange(before: date(5, 8), rules: none, calendar: calendar) == nil)
-    }
-
-    @Test func scheduleSwitchesAnEmptyLog() {
-        let decision = decide(.schedule, ModeLog(), at: date(5, 10))
-        #expect(decision == ModeDecision(mode: .work, source: .schedule, reason: "工作日上班时间"))
-    }
-
-    @Test func scheduleActsOncePerPeriod() {
-        // Work started at 9:30; Mike picked money at 10:00, more than 2 h ago.
-        let picked = log((.work, .schedule, date(5, 9, 30)), (.money, .manual, date(5, 10)))
-        #expect(decide(.schedule, picked, at: date(5, 13)) == nil)
-        #expect(decide(.schedule, picked, at: date(5, 18, 31))?.mode == .chill)
-        #expect(decide(.schedule, picked, at: date(5, 18, 31))?.reason == "下班时间")
-    }
-
-    @Test func scheduleWaitsTwoHoursAfterAManualChange() {
-        let manual = log((.money, .manual, date(5, 17, 45)))
-        #expect(decide(.schedule, manual, at: date(5, 19, 44)) == nil)
-        #expect(decide(.schedule, manual, at: date(5, 19, 45))?.mode == .chill)
-    }
-
-    @Test func scheduleLeavesTheMatchingModeAlone() {
-        #expect(decide(.schedule, log((.chill, .inferred, date(4, 20))), at: date(5, 8)) == nil)
-    }
-
-    @Test func scheduleDoesNotEndAGymVisit() {
-        let gym = log((.work, .schedule, date(5, 9, 30)), (.boxing, .location, date(5, 18)))
-        #expect(decide(.schedule, gym, at: date(5, 19)) == nil)
+    @Test func theClockNeverSwitchesTheMode() {
+        // Mike, 2026-10-05: at 10:00 on a work day, still at home, the mode stays as it was.
+        let morning = log((.chill, .manual, date(4, 23)))
+        for trigger in [ModeTrigger.leftOffice, .leftGym] {
+            #expect(decide(trigger, morning, at: date(5, 10)) == nil)
+        }
     }
 
     @Test func gymWinsEvenRightAfterAManualChange() {
@@ -83,21 +55,10 @@ import Testing
         #expect(decision == ModeDecision(mode: .chill, source: .location, reason: "离开拳馆，回到「下班 Chill」"))
     }
 
-    @Test func leavingTheGymAfterWorkHoursFollowsTheSchedule() {
-        let visit = log((.work, .schedule, date(5, 9, 30)), (.boxing, .location, date(5, 18)))
-        let decision = decide(.leftGym, visit, at: date(5, 20))
-        #expect(decision?.mode == .chill)
-        let left = log(
-            (.work, .schedule, date(5, 9, 30)),
-            (.boxing, .location, date(5, 18)),
-            (.chill, .location, date(5, 20))
-        )
-        #expect(decide(.schedule, left, at: date(5, 21)) == nil)
-    }
-
-    @Test func leavingTheGymWithNoHistoryUsesTheSchedule() {
-        let visit = log((.boxing, .location, date(5, 7)))
-        #expect(decide(.leftGym, visit, at: date(5, 10))?.mode == .work)
+    @Test func leavingTheGymAfterAnAutomaticModeGoesToChill() {
+        let visit = log((.work, .location, date(5, 9, 30)), (.boxing, .location, date(5, 18)))
+        #expect(decide(.leftGym, visit, at: date(5, 20))?.mode == .chill)
+        #expect(decide(.leftGym, log((.boxing, .location, date(5, 7))), at: date(5, 10))?.mode == .chill)
     }
 
     @Test func leavingTheGymKeepsAManualChangeMadeThere() {
@@ -117,6 +78,13 @@ import Testing
         #expect(decide(.enteredOffice, log((.work, .schedule, date(5, 9, 30))), at: date(5, 9, 40)) == nil)
     }
 
+    @Test func leavingTheOfficeEndsWorkUnlessHeld() {
+        let decision = decide(.leftOffice, log((.work, .location, date(5, 9))), at: date(5, 18, 40))
+        #expect(decision == ModeDecision(mode: .chill, source: .location, reason: "离开公司了"))
+        #expect(decide(.leftOffice, log((.work, .manual, date(5, 18))), at: date(5, 18, 40)) == nil)
+        #expect(decide(.leftOffice, log((.money, .manual, date(5, 9))), at: date(5, 18, 40)) == nil)
+    }
+
     @Test func addedPlacesSwitchUnlessHeld() {
         let studio = ModeTrigger.enteredPlace(.money, name: "工作室")
         let decision = decide(studio, log((.chill, .schedule, date(3, 14))), at: date(3, 15))
@@ -128,21 +96,28 @@ import Testing
 
     @MainActor @Test func storeAppliesTheDecision() {
         let store = ModeStore(fileURL: nil, deviceID: "test")
-        let decision = store.autoSwitch(.schedule, now: date(5, 10), calendar: calendar)
+        let decision = store.autoSwitch(.enteredOffice, now: date(5, 10), calendar: calendar)
         #expect(decision?.mode == .work)
-        #expect(store.log.current?.source == .schedule)
-        #expect(store.autoSwitch(.schedule, now: date(5, 11), calendar: calendar) == nil)
+        #expect(store.log.current?.source == .location)
+        #expect(store.autoSwitch(.enteredOffice, now: date(5, 11), calendar: calendar) == nil)
     }
 
-    @Test func offWorkNoticeIsBeforeTheEndOfEachWorkday() {
-        let notices = ModeRules.standard.offWorkNotices
-        #expect(notices.map(\.weekday) == [2, 3, 4, 5, 6])
-        #expect(notices.allSatisfy { $0.hour == 18 && $0.minute == 15 })
+    @Test func offWorkNoticeOnlyWhenAtWork() {
+        let rules = ModeRules.standard
+        let notice = { (now: Date, mode: Mode?, office: Bool) in
+            rules.offWorkNotice(on: now, mode: mode, atOffice: office, calendar: self.calendar)
+        }
+        #expect(notice(date(5, 10), .work, false) == date(5, 18, 15))
+        #expect(notice(date(5, 10), .chill, true) == date(5, 18, 15))
+        // Not at work, already past, or not a work day: none.
+        #expect(notice(date(5, 10), .chill, false) == nil)
+        #expect(notice(date(5, 10), nil, false) == nil)
+        #expect(notice(date(5, 18, 15), .work, true) == nil)
+        #expect(notice(date(4, 10), .work, true) == nil)
 
-        var early = ModeRules.standard
-        early.workdays = [3]
+        var early = rules
         early.workEndMinute = 10
-        #expect(early.offWorkNotices == [DateComponents(hour: 0, minute: 0, weekday: 3)])
+        #expect(early.offWorkNotice(on: date(5, 0, 5), mode: .work, atOffice: false, calendar: calendar) == nil)
     }
 
     @Test func rulesRoundTripThroughDefaults() throws {

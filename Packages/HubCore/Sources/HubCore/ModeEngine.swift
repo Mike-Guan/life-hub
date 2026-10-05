@@ -40,10 +40,20 @@ extension ModeRules {
     /// Minutes before the end of work hours that the off-work notice goes out.
     public static let offWorkLead = 15
 
-    /// When the off-work notice goes out: one weekday, hour and minute per work day.
-    public var offWorkNotices: [DateComponents] {
+    // Mike, 2026-10-05: only when he is really at work, so a day off or working elsewhere gets no notice.
+    /// When today's off-work notice goes out, or `nil` when it shouldn't: not a work day, already past,
+    /// or Mike is neither in work mode nor at the office.
+    public func offWorkNotice(
+        on now: Date,
+        mode: Mode?,
+        atOffice: Bool,
+        calendar: Calendar = .current
+    ) -> Date? {
+        guard workdays.contains(calendar.component(.weekday, from: now)), mode == .work || atOffice else { return nil }
         let minute = max(workEndMinute - Self.offWorkLead, 0)
-        return workdays.sorted().map { DateComponents(hour: minute / 60, minute: minute % 60, weekday: $0) }
+        let midnight = calendar.startOfDay(for: now)
+        guard let time = calendar.date(byAdding: .minute, value: minute, to: midnight), time > now else { return nil }
+        return time
     }
 
     static let defaultsKey = "modeRules"
@@ -62,11 +72,10 @@ extension ModeRules {
 
 /// Something that may change the mode without Mike tapping.
 public enum ModeTrigger: Equatable, Sendable {
-    /// A periodic check against the weekday schedule.
-    case schedule
     case enteredGym
     case leftGym
     case enteredOffice
+    case leftOffice
     /// Arriving at a place Mike added that switches to `mode`.
     case enteredPlace(Mode, name: String)
     /// An iOS Focus with the 副业 filter turned on, for vibe coding.
@@ -82,6 +91,7 @@ public struct ModeDecision: Equatable, Sendable {
     public var tag: String?
 }
 
+// Modes change by place or by hand only; Mike turned off switching by the clock (PRD §16, 2026-10-05).
 /// Rules for automatic mode changes. Manual changes always win, except arriving at the gym.
 public enum ModeEngine {
     /// The mode the weekday schedule gives at `date`.
@@ -91,22 +101,6 @@ public enum ModeEngine {
         let minute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
         let inHours = minute >= rules.workStartMinute && minute < rules.workEndMinute
         return rules.workdays.contains(weekday) && inHours ? .work : .chill
-    }
-
-    /// The latest time at or before `date` where the schedule changes mode, within the last week.
-    public static func lastScheduleChange(before date: Date, rules: ModeRules, calendar: Calendar = .current) -> Date? {
-        var latest: Date?
-        let today = calendar.startOfDay(for: date)
-        for back in 0...7 {
-            guard let day = calendar.date(byAdding: .day, value: -back, to: today) else { continue }
-            guard rules.workdays.contains(calendar.component(.weekday, from: day)) else { continue }
-            for minute in [rules.workStartMinute, rules.workEndMinute] {
-                if let time = calendar.date(byAdding: .minute, value: minute, to: day), time <= date {
-                    latest = max(latest ?? time, time)
-                }
-            }
-        }
-        return latest
     }
 
     /// What `trigger` should do to the mode in `log` at `now`.
@@ -129,16 +123,19 @@ public enum ModeEngine {
             // Only undo our own switch: the gym entry must still be the latest change.
             guard let entry = current, isGymVisit(entry) else { return nil }
             guard now.timeIntervalSince(entry.at) >= rules.gymMinimumStay else { return nil }
-            // A mode Mike picked comes back; anything automatic is re-decided by the schedule for now.
+            // A mode Mike picked comes back. An automatic one came from where he was before, so it's chill now.
             let previous = changes.dropLast().last
-            let scheduled = scheduledMode(at: now, rules: rules, calendar: calendar)
-            let before = previous.map { $0.source.isManual ? $0.mode : scheduled } ?? scheduled
+            let before = previous.map { $0.source.isManual ? $0.mode : .chill } ?? .chill
             guard before != .boxing else { return nil }
             return ModeDecision(mode: before, source: .location, reason: "离开拳馆，回到「\(before.title)」")
 
         case .enteredOffice:
             guard !isHeld(changes, now: now, rules: rules), current?.mode != .work else { return nil }
             return ModeDecision(mode: .work, source: .location, reason: "到公司了")
+
+        case .leftOffice:
+            guard !isHeld(changes, now: now, rules: rules), current?.mode == .work else { return nil }
+            return ModeDecision(mode: .chill, source: .location, reason: "离开公司了")
 
         case .enteredPlace(let mode, let name):
             guard !isHeld(changes, now: now, rules: rules), current?.mode != mode else { return nil }
@@ -148,18 +145,6 @@ public enum ModeEngine {
             guard !isHeld(changes, now: now, rules: rules), current?.sideHustle != .vibeCoding else { return nil }
             let tag = SideHustle.vibeCoding.rawValue
             return ModeDecision(mode: .money, source: .focus, reason: "编程专注模式开了", tag: tag)
-
-        case .schedule:
-            guard !isHeld(changes, now: now, rules: rules) else { return nil }
-            // Leaving the gym ends a visit, not the schedule.
-            if let current, isGymVisit(current) { return nil }
-            // The schedule acts once per period, so a later choice in the same period stays.
-            let boundary = lastScheduleChange(before: now, rules: rules, calendar: calendar)
-            if let current, let boundary, current.at >= boundary { return nil }
-            let mode = scheduledMode(at: now, rules: rules, calendar: calendar)
-            guard current?.mode != mode else { return nil }
-            let reason = mode == .work ? "工作日上班时间" : "下班时间"
-            return ModeDecision(mode: mode, source: .schedule, reason: reason)
         }
     }
 
