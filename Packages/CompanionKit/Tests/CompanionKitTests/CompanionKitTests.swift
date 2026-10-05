@@ -468,7 +468,7 @@ import Testing
         #expect(!CompanionView.packUpDue(last: 100_000 - 19 * 60, now: now))
     }
 
-    @Test func hakuHoldsUpThePlannedTasksProp() {
+    @Test @MainActor func hakuHoldsUpThePlannedTasksProp() {
         var tapping = RunnerPose(mode: .work, time: 0, face: .mid, react: 0)
         tapping.cue(DailyCue(stage: .soon, prop: .note, id: "a"), time: 1, slap: nil)
         let tappingParts = Set(RunnerFigure.parts(for: .work, pose: tapping))
