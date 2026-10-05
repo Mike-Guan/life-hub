@@ -1,4 +1,5 @@
 import AppIntents
+import FamilyControls
 import HubCore
 import SwiftUI
 import UIKit
@@ -106,6 +107,7 @@ struct LifeHubApp: App {
             cans: growth.ledger.balance,
             onShop: { showsShop = true },
             wardrobe: wardrobe,
+            ledger: growth.ledger,
             onWardrobe: { showsWardrobe = true }
         )
         .environment(store)
@@ -223,13 +225,18 @@ struct LifeHubApp: App {
                 growth.record(visit.win, source: visit.source, at: visit.at)
             }
             let rules = ModeRules.stored(in: AppGroup.defaults)
+            let decision: ModeDecision?
             if !entered, let stayStart, Date.now.timeIntervalSince(stayStart) < PlacePresence.bounce {
                 // Walking past a fence takes back the switch the arrival made.
-                store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules)
+                decision = store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules)
             } else if let trigger = place.trigger(entered: entered) {
                 // After a GPS-drift return the stay continues; this puts back a mode the leave changed.
-                store.autoSwitch(trigger, rules: rules)
+                decision = store.autoSwitch(trigger, rules: rules)
+            } else {
+                decision = nil
             }
+            let outcome = decision.map { "切到\($0.mode.title)" } ?? "不切"
+            Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
             needs.refresh(places: places, manualSince: store.log.changes.last(where: \.source.isManual)?.at)
             widgets.need = needs.reading
             widgets.workouts = needs.workouts
@@ -261,11 +268,19 @@ struct LifeHubApp: App {
 
     // Builds before the report ladder watched a single 30-minute event; restarting swaps in the ladder.
     private static func restartScrollWatch() -> String? {
-        guard ScrollWatch.hasSelection else { return nil }
+        // Without Screen Time HAKU never sees couch scrolling; the dogfood log says why.
+        guard ScrollWatch.hasSelection else {
+            Dogfood.note("screenTime", "没选 App，不判断刷手机")
+            return nil
+        }
+        if AuthorizationCenter.shared.authorizationStatus != .approved {
+            Dogfood.note("screenTime", "没授权，不判断刷手机")
+        }
         do {
             try ScrollWatch.start(ScrollWatch.selection, work: .stored(in: AppGroup.defaults))
             return nil
         } catch {
+            Dogfood.note("screenTime", "监测没启动：\(error.localizedDescription)")
             return "Screen Time 监测没启动：\(error.localizedDescription)"
         }
     }

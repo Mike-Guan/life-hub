@@ -33,6 +33,8 @@ struct HomeView: View {
     var onShop: (() -> Void)?
     /// What HAKU wears.
     var wardrobe = Wardrobe()
+    /// Earned cans, for the traces that stay.
+    var ledger = CanLedger()
     /// Shows the wardrobe button on HAKU's card that calls this, when set.
     var onWardrobe: (() -> Void)?
 
@@ -61,12 +63,7 @@ struct HomeView: View {
                         activity: shownActivity(at: context.date),
                         moment: moment(at: context.date),
                         codingCans: codingCans(at: context.date),
-                        traces: MomentEngine.traces(
-                            log: store.log,
-                            workouts: workouts,
-                            energy: reading?.level,
-                            now: context.date
-                        ),
+                        traces: traces(at: context.date, energy: reading?.level),
                         event: event ?? stayHome(at: context.date),
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
@@ -191,6 +188,11 @@ struct HomeView: View {
         activitySignals.flatMap {
             ActivityEngine.activity($0, days: activityDays, work: rules, bedtime: bedtime, now: date)
         }
+    }
+
+    private func traces(at date: Date, energy: EnergyLevel?) -> Set<CompanionTrace> {
+        let today = MomentEngine.traces(log: store.log, workouts: workouts, energy: energy, now: date)
+        return today.union(MomentEngine.lastingTraces(log: store.log, ledger: ledger, now: date))
     }
 
     private func codingCans(at date: Date) -> Int {

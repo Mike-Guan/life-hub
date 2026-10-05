@@ -71,6 +71,7 @@ struct SettingsView: View {
             // entitlement, so the button could only fail. Remove with the CI-CD.md Screen Time step.
             #if DEBUG
             scrollCard
+            dogfoodCard
             #endif
         }
         .padding(20)
@@ -153,6 +154,31 @@ struct SettingsView: View {
         .onChange(of: scrollApps) { watchScrolling() }
     }
 
+    // Debug builds only: the automatic decisions noted during the weeks of use (PRD section 19).
+    private var dogfoodCard: some View {
+        let log = DogfoodLog.stored(in: AppGroup.defaults)
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Text("调试记录")
+                    .font(Toy.body(16, weight: .heavy))
+                Text("\(log.entries.count) 条")
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.muted)
+                Spacer()
+                ShareLink("导出", item: log.text())
+                    .font(Toy.body(13, weight: .heavy))
+                    .disabled(log.entries.isEmpty)
+            }
+            ForEach(Array(log.entries.suffix(5).reversed().enumerated()), id: \.offset) { _, entry in
+                Text("\(entry.at.formatted(date: .omitted, time: .shortened)) \(entry.kind)：\(entry.detail)")
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.muted)
+            }
+        }
+        .padding(16)
+        .toyCard()
+    }
+
     private var pickedLabel: String {
         let apps = scrollApps.applicationTokens.count + scrollApps.categoryTokens.count
         let count = apps + scrollApps.webDomainTokens.count
@@ -167,6 +193,7 @@ struct SettingsView: View {
             pickingApps = true
         } catch {
             screenTimeError = "Screen Time 没打开：\(error.localizedDescription)"
+            Dogfood.note("screenTime", "授权失败：\(error.localizedDescription)")
         }
     }
 
@@ -177,6 +204,7 @@ struct SettingsView: View {
             screenTimeError = nil
         } catch {
             screenTimeError = "Screen Time 监测没启动：\(error.localizedDescription)"
+            Dogfood.note("screenTime", "监测没启动：\(error.localizedDescription)")
         }
     }
 

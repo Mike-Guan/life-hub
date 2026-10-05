@@ -141,6 +141,24 @@ import Testing
         #expect(traces(ModeLog(), workouts: [yesterday], energy: .okay).isEmpty)
     }
 
+    @Test func lastingTracesBuildUpAndStay() {
+        func earned(_ win: Win, _ times: Int) -> [CanEntry] {
+            (0..<times).map { CanEntry.earned(win, source: "\(win)\($0)", at: date(1, 12), deviceID: "t") }
+        }
+        let few = CanLedger(entries: earned(.boxing, 4) + earned(.run5k, 1))
+        #expect(MomentEngine.lastingTraces(log: ModeLog(), ledger: few, now: date(5, 12)).isEmpty)
+        let enough = CanLedger(entries: earned(.boxing, 5) + earned(.run5k, 2))
+        let lasting = MomentEngine.lastingTraces(log: ModeLog(), ledger: enough, now: date(5, 12))
+        #expect(lasting == [.wornGloves, .runningShoes])
+        let coding = log(
+            (.money, "vibeCoding", date(1, 10)),
+            (.chill, nil, date(1, 16)),
+            (.money, "vibeCoding", date(2, 10))
+        )
+        #expect(MomentEngine.lastingTraces(log: coding, ledger: CanLedger(), now: date(2, 13, 59)).isEmpty)
+        #expect(MomentEngine.lastingTraces(log: coding, ledger: CanLedger(), now: date(2, 14)) == [.deskMonitor])
+    }
+
     @Test func snapshotCarriesTodaysTracesAndHomeSignals() {
         var snapshot = WidgetSnapshot(mode: .chill, since: nil, updatedAt: date(5, 20))
         snapshot.traces = [.bandage]
@@ -148,6 +166,9 @@ import Testing
         snapshot.manualAt = date(5, 8)
         #expect(snapshot.traces(at: date(5, 23), calendar: calendar) == [.bandage])
         #expect(snapshot.traces(at: date(6, 6), calendar: calendar).isEmpty)
+        snapshot.lasting = [.wornGloves]
+        #expect(snapshot.traces(at: date(5, 23), calendar: calendar) == [.bandage, .wornGloves])
+        #expect(snapshot.traces(at: date(6, 6), calendar: calendar) == [.wornGloves])
         let home = snapshot.home(since: date(5, 19), at: date(5, 19, 10), calendar: calendar)
         #expect(home == HomeSignals(since: date(5, 19), workedToday: 9 * 60 * 60, manualAt: date(5, 8)))
         #expect(snapshot.home(since: date(5, 19), at: date(6, 6), calendar: calendar)?.workedToday == 0)

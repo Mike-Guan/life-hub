@@ -28,6 +28,12 @@ public enum MomentEngine {
     public static let blanketMinute = 21 * 60
     /// Time boxing or vibe coding today that leaves a trace.
     public static let traceAfter: TimeInterval = 30 * 60
+    /// Boxing cans earned before the gloves look worn.
+    public static let glovesAfter = 5
+    /// Vibe coding time in all before the second monitor appears.
+    public static let monitorAfter: TimeInterval = 10 * 60 * 60
+    /// 5 km run cans earned before the running shoes stay out.
+    public static let shoesAfter = 2
 
     /// The state HAKU acts out at `now`: the 副业 state, then the gym-day states, then scrolling at work,
     /// then drowsy or overtime at the office, then the states at home.
@@ -172,6 +178,18 @@ public enum MomentEngine {
         if boxed { traces.insert(.bandage) }
         if coded { traces.insert(.pcGlow) }
         if energy == .full { traces.insert(.sunlight) }
+        return traces
+    }
+
+    // PRD section 19: these build up over weeks and never fade, unlike today's traces.
+    /// The traces that stay once Mike has done enough of something, counted from earned cans and the mode log.
+    public static func lastingTraces(log: ModeLog, ledger: CanLedger, now: Date) -> Set<CompanionTrace> {
+        var traces: Set<CompanionTrace> = []
+        if ledger.count(.boxing) >= glovesAfter { traces.insert(.wornGloves) }
+        if ledger.count(.run5k) >= shoesAfter { traces.insert(.runningShoes) }
+        if log.time(from: .distantPast, to: now, where: { $0.sideHustle == .vibeCoding }) >= monitorAfter {
+            traces.insert(.deskMonitor)
+        }
         return traces
     }
 
