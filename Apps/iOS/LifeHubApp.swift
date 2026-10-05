@@ -220,9 +220,11 @@ struct LifeHubApp: App {
             if place.action == .fitness, !entered, let arrived, let visit = Win.gymVisit(from: arrived, to: .now) {
                 growth.record(visit.win, source: visit.source, at: visit.at)
             }
-            if let trigger = place.trigger(entered: entered) {
-                store.autoSwitch(trigger, rules: .stored(in: AppGroup.defaults))
+            let decision = place.trigger(entered: entered).flatMap {
+                store.autoSwitch($0, rules: .stored(in: AppGroup.defaults))
             }
+            let outcome = decision.map { "切到\($0.mode.title)" } ?? "不切"
+            Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
             needs.refresh(places: places, manualSince: store.log.changes.last(where: \.source.isManual)?.at)
             widgets.need = needs.reading
             widgets.workouts = needs.workouts

@@ -19,6 +19,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Debug builds keep a local dogfood log of automatic decisions (each geofence arrival or departure and
+  whether it switched the mode, and the 编程 Focus), so wrong switches can be found after a few weeks of use.
+  It stays on the iPhone and isn't shown in the app.
 - When you open the app, HAKU is looking elsewhere and turns to you half a beat late. A napping HAKU
   doesn't.
 - When HAKU has waited at the door long enough on a work-day morning, it gives up once: headphones off,
