@@ -345,6 +345,18 @@ import Testing
         #expect(done.eyesDx == 0 && done.headDy == 0)
     }
 
+    @Test func boxingHakuShakesOutAndFixesTheHeadband() {
+        // Cycle 1 of 10 s starts at 10 s; the fidget runs from 16 s to 19.5 s.
+        let shaking = RunnerPose(mode: .boxing, time: 16.5, face: .mid, react: 0)
+        #expect(shaking.gloveL.height == 8 && shaking.gloveR.height == 8)
+        let fixing = RunnerPose(mode: .boxing, time: 18.5, face: .mid, react: 0)
+        #expect(fixing.gloveR.height < -69 && fixing.gloveL == .zero)
+        let guarding = RunnerPose(mode: .boxing, time: 28.5, face: .mid, react: 0)
+        #expect(guarding.gloveR.height > -4)
+        let jab = RunnerPose(mode: .boxing, time: 18.5, face: .mid, react: 0.5)
+        #expect(jab.gloveR.height > -69)
+    }
+
     @Test func atWorkHakuPausesAndPushesTheHeadset() {
         // Cycle 2 of 12 s starts at 24 s; the pause runs from 32 s to 35 s.
         let nod = RunnerPose(mode: .work, time: 32.25, face: .mid, react: 0)
