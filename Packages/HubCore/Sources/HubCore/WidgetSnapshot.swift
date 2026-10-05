@@ -30,6 +30,12 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var trainedDay: Date?
     /// Start of the hub day of the last run.
     public var ranDay: Date?
+    /// What today left in HAKU's world as of `updatedAt`, `nil` in snapshots from older builds.
+    public var traces: Set<CompanionTrace>?
+    /// Time in work mode since 05:00 as of `updatedAt`, `nil` in snapshots from older builds.
+    public var workedToday: TimeInterval?
+    /// When Mike last changed the mode by hand, `nil` when never or unknown.
+    public var manualAt: Date?
     public var updatedAt: Date
 
     public init(
@@ -79,6 +85,7 @@ extension WidgetSnapshot {
             copy.mode = change.mode
             copy.since = change.at
             copy.sideHustle = change.sideHustle
+            if change.source.isManual { copy.manualAt = change.at }
         case .energy(let event) where event.kind == .selfReport:
             copy.energy = event.level
         default:
@@ -117,6 +124,20 @@ extension WidgetSnapshot {
         guard updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) else { return nil }
         if need != nil, need(at: date, calendar: calendar) == nil { return lineAfterNeed }
         return line
+    }
+
+    /// Today's traces as of `date`, none when the snapshot was written before today's 05:00.
+    public func traces(at date: Date, calendar: Calendar = .current) -> Set<CompanionTrace> {
+        updatedAt >= StateEngine.dayStart(for: date, calendar: calendar) ? traces ?? [] : []
+    }
+
+    /// The signals for the states at home at `date`.
+    /// - Parameter since: when Mike got home, `nil` when he isn't home.
+    /// - Returns: `nil` when Mike isn't home.
+    public func home(since: Date?, at date: Date, calendar: Calendar = .current) -> HomeSignals? {
+        guard let since else { return nil }
+        let today = updatedAt >= StateEngine.dayStart(for: date, calendar: calendar)
+        return HomeSignals(since: since, workedToday: today ? workedToday ?? 0 : 0, manualAt: manualAt)
     }
 
     /// When the needs in this snapshot start, end or change stage (HAKU peeking during couch scrolling).
