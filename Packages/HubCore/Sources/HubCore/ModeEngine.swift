@@ -76,6 +76,8 @@ public enum ModeTrigger: Equatable, Sendable {
     case leftGym
     case enteredOffice
     case leftOffice
+    /// Arriving at the fitness gym, or a place that counts as one.
+    case enteredFitness
     /// Arriving at a place Mike added that switches to `mode`.
     case enteredPlace(Mode, name: String)
     /// An iOS Focus with the 副业 filter turned on, for vibe coding.
@@ -141,6 +143,13 @@ public enum ModeEngine {
             let parts = calendar.dateComponents([.hour, .minute], from: now)
             guard (parts.hour ?? 0) * 60 + (parts.minute ?? 0) >= offWorkFromMinute else { return nil }
             return ModeDecision(mode: .chill, source: .location, reason: "离开公司了")
+
+        case .enteredFitness:
+            // PRD section 16, Mike 2026-10-05: lifting happens in Chill, so the gym ends Work or 副业.
+            // Leaving the gym keeps the mode.
+            let settled: [Mode?] = [.chill, .boxing]
+            guard !isHeld(changes, now: now, rules: rules), !settled.contains(current?.mode) else { return nil }
+            return ModeDecision(mode: .chill, source: .location, reason: "到健身房了")
 
         case .enteredPlace(let mode, let name):
             guard !isHeld(changes, now: now, rules: rules), current?.mode != mode else { return nil }

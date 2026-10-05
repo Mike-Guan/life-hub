@@ -48,6 +48,16 @@ import Testing
         #expect(decide(.enteredGym, log((.boxing, .manual, date(5, 18))), at: date(5, 19)) == nil)
     }
 
+    @Test func theFitnessGymEndsWorkAndSideHustle() {
+        let work = log((.work, .location, date(5, 9, 30)))
+        let decision = decide(.enteredFitness, work, at: date(5, 19))
+        #expect(decision == ModeDecision(mode: .chill, source: .location, reason: "到健身房了"))
+        #expect(decide(.enteredFitness, log((.money, .focus, date(5, 18))), at: date(5, 19))?.mode == .chill)
+        #expect(decide(.enteredFitness, log((.chill, .location, date(5, 18))), at: date(5, 19)) == nil)
+        // A mode Mike picked in the last 2 hours stays.
+        #expect(decide(.enteredFitness, log((.money, .manual, date(5, 18, 30))), at: date(5, 19)) == nil)
+    }
+
     @Test func leavingTheGymRestoresTheEarlierMode() {
         let visit = log((.chill, .manual, date(5, 18, 40)), (.boxing, .location, date(5, 19)))
         #expect(decide(.leftGym, visit, at: date(5, 19, 29)) == nil)
