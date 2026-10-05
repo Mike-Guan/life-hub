@@ -114,7 +114,7 @@ struct HomeView: View {
                         .foregroundStyle(Toy.ink)
                 }
 
-                // Why RUNNER looks the way it does: the activity, bedtime, then the need, then energy.
+                // Why RUNNER looks the way it does: leaving work, the activity, bedtime, then the need, then energy.
                 TimelineView(.everyMinute) { context in
                     let state = bedtime.state(at: context.date)
                     let active = activeNeed(at: context.date)
@@ -123,7 +123,10 @@ struct HomeView: View {
                         HakuLines.line($0, at: context.date)
                     }
                     let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
-                    if let line = activity(at: context.date)?.reason ?? workLine ?? notice ?? sunday ?? why {
+                    let leftWork = HakuLines.offWorkUntil(store.log, now: context.date)
+                    let offWork = leftWork.map { _ in HakuLines.offWorkLine }
+                    let activityLine = activity(at: context.date)?.reason
+                    if let line = offWork ?? activityLine ?? workLine ?? notice ?? sunday ?? why {
                         Text(line)
                             .font(Toy.body(13, weight: .bold))
                             .foregroundStyle(Toy.muted)
