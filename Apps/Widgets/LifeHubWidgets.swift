@@ -33,6 +33,8 @@ struct HubEntry: TimelineEntry {
     var offWork: String?
     /// "下一件 18:00" for today's next Daily task, without its title.
     var nextTask: String?
+    /// The Daily task starting soon or now at `date`, whose prop HAKU holds up.
+    var daily: DailyCue?
 
     var mode: Mode? { snapshot?.mode }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
@@ -129,7 +131,8 @@ struct HubProvider: TimelineProvider {
                 notice: backoff.notice(at: date),
                 weekLine: ChangeEngine.sundayLine(times: changes, now: date),
                 offWork: snapshot?.offWorkLine(at: date),
-                nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false) }
+                nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false) },
+                daily: daily?.cue(at: date)
             )
         }
     }

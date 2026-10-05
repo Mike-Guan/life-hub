@@ -104,7 +104,7 @@ public struct DailyTask: Decodable, Equatable, Sendable {
 }
 
 /// What HAKU holds up for a Daily task.
-public enum DailyProp: String, Codable, Sendable {
+public enum DailyProp: String, Codable, CaseIterable, Sendable {
     case headphones
     case bag
     case gymBag

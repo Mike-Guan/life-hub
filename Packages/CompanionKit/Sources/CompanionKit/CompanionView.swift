@@ -26,6 +26,9 @@ public struct CompanionView: View {
     /// A one-off animation: celebrating a workout, going off work, unboxing an item or staying home.
     /// Each event id plays once.
     let event: CompanionEvent?
+    /// A planned Daily Widget task starting soon or now: HAKU holds up its prop, and slaps a sticky note on the
+    /// screen once as it starts.
+    let daily: DailyCue?
     /// Today's invite, written by the app. While set, RUNNER gets up, jumps and says it.
     let invite: String?
     /// Increment to play the cheer jump.
@@ -83,6 +86,15 @@ public struct CompanionView: View {
     @State private var packUpStart: Date?
     // Seconds since the reference date HAKU last started packing up, shared by every CompanionView.
     @AppStorage("companion.lastPackUp") private var lastPackUp: Double = 0
+    @State private var slapStart: Date?
+    // Ids of the last planned tasks HAKU reacted to before and at their start, shared by every CompanionView so
+    // each plays once.
+    @AppStorage("companion.lastDailySoon") private var lastDailySoon = ""
+    @AppStorage("companion.lastDailyNow") private var lastDailyNow = ""
+    @State private var doneStart: Date?
+    @State private var doneFocus = false
+    // Id of the last planned task cheered as done, shared by every CompanionView so each plays once.
+    @AppStorage("companion.lastTaskDone") private var lastTaskDone = ""
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -97,6 +109,7 @@ public struct CompanionView: View {
         traces: Set<CompanionTrace> = [],
         vitals: HakuVitals = HakuVitals(),
         event: CompanionEvent? = nil,
+        daily: DailyCue? = nil,
         invite: String? = nil,
         cheer: Int = 0,
         bedtime: Bedtime = .off,
@@ -115,6 +128,7 @@ public struct CompanionView: View {
         self.traces = traces
         self.vitals = vitals
         self.event = event
+        self.daily = daily
         self.invite = invite
         self.cheer = cheer
         self.bedtime = bedtime
@@ -153,6 +167,7 @@ public struct CompanionView: View {
             startNotice()
             startStretchUp()
             startPackUp()
+            startCue()
             if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
             playEventIfNew()
             if invite != nil { startInvite() }
@@ -161,11 +176,13 @@ public struct CompanionView: View {
             if new != nil { startInvite() }
         }
         .onChange(of: event) { _, _ in playEventIfNew() }
+        .onChange(of: daily) { _, _ in startCue() }
         .onChange(of: scenePhase) { _, new in
             if new == .active {
                 startNotice()
                 startStretchUp()
                 startPackUp()
+                startCue()
             }
             if new == .background { lastSeen = Date.now.timeIntervalSinceReferenceDate }
         }
@@ -271,8 +288,9 @@ public struct CompanionView: View {
     /// What HAKU does on its own: only at home (chill), with nothing needed, awake and no event playing.
     private func idleLife(_ mode: Mode, at date: Date) -> IdleLife? {
         let time = date.timeIntervalSinceReferenceDate
-        let busy = celebration(at: time) != nil || stillOneOff(at: time)
-        guard mode == .chill, need == nil, activity == nil, moment == nil, invite == nil, bedtime == .off, !busy else {
+        let busy = celebration(at: time) != nil || taskDone(at: time) != nil || stillOneOff(at: time)
+        let free = need == nil && activity == nil && moment == nil && daily == nil && invite == nil
+        guard mode == .chill, free, bedtime == .off, !busy else {
             return nil
         }
         return IdleLife.at(date, stamina: vitals.stamina)
@@ -288,7 +306,9 @@ public struct CompanionView: View {
         }
         if bedtime == .on || life == .nap { return IdleMotion.sleeping(time: time) }
         if stillOneOff(at: time) { return IdleMotion(dy: 0, angle: 0) }
-        if let progress = celebration(at: time) { return IdleMotion.celebrating(progress: progress) }
+        if let progress = celebration(at: time) ?? taskDone(at: time) {
+            return IdleMotion.celebrating(progress: progress)
+        }
         let pace = face.speed * vitals.motionSpeed
         if let moment = shownMoment { return IdleMotion(moment: moment, mode: mode, time: time * pace) }
         // Warming up hops like boxing day, whatever the outfit.
@@ -319,6 +339,7 @@ public struct CompanionView: View {
             if stage == .up { pose.bagLift = 1 }
             pose.headDy += vitals.slouch
             if turnAway(at: time) != nil { pose.turnedAway = true }
+            if let daily { pose.cue(daily, time: 5, slap: nil) }
             return pose
         }
         var pose = RunnerPose(
@@ -339,7 +360,16 @@ public struct CompanionView: View {
             // Switching state: a quick burst of sparkles over the squash.
             pose.burst = CGFloat(progress)
         }
+        if let daily { pose.cue(daily, time: time, slap: slap(at: time)) }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
+        if let progress = taskDone(at: time) {
+            if doneFocus {
+                pose.cheerFocus(progress: progress)
+            } else {
+                // The peace sign from a run's celebration.
+                pose.celebrate(.running, progress: CGFloat(progress))
+            }
+        }
         if let progress = unlock(at: time) { pose.unbox(progress: CGFloat(progress)) }
         if let progress = Self.progress(since: noticeStart, at: time, duration: noticeDuration),
             life != .nap, !stillOneOff(at: time), celebration(at: time) == nil
@@ -416,6 +446,38 @@ public struct CompanionView: View {
         guard shownMoment == .packingUp, bedtime == .off, Self.packUpDue(last: lastPackUp, now: now) else { return }
         lastPackUp = now.timeIntervalSinceReferenceDate
         packUpStart = now
+    }
+
+    /// Says the planned task's line once before its start, and slaps the sticky note on once as it starts.
+    private func startCue() {
+        guard bedtime == .off, let daily else { return }
+        switch daily.stage {
+        case .soon:
+            guard let id = Self.newCue(daily, stage: .soon, last: lastDailySoon) else { return }
+            lastDailySoon = id
+            say("还有 15 分钟。我先替你紧张一下。", for: 3.5)
+        case .now:
+            guard let id = Self.newCue(daily, stage: .now, last: lastDailyNow) else { return }
+            lastDailyNow = id
+            slapStart = .now
+            say("到点了。")
+        }
+    }
+
+    /// The id of `cue` when it is at `stage` and didn't play yet, else nil.
+    nonisolated static func newCue(_ cue: DailyCue?, stage: DailyCue.Stage, last: String) -> String? {
+        guard let cue, cue.stage == stage, cue.id != last else { return nil }
+        return cue.id
+    }
+
+    /// Progress of the sticky note on the screen at `time`, 0..<1, or nil when it isn't.
+    private func slap(at time: TimeInterval) -> Double? {
+        Self.progress(since: slapStart, at: time, duration: RunnerPose.noteSlapLength)
+    }
+
+    /// Progress of cheering a planned task done at `time`, 0..<1, or nil when none is playing.
+    private func taskDone(at time: TimeInterval) -> Double? {
+        Self.progress(since: doneStart, at: time, duration: doneFocus ? Self.focusDoneDuration : Self.doneDuration)
     }
 
     /// Whether packing up plays from the start again, 20 minutes after the `last` time.
@@ -501,6 +563,8 @@ public struct CompanionView: View {
     private static let whistleDuration = 2.6
     private static let stretchUpDuration = 6.0
     private static let limberDuration = 4.6
+    private static let doneDuration = 2.0
+    private static let focusDoneDuration = 3.0
 
     /// Progress of a hummed note at `time` when 元气 is high: 2.4 s in every 16 s, or nil in between.
     nonisolated static func hum(at time: TimeInterval) -> Double? {
@@ -590,6 +654,12 @@ public struct CompanionView: View {
         return id
     }
 
+    /// The planned task id to cheer for `event`, or nil when there is none or it already played.
+    nonisolated static func newTaskDone(_ event: CompanionEvent?, last: String) -> String? {
+        guard case .taskDone(let id, _) = event, id != last else { return nil }
+        return id
+    }
+
     private func playEventIfNew() {
         guard bedtime == .off else { return }
         if let id = Self.newCelebration(event, last: lastCelebration), case .celebrate(_, let kind) = event {
@@ -636,6 +706,18 @@ public struct CompanionView: View {
                 try? await Task.sleep(for: .seconds(Self.limberDuration * 0.52))
                 guard !Task.isCancelled else { return }
                 say("嗯，活过来了。", for: 3)
+            }
+        }
+        if let id = Self.newTaskDone(event, last: lastTaskDone), case .taskDone(_, let focus) = event {
+            lastTaskDone = id
+            doneFocus = focus
+            doneStart = .now
+            say(nil)
+            bubbleTask = Task {
+                // The focus cheer says it after the fist pumps.
+                try? await Task.sleep(for: .seconds(focus ? Self.focusDoneDuration * 0.9 : 0.3))
+                guard !Task.isCancelled else { return }
+                say("哦。弄完了？")
             }
         }
     }
@@ -692,7 +774,7 @@ public struct CompanionView: View {
         say((candidates.isEmpty ? lines : candidates).randomElement())
         // Taps during a one-off animation only get HAKU's reaction.
         let time = Date.now.timeIntervalSinceReferenceDate
-        guard celebration(at: time) == nil, !stillOneOff(at: time) else { return }
+        guard celebration(at: time) == nil, taskDone(at: time) == nil, !stillOneOff(at: time) else { return }
         onTap?()
     }
 
@@ -855,6 +937,16 @@ private struct SpeechBubble: View {
             CompanionView(mode: .work, event: .offWork(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .chill, event: .stayHome(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .work, event: .stretched(id: "preview")).frame(height: 180).toyCard()
+            ForEach(DailyProp.allCases, id: \.self) { prop in
+                CompanionView(mode: .work, daily: DailyCue(stage: .soon, prop: prop, id: "preview-\(prop)"))
+                    .frame(height: 180)
+                    .toyCard()
+            }
+            CompanionView(mode: .work, daily: DailyCue(stage: .now, prop: .note, id: "preview-now"))
+                .frame(height: 180)
+                .toyCard()
+            CompanionView(mode: .work, event: .taskDone(id: "preview", focus: false)).frame(height: 180).toyCard()
+            CompanionView(mode: .work, event: .taskDone(id: "preview-focus", focus: true)).frame(height: 180).toyCard()
             CompanionView(
                 mode: .boxing,
                 event: .unlock(id: "preview", item: "gloves.gold"),

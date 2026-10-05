@@ -22,6 +22,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU reacts to planned Daily Widget tasks: 15 minutes before, it taps its watch and holds up the task's prop
+  (headphones, shopping bag, gym bag or a sticky note); at the start it slaps a sticky note on the screen; when a
+  task is done it gives a peace sign, or for the day's focus flares its mask and pumps its fist.
 - With Daily Widget linked, the home screen shows "下一件 18:00 <title>" for today's next timed task, and
   the Lock Screen shows "下一件 18:00" without the title. Tapping the line opens Daily on that day. A
   couch-scrolling invite within an hour of a task says "等下还有事，先起来收拾？" instead. HAKU's task
