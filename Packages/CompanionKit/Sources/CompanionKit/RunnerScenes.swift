@@ -8,7 +8,7 @@ extension DailyScene {
     var parts: Set<RunnerPart> {
         switch self {
         case .coffee: [.coffeeSteam, .blowLines, .coffeeCup]
-        case .meal: [.riceBowl, .chopsticks]
+        case .meal, .drinks: [.riceBowl, .chopsticks]
         case .meeting: [.screenGlow, .macbook, .typeHandL, .typeHandR]
         case .call: [.phoneEar, .talkDots]
         case .grocery: [.toteBag]
@@ -16,7 +16,7 @@ extension DailyScene {
         case .cook: [.apron, .spatula]
         case .gym: [.gymBag, .dumbbell]
         case .run: [.speedLines, .walkDust]
-        case .stroll: [.sunIcon, .walkDust, .earbud]
+        case .walk: [.sunIcon, .walkDust, .earbud]
         case .photo: [.cameraFlash, .camera]
         case .friends: [.waveArcs, .waveHand]
         case .haircut: [.hairBits, .clipArm, .clipper, .buzzLines]
@@ -68,7 +68,7 @@ struct SceneMove {
         case (.coffee, .blowLines):
             let c = loop(t, 3.4)
             move.opacity = c > 0.5 && c < 1.8 && sin(t * 12) > -0.3 ? 1 : 0
-        case (.meal, .chopsticks):
+        case (.meal, .chopsticks), (.drinks, .chopsticks):
             let k = bump(loop(t, 1.6), from: 0, to: 1.1)
             move.offset = CGSize(width: -4 * k, height: -10 * k)
             move.angle = -8 * Double(k)
@@ -99,13 +99,13 @@ struct SceneMove {
             let d = frac(t * 1.9 / 0.5)
             move.offset.width = -8 * d
             move.opacity = Double(1 - 0.6 * d)
-        case (.run, .walkDust), (.stroll, .walkDust):
+        case (.run, .walkDust), (.walk, .walkDust):
             let p = frac(t * (scene == .run ? 1.9 : 0.6) / 0.9)
             move.offset = CGSize(width: -10 * p, height: -4 * p)
             move.scale = 0.6 + 0.6 * p
             move.anchor = anchor(22, 128)
             move.opacity = Double(1 - p)
-        case (.stroll, .sunIcon):
+        case (.walk, .sunIcon):
             move.angle = Double(t) * 20
             move.anchor = anchor(20, 8)
         case (.photo, .camera):
@@ -144,7 +144,7 @@ extension RunnerPose {
     mutating func playScene(_ scene: DailyScene, time t: CGFloat) {
         let r = propRaise
         switch scene {
-        case .meal:
+        case .meal, .drinks:
             headDy += 1.5 * bump(loop(t, 1.6), from: 0, to: 1.1) * r
         case .meeting:
             headDy += 1.6 * bump(loop(t, 3.2), from: 2.2, to: 2.9) * r
@@ -158,7 +158,7 @@ extension RunnerPose {
             headDy += bump(loop(t, 1.4), from: 0, to: 0.7) * r
         case .gym:
             headDy += 1.2 * bump(loop(t, 2), from: 0.2, to: 1.6) * r
-        case .run, .stroll:
+        case .run, .walk:
             let pace: CGFloat = scene == .run ? 1.9 : 0.6
             let step = abs(sin(t * pace * .pi / 0.45))
             lean = (scene == .run ? 8 : 4) * Double(r)

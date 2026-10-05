@@ -179,10 +179,14 @@ public struct ActivitySignals: Equatable, Sendable {
 
 /// Rules for what HAKU is doing alongside Mike.
 public enum ActivityEngine {
-    /// The activity at `now`: running, then a gym visit, then a gym or run day before it's done.
+    // PRD section 16, Mike 2026-10-05: lifting belongs to Chill. A switch to another mode at the gym stops it.
+    /// The activity at `now`: running, then a gym visit (lifting only in Chill), then a gym or run day
+    /// before it's done.
+    /// - Parameter mode: the current mode, `nil` when none is set.
     /// - Returns: `nil` when nothing is going on.
     public static func activity(
         _ signals: ActivitySignals,
+        mode: Mode?,
         days: ActivityDays = .standard,
         work: ModeRules = .standard,
         bedtime: BedtimeSchedule = .standard,
@@ -191,7 +195,7 @@ public enum ActivityEngine {
     ) -> CompanionActivity? {
         if signals.runningSince != nil { return .running }
         if signals.presence.since(.gym) != nil { return .boxingAtGym }
-        if signals.presence.since(.fitness) != nil { return .gymSession }
+        if signals.presence.since(.fitness) != nil { return mode == .chill ? .gymSession : nil }
         guard bedtime.state(at: now, calendar: calendar) == .off else { return nil }
 
         let today = StateEngine.dayStart(for: now, calendar: calendar)

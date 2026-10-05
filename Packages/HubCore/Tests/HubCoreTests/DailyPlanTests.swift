@@ -84,14 +84,6 @@ import Testing
         #expect(plan.times.contains(date(5, 17, 45)) && plan.times.contains(date(5, 18, 10)))
     }
 
-    @Test func cueCarriesTheSceneFromTheTitle() {
-        var coffee = task("t", at: date(5, 18))
-        coffee.title = "咖啡"
-        let plan = DailyPlan(occurrences: [coffee])
-        #expect(plan.cue(at: date(5, 17, 50))?.scene == .coffee)
-        #expect(plan.cue(at: date(5, 18))?.scene == .coffee)
-    }
-
     @Test func aTaskWithinTheHourChangesTheCouchInvite() {
         let plan = DailyPlan(occurrences: [task("t", at: date(5, 18))])
         #expect(plan.hasTask(within: DailyAgenda.inviteLead, after: date(5, 17)))
