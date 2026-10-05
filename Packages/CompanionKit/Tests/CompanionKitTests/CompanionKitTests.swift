@@ -400,8 +400,8 @@ import Testing
 
     @Test func caughtSnackingHakuWhistles() {
         var hiding = RunnerPose(mode: .chill, time: 3, face: .mid, life: .snack, react: 0)
-        hiding.whistle(progress: 0.2)
-        #expect(hiding.propHidden == 1 && hiding.whistle < 0)
+        hiding.whistle(progress: 0.1)
+        #expect(hiding.propHidden == 0 && hiding.eyesDx == 0 && hiding.whistle < 0)
         #expect(!RunnerFigure.parts(for: .chill, pose: hiding).contains(.musicNote))
         var whistling = RunnerPose(mode: .chill, time: 3, face: .mid, life: .drawing, react: 0)
         whistling.whistle(progress: 0.65)
