@@ -193,6 +193,7 @@ struct SettingsView: View {
             pickingApps = true
         } catch {
             screenTimeError = "Screen Time 没打开：\(error.localizedDescription)"
+            Dogfood.note("screenTime", "授权失败：\(error.localizedDescription)")
         }
     }
 
@@ -203,6 +204,7 @@ struct SettingsView: View {
             screenTimeError = nil
         } catch {
             screenTimeError = "Screen Time 监测没启动：\(error.localizedDescription)"
+            Dogfood.note("screenTime", "监测没启动：\(error.localizedDescription)")
         }
     }
 
