@@ -1344,7 +1344,10 @@ struct RunnerFigure: View {
         }
         .offset(y: (isHead ? pose.headDy : 0) * scale)
         .offset(y: isHead || Self.chinParts.contains(part) ? 30 * pose.slump * scale : 0)
-        .rotationEffect(.degrees(isHead ? -14 * Double(pose.lie) + pose.headTilt : 0), anchor: Self.unit(x: 60, y: 96))
+        .rotationEffect(
+            .degrees(isHead ? -14 * Double(pose.lie) + pose.headTilt : 0),
+            anchor: Self.unit(x: 60, y: 96)
+        )
     }
 
     private static let dots = RunnerText(

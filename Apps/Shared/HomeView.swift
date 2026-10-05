@@ -19,10 +19,14 @@ struct HomeView: View {
     var departure: GymDeparture?
     /// A one-off animation for RUNNER, such as celebrating a workout.
     var event: CompanionEvent?
+    /// The mode to show for a moment before the current one, so a switch made while the app was closed plays.
+    var replayFrom: Mode?
     /// Today's invite text while its need lasts, so RUNNER gets up and says it.
     var invite: String?
     /// HAKU's line on a day it stopped an invite Mike kept ignoring, from the iOS app.
     var notice: String?
+    /// When each change moment happened, for HAKU's Sunday line.
+    var changes: [Date] = []
     /// The savings card, once Mike has set a target and a balance.
     var money: MoneyCard?
     /// Shows a settings button that calls this, when set.
@@ -41,6 +45,7 @@ struct HomeView: View {
     @Environment(ModeStore.self) private var store
     @Environment(EnergyStore.self) private var energy
     @State private var cheer = 0
+    @State private var replaying = false
 
     var body: some View {
         let reading = energy.reading()
@@ -56,7 +61,7 @@ struct HomeView: View {
 
                 TimelineView(.everyMinute) { context in
                     CompanionView(
-                        mode: store.current,
+                        mode: replaying ? replayFrom : store.current,
                         energy: reading?.value,
                         need: activeNeed(at: context.date)?.need,
                         needSince: activeNeed(at: context.date)?.since,
@@ -115,7 +120,8 @@ struct HomeView: View {
                     let workLine = moment(at: context.date).flatMap(HakuLines.scene(for:)).map {
                         HakuLines.line($0, at: context.date)
                     }
-                    if let line = activity(at: context.date)?.reason ?? workLine ?? notice ?? why {
+                    let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
+                    if let line = activity(at: context.date)?.reason ?? workLine ?? notice ?? sunday ?? why {
                         Text(line)
                             .font(Toy.body(13, weight: .bold))
                             .foregroundStyle(Toy.muted)
@@ -141,6 +147,13 @@ struct HomeView: View {
         }
         .background(Toy.paper.ignoresSafeArea())
         .modeSwitchHaptic(trigger: store.current)
+        // HAKU starts in the old mode, then switches, so the switch animation plays.
+        .task(id: replayFrom) {
+            replaying = replayFrom != nil
+            guard replaying else { return }
+            try? await Task.sleep(for: .seconds(1.2))
+            replaying = false
+        }
     }
 
     // The tracker refreshes on open and on place events, so a need can end while the app stays open.
