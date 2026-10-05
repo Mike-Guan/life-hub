@@ -105,6 +105,7 @@ struct LifeHubApp: App {
             replayFrom: replayFrom,
             invite: needs.invite,
             notice: NudgeBackoff.stored(in: AppGroup.defaults).notice(at: .now),
+            changes: ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: growth.ledger),
             money: moneyCard,
             onSettings: { showsSettings = true },
             cans: growth.ledger.balance,
@@ -203,6 +204,10 @@ struct LifeHubApp: App {
         for earned in Win.wins(in: needs.workouts) {
             growth.record(earned.win, source: earned.source, at: earned.at)
         }
+        // Getting up after an invite is noted by whichever process judged it; the can is earned here.
+        for moment in ChangeLog.stored(in: AppGroup.defaults).moments where moment.kind == .gotUp {
+            growth.record(.gotUp, source: Win.gotUp.source(at: moment.at), at: moment.at)
+        }
     }
 
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.
@@ -232,6 +237,13 @@ struct LifeHubApp: App {
             var presence = PlacePresence.stored(in: AppGroup.defaults)
             let arrived = presence.since(.fitness)
             let stayStart = presence.since(place)
+            if entered, place.action == .fitness, presence.since(.fitness) == nil {
+                let departure = GymDeparture.stored(in: AppGroup.defaults)
+                let deviceID = HubDevice.id(defaults: AppGroup.defaults)
+                if let went = ChangeEngine.wentAfterGo(departure: departure, arrivedAt: .now, deviceID: deviceID) {
+                    ChangeLog.note(went, in: AppGroup.defaults)
+                }
+            }
             presence.record(place, entered: entered, at: .now)
             presence.store(in: AppGroup.defaults)
             if place.action == .fitness, !entered, let arrived, let visit = Win.gymVisit(from: arrived, to: .now) {
