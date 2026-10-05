@@ -27,6 +27,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HubCore knows when HAKU should walk: for 30 minutes after you leave home, the office or a gym, until
+  you arrive somewhere. The mode stays as it was. The walking art comes in a UI change.
 - Daily Widget tasks whose title names one of 15 scenes (coffee, a meeting, groceries, the gym and more)
   carry that scene, so HAKU can act it out around the start. Titles are matched on the phone only.
 - HAKU acts out a Daily Widget task by its title in the 15 minutes before it starts: sipping coffee, eating or
