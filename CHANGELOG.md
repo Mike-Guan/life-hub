@@ -27,6 +27,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HubCore knows when HAKU takes its bath: from 45 minutes before bedtime for 30 minutes, only at home in
+  Chill, and not again that evening once you tap it away. No push, no cans.
 - HAKU walks for up to 30 minutes after you leave home, the office or a gym, until you arrive somewhere:
   leaning in, a hop each step, speed lines and dust behind, with earbuds from home, the bag from the
   office, a towel from the gym or a bandage from boxing. It shows on the home screen and the widgets.
