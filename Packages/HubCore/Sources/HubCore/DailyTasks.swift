@@ -135,6 +135,8 @@ public struct DailyOccurrence: Codable, Equatable, Sendable {
     /// Whether the task was created before it starts, not added on the spot.
     public var planned: Bool
     public var prop: DailyProp
+    /// The scene the title names, `nil` to use `prop`.
+    public var scene: DailyScene?
     /// Opens Daily Widget on this task's day, `nil` when the link can't be built.
     public var link: URL?
 
@@ -147,9 +149,11 @@ public struct DailyOccurrence: Codable, Equatable, Sendable {
         focus: Bool,
         planned: Bool,
         prop: DailyProp = .note,
+        scene: DailyScene? = nil,
         link: URL? = nil
     ) {
         self.prop = prop
+        self.scene = scene
         self.link = link
         self.id = id
         self.title = title
@@ -180,6 +184,7 @@ extension DailyTask {
             focus: repeating ? focusDates.contains(key) : focus,
             planned: createdAt.map { $0 < at(start) } ?? false,
             prop: DailyProp(category: category),
+            scene: SceneTable.standard.scene(for: title),
             link: DailyAgenda.link(id: id, day: key)
         )
     }
@@ -275,12 +280,15 @@ public struct DailyCue: Equatable, Sendable {
 
     public var stage: Stage
     public var prop: DailyProp
+    /// The scene to act out instead of `prop`, `nil` for none.
+    public var scene: DailyScene?
     /// The occurrence id, so the start plays once.
     public var id: String
 
-    public init(stage: Stage, prop: DailyProp, id: String) {
+    public init(stage: Stage, prop: DailyProp, scene: DailyScene? = nil, id: String) {
         self.stage = stage
         self.prop = prop
+        self.scene = scene
         self.id = id
     }
 }
@@ -305,10 +313,10 @@ public struct DailyPlan: Codable, Equatable, Sendable {
     public func cue(at now: Date) -> DailyCue? {
         for task in occurrences where !task.done {
             if now >= task.start.addingTimeInterval(-DailyAgenda.soonLead), now < task.start {
-                return DailyCue(stage: .soon, prop: task.prop, id: task.id)
+                return DailyCue(stage: .soon, prop: task.prop, scene: task.scene, id: task.id)
             }
             if now >= task.start, now < task.start.addingTimeInterval(DailyAgenda.nowLasts) {
-                return DailyCue(stage: .now, prop: task.prop, id: task.id)
+                return DailyCue(stage: .now, prop: task.prop, scene: task.scene, id: task.id)
             }
         }
         return nil
