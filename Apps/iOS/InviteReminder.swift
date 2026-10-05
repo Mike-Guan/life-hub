@@ -17,15 +17,18 @@ enum InviteReminder {
     static let goAction = "go"
 
     /// Replaces the scheduled invite with one for `reading`, or removes it when there should be none.
-    static func plan(_ reading: NeedReading?, now: Date = .now) {
+    /// - Parameter signals: what the app knows now, to judge whether the last invite was followed.
+    static func plan(_ reading: NeedReading?, signals: NeedSignals? = nil, now: Date = .now) {
         let defaults = AppGroup.defaults
         var log = InviteLog.stored(in: defaults).settled(now: now)
+        let backoff = judgeLastInvite(log, signals: signals, now: now)
         let center = UNUserNotificationCenter.current()
         center.removePendingNotificationRequests(withIdentifiers: [requestID])
         log.pendingAt = nil
+        log.pendingNeed = nil
         let bedtime = BedtimeSchedule.stored(in: defaults)
         let at = NeedEngine.inviteTime(for: reading, now: now, lastInviteAt: log.lastSentAt, bedtime: bedtime)
-        if let reading, let at {
+        if let reading, let at, !backoff.isPaused(reading.need, at: at) {
             let content = UNMutableNotificationContent()
             content.title = "HAKU"
             content.body = NeedEngine.inviteText(for: reading.need)
@@ -38,8 +41,25 @@ enum InviteReminder {
             let request = UNNotificationRequest(identifier: requestID, content: content, trigger: trigger)
             center.add(request, withCompletionHandler: nil)
             log.pendingAt = at
+            log.pendingNeed = reading.need
         }
         log.store(in: defaults)
+    }
+
+    // Each sent invite is judged once, as soon as the signals can tell.
+    /// Records whether the last invite was followed, and returns the back-off state.
+    private static func judgeLastInvite(_ log: InviteLog, signals: NeedSignals?, now: Date) -> NudgeBackoff {
+        let defaults = AppGroup.defaults
+        var backoff = NudgeBackoff.stored(in: defaults)
+        guard let signals, let sent = log.lastSentAt, let need = log.lastNeed, backoff.judgedSentAt != sent else {
+            return backoff
+        }
+        let departed = GymDeparture.stored(in: defaults)?.at
+        let followed = NudgeBackoff.followed(need, sentAt: sent, signals: signals, departedAt: departed, now: now)
+        guard let followed else { return backoff }
+        backoff.record(need, followed: followed, sentAt: sent, now: now)
+        backoff.store(in: defaults)
+        return backoff
     }
 
     /// The text of the invite sent for `reading`, or `nil` when none went out for it.
