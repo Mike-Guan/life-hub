@@ -140,6 +140,7 @@ import Testing
         let list = DailyAgenda.occurrences(tasks, now: date(5, 17), calendar: calendar)
         #expect(list.map(\.id) == ["y", "done", "t", "m"])
         #expect(DailyAgenda.next(in: list, after: date(5, 17))?.id == "t")
+        #expect(DailyAgenda.next(in: list, after: date(5, 18, 35))?.id == "t")
         #expect(DailyAgenda.next(in: list, after: date(5, 18, 40))?.id == "m")
     }
 

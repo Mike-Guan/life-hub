@@ -220,9 +220,11 @@ public enum DailyAgenda {
         return all.sorted { ($0.start, $0.id) < ($1.start, $1.id) }
     }
 
-    /// The next task not done yet that starts at or after `now`, today or tomorrow.
+    // PM 2026-10-05: a task just started stays for the first `nowLasts`, the same as HAKU's sticky note,
+    // so it doesn't vanish at its start; after that it never lingers or shows as missed.
+    /// The first task not done yet that starts after `now` or started less than `nowLasts` before it.
     public static func next(in occurrences: [DailyOccurrence], after now: Date) -> DailyOccurrence? {
-        occurrences.first { !$0.done && $0.start >= now }
+        occurrences.first { !$0.done && $0.start.addingTimeInterval(nowLasts) > now }
     }
 
     // Daily keeps no time of finishing, so a finish counts on the hub day Life Hub first reads it.
@@ -293,7 +295,7 @@ public struct DailyPlan: Codable, Equatable, Sendable {
         self.occurrences = occurrences
     }
 
-    /// The next task not done yet that starts at or after `now` on the same calendar day.
+    /// The task `DailyAgenda.next(in:after:)` picks, when it starts on the same calendar day as `now`.
     public func next(after now: Date, calendar: Calendar = .current) -> DailyOccurrence? {
         let next = DailyAgenda.next(in: occurrences, after: now)
         return next.flatMap { calendar.isDate($0.start, inSameDayAs: now) ? $0 : nil }
@@ -362,11 +364,17 @@ extension DailyAgenda {
         return parts.url
     }
 
-    /// "下一件 18:00", with the title after it when `title` is true.
-    public static func nextLine(_ task: DailyOccurrence, title: Bool, calendar: Calendar = .current) -> String {
+    /// "下一件 18:00", or "现在 18:00" once the task started, with the title after it when `title` is true.
+    public static func nextLine(
+        _ task: DailyOccurrence,
+        title: Bool,
+        now: Date,
+        calendar: Calendar = .current
+    ) -> String {
         let parts = calendar.dateComponents([.hour, .minute], from: task.start)
         let time = String(format: "%02d:%02d", parts.hour ?? 0, parts.minute ?? 0)
-        return title && !task.title.isEmpty ? "下一件 \(time) \(task.title)" : "下一件 \(time)"
+        let head = "\(now >= task.start ? "现在" : "下一件") \(time)"
+        return title && !task.title.isEmpty ? "\(head) \(task.title)" : head
     }
 
     // The first read after linking only notes what is done already, so old tasks don't all celebrate.

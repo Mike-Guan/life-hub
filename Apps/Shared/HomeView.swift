@@ -70,7 +70,7 @@ struct HomeView: View {
                     if let next = daily?.next(after: context.date), let link = next.link {
                         Link(destination: link) {
                             HStack {
-                                Text(DailyAgenda.nextLine(next, title: true))
+                                Text(DailyAgenda.nextLine(next, title: true, now: context.date))
                                 Spacer()
                                 Image(systemName: "chevron.right")
                             }
