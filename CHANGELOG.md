@@ -20,6 +20,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU has two hidden params, worked out by rules: 体能 from the last four weeks of boxing, gym and 5 km
+  runs, and 元气 from the last three nights' sleep plus daylight. They rise fast and fall slowly and never go
+  below tired. HAKU's moves will use them once the looks exist. No numbers or bars anywhere, and no cans.
 - At home, every fourth sip HAKU finds the can empty, shakes it by its ear and stares at it.
 - Lasting traces in HAKU's world: taped, scuffed gloves after 5 boxing sessions, a second monitor by
   the laptop after 10 hours of vibe coding, running shoes at home after 2 runs. The app decides when
