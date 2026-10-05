@@ -65,7 +65,7 @@ struct HomeView: View {
                             energy: reading?.level,
                             now: context.date
                         ),
-                        event: event,
+                        event: event ?? stayHome(at: context.date),
                         invite: activeNeed(at: context.date) == nil ? nil : invite,
                         cheer: cheer,
                         bedtime: bedtime.state(at: context.date),
@@ -157,16 +157,26 @@ struct HomeView: View {
             need: activeNeed(at: date)?.need,
             departing: presence.map { departure?.isActive(at: date, presence: $0) ?? false } ?? false,
             officeSince: presence?.since(.office),
-            home: presence?.since(.home).map {
-                HomeSignals(
-                    since: $0,
-                    workedToday: MomentEngine.workedToday(store.log, now: date),
-                    manualAt: store.log.active.last(where: \.source.isManual)?.at
-                )
-            },
+            home: home(at: date),
             now: date,
             work: rules
         )
+    }
+
+    private func home(at date: Date) -> HomeSignals? {
+        activitySignals?.presence.since(.home).map {
+            HomeSignals(
+                since: $0,
+                workedToday: MomentEngine.workedToday(store.log, now: date),
+                manualAt: store.log.active.last(where: \.source.isManual)?.at
+            )
+        }
+    }
+
+    // When HAKU stops waiting at the door it gives up once, if nothing else is going on.
+    private func stayHome(at date: Date) -> CompanionEvent? {
+        guard activity(at: date) == nil, activeNeed(at: date) == nil, let home = home(at: date) else { return nil }
+        return MomentEngine.stayHome(mode: store.current, signals: home, now: date, work: rules)
     }
 
     // On gym days HAKU waits at the door during the invite and walks after 走, instead of the plain bag.

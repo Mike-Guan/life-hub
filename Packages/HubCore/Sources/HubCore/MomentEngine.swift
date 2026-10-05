@@ -79,19 +79,56 @@ public enum MomentEngine {
         if signals.workedToday >= longWorkDay, now < signals.since.addingTimeInterval(collapsedLasts) {
             return .collapsed
         }
-        let dayStart = StateEngine.dayStart(for: now, calendar: calendar)
-        let midnight = calendar.startOfDay(for: now)
-        let parts = calendar.dateComponents([.hour, .minute], from: now)
-        let minute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
-        // From midnight to 05:00 still belongs to the day before.
-        let lateNight = midnight > dayStart
-        let dayOff = signals.manualAt.map { $0 >= dayStart } ?? false
-        let workday = work.workdays.contains(calendar.component(.weekday, from: now))
+        let minute = minuteOfDay(now, calendar: calendar)
         // PM, 2026-10-05: the door wait ends 90 minutes after work start, so a sick day isn't nagged.
-        if workday, !lateNight, !dayOff, minute < work.workStartMinute + leaveWaitMinutes {
+        let waiting = minute < work.workStartMinute + leaveWaitMinutes
+        if waiting, isWorkMorning(signals, now: now, work: work, calendar: calendar) {
             return minute < work.workStartMinute ? .morning : .timeToLeave
         }
+        let lateNight = calendar.startOfDay(for: now) > StateEngine.dayStart(for: now, calendar: calendar)
         return lateNight || minute >= blanketMinute ? .blanket : nil
+    }
+
+    /// The give-up animation once HAKU stops waiting at the door: Mike was home when the wait ended and
+    /// it's still work hours. Its id is the day, so it plays once a day.
+    /// - Returns: `nil` when HAKU didn't wait at the door today or the wait isn't over.
+    public static func stayHome(
+        mode: Mode?,
+        signals: HomeSignals,
+        now: Date,
+        work: ModeRules = .standard,
+        calendar: Calendar = .current
+    ) -> CompanionEvent? {
+        guard mode == nil || mode == .chill, isWorkMorning(signals, now: now, work: work, calendar: calendar) else {
+            return nil
+        }
+        let end = work.workStartMinute + leaveWaitMinutes
+        let midnight = calendar.startOfDay(for: now)
+        let waitEnded = calendar.date(byAdding: .minute, value: end, to: midnight) ?? midnight
+        guard signals.since <= waitEnded else { return nil }
+        let minute = minuteOfDay(now, calendar: calendar)
+        guard minute >= end, minute < work.workEndMinute else { return nil }
+        let day = Date.ISO8601FormatStyle(timeZone: calendar.timeZone).year().month().day()
+        return .stayHome(id: now.formatted(day))
+    }
+
+    // From midnight to 05:00 still belongs to the day before, so it is never a work morning.
+    /// Whether `now` is on a work day after 05:00 with no manual mode change since then.
+    private static func isWorkMorning(
+        _ signals: HomeSignals,
+        now: Date,
+        work: ModeRules,
+        calendar: Calendar
+    ) -> Bool {
+        let dayStart = StateEngine.dayStart(for: now, calendar: calendar)
+        let lateNight = calendar.startOfDay(for: now) > dayStart
+        let dayOff = signals.manualAt.map { $0 >= dayStart } ?? false
+        return work.workdays.contains(calendar.component(.weekday, from: now)) && !lateNight && !dayOff
+    }
+
+    private static func minuteOfDay(_ date: Date, calendar: Calendar) -> Int {
+        let parts = calendar.dateComponents([.hour, .minute], from: date)
+        return (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
     }
 
     /// When the states at home start or end on the day of `now`, for widget timelines.
