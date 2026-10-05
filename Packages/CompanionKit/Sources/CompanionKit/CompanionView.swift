@@ -73,6 +73,7 @@ public struct CompanionView: View {
     @State private var rollStart: Date?
     @State private var tapTimes: [Date] = []
     @State private var turnAwayStart: Date?
+    @State private var whistleStart: Date?
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -327,6 +328,11 @@ public struct CompanionView: View {
             pose.notice(progress: progress, lookUp: noticeLookUp)
         }
         if let progress = turnAway(at: time) { pose.turnAway(progress: progress) }
+        if life == .snack || life == .drawing,
+            let progress = Self.progress(since: whistleStart, at: time, duration: Self.whistleDuration)
+        {
+            pose.whistle(progress: progress)
+        }
         if vitals.spirit == .low, shownNeed == nil, shownMoment == nil, life == nil, activity == nil,
             let progress = Self.rubEyes(at: time * vitals.motionSpeed, mode: mode)
         {
@@ -422,6 +428,7 @@ public struct CompanionView: View {
     private var noticeDuration: TimeInterval { noticeLookUp ? 1.6 : 0.9 }
     private static let lateNightDuration = 2.6
     private static let turnAwayDuration = 2.2
+    private static let whistleDuration = 2.6
 
     /// Progress of a hummed note at `time` when 元气 is high: 2.4 s in every 16 s, or nil in between.
     nonisolated static func hum(at time: TimeInterval) -> Double? {
@@ -583,6 +590,7 @@ public struct CompanionView: View {
         }
         pop += 1
         taps += 1
+        whistleStart = bedtime == .off && (life == .snack || life == .drawing) ? .now : nil
         let peeking = couchStage(at: .now) == .peeking
         let lines = CompanionLines.lines(
             for: mode,

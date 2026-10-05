@@ -209,6 +209,8 @@ struct RunnerPose {
     var scratch: CGFloat = -1
     /// Height of the tuft of hair left sticking up after a scratch, 0 = settled, 1 = upright.
     var tuft: CGFloat = 0
+    /// Rise of the note whistled after hiding a snack or sketchbook, 0...1, or -1 when not whistling.
+    var whistle: CGFloat = -1
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -749,6 +751,16 @@ struct RunnerPose {
         headDy += 1
     }
 
+    /// Whistling innocently at `progress` (0...1) after a tap made HAKU hide its snack or sketchbook: the prop
+    /// stays hidden, the eyes look away, and a note floats from the mouth once the hiding is done.
+    mutating func whistle(progress: Double) {
+        let p = CGFloat(min(max(progress, 0), 1))
+        propHidden = 1
+        eyesDx = 3
+        eyesDy = -1
+        whistle = p < 0.3 ? -1 : (p - 0.3) / 0.7
+    }
+
     /// The still bedtime pose, used for portraits and reduced motion.
     static func bedtimeStill() -> RunnerPose {
         var pose = bedtime(time: 2, goodnight: 1, liesDown: false)
@@ -828,7 +840,7 @@ struct RunnerFigure: View {
         }
         wear(pose, mode: mode, on: &visible)
         if pose.rubEye >= 0 { visible.insert(.rubHand) }
-        if pose.hum >= 0 { visible.insert(.musicNote) }
+        if pose.hum >= 0 || pose.whistle >= 0 { visible.insert(.musicNote) }
         if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
@@ -1090,6 +1102,11 @@ struct RunnerFigure: View {
             case .hairTuft:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 1, y: max(pose.tuft, 0.001), anchor: Self.unit(x: 51, y: 31))
+            case .musicNote where pose.whistle >= 0:
+                // Whistled: starts at the mouth instead of by the head.
+                RunnerPartView(part: part)
+                    .offset(x: (-34 + 4 * pose.whistle) * scale, y: (52 - 10 * pose.whistle) * scale)
+                    .opacity(Double(sin(pose.whistle * .pi)))
             case .musicNote:
                 // Floats up and sways a little as it fades.
                 RunnerPartView(part: part)

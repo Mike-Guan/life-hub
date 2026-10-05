@@ -398,6 +398,18 @@ import Testing
         #expect(CompanionView.newLateNight(at: morning, last: "", calendar: calendar) == nil)
     }
 
+    @Test func caughtSnackingHakuWhistles() {
+        var hiding = RunnerPose(mode: .chill, time: 3, face: .mid, life: .snack, react: 0)
+        hiding.whistle(progress: 0.2)
+        #expect(hiding.propHidden == 1 && hiding.whistle < 0)
+        #expect(!RunnerFigure.parts(for: .chill, pose: hiding).contains(.musicNote))
+        var whistling = RunnerPose(mode: .chill, time: 3, face: .mid, life: .drawing, react: 0)
+        whistling.whistle(progress: 0.65)
+        #expect(whistling.propHidden == 1 && whistling.eyesDx == 3)
+        #expect(abs(whistling.whistle - 0.5) < 0.001)
+        #expect(RunnerFigure.parts(for: .chill, pose: whistling).contains(.musicNote))
+    }
+
     @Test func atHomeHakuScratchesItsHead() {
         let scratching = RunnerPose(mode: .chill, time: 6, face: .mid, react: 0)
         #expect(scratching.scratch == 0.5 && scratching.tuft > 0)
