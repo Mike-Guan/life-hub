@@ -38,7 +38,7 @@ public struct HubPlace: Codable, Equatable, Identifiable, Sendable {
         public func trigger(entered: Bool) -> ModeTrigger? {
             switch self {
             case .gym: entered ? .enteredGym : .leftGym
-            case .office: entered ? .enteredOffice : nil
+            case .office: entered ? .enteredOffice : .leftOffice
             case .home, .fitness, .custom: nil
             }
         }
@@ -147,7 +147,7 @@ public struct HubPlace: Codable, Equatable, Identifiable, Sendable {
         guard kind == .custom else { return kind.trigger(entered: entered) }
         switch action {
         case .boxing: return HubPlace.Kind.gym.trigger(entered: entered)
-        case .work: return entered ? .enteredOffice : nil
+        case .work: return entered ? .enteredOffice : .leftOffice
         case .chill: return entered ? .enteredPlace(.chill, name: title) : nil
         case .sideHustle: return entered ? .enteredPlace(.money, name: title) : nil
         case .recordOnly, .fitness: return nil

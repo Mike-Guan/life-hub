@@ -133,7 +133,6 @@ struct HomeView: View {
         }
         .background(Toy.paper.ignoresSafeArea())
         .modeSwitchHaptic(trigger: store.current)
-        .scheduleAutoMode(store, rules: rules)
     }
 
     // The tracker refreshes on open and on place events, so a need can end while the app stays open.
