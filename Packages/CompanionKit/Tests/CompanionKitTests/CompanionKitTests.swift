@@ -307,6 +307,17 @@ import Testing
         }
     }
 
+    @Test func eyesDriftNowAndThenAndComeBack() {
+        #expect(RunnerPose.drift(at: 5) == 0)
+        #expect(RunnerPose.drift(at: 9.7) > 2.9)
+        #expect(RunnerPose.drift(at: 13 + 9.7) < -2.9)
+        #expect(RunnerPose.drift(at: 11) == 0)
+        let plain = RunnerPose(mode: .work, time: 9.7, face: .mid, react: 0)
+        #expect(plain.eyesDx > 2.9)
+        let peeking = RunnerPose(mode: .work, time: 9.7, face: .mid, moment: .slacking, react: 0)
+        #expect(peeking.eyesDx != plain.eyesDx)
+    }
+
     @Test func noticeTurnsToYouHalfABeatLate() {
         var start = RunnerPose()
         start.notice(progress: 0.3)

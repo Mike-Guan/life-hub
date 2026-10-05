@@ -341,6 +341,15 @@ struct RunnerPose {
         if let life = self.life { live(life, time: t, react: r) }
         if let moment = self.moment { play(moment, time: t) }
         if let activity { act(activity, time: t) }
+        // Choreographed eyes (needs, moments, its own time, activities) keep their own look.
+        if self.need == nil, self.moment == nil, self.life == nil, activity == nil { eyesDx += Self.drift(at: t) }
+    }
+
+    /// Now and then the eyes drift off to one side and come back: every 13 s, left and right in turn.
+    static func drift(at t: TimeInterval) -> CGFloat {
+        let cycle = (t / 13).rounded(.down)
+        let side: CGFloat = cycle.truncatingRemainder(dividingBy: 2) == 0 ? 1 : -1
+        return 3 * side * bump(CGFloat(t - cycle * 13), from: 9, to: 10.4)
     }
 
     /// The state within the mode: peeking, dozing, slumped, at the door, walking, or vibe coding.

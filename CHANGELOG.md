@@ -20,6 +20,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU's eyes drift off to one side now and then and come back, so it looks like it has its own
+  thoughts.
 - HAKU on the widgets and Lock Screen changes a little every 15 minutes: a glance, a sip, gloves up.
   At home it shows what it is doing in the app, such as napping (just zzz) or playing the handheld.
 - HAKU backs off: if you ignore the same invite (couch, gym day or scrolling at work) three times in a row,
