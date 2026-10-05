@@ -56,6 +56,8 @@ public enum CompanionMoment: String, Codable, CaseIterable, Sendable {
     case timeToLeave
     /// Work or 副业, sitting for too long: HAKU twists and thumps its own back.
     case stiff
+    /// Work, at the office near the end of work hours: closing the laptop, wiping the desk, then watching the clock.
+    case packingUp
 }
 
 // PRD section 18. Traces fade the next day; the state logic decides which are on.

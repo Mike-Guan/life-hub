@@ -22,6 +22,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Near the end of a work day at the office, HAKU packs up: it closes the laptop, wipes the desk, takes
+  the headset off, shoulders the bag and watches the clock.
 - When HAKU is stiff in work hours, it sends "起来。我先起了。" once. This shares the one work-time
   notice a day with the scrolling-at-work notice. Ignored 3 days in a row, it pauses for a week.
 - HAKU gets stiff when your Apple Watch logs two idle stand hours in a row in 上班 or 副业: it twists
