@@ -57,13 +57,20 @@ import Testing
         #expect(plan.next(after: date(6, 8), calendar: calendar)?.id == "tomorrow")
     }
 
+    @Test func aStartedTaskReadsAsNow() {
+        let started = task("t", at: date(5, 18))
+        let line = DailyAgenda.nextLine(started, title: true, now: date(5, 18, 5), calendar: calendar)
+        #expect(line == "现在 18:00 Sample")
+        #expect(DailyAgenda.nextLine(started, title: false, now: date(5, 18), calendar: calendar) == "现在 18:00")
+    }
+
     @Test func nextLineShowsTheTitleOnlyWhenAsked() {
         let next = task("t", at: date(5, 18))
-        #expect(DailyAgenda.nextLine(next, title: true, calendar: calendar) == "下一件 18:00 Sample")
-        #expect(DailyAgenda.nextLine(next, title: false, calendar: calendar) == "下一件 18:00")
+        #expect(DailyAgenda.nextLine(next, title: true, now: date(5, 17), calendar: calendar) == "下一件 18:00 Sample")
+        #expect(DailyAgenda.nextLine(next, title: false, now: date(5, 17), calendar: calendar) == "下一件 18:00")
         var untitled = next
         untitled.title = ""
-        #expect(DailyAgenda.nextLine(untitled, title: true, calendar: calendar) == "下一件 18:00")
+        #expect(DailyAgenda.nextLine(untitled, title: true, now: date(5, 17), calendar: calendar) == "下一件 18:00")
     }
 
     @Test func cueIsSoonThenNowThenNothing() {

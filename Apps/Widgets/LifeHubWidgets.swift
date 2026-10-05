@@ -131,7 +131,7 @@ struct HubProvider: TimelineProvider {
                 notice: backoff.notice(at: date),
                 weekLine: ChangeEngine.sundayLine(times: changes, now: date),
                 offWork: snapshot?.offWorkLine(at: date),
-                nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false) },
+                nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false, now: date) },
                 daily: daily?.cue(at: date)
             )
         }

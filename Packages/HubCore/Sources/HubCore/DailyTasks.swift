@@ -364,11 +364,17 @@ extension DailyAgenda {
         return parts.url
     }
 
-    /// "下一件 18:00", with the title after it when `title` is true.
-    public static func nextLine(_ task: DailyOccurrence, title: Bool, calendar: Calendar = .current) -> String {
+    /// "下一件 18:00", or "现在 18:00" once the task started, with the title after it when `title` is true.
+    public static func nextLine(
+        _ task: DailyOccurrence,
+        title: Bool,
+        now: Date,
+        calendar: Calendar = .current
+    ) -> String {
         let parts = calendar.dateComponents([.hour, .minute], from: task.start)
         let time = String(format: "%02d:%02d", parts.hour ?? 0, parts.minute ?? 0)
-        return title && !task.title.isEmpty ? "下一件 \(time) \(task.title)" : "下一件 \(time)"
+        let head = "\(now >= task.start ? "现在" : "下一件") \(time)"
+        return title && !task.title.isEmpty ? "\(head) \(task.title)" : head
     }
 
     // The first read after linking only notes what is done already, so old tasks don't all celebrate.
