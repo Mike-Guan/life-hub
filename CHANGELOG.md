@@ -22,6 +22,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - Tapping a napping HAKU makes it roll over in its sleep. Tap again soon after and it half wakes
   and grumbles.
+- Traces that stay: after 5 boxing cans HAKU's gloves look worn, after 2 runs of 5 km the running shoes
+  stay by the door, and after 10 hours of vibe coding in all a second monitor sits by the laptop. They
+  show at home, on widgets and on the Lock Screen, and never go away.
+- Debug builds keep a local dogfood log of automatic decisions (each geofence arrival or departure and
+  whether it switched the mode, and the 编程 Focus), so wrong switches can be found after a few weeks of use.
+  It stays on the iPhone and isn't shown in the app.
+- HAKU has two hidden params, worked out by rules: 体能 from the last four weeks of boxing, gym and 5 km
+  runs, and 元气 from the last three nights' sleep plus daylight. They rise fast and fall slowly and never go
+  below tired. HAKU's moves will use them once the looks exist. No numbers or bars anywhere, and no cans.
+- At home, every fourth sip HAKU finds the can empty, shakes it by its ear and stares at it.
 - Lasting traces in HAKU's world: taped, scuffed gloves after 5 boxing sessions, a second monitor by
   the laptop after 10 hours of vibe coding, running shoes at home after 2 runs. The app decides when
   they are earned.

@@ -355,6 +355,20 @@ import Testing
         #expect(IdleMotion.rollingOver(time: 0, progress: 0).angle == 0)
     }
 
+    @Test func everyFourthSipTheCanIsEmpty() {
+        // Cycle 4 (32 s) follows the fourth sip: shake, then stare.
+        let shaking = RunnerPose(mode: .chill, time: 32.5, face: .mid, react: 0)
+        #expect(!shaking.emptyCan && shaking.canOffset.height == -10)
+        let staring = RunnerPose(mode: .chill, time: 34, face: .mid, react: 0)
+        #expect(staring.emptyCan)
+        let parts = Set(RunnerFigure.parts(for: .chill, pose: staring))
+        #expect(parts.isSuperset(of: [.eyesWork, .monsterCan]))
+        #expect(!parts.contains(.eyesChill))
+        #expect(!RunnerPose(mode: .chill, time: 36, face: .mid, react: 0).emptyCan)
+        #expect(!RunnerPose(mode: .chill, time: 2, face: .mid, react: 0).emptyCan)
+        #expect(!RunnerPose(mode: .chill, time: 34, face: .mid, life: .snack, react: 0).emptyCan)
+    }
+
     @Test func sundayAfternoonIsForTidying() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))

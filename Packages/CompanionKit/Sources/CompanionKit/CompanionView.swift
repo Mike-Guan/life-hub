@@ -248,7 +248,9 @@ public struct CompanionView: View {
     private var paused: Bool { reduceMotion || scenePhase != .active }
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
-        if life == .nap, let progress = Self.progress(since: rollStart, at: time, duration: Self.rollDuration) {
+        if bedtime == .off, life == .nap,
+            let progress = Self.progress(since: rollStart, at: time, duration: Self.rollDuration)
+        {
             return IdleMotion.rollingOver(time: time, progress: progress)
         }
         if bedtime == .on || life == .nap { return IdleMotion.sleeping(time: time) }
@@ -452,7 +454,7 @@ public struct CompanionView: View {
 
     private func react() {
         let life = mode.flatMap { idleLife($0, at: .now) }
-        if life == .nap, !Self.napWakes(lastTap: rollStart, now: .now) {
+        if bedtime == .off, life == .nap, !Self.napWakes(lastTap: rollStart, now: .now) {
             rollStart = .now
             say(nil)
             onTap?()

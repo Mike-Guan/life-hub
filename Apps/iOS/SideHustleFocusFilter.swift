@@ -19,9 +19,10 @@ struct SideHustleFocusFilter: SetFocusFilterIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        if switchesMode, store.autoSwitch(.codingFocus, rules: .stored(in: AppGroup.defaults)) != nil {
-            WidgetCenter.shared.reloadAllTimelines()
-        }
+        guard switchesMode else { return .result() }
+        let switched = store.autoSwitch(.codingFocus, rules: .stored(in: AppGroup.defaults)) != nil
+        Dogfood.note("focus", switched ? "编程专注，切到 vibe coding" : "编程专注，不切")
+        if switched { WidgetCenter.shared.reloadAllTimelines() }
         return .result()
     }
 }
