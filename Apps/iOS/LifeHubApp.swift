@@ -26,6 +26,8 @@ struct LifeHubApp: App {
     @State private var healthError: String?
     @State private var countdownError: String?
     @State private var screenTimeError: String?
+    /// The mode HAKU switches from as the app opens, replaying a switch made while it was closed.
+    @State private var replayFrom: Mode?
     @State private var places: PlaceSettings
     @State private var budget: BudgetSettings
     @State private var placeMonitor: PlaceMonitor
@@ -100,6 +102,7 @@ struct LifeHubApp: App {
             activityDays: .stored(in: AppGroup.defaults),
             departure: needs.departure,
             event: needs.event,
+            replayFrom: replayFrom,
             invite: needs.invite,
             notice: NudgeBackoff.stored(in: AppGroup.defaults).notice(at: .now),
             money: moneyCard,
@@ -113,10 +116,18 @@ struct LifeHubApp: App {
         .environment(store)
         .environment(energy)
         .onChange(of: scenePhase, initial: true) { _, phase in
+            if phase == .background {
+                AppGroup.defaults.set(Date.now, forKey: Self.lastBackgroundKey)
+                replayFrom = nil
+            }
             guard phase == .active else { return }
+            let away = AppGroup.defaults.object(forKey: Self.lastBackgroundKey) as? Date
+            replayFrom = OpenReplay.switchFrom(log: store.log, lastSeen: away, now: .now)
             syncWidgets()
             // One after the other, so the two permission prompts don't overlap.
             Task {
+                // Before rescheduling, which could replace today's delivered notice.
+                await replayOffWork()
                 await scheduleReminder()
                 await importSleep()
                 await needs.importMotion()
@@ -247,6 +258,17 @@ struct LifeHubApp: App {
             // Arriving at or leaving the office decides today's off-work notice.
             let atOffice = presence.since(.office) != nil
             Task { _ = await OffWorkReminder.schedule(rules, mode: store.current, atOffice: atOffice) }
+        }
+    }
+
+    private static let lastBackgroundKey = "lastBackground"
+
+    // A notice still in Notification Center was never tapped, so its animation never played.
+    private func replayOffWork() async {
+        let delivered = await UNUserNotificationCenter.current().deliveredNotifications()
+        let notice = delivered.first { $0.request.identifier == OffWorkReminder.requestID }
+        if OpenReplay.offWork(deliveredAt: notice?.date, mode: store.current, now: .now), let notice {
+            needs.offWork(at: notice.date)
         }
     }
 

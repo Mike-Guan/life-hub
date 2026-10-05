@@ -225,6 +225,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Fixed
 - Leaving the office switches to 下班 Chill only from 17:30. Stepping out earlier, such as for lunch,
   keeps 上班.
+- Opening the app now plays what you missed in the last 3 hours: a mode switch made while the app was
+  closed (HAKU starts in the old outfit and changes), and the off-work animation if you didn't tap the
+  notice and aren't back in 上班. Before, these only played with the app on screen, so HAKU looked idle.
 - Walking past a place no longer leaves HAKU in that mode: leaving within 3 minutes of arriving puts
   the earlier mode back. A GPS blip that leaves and returns within 3 minutes keeps the stay going, so
   gym time and office time aren't cut short.
