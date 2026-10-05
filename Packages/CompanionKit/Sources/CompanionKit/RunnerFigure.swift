@@ -203,6 +203,8 @@ struct RunnerPose {
     var turnSqueeze: CGFloat = 1
     /// Progress of rubbing an eye with the fist, 0...1, or -1 when not rubbing.
     var rubEye: CGFloat = -1
+    /// Rise of a hummed music note, 0...1, or -1 when hidden.
+    var hum: CGFloat = -1
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -816,6 +818,7 @@ struct RunnerFigure: View {
         }
         wear(pose, mode: mode, on: &visible)
         if pose.rubEye >= 0 { visible.insert(.rubHand) }
+        if pose.hum >= 0 { visible.insert(.musicNote) }
         if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
@@ -1069,6 +1072,11 @@ struct RunnerFigure: View {
             case .mouthYawn:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 0.7 + 0.3 * pose.yawn, y: pose.yawn, anchor: Self.unit(x: 60, y: 85))
+            case .musicNote:
+                // Floats up and sways a little as it fades.
+                RunnerPartView(part: part)
+                    .offset(x: 3 * sin(pose.hum * 2 * .pi) * scale, y: -10 * pose.hum * scale)
+                    .opacity(Double(sin(pose.hum * .pi)))
             case .rubHand:
                 // Up from below, a few small rubs, back down.
                 let up = min(

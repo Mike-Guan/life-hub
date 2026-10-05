@@ -332,6 +332,11 @@ public struct CompanionView: View {
         {
             pose.rubEyes(progress: progress)
         }
+        if vitals.spirit == .high, shownNeed == nil, shownMoment == nil, life == nil, activity == nil,
+            let progress = Self.hum(at: time * vitals.motionSpeed)
+        {
+            pose.hum = CGFloat(progress)
+        }
         if Self.progress(since: lateNightStart, at: time, duration: Self.lateNightDuration) != nil {
             // Opened after midnight: a squint at you.
             pose.blink = min(pose.blink, 0.4)
@@ -417,6 +422,13 @@ public struct CompanionView: View {
     private var noticeDuration: TimeInterval { noticeLookUp ? 1.6 : 0.9 }
     private static let lateNightDuration = 2.6
     private static let turnAwayDuration = 2.2
+
+    /// Progress of a hummed note at `time` when 元气 is high: 2.4 s in every 16 s, or nil in between.
+    nonisolated static func hum(at time: TimeInterval) -> Double? {
+        let phase = time.truncatingRemainder(dividingBy: 16)
+        guard phase >= 9, phase < 11.4 else { return nil }
+        return (phase - 9) / 2.4
+    }
 
     /// Progress of rubbing an eye at `time` when 元气 is low: 2.5 s in every 20 s, or nil in between and on
     /// boxing day.
