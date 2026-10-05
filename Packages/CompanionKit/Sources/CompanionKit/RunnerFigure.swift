@@ -228,6 +228,18 @@ struct RunnerPose {
     var packStep = 3
     /// 0 = laptop open, 1 = closed.
     var lidClose: CGFloat = 0
+    /// What HAKU holds up for a planned Daily Widget task, or nil.
+    var dailyProp: DailyProp?
+    /// 0 = the planned task's prop down (bag on the floor, note out of view), 1 = held up.
+    var propRaise: CGFloat = 0
+    /// Tapping the watch before a planned task.
+    var watchTap = false
+    /// Progress of the sticky note slapped on the screen as a planned task starts, 0..<1, or -1 when none.
+    var noteSlap: CGFloat = -1
+    /// Height of the fist pumped for the day's focus done: 0 = low, 1 = high, or -1 when hidden.
+    var fistPump: CGFloat = -1
+    /// Flare of the mask LED, 0...1.
+    var ledFlare: CGFloat = 0
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -572,6 +584,45 @@ struct RunnerPose {
             eyesDy = -Self.bump(k, from: 0, to: 0.7)
             headDy = 0
         }
+    }
+
+    /// How long the sticky note stays on the screen as a planned task starts, in seconds.
+    static let noteSlapLength: TimeInterval = 3
+
+    /// Size of the slapped sticky note `t` seconds in: it flies in past full size and settles at 1.
+    static func noteSize(at t: CGFloat) -> CGFloat {
+        if t < 0.25 { return 0.3 + 0.8 * ramp(t, from: 0, to: 0.25) }
+        return 1.1 - 0.1 * ramp(t, from: 0.25, to: 0.4)
+    }
+
+    /// The planned task's prop at `time`. Soon: a 10 s loop of tapping the watch, then the prop held up. Now: the
+    /// prop held up, with the sticky note slapped on the screen at `slap` (0..<1), or nil when it isn't.
+    mutating func cue(_ cue: DailyCue, time t: TimeInterval, slap: Double?) {
+        dailyProp = cue.prop
+        noteSlap = slap.map { CGFloat($0) } ?? -1
+        propRaise = 1
+        if cue.stage == .soon {
+            let c = CGFloat(t.truncatingRemainder(dividingBy: 10))
+            watchTap = c < 2.4
+            if watchTap {
+                prop = CGSize(width: 0, height: 3 * abs(sin(c * .pi / 0.4)))
+                eyesDx = 3
+                eyesDy = 1.5
+            }
+            propRaise = Self.ramp(c, from: 2.4, to: 2.9) * (1 - Self.ramp(c, from: 9.4, to: 10))
+        }
+        if cue.prop == .gymBag { bagLift = max(bagLift, propRaise) }
+    }
+
+    /// Cheering the day's focus done at `progress` (0..<1): the mask LED flares, then three fist pumps with the
+    /// eyes shut and a burst of sparkles.
+    mutating func cheerFocus(progress: Double) {
+        let t = CGFloat(min(max(progress, 0), 1)) * 3
+        let pumping = t > 1 && t < 2.8
+        ledFlare = max(Self.bump(t, from: 0, to: 1), pumping ? 0.5 : 0)
+        eyesShut = pumping
+        fistPump = pumping ? abs(sin((t - 1) * .pi / 0.6)) : -1
+        burst = t > 1 && t < 2.4 ? (t - 1) / 1.4 : -1
     }
 
     /// Sitting too long, a 4 s loop: two twists of the waist, then three thumps on the right shoulder.
@@ -992,8 +1043,14 @@ struct RunnerFigure: View {
         wear(pose, mode: mode, on: &visible)
         if pose.rubEye >= 0 { visible.insert(.rubHand) }
         if pose.hum >= 0 || pose.whistle >= 0 { visible.insert(.musicNote) }
-        if pose.thump >= 0 { visible.insert(.backFist) }
+        if pose.thump >= 0 || pose.fistPump >= 0 { visible.insert(.backFist) }
         if pose.thumpHit { visible.insert(.thumpLines) }
+        if let prop = pose.dailyProp, !pose.bedtime { holdUp(prop, pose: pose, on: &visible) }
+        if pose.noteSlap >= 0 {
+            visible.insert(.bigNote)
+            let t = pose.noteSlap * CGFloat(RunnerPose.noteSlapLength)
+            if t > 0.25, t < 0.8 { visible.insert(.noteHit) }
+        }
         if pose.eyesShut {
             visible.subtract(openEyes)
             visible.insert(.eyesClosed)
@@ -1025,6 +1082,20 @@ struct RunnerFigure: View {
         }
         if pose.traces.contains(.deskMonitor), visible.contains(.ledCode) { visible.insert(.deskMonitor) }
         if home, pose.traces.contains(.runningShoes) { visible.insert(.runningShoes) }
+    }
+
+    /// The planned task's prop, and the watch while HAKU taps it.
+    nonisolated private static func holdUp(_ prop: DailyProp, pose: RunnerPose, on visible: inout Set<RunnerPart>) {
+        if pose.watchTap { visible.formUnion([.watchWrist, .tapHand]) }
+        switch prop {
+        case .headphones: visible.formUnion(headsetParts)
+        case .gymBag: visible.insert(.gymBag)
+        case .bag: visible.insert(.shopBag)
+        case .note:
+            if pose.propRaise > 0 { visible.insert(.stickyNote) }
+        }
+        // The right hand holds the note or taps the watch, so the can goes.
+        visible.remove(.monsterCan)
     }
 
     nonisolated private static let awayParts: Set<RunnerPart> = [.gymBag, .heavyBag, .dumbbell, .speedLines]
@@ -1263,6 +1334,11 @@ struct RunnerFigure: View {
                     .opacity(Double(1 - pose.maskDrop))
             case .maskDown where pose.unmasking, .maskStripesDown where pose.unmasking:
                 RunnerPartView(part: part).opacity(Double(pose.maskDrop))
+            case .ledLine where pose.ledFlare > 0:
+                // Flares wider with a glow.
+                RunnerPartView(part: part)
+                    .scaleEffect(x: 1 + 0.3 * pose.ledFlare, y: 1, anchor: Self.unit(x: 60, y: 82))
+                    .shadow(color: RunnerPalette.neonCyan, radius: 4 * pose.ledFlare * scale)
             case .ledLine:
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
             case .headset, .cupL, .cupR, .mic:
@@ -1272,6 +1348,11 @@ struct RunnerFigure: View {
             case .mouthYawn:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 0.7 + 0.3 * pose.yawn, y: pose.yawn, anchor: Self.unit(x: 60, y: 85))
+            case .backFist where pose.fistPump >= 0:
+                // Pumped up in front of the shoulder.
+                RunnerPartView(part: part)
+                    .scaleEffect(1.4, anchor: Self.unit(x: 87, y: 99))
+                    .offset(x: 4 * scale, y: (8 - 22 * pose.fistPump) * scale)
             case .backFist, .thumpLines:
                 RunnerPartView(part: part).offset(y: (4 * pose.thump - 2) * scale)
             case .scratchHand:
@@ -1333,6 +1414,23 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .rotationEffect(.degrees(-10 * Double(pose.bagLift)), anchor: Self.unit(x: 24, y: 122))
                     .offset(x: 6 * pose.bagLift * scale, y: -16 * pose.bagLift * scale)
+            case .shopBag:
+                // Picked up from the floor by the door.
+                RunnerPartView(part: part)
+                    .rotationEffect(.degrees(-6 * Double(pose.propRaise)), anchor: Self.unit(x: 22, y: 120))
+                    .offset(x: 4 * pose.propRaise * scale, y: -14 * pose.propRaise * scale)
+            case .stickyNote:
+                // Held up from below by the cheek.
+                RunnerPartView(part: part).offset(y: 44 * (1 - pose.propRaise) * scale)
+            case .bigNote:
+                // Slapped on the screen with a bounce, held, then peeled off down and to the left.
+                let t = pose.noteSlap * CGFloat(RunnerPose.noteSlapLength)
+                let peel = RunnerPose.ramp(t, from: 2.4, to: 3)
+                RunnerPartView(part: part)
+                    .scaleEffect(RunnerPose.noteSize(at: t), anchor: Self.unit(x: 60, y: 60))
+                    .rotationEffect(.degrees(-28 * Double(peel)), anchor: Self.unit(x: 16, y: 14))
+                    .offset(y: 40 * peel * peel * scale)
+                    .opacity(Double(1 - peel))
             case .peaceHand:
                 // A sneaky peace sign pops up by the cheek and wiggles.
                 RunnerPartView(part: part)
@@ -1680,6 +1778,7 @@ public struct CompanionPortrait: View {
     let date: Date
     let bedtime: Bedtime
     let wardrobe: Wardrobe
+    let daily: DailyCue?
     let framing: Framing
 
     // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
@@ -1692,6 +1791,7 @@ public struct CompanionPortrait: View {
     ///   - vitals: HAKU's hidden params; they change only how it looks.
     ///   - date: the moment shown, such as a widget timeline entry's date.
     ///   - wardrobe: what HAKU wears from the shop and keepsakes.
+    ///   - daily: a planned Daily Widget task starting soon or now; HAKU holds up its prop.
     public init(
         mode: Mode,
         energy: Double? = nil,
@@ -1705,6 +1805,7 @@ public struct CompanionPortrait: View {
         date: Date = .now,
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
+        daily: DailyCue? = nil,
         framing: Framing = .full
     ) {
         self.mode = mode
@@ -1719,6 +1820,7 @@ public struct CompanionPortrait: View {
         self.date = date
         self.bedtime = bedtime
         self.wardrobe = wardrobe
+        self.daily = daily
         self.framing = framing
     }
 
@@ -1758,7 +1860,7 @@ public struct CompanionPortrait: View {
     /// thing on its own as in the app.
     var pose: RunnerPose {
         guard bedtime == .off else { return RunnerPose.bedtimeStill() }
-        let plain = need == nil && activity == nil && moment == nil
+        let plain = need == nil && activity == nil && moment == nil && daily == nil
         let life = plain && mode == .chill ? IdleLife.at(date, stamina: vitals.stamina) : nil
         var pose = RunnerPose(
             face: EnergyFace(energy: energy),
@@ -1774,6 +1876,7 @@ public struct CompanionPortrait: View {
             pose.bagLift = 0
             pose.eyesDx = -3
         }
+        if let daily { pose.cue(daily, time: 5, slap: nil) }
         return pose
     }
 }

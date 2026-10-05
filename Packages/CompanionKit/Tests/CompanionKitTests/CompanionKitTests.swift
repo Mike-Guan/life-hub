@@ -468,6 +468,42 @@ import Testing
         #expect(!CompanionView.packUpDue(last: 100_000 - 19 * 60, now: now))
     }
 
+    @Test func hakuHoldsUpThePlannedTasksProp() {
+        var tapping = RunnerPose(mode: .work, time: 0, face: .mid, react: 0)
+        tapping.cue(DailyCue(stage: .soon, prop: .note, id: "a"), time: 1, slap: nil)
+        let tappingParts = Set(RunnerFigure.parts(for: .work, pose: tapping))
+        #expect(tapping.watchTap && tapping.propRaise == 0)
+        #expect(tappingParts.isSuperset(of: [.watchWrist, .tapHand]) && !tappingParts.contains(.stickyNote))
+        var holding = RunnerPose(mode: .chill, time: 0, face: .mid, react: 0)
+        holding.cue(DailyCue(stage: .soon, prop: .bag, id: "a"), time: 5, slap: nil)
+        let holdingParts = Set(RunnerFigure.parts(for: .chill, pose: holding))
+        #expect(holding.propRaise == 1 && holdingParts.contains(.shopBag) && !holdingParts.contains(.monsterCan))
+        let gym = CompanionPortrait(mode: .work, daily: DailyCue(stage: .now, prop: .gymBag, id: "b")).pose
+        #expect(gym.bagLift == 1 && RunnerFigure.parts(for: .work, pose: gym).contains(.gymBag))
+        var slapping = RunnerPose(mode: .work, time: 0, face: .mid, react: 0)
+        slapping.cue(DailyCue(stage: .now, prop: .headphones, id: "b"), time: 0, slap: 0.15)
+        let slapParts = Set(RunnerFigure.parts(for: .work, pose: slapping))
+        #expect(slapParts.isSuperset(of: [.bigNote, .noteHit, .headset]))
+        #expect(RunnerPose.noteSize(at: 0.25) > 1 && abs(RunnerPose.noteSize(at: 1) - 1) < 0.001)
+        let soon = DailyCue(stage: .soon, prop: .note, id: "a")
+        #expect(CompanionView.newCue(soon, stage: .soon, last: "") == "a")
+        #expect(CompanionView.newCue(soon, stage: .soon, last: "a") == nil)
+        #expect(CompanionView.newCue(soon, stage: .now, last: "") == nil)
+    }
+
+    @Test func hakuCheersAPlannedTaskDone() {
+        var focus = RunnerPose(mode: .work, time: 0, face: .mid, react: 0)
+        focus.cheerFocus(progress: 0.1)
+        #expect(focus.ledFlare > 0 && focus.fistPump < 0 && !focus.eyesShut)
+        focus.cheerFocus(progress: 0.5)
+        let parts = Set(RunnerFigure.parts(for: .work, pose: focus))
+        #expect(focus.eyesShut && focus.fistPump >= 0 && focus.burst >= 0)
+        #expect(parts.isSuperset(of: [.backFist, .eyesClosed, .sparkle]) && !parts.contains(.headBack))
+        #expect(CompanionView.newTaskDone(.taskDone(id: "t", focus: true), last: "") == "t")
+        #expect(CompanionView.newTaskDone(.taskDone(id: "t", focus: false), last: "t") == nil)
+        #expect(CompanionView.newTaskDone(.stretched(id: "t"), last: "") == nil)
+    }
+
     @Test func atHomeHakuScratchesItsHead() {
         let scratching = RunnerPose(mode: .chill, time: 6, face: .mid, react: 0)
         #expect(scratching.scratch == 0.5 && scratching.tuft > 0)

@@ -22,6 +22,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU reacts to planned Daily Widget tasks: 15 minutes before, it taps its watch and holds up the task's prop
+  (headphones, shopping bag, gym bag or a sticky note); at the start it slaps a sticky note on the screen; when a
+  task is done it gives a peace sign, or for the day's focus flares its mask and pumps its fist.
 - Settings has a "联动 Daily Widget" switch, off by default. Turned on, you pick Daily's iCloud Drive
   folder once and Life Hub reads its tasks (never writes). A task planned ahead in Daily and done earns
   1 能量罐, at most 3 a day. Turning it off forgets the folder; cans stay.

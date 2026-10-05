@@ -27,6 +27,9 @@ public enum CompanionEvent: Equatable, Sendable {
     case stayHome(id: String)
     /// Rolling the shoulders after Mike stood up from a long sit; `id` is the hour he stood, so it plays once.
     case stretched(id: String)
+    /// A planned Daily Widget task was done; `id` is the task's id (with the day for a repeating task), so it
+    /// plays once, and `focus` marks the day's focus.
+    case taskDone(id: String, focus: Bool)
 }
 
 /// A workout from the Health app, reduced to what the hub uses.
