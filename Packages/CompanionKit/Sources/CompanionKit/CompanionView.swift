@@ -18,6 +18,8 @@ public struct CompanionView: View {
     let moment: CompanionMoment?
     /// Monster cans piled up next to HAKU while vibe coding.
     let codingCans: Int
+    /// What today left in HAKU's world, such as a bandage after boxing.
+    let traces: Set<CompanionTrace>
     // To show a new item after its unboxing, pass a `wardrobe` with it equipped and its slot's `showcaseMode`.
     /// A one-off animation: celebrating a workout, going off work or unboxing an item. Each event id plays once.
     let event: CompanionEvent?
@@ -64,6 +66,7 @@ public struct CompanionView: View {
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
         codingCans: Int = 0,
+        traces: Set<CompanionTrace> = [],
         event: CompanionEvent? = nil,
         invite: String? = nil,
         cheer: Int = 0,
@@ -80,6 +83,7 @@ public struct CompanionView: View {
         self.activity = activity
         self.moment = moment
         self.codingCans = codingCans
+        self.traces = traces
         self.event = event
         self.invite = invite
         self.cheer = cheer
@@ -146,7 +150,7 @@ public struct CompanionView: View {
                     let motion = idleMotion(mode, life: life, time: time)
                     RunnerFigure(
                         mode: mode,
-                        pose: pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe))
+                        pose: pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe)).leaving(traces)
                     )
                     .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
                     .offset(y: reduceMotion ? 0 : motion.dy)
@@ -485,6 +489,13 @@ struct IdleMotion {
             self.init(mode: .work, time: t)
         case .shooting:
             self.init(mode: .money, time: t)
+        case .collapsed, .blanket:
+            let breath = IdleMotion.sleeping(time: t)
+            self.init(dy: breath.dy, angle: breath.angle)
+        case .morning:
+            self.init(mode: .chill, time: t)
+        case .timeToLeave:
+            self.init(dy: -CGFloat(abs(sin(t * .pi / 0.5))) * 1.5, angle: 0)
         }
     }
 

@@ -147,6 +147,13 @@ struct RunnerPose {
         pose.outfit = outfit
         return pose
     }
+
+    /// The same pose with today's `traces`.
+    func leaving(_ traces: Set<CompanionTrace>) -> RunnerPose {
+        var pose = self
+        pose.traces = traces
+        return pose
+    }
     /// 0 = mask up, 1 = pulled down to the chin.
     var maskDrop: CGFloat = 0
     var canOpacity: Double = 1
@@ -182,6 +189,8 @@ struct RunnerPose {
     var soulRise: CGFloat = -1
     /// Brightness of the floating code brackets in flow, 0...1.
     var codeGlow: Double = 1
+    /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
+    var traces: Set<CompanionTrace> = []
 
     var tired: Bool { face == .low }
     var offWorking: Bool { offWork >= 0 }
@@ -231,6 +240,16 @@ struct RunnerPose {
             headDy = 2
             eyesDy = 1.5
             if self.moment == .flow { canOpacity = 0 }
+        case .collapsed:
+            slump = Self.collapse
+            blink = 0.15
+        case .blanket:
+            blink = 0.4
+            headDy = 2
+        case .morning:
+            blink = 0.6
+        case .timeToLeave:
+            eyesDx = -3
         case .shooting, nil:
             break
         }
@@ -368,8 +387,28 @@ struct RunnerPose {
             canAngle = Double(-12 * hand)
         case .shooting:
             break
+        case .collapsed:
+            // Head down on the sofa arm, slow breaths.
+            slump = Self.collapse
+            blink = 0.15
+            headDy = CGFloat(sin(t * 2 * .pi / 4))
+        case .blanket:
+            // Wrapped up, eyes half shut, sinking a little.
+            blink = max(0.15, 0.4 * Self.blink(at: t * 0.5))
+            headDy = 2 + CGFloat(sin(t * 2 * .pi / 5))
+        case .morning:
+            // Brushing, half asleep.
+            prop = CGSize(width: CGFloat(sin(t * 2 * .pi / 0.35)) * 3, height: 0)
+            blink = max(0.3, 0.6 * Self.blink(at: t))
+        case .timeToLeave:
+            // Tapping the watch, a look at the door every 4 s.
+            prop = CGSize(width: 0, height: 3 * CGFloat(abs(sin(t * .pi / 0.4))))
+            eyesDx = -3 + 3 * Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 4)), from: 3, to: 4)
         }
     }
+
+    /// How far the head drops onto the sofa arm when collapsed, as a fraction of the desk slump.
+    private static let collapse: CGFloat = 0.85
 
     /// Doing it alongside Mike: heavy-bag combos, curls, running, or getting ready for the gym or the run.
     private mutating func act(_ activity: CompanionActivity, time t: TimeInterval) {
@@ -619,6 +658,11 @@ struct RunnerFigure: View {
         // The room item stays home: hidden while HAKU carries the gym bag or is out boxing, lifting or running.
         if mode == .chill, let room = outfit.room, visible.isDisjoint(with: awayParts) { visible.insert(room) }
         if outfit.peaceSign, pose.burst >= 0, !pose.bedtime { visible.insert(.peaceHand) }
+        // Today's traces: the bandage goes everywhere, the monitor and the sunlight are in the room at home.
+        if pose.traces.contains(.bandage) { visible.insert(.bandage) }
+        let home = mode == .chill && visible.isDisjoint(with: awayParts.union([.door]))
+        if home, pose.traces.contains(.pcGlow) { visible.insert(.roomPc) }
+        if home, pose.traces.contains(.sunlight) { visible.insert(.sunlight) }
     }
 
     nonisolated private static let awayParts: Set<RunnerPart> = [.gymBag, .heavyBag, .dumbbell, .speedLines]
@@ -711,6 +755,14 @@ struct RunnerFigure: View {
             }
         case .shooting:
             visible.formUnion(moneyParts)
+        case .collapsed:
+            visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .sofaArm])
+        case .blanket:
+            visible.formUnion([.blanket, .eyesSleepy, .maskDown, .earringNeon, .earbud])
+        case .morning:
+            visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .toothbrush])
+        case .timeToLeave:
+            visible.formUnion(workParts.union([.ledLine, .door, .watchWrist, .tapHand]))
         }
         return visible
     }
@@ -865,7 +917,7 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .offset(x: -8 * pose.dash * scale)
                     .opacity(Double(1 - 0.7 * pose.dash))
-            case .handheld, .cloth, .runShoe:
+            case .handheld, .cloth, .runShoe, .toothbrush, .tapHand:
                 RunnerPartView(part: part).offset(x: pose.prop.width * scale, y: pose.prop.height * scale)
             case .onigiri:
                 RunnerPartView(part: part)
@@ -941,7 +993,7 @@ struct RunnerFigure: View {
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .browsWork, .eyesChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
-        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode,
+        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
@@ -1125,6 +1177,7 @@ public struct CompanionPortrait: View {
     let activity: CompanionActivity?
     let moment: CompanionMoment?
     let codingCans: Int
+    let traces: Set<CompanionTrace>
     let date: Date
     let bedtime: Bedtime
     let wardrobe: Wardrobe
@@ -1136,6 +1189,7 @@ public struct CompanionPortrait: View {
     ///   - activity: what HAKU does alongside Mike; it replaces the need.
     ///   - moment: the state within the mode, such as vibe coding; it replaces the need.
     ///   - codingCans: Monster cans piled up while vibe coding.
+    ///   - traces: what today left in HAKU's world, such as a bandage after boxing.
     ///   - date: the moment shown, such as a widget timeline entry's date.
     ///   - wardrobe: what HAKU wears from the shop and keepsakes.
     public init(
@@ -1146,6 +1200,7 @@ public struct CompanionPortrait: View {
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
         codingCans: Int = 0,
+        traces: Set<CompanionTrace> = [],
         date: Date = .now,
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
@@ -1158,6 +1213,7 @@ public struct CompanionPortrait: View {
         self.activity = activity
         self.moment = moment
         self.codingCans = codingCans
+        self.traces = traces
         self.date = date
         self.bedtime = bedtime
         self.wardrobe = wardrobe
@@ -1193,10 +1249,11 @@ public struct CompanionPortrait: View {
     private var figure: RunnerFigure {
         let outfit = Outfit(wardrobe)
         guard bedtime == .off else {
-            return RunnerFigure(mode: mode, pose: RunnerPose.bedtimeStill().wearing(outfit))
+            return RunnerFigure(mode: mode, pose: RunnerPose.bedtimeStill().wearing(outfit).leaving(traces))
         }
         var pose = RunnerPose(face: EnergyFace(energy: energy), need: need, activity: activity, moment: moment)
             .wearing(outfit)
+            .leaving(traces)
         pose.codingCans = codingCans
         if peeking {
             pose.bagLift = 0

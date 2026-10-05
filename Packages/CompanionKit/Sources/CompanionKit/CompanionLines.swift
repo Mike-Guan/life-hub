@@ -49,6 +49,10 @@ enum CompanionLines {
         case .flow: ["……"]
         case .lateCoding: ["代码明天还在。"]
         case .shooting: ["光线不错。", "这张可以。", "¥¥ 在路上。"]
+        case .collapsed: ["你也活着回来了啊。", "……先让我趴五分钟。"]
+        case .blanket: ["今天就这样吧。", "毯子分你一半。"]
+        case .morning: ["又要上班了。", "耳机……耳机去哪了。"]
+        case .timeToLeave: ["……公司还在等你。", "唉。"]
         }
     }
 
@@ -119,6 +123,10 @@ enum CompanionLines {
         case .flow: "写代码写进了心流"
         case .lateCoding: "熬夜写代码，很困"
         case .shooting: "在忙副业的拍摄"
+        case .collapsed: "下班回家，趴在沙发扶手上"
+        case .blanket: "裹着毯子瘫在沙发上"
+        case .morning: "早上起来在刷牙"
+        case .timeToLeave: "戴好耳机站在门口，敲着手表"
         }
     }
 
