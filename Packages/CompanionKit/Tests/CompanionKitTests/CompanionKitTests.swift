@@ -700,6 +700,15 @@ import Testing
         #expect(label != "HAKU，\(Mode.money.title)")
     }
 
+    @Test func vibeCodingStopsForAStretch() {
+        let typing = RunnerPose(mode: .money, time: 5, face: .mid, moment: .vibeCoding, react: 0)
+        #expect(typing.stretch == 0 && typing.headDy == 2)
+        let stretching = RunnerPose(mode: .money, time: 12.25, face: .mid, moment: .vibeCoding, react: 0)
+        #expect(stretching.stretch > 0.59 && stretching.headDy < 0 && stretching.typing.height < -3.9)
+        let flow = RunnerPose(mode: .money, time: 12.25, face: .mid, moment: .flow, react: 0)
+        #expect(flow.stretch == 0)
+    }
+
     @Test func vibeCodingWearsTheHoodieAndPilesUpCans() {
         var pose = RunnerPose(moment: .vibeCoding)
         let parts = Set(RunnerFigure.parts(for: .money, pose: pose))
