@@ -2,6 +2,7 @@
 
 This is the single rules page for agents working in this repo. Read it first. When another doc
 disagrees with it, this page wins; record rule changes in the decisions log at the bottom.
+Then read `PRODUCT_PRINCIPLES.md`: what Life Hub is for. Every feature and line of HAKU must fit it.
 
 Personal life hub for one user (Mike). iOS + macOS, native SwiftUI. A companion
 character (RUNNER, Rive) mirrors the current mode and energy.
@@ -190,3 +191,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   1-push-a-day L2 limit, next to the bedtime reminder.
 - 2026-10-05: Mike turned off clock-based mode switching. Modes change by place (office, gyms, added
   places) or by hand; the off-work notice goes out only on days he is at work.
+- 2026-10-05: Mike set the product principles (`PRODUCT_PRINCIPLES.md`) and a scope freeze: after the current
+  batch, 2 to 4 weeks with no new features, only HAKU-aliveness work and device bugs.
