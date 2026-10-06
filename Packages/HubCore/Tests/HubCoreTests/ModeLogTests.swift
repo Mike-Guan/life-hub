@@ -28,19 +28,19 @@ import Testing
         #expect(!segments[0].isOngoing)
     }
 
-    @Test func modeCarriedOverFromYesterdayStartsAtMidnight() {
+    @Test func modeCarriedOverFromYesterdayStartsAtFive() {
         let log = ModeLog(changes: [change(.chill, date(1, 22)), change(.work, date(2, 9))])
         let segments = log.segments(on: date(2, 12), now: date(2, 10), calendar: calendar)
         #expect(segments.map(\.mode) == [.chill, .work])
-        #expect(segments[0].start == date(2, 0))
-        #expect(segments[0].duration == 9 * 3600)
+        #expect(segments[0].start == date(2, 5))
+        #expect(segments[0].duration == 4 * 3600)
     }
 
-    @Test func pastDayEndsAtMidnightAndIsNotOngoing() {
+    @Test func pastDayEndsAtFiveAndIsNotOngoing() {
         let log = ModeLog(changes: [change(.boxing, date(1, 19))])
         let segments = log.segments(on: date(1, 12), now: date(2, 8), calendar: calendar)
         #expect(segments.count == 1)
-        #expect(segments[0].end == date(2, 0))
+        #expect(segments[0].end == date(2, 5))
         #expect(!segments[0].isOngoing)
     }
 
@@ -51,6 +51,16 @@ import Testing
         #expect(log.current?.mode == .work)
         let work = log.totals(on: date(2, 12), now: date(2, 14), calendar: calendar)[.work] ?? 0
         #expect(abs(work - 5 * 3600) < 0.001)
+    }
+
+    @Test func lateNightChangesStayWithTheEveningBefore() {
+        let log = ModeLog(changes: [change(.chill, date(1, 20)), change(.money, date(2, 1))])
+        let night = log.segments(on: date(2, 3), now: date(2, 3), calendar: calendar)
+        #expect(night.map(\.mode) == [.chill, .money])
+        #expect(night[0].start == date(1, 20))
+        let morning = log.segments(on: date(2, 6), now: date(2, 6), calendar: calendar)
+        #expect(morning.map(\.mode) == [.money])
+        #expect(morning[0].start == date(2, 5))
     }
 
     @Test func futureDayHasNoSegments() {

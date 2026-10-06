@@ -64,9 +64,11 @@ public struct ModeLog: RecordLog, Equatable {
 
     public var current: ModeChange? { active.last }
 
-    /// Segments overlapping the calendar day containing `day`, ending at `now` for the running one.
+    // Mike (2026-10-06): the log turns over at 05:00, not midnight, so late-night changes stay with
+    // the evening before.
+    /// Segments overlapping the hub day (05:00 to 05:00) containing `day`, ending at `now` for the running one.
     public func segments(on day: Date, now: Date = .now, calendar: Calendar = .current) -> [ModeSegment] {
-        let dayStart = calendar.startOfDay(for: day)
+        let dayStart = StateEngine.dayStart(for: day, calendar: calendar)
         guard let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) else { return [] }
         let windowEnd = min(dayEnd, now)
         guard windowEnd > dayStart else { return [] }
