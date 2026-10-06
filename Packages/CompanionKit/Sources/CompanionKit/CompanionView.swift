@@ -103,6 +103,9 @@ public struct CompanionView: View {
     // Id of the last planned task cheered as done, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastTaskDone") private var lastTaskDone = ""
     @State private var dryStart: Date?
+    @State private var reviveStart: Date?
+    // Id of the last time HAKU got up from the sofa, shared by every CompanionView so each plays once.
+    @AppStorage("companion.lastRevived") private var lastRevived = ""
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -354,6 +357,11 @@ public struct CompanionView: View {
         if let progress = limber(at: time) {
             return RunnerPose.limber(time: time, progress: reduceMotion ? 1 : progress, face: face)
         }
+        if let progress = revive(at: time) {
+            // Reduced motion holds the last frame: standing with the mask up.
+            let t = reduceMotion ? RunnerPose.reviveLength - 0.5 : CGFloat(progress) * RunnerPose.reviveLength
+            return RunnerPose.revive(time: t, face: face)
+        }
         let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
         if reduceMotion {
             var pose = RunnerPose(face: face, need: shownNeed, life: life, activity: activity, moment: shownMoment)
@@ -531,6 +539,11 @@ public struct CompanionView: View {
         Self.progress(since: limberStart, at: time, duration: Self.limberDuration)
     }
 
+    /// Progress of getting up from the sofa at `time`, 0..<1, or nil when none is playing.
+    private func revive(at time: TimeInterval) -> Double? {
+        Self.progress(since: reviveStart, at: time, duration: Double(RunnerPose.reviveLength))
+    }
+
     /// Progress of turning away after being tapped too often at `time`, 0..<1, or nil when not turned away.
     private func turnAway(at time: TimeInterval) -> Double? {
         Self.progress(since: turnAwayStart, at: time, duration: Self.turnAwayDuration)
@@ -557,10 +570,10 @@ public struct CompanionView: View {
     }
 
     /// Whether a one-off animation that holds HAKU still is playing: off work, unboxing, staying home,
-    /// stretching or rolling the shoulders.
+    /// stretching, rolling the shoulders or getting up from the sofa.
     private func stillOneOff(at time: TimeInterval) -> Bool {
         offWork(at: time) != nil || unlock(at: time) != nil || stayHome(at: time) != nil
-            || stretchUp(at: time) != nil || limber(at: time) != nil
+            || stretchUp(at: time) != nil || limber(at: time) != nil || revive(at: time) != nil
     }
 
     private static func progress(since start: Date?, at time: TimeInterval, duration: Double) -> Double? {
@@ -685,6 +698,12 @@ public struct CompanionView: View {
         return id
     }
 
+    /// The id of getting up from the sofa to play for `event`, or nil when there is none or it already played.
+    nonisolated static func newRevived(_ event: CompanionEvent?, last: String) -> String? {
+        guard case .revived(let id) = event, id != last else { return nil }
+        return id
+    }
+
     /// The planned task id to cheer for `event`, or nil when there is none or it already played.
     nonisolated static func newTaskDone(_ event: CompanionEvent?, last: String) -> String? {
         guard case .taskDone(let id, _) = event, id != last else { return nil }
@@ -739,6 +758,16 @@ public struct CompanionView: View {
                 say("嗯，活过来了。", for: 3)
             }
         }
+        if let id = Self.newRevived(event, last: lastRevived) {
+            lastRevived = id
+            reviveStart = .now
+            say(nil)
+            bubbleTask = Task {
+                try? await Task.sleep(for: .seconds(Double(RunnerPose.reviveLine)))
+                guard !Task.isCancelled else { return }
+                say(Self.reviveLine, for: 2)
+            }
+        }
         if let id = Self.newTaskDone(event, last: lastTaskDone), case .taskDone(_, let focus) = event {
             lastTaskDone = id
             doneFocus = focus
@@ -772,6 +801,7 @@ public struct CompanionView: View {
     }
 
     static let bathLine = "……去洗澡。我先占浴室了。"
+    static let reviveLine = "……活过来了？"
 
     private func react() {
         if bath, dryStart == nil {
@@ -980,6 +1010,7 @@ private struct SpeechBubble: View {
             CompanionView(mode: .work, event: .offWork(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .chill, event: .stayHome(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .work, event: .stretched(id: "preview")).frame(height: 180).toyCard()
+            CompanionView(mode: .money, event: .revived(id: "preview")).frame(height: 180).toyCard()
             ForEach(DailyProp.allCases, id: \.self) { prop in
                 CompanionView(mode: .work, daily: DailyCue(stage: .soon, prop: prop, id: "preview-\(prop)"))
                     .frame(height: 180)

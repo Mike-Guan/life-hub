@@ -30,6 +30,9 @@ public enum CompanionEvent: Equatable, Sendable {
     /// A Daily task was ticked done; `id` is the occurrence id, so it plays once, and `focus` picks the
     /// bigger celebration.
     case taskDone(id: String, focus: Bool)
+    /// Getting up from the sofa after long couch scrolling, as Mike starts the bath or vibe coding; `id` is the
+    /// switch, so it plays once.
+    case revived(id: String)
 }
 
 /// A workout from the Health app, reduced to what the hub uses.
