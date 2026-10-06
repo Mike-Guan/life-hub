@@ -277,3 +277,62 @@ extension SceneMove {
         return move
     }
 }
+
+// Getting up from the sofa (Mike approved the preview 2026-10-06): after long couch scrolling, as the bath or
+// vibe coding starts, HAKU drops the phone, stretches and pulls the mask up.
+extension RunnerPose {
+    /// How long getting up from the sofa lasts, in seconds.
+    static let reviveLength: CGFloat = 7
+    /// Seconds in when the eyes open.
+    static let reviveWake: CGFloat = 1.7
+    /// Seconds in when the dropped phone is gone.
+    static let revivePhoneGone: CGFloat = 1.9
+    /// Seconds in when the sofa has slid out of view.
+    static let reviveSofaGone: CGFloat = 3
+    /// Seconds in when HAKU says its line.
+    static let reviveLine: CGFloat = 5.3
+
+    /// Getting up from the sofa `time` seconds in: slumped scrolling, the phone drops, a stretch with the arms
+    /// over the head and the eyes shut, then the mask comes up from the chin and the </> lights.
+    static func revive(time t: CGFloat, face: EnergyFace) -> RunnerPose {
+        var pose = RunnerPose(face: face)
+        pose.revive = t
+        let sit = 1 - ease(ramp(t, from: 2, to: 2.8))
+        pose.stretch = ease(ramp(t, from: 2, to: 2.7)) * (1 - ease(ramp(t, from: 4.2, to: 4.8)))
+        pose.armsUp = ramp(t, from: 2.7, to: 3.5) * (1 - ramp(t, from: 4, to: 4.5))
+        pose.bounce = (4 + sin(t * 1.25)) * sit
+        pose.lean = -3 * Double(sit)
+        pose.headDy = 6 * sit - 2 * bump(t, from: 2.9, to: 4.4)
+        pose.eyesShut = t > 2.9 && t < 4.4
+        pose.maskDrop = 1 - ease(ramp(t, from: 4.6, to: 5.2))
+        pose.feed = frac(t * 0.8)
+        return pose
+    }
+}
+
+extension SceneMove {
+    /// The move of the phone or the sofa `t` seconds into getting up, or nil when `part` isn't one or HAKU
+    /// isn't getting up.
+    static func revive(_ part: RunnerPart, at t: CGFloat) -> SceneMove? {
+        guard t >= 0 else { return nil }
+        var move = SceneMove()
+        let box = RunnerArt.bounds
+        switch part {
+        case .phone, .phoneFeed, .phoneHand:
+            let drop = ease(RunnerPose.ramp(t, from: 1.4, to: 1.9))
+            move.offset.height = 30 * drop - (part == .phoneFeed ? 5 * frac(t * 0.8) : 0)
+            move.angle = 25 * Double(drop)
+            move.anchor = UnitPoint(x: (59 - box.minX) / box.width, y: (104 - box.minY) / box.height)
+            move.opacity = Double(1 - drop)
+        case .sofaArm:
+            move.offset.height = 24 * ease(RunnerPose.ramp(t, from: 2.2, to: 3))
+        default:
+            return nil
+        }
+        return move
+    }
+}
+
+private func ease(_ x: CGFloat) -> CGFloat {
+    x * x * (3 - 2 * x)
+}

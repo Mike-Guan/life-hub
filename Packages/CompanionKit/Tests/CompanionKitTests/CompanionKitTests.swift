@@ -546,6 +546,25 @@ import Testing
         #expect(SceneMove.bath(.camera, call: 1, dry: -1, shift: 0) == nil)
     }
 
+    @Test func hakuGetsUpFromTheSofa() {
+        let slumped = RunnerPose.revive(time: 0.5, face: .mid)
+        let slumpedParts = Set(RunnerFigure.parts(for: .money, pose: slumped))
+        #expect(slumpedParts.isSuperset(of: [.phone, .sofaArm, .eyesSleepy, .maskDown]))
+        #expect(!slumpedParts.contains(.ledCode))
+        let stretching = RunnerPose.revive(time: 3.6, face: .mid)
+        let stretchParts = Set(RunnerFigure.parts(for: .money, pose: stretching))
+        #expect(stretching.armsUp > 0 && stretchParts.contains(.eyesClosed) && !stretchParts.contains(.phone))
+        let masked = RunnerPose.revive(time: 6, face: .mid)
+        let maskedParts = Set(RunnerFigure.parts(for: .money, pose: masked))
+        #expect(maskedParts.isSuperset(of: [.maskUp, .ledCode, .eyesChill]) && !maskedParts.contains(.maskDown))
+        #expect(!maskedParts.contains(.sofaArm) && masked.armsUp == 0)
+        #expect(SceneMove.revive(.phone, at: 1.8)?.opacity ?? 1 < 1)
+        #expect(SceneMove.revive(.phone, at: -1) == nil && SceneMove.revive(.camera, at: 1) == nil)
+        #expect(CompanionView.newRevived(.revived(id: "r"), last: "") == "r")
+        #expect(CompanionView.newRevived(.revived(id: "r"), last: "r") == nil)
+        #expect(CompanionView.newRevived(.stretched(id: "r"), last: "") == nil)
+    }
+
     @Test func hakuCheersAPlannedTaskDone() {
         var focus = RunnerPose(mode: .work, time: 0, face: .mid, react: 0)
         focus.cheerFocus(progress: 0.1)

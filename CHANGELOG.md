@@ -30,6 +30,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- After long couch scrolling, as the bath or vibe coding starts, HAKU drops the phone, gets up from the sofa,
+  stretches, pulls its mask up with the </> lit and says "……活过来了？". It plays once; the app decides when.
 - HAKU can call you to the bath: a towel on its head, shampoo and a rubber duck, "……去洗澡。我先占浴室了。",
   then it walks off. A tap makes it dry its hair, flicking water off.
 - The bath shows on the home screen and widgets from 45 minutes before bedtime for 30 minutes, only at home

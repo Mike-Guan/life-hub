@@ -142,6 +142,8 @@ struct RunnerPose {
     var offWork: CGFloat = -1
     /// Progress of giving up on leaving for work, 0...1, or -1 when none is playing.
     var stayHome: CGFloat = -1
+    /// Seconds into getting up from the sofa, or -1 when HAKU isn't getting up.
+    var revive: CGFloat = -1
     /// What HAKU wears from the wardrobe.
     var outfit = Outfit()
 
@@ -264,8 +266,9 @@ struct RunnerPose {
     var tired: Bool { face == .low }
     var offWorking: Bool { offWork >= 0 }
     var stayingHome: Bool { stayHome >= 0 }
-    /// Whether the mask slides down to the chin: going off work or staying home.
-    var unmasking: Bool { offWorking || stayingHome }
+    var reviving: Bool { revive >= 0 }
+    /// Whether the mask slides between the face and the chin: going off work, staying home or getting up.
+    var unmasking: Bool { offWorking || stayingHome || reviving }
     /// How high the dumbbell is: the celebration reps while one plays, else the lift.
     var dumbbellRise: CGFloat { burst >= 0 ? abs(sin(burst * 2 * .pi)) : lift }
     /// HAKU's height while unboxing: 0 = inside the box, then a pop past full height that settles at 1.
@@ -1063,6 +1066,8 @@ struct RunnerFigure: View {
             visible = offWorkParts(pose)
         } else if pose.stayingHome {
             visible = stayHomeParts(pose)
+        } else if pose.reviving {
+            visible = reviveParts(pose)
         } else {
             visible = modeParts(for: mode, pose: pose)
         }
@@ -1309,6 +1314,20 @@ struct RunnerFigure: View {
         return visible
     }
 
+    /// Slumped on the sofa with the phone turning into standing with the mask up, whatever the mode.
+    nonisolated private static func reviveParts(_ pose: RunnerPose) -> Set<RunnerPart> {
+        var visible = baseParts.union([.earringNeon])
+        let t = pose.revive
+        visible.insert(t < RunnerPose.reviveWake ? .eyesSleepy : .eyesChill)
+        if t < RunnerPose.revivePhoneGone { visible.formUnion([.phone, .phoneFeed, .phoneHand]) }
+        if t < RunnerPose.reviveSofaGone { visible.insert(.sofaArm) }
+        if pose.maskDrop > 0.5 { visible.insert(.mouthSmile) }
+        if pose.maskDrop < 1 { visible.formUnion([.maskUp, .panelLines]) }
+        if pose.maskDrop > 0 { visible.insert(.maskDown) }
+        if pose.maskDrop == 0 { visible.insert(.ledCode) }
+        return visible
+    }
+
     nonisolated static let baseParts: Set<RunnerPart> = [
         .jacket, .stripeNeon, .hoodCollar, .hairBack, .earL, .earR, .faceBase, .hairFringe,
     ]
@@ -1381,6 +1400,8 @@ struct RunnerFigure: View {
             {
                 moved(part, move, scale: scale).opacity(Double(pose.propRaise))
             } else if let move = SceneMove.bath(part, call: pose.bathCall, dry: pose.bathDry, shift: pose.shift) {
+                moved(part, move, scale: scale)
+            } else if let move = SceneMove.revive(part, at: pose.revive) {
                 moved(part, move, scale: scale)
             } else if part == .walkDust, pose.walkFrom != nil {
                 moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
