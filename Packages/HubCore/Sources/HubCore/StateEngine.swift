@@ -50,6 +50,20 @@ public enum StateEngine {
         return calendar.date(byAdding: .day, value: -1, to: start) ?? start
     }
 
+    // Mike (PRD section 16, 2026-10-06): after a short night, scrolling on the couch is rest, so no walk invite.
+    /// Whether the sleep that ended today was shorter than `thresholds.lowBelow`. A self-report doesn't count.
+    public static func sleptShort(
+        events: [EnergyEvent],
+        now: Date,
+        calendar: Calendar = .current,
+        thresholds: SleepThresholds = .standard
+    ) -> Bool {
+        let start = dayStart(for: now, calendar: calendar)
+        let nights = events.filter { $0.deletedAt == nil && $0.kind == .sleep && $0.at >= start && $0.at <= now }
+        let night = nights.max { $0.at < $1.at }
+        return night?.sleepMinutes.map { $0 < thresholds.lowBelow } ?? false
+    }
+
     /// Today's energy from `events`: Mike's latest self-report today wins, otherwise the sleep
     /// that ended today. `nil` when there is neither; the UI then shows energy as unknown.
     public static func energy(

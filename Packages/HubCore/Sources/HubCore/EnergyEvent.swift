@@ -148,3 +148,12 @@ public struct EnergyLog: RecordLog, Equatable {
         events.filter { $0.deletedAt == nil }.sorted { $0.at < $1.at }
     }
 }
+
+extension EnergyLog {
+    // EnergyStore is the log's single writer, so this only reads the file and never moves it aside.
+    /// The log in the file at `url`, or an empty one when there is none or it can't be read.
+    public static func read(from url: URL?) -> EnergyLog {
+        guard let url, let data = try? Data(contentsOf: url) else { return EnergyLog() }
+        return (try? HubJSON.decoder().decode(EnergyLog.self, from: data)) ?? EnergyLog()
+    }
+}

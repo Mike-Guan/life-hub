@@ -42,6 +42,23 @@ import Testing
         #expect(reading.value == EnergyLevel.low.value)
     }
 
+    @Test func shortSleepIsTodaysNightUnderSixHours() {
+        let short = EnergyEvent.sleep(minutes: 5 * 60 + 59, endedAt: date(3, 7), deviceID: "test")
+        let enough = EnergyEvent.sleep(minutes: 6 * 60, endedAt: date(3, 7), deviceID: "test")
+        let sleptShort = { (events: [EnergyEvent], now: Date) in
+            StateEngine.sleptShort(events: events, now: now, calendar: self.calendar)
+        }
+        #expect(sleptShort([short], date(3, 20)))
+        #expect(!sleptShort([enough], date(3, 20)))
+        #expect(!sleptShort([], date(3, 20)))
+        // Yesterday's night says nothing about today.
+        #expect(!sleptShort([short], date(4, 20)))
+        // The latest sleep wins, and a self-report doesn't count.
+        let nap = EnergyEvent.sleep(minutes: 6 * 60 + 30, endedAt: date(3, 9), deviceID: "test")
+        #expect(!sleptShort([nap, short], date(3, 20)))
+        #expect(sleptShort([short, .selfReport(.full, at: date(3, 10), deviceID: "test")], date(3, 20)))
+    }
+
     @Test func selfReportBeatsSleep() throws {
         let events = [
             EnergyEvent.selfReport(.full, at: date(3, 10), deviceID: "test"),

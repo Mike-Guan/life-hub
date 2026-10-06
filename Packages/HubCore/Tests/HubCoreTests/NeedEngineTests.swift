@@ -161,6 +161,22 @@ import Testing
         #expect(invite(date(6, 7), date(6, 4)))
     }
 
+    @Test func noCouchInviteAfterAShortNight() {
+        let couch = NeedReading(need: .couchScroll, since: date(5, 20), reasons: [])
+        let time = { (sleptShort: Bool) in
+            NeedEngine.inviteTime(
+                for: couch,
+                now: date(5, 20),
+                lastInviteAt: nil,
+                bedtime: .standard,
+                sleptShort: sleptShort,
+                calendar: self.calendar
+            )
+        }
+        #expect(time(false) == date(5, 21))
+        #expect(time(true) == nil)
+    }
+
     func time(_ reading: NeedReading?, _ now: Date, _ last: Date?) -> Date? {
         NeedEngine.inviteTime(for: reading, now: now, lastInviteAt: last, bedtime: .standard, calendar: calendar)
     }
