@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.
 - The TODAY mode log on the home screen starts a new day at 05:00, not midnight. Changes after midnight
   stay in the evening's log until 05:00.
 - Arriving at the gym in Work or 副业 switches to Chill, unless you picked the mode in the last 2 hours.

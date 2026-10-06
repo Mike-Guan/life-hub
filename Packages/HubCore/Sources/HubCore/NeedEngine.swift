@@ -359,18 +359,22 @@ public enum NeedEngine {
     }
 
     /// When the invite for `reading` should go out, at `now` or later, or `nil` when it shouldn't:
-    /// the need ends first, today's invite went out, or it would land at bedtime.
+    /// the need ends first, today's invite went out, it would land at bedtime, or it's a couch invite
+    /// after a short night.
     /// - Parameters:
     ///   - lastInviteAt: when the last invite went out, `nil` if never.
     ///   - bedtime: the bedtime window, checked at the time the invite would go out.
+    ///   - sleptShort: whether last night was short, which drops the couch invite.
     public static func inviteTime(
         for reading: NeedReading?,
         now: Date,
         lastInviteAt: Date?,
         bedtime: BedtimeSchedule,
+        sleptShort: Bool = false,
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> Date? {
+        if sleptShort, reading?.need == .couchScroll { return nil }
         guard let reading else { return nil }
         let at = max(reading.since.addingTimeInterval(inviteWait(reading.need, rules: rules)), now)
         guard reading.isActive(at: at) else { return nil }

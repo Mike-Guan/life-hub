@@ -27,7 +27,14 @@ enum InviteReminder {
         log.pendingAt = nil
         log.pendingNeed = nil
         let bedtime = BedtimeSchedule.stored(in: defaults)
-        let at = NeedEngine.inviteTime(for: reading, now: now, lastInviteAt: log.lastSentAt, bedtime: bedtime)
+        let energy = EnergyLog.read(from: AppGroup.container.energyLogURL)
+        let at = NeedEngine.inviteTime(
+            for: reading,
+            now: now,
+            lastInviteAt: log.lastSentAt,
+            bedtime: bedtime,
+            sleptShort: StateEngine.sleptShort(events: energy.events, now: now)
+        )
         if let reading, let at, !backoff.isPaused(reading.need, at: at) {
             let content = UNMutableNotificationContent()
             content.title = "HAKU"
