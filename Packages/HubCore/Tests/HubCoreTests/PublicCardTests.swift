@@ -50,16 +50,19 @@ import Testing
         #expect(Set(keys).isSubset(of: whitelist))
     }
 
+    // A nil Optional boxed in Any matches every `is T?` check, so compare the exact types instead.
     @Test func cannotHoldPlacesTimesDurationsSleepOrScreenTime() {
         let recordDates: Set<String> = ["createdAt", "updatedAt", "deletedAt"]
+        let forbidden: [Any.Type] = [
+            Double.self, Double?.self, TimeInterval.self, HubPlace.self, HubPlace?.self, PlacePresence.self,
+            PlacePresence?.self, [EnergyEvent].self, EnergyEvent?.self, NeedSignals.self, NeedSignals?.self,
+        ]
         for child in Mirror(reflecting: card()).children {
             let label = child.label ?? ""
-            let value = child.value
-            if value is Date || value is Date? { #expect(recordDates.contains(label), "\(label)") }
-            #expect(!(value is Double) && !(value is Double?), "\(label)")
-            if value is Int { #expect(label == "schemaVersion") }
-            #expect(!(value is HubPlace) && !(value is HubPlace?) && !(value is PlacePresence), "\(label)")
-            #expect(!(value is [EnergyEvent]) && !(value is NeedSignals?), "\(label)")
+            let kind = type(of: child.value)
+            if kind == Date.self || kind == Date?.self { #expect(recordDates.contains(label), "\(label)") }
+            if kind == Int.self || kind == Int?.self { #expect(label == "schemaVersion") }
+            #expect(!forbidden.contains { $0 == kind }, "\(label)")
         }
     }
 
