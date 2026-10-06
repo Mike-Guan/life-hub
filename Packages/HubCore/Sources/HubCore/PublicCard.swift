@@ -127,7 +127,7 @@ public struct PublicCard: Codable, Equatable, Sendable {
     /// drops it when it is hidden.
     public func shared(with policy: SharePolicy) -> PublicCard {
         var copy = self
-        if policy.tier == .look || activity.map { policy.hidden.contains($0) } == true { copy.activity = nil }
+        if let activity, policy.tier == .look || policy.hidden.contains(activity) { copy.activity = nil }
         return copy
     }
 
