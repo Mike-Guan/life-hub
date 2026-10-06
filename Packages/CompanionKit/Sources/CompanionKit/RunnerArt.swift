@@ -1250,54 +1250,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 53.7, y: 123))
+                    p.move(to: .init(x: 57.7, y: 122))
                     p.addCurve(
-                        to: .init(x: 52, y: 124.4),
-                        control1: .init(x: 53.7, y: 123.77),
-                        control2: .init(x: 52.94, y: 124.4)
+                        to: .init(x: 56, y: 123.4),
+                        control1: .init(x: 57.7, y: 122.77),
+                        control2: .init(x: 56.94, y: 123.4)
                     )
                     p.addCurve(
-                        to: .init(x: 50.3, y: 123),
-                        control1: .init(x: 51.06, y: 124.4),
-                        control2: .init(x: 50.3, y: 123.77)
+                        to: .init(x: 54.3, y: 122),
+                        control1: .init(x: 55.06, y: 123.4),
+                        control2: .init(x: 54.3, y: 122.77)
                     )
                     p.addCurve(
-                        to: .init(x: 52, y: 121.6),
-                        control1: .init(x: 50.3, y: 122.23),
-                        control2: .init(x: 51.06, y: 121.6)
+                        to: .init(x: 56, y: 120.6),
+                        control1: .init(x: 54.3, y: 121.23),
+                        control2: .init(x: 55.06, y: 120.6)
                     )
                     p.addCurve(
-                        to: .init(x: 53.7, y: 123),
-                        control1: .init(x: 52.94, y: 121.6),
-                        control2: .init(x: 53.7, y: 122.23)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.catOrange,
-                opacity: 0.55
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 50.9, y: 120.8))
-                    p.addCurve(
-                        to: .init(x: 50.2, y: 121.5),
-                        control1: .init(x: 50.9, y: 121.19),
-                        control2: .init(x: 50.59, y: 121.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 49.5, y: 120.8),
-                        control1: .init(x: 49.81, y: 121.5),
-                        control2: .init(x: 49.5, y: 121.19)
-                    )
-                    p.addCurve(
-                        to: .init(x: 50.2, y: 120.1),
-                        control1: .init(x: 49.5, y: 120.41),
-                        control2: .init(x: 49.81, y: 120.1)
-                    )
-                    p.addCurve(
-                        to: .init(x: 50.9, y: 120.8),
-                        control1: .init(x: 50.59, y: 120.1),
-                        control2: .init(x: 50.9, y: 120.41)
+                        to: .init(x: 57.7, y: 122),
+                        control1: .init(x: 56.94, y: 120.6),
+                        control2: .init(x: 57.7, y: 121.23)
                     )
                     p.closeSubpath()
                 },
@@ -1306,54 +1278,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 52.7, y: 120.1))
+                    p.move(to: .init(x: 54.9, y: 119.8))
                     p.addCurve(
-                        to: .init(x: 52, y: 120.8),
-                        control1: .init(x: 52.7, y: 120.49),
-                        control2: .init(x: 52.39, y: 120.8)
+                        to: .init(x: 54.2, y: 120.5),
+                        control1: .init(x: 54.9, y: 120.19),
+                        control2: .init(x: 54.59, y: 120.5)
                     )
                     p.addCurve(
-                        to: .init(x: 51.3, y: 120.1),
-                        control1: .init(x: 51.61, y: 120.8),
-                        control2: .init(x: 51.3, y: 120.49)
+                        to: .init(x: 53.5, y: 119.8),
+                        control1: .init(x: 53.81, y: 120.5),
+                        control2: .init(x: 53.5, y: 120.19)
                     )
                     p.addCurve(
-                        to: .init(x: 52, y: 119.4),
-                        control1: .init(x: 51.3, y: 119.71),
-                        control2: .init(x: 51.61, y: 119.4)
+                        to: .init(x: 54.2, y: 119.1),
+                        control1: .init(x: 53.5, y: 119.41),
+                        control2: .init(x: 53.81, y: 119.1)
                     )
                     p.addCurve(
-                        to: .init(x: 52.7, y: 120.1),
-                        control1: .init(x: 52.39, y: 119.4),
-                        control2: .init(x: 52.7, y: 119.71)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.catOrange,
-                opacity: 0.55
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 54.5, y: 120.8))
-                    p.addCurve(
-                        to: .init(x: 53.8, y: 121.5),
-                        control1: .init(x: 54.5, y: 121.19),
-                        control2: .init(x: 54.19, y: 121.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 53.1, y: 120.8),
-                        control1: .init(x: 53.41, y: 121.5),
-                        control2: .init(x: 53.1, y: 121.19)
-                    )
-                    p.addCurve(
-                        to: .init(x: 53.8, y: 120.1),
-                        control1: .init(x: 53.1, y: 120.41),
-                        control2: .init(x: 53.41, y: 120.1)
-                    )
-                    p.addCurve(
-                        to: .init(x: 54.5, y: 120.8),
-                        control1: .init(x: 54.19, y: 120.1),
-                        control2: .init(x: 54.5, y: 120.41)
+                        to: .init(x: 54.9, y: 119.8),
+                        control1: .init(x: 54.59, y: 119.1),
+                        control2: .init(x: 54.9, y: 119.41)
                     )
                     p.closeSubpath()
                 },
@@ -1362,54 +1306,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 65.7, y: 133))
+                    p.move(to: .init(x: 56.7, y: 119.1))
                     p.addCurve(
-                        to: .init(x: 64, y: 134.4),
-                        control1: .init(x: 65.7, y: 133.77),
-                        control2: .init(x: 64.94, y: 134.4)
+                        to: .init(x: 56, y: 119.8),
+                        control1: .init(x: 56.7, y: 119.49),
+                        control2: .init(x: 56.39, y: 119.8)
                     )
                     p.addCurve(
-                        to: .init(x: 62.3, y: 133),
-                        control1: .init(x: 63.06, y: 134.4),
-                        control2: .init(x: 62.3, y: 133.77)
+                        to: .init(x: 55.3, y: 119.1),
+                        control1: .init(x: 55.61, y: 119.8),
+                        control2: .init(x: 55.3, y: 119.49)
                     )
                     p.addCurve(
-                        to: .init(x: 64, y: 131.6),
-                        control1: .init(x: 62.3, y: 132.23),
-                        control2: .init(x: 63.06, y: 131.6)
+                        to: .init(x: 56, y: 118.4),
+                        control1: .init(x: 55.3, y: 118.71),
+                        control2: .init(x: 55.61, y: 118.4)
                     )
                     p.addCurve(
-                        to: .init(x: 65.7, y: 133),
-                        control1: .init(x: 64.94, y: 131.6),
-                        control2: .init(x: 65.7, y: 132.23)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.catOrange,
-                opacity: 0.55
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 62.9, y: 130.8))
-                    p.addCurve(
-                        to: .init(x: 62.2, y: 131.5),
-                        control1: .init(x: 62.9, y: 131.19),
-                        control2: .init(x: 62.59, y: 131.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 61.5, y: 130.8),
-                        control1: .init(x: 61.81, y: 131.5),
-                        control2: .init(x: 61.5, y: 131.19)
-                    )
-                    p.addCurve(
-                        to: .init(x: 62.2, y: 130.1),
-                        control1: .init(x: 61.5, y: 130.41),
-                        control2: .init(x: 61.81, y: 130.1)
-                    )
-                    p.addCurve(
-                        to: .init(x: 62.9, y: 130.8),
-                        control1: .init(x: 62.59, y: 130.1),
-                        control2: .init(x: 62.9, y: 130.41)
+                        to: .init(x: 56.7, y: 119.1),
+                        control1: .init(x: 56.39, y: 118.4),
+                        control2: .init(x: 56.7, y: 118.71)
                     )
                     p.closeSubpath()
                 },
@@ -1418,54 +1334,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 64.7, y: 130.1))
+                    p.move(to: .init(x: 58.5, y: 119.8))
                     p.addCurve(
-                        to: .init(x: 64, y: 130.8),
-                        control1: .init(x: 64.7, y: 130.49),
-                        control2: .init(x: 64.39, y: 130.8)
+                        to: .init(x: 57.8, y: 120.5),
+                        control1: .init(x: 58.5, y: 120.19),
+                        control2: .init(x: 58.19, y: 120.5)
                     )
                     p.addCurve(
-                        to: .init(x: 63.3, y: 130.1),
-                        control1: .init(x: 63.61, y: 130.8),
-                        control2: .init(x: 63.3, y: 130.49)
+                        to: .init(x: 57.1, y: 119.8),
+                        control1: .init(x: 57.41, y: 120.5),
+                        control2: .init(x: 57.1, y: 120.19)
                     )
                     p.addCurve(
-                        to: .init(x: 64, y: 129.4),
-                        control1: .init(x: 63.3, y: 129.71),
-                        control2: .init(x: 63.61, y: 129.4)
+                        to: .init(x: 57.8, y: 119.1),
+                        control1: .init(x: 57.1, y: 119.41),
+                        control2: .init(x: 57.41, y: 119.1)
                     )
                     p.addCurve(
-                        to: .init(x: 64.7, y: 130.1),
-                        control1: .init(x: 64.39, y: 129.4),
-                        control2: .init(x: 64.7, y: 129.71)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.catOrange,
-                opacity: 0.55
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 66.5, y: 130.8))
-                    p.addCurve(
-                        to: .init(x: 65.8, y: 131.5),
-                        control1: .init(x: 66.5, y: 131.19),
-                        control2: .init(x: 66.19, y: 131.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 65.1, y: 130.8),
-                        control1: .init(x: 65.41, y: 131.5),
-                        control2: .init(x: 65.1, y: 131.19)
-                    )
-                    p.addCurve(
-                        to: .init(x: 65.8, y: 130.1),
-                        control1: .init(x: 65.1, y: 130.41),
-                        control2: .init(x: 65.41, y: 130.1)
-                    )
-                    p.addCurve(
-                        to: .init(x: 66.5, y: 130.8),
-                        control1: .init(x: 66.19, y: 130.1),
-                        control2: .init(x: 66.5, y: 130.41)
+                        to: .init(x: 58.5, y: 119.8),
+                        control1: .init(x: 58.19, y: 119.1),
+                        control2: .init(x: 58.5, y: 119.41)
                     )
                     p.closeSubpath()
                 },
@@ -1474,54 +1362,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 77.7, y: 122))
+                    p.move(to: .init(x: 63.7, y: 133))
                     p.addCurve(
-                        to: .init(x: 76, y: 123.4),
-                        control1: .init(x: 77.7, y: 122.77),
-                        control2: .init(x: 76.94, y: 123.4)
+                        to: .init(x: 62, y: 134.4),
+                        control1: .init(x: 63.7, y: 133.77),
+                        control2: .init(x: 62.94, y: 134.4)
                     )
                     p.addCurve(
-                        to: .init(x: 74.3, y: 122),
-                        control1: .init(x: 75.06, y: 123.4),
-                        control2: .init(x: 74.3, y: 122.77)
+                        to: .init(x: 60.3, y: 133),
+                        control1: .init(x: 61.06, y: 134.4),
+                        control2: .init(x: 60.3, y: 133.77)
                     )
                     p.addCurve(
-                        to: .init(x: 76, y: 120.6),
-                        control1: .init(x: 74.3, y: 121.23),
-                        control2: .init(x: 75.06, y: 120.6)
+                        to: .init(x: 62, y: 131.6),
+                        control1: .init(x: 60.3, y: 132.23),
+                        control2: .init(x: 61.06, y: 131.6)
                     )
                     p.addCurve(
-                        to: .init(x: 77.7, y: 122),
-                        control1: .init(x: 76.94, y: 120.6),
-                        control2: .init(x: 77.7, y: 121.23)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.catOrange,
-                opacity: 0.55
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 74.9, y: 119.8))
-                    p.addCurve(
-                        to: .init(x: 74.2, y: 120.5),
-                        control1: .init(x: 74.9, y: 120.19),
-                        control2: .init(x: 74.59, y: 120.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 73.5, y: 119.8),
-                        control1: .init(x: 73.81, y: 120.5),
-                        control2: .init(x: 73.5, y: 120.19)
-                    )
-                    p.addCurve(
-                        to: .init(x: 74.2, y: 119.1),
-                        control1: .init(x: 73.5, y: 119.41),
-                        control2: .init(x: 73.81, y: 119.1)
-                    )
-                    p.addCurve(
-                        to: .init(x: 74.9, y: 119.8),
-                        control1: .init(x: 74.59, y: 119.1),
-                        control2: .init(x: 74.9, y: 119.41)
+                        to: .init(x: 63.7, y: 133),
+                        control1: .init(x: 62.94, y: 131.6),
+                        control2: .init(x: 63.7, y: 132.23)
                     )
                     p.closeSubpath()
                 },
@@ -1530,54 +1390,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 76.7, y: 119.1))
+                    p.move(to: .init(x: 60.9, y: 130.8))
                     p.addCurve(
-                        to: .init(x: 76, y: 119.8),
-                        control1: .init(x: 76.7, y: 119.49),
-                        control2: .init(x: 76.39, y: 119.8)
+                        to: .init(x: 60.2, y: 131.5),
+                        control1: .init(x: 60.9, y: 131.19),
+                        control2: .init(x: 60.59, y: 131.5)
                     )
                     p.addCurve(
-                        to: .init(x: 75.3, y: 119.1),
-                        control1: .init(x: 75.61, y: 119.8),
-                        control2: .init(x: 75.3, y: 119.49)
+                        to: .init(x: 59.5, y: 130.8),
+                        control1: .init(x: 59.81, y: 131.5),
+                        control2: .init(x: 59.5, y: 131.19)
                     )
                     p.addCurve(
-                        to: .init(x: 76, y: 118.4),
-                        control1: .init(x: 75.3, y: 118.71),
-                        control2: .init(x: 75.61, y: 118.4)
+                        to: .init(x: 60.2, y: 130.1),
+                        control1: .init(x: 59.5, y: 130.41),
+                        control2: .init(x: 59.81, y: 130.1)
                     )
                     p.addCurve(
-                        to: .init(x: 76.7, y: 119.1),
-                        control1: .init(x: 76.39, y: 118.4),
-                        control2: .init(x: 76.7, y: 118.71)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.catOrange,
-                opacity: 0.55
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 78.5, y: 119.8))
-                    p.addCurve(
-                        to: .init(x: 77.8, y: 120.5),
-                        control1: .init(x: 78.5, y: 120.19),
-                        control2: .init(x: 78.19, y: 120.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 77.1, y: 119.8),
-                        control1: .init(x: 77.41, y: 120.5),
-                        control2: .init(x: 77.1, y: 120.19)
-                    )
-                    p.addCurve(
-                        to: .init(x: 77.8, y: 119.1),
-                        control1: .init(x: 77.1, y: 119.41),
-                        control2: .init(x: 77.41, y: 119.1)
-                    )
-                    p.addCurve(
-                        to: .init(x: 78.5, y: 119.8),
-                        control1: .init(x: 78.19, y: 119.1),
-                        control2: .init(x: 78.5, y: 119.41)
+                        to: .init(x: 60.9, y: 130.8),
+                        control1: .init(x: 60.59, y: 130.1),
+                        control2: .init(x: 60.9, y: 130.41)
                     )
                     p.closeSubpath()
                 },
@@ -1586,54 +1418,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 89.7, y: 132))
+                    p.move(to: .init(x: 62.7, y: 130.1))
                     p.addCurve(
-                        to: .init(x: 88, y: 133.4),
-                        control1: .init(x: 89.7, y: 132.77),
-                        control2: .init(x: 88.94, y: 133.4)
+                        to: .init(x: 62, y: 130.8),
+                        control1: .init(x: 62.7, y: 130.49),
+                        control2: .init(x: 62.39, y: 130.8)
                     )
                     p.addCurve(
-                        to: .init(x: 86.3, y: 132),
-                        control1: .init(x: 87.06, y: 133.4),
-                        control2: .init(x: 86.3, y: 132.77)
+                        to: .init(x: 61.3, y: 130.1),
+                        control1: .init(x: 61.61, y: 130.8),
+                        control2: .init(x: 61.3, y: 130.49)
                     )
                     p.addCurve(
-                        to: .init(x: 88, y: 130.6),
-                        control1: .init(x: 86.3, y: 131.23),
-                        control2: .init(x: 87.06, y: 130.6)
+                        to: .init(x: 62, y: 129.4),
+                        control1: .init(x: 61.3, y: 129.71),
+                        control2: .init(x: 61.61, y: 129.4)
                     )
                     p.addCurve(
-                        to: .init(x: 89.7, y: 132),
-                        control1: .init(x: 88.94, y: 130.6),
-                        control2: .init(x: 89.7, y: 131.23)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.catOrange,
-                opacity: 0.55
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 86.9, y: 129.8))
-                    p.addCurve(
-                        to: .init(x: 86.2, y: 130.5),
-                        control1: .init(x: 86.9, y: 130.19),
-                        control2: .init(x: 86.59, y: 130.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 85.5, y: 129.8),
-                        control1: .init(x: 85.81, y: 130.5),
-                        control2: .init(x: 85.5, y: 130.19)
-                    )
-                    p.addCurve(
-                        to: .init(x: 86.2, y: 129.1),
-                        control1: .init(x: 85.5, y: 129.41),
-                        control2: .init(x: 85.81, y: 129.1)
-                    )
-                    p.addCurve(
-                        to: .init(x: 86.9, y: 129.8),
-                        control1: .init(x: 86.59, y: 129.1),
-                        control2: .init(x: 86.9, y: 129.41)
+                        to: .init(x: 62.7, y: 130.1),
+                        control1: .init(x: 62.39, y: 129.4),
+                        control2: .init(x: 62.7, y: 129.71)
                     )
                     p.closeSubpath()
                 },
@@ -1642,54 +1446,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 88.7, y: 129.1))
+                    p.move(to: .init(x: 64.5, y: 130.8))
                     p.addCurve(
-                        to: .init(x: 88, y: 129.8),
-                        control1: .init(x: 88.7, y: 129.49),
-                        control2: .init(x: 88.39, y: 129.8)
+                        to: .init(x: 63.8, y: 131.5),
+                        control1: .init(x: 64.5, y: 131.19),
+                        control2: .init(x: 64.19, y: 131.5)
                     )
                     p.addCurve(
-                        to: .init(x: 87.3, y: 129.1),
-                        control1: .init(x: 87.61, y: 129.8),
-                        control2: .init(x: 87.3, y: 129.49)
+                        to: .init(x: 63.1, y: 130.8),
+                        control1: .init(x: 63.41, y: 131.5),
+                        control2: .init(x: 63.1, y: 131.19)
                     )
                     p.addCurve(
-                        to: .init(x: 88, y: 128.4),
-                        control1: .init(x: 87.3, y: 128.71),
-                        control2: .init(x: 87.61, y: 128.4)
+                        to: .init(x: 63.8, y: 130.1),
+                        control1: .init(x: 63.1, y: 130.41),
+                        control2: .init(x: 63.41, y: 130.1)
                     )
                     p.addCurve(
-                        to: .init(x: 88.7, y: 129.1),
-                        control1: .init(x: 88.39, y: 128.4),
-                        control2: .init(x: 88.7, y: 128.71)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.catOrange,
-                opacity: 0.55
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 90.5, y: 129.8))
-                    p.addCurve(
-                        to: .init(x: 89.8, y: 130.5),
-                        control1: .init(x: 90.5, y: 130.19),
-                        control2: .init(x: 90.19, y: 130.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 89.1, y: 129.8),
-                        control1: .init(x: 89.41, y: 130.5),
-                        control2: .init(x: 89.1, y: 130.19)
-                    )
-                    p.addCurve(
-                        to: .init(x: 89.8, y: 129.1),
-                        control1: .init(x: 89.1, y: 129.41),
-                        control2: .init(x: 89.41, y: 129.1)
-                    )
-                    p.addCurve(
-                        to: .init(x: 90.5, y: 129.8),
-                        control1: .init(x: 90.19, y: 129.1),
-                        control2: .init(x: 90.5, y: 129.41)
+                        to: .init(x: 64.5, y: 130.8),
+                        control1: .init(x: 64.19, y: 130.1),
+                        control2: .init(x: 64.5, y: 130.41)
                     )
                     p.closeSubpath()
                 },
@@ -1698,54 +1474,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 49.7, y: 135))
+                    p.move(to: .init(x: 71.7, y: 119))
                     p.addCurve(
-                        to: .init(x: 48, y: 136.4),
-                        control1: .init(x: 49.7, y: 135.77),
-                        control2: .init(x: 48.94, y: 136.4)
+                        to: .init(x: 70, y: 120.4),
+                        control1: .init(x: 71.7, y: 119.77),
+                        control2: .init(x: 70.94, y: 120.4)
                     )
                     p.addCurve(
-                        to: .init(x: 46.3, y: 135),
-                        control1: .init(x: 47.06, y: 136.4),
-                        control2: .init(x: 46.3, y: 135.77)
+                        to: .init(x: 68.3, y: 119),
+                        control1: .init(x: 69.06, y: 120.4),
+                        control2: .init(x: 68.3, y: 119.77)
                     )
                     p.addCurve(
-                        to: .init(x: 48, y: 133.6),
-                        control1: .init(x: 46.3, y: 134.23),
-                        control2: .init(x: 47.06, y: 133.6)
+                        to: .init(x: 70, y: 117.6),
+                        control1: .init(x: 68.3, y: 118.23),
+                        control2: .init(x: 69.06, y: 117.6)
                     )
                     p.addCurve(
-                        to: .init(x: 49.7, y: 135),
-                        control1: .init(x: 48.94, y: 133.6),
-                        control2: .init(x: 49.7, y: 134.23)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.catOrange,
-                opacity: 0.55
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 46.9, y: 132.8))
-                    p.addCurve(
-                        to: .init(x: 46.2, y: 133.5),
-                        control1: .init(x: 46.9, y: 133.19),
-                        control2: .init(x: 46.59, y: 133.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 45.5, y: 132.8),
-                        control1: .init(x: 45.81, y: 133.5),
-                        control2: .init(x: 45.5, y: 133.19)
-                    )
-                    p.addCurve(
-                        to: .init(x: 46.2, y: 132.1),
-                        control1: .init(x: 45.5, y: 132.41),
-                        control2: .init(x: 45.81, y: 132.1)
-                    )
-                    p.addCurve(
-                        to: .init(x: 46.9, y: 132.8),
-                        control1: .init(x: 46.59, y: 132.1),
-                        control2: .init(x: 46.9, y: 132.41)
+                        to: .init(x: 71.7, y: 119),
+                        control1: .init(x: 70.94, y: 117.6),
+                        control2: .init(x: 71.7, y: 118.23)
                     )
                     p.closeSubpath()
                 },
@@ -1754,54 +1502,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 48.7, y: 132.1))
+                    p.move(to: .init(x: 68.9, y: 116.8))
                     p.addCurve(
-                        to: .init(x: 48, y: 132.8),
-                        control1: .init(x: 48.7, y: 132.49),
-                        control2: .init(x: 48.39, y: 132.8)
+                        to: .init(x: 68.2, y: 117.5),
+                        control1: .init(x: 68.9, y: 117.19),
+                        control2: .init(x: 68.59, y: 117.5)
                     )
                     p.addCurve(
-                        to: .init(x: 47.3, y: 132.1),
-                        control1: .init(x: 47.61, y: 132.8),
-                        control2: .init(x: 47.3, y: 132.49)
+                        to: .init(x: 67.5, y: 116.8),
+                        control1: .init(x: 67.81, y: 117.5),
+                        control2: .init(x: 67.5, y: 117.19)
                     )
                     p.addCurve(
-                        to: .init(x: 48, y: 131.4),
-                        control1: .init(x: 47.3, y: 131.71),
-                        control2: .init(x: 47.61, y: 131.4)
+                        to: .init(x: 68.2, y: 116.1),
+                        control1: .init(x: 67.5, y: 116.41),
+                        control2: .init(x: 67.81, y: 116.1)
                     )
                     p.addCurve(
-                        to: .init(x: 48.7, y: 132.1),
-                        control1: .init(x: 48.39, y: 131.4),
-                        control2: .init(x: 48.7, y: 131.71)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.catOrange,
-                opacity: 0.55
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 50.5, y: 132.8))
-                    p.addCurve(
-                        to: .init(x: 49.8, y: 133.5),
-                        control1: .init(x: 50.5, y: 133.19),
-                        control2: .init(x: 50.19, y: 133.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 49.1, y: 132.8),
-                        control1: .init(x: 49.41, y: 133.5),
-                        control2: .init(x: 49.1, y: 133.19)
-                    )
-                    p.addCurve(
-                        to: .init(x: 49.8, y: 132.1),
-                        control1: .init(x: 49.1, y: 132.41),
-                        control2: .init(x: 49.41, y: 132.1)
-                    )
-                    p.addCurve(
-                        to: .init(x: 50.5, y: 132.8),
-                        control1: .init(x: 50.19, y: 132.1),
-                        control2: .init(x: 50.5, y: 132.41)
+                        to: .init(x: 68.9, y: 116.8),
+                        control1: .init(x: 68.59, y: 116.1),
+                        control2: .init(x: 68.9, y: 116.41)
                     )
                     p.closeSubpath()
                 },
@@ -1810,14 +1530,294 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 28.8, y: 126.6))
-                    p.addQuadCurve(to: .init(x: 30, y: 119.28), control: .init(x: 28.56, y: 122.4))
-                    p.addLine(to: .init(x: 33.12, y: 120.96))
-                    p.addQuadCurve(to: .init(x: 38.88, y: 120.96), control: .init(x: 36, y: 120.24))
-                    p.addLine(to: .init(x: 42, y: 119.28))
-                    p.addQuadCurve(to: .init(x: 43.2, y: 126.6), control: .init(x: 43.44, y: 122.4))
-                    p.addQuadCurve(to: .init(x: 36, y: 131.52), control: .init(x: 42.72, y: 131.52))
-                    p.addQuadCurve(to: .init(x: 28.8, y: 126.6), control: .init(x: 29.28, y: 131.52))
+                    p.move(to: .init(x: 70.7, y: 116.1))
+                    p.addCurve(
+                        to: .init(x: 70, y: 116.8),
+                        control1: .init(x: 70.7, y: 116.49),
+                        control2: .init(x: 70.39, y: 116.8)
+                    )
+                    p.addCurve(
+                        to: .init(x: 69.3, y: 116.1),
+                        control1: .init(x: 69.61, y: 116.8),
+                        control2: .init(x: 69.3, y: 116.49)
+                    )
+                    p.addCurve(
+                        to: .init(x: 70, y: 115.4),
+                        control1: .init(x: 69.3, y: 115.71),
+                        control2: .init(x: 69.61, y: 115.4)
+                    )
+                    p.addCurve(
+                        to: .init(x: 70.7, y: 116.1),
+                        control1: .init(x: 70.39, y: 115.4),
+                        control2: .init(x: 70.7, y: 115.71)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                opacity: 0.55
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 72.5, y: 116.8))
+                    p.addCurve(
+                        to: .init(x: 71.8, y: 117.5),
+                        control1: .init(x: 72.5, y: 117.19),
+                        control2: .init(x: 72.19, y: 117.5)
+                    )
+                    p.addCurve(
+                        to: .init(x: 71.1, y: 116.8),
+                        control1: .init(x: 71.41, y: 117.5),
+                        control2: .init(x: 71.1, y: 117.19)
+                    )
+                    p.addCurve(
+                        to: .init(x: 71.8, y: 116.1),
+                        control1: .init(x: 71.1, y: 116.41),
+                        control2: .init(x: 71.41, y: 116.1)
+                    )
+                    p.addCurve(
+                        to: .init(x: 72.5, y: 116.8),
+                        control1: .init(x: 72.19, y: 116.1),
+                        control2: .init(x: 72.5, y: 116.41)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                opacity: 0.55
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 95.7, y: 134))
+                    p.addCurve(
+                        to: .init(x: 94, y: 135.4),
+                        control1: .init(x: 95.7, y: 134.77),
+                        control2: .init(x: 94.94, y: 135.4)
+                    )
+                    p.addCurve(
+                        to: .init(x: 92.3, y: 134),
+                        control1: .init(x: 93.06, y: 135.4),
+                        control2: .init(x: 92.3, y: 134.77)
+                    )
+                    p.addCurve(
+                        to: .init(x: 94, y: 132.6),
+                        control1: .init(x: 92.3, y: 133.23),
+                        control2: .init(x: 93.06, y: 132.6)
+                    )
+                    p.addCurve(
+                        to: .init(x: 95.7, y: 134),
+                        control1: .init(x: 94.94, y: 132.6),
+                        control2: .init(x: 95.7, y: 133.23)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                opacity: 0.55
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 92.9, y: 131.8))
+                    p.addCurve(
+                        to: .init(x: 92.2, y: 132.5),
+                        control1: .init(x: 92.9, y: 132.19),
+                        control2: .init(x: 92.59, y: 132.5)
+                    )
+                    p.addCurve(
+                        to: .init(x: 91.5, y: 131.8),
+                        control1: .init(x: 91.81, y: 132.5),
+                        control2: .init(x: 91.5, y: 132.19)
+                    )
+                    p.addCurve(
+                        to: .init(x: 92.2, y: 131.1),
+                        control1: .init(x: 91.5, y: 131.41),
+                        control2: .init(x: 91.81, y: 131.1)
+                    )
+                    p.addCurve(
+                        to: .init(x: 92.9, y: 131.8),
+                        control1: .init(x: 92.59, y: 131.1),
+                        control2: .init(x: 92.9, y: 131.41)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                opacity: 0.55
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 94.7, y: 131.1))
+                    p.addCurve(
+                        to: .init(x: 94, y: 131.8),
+                        control1: .init(x: 94.7, y: 131.49),
+                        control2: .init(x: 94.39, y: 131.8)
+                    )
+                    p.addCurve(
+                        to: .init(x: 93.3, y: 131.1),
+                        control1: .init(x: 93.61, y: 131.8),
+                        control2: .init(x: 93.3, y: 131.49)
+                    )
+                    p.addCurve(
+                        to: .init(x: 94, y: 130.4),
+                        control1: .init(x: 93.3, y: 130.71),
+                        control2: .init(x: 93.61, y: 130.4)
+                    )
+                    p.addCurve(
+                        to: .init(x: 94.7, y: 131.1),
+                        control1: .init(x: 94.39, y: 130.4),
+                        control2: .init(x: 94.7, y: 130.71)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                opacity: 0.55
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 96.5, y: 131.8))
+                    p.addCurve(
+                        to: .init(x: 95.8, y: 132.5),
+                        control1: .init(x: 96.5, y: 132.19),
+                        control2: .init(x: 96.19, y: 132.5)
+                    )
+                    p.addCurve(
+                        to: .init(x: 95.1, y: 131.8),
+                        control1: .init(x: 95.41, y: 132.5),
+                        control2: .init(x: 95.1, y: 132.19)
+                    )
+                    p.addCurve(
+                        to: .init(x: 95.8, y: 131.1),
+                        control1: .init(x: 95.1, y: 131.41),
+                        control2: .init(x: 95.41, y: 131.1)
+                    )
+                    p.addCurve(
+                        to: .init(x: 96.5, y: 131.8),
+                        control1: .init(x: 96.19, y: 131.1),
+                        control2: .init(x: 96.5, y: 131.41)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                opacity: 0.55
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 29.7, y: 120))
+                    p.addCurve(
+                        to: .init(x: 28, y: 121.4),
+                        control1: .init(x: 29.7, y: 120.77),
+                        control2: .init(x: 28.94, y: 121.4)
+                    )
+                    p.addCurve(
+                        to: .init(x: 26.3, y: 120),
+                        control1: .init(x: 27.06, y: 121.4),
+                        control2: .init(x: 26.3, y: 120.77)
+                    )
+                    p.addCurve(
+                        to: .init(x: 28, y: 118.6),
+                        control1: .init(x: 26.3, y: 119.23),
+                        control2: .init(x: 27.06, y: 118.6)
+                    )
+                    p.addCurve(
+                        to: .init(x: 29.7, y: 120),
+                        control1: .init(x: 28.94, y: 118.6),
+                        control2: .init(x: 29.7, y: 119.23)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                opacity: 0.55
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 26.9, y: 117.8))
+                    p.addCurve(
+                        to: .init(x: 26.2, y: 118.5),
+                        control1: .init(x: 26.9, y: 118.19),
+                        control2: .init(x: 26.59, y: 118.5)
+                    )
+                    p.addCurve(
+                        to: .init(x: 25.5, y: 117.8),
+                        control1: .init(x: 25.81, y: 118.5),
+                        control2: .init(x: 25.5, y: 118.19)
+                    )
+                    p.addCurve(
+                        to: .init(x: 26.2, y: 117.1),
+                        control1: .init(x: 25.5, y: 117.41),
+                        control2: .init(x: 25.81, y: 117.1)
+                    )
+                    p.addCurve(
+                        to: .init(x: 26.9, y: 117.8),
+                        control1: .init(x: 26.59, y: 117.1),
+                        control2: .init(x: 26.9, y: 117.41)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                opacity: 0.55
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 28.7, y: 117.1))
+                    p.addCurve(
+                        to: .init(x: 28, y: 117.8),
+                        control1: .init(x: 28.7, y: 117.49),
+                        control2: .init(x: 28.39, y: 117.8)
+                    )
+                    p.addCurve(
+                        to: .init(x: 27.3, y: 117.1),
+                        control1: .init(x: 27.61, y: 117.8),
+                        control2: .init(x: 27.3, y: 117.49)
+                    )
+                    p.addCurve(
+                        to: .init(x: 28, y: 116.4),
+                        control1: .init(x: 27.3, y: 116.71),
+                        control2: .init(x: 27.61, y: 116.4)
+                    )
+                    p.addCurve(
+                        to: .init(x: 28.7, y: 117.1),
+                        control1: .init(x: 28.39, y: 116.4),
+                        control2: .init(x: 28.7, y: 116.71)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                opacity: 0.55
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 30.5, y: 117.8))
+                    p.addCurve(
+                        to: .init(x: 29.8, y: 118.5),
+                        control1: .init(x: 30.5, y: 118.19),
+                        control2: .init(x: 30.19, y: 118.5)
+                    )
+                    p.addCurve(
+                        to: .init(x: 29.1, y: 117.8),
+                        control1: .init(x: 29.41, y: 118.5),
+                        control2: .init(x: 29.1, y: 118.19)
+                    )
+                    p.addCurve(
+                        to: .init(x: 29.8, y: 117.1),
+                        control1: .init(x: 29.1, y: 117.41),
+                        control2: .init(x: 29.41, y: 117.1)
+                    )
+                    p.addCurve(
+                        to: .init(x: 30.5, y: 117.8),
+                        control1: .init(x: 30.19, y: 117.1),
+                        control2: .init(x: 30.5, y: 117.41)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                opacity: 0.55
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 31.7, y: 128.53))
+                    p.addQuadCurve(to: .init(x: 32.75, y: 122.12), control: .init(x: 31.49, y: 124.85))
+                    p.addLine(to: .init(x: 35.48, y: 123.59))
+                    p.addQuadCurve(to: .init(x: 40.52, y: 123.59), control: .init(x: 38, y: 122.96))
+                    p.addLine(to: .init(x: 43.25, y: 122.12))
+                    p.addQuadCurve(to: .init(x: 44.3, y: 128.53), control: .init(x: 44.51, y: 124.85))
+                    p.addQuadCurve(to: .init(x: 38, y: 132.83), control: .init(x: 43.88, y: 132.83))
+                    p.addQuadCurve(to: .init(x: 31.7, y: 128.53), control: .init(x: 32.12, y: 132.83))
                     p.closeSubpath()
                 },
                 fill: RunnerPalette.catOrange,
@@ -1827,20 +1827,20 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 31.68, y: 127.44))
-                    p.addQuadCurve(to: .init(x: 40.32, y: 127.44), control: .init(x: 36, y: 124.56))
-                    p.addQuadCurve(to: .init(x: 36, y: 131.28), control: .init(x: 40.08, y: 131.28))
-                    p.addQuadCurve(to: .init(x: 31.68, y: 127.44), control: .init(x: 31.92, y: 131.28))
+                    p.move(to: .init(x: 34.22, y: 129.26))
+                    p.addQuadCurve(to: .init(x: 41.78, y: 129.26), control: .init(x: 38, y: 126.74))
+                    p.addQuadCurve(to: .init(x: 38, y: 132.62), control: .init(x: 41.57, y: 132.62))
+                    p.addQuadCurve(to: .init(x: 34.22, y: 129.26), control: .init(x: 34.43, y: 132.62))
                     p.closeSubpath()
                 },
                 fill: RunnerPalette.white
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 34.8, y: 120.48))
-                    p.addLine(to: .init(x: 34.8, y: 122.88))
-                    p.move(to: .init(x: 37.2, y: 120.48))
-                    p.addLine(to: .init(x: 37.2, y: 122.88))
+                    p.move(to: .init(x: 36.95, y: 123.17))
+                    p.addLine(to: .init(x: 36.95, y: 125.27))
+                    p.move(to: .init(x: 39.05, y: 123.17))
+                    p.addLine(to: .init(x: 39.05, y: 125.27))
                 },
                 stroke: RunnerPalette.catStripe,
                 lineWidth: 0.9,
@@ -1848,53 +1848,26 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 34.5, y: 125.28))
+                    p.move(to: .init(x: 36.69, y: 127.37))
                     p.addCurve(
-                        to: .init(x: 33.6, y: 126.18),
-                        control1: .init(x: 34.5, y: 125.78),
-                        control2: .init(x: 34.1, y: 126.18)
+                        to: .init(x: 35.9, y: 128.16),
+                        control1: .init(x: 36.69, y: 127.8),
+                        control2: .init(x: 36.33, y: 128.16)
                     )
                     p.addCurve(
-                        to: .init(x: 32.7, y: 125.28),
-                        control1: .init(x: 33.1, y: 126.18),
-                        control2: .init(x: 32.7, y: 125.78)
+                        to: .init(x: 35.11, y: 127.37),
+                        control1: .init(x: 35.47, y: 128.16),
+                        control2: .init(x: 35.11, y: 127.8)
                     )
                     p.addCurve(
-                        to: .init(x: 33.6, y: 124.38),
-                        control1: .init(x: 32.7, y: 124.78),
-                        control2: .init(x: 33.1, y: 124.38)
+                        to: .init(x: 35.9, y: 126.58),
+                        control1: .init(x: 35.11, y: 126.94),
+                        control2: .init(x: 35.47, y: 126.58)
                     )
                     p.addCurve(
-                        to: .init(x: 34.5, y: 125.28),
-                        control1: .init(x: 34.1, y: 124.38),
-                        control2: .init(x: 34.5, y: 124.78)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.ink
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 39.3, y: 125.28))
-                    p.addCurve(
-                        to: .init(x: 38.4, y: 126.18),
-                        control1: .init(x: 39.3, y: 125.78),
-                        control2: .init(x: 38.9, y: 126.18)
-                    )
-                    p.addCurve(
-                        to: .init(x: 37.5, y: 125.28),
-                        control1: .init(x: 37.9, y: 126.18),
-                        control2: .init(x: 37.5, y: 125.78)
-                    )
-                    p.addCurve(
-                        to: .init(x: 38.4, y: 124.38),
-                        control1: .init(x: 37.5, y: 124.78),
-                        control2: .init(x: 37.9, y: 124.38)
-                    )
-                    p.addCurve(
-                        to: .init(x: 39.3, y: 125.28),
-                        control1: .init(x: 38.9, y: 124.38),
-                        control2: .init(x: 39.3, y: 124.78)
+                        to: .init(x: 36.69, y: 127.37),
+                        control1: .init(x: 36.33, y: 126.58),
+                        control2: .init(x: 36.69, y: 126.94)
                     )
                     p.closeSubpath()
                 },
@@ -1902,9 +1875,137 @@ enum RunnerArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 35.16, y: 127.8))
-                    p.addLine(to: .init(x: 36.84, y: 127.8))
-                    p.addLine(to: .init(x: 36, y: 128.76))
+                    p.move(to: .init(x: 40.89, y: 127.37))
+                    p.addCurve(
+                        to: .init(x: 40.1, y: 128.16),
+                        control1: .init(x: 40.89, y: 127.8),
+                        control2: .init(x: 40.53, y: 128.16)
+                    )
+                    p.addCurve(
+                        to: .init(x: 39.31, y: 127.37),
+                        control1: .init(x: 39.67, y: 128.16),
+                        control2: .init(x: 39.31, y: 127.8)
+                    )
+                    p.addCurve(
+                        to: .init(x: 40.1, y: 126.58),
+                        control1: .init(x: 39.31, y: 126.94),
+                        control2: .init(x: 39.67, y: 126.58)
+                    )
+                    p.addCurve(
+                        to: .init(x: 40.89, y: 127.37),
+                        control1: .init(x: 40.53, y: 126.58),
+                        control2: .init(x: 40.89, y: 126.94)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.ink
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 37.27, y: 129.57))
+                    p.addLine(to: .init(x: 38.74, y: 129.57))
+                    p.addLine(to: .init(x: 38, y: 130.42))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.blush
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 73.7, y: 123.53))
+                    p.addQuadCurve(to: .init(x: 74.75, y: 117.12), control: .init(x: 73.49, y: 119.85))
+                    p.addLine(to: .init(x: 77.48, y: 118.59))
+                    p.addQuadCurve(to: .init(x: 82.52, y: 118.59), control: .init(x: 80, y: 117.96))
+                    p.addLine(to: .init(x: 85.25, y: 117.12))
+                    p.addQuadCurve(to: .init(x: 86.3, y: 123.53), control: .init(x: 86.51, y: 119.85))
+                    p.addQuadCurve(to: .init(x: 80, y: 127.83), control: .init(x: 85.88, y: 127.83))
+                    p.addQuadCurve(to: .init(x: 73.7, y: 123.53), control: .init(x: 74.12, y: 127.83))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.catOrange,
+                stroke: RunnerPalette.ink,
+                lineWidth: 1.3,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 76.22, y: 124.26))
+                    p.addQuadCurve(to: .init(x: 83.78, y: 124.26), control: .init(x: 80, y: 121.74))
+                    p.addQuadCurve(to: .init(x: 80, y: 127.62), control: .init(x: 83.57, y: 127.62))
+                    p.addQuadCurve(to: .init(x: 76.22, y: 124.26), control: .init(x: 76.43, y: 127.62))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.white
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 78.95, y: 118.17))
+                    p.addLine(to: .init(x: 78.95, y: 120.27))
+                    p.move(to: .init(x: 81.05, y: 118.17))
+                    p.addLine(to: .init(x: 81.05, y: 120.27))
+                },
+                stroke: RunnerPalette.catStripe,
+                lineWidth: 0.9,
+                cap: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 78.69, y: 122.37))
+                    p.addCurve(
+                        to: .init(x: 77.9, y: 123.16),
+                        control1: .init(x: 78.69, y: 122.8),
+                        control2: .init(x: 78.33, y: 123.16)
+                    )
+                    p.addCurve(
+                        to: .init(x: 77.11, y: 122.37),
+                        control1: .init(x: 77.47, y: 123.16),
+                        control2: .init(x: 77.11, y: 122.8)
+                    )
+                    p.addCurve(
+                        to: .init(x: 77.9, y: 121.58),
+                        control1: .init(x: 77.11, y: 121.94),
+                        control2: .init(x: 77.47, y: 121.58)
+                    )
+                    p.addCurve(
+                        to: .init(x: 78.69, y: 122.37),
+                        control1: .init(x: 78.33, y: 121.58),
+                        control2: .init(x: 78.69, y: 121.94)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.ink
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 82.89, y: 122.37))
+                    p.addCurve(
+                        to: .init(x: 82.1, y: 123.16),
+                        control1: .init(x: 82.89, y: 122.8),
+                        control2: .init(x: 82.53, y: 123.16)
+                    )
+                    p.addCurve(
+                        to: .init(x: 81.31, y: 122.37),
+                        control1: .init(x: 81.67, y: 123.16),
+                        control2: .init(x: 81.31, y: 122.8)
+                    )
+                    p.addCurve(
+                        to: .init(x: 82.1, y: 121.58),
+                        control1: .init(x: 81.31, y: 121.94),
+                        control2: .init(x: 81.67, y: 121.58)
+                    )
+                    p.addCurve(
+                        to: .init(x: 82.89, y: 122.37),
+                        control1: .init(x: 82.53, y: 121.58),
+                        control2: .init(x: 82.89, y: 121.94)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.ink
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 79.27, y: 124.58))
+                    p.addLine(to: .init(x: 80.74, y: 124.58))
+                    p.addLine(to: .init(x: 80, y: 125.42))
                     p.closeSubpath()
                 },
                 fill: RunnerPalette.blush
