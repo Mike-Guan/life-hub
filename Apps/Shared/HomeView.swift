@@ -49,6 +49,8 @@ struct HomeView: View {
     var onWardrobe: (() -> Void)?
     /// When Mike last tapped HAKU's bath away.
     var bathDoneAt: Date?
+    /// The last Screen Time report of couch scrolling, from the iOS app.
+    var scrollSeenAt: Date?
     /// Records that Mike tapped HAKU's bath away.
     var onBathDone: (() -> Void)?
 
@@ -98,7 +100,8 @@ struct HomeView: View {
                         codingCans: codingCans(at: context.date),
                         traces: traces(at: context.date, energy: reading?.level),
                         vitals: VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: context.date),
-                        event: event ?? sit?.stretched(at: context.date) ?? stayHome(at: context.date) ?? dailyDone,
+                        event: event ?? revived(at: context.date) ?? sit?.stretched(at: context.date)
+                            ?? stayHome(at: context.date) ?? dailyDone,
                         daily: daily?.cue(at: context.date),
                         walking: activitySignals.flatMap { PlaceWalk.walk(in: $0.presence, now: context.date)?.from },
                         bath: bath(at: context.date),
@@ -232,6 +235,16 @@ struct HomeView: View {
     private func shownActivity(at date: Date) -> CompanionActivity? {
         let activity = activity(at: date)
         return activity == .gymDay && moment(at: date) != nil ? nil : activity
+    }
+
+    private func revived(at date: Date) -> CompanionEvent? {
+        let window = bath(at: date) ? BathTime.window(at: date, bedtime: bedtime) : nil
+        return ReviveEngine.revived(
+            switchedAt: ReviveEngine.switchedAt(change: store.log.current, bath: window),
+            scrollSeenAt: scrollSeenAt,
+            atHome: activitySignals?.presence.since(.home) != nil,
+            now: date
+        )
     }
 
     private func bath(at date: Date) -> Bool {

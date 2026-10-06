@@ -119,6 +119,7 @@ struct LifeHubApp: App {
             ledger: growth.ledger,
             onWardrobe: { showsWardrobe = true },
             bathDoneAt: bathDoneAt,
+            scrollSeenAt: needs.scrollSeenAt,
             onBathDone: {
                 BathTime.markDone(at: .now, in: AppGroup.defaults)
                 bathDoneAt = .now

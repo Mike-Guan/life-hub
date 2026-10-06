@@ -31,7 +31,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Added
 - After long couch scrolling, as the bath or vibe coding starts, HAKU drops the phone, gets up from the sofa,
-  stretches, pulls its mask up with the </> lit and says "……活过来了？". It plays once; the app decides when.
+  stretches, pulls its mask up with the </> lit and says "……活过来了？". It plays at most once a day, when
+  you switch within 20 minutes of the last couch scrolling at home and open the app within 30 minutes.
 - Groundwork for sharing HAKU later: a separate public card that can hold only the look, mode, face and an
   optional activity, with share tiers per relationship. Nothing uses it yet and nothing you see changes.
 - HAKU can call you to the bath: a towel on its head, shampoo and a rubber duck, "……去洗澡。我先占浴室了。",

@@ -18,6 +18,8 @@ final class NeedTracker {
     private(set) var event: CompanionEvent?
     /// Whether Mike sat too long or just stood up, from the last stand hours; `nil` before the first reading.
     private(set) var sit: SitState?
+    /// The last Screen Time report of couch scrolling, `nil` when there was none.
+    private(set) var scrollSeenAt: Date?
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
     @ObservationIgnored private var motion: HealthMotion.Reading?
@@ -70,6 +72,7 @@ final class NeedTracker {
         let days = AppGroup.activityDays(now: now)
         reading = NeedEngine.need(signals, now: now, days: days, work: .stored(in: AppGroup.defaults))
         activitySignals = ActivitySignals(presence: presence, workouts: motion?.workouts ?? [])
+        scrollSeenAt = ScrollWatch.seenAt ?? ScrollWatch.reachedAt
         InviteReminder.plan(reading, signals: signals, now: now)
         invite = InviteReminder.sent(for: reading)
     }
