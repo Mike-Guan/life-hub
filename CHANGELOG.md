@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- HAKU's blanket is now cream with a white folded hem, one small orange-and-white cat on the left and faint
+  paw prints, everywhere it shows.
 - After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.
 - The TODAY mode log on the home screen starts a new day at 05:00, not midnight. Changes after midnight
   stay in the evening's log until 05:00.
