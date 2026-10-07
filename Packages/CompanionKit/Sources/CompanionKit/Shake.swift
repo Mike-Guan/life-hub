@@ -79,6 +79,9 @@ import CoreMotion
 
 /// Shakes of the phone or the watch.
 enum DeviceShakes {
+    /// How long a view waits after it appears before it starts listening, so launch is not slowed down.
+    static let startDelay: Duration = .seconds(2)
+
     /// A stream that yields once per shake and stops listening when it is cancelled.
     static func stream() -> AsyncStream<Void> {
         AsyncStream { continuation in
@@ -87,16 +90,21 @@ enum DeviceShakes {
                 continuation.finish()
                 return
             }
-            listener.manager.deviceMotionUpdateInterval = 1.0 / 30
-            listener.manager.startDeviceMotionUpdates(to: listener.queue) { motion, _ in
-                guard let motion else { return }
-                let a = motion.userAcceleration
-                let magnitude = (a.x * a.x + a.y * a.y + a.z * a.z).squareRoot()
-                if listener.detector.add(magnitude: magnitude, at: motion.timestamp) {
-                    continuation.yield()
+            // Started on the listener's queue, so the main thread never waits for CoreMotion.
+            listener.queue.addOperation {
+                listener.manager.deviceMotionUpdateInterval = 1.0 / 30
+                listener.manager.startDeviceMotionUpdates(to: listener.queue) { motion, _ in
+                    guard let motion else { return }
+                    let a = motion.userAcceleration
+                    let magnitude = (a.x * a.x + a.y * a.y + a.z * a.z).squareRoot()
+                    if listener.detector.add(magnitude: magnitude, at: motion.timestamp) {
+                        continuation.yield()
+                    }
                 }
             }
-            continuation.onTermination = { _ in listener.manager.stopDeviceMotionUpdates() }
+            continuation.onTermination = { _ in
+                listener.queue.addOperation { listener.manager.stopDeviceMotionUpdates() }
+            }
         }
     }
 

@@ -372,6 +372,8 @@ public struct KuroView: View {
     private func listenForShakes() async {
         #if os(iOS) || os(watchOS)
         guard listensForShakes else { return }
+        try? await Task.sleep(for: DeviceShakes.startDelay)
+        guard !Task.isCancelled else { return }
         for await _ in DeviceShakes.stream() { react() }
         #endif
     }
