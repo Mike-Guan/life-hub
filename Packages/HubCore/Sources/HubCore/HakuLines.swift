@@ -192,8 +192,23 @@ public enum HakuLines {
     public static let offWorkLine = "……收工。"
 
     /// The off-work line in `persona`'s voice.
-    public static func offWorkLine(for persona: Persona) -> String {
-        persona == .kuro ? KuroLines.offWorkLine : offWorkLine
+    /// - Parameters:
+    ///   - persona: whose voice says the line.
+    ///   - evening: whether the leave came after the evening extension started.
+    public static func offWorkLine(for persona: Persona, evening: Bool = false) -> String {
+        guard persona == .kuro else { return offWorkLine }
+        return evening ? KuroLines.eveningOffWorkLine : KuroLines.offWorkLine
+    }
+
+    /// The off-work line in `persona`'s voice for a line that stops showing at `until`.
+    public static func offWorkLine(
+        for persona: Persona,
+        until: Date,
+        work: ModeRules,
+        calendar: Calendar = .current
+    ) -> String {
+        let left = until.addingTimeInterval(-offWorkLasts)
+        return offWorkLine(for: persona, evening: work.isEvening(left, calendar: calendar))
     }
     /// How long the off-work line stays after Mike leaves the office.
     public static let offWorkLasts: TimeInterval = 30 * 60
