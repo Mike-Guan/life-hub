@@ -206,3 +206,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   2h manual hold applies). Lifting shows only in Chill; the gym can is mode-independent; leaving keeps the mode.
 - 2026-10-07: Mike: every new character starts from the new-character checklist, measured against HAKU,
   so nothing (shop, colors, tap reactions, surfaces) is found missing after an install.
+- 2026-10-07: Mike (via PM): each character keeps her own cans, items, keepsakes, room traces and hidden stats;
+  a win pays only the character picked at the time; switching asks first. Life records stay shared.

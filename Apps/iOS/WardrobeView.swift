@@ -52,7 +52,9 @@ struct WardrobeView: View {
         .background(Toy.paper.ignoresSafeArea())
     }
 
-    private var owned: Set<String> { growth.ledger.owned }
+    // Each character spends and collects with her own cans.
+    private var ledger: CanLedger { growth.ledger.only(persona) }
+    private var owned: Set<String> { ledger.owned }
 
     private var ownedItems: [ShopItem] {
         ShopItem.catalog(for: persona).filter { $0.slot == slot && owned.contains($0.id) }
@@ -69,7 +71,7 @@ struct WardrobeView: View {
     private var collection: [(item: ShopItem, at: Date)] {
         ShopItem.catalog(for: persona)
             .compactMap { item in
-                guard item.keepsake != nil, let at = growth.ledger.ownedAt(item.id) else { return nil }
+                guard item.keepsake != nil, let at = ledger.ownedAt(item.id) else { return nil }
                 return (item, at)
             }
             .sorted { $0.at < $1.at }
@@ -121,7 +123,7 @@ struct WardrobeView: View {
             Text("衣柜")
                 .font(Toy.display(26))
             Spacer()
-            CanChip(count: growth.ledger.balance)
+            CanChip(count: ledger.balance)
         }
     }
 
@@ -245,7 +247,7 @@ struct WardrobeView: View {
 
     private func lockedTile(_ item: ShopItem) -> some View {
         let keepsake = item.keepsake
-        let count = keepsake.map { min(growth.ledger.count($0.win), $0.count) } ?? 0
+        let count = keepsake.map { min(ledger.count($0.win), $0.count) } ?? 0
         return VStack(spacing: 6) {
             ShopItemIcon(item: item)
                 .frame(width: 56, height: 56)
