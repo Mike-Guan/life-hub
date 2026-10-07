@@ -55,8 +55,19 @@ import Testing
 
     @Test func arrivingAnywhereEndsIt() {
         var home = presence(stay: .home, from: date(6, 19), leave: date(7, 8, 30))
-        home.record(.office, entered: true, at: date(7, 9, 20))
-        #expect(phase(home, at: date(7, 9, 25)) == nil)
+        home.record(.fitness, entered: true, at: date(7, 9, 20))
+        #expect(phase(home, at: date(7, 9, 21)) == nil)
+    }
+
+    @Test func arrivingAtTheOtherEndShowsForThreeMinutes() {
+        var trip = presence(stay: .home, from: date(6, 19), leave: date(7, 8, 30))
+        trip.record(.office, entered: true, at: date(7, 9, 20))
+        let arrived = CommutePhase(leg: .toWork, stage: .arrived, since: date(7, 9, 20))
+        #expect(phase(trip, mode: .work, at: date(7, 9, 21)) == arrived)
+        #expect(phase(trip, mode: .work, at: date(7, 9, 24)) == nil)
+        var back = presence(stay: .office, from: date(7, 9), leave: date(7, 18))
+        back.record(.home, entered: true, at: date(7, 18, 40))
+        #expect(phase(back, at: date(7, 18, 41)) == CommutePhase(leg: .home, stage: .arrived, since: date(7, 18, 40)))
     }
 
     @Test func weekendsAndLunchAreNoCommute() {
