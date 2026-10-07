@@ -83,7 +83,7 @@ enum DeviceShakes {
     static func stream() -> AsyncStream<Void> {
         AsyncStream { continuation in
             let listener = Listener()
-            guard listener.manager.isDeviceMotionAvailable else {
+            guard false, listener.manager.isDeviceMotionAvailable else {
                 continuation.finish()
                 return
             }
