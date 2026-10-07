@@ -77,7 +77,7 @@ struct LifeHubApp: App {
         let taps = NotificationTaps(
             onOffWork: { needs.offWork(at: $0) },
             onGo: { date in
-                Self.depart(at: date, store: store, energy: energy, widgets: widgets, needs: needs)
+                Self.depart(at: date, store: store, energy: energy, widgets: widgets, needs: needs, growth: growth)
             }
         )
         UNUserNotificationCenter.current().delegate = taps
@@ -372,7 +372,7 @@ struct LifeHubApp: App {
             widgets.workouts = needs.workouts
             widgets.sync(mode: store, energy: energy)
             WidgetCenter.shared.reloadAllTimelines()
-            sendToWatch()
+            Self.sendToWatch(store: store, needs: needs, growth: growth)
             // Arriving at the gym ends the countdown, even with the app in the background.
             Task { _ = await BoxingCountdown.update(for: needs.reading) }
             // Arriving at or leaving the office decides today's off-work notice.
@@ -398,7 +398,8 @@ struct LifeHubApp: App {
         store: ModeStore,
         energy: EnergyStore,
         widgets: WidgetBridge,
-        needs: NeedTracker
+        needs: NeedTracker,
+        growth: GrowthStore
     ) {
         GymDeparture(at: date).store(in: AppGroup.defaults)
         let places = PlaceSettings.stored(in: AppGroup.defaults)
@@ -411,7 +412,7 @@ struct LifeHubApp: App {
         widgets.rules = AppGroup.needRules()
         widgets.sync(mode: store, energy: energy)
         WidgetCenter.shared.reloadAllTimelines()
-        sendToWatch()
+        Self.sendToWatch(store: store, needs: needs, growth: growth)
     }
 
     // Builds before the report ladder watched a single 30-minute event; restarting swaps in the ladder.
@@ -452,18 +453,23 @@ struct LifeHubApp: App {
         sendToWatch()
     }
 
-    // The watch plays the home card's scenes, worked out from the same inputs as HomeView.
     private func sendToWatch() {
+        Self.sendToWatch(store: store, needs: needs, growth: growth)
+    }
+
+    // The watch plays the home card's scenes, worked out from the same inputs as HomeView. Static, so
+    // place events in the background can send too; settings come from the App Group, where they are saved.
+    private static func sendToWatch(store: ModeStore, needs: NeedTracker, growth: GrowthStore) {
         let inputs = HomeSceneInputs(
             log: store.log,
-            rules: rules,
-            bedtime: bedtime,
+            rules: ModeRules.stored(in: AppGroup.defaults),
+            bedtime: BedtimeSchedule.stored(in: AppGroup.defaults),
             need: needs.reading,
             signals: needs.activitySignals,
             days: ActivityDays.stored(in: AppGroup.defaults).learningGym(from: growth.ledger, now: .now),
             departure: needs.departure,
             sit: needs.sit,
-            bathDoneAt: bathDoneAt
+            bathDoneAt: BathTime.doneAt(in: AppGroup.defaults)
         )
         WatchSync.shared.send(scenes: inputs.timeline(from: .now))
     }
