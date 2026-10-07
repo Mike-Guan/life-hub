@@ -4,6 +4,7 @@ import SwiftUI
 // Used by .github/workflows/screenshots.yml to draw the README images. Debug builds only.
 /// Launch argument `-screenshot-mode <mode>` shows the home screen with fixed, in-memory data.
 /// `-screenshot-persona <persona>` picks the character, HAKU by default.
+/// `-screenshot-wearing <ids>` dresses her in shop items, given as comma-separated ids.
 enum ScreenshotMode {
     static var mode: Mode? {
         value(after: "-screenshot-mode").flatMap(Mode.init(rawValue:))
@@ -11,6 +12,14 @@ enum ScreenshotMode {
 
     static var persona: Persona {
         value(after: "-screenshot-persona").flatMap(Persona.init(rawValue:)) ?? .haku
+    }
+
+    static var wardrobe: Wardrobe {
+        var wardrobe = Wardrobe()
+        for id in value(after: "-screenshot-wearing")?.split(separator: ",") ?? [] {
+            if let item = ShopItem.item(String(id)) { wardrobe.equip(item) }
+        }
+        return wardrobe
     }
 
     private static func value(after flag: String) -> String? {
@@ -32,13 +41,17 @@ struct ScreenshotHome: View {
 
     var body: some View {
         // An empty bedtime window, so RUNNER is awake whatever time CI runs.
-        HomeView(bedtime: BedtimeSchedule(startMinute: 0, endMinute: 0), persona: ScreenshotMode.persona)
-            .environment(store)
-            .environment(energy)
-            .onAppear {
-                // A fresh manual change, so the schedule's 2h hold keeps this mode on screen.
-                store.switchTo(mode)
-                energy.report(.full)
-            }
+        HomeView(
+            bedtime: BedtimeSchedule(startMinute: 0, endMinute: 0),
+            wardrobe: ScreenshotMode.wardrobe,
+            persona: ScreenshotMode.persona
+        )
+        .environment(store)
+        .environment(energy)
+        .onAppear {
+            // A fresh manual change, so the schedule's 2h hold keeps this mode on screen.
+            store.switchTo(mode)
+            energy.report(.full)
+        }
     }
 }

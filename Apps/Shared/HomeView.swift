@@ -45,13 +45,13 @@ struct HomeView: View {
     var cans: Int?
     /// Opens the shop, when set.
     var onShop: (() -> Void)?
-    /// What HAKU wears.
+    /// What the character wears.
     var wardrobe = Wardrobe()
     /// Which character the card draws.
     var persona = Persona.haku
     /// Earned cans, for the traces that stay.
     var ledger = CanLedger()
-    /// Shows the wardrobe button on HAKU's card that calls this, when set.
+    /// Shows the wardrobe button on the companion card that calls this, when set.
     var onWardrobe: (() -> Void)?
     /// When Mike last tapped HAKU's bath away.
     var bathDoneAt: Date?
@@ -106,7 +106,8 @@ struct HomeView: View {
                             need: activeNeed(at: context.date)?.need,
                             activity: shownActivity(at: context.date),
                             moment: moment(at: context.date),
-                            overtimeUntil: rules.eveningUntil(at: context.date)
+                            overtimeUntil: rules.eveningUntil(at: context.date),
+                            wearing: Set(wardrobe.equipped.values)
                         )
                     } else {
                         CompanionView(
@@ -138,7 +139,7 @@ struct HomeView: View {
                 .frame(height: 340)
                 .toyCard()
                 .overlay(alignment: .topTrailing) {
-                    if let onWardrobe, persona == .haku {
+                    if let onWardrobe {
                         Button(action: onWardrobe) {
                             Label("衣柜", systemImage: "tshirt")
                                 .font(Toy.body(15, weight: .heavy))

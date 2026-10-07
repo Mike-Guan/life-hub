@@ -2,18 +2,22 @@ import CompanionKit
 import HubCore
 import SwiftUI
 
-/// The wardrobe: what HAKU wears in each slot, from the items Mike owns.
+/// The wardrobe: what `persona` wears in each slot, from her items Mike owns.
 struct WardrobeView: View {
     let growth: GrowthStore
     @Binding var wardrobe: Wardrobe
+    let persona: Persona
     @Environment(\.dismiss) private var dismiss
     @State private var previewMode: Mode
     @State private var slot: Slot = .gloves
 
-    /// - Parameter mode: the mode to preview first, usually the current one.
-    init(growth: GrowthStore, wardrobe: Binding<Wardrobe>, mode: Mode?) {
+    /// - Parameters:
+    ///   - persona: the character whose wardrobe it is.
+    ///   - mode: the mode to preview first, usually the current one.
+    init(growth: GrowthStore, wardrobe: Binding<Wardrobe>, persona: Persona, mode: Mode?) {
         self.growth = growth
         _wardrobe = wardrobe
+        self.persona = persona
         _previewMode = State(initialValue: mode ?? .chill)
     }
 
@@ -51,11 +55,11 @@ struct WardrobeView: View {
     private var owned: Set<String> { growth.ledger.owned }
 
     private var ownedItems: [ShopItem] {
-        ShopItem.catalog(for: .haku).filter { $0.slot == slot && owned.contains($0.id) }
+        ShopItem.catalog(for: persona).filter { $0.slot == slot && owned.contains($0.id) }
     }
 
     private var lockedKeepsakes: [ShopItem] {
-        ShopItem.catalog(for: .haku).filter { item in
+        ShopItem.catalog(for: persona).filter { item in
             guard item.slot == slot, let keepsake = item.keepsake, !owned.contains(item.id) else { return false }
             return ShopView.liveWins.contains(keepsake.win)
         }
@@ -63,7 +67,7 @@ struct WardrobeView: View {
 
     // Keepsakes from every slot, in the order they were earned.
     private var collection: [(item: ShopItem, at: Date)] {
-        ShopItem.catalog(for: .haku)
+        ShopItem.catalog(for: persona)
             .compactMap { item in
                 guard item.keepsake != nil, let at = growth.ledger.ownedAt(item.id) else { return nil }
                 return (item, at)
@@ -77,12 +81,12 @@ struct WardrobeView: View {
                 .font(Toy.display(22))
             ForEach(collection, id: \.item.id) { entry in
                 HStack(spacing: 12) {
-                    WardrobeItemIcon(item: entry.item)
+                    ShopItemIcon(item: entry.item)
                         .frame(width: 44, height: 44)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(entry.item.title)
                             .font(Toy.body(15, weight: .heavy))
-                        Text(Self.earnedLine(entry.item, at: entry.at))
+                        Text(earnedLine(entry.item, at: entry.at))
                             .font(Toy.body(12, weight: .bold))
                             .foregroundStyle(Toy.muted)
                     }
@@ -97,10 +101,10 @@ struct WardrobeView: View {
     }
 
     /// "2026-11-02 · 累计 10 次周日拳击": when and how a keepsake was earned.
-    private static func earnedLine(_ item: ShopItem, at date: Date) -> String {
+    private func earnedLine(_ item: ShopItem, at date: Date) -> String {
         let day = date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
         guard let keepsake = item.keepsake else { return day }
-        return "\(day) · 累计 \(keepsake.count) 次\(keepsake.win.shopTitle)"
+        return "\(day) · 累计 \(keepsake.count) 次\(keepsake.win.shopTitle(for: persona))"
     }
 
     private var header: some View {
@@ -122,7 +126,7 @@ struct WardrobeView: View {
     }
 
     private var preview: some View {
-        CompanionPortrait(mode: previewMode, wardrobe: wardrobe)
+        PersonaPortrait(persona: persona, mode: previewMode, wardrobe: wardrobe)
             .frame(width: 210, height: 276)
             .frame(maxWidth: .infinity, alignment: .bottom)
             .frame(height: 300, alignment: .bottom)
@@ -134,7 +138,7 @@ struct WardrobeView: View {
                     .toyCard(radius: 12, shadow: 0)
                     .padding(12)
             }
-            .toyCard(fill: previewMode.color)
+            .toyCard(fill: previewMode.color(for: persona))
     }
 
     // Only changes the preview, never the real mode.
@@ -144,11 +148,13 @@ struct WardrobeView: View {
                 Button {
                     previewMode = mode
                 } label: {
-                    Text(mode.code)
+                    Text(mode.code(for: persona))
                         .font(Toy.body(13, weight: .heavy))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }
-                .buttonStyle(ToyButtonStyle(fill: mode.color, isSelected: previewMode == mode))
+                .buttonStyle(ToyButtonStyle(fill: mode.color(for: persona), isSelected: previewMode == mode))
                 .accessibilityAddTraits(previewMode == mode ? .isSelected : [])
             }
         }
@@ -162,7 +168,7 @@ struct WardrobeView: View {
                 Button {
                     slot = tab
                 } label: {
-                    Text(tab.title)
+                    Text(tab.title(for: persona))
                         .font(Toy.body(14, weight: .heavy))
                         .foregroundStyle(slot == tab ? Toy.paper : Toy.ink)
                         .frame(maxWidth: .infinity, minHeight: 44)
@@ -181,8 +187,14 @@ struct WardrobeView: View {
             wardrobe.clear(slot)
         } label: {
             tile(isWorn: isWorn) {
-                WardrobeItemIcon(slotDefault: slot)
-                    .frame(width: 56, height: 56)
+                // KURO's default is her plain look, so her tile has no icon.
+                if persona == .haku {
+                    WardrobeItemIcon(slotDefault: slot)
+                        .frame(width: 56, height: 56)
+                } else {
+                    Color.clear
+                        .frame(width: 56, height: 56)
+                }
                 Text(slot == .room ? "无" : "默认")
                     .font(Toy.body(13, weight: .heavy))
             }
@@ -195,9 +207,13 @@ struct WardrobeView: View {
         let isWorn = wardrobe.equipped[slot] == item.id
         return Button {
             wardrobe.equip(item)
+            // Her items show only in their own look, so the preview switches to it.
+            if let look = KuroItem(rawValue: item.id)?.look {
+                previewMode = Mode.allCases.first { KuroLook(mode: $0) == look } ?? previewMode
+            }
         } label: {
             tile(isWorn: isWorn) {
-                WardrobeItemIcon(item: item)
+                ShopItemIcon(item: item)
                     .frame(width: 56, height: 56)
                 Text(item.title)
                     .font(Toy.body(13, weight: .heavy))
@@ -231,12 +247,12 @@ struct WardrobeView: View {
         let keepsake = item.keepsake
         let count = keepsake.map { min(growth.ledger.count($0.win), $0.count) } ?? 0
         return VStack(spacing: 6) {
-            WardrobeItemIcon(item: item)
+            ShopItemIcon(item: item)
                 .frame(width: 56, height: 56)
                 .opacity(0.25)
             Text(item.title)
                 .font(Toy.body(13, weight: .heavy))
-            Text("\(keepsake?.win.shopTitle ?? "") \(count)/\(keepsake?.count ?? 1)")
+            Text("\(keepsake?.win.shopTitle(for: persona) ?? "") \(count)/\(keepsake?.count ?? 1)")
                 .font(Toy.body(11, weight: .bold))
                 .foregroundStyle(Toy.muted)
         }
@@ -251,12 +267,13 @@ struct WardrobeView: View {
 }
 
 extension Slot {
-    /// The slot's name on its tab.
-    var title: String {
+    // KURO's items reuse HAKU's slots: her tennis things are gloves, hair ties headbands, the blanket a mask.
+    /// The slot's name on `persona`'s tab.
+    func title(for persona: Persona) -> String {
         switch self {
-        case .gloves: "拳套"
-        case .headband: "头带"
-        case .mask: "面罩"
+        case .gloves: persona == .kuro ? "网球" : "拳套"
+        case .headband: persona == .kuro ? "发饰" : "头带"
+        case .mask: persona == .kuro ? "毯子" : "面罩"
         case .room: "房间"
         case .celebration: "庆祝"
         }

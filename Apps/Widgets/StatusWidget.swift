@@ -73,6 +73,7 @@ struct StatusView: View {
                 look: KuroLook(mode: mode),
                 energy: entry.energy?.value,
                 bedtime: entry.bedtime,
+                wearing: Set(entry.wardrobe.equipped.values),
                 framing: framing
             )
         } else {

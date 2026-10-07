@@ -23,8 +23,11 @@ struct LifeHubApp: App {
     @State private var showsWardrobe = false
     @State private var unboxing: CanEntry?
     @State private var welcomeBack: CompanionEvent?
-    @State private var wardrobe = Wardrobe.stored(in: AppGroup.defaults)
     @State private var persona = Persona.stored(in: AppGroup.defaults)
+    @State private var wardrobe = Wardrobe.stored(
+        in: AppGroup.defaults,
+        persona: Persona.stored(in: AppGroup.defaults)
+    )
     @State private var healthError: String?
     @State private var countdownError: String?
     @State private var screenTimeError: String?
@@ -119,8 +122,7 @@ struct LifeHubApp: App {
             money: moneyCard,
             onSettings: { showsSettings = true },
             cans: growth.ledger.balance,
-            // The shop and its unboxing sell HAKU's items; KURO's own come after their preview.
-            onShop: persona == .haku ? { showsShop = true } : nil,
+            onShop: { showsShop = true },
             wardrobe: wardrobe,
             persona: persona,
             ledger: growth.ledger,
@@ -209,16 +211,18 @@ struct LifeHubApp: App {
             )
         }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
-            ShopView(growth: growth, wardrobe: $wardrobe)
+            ShopView(growth: growth, wardrobe: $wardrobe, persona: persona)
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
-            WardrobeView(growth: growth, wardrobe: $wardrobe, mode: store.current)
+            WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
         }
         .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in
-            UnboxCover(entry: entry, wardrobe: $wardrobe)
+            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
         }
         .onChange(of: persona) {
             persona.store(in: AppGroup.defaults)
+            // Each character keeps her own wardrobe; storing it again below is harmless.
+            wardrobe = Wardrobe.stored(in: AppGroup.defaults, persona: persona)
             // Settings is a sheet, so the scene stays active: refresh here what an open would refresh.
             // Needs reschedule the invite, and the widgets and the watch get the new lines.
             refreshNeeds()
@@ -228,7 +232,7 @@ struct LifeHubApp: App {
             }
         }
         .onChange(of: wardrobe) {
-            wardrobe.store(in: AppGroup.defaults)
+            wardrobe.store(in: AppGroup.defaults, persona: persona)
             WidgetCenter.shared.reloadAllTimelines()
             WatchSync.shared.send()
         }
@@ -304,8 +308,8 @@ struct LifeHubApp: App {
 
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.
     private func showNextUnboxing() {
-        guard !showsShop, !showsWardrobe, !showsSettings, persona == .haku else { return }
-        unboxing = UnboxLog.next(in: growth.ledger)
+        guard !showsShop, !showsWardrobe, !showsSettings else { return }
+        unboxing = UnboxLog.next(in: growth.ledger, persona: persona)
     }
 
     private var firstError: String? {
