@@ -239,8 +239,9 @@ struct LifeHubApp: App {
             WidgetCenter.shared.reloadAllTimelines()
             WatchSync.shared.send()
         }
-        // A manual mode change ends couch scrolling, so needs are worked out again.
-        .onChange(of: store.log.changes.count) {
+        // A manual mode change ends couch scrolling, so needs are worked out again. Watches the current
+        // change, not the count: undoing a quick switch soft-deletes it and adds nothing.
+        .onChange(of: store.log.current?.id) {
             refreshNeeds()
             Task { await scheduleOffWork() }
         }
@@ -364,7 +365,7 @@ struct LifeHubApp: App {
             Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
             needs.refresh(
                 places: places,
-                manualSince: store.log.changes.last(where: \.source.isManual)?.at,
+                manualSince: store.log.active.last(where: \.source.isManual)?.at,
                 mode: store.current
             )
             widgets.need = needs.reading
@@ -404,7 +405,7 @@ struct LifeHubApp: App {
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         needs.refresh(
             places: places,
-            manualSince: store.log.changes.last(where: \.source.isManual)?.at,
+            manualSince: store.log.active.last(where: \.source.isManual)?.at,
             mode: store.current
         )
         widgets.need = needs.reading
@@ -436,7 +437,7 @@ struct LifeHubApp: App {
     private func refreshNeeds() {
         needs.refresh(
             places: places,
-            manualSince: store.log.changes.last(where: \.source.isManual)?.at,
+            manualSince: store.log.active.last(where: \.source.isManual)?.at,
             mode: store.current
         )
         widgets.need = needs.reading
