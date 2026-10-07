@@ -31,6 +31,18 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         bedtime = (try? values.decodeIfPresent(BedtimeSchedule.self, forKey: .bedtime)) ?? .standard
     }
 
+    /// Whether `other` draws the same watch face: equal apart from the write time and the work time.
+    public func drawsLike(_ other: WatchPayload) -> Bool {
+        var mine = self
+        var theirs = other
+        // Both change on every iPhone write while nothing on the watch face does.
+        mine.snapshot.updatedAt = .distantPast
+        theirs.snapshot.updatedAt = .distantPast
+        mine.snapshot.workedToday = nil
+        theirs.snapshot.workedToday = nil
+        return mine == theirs
+    }
+
     /// When the watch widgets redraw: the iPhone widgets' times for this snapshot.
     public func timelineDates(after date: Date, calendar: Calendar = .current) -> [Date] {
         WidgetSnapshot.timelineDates(after: date, bedtime: bedtime, needTimes: snapshot.needTimes, calendar: calendar)

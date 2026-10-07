@@ -28,13 +28,16 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
             wardrobe: Wardrobe.stored(in: AppGroup.defaults),
             bedtime: BedtimeSchedule.stored(in: AppGroup.defaults)
         )
+        // Complication transfers have a daily budget (about 50), so they go out only when what the watch
+        // face draws changed.
+        let changed = WatchPayload(message: session.applicationContext).map { !payload.drawsLike($0) } ?? true
         guard let message = payload.message else { return }
         do {
             try session.updateApplicationContext(message)
         } catch {
             Dogfood.note("watch", "没发到手表：\(error.localizedDescription)")
         }
-        if session.isComplicationEnabled, session.remainingComplicationUserInfoTransfers > 0 {
+        if changed, session.isComplicationEnabled, session.remainingComplicationUserInfoTransfers > 0 {
             session.transferCurrentComplicationUserInfo(message)
         }
     }

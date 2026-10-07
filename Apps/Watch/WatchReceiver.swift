@@ -10,6 +10,8 @@ final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
     static let shared = WatchReceiver()
     /// Posted after a new payload is stored.
     static let didReceive = Notification.Name("WatchReceiver.didReceive")
+    /// Posted with a message for the watch app when a payload could not be stored.
+    static let didFail = Notification.Name("WatchReceiver.didFail")
     /// How long a background launch waits for pending transfers.
     private static let pendingWait: Duration = .seconds(10)
 
@@ -47,12 +49,21 @@ final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
     }
 
     private func store(_ message: [String: Any]) {
-        guard let payload = WatchPayload(message: message), let url = AppGroup.container.watchPayloadURL else {
+        guard let payload = WatchPayload(message: message) else { return }
+        // A write that fails leaves the last payload in place; the next one from the iPhone tries again.
+        do {
+            guard let url = AppGroup.container.watchPayloadURL else { throw CocoaError(.fileNoSuchFile) }
+            try payload.write(to: url)
+        } catch {
+            post(Self.didFail, "没存下 iPhone 发来的状态：\(error.localizedDescription)")
             return
         }
-        // A write that fails leaves the last payload in place; the next one from the iPhone tries again.
-        try? payload.write(to: url)
         WidgetCenter.shared.reloadAllTimelines()
-        NotificationCenter.default.post(name: Self.didReceive, object: nil)
+        post(Self.didReceive, nil)
+    }
+
+    // Delegate calls arrive on a background queue; the app's views listen on the main one.
+    private func post(_ name: Notification.Name, _ message: String?) {
+        DispatchQueue.main.async { NotificationCenter.default.post(name: name, object: message) }
     }
 }
