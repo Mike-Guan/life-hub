@@ -58,6 +58,14 @@ import Testing
         #expect(KuroView.newUnbox(.unlock(id: "e2", item: "gloves.gold"), last: "") == nil)
     }
 
+    @Test func eachWorkoutIsCheeredOnce() {
+        let event = CompanionEvent.celebrate(id: "w1", kind: .cycling)
+        #expect(KuroView.newCelebration(event, last: "")?.1 == .cycling)
+        #expect(KuroView.newCelebration(event, last: "w1") == nil)
+        #expect(KuroView.newCelebration(.unlock(id: "e1", item: KuroItem.bag.rawValue), last: "") == nil)
+        #expect(KuroBubbleLines.celebration(.cycling) == "嗯。……还行。")
+    }
+
     @Test func sheActsCalmAboutItemsAndShyAboutKeepsakes() {
         #expect(KuroBubbleLines.unlock(KuroItem.bag.rawValue) == "……还行吧。")
         #expect(KuroBubbleLines.unlock(KuroItem.goldRacket.rawValue) == "……给你的。不是特意挑的。")

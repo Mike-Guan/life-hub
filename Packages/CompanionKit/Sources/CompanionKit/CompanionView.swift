@@ -1376,8 +1376,8 @@ struct SpeechBubble: View {
     .background(Toy.paper)
 }
 
-/// Turns the Digital Crown into eye movement on the watch.
-private struct CrownLook: ViewModifier {
+/// Lets the Digital Crown on the watch turn `crown`.
+struct CrownLook: ViewModifier {
     var isEnabled: Bool
     @Binding var crown: Double
 
