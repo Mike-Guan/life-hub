@@ -16,7 +16,7 @@ extension DailyScene {
         case .cook: [.apron, .spatula]
         case .gym: [.gymBag, .dumbbell]
         case .run: [.speedLines, .walkDust]
-        case .walk: [.sunIcon, .walkDust, .earbud]
+        case .walk: [.sunIcon, .walkDust]
         case .photo: [.cameraFlash, .camera]
         case .friends: [.waveArcs, .waveHand]
         case .haircut: [.hairBits, .clipArm, .clipper, .buzzLines]

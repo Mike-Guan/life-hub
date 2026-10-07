@@ -1166,11 +1166,11 @@ struct RunnerFigure: View {
     }
 
     // The bag from the office comes with `bagLift`.
-    /// Speed lines and dust while walking, with what HAKU carries away from `place`: earbuds from home, a towel
+    /// Speed lines and dust while walking, with what HAKU carries away from `place`: a towel
     /// from the gym, a bandage from boxing.
     nonisolated private static func walkParts(_ place: HubPlace.Kind) -> Set<RunnerPart> {
         switch place {
-        case .home: [.speedLines, .walkDust, .earbud]
+        case .home: [.speedLines, .walkDust]
         case .fitness: [.speedLines, .walkDust, .towel]
         case .gym: [.speedLines, .walkDust, .bandage]
         case .office, .custom: [.speedLines, .walkDust]
@@ -1303,7 +1303,7 @@ struct RunnerFigure: View {
         case .collapsed:
             visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .sofaArm])
         case .blanket:
-            visible.formUnion([.blanket, .eyesSleepy, .maskDown, .earringNeon, .earbud])
+            visible.formUnion([.blanket, .eyesSleepy, .maskDown, .earringNeon])
         case .morning:
             visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .toothbrush])
         case .timeToLeave:
@@ -1393,7 +1393,7 @@ struct RunnerFigure: View {
         .eyesWork, .lidsWork, .eyebags, .browsWork, .maskUp, .panelLines, .headset, .cupL, .cupR, .mic,
     ]
     nonisolated private static let chillParts: Set<RunnerPart> = [
-        .eyesChill, .mouthSmile, .maskDown, .earringNeon, .earbud, .monsterCan,
+        .eyesChill, .mouthSmile, .maskDown, .earringNeon, .monsterCan,
     ]
     nonisolated private static let boxingParts: Set<RunnerPart> = [
         .cateyeL, .cateyeR, .browsBox, .mouthFang, .maskDown, .earringNeon, .headband, .gloveL, .gloveR,

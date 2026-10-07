@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- HAKU wears only the blue earring everywhere. The white earbud in chill, at night under the blanket and on walks is gone.
 - Workouts from the Health app are sorted into about ten groups (walking, cycling, swimming, racket, ball,
   yoga, dance, outdoor and more). Cans are unchanged: only boxing, 5 km runs and the gym earn.
 - Settings: the character choice and the times use outlined Toy controls, so they no longer show as pale grey.
