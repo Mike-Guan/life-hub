@@ -73,7 +73,13 @@ struct SettingsView: View {
                     .font(Toy.body(15))
                 DatePicker("下班", selection: time($rules.workEndMinute), displayedComponents: .hourAndMinute)
                     .font(Toy.body(15))
-                Text("到公司才切到上班。在上班的日子，下班前 \(ModeRules.offWorkLead) 分钟提醒一次。")
+                Toggle("晚间延长", isOn: eveningBinding)
+                    .font(Toy.body(15))
+                if rules.eveningUntilMinute != nil {
+                    DatePicker("延长到", selection: time(eveningMinute), displayedComponents: .hourAndMinute)
+                        .font(Toy.body(15))
+                }
+                Text("到公司才切到上班。在上班的日子，下班前 \(ModeRules.offWorkLead) 分钟提醒一次。晚间延长打开后，下班后还在公司就托腮等到延长时间。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
             }
@@ -330,6 +336,22 @@ struct SettingsView: View {
     }
 
     // The picker edits a Date; only its hour and minute are kept.
+    private var eveningBinding: Binding<Bool> {
+        Binding {
+            rules.eveningUntilMinute != nil
+        } set: { on in
+            rules.eveningUntilMinute = on ? ModeRules.eveningDefaultMinute : nil
+        }
+    }
+
+    private var eveningMinute: Binding<Int> {
+        Binding {
+            rules.eveningUntilMinute ?? ModeRules.eveningDefaultMinute
+        } set: { minute in
+            rules.eveningUntilMinute = minute
+        }
+    }
+
     private func time(_ minute: Binding<Int>) -> Binding<Date> {
         Binding {
             let value = minute.wrappedValue
