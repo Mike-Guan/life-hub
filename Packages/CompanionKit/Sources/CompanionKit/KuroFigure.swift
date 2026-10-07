@@ -216,8 +216,8 @@ public struct KuroView: View {
                 let time = context.date.timeIntervalSinceReferenceDate
                 let pose = self.pose
                 let pace = EnergyFace(energy: energy).speed
-                let motion = bedtime == .on || pose.overtime
-                    ? IdleMotion.sleeping(time: time) : Self.motion(look, time: time * pace)
+                let sleepy = bedtime == .on || pose.overtime
+                let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(look, time: time * pace)
                 KuroFigure(look: look, pose: reduceMotion ? pose : pose.blink(at: time))
                     .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
                     .offset(y: reduceMotion ? 0 : motion.dy)
