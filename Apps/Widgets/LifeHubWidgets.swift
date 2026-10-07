@@ -55,8 +55,10 @@ struct HubEntry: TimelineEntry {
         if bath { return "去洗澡" }
         if let activity { return activity.reason }
         if moment == .heading { return "出发了，包我背着" }
-        if let scene = moment.flatMap(HakuLines.scene(for:)) { return HakuLines.line(scene, at: date) }
-        if bedtime == .on { return HakuLines.line(.bedtime, at: date) }
+        if let scene = moment.flatMap(HakuLines.scene(for:)) {
+            return HakuLines.line(scene, at: date, persona: persona)
+        }
+        if bedtime == .on { return HakuLines.line(.bedtime, at: date, persona: persona) }
         if let notice { return notice }
         if let weekLine { return weekLine }
         if let nextTask { return nextTask }
@@ -151,7 +153,7 @@ struct HubProvider: TimelineProvider {
                 traces: snapshot?.traces(at: date) ?? [],
                 notice: backoff.notice(at: date),
                 weekLine: ChangeEngine.sundayLine(times: changes, now: date),
-                offWork: snapshot?.offWorkLine(at: date),
+                offWork: snapshot?.offWorkLine(at: date, persona: persona),
                 nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false, now: date) },
                 daily: daily?.cue(at: date),
                 walking: PlaceWalk.walk(in: presence, now: date)?.from,

@@ -2,8 +2,8 @@ import HubCore
 
 // Issue #164. Tier 0: no model. Voice: KURO, quiet and dry, a few words at a time.
 // Boxing is her tennis day and the side-hustle slot is her desk time, like `KuroLook`.
-/// KURO's fixed lines per mode, need and idle bit.
-enum KuroLines {
+/// KURO's speech bubble lines per mode, need and idle bit.
+enum KuroBubbleLines {
     /// KURO's lines for the same inputs as `CompanionLines.lines`.
     static func lines(
         for mode: Mode?,

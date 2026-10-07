@@ -14,7 +14,7 @@ enum CompanionLines {
         persona: Persona = .haku
     ) -> [String] {
         if persona == .kuro {
-            return KuroLines.lines(
+            return KuroBubbleLines.lines(
                 for: mode,
                 need: need,
                 peeking: peeking,
@@ -82,7 +82,7 @@ enum CompanionLines {
 
     /// What the companion says after a workout: plays it cool.
     static func celebration(_ kind: WorkoutSummary.Kind, persona: Persona = .haku) -> String {
-        if persona == .kuro { return KuroLines.celebration(kind) }
+        if persona == .kuro { return KuroBubbleLines.celebration(kind) }
         return switch kind {
         case .boxing: "……其实还挺爽的。"
         case .running: "居然真跑完了。"
@@ -93,7 +93,7 @@ enum CompanionLines {
 
     /// What the companion says when unboxing the item with `itemID`: a keepsake it pretends it didn't pick.
     static func unlock(_ itemID: String, persona: Persona = .haku) -> String {
-        if persona == .kuro { return KuroLines.unlock(itemID) }
+        if persona == .kuro { return KuroBubbleLines.unlock(itemID) }
         return ShopItem.item(itemID)?.keepsake != nil ? "……给你的。才不是特意挑的。" : "买了？……那我就勉强收下了。"
     }
 
