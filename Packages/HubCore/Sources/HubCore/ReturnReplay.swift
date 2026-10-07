@@ -138,7 +138,8 @@ public struct ReturnCard: Equatable, Sendable {
             cards.append(ReturnCard(kind: .trace, count: 1, item: trace.rawValue, text: line))
         }
         for entry in granted {
-            guard let id = entry.itemID, let item = ShopItem.item(id) else { continue }
+            // The return is HAKU's, so KURO's keepsakes granted at the same milestones stay out.
+            guard let id = entry.itemID, let item = ShopItem.item(id), item.persona == .haku else { continue }
             cards.append(ReturnCard(kind: .keepsake, count: 1, item: id, text: "拿到了\(item.title)。"))
         }
         return cards
