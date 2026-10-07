@@ -42,8 +42,10 @@ struct WatchHomeView: View {
                                 look: KuroLook(mode: mode),
                                 energy: snapshot.energy(at: context.date)?.value,
                                 bedtime: payload.bedtime.state(at: context.date),
+                                need: snapshot.need(at: context.date),
                                 activity: scene?.activity,
                                 moment: scene?.moment,
+                                overtimeUntil: scene?.overtimeUntil,
                                 style: .watch,
                                 wearing: Set(payload.wardrobe.equipped.values)
                             )
@@ -58,8 +60,12 @@ struct WatchHomeView: View {
                                 codingCans: scene?.codingCans ?? 0,
                                 traces: snapshot.traces(at: context.date),
                                 vitals: snapshot.vitals ?? HakuVitals(),
+                                // Same order as the iPhone home card: a one-off from the iPhone, then the time's.
+                                event: payload.event ?? scene?.event,
+                                daily: scene?.daily,
                                 walking: scene?.walking,
                                 bath: scene?.bath ?? false,
+                                invite: scene?.invite,
                                 bedtime: payload.bedtime.state(at: context.date),
                                 wardrobe: payload.wardrobe,
                                 style: .watch

@@ -11,7 +11,7 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
     // Besides the session, which WatchConnectivity makes safe to use from any thread, only the last scenes
     // the app worked out, behind a lock, so a send from a session callback still carries them.
     static let shared = WatchSync()
-    private let scenes = Mutex<[TimedScene]>([])
+    private let played = Mutex(WatchPlay())
 
     /// Starts the session; the latest state goes out once it is active.
     func activate() {
@@ -20,10 +20,12 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
         WCSession.default.activate()
     }
 
-    /// Sends the snapshot the widgets read, with the wardrobe, bedtime and scenes, when a watch app is installed.
-    /// - Parameter scenes: what the home card plays next; `nil` sends the last ones given.
-    func send(scenes newScenes: [TimedScene]? = nil) {
-        if let newScenes { scenes.withLock { $0 = newScenes } }
+    /// Sends the snapshot the widgets read, with the wardrobe, bedtime and what the home card plays, when a
+    /// watch app is installed.
+    /// - Parameter play: what the home card plays next; `nil` sends the last one given.
+    func send(_ play: WatchPlay? = nil) {
+        if let play { played.withLock { $0 = play } }
+        let play = played.withLock { $0 }
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
         guard session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return }
@@ -34,7 +36,8 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
             wardrobe: Wardrobe.stored(in: AppGroup.defaults, persona: persona),
             bedtime: BedtimeSchedule.stored(in: AppGroup.defaults),
             persona: persona,
-            scenes: scenes.withLock { $0 }
+            scenes: play.scenes,
+            event: play.event
         )
         // Complication transfers have a daily budget (about 50), so they go out only when what the watch
         // face draws changed.
@@ -69,4 +72,10 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
     func sessionWatchStateDidChange(_ session: WCSession) {
         send()
     }
+}
+
+/// What the home card plays, as the app last worked it out.
+struct WatchPlay: Sendable {
+    var scenes: [TimedScene] = []
+    var event: CompanionEvent?
 }

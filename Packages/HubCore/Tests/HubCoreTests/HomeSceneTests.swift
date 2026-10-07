@@ -62,4 +62,36 @@ import Testing
         let playing = WatchPayload(snapshot: snapshot, scenes: [TimedScene(from: at, scene: HomeScene(codingCans: 1))])
         #expect(plain.drawsLike(playing))
     }
+
+    @Test func theInviteShowsOnlyWhileItsNeedLasts() {
+        let store = ModeStore(fileURL: nil, deviceID: "test")
+        store.switchTo(.chill, at: at)
+        let need = NeedReading(need: .couchScroll, since: at, reasons: [], until: at + 3600)
+        let inputs = HomeSceneInputs(log: store.log, need: need, invite: "走？")
+        #expect(inputs.scene(at: at + 60).invite == "走？")
+        #expect(inputs.scene(at: at + 3600).invite == nil)
+    }
+
+    @Test func eventsTravelToTheWatch() throws {
+        let card = ReturnCard(kind: .boxing, count: 2, text: "打了 2 次拳。")
+        let replay = ReturnReplay(tier: .glance, cards: [card], cans: 0)
+        let events: [CompanionEvent] = [
+            .celebrate(id: "w1", kind: .racket),
+            .offWork(id: "2026-10-07"),
+            .unlock(id: "u1", item: "gloves.gold"),
+            .stayHome(id: "2026-10-07"),
+            .stretched(id: "h9"),
+            .taskDone(id: "t1", focus: true),
+            .revived(id: "2026-10-07"),
+            .welcomeBack(id: "c1", replay: replay),
+        ]
+        let snapshot = WidgetSnapshot(mode: .chill, since: at, updatedAt: at)
+        for event in events {
+            let scene = HomeScene(event: event, daily: DailyCue(stage: .now, prop: .note, id: "t1"))
+            let payload = WatchPayload(snapshot: snapshot, scenes: [TimedScene(from: at, scene: scene)], event: event)
+            let message = try #require(payload.message)
+            #expect(WatchPayload(message: message) == payload)
+            #expect(payload.drawsLike(WatchPayload(snapshot: snapshot)))
+        }
+    }
 }

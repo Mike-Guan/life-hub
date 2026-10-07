@@ -268,6 +268,8 @@ struct RunnerPose {
     var lean: Double = 0
     /// Vertical hop of the whole figure, in SVG units; negative is up.
     var bounce: CGFloat = 0
+    /// The leg of the commute HAKU is on, or nil when it isn't commuting.
+    var commuteLeg: CommutePhase.Leg?
     /// The place HAKU is walking away from, or nil when it isn't walking.
     var walkFrom: HubPlace.Kind?
     /// Seconds into the walk.
@@ -1154,6 +1156,7 @@ struct RunnerFigure: View {
         if pose.thumpHit { visible.insert(.thumpLines) }
         if let prop = pose.dailyProp, !pose.bedtime { holdUp(prop, pose: pose, on: &visible) }
         if let place = pose.walkFrom, pose.dailyScene == nil, !pose.bedtime { visible.formUnion(walkParts(place)) }
+        if let leg = pose.commuteLeg, !pose.bedtime { commuted(leg, pose: pose, on: &visible) }
         if pose.bathDry >= 0 {
             visible.subtract(bathHides)
             visible.formUnion([.bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .rubTowelL, .rubTowelR])
@@ -1210,6 +1213,25 @@ struct RunnerFigure: View {
         case .fitness: [.speedLines, .walkDust, .towel]
         case .gym: [.speedLines, .walkDust, .bandage]
         case .office, .custom: [.speedLines, .walkDust]
+        }
+    }
+
+    /// The commute look: a tote bag and yawns on the way to work, sleepy eyes on the way home.
+    nonisolated private static func commuted(
+        _ leg: CommutePhase.Leg,
+        pose: RunnerPose,
+        on visible: inout Set<RunnerPart>
+    ) {
+        switch leg {
+        case .toWork:
+            visible.insert(.toteBag)
+            if pose.yawn > 0.05 {
+                visible.remove(.mouthSmile)
+                visible.insert(.mouthYawn)
+            }
+        case .home:
+            visible.subtract(openEyes)
+            visible.insert(.eyesSleepy)
         }
     }
 
