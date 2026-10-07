@@ -24,6 +24,16 @@ public enum KuroLook: String, CaseIterable, Sendable {
         }
     }
 
+    /// Her card's background, from the approved preview.
+    public var color: Color {
+        switch self {
+        case .work: Color(hex: 0xBFEBD3)
+        case .chill: Color(hex: 0x7FB7FF)
+        case .tennis: Color(hex: 0xFFD1DC)
+        case .desk: Color(hex: 0xDCCFFF)
+        }
+    }
+
     /// The mode that dresses her in this look.
     var mode: Mode {
         switch self {
@@ -212,9 +222,9 @@ public struct KuroView: View {
 
     public var body: some View {
         ZStack {
-            // The same card as HAKU's: the mode's color fills it, dimmed at bedtime.
+            // The same card as HAKU's: her look's color fills it, dimmed at bedtime.
             Rectangle()
-                .fill(look.mode.color)
+                .fill(look.color)
                 .overlay { Toy.ink.opacity(bedtime == .on ? 0.35 : 0) }
                 .animation(.easeInOut(duration: 0.25), value: look)
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
