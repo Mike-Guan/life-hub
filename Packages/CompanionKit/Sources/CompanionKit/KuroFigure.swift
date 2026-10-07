@@ -184,6 +184,8 @@ public struct KuroView: View {
     let overtimeUntil: Date?
     let style: CompanionStyle
     let showsBubble: Bool
+    /// Called after KURO reacts to a tap, for example to switch the 副业 state.
+    let onTap: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -204,6 +206,7 @@ public struct KuroView: View {
     ///   - overtimeUntil: the late end of the work day, shown on a sign above her head during `.overtime`.
     ///   - style: `.watch` makes a tap a poke: a happy hop and a light tap on the wrist instead of a line.
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
+    ///   - onTap: called after she reacts to a tap.
     public init(
         look: KuroLook,
         energy: Double? = nil,
@@ -213,7 +216,8 @@ public struct KuroView: View {
         moment: CompanionMoment? = nil,
         overtimeUntil: Date? = nil,
         style: CompanionStyle = .standard,
-        showsBubble: Bool = true
+        showsBubble: Bool = true,
+        onTap: (() -> Void)? = nil
     ) {
         self.look = look
         self.energy = energy
@@ -224,6 +228,7 @@ public struct KuroView: View {
         self.overtimeUntil = overtimeUntil
         self.style = style
         self.showsBubble = showsBubble
+        self.onTap = onTap
     }
 
     public var body: some View {
@@ -281,7 +286,7 @@ public struct KuroView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime, pose: pose))
-        .accessibilityAddTraits(showsBubble || style == .watch ? .isButton : [])
+        .accessibilityAddTraits(showsBubble || style == .watch || onTap != nil ? .isButton : [])
     }
 
     /// On the watch a tap is a poke; elsewhere it shows a line.
@@ -293,6 +298,7 @@ public struct KuroView: View {
         } else if showsBubble {
             say(Self.line(after: bubble, from: lines))
         }
+        onTap?()
     }
 
     /// How long a poke on the watch plays, in seconds.
