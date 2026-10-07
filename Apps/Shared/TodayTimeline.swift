@@ -5,6 +5,7 @@ import SwiftUI
 /// Today's mode log: when each mode started and how long it lasted.
 struct TodayTimeline: View {
     let segments: [ModeSegment]
+    var persona = Persona.haku
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -18,7 +19,7 @@ struct TodayTimeline: View {
                     .foregroundStyle(Toy.muted)
             } else {
                 ForEach(segments.reversed()) { segment in
-                    Row(segment: segment)
+                    Row(segment: segment, persona: persona)
                 }
             }
         }
@@ -29,6 +30,7 @@ struct TodayTimeline: View {
 
     private struct Row: View {
         let segment: ModeSegment
+        let persona: Persona
 
         var body: some View {
             HStack(spacing: 12) {
@@ -42,7 +44,7 @@ struct TodayTimeline: View {
                     .overlay(RoundedRectangle(cornerRadius: 4).stroke(Toy.ink, lineWidth: 2))
                     .frame(width: 16, height: 16)
 
-                Text(segment.mode.title)
+                Text(segment.mode.title(for: persona))
                     .font(Toy.body(15, weight: .heavy))
                     .foregroundStyle(Toy.ink)
 

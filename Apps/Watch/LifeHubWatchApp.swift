@@ -32,18 +32,28 @@ struct WatchHomeView: View {
                 let snapshot = payload.snapshot
                 // Card layout from the UI thread's watch preview (Issue #160).
                 VStack(spacing: 4) {
-                    Text(mode.title).font(.headline).foregroundStyle(mode.color)
-                    CompanionView(
-                        mode: mode,
-                        energy: snapshot.energy(at: context.date)?.value,
-                        need: snapshot.need(at: context.date),
-                        needSince: snapshot.needSince(at: context.date),
-                        traces: snapshot.traces(at: context.date),
-                        vitals: snapshot.vitals ?? HakuVitals(),
-                        bedtime: payload.bedtime.state(at: context.date),
-                        wardrobe: payload.wardrobe,
-                        style: .watch
-                    )
+                    Text(mode.title(for: payload.persona)).font(.headline).foregroundStyle(mode.color)
+                    Group {
+                        if payload.persona == .kuro {
+                            KuroView(
+                                look: KuroLook(mode: mode),
+                                energy: snapshot.energy(at: context.date)?.value,
+                                bedtime: payload.bedtime.state(at: context.date)
+                            )
+                        } else {
+                            CompanionView(
+                                mode: mode,
+                                energy: snapshot.energy(at: context.date)?.value,
+                                need: snapshot.need(at: context.date),
+                                needSince: snapshot.needSince(at: context.date),
+                                traces: snapshot.traces(at: context.date),
+                                vitals: snapshot.vitals ?? HakuVitals(),
+                                bedtime: payload.bedtime.state(at: context.date),
+                                wardrobe: payload.wardrobe,
+                                style: .watch
+                            )
+                        }
+                    }
                     .clipShape(RoundedRectangle(cornerRadius: 30))
                     if let failure {
                         Text(failure).font(.caption2).foregroundStyle(.secondary).lineLimit(2)

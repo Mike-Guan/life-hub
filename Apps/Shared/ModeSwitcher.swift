@@ -4,6 +4,7 @@ import SwiftUI
 
 struct ModeSwitcher: View {
     let current: Mode?
+    var persona = Persona.haku
     var compact = false
     let onSelect: (Mode) -> Void
 
@@ -16,7 +17,7 @@ struct ModeSwitcher: View {
                     label(for: mode)
                 }
                 .buttonStyle(ToyButtonStyle(fill: mode.color, isSelected: mode == current))
-                .accessibilityLabel(mode.title)
+                .accessibilityLabel(mode.title(for: persona))
                 .accessibilityAddTraits(mode == current ? .isSelected : [])
             }
         }
@@ -33,7 +34,7 @@ struct ModeSwitcher: View {
                     .font(.system(size: 20, weight: .bold))
                     .frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(mode.title).font(Toy.body(16, weight: .heavy))
+                    Text(mode.title(for: persona)).font(Toy.body(16, weight: .heavy))
                     Text(mode.code).font(Toy.body(11, weight: .bold)).opacity(0.6)
                 }
                 Spacer(minLength: 0)

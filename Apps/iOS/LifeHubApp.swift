@@ -23,6 +23,7 @@ struct LifeHubApp: App {
     @State private var showsWardrobe = false
     @State private var unboxing: CanEntry?
     @State private var wardrobe = Wardrobe.stored(in: AppGroup.defaults)
+    @State private var persona = Persona.stored(in: AppGroup.defaults)
     @State private var healthError: String?
     @State private var countdownError: String?
     @State private var screenTimeError: String?
@@ -117,6 +118,7 @@ struct LifeHubApp: App {
             cans: growth.ledger.balance,
             onShop: { showsShop = true },
             wardrobe: wardrobe,
+            persona: persona,
             ledger: growth.ledger,
             onWardrobe: { showsWardrobe = true },
             bathDoneAt: bathDoneAt,
@@ -190,6 +192,7 @@ struct LifeHubApp: App {
                 rules: $rules,
                 places: $places,
                 budget: $budget,
+                persona: $persona,
                 monitor: placeMonitor,
                 daily: daily
             )
@@ -202,6 +205,11 @@ struct LifeHubApp: App {
         }
         .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in
             UnboxCover(entry: entry, wardrobe: $wardrobe)
+        }
+        .onChange(of: persona) {
+            persona.store(in: AppGroup.defaults)
+            WidgetCenter.shared.reloadAllTimelines()
+            WatchSync.shared.send()
         }
         .onChange(of: wardrobe) {
             wardrobe.store(in: AppGroup.defaults)
