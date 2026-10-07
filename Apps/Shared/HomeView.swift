@@ -407,7 +407,7 @@ private struct Header: View {
 
     private var subtitle: String {
         let date = Date.now.formatted(.dateTime.month().day().weekday(.wide))
-        return "\(date) · \(mode?.code ?? "NO MODE") MODE"
+        return "\(date) · \(mode.map { "\($0.code) MODE" } ?? "NO MODE")"
     }
 }
 
