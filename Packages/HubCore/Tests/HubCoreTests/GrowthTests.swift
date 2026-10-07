@@ -89,12 +89,13 @@ import Testing
         #expect(store.remaining(for: headband) == 1)
         #expect(store.ledger.ownedAt(headband.id) == nil)
         let fourth = at.addingTimeInterval(3_600)
-        let sakura = try item("kuro.headband.sakura")
-        #expect(store.record(.run5k, source: "run-3", at: fourth) == [headband, sakura])
+        #expect(store.record(.run5k, source: "run-3", at: fourth) == [headband])
         #expect(store.ledger.ownedAt(headband.id) == fourth)
         #expect(store.remaining(for: headband) == nil)
         #expect(store.record(.run5k, source: "run-4", at: at).isEmpty)
-        #expect(store.ledger.owned == ["keepsake.headband.runner", "kuro.headband.sakura"])
+        #expect(store.ledger.owned == ["keepsake.headband.runner"])
+        // KURO's runs start from zero.
+        #expect(store.remaining(for: try item("kuro.headband.sakura")) == 4)
         // Keepsakes are free.
         #expect(store.ledger.balance == 5 * Win.run5k.cans)
         #expect(store.remaining(for: try item("room.plant")) == nil)
@@ -113,12 +114,43 @@ import Testing
     @Test func eachCharacterUnboxesOnlyHerOwnItems() throws {
         let store = GrowthStore(fileURL: nil, deviceID: "t")
         for run in 0..<4 { store.record(.run5k, source: "run-\(run)", at: at.addingTimeInterval(Double(run))) }
+        store.persona = .kuro
+        for run in 4..<8 { store.record(.run5k, source: "run-\(run)", at: at.addingTimeInterval(Double(run))) }
         try store.buy(try item("kuro.room.flower"), at: at.addingTimeInterval(10))
         #expect(store.ledger.unboxings(seen: []).compactMap(\.itemID) == ["keepsake.headband.runner"])
         let kuro = store.ledger.unboxings(seen: [], persona: .kuro).compactMap(\.itemID)
         #expect(kuro == ["kuro.headband.sakura", "kuro.room.flower"])
-        // One balance for both shops.
-        #expect(store.ledger.balance == 4 * Win.run5k.cans - 10)
+    }
+
+    @Test func eachCharacterHasHerOwnCans() throws {
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        for day in 0..<4 { store.record(.boxing, source: "day-\(day)", at: at) }
+        store.persona = .kuro
+        // The same win can't pay KURO again after HAKU got it.
+        store.record(.boxing, source: "day-0", at: at)
+        store.record(.gym, source: "day-9", at: at)
+        #expect(store.ledger.only(.haku).balance == 4 * Win.boxing.cans)
+        #expect(store.ledger.only(.kuro).balance == Win.gym.cans)
+        #expect(throws: GrowthStore.BuyError.notEnoughCans) { try store.buy(try item("kuro.room.flower"), at: at) }
+        #expect(throws: GrowthStore.BuyError.notForSale) { try store.buy(try item("room.plant"), at: at) }
+        store.persona = .haku
+        try store.buy(try item("room.plant"), at: at)
+        #expect(store.ledger.only(.haku).balance == 4 * Win.boxing.cans - 10)
+        #expect(store.ledger.only(.kuro).balance == Win.gym.cans)
+        #expect(store.ledger.only(.kuro).owned.isEmpty)
+    }
+
+    @Test func entriesWithoutACharacterAreHakus() throws {
+        let json = #"{"id":"\#(UUID().uuidString)","kind":"earned","at":"2026-10-04T00:00:00Z","win":"gym","cans":3}"#
+        let entry = try HubJSON.decoder().decode(CanEntry.self, from: Data(json.utf8))
+        #expect(entry.persona == .haku)
+        let ledger = CanLedger(entries: [entry])
+        #expect(ledger.only(.haku).balance == 3)
+        #expect(ledger.only(.kuro).balance == 0)
+        var kuro = entry
+        kuro.persona = .kuro
+        let decoded = try HubJSON.decoder().decode(CanEntry.self, from: HubJSON.encoder().encode(kuro))
+        #expect(decoded.persona == .kuro)
     }
 
     @Test func kuroHasHerOwnCatalogAtHakusPrices() {
@@ -143,7 +175,7 @@ import Testing
         try JSONSerialization.data(withJSONObject: json).write(to: url)
 
         let reloaded = GrowthStore(fileURL: url, deviceID: "t")
-        #expect(reloaded.ledger.owned == ["celebrate.up", "kuro.celebrate.spin"])
+        #expect(reloaded.ledger.owned == ["celebrate.up"])
         #expect(reloaded.ledger.unreadable.count == 1)
         reloaded.record(.daylight, source: "day-1", at: at)
         let again = GrowthStore(fileURL: url, deviceID: "t")
