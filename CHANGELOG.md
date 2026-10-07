@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- Groundwork for the watch commute: Life Hub can tell walking to work, riding the train and walking home
+  between home and the office. Nothing shows it yet.
 - Workouts from the Health app are sorted into about ten groups (walking, cycling, swimming, racket, ball,
   yoga, dance, outdoor and more). Cans are unchanged: only boxing, 5 km runs and the gym earn.
 - Settings: the character choice and the times use outlined Toy controls, so they no longer show as pale grey.
