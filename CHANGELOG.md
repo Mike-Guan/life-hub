@@ -6,8 +6,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat shape.
-- KURO has her own shop, wardrobe and unboxing: her 5 items and 3 keepsakes, at the same can prices and from
-  the same can balance. Each character keeps what she wears; the home card, widgets and watch show it.
+- Each character has her own cans, items, keepsake progress, room traces and hidden stats. Cans go to the
+  character picked when they are earned; switching asks first. Everything earned before stays HAKU's. Life
+  records, sleep and the weekly changes are shared.
+- KURO has her own shop, wardrobe and unboxing: her 5 items and 3 keepsakes, at the same can prices. Each character keeps what she wears; the home card, widgets and watch show it.
 - HAKU's blanket is now cream with a white folded hem, two small orange-and-white cats and faint paw prints,
   everywhere it shows.
 - After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.

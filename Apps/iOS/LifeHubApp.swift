@@ -57,6 +57,7 @@ struct LifeHubApp: App {
         let needs = NeedTracker()
         WatchSync.shared.activate()
         let growth = GrowthStore.live(in: container, defaults: AppGroup.defaults)
+        growth.persona = Persona.stored(in: AppGroup.defaults)
         _store = State(initialValue: store)
         // The Focus filter switches mode through this store, so the app keeps one writer for the log.
         AppDependencyManager.shared.add { store }
@@ -121,11 +122,11 @@ struct LifeHubApp: App {
             changes: ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: growth.ledger),
             money: moneyCard,
             onSettings: { showsSettings = true },
-            cans: growth.ledger.balance,
+            cans: growth.ledger.only(persona).balance,
             onShop: { showsShop = true },
             wardrobe: wardrobe,
             persona: persona,
-            ledger: growth.ledger,
+            ledger: growth.ledger.only(persona),
             onWardrobe: { showsWardrobe = true },
             bathDoneAt: bathDoneAt,
             scrollSeenAt: needs.scrollSeenAt,
@@ -221,6 +222,8 @@ struct LifeHubApp: App {
         }
         .onChange(of: persona) {
             persona.store(in: AppGroup.defaults)
+            // New cans and items go to the picked character from now on.
+            growth.persona = persona
             // Each character keeps her own wardrobe; storing it again below is harmless.
             wardrobe = Wardrobe.stored(in: AppGroup.defaults, persona: persona)
             // Settings is a sheet, so the scene stays active: refresh here what an open would refresh.
@@ -283,7 +286,7 @@ struct LifeHubApp: App {
         let replay = ReturnReplay.make(
             lastSeen: since,
             lastBox: ReturnLog.lastBox(in: AppGroup.defaults),
-            ledger: growth.ledger,
+            ledger: growth.ledger.only(persona),
             nights: nights,
             log: store.log,
             now: .now

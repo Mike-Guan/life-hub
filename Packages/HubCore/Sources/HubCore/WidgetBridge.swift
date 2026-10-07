@@ -70,7 +70,8 @@ public final class WidgetBridge {
             now: now,
             calendar: calendar
         )
-        let ledger = CanLedger.read(from: container.canLedgerURL)
+        // Room traces and hidden stats belong to the picked character.
+        let ledger = CanLedger.read(from: container.canLedgerURL).only(rules.persona)
         snapshot.lasting = MomentEngine.lastingTraces(log: mode.log, ledger: ledger, now: now)
         snapshot.vitals = VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: now, calendar: calendar)
         snapshot.workedToday = MomentEngine.workedToday(mode.log, now: now, calendar: calendar)

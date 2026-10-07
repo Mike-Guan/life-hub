@@ -136,12 +136,23 @@ public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
     public var cans: Int
     public var win: Win?
     public var itemID: String?
+    /// The character whose cans or item this is.
+    public var persona: Persona
     public var createdAt: Date
     public var updatedAt: Date
     public var updatedBy: String
     public var deletedAt: Date?
 
-    public init(id: UUID, kind: Kind, at: Date, cans: Int, win: Win? = nil, itemID: String? = nil, deviceID: String) {
+    public init(
+        id: UUID,
+        kind: Kind,
+        at: Date,
+        cans: Int,
+        win: Win? = nil,
+        itemID: String? = nil,
+        persona: Persona = .haku,
+        deviceID: String
+    ) {
         self.schemaVersion = Self.currentSchemaVersion
         self.id = id
         self.kind = kind
@@ -149,31 +160,40 @@ public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
         self.cans = cans
         self.win = win
         self.itemID = itemID
+        self.persona = persona
         self.createdAt = at
         self.updatedAt = at
         self.updatedBy = deviceID
         self.deletedAt = nil
     }
 
-    // The id comes from the win and its source (a workout id, a night, an invite), so importing
-    // the same win again finds the existing entry.
-    /// Cans earned for `win`, identified by `source`.
-    public static func earned(_ win: Win, source: String, at: Date, deviceID: String) -> CanEntry {
+    // The id comes from the win and its source (a workout id, a night, an invite), not the character,
+    // so importing the same win again finds the existing entry and one win never pays both characters.
+    /// Cans earned for `win` by `persona`, identified by `source`.
+    public static func earned(
+        _ win: Win,
+        source: String,
+        at: Date,
+        persona: Persona = .haku,
+        deviceID: String
+    ) -> CanEntry {
         CanEntry(
             id: .derived(from: "win:\(win.rawValue):\(source)"),
             kind: .earned,
             at: at,
             cans: win.cans,
             win: win,
+            persona: persona,
             deviceID: deviceID
         )
     }
 
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, id, kind, at, cans, win, itemID, createdAt, updatedAt, updatedBy, deletedAt
+        case schemaVersion, id, kind, at, cans, win, itemID, persona, createdAt, updatedAt, updatedBy, deletedAt
     }
 
     // An unknown kind or win throws, so the ledger keeps the raw record instead of guessing.
+    // Entries from before characters had their own cans have no persona; they were all HAKU's.
     /// Decodes an entry. `id`, `kind` and `at` are required.
     /// - Throws: `DecodingError` when a required field is missing or invalid.
     public init(from decoder: Decoder) throws {
@@ -185,6 +205,7 @@ public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
         cans = try values.decodeIfPresent(Int.self, forKey: .cans) ?? 0
         win = try values.decodeIfPresent(Win.self, forKey: .win)
         itemID = try values.decodeIfPresent(String.self, forKey: .itemID)
+        persona = try values.decodeIfPresent(Persona.self, forKey: .persona) ?? .haku
         createdAt = try values.decodeIfPresent(Date.self, forKey: .createdAt) ?? at
         updatedAt = try values.decodeIfPresent(Date.self, forKey: .updatedAt) ?? createdAt
         updatedBy = try values.decodeIfPresent(String.self, forKey: .updatedBy) ?? "unknown"
@@ -232,6 +253,13 @@ public struct CanLedger: RecordLog, Equatable {
         var list = values.nestedUnkeyedContainer(forKey: .entries)
         for entry in entries { try list.encode(entry) }
         for raw in unreadable { try list.encode(raw) }
+    }
+
+    // Cans, items and keepsake progress belong to one character; the wins themselves are Mike's life,
+    // so code that reads his life (gym days, tennis day, weekly changes) uses the whole ledger.
+    /// The entries of `persona` only, for her balance, items and progress.
+    public func only(_ persona: Persona) -> CanLedger {
+        CanLedger(entries: entries.filter { $0.persona == persona })
     }
 
     /// Non-deleted entries, oldest first.
