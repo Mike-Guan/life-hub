@@ -45,7 +45,7 @@ public struct ReturnReplay: Equatable, Sendable {
     ///   - lastSeen: when the app last went to the background, `nil` if never.
     ///   - lastBox: when the last `.box` return played, `nil` if never.
     ///   - ledger: the can ledger, read after this open's wins are recorded.
-    ///   - energy: the energy events, for the nights slept while away.
+    ///   - nights: the nights slept while away, read back from Health.
     ///   - log: the mode log, for room traces that appeared while away.
     ///   - now: the time the app opens.
     ///   - calendar: the calendar for hub days.
@@ -53,7 +53,7 @@ public struct ReturnReplay: Equatable, Sendable {
         lastSeen: Date?,
         lastBox: Date?,
         ledger: CanLedger,
-        energy: [EnergyEvent],
+        nights: [SleepNight],
         log: ModeLog,
         now: Date,
         calendar: Calendar = .current
@@ -70,7 +70,7 @@ public struct ReturnReplay: Equatable, Sendable {
         let cards = ReturnCard.cards(
             earned: earned,
             granted: away.filter { $0.kind == .granted },
-            nights: energy.filter { $0.deletedAt == nil && $0.kind == .sleep && $0.at > lastSeen && $0.at <= now },
+            nights: nights.filter { $0.endedAt > lastSeen && $0.endedAt <= now },
             traces: newTraces(log: log, ledger: ledger, since: lastSeen, now: now)
         )
         let limit = tier == .box ? 5 : 3
@@ -118,12 +118,12 @@ public struct ReturnCard: Equatable, Sendable {
     static func cards(
         earned: [CanEntry],
         granted: [CanEntry],
-        nights: [EnergyEvent],
+        nights: [SleepNight],
         traces: [CompanionTrace]
     ) -> [ReturnCard] {
         func count(_ win: Win) -> Int { earned.filter { $0.win == win }.count }
         let fullFrom = SleepThresholds.standard.fullFrom
-        let slept = Set(nights.filter { ($0.sleepMinutes ?? 0) >= fullFrom }.map(\.id)).count
+        let slept = Set(nights.filter { $0.minutes >= fullFrom }.map(\.id)).count
         var cards: [ReturnCard] = []
         func add(_ kind: Kind, _ count: Int, _ text: String) {
             if count > 0 { cards.append(ReturnCard(kind: kind, count: count, text: text)) }

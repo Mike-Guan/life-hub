@@ -18,18 +18,36 @@ import Testing
         CanEntry(id: UUID(), kind: .earned, at: at, cans: win.cans, win: win, deviceID: "t")
     }
 
+    func night(_ day: Int, minutes: Int) -> SleepNight {
+        SleepNight(id: UUID(), minutes: minutes, endedAt: date(day, 7))
+    }
+
+    @Test func nightsAreReadBackPerHubDay() {
+        // Two nights while away, each 23:00 to 07:00, and a nap that doesn't count.
+        let intervals = [
+            SleepInterval(start: date(2, 23), end: date(3, 7)),
+            SleepInterval(start: date(3, 23), end: date(4, 7)),
+            SleepInterval(start: date(4, 15), end: date(4, 16)),
+        ]
+        let window = SleepNight.window(from: date(2), to: date(5), calendar: calendar)
+        #expect(window.start == date(1, 17))
+        let nights = SleepNight.nights(intervals, from: date(2), to: date(5), calendar: calendar)
+        #expect(nights.map(\.minutes) == [480, 480])
+        #expect(Set(nights.map(\.id)).count == 2)
+    }
+
     func replay(
         seen: Date?,
         now: Date,
         lastBox: Date? = nil,
         entries: [CanEntry] = [],
-        energy: [EnergyEvent] = []
+        nights: [SleepNight] = []
     ) -> ReturnReplay? {
         ReturnReplay.make(
             lastSeen: seen,
             lastBox: lastBox,
             ledger: CanLedger(entries: entries),
-            energy: energy,
+            nights: nights,
             log: ModeLog(changes: []),
             now: now,
             calendar: calendar
@@ -68,17 +86,14 @@ import Testing
             earned(.plannedTask, at: date(6)),
             earned(.daylight, at: date(7)),
         ]
-        let nights = [
-            EnergyEvent.sleep(minutes: 480, endedAt: date(3, 7), deviceID: "t"),
-            EnergyEvent.sleep(minutes: 300, endedAt: date(4, 7), deviceID: "t"),
-        ]
-        let box = try #require(replay(seen: date(1), now: date(10), entries: entries, energy: nights))
+        let nights = [night(3, minutes: 480), night(4, minutes: 300)]
+        let box = try #require(replay(seen: date(1), now: date(10), entries: entries, nights: nights))
         #expect(box.tier == .box)
         #expect(box.line == "……又不是在等你。")
         let texts = ["打了 2 次拳。", "跑了 1 次 5 公里。", "去了 1 次健身房。", "有一天睡得挺好。", "做完了 1 件提前定好的事。"]
         #expect(box.cards.map(\.text) == texts)
         #expect(box.cans == 5 + 5 + 5 + 3 + 1 + 1)
-        let glance = try #require(replay(seen: date(1), now: date(5, 13), entries: entries, energy: nights))
+        let glance = try #require(replay(seen: date(1), now: date(5, 13), entries: entries, nights: nights))
         #expect(glance.line == "哦，回来了。")
         #expect(glance.cards.count == 3)
     }
@@ -96,7 +111,8 @@ import Testing
     @Test func newTracesAndKeepsakesGetCards() throws {
         var entries = (0..<4).map { earned(.boxing, at: date(1, 8).addingTimeInterval(Double($0) * 60)) }
         entries.append(earned(.boxing, at: date(3)))
-        let keepsake = CanEntry(id: UUID(), kind: .granted, at: date(9, 9), cans: 0, itemID: "celebrate.up", deviceID: "t")
+        let up = "celebrate.up"
+        let keepsake = CanEntry(id: UUID(), kind: .granted, at: date(9, 9), cans: 0, itemID: up, deviceID: "t")
         entries.append(keepsake)
         let back = try #require(replay(seen: date(1), now: date(10), entries: entries))
         #expect(back.cards.map(\.kind) == [.boxing, .trace, .keepsake])
@@ -106,7 +122,7 @@ import Testing
     }
 
     @Test func severalGoodNightsAreSaidLoosely() {
-        let nights = (2..<5).map { EnergyEvent.sleep(minutes: 470, endedAt: date($0, 7), deviceID: "t") }
+        let nights = (2..<5).map { night($0, minutes: 470) }
         let cards = ReturnCard.cards(earned: [], granted: [], nights: nights, traces: [])
         #expect(cards.map(\.text) == ["有几天睡得挺好。"])
         #expect(cards.first?.count == 3)
