@@ -35,6 +35,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - 晚间延长 in Settings, off by default. On work days, still at the office in work mode after work hours, the
   character waits at the desk until the picked time. If KURO leaves after work hours on such a day, she says
   "……终于。" instead of her usual off-work line. The off-work notice stays at the end of work hours.
+- KURO has her own lines in her own quiet voice for every mode, need, moment and idle bit, plus after a workout
+  and on unboxing. Tapping her shows one in a speech bubble.
 - KURO's own Lock Screen and widget lines for every scene HAKU has, plus her off-work line.
 - KURO's tennis day: the boxing day rules with her own lines. Her day is learned from her sessions at the
   tennis court (a weekday in 2 of the last 4 weeks), Saturday until one qualifies. Her invites carry her name.
