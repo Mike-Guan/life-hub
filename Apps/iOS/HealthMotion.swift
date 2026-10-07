@@ -53,21 +53,39 @@ enum HealthMotion {
     }
 
     private static func summary(_ workout: HKWorkout) -> WorkoutSummary {
-        let kind: WorkoutSummary.Kind
-        switch workout.workoutActivityType {
-        case .boxing, .kickboxing: kind = .boxing
-        case .running: kind = .running
-        case .traditionalStrengthTraining, .functionalStrengthTraining: kind = .strength
-        default: kind = .other
-        }
         let distance = workout.statistics(for: HKQuantityType(.distanceWalkingRunning))?.sumQuantity()
         return WorkoutSummary(
             id: workout.uuid.uuidString,
-            kind: kind,
+            kind: kind(workout.workoutActivityType),
             start: workout.startDate,
             end: workout.endDate,
             meters: distance?.doubleValue(for: .meter())
         )
+    }
+
+    // Issue #205: about ten groups so HAKU and KURO can react to each later. Only boxing, running and
+    // strength earn cans (`Win.wins`), so martial arts and walking stay out of those groups.
+    private static func kind(_ type: HKWorkoutActivityType) -> WorkoutSummary.Kind {
+        switch type {
+        case .walking, .wheelchairWalkPace: .walking
+        case .running: .running
+        case .cycling, .handCycling: .cycling
+        case .swimming, .waterFitness: .swimming
+        case .traditionalStrengthTraining, .functionalStrengthTraining, .coreTraining: .strength
+        case .boxing, .kickboxing: .boxing
+        case .martialArts, .wrestling, .fencing: .martialArts
+        case .tennis, .badminton, .squash, .racquetball, .tableTennis, .pickleball: .racket
+        case .basketball, .soccer, .volleyball, .baseball, .softball, .americanFootball, .rugby, .hockey,
+            .handball, .lacrosse, .cricket, .australianFootball, .golf:
+            .ball
+        case .yoga, .flexibility, .pilates, .mindAndBody, .taiChi, .cooldown, .preparationAndRecovery, .barre:
+            .yoga
+        case .socialDance, .cardioDance: .dance
+        case .hiking, .climbing, .downhillSkiing, .snowboarding, .crossCountrySkiing, .snowSports,
+            .surfingSports, .paddleSports, .sailing, .skatingSports:
+            .outdoor
+        default: .other
+        }
     }
 
     // Steps in 15-minute buckets over the last 4 hours; still since the end of the last busy one.
