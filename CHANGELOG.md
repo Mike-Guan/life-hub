@@ -34,6 +34,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- KURO's own shop items (five to buy at HAKU's prices, three keepsakes at HAKU's milestones) and her own
+  wardrobe, kept apart from HAKU's. Both share one can balance. Not shown yet; her shop opens with its pictures.
+- The second preset character's shop items are drawn on her: a window flower, a scrunchie, a cat blanket, a cat-ear
+  lamp, a tennis bag and three keepsakes, each in its own look, with icons and her own unboxing (she pops out of the
+  box acting calm, with stars in a thought bubble). Data and screens follow in engineering's part of #192.
 - 回来的时候 (animation): HAKU looks up from the phone after a short absence. After a long one it dozes on
   the sofa (or at the desk in Work), sits up, turns the phone face down, says "……又不是在等你。", pushes over a
   crate, and the cards flip one by one before the cans open together. With nothing recorded it scoots over and
@@ -316,6 +321,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- With KURO, the mode buttons, TODAY log, control and watch use her card colors, and her tennis and desk
+  modes read TENNIS and DESK instead of BOXING and SIDE. Her desk time shows her tagline, not HAKU's
+  side-hustle state.
 - The second preset character's colored card fills the whole home card, with no white strips above and below.
 - Picking KURO in Settings now updates the widgets, the watch, the invite and the bedtime notification
   right away, and ends a running boxing countdown. With KURO, the small widget, the mode buttons and the
@@ -328,6 +336,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character's card now fills with her own color per mode (mint, sky, pink, lavender, as in
   the approved preview), dims at bedtime and squashes as the mode changes, on the home screen and the watch.
   Before, it stayed white.
+- With the second preset character chosen, a tap on her on the watch is a poke: a happy hop and a light tap on
+  the wrist. Expanded notifications draw her instead of HAKU, and the widget line no longer mentions HAKU's
+  bath, walks or activities she doesn't show.
+- The second preset character can take a tap action like HAKU's, so the app can switch the 副业 state from her.
+- A mode change during the welcome back no longer clears its line.
 - Leaving the office switches to 下班 Chill only from 17:30. Stepping out earlier, such as for lunch,
   keeps 上班.
 - Staying 30 minutes at the boxing gym counts as boxing, like the fitness gym: 5 cans once a week and

@@ -39,6 +39,15 @@ extension Mode {
         }
     }
 
+    /// The mode's short English code for `persona`: KURO's identity and side slots are TENNIS and DESK.
+    public func code(for persona: Persona) -> String {
+        switch (persona, self) {
+        case (.kuro, .boxing): "TENNIS"
+        case (.kuro, .money): "DESK"
+        default: code
+        }
+    }
+
     /// The line under the home card for `persona`.
     public func tagline(for persona: Persona) -> String {
         switch (persona, self) {

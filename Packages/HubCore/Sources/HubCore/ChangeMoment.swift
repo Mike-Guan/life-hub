@@ -115,7 +115,8 @@ public enum ChangeEngine {
     /// When Mike earned a keepsake's last win within `unlockWindow` of the win before it.
     public static func nearUnlocks(in ledger: CanLedger) -> [Date] {
         let granted = Set(ledger.active.filter { $0.kind == .granted }.compactMap(\.itemID))
-        return ShopItem.catalog.compactMap { item -> Date? in
+        // KURO's keepsakes share HAKU's milestones, so counting HAKU's alone keeps each unlock once.
+        return ShopItem.catalog(for: .haku).compactMap { item -> Date? in
             guard granted.contains(item.id), let keepsake = item.keepsake, keepsake.count >= 2 else { return nil }
             let wins = ledger.active.filter { $0.kind == .earned && $0.win == keepsake.win }.map(\.at).sorted()
             guard wins.count >= keepsake.count else { return nil }

@@ -239,9 +239,12 @@ public struct CanLedger: RecordLog, Equatable {
         entries.filter { $0.deletedAt == nil }.sorted { $0.at < $1.at }
     }
 
-    /// Items bought or granted whose entry isn't in `seen`, oldest first, for the unboxing.
-    public func unboxings(seen: Set<UUID>) -> [CanEntry] {
-        active.filter { $0.kind != .earned && $0.itemID != nil && !seen.contains($0.id) }
+    /// Items of `persona` bought or granted whose entry isn't in `seen`, oldest first, for the unboxing.
+    public func unboxings(seen: Set<UUID>, persona: Persona = .haku) -> [CanEntry] {
+        active.filter { entry in
+            guard entry.kind != .earned, !seen.contains(entry.id), let id = entry.itemID else { return false }
+            return ShopItem.item(id)?.persona == persona
+        }
     }
 
     /// Cans earned minus cans spent.
@@ -280,7 +283,7 @@ public enum Slot: String, Codable, CodingKeyRepresentable, CaseIterable, Sendabl
     case celebration
 }
 
-/// Something HAKU can own: bought in the shop, or granted as a keepsake.
+/// Something a character can own: bought in the shop, or granted as a keepsake.
 public struct ShopItem: Identifiable, Equatable, Sendable {
     /// A milestone that grants an item for free.
     public struct Keepsake: Equatable, Sendable {
@@ -294,9 +297,13 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     /// Price in cans; `nil` for a keepsake, which can't be bought.
     public var price: Int?
     public var keepsake: Keepsake?
+    /// The character who wears or shows it.
+    public var persona: Persona
 
-    // The first catalog (PRD v4.2 section 13). Ids are stored in the ledger, so never reuse one.
-    /// Everything HAKU can own.
+    // The first catalog (PRD v4.2 section 13), then KURO's (奖励数值表 section 7, approved 2026-10-07).
+    // Ids are stored in the ledger, so never reuse one. KURO's items reuse HAKU's slots: her hair ties are
+    // headbands, her blanket is the mask slot, her tennis bag and racket are the gloves slot.
+    /// Everything either character can own.
     public static let catalog: [ShopItem] = [
         ShopItem(id: "headband.cyan", slot: .headband, title: "青色头带", price: 15),
         ShopItem(id: "mask.stripes", slot: .mask, title: "条纹面罩", price: 20),
@@ -311,23 +318,62 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             keepsake: Keepsake(win: .run5k, count: 4)
         ),
         ShopItem(id: "celebrate.up", slot: .celebration, title: "起身庆祝", keepsake: Keepsake(win: .gotUp, count: 1)),
+        ShopItem(id: "kuro.room.flower", slot: .room, title: "窗台小粉花", price: 10, persona: .kuro),
+        ShopItem(id: "kuro.hair.scrunchie", slot: .headband, title: "粉色发圈", price: 15, persona: .kuro),
+        ShopItem(id: "kuro.blanket.cats", slot: .mask, title: "粉色猫猫毯", price: 20, persona: .kuro),
+        ShopItem(id: "kuro.room.lamp", slot: .room, title: "猫耳台灯", price: 25, persona: .kuro),
+        ShopItem(id: "kuro.bag.tennis", slot: .gloves, title: "粉色网球包", price: 30, persona: .kuro),
+        ShopItem(
+            id: "kuro.celebrate.spin",
+            slot: .celebration,
+            title: "藏不住转一圈",
+            keepsake: Keepsake(win: .gotUp, count: 1),
+            persona: .kuro
+        ),
+        ShopItem(
+            id: "kuro.headband.sakura",
+            slot: .headband,
+            title: "樱色运动发带",
+            keepsake: Keepsake(win: .run5k, count: 4),
+            persona: .kuro
+        ),
+        ShopItem(
+            id: "kuro.racket.gold",
+            slot: .gloves,
+            title: "金色网球拍",
+            keepsake: Keepsake(win: .boxing, count: 10),
+            persona: .kuro
+        ),
     ]
 
-    init(id: String, slot: Slot, title: String, price: Int? = nil, keepsake: Keepsake? = nil) {
+    init(
+        id: String,
+        slot: Slot,
+        title: String,
+        price: Int? = nil,
+        keepsake: Keepsake? = nil,
+        persona: Persona = .haku
+    ) {
         self.id = id
         self.slot = slot
         self.title = title
         self.price = price
         self.keepsake = keepsake
+        self.persona = persona
     }
 
     /// The catalog item with `id`.
     public static func item(_ id: String) -> ShopItem? {
         catalog.first { $0.id == id }
     }
+
+    /// The items `persona` can own, in catalog order.
+    public static func catalog(for persona: Persona) -> [ShopItem] {
+        catalog.filter { $0.persona == persona }
+    }
 }
 
-/// Which owned item HAKU wears in each slot. A setting, so it is replaced in place.
+/// Which owned item a character wears in each slot. A setting, so it is replaced in place.
 public struct Wardrobe: Codable, Equatable, Sendable {
     public var equipped: [Slot: String]
 
@@ -345,17 +391,20 @@ public struct Wardrobe: Codable, Equatable, Sendable {
         equipped[slot] = nil
     }
 
-    static let defaultsKey = "wardrobe"
+    // HAKU keeps the original key, so wardrobes saved before KURO had one still load.
+    static func defaultsKey(for persona: Persona) -> String {
+        persona == .haku ? "wardrobe" : "wardrobe.\(persona.rawValue)"
+    }
 
-    /// The wardrobe saved in `defaults`, or an empty one when none is saved or it can't be read.
-    public static func stored(in defaults: UserDefaults) -> Wardrobe {
-        guard let data = defaults.data(forKey: defaultsKey) else { return Wardrobe() }
+    /// `persona`'s wardrobe saved in `defaults`, or an empty one when none is saved or it can't be read.
+    public static func stored(in defaults: UserDefaults, persona: Persona = .haku) -> Wardrobe {
+        guard let data = defaults.data(forKey: defaultsKey(for: persona)) else { return Wardrobe() }
         return (try? JSONDecoder().decode(Wardrobe.self, from: data)) ?? Wardrobe()
     }
 
-    /// Saves the wardrobe in `defaults`.
-    public func store(in defaults: UserDefaults) {
-        defaults.set(try? JSONEncoder().encode(self), forKey: Self.defaultsKey)
+    /// Saves the wardrobe in `defaults` as `persona`'s.
+    public func store(in defaults: UserDefaults, persona: Persona = .haku) {
+        defaults.set(try? JSONEncoder().encode(self), forKey: Self.defaultsKey(for: persona))
     }
 }
 

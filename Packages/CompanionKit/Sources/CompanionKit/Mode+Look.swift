@@ -21,6 +21,11 @@ extension Mode {
         }
     }
 
+    /// The mode's color for `persona`: KURO's are her card colors from the approved preview.
+    public func color(for persona: Persona) -> Color {
+        persona == .kuro ? KuroLook(mode: self).color : color
+    }
+
     /// The SF Symbol for the mode as `persona` lives it: KURO's identity day is tennis.
     public func symbol(for persona: Persona) -> String {
         switch (persona, self) {

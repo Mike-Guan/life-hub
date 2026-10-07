@@ -907,7 +907,7 @@ import Testing
         #expect(Outfit(Wardrobe(equipped: [.gloves: "gloves.someday", .room: "room.someday"])) == Outfit())
     }
 
-    @Test(arguments: ShopItem.catalog)
+    @Test(arguments: ShopItem.catalog(for: .haku))
     func everyWornItemChangesTheLook(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
@@ -936,7 +936,7 @@ import Testing
         #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
     }
 
-    @Test(arguments: ShopItem.catalog)
+    @Test(arguments: ShopItem.catalog(for: .haku))
     func everyItemIconDrawsSomething(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)

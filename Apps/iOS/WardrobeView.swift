@@ -51,11 +51,11 @@ struct WardrobeView: View {
     private var owned: Set<String> { growth.ledger.owned }
 
     private var ownedItems: [ShopItem] {
-        ShopItem.catalog.filter { $0.slot == slot && owned.contains($0.id) }
+        ShopItem.catalog(for: .haku).filter { $0.slot == slot && owned.contains($0.id) }
     }
 
     private var lockedKeepsakes: [ShopItem] {
-        ShopItem.catalog.filter { item in
+        ShopItem.catalog(for: .haku).filter { item in
             guard item.slot == slot, let keepsake = item.keepsake, !owned.contains(item.id) else { return false }
             return ShopView.liveWins.contains(keepsake.win)
         }
@@ -63,7 +63,7 @@ struct WardrobeView: View {
 
     // Keepsakes from every slot, in the order they were earned.
     private var collection: [(item: ShopItem, at: Date)] {
-        ShopItem.catalog
+        ShopItem.catalog(for: .haku)
             .compactMap { item in
                 guard item.keepsake != nil, let at = growth.ledger.ownedAt(item.id) else { return nil }
                 return (item, at)

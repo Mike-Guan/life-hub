@@ -66,15 +66,15 @@ struct ShopView: View {
     private var owned: Set<String> { growth.ledger.owned }
 
     private var forSale: [ShopItem] {
-        ShopItem.catalog.filter { $0.price != nil && !owned.contains($0.id) }
+        ShopItem.catalog(for: .haku).filter { $0.price != nil && !owned.contains($0.id) }
     }
 
     private var ownedFromShop: [ShopItem] {
-        ShopItem.catalog.filter { $0.price != nil && owned.contains($0.id) }
+        ShopItem.catalog(for: .haku).filter { $0.price != nil && owned.contains($0.id) }
     }
 
     private var keepsakes: [ShopItem] {
-        ShopItem.catalog.filter { item in
+        ShopItem.catalog(for: .haku).filter { item in
             guard let keepsake = item.keepsake else { return false }
             return Self.liveWins.contains(keepsake.win) || owned.contains(item.id)
         }

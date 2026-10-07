@@ -32,13 +32,16 @@ struct WatchHomeView: View {
                 let snapshot = payload.snapshot
                 // Card layout from the UI thread's watch preview (Issue #160).
                 VStack(spacing: 4) {
-                    Text(mode.title(for: payload.persona)).font(.headline).foregroundStyle(mode.color)
+                    Text(mode.title(for: payload.persona))
+                        .font(.headline)
+                        .foregroundStyle(mode.color(for: payload.persona))
                     Group {
                         if payload.persona == .kuro {
                             KuroView(
                                 look: KuroLook(mode: mode),
                                 energy: snapshot.energy(at: context.date)?.value,
-                                bedtime: payload.bedtime.state(at: context.date)
+                                bedtime: payload.bedtime.state(at: context.date),
+                                style: .watch
                             )
                         } else {
                             CompanionView(
