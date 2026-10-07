@@ -20,6 +20,8 @@ import Testing
         #expect(Mode.chill.title(for: .kuro) == Mode.chill.title)
         for mode in Mode.allCases {
             #expect(mode.title(for: .haku) == mode.title)
+            #expect(mode.tagline(for: .haku) == mode.tagline)
+            #expect(mode.tagline(for: .kuro) != mode.tagline)
         }
     }
 

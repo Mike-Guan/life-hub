@@ -38,6 +38,17 @@ extension Mode {
         default: title
         }
     }
+
+    /// The line under the home card for `persona`.
+    public func tagline(for persona: Persona) -> String {
+        switch (persona, self) {
+        case (.haku, _): tagline
+        case (.kuro, .work): "面罩戴好，平板在手"
+        case (.kuro, .chill): "面罩摘下，热饮捧着"
+        case (.kuro, .boxing): "头带扎好，拍子拎上"
+        case (.kuro, .money): "眼镜戴上，红笔就位"
+        }
+    }
 }
 
 extension HubPlace.Kind {

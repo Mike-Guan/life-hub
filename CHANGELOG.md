@@ -317,7 +317,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Picking KURO in Settings now updates the widgets, the watch, the invite and the bedtime notification
   right away, and ends a running boxing countdown. With KURO, the small widget, the mode buttons and the
   activity line say 网球日 / 备课 / 网球场 with a tennis icon, and Settings and the bedtime notification
-  use her name instead of HAKU.
+  use her name instead of HAKU. The line under her home card is her own for each mode.
 - Leaving the office switches to 下班 Chill only from 17:30. Stepping out earlier, such as for lunch,
   keeps 上班.
 - Staying 30 minutes at the boxing gym counts as boxing, like the fitness gym: 5 cans once a week and

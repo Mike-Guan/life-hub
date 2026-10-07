@@ -159,7 +159,7 @@ struct HomeView: View {
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
                 } else if let mode = store.current {
-                    Text(mode.tagline)
+                    Text(mode.tagline(for: persona))
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
                 } else {
