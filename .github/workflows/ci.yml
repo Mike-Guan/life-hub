@@ -107,6 +107,15 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
           SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES
 
+      - name: Build watch app (simulator, warnings as errors)
+        run: >
+          xcodebuild build -quiet
+          -project LifeHub.xcodeproj -scheme LifeHub-Watch
+          -destination 'generic/platform=watchOS Simulator'
+          -derivedDataPath build
+          CODE_SIGNING_ALLOWED=NO
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES
+
       - name: Build macOS app (warnings as errors)
         run: >
           xcodebuild build -quiet

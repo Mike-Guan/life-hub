@@ -32,6 +32,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU on Apple Watch: a watch face widget (circular, corner and rectangular) and a watch app that shows
+  HAKU as the iPhone last saw it. The iPhone sends the state; the watch changes nothing.
 - Poking HAKU on the Apple Watch plays a reaction for its state, with a light tap on the wrist: a headset cup
   pushed up ("在上班。") at work, the can held out to clink ("叮。") in Chill, a punch at boxing, the mask
   flashing </> in 副业, a roll-over when asleep or out of energy, and a glare ("……干嘛。") while HAKU is busy.
