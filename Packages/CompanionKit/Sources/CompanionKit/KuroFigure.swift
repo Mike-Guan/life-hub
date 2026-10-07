@@ -65,6 +65,14 @@ struct KuroPose: Sendable {
     var items: Set<KuroItem> = []
     /// Acting calm: flat mouth, blush kept.
     var calm = false
+    /// A round open mouth, replacing her look's mouth.
+    var mouthO = false
+    /// The reaction to a tap she is playing, if any.
+    var tap: KuroTap?
+    /// How far into `tap` she is, 0..<1.
+    var tapProgress = 0.0
+    /// Whether the heart thought bubble shows.
+    var heart = false
 
     /// The resting pose for `look` at `energy` (0-100, or nil when unknown); `bedtime` makes her sleepy.
     init(look: KuroLook, energy: Double?, bedtime: Bedtime = .off) {
@@ -106,7 +114,7 @@ struct KuroFigure: View {
     var body: some View {
         ZStack {
             ForEach(Self.parts(for: look, pose: pose), id: \.self) { part in
-                KuroPartView(part: part)
+                KuroPartView(part: part, shift: Self.shift(part, pose: pose))
             }
             if pose.overtime, let sign = pose.sign {
                 RunnerTextView(text: RunnerText(string: sign, x: 60, y: -1, size: 9, color: KuroPalette.ink))
@@ -127,12 +135,15 @@ struct KuroFigure: View {
             if pose.sign != nil { visible.insert(.overtimeSign) }
         }
         if look != .work {
-            visible.insert(pose.tired || pose.calm ? .mouthFlat : look == .tennis ? .mouthSmile : .mouthCat)
+            let mouth: KuroPart = pose.tired || pose.calm ? .mouthFlat : look == .tennis ? .mouthSmile : .mouthCat
+            visible.insert(pose.mouthO ? .mouthO : mouth)
         }
         for item in pose.items where item.look == look {
             visible.insert(item.part)
             if let replaced = item.replaces { visible.remove(replaced) }
         }
+        if let tap = pose.tap { apply(tap, progress: pose.tapProgress, to: &visible) }
+        if pose.heart { visible.insert(.tapHeart) }
         return KuroPart.allCases.filter { visible.contains($0) }
     }
 
@@ -174,10 +185,13 @@ extension KuroArt {
 /// Draws one `KuroPart` across the whole figure frame.
 struct KuroPartView: View {
     let part: KuroPart
+    /// How far the part moves, in SVG units.
+    var shift: CGSize = .zero
 
     var body: some View {
         Canvas { context, size in
             RunnerDrawing.enterFigureSpace(&context, size: size)
+            context.translateBy(x: shift.width, y: shift.height)
             RunnerDrawing.draw(KuroArt.cachedInks(part), in: context)
         }
     }
@@ -204,7 +218,10 @@ public struct KuroView: View {
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
     @State private var pop = 0
-    @State private var pokeStart: Date?
+    @State private var tapStart: Date?
+    @State private var tapKind: KuroTap?
+    @State private var tapHeart = false
+    @State private var tapTimes: [Date] = []
     @State private var pokes = 0
     @State private var unboxStart: Date?
     @State private var unboxItem: KuroItem?
@@ -220,7 +237,7 @@ public struct KuroView: View {
     ///   - moment: the moment of the day, which picks her lines unless an activity does. In the work look,
     ///     `.overtime` sits her at the desk with her chin on her hand.
     ///   - overtimeUntil: the late end of the work day, shown on a sign above her head during `.overtime`.
-    ///   - style: `.watch` makes a tap a poke: a happy hop and a light tap on the wrist instead of a line.
+    ///   - style: `.watch` gives a tap a light tap on the wrist instead of a line.
     ///   - wearing: ids of her shop items she wears; each shows only in its own look.
     ///   - event: a one-off animation. `.unlock` with one of her items plays the unboxing once per id;
     ///     pass the item's `look` so it shows.
@@ -267,16 +284,17 @@ public struct KuroView: View {
             let paused = reduceMotion || scenePhase != .active
             TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
                 let time = context.date.timeIntervalSinceReferenceDate
-                let poke = Self.poke(since: pokeStart, at: time)
+                let tap = reaction(at: time)
                 let unbox = unbox(at: time)
-                let pose = unbox != nil ? unboxPose : poke == nil ? self.pose : self.pose.showing(.happy)
+                let reacting = tap.map { self.pose.reacting($0.0, progress: $0.1, heart: tapHeart) }
+                let pose = unbox != nil ? unboxPose : reacting ?? self.pose
                 let pace = EnergyFace(energy: energy).speed
                 let sleepy = bedtime == .on || pose.overtime
                 let still = reduceMotion || unbox != nil
                 let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(look, time: time * pace)
-                let hop: CGFloat = still ? 0 : -10 * CGFloat(sin((poke ?? 0) * .pi))
+                let hop: CGFloat = still ? 0 : Self.hop(tap)
                 ZStack {
-                    KuroFigure(look: look, pose: still || poke != nil ? pose : pose.blink(at: time))
+                    KuroFigure(look: look, pose: still || tap != nil ? pose : pose.blink(at: time))
                         .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
                     if let unbox {
                         GiftBox(progress: unbox.box, fill: RunnerPalette.cardboard, ribbon: KuroPalette.pink)
@@ -334,26 +352,47 @@ public struct KuroView: View {
         .accessibilityAddTraits(showsBubble || style == .watch || onTap != nil ? .isButton : [])
     }
 
-    /// On the watch a tap is a poke; elsewhere it shows a line.
+    /// Plays her reaction to a tap: a body move for her look, and a line except on the watch. Taps during a move
+    /// only change the line; too many in a row turn her away.
     private func react() {
-        if style == .watch {
-            pokes += 1
-            pop += 1
-            pokeStart = .now
-        } else if showsBubble {
-            say(Self.line(after: bubble, from: lines))
+        let now = Date.now
+        if style == .watch { pokes += 1 }
+        if tapKind == .turnAway, reaction(at: now.timeIntervalSinceReferenceDate) != nil { return }
+        tapTimes = tapTimes.filter { now.timeIntervalSince($0) < CompanionView.pesterWindow } + [now]
+        let talks = showsBubble && style != .watch
+        if bedtime == .off, CompanionView.pestered(tapTimes, now: now, count: KuroTap.tooMany) {
+            tapTimes = []
+            play(.turnAway, at: now)
+            if talks { say("……干嘛。") }
+            onTap?()
+            return
         }
+        if reaction(at: now.timeIntervalSinceReferenceDate) == nil, unboxStart == nil, !pose.overtime {
+            let sleepy = bedtime == .on || EnergyFace(energy: energy) == .low
+            play(KuroTap(look: look, sleepy: sleepy), at: now)
+        }
+        if talks { say(Self.line(after: bubble, from: lines)) }
         onTap?()
     }
 
-    /// How long a poke on the watch plays, in seconds.
-    nonisolated static let pokeDuration: TimeInterval = 0.9
+    private func play(_ kind: KuroTap, at now: Date) {
+        tapKind = kind
+        tapStart = now
+        tapHeart = KuroTap.heart()
+        pop += 1
+    }
 
-    /// Progress of the poke that started at `start` at `time`, 0..<1, or nil when none is playing.
-    nonisolated static func poke(since start: Date?, at time: TimeInterval) -> Double? {
-        guard let start = start?.timeIntervalSinceReferenceDate else { return nil }
-        let progress = (time - start) / pokeDuration
-        return (0..<1).contains(progress) ? progress : nil
+    /// The tap reaction and its progress (0..<1) at `time`, or nil when none is playing.
+    private func reaction(at time: TimeInterval) -> (KuroTap, Double)? {
+        guard let kind = tapKind, let start = tapStart?.timeIntervalSinceReferenceDate else { return nil }
+        let progress = (time - start) / kind.duration
+        return (0..<1).contains(progress) ? (kind, progress) : nil
+    }
+
+    /// How far she hops at the start of a tap reaction, in points; turning away has no hop.
+    nonisolated static func hop(_ tap: (KuroTap, Double)?) -> CGFloat {
+        guard let tap, tap.0 != .turnAway, tap.1 < 0.35 else { return 0 }
+        return -8 * CGFloat(sin(tap.1 / 0.35 * .pi))
     }
 
     private var pose: KuroPose {

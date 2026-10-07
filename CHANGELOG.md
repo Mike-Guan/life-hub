@@ -37,6 +37,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Tapping KURO plays a move for her look: the tablet over her face, a sip from her cup, a ball bounced on her
+  racket or a push of her glasses. When tired she rubs her eyes, 5 taps turn her back, and sometimes a heart pops up.
 - KURO's own shop items (five to buy at HAKU's prices, three keepsakes at HAKU's milestones) and her own
   wardrobe, kept apart from HAKU's. Both share one can balance. Not shown yet; her shop opens with its pictures.
 - The second preset character's shop items are drawn on her: a window flower, a scrunchie, a cat blanket, a cat-ear
