@@ -53,6 +53,7 @@ struct WatchStatusWidget: Widget {
 struct WatchStatusView: View {
     let entry: WatchEntry
     @Environment(\.widgetFamily) private var family
+    @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
         content.containerBackground(.clear, for: .widget)
@@ -87,7 +88,23 @@ struct WatchStatusView: View {
     private var persona: Persona { entry.payload?.persona ?? .haku }
     private var title: String? { entry.mode?.title(for: persona) }
 
+    // A tinted face keeps only each pixel's alpha, so the filled figure would read as one flat blob.
+    // There the outlines become the opaque part and light fills fade, like a line drawing in the face's tint.
+    /// The character's head, in colour on full-colour faces and as tinted line art on the others.
     @ViewBuilder private var head: some View {
+        if entry.payload == nil || entry.mode == nil {
+            Image(systemName: "circle.dashed")
+        } else if renderingMode == .fullColor {
+            portrait
+        } else {
+            portrait
+                .colorInvert()
+                .luminanceToAlpha()
+                .widgetAccentable()
+        }
+    }
+
+    @ViewBuilder private var portrait: some View {
         if let payload = entry.payload, let mode = entry.mode, payload.persona == .kuro {
             KuroPortrait(
                 look: KuroLook(mode: mode),

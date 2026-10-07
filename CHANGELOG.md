@@ -7,6 +7,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
   lifting, running, morning, overtime, just home, the bath and the vibe-coding cans.
+- Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat shape.
 - Workouts from the Health app are sorted into about ten groups (walking, cycling, swimming, racket, ball,
   yoga, dance, outdoor and more). Cans are unchanged: only boxing, 5 km runs and the gym earn.
 - Settings: the character choice and the times use outlined Toy controls, so they no longer show as pale grey.
@@ -330,6 +331,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Switching mode and back within 2 minutes now updates the widgets and the Apple Watch too. Before, they
+  kept showing the mode you had undone.
+- A night of sleep imported again with new numbers now updates HAKU's face in the widgets and on the watch.
+- The watch keeps the newest state from the iPhone when two arrive out of order.
 - KURO's keepsakes granted by the previous two builds stay hers, and a keepsake is never granted twice.
 - With KURO, the mode buttons, TODAY log, control and watch use her card colors, and her tennis and desk
   modes read TENNIS and DESK instead of BOXING and SIDE. Her desk time shows her tagline, not HAKU's

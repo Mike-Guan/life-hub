@@ -44,6 +44,12 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         scenes = (try? values.decodeIfPresent([TimedScene].self, forKey: .scenes)) ?? []
     }
 
+    /// Whether this payload should replace `stored`: it is not older. Transfers can arrive out of order.
+    public func replaces(_ stored: WatchPayload?) -> Bool {
+        guard let stored else { return true }
+        return snapshot.updatedAt >= stored.snapshot.updatedAt
+    }
+
     /// Whether `other` draws the same watch face: equal apart from the write time, the work time and the
     /// scenes, which only the watch app plays.
     public func drawsLike(_ other: WatchPayload) -> Bool {

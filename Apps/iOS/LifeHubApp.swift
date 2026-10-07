@@ -239,12 +239,14 @@ struct LifeHubApp: App {
             WidgetCenter.shared.reloadAllTimelines()
             sendToWatch()
         }
-        // A manual mode change ends couch scrolling, so needs are worked out again.
-        .onChange(of: store.log.changes.count) {
+        // A manual mode change ends couch scrolling, so needs are worked out again. Watches every write,
+        // not the count: undoing a quick switch soft-deletes it and adds nothing.
+        .onChange(of: store.revision) {
             refreshNeeds()
             Task { await scheduleOffWork() }
         }
-        .onChange(of: energy.log.events.count) { syncWidgets() }
+        // A sleep import updates its night in place, so this watches every write too.
+        .onChange(of: energy.revision) { syncWidgets() }
     }
 
     private var moneyCard: MoneyCard? {
@@ -364,7 +366,7 @@ struct LifeHubApp: App {
             Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
             needs.refresh(
                 places: places,
-                manualSince: store.log.changes.last(where: \.source.isManual)?.at,
+                manualSince: store.log.active.last(where: \.source.isManual)?.at,
                 mode: store.current
             )
             widgets.need = needs.reading
@@ -405,7 +407,7 @@ struct LifeHubApp: App {
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         needs.refresh(
             places: places,
-            manualSince: store.log.changes.last(where: \.source.isManual)?.at,
+            manualSince: store.log.active.last(where: \.source.isManual)?.at,
             mode: store.current
         )
         widgets.need = needs.reading
@@ -437,7 +439,7 @@ struct LifeHubApp: App {
     private func refreshNeeds() {
         needs.refresh(
             places: places,
-            manualSince: store.log.changes.last(where: \.source.isManual)?.at,
+            manualSince: store.log.active.last(where: \.source.isManual)?.at,
             mode: store.current
         )
         widgets.need = needs.reading

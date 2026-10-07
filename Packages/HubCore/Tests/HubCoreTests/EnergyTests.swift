@@ -147,6 +147,19 @@ import Testing
         #expect(reloaded.log.events.count == 2)
         #expect(reloaded.reading(now: date(3, 12), calendar: calendar)?.level == .okay)
     }
+
+    @MainActor @Test func everyWriteRaisesTheRevision() {
+        let store = EnergyStore(fileURL: nil, deviceID: "test")
+        let night = SleepNight(id: UUID(), minutes: 300, endedAt: date(3, 7))
+        #expect(store.record(night))
+        #expect(store.revision == 1)
+        // A later import of the same night updates it in place: same count, new revision.
+        #expect(store.record(SleepNight(id: night.id, minutes: 480, endedAt: date(3, 7))))
+        #expect(store.log.events.count == 1)
+        #expect(store.revision == 2)
+        #expect(!store.record(SleepNight(id: night.id, minutes: 480, endedAt: date(3, 7))))
+        #expect(store.revision == 2)
+    }
 }
 
 @Suite struct BedtimeTests {

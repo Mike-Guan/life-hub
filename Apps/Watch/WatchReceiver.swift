@@ -50,6 +50,8 @@ final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
 
     private func store(_ message: [String: Any]) {
         guard let payload = WatchPayload(message: message) else { return }
+        // Application context and complication transfers can arrive out of order; an older one is dropped.
+        guard payload.replaces(WatchPayload.read(from: AppGroup.container.watchPayloadURL)) else { return }
         // A write that fails leaves the last payload in place; the next one from the iPhone tries again.
         do {
             guard let url = AppGroup.container.watchPayloadURL else { throw CocoaError(.fileNoSuchFile) }
