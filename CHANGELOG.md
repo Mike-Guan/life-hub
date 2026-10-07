@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- The watch also plays the one-offs (a workout cheer, a Daily task done, getting up from the sofa, the
+  opening of coming back), the Daily task cue and the invite, and KURO's need and overtime sign, like the phone.
 - Groundwork for the watch commute: Life Hub can tell walking to work, riding the train and walking home
   between home and the office. Nothing shows it yet.
 - The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
