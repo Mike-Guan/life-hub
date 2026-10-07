@@ -1155,14 +1155,11 @@ struct WatchFigureFrame: ViewModifier {
 
     @ViewBuilder func body(content: Content) -> some View {
         if isEnabled {
-            // The approved C layout shows him from the chest up, so the figure takes the whole width and the
-            // screen edge crops the rest. The 12 pt side and 24 pt top padding of the card are undone here.
-            GeometryReader { proxy in
-                let width = proxy.size.width + 24
-                content
-                    .frame(width: width, height: width * 2, alignment: .top)
-                    .offset(x: -12, y: 6)
-            }
+            // The approved C layout shows him from the chest up: the figure grows from the top and the screen
+            // edge crops the rest. A plain scale keeps the layout to one pass (no GeometryReader).
+            content
+                .scaleEffect(1.15, anchor: .top)
+                .offset(y: 6)
         } else {
             content
         }
