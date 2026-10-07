@@ -314,6 +314,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- The welcome back after days away no longer gets stuck when you pull down Control Center, which had
+  held back celebrations and keepsake unboxing. Leaving the big return halfway still counts toward its
+  once-in-30-days limit, and a return kept from bedtime is dropped when KURO is picked.
 - Leaving the office switches to 下班 Chill only from 17:30. Stepping out earlier, such as for lunch,
   keeps 上班.
 - Staying 30 minutes at the boxing gym counts as boxing, like the fitness gym: 5 cans once a week and
