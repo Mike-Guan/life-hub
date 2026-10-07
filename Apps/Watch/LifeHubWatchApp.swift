@@ -30,6 +30,7 @@ struct WatchHomeView: View {
         TimelineView(.everyMinute) { context in
             if let payload, let mode = payload.snapshot.mode {
                 let snapshot = payload.snapshot
+                let scene = payload.scenes.scene(at: context.date)
                 // Card layout from the UI thread's watch preview (Issue #160).
                 VStack(spacing: 4) {
                     Text(mode.title(for: payload.persona))
@@ -41,6 +42,8 @@ struct WatchHomeView: View {
                                 look: KuroLook(mode: mode),
                                 energy: snapshot.energy(at: context.date)?.value,
                                 bedtime: payload.bedtime.state(at: context.date),
+                                activity: scene?.activity,
+                                moment: scene?.moment,
                                 style: .watch,
                                 wearing: Set(payload.wardrobe.equipped.values)
                             )
@@ -50,8 +53,13 @@ struct WatchHomeView: View {
                                 energy: snapshot.energy(at: context.date)?.value,
                                 need: snapshot.need(at: context.date),
                                 needSince: snapshot.needSince(at: context.date),
+                                activity: scene?.activity,
+                                moment: scene?.moment,
+                                codingCans: scene?.codingCans ?? 0,
                                 traces: snapshot.traces(at: context.date),
                                 vitals: snapshot.vitals ?? HakuVitals(),
+                                walking: scene?.walking,
+                                bath: scene?.bath ?? false,
                                 bedtime: payload.bedtime.state(at: context.date),
                                 wardrobe: payload.wardrobe,
                                 style: .watch
