@@ -517,7 +517,8 @@ import Testing
         home.walk(from: .home, time: 0.2)
         let homeParts = Set(RunnerFigure.parts(for: .chill, pose: home))
         #expect(home.lean == 4 && home.bounce < 0)
-        #expect(homeParts.isSuperset(of: [.speedLines, .walkDust, .earbud]))
+        #expect(homeParts.isSuperset(of: [.speedLines, .walkDust]))
+        #expect(!homeParts.contains(.earbud))
         let office = CompanionPortrait(mode: .work, walking: .office).pose
         #expect(office.bagLift == 1 && RunnerFigure.parts(for: .work, pose: office).contains(.gymBag))
         let boxing = CompanionPortrait(mode: .chill, walking: .gym).pose
