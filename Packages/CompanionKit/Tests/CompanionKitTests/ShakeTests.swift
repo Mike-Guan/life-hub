@@ -30,21 +30,30 @@ import Testing
 
     @Test func twoJoltsMakeOneShake() {
         var detector = ShakeDetector()
-        #expect(!detector.add(magnitude: 2.5, at: 10))
+        let shake1 = detector.add(magnitude: 2.5, at: 10)
+        #expect(!shake1)
         // Samples of the same jolt are too close together.
-        #expect(!detector.add(magnitude: 2.5, at: 10.03))
-        #expect(detector.add(magnitude: 2.4, at: 10.3))
+        let shake2 = detector.add(magnitude: 2.5, at: 10.03)
+        #expect(!shake2)
+        let shake3 = detector.add(magnitude: 2.4, at: 10.3)
+        #expect(shake3)
         // Cooling down after a shake.
-        #expect(!detector.add(magnitude: 3, at: 10.6))
-        #expect(!detector.add(magnitude: 3, at: 10.9))
+        let shake4 = detector.add(magnitude: 3, at: 10.6)
+        #expect(!shake4)
+        let shake5 = detector.add(magnitude: 3, at: 10.9)
+        #expect(!shake5)
     }
 
     @Test func gentleOrSlowMovesAreNotShakes() {
         var detector = ShakeDetector()
-        #expect(!detector.add(magnitude: 1.2, at: 1))
-        #expect(!detector.add(magnitude: 1.2, at: 1.3))
-        #expect(!detector.add(magnitude: 2.5, at: 5))
-        #expect(!detector.add(magnitude: 2.5, at: 6))
+        let shake6 = detector.add(magnitude: 1.2, at: 1)
+        #expect(!shake6)
+        let shake7 = detector.add(magnitude: 1.2, at: 1.3)
+        #expect(!shake7)
+        let shake8 = detector.add(magnitude: 2.5, at: 5)
+        #expect(!shake8)
+        let shake9 = detector.add(magnitude: 2.5, at: 6)
+        #expect(!shake9)
     }
 
     @Test @MainActor func dizzyShowsSwirlEyesAndStars() {
