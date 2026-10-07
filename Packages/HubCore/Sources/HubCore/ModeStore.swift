@@ -10,6 +10,8 @@ public final class ModeStore {
     public private(set) var log: ModeLog
     /// Last load or save failure, for the UI to show.
     public private(set) var lastError: String?
+    /// Goes up on every write to the log, including an undo that adds no change.
+    public private(set) var revision = 0
     public let deviceID: String
 
     @ObservationIgnored private var file: LogFile<ModeLog>
@@ -113,6 +115,7 @@ public final class ModeStore {
 
     private func save() {
         lastError = file.save(&log)
+        revision += 1
     }
 
     static let encoder = HubJSON.encoder()
