@@ -118,6 +118,17 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
           SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES
 
+      - name: Launch the watch app (simulator)
+        run: scripts/watch-launch-check.sh build/Build/Products/Debug-watchsimulator/LifeHubWatch.app
+
+      - name: Upload watch launch screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: watch-launch
+          path: build/watch-launch/
+          if-no-files-found: ignore
+
       - name: Build macOS app (warnings as errors)
         run: >
           xcodebuild build -quiet
