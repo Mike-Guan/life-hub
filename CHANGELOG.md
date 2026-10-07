@@ -33,6 +33,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Added
 - KURO waits out a late work day at her desk, chin on hand, with the late end on a small sign above her head.
+- On home, the line KURO says when tapped follows the current need, activity and moment of the day.
+- 晚间延长 in Settings, off by default. On work days, still at the office in work mode after work hours, the
+  character waits at the desk until the picked time. If KURO leaves after work hours on such a day, she says
+  "……终于。" instead of her usual off-work line. The off-work notice stays at the end of work hours.
 - KURO says her own line on the day an invite you ignored 3 times pauses for a week.
 - KURO has her own lines in her own quiet voice for every mode, need, moment and idle bit, plus after a workout
   and on unboxing. Tapping her shows one in a speech bubble.

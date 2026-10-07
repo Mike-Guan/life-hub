@@ -201,7 +201,7 @@ public enum MomentEngine {
 
     // One drowsy spell a day: from 3 hours after arriving or 14:00, whichever comes first.
     // PRD section 16, Mike 2026-10-05: packing up runs from 15 minutes before the end of work hours to
-    // 30 minutes after, on work days only. Overtime still wins.
+    // 30 minutes after, on work days only. Overtime still wins, and the evening extension counts as overtime.
     /// Overtime, packing up or drowsy while in work mode at the office, else `nil`.
     public static func office(
         mode: Mode?,
@@ -216,7 +216,9 @@ public enum MomentEngine {
         func time(_ minute: Int) -> Date {
             calendar.date(byAdding: .minute, value: minute, to: midnight) ?? midnight
         }
-        if now >= time(rules.overtimeMinute) { return .overtime }
+        if now >= time(rules.overtimeMinute) || work.eveningUntil(at: now, calendar: calendar) != nil {
+            return .overtime
+        }
         let workday = work.workdays.contains(calendar.component(.weekday, from: now))
         let packing = now >= time(work.workEndMinute - packUpLead) && now < time(work.workEndMinute + packUpAfter)
         if workday && packing { return .packingUp }
@@ -237,6 +239,7 @@ public enum MomentEngine {
         let minute = { (value: Int) in calendar.date(byAdding: .minute, value: value, to: midnight) ?? midnight }
         let start = min(minute(rules.drowsyStartMinute), since.addingTimeInterval(rules.drowsyAfterArrival))
         let packing = [minute(work.workEndMinute - packUpLead), minute(work.workEndMinute + packUpAfter)]
-        return [start, start.addingTimeInterval(rules.drowsyLasts), minute(rules.overtimeMinute)] + packing
+        let evening = work.eveningUntilMinute.map { [minute(work.workEndMinute), minute($0)] } ?? []
+        return [start, start.addingTimeInterval(rules.drowsyLasts), minute(rules.overtimeMinute)] + packing + evening
     }
 }

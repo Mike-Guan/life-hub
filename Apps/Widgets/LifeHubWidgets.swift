@@ -153,7 +153,7 @@ struct HubProvider: TimelineProvider {
                 traces: snapshot?.traces(at: date) ?? [],
                 notice: backoff.notice(at: date, persona: persona),
                 weekLine: ChangeEngine.sundayLine(times: changes, now: date),
-                offWork: snapshot?.offWorkLine(at: date, persona: persona),
+                offWork: snapshot?.offWorkLine(at: date, persona: persona, work: work),
                 nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false, now: date) },
                 daily: daily?.cue(at: date),
                 walking: PlaceWalk.walk(in: presence, now: date)?.from,

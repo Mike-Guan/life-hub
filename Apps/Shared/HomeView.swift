@@ -93,11 +93,14 @@ struct HomeView: View {
 
                 TimelineView(.everyMinute) { context in
                     if persona == .kuro {
-                        // Issue #164: KURO's first step is her look per mode, her energy face and bedtime.
+                        // Issue #164: her look per mode, energy face and bedtime; a tap shows a line for now.
                         KuroView(
                             look: KuroLook(mode: (replaying ? replayFrom : store.current) ?? .chill),
                             energy: reading?.value,
-                            bedtime: bedtime.state(at: context.date)
+                            bedtime: bedtime.state(at: context.date),
+                            need: activeNeed(at: context.date)?.need,
+                            activity: shownActivity(at: context.date),
+                            moment: moment(at: context.date)
                         )
                         .padding(.vertical, 12)
                     } else {
@@ -169,7 +172,7 @@ struct HomeView: View {
                     }
                     let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
                     let leftWork = HakuLines.offWorkUntil(store.log, now: context.date)
-                    let offWork = leftWork.map { _ in HakuLines.offWorkLine(for: persona) }
+                    let offWork = leftWork.map { HakuLines.offWorkLine(for: persona, until: $0, work: rules) }
                     let activityLine = activity(at: context.date)?.reason
                     if let line = offWork ?? activityLine ?? workLine ?? notice ?? sunday ?? why {
                         Text(line)
