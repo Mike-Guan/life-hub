@@ -2,11 +2,12 @@ import CompanionKit
 import HubCore
 import SwiftUI
 
-/// Shows a new item: HAKU pops out of a gift box wearing it, then Mike wears it now or keeps it for later.
+/// Shows a new item: its character pops out of a gift box with it, then Mike wears it now or keeps it for later.
 struct UnboxSheet: View {
     let entry: CanEntry
     let item: ShopItem
     @Binding var wardrobe: Wardrobe
+    let persona: Persona
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -27,13 +28,23 @@ struct UnboxSheet: View {
                 .font(Toy.body(15, weight: .heavy))
                 .foregroundStyle(Toy.paper.opacity(0.75))
 
-            // HAKU keeps wearing the item after the animation, so the preview has it equipped.
-            CompanionView(
-                mode: item.slot.showcaseMode,
-                event: .unlock(id: entry.id.uuidString, item: item.id),
-                wardrobe: wearing,
-                showsBubble: true
-            )
+            // The character keeps wearing the item after the animation, so the preview has it equipped.
+            Group {
+                if let kuro = KuroItem(rawValue: item.id) {
+                    KuroView(
+                        look: kuro.look,
+                        wearing: Set(wearing.equipped.values),
+                        event: .unlock(id: entry.id.uuidString, item: item.id)
+                    )
+                } else {
+                    CompanionView(
+                        mode: item.slot.showcaseMode,
+                        event: .unlock(id: entry.id.uuidString, item: item.id),
+                        wardrobe: wearing,
+                        showsBubble: true
+                    )
+                }
+            }
             .frame(height: 380)
             .toyCard()
 
@@ -73,7 +84,7 @@ struct UnboxSheet: View {
 
     private var subtitle: String {
         if let keepsake = item.keepsake {
-            return "\(keepsake.count) 次\(keepsake.win.shopTitle)"
+            return "\(keepsake.count) 次\(keepsake.win.shopTitle(for: persona))"
         }
         return "用 \(entry.cans) 个能量罐换的"
     }
@@ -83,11 +94,12 @@ struct UnboxSheet: View {
 struct UnboxCover: View {
     let entry: CanEntry
     @Binding var wardrobe: Wardrobe
+    let persona: Persona
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         if let item = entry.itemID.flatMap(ShopItem.item) {
-            UnboxSheet(entry: entry, item: item, wardrobe: $wardrobe)
+            UnboxSheet(entry: entry, item: item, wardrobe: $wardrobe, persona: persona)
         } else {
             Color.clear.onAppear {
                 UnboxLog.markSeen(entry)

@@ -25,8 +25,8 @@ enum UnboxLog {
         AppGroup.defaults.set(ids, forKey: key)
     }
 
-    /// The oldest item in `ledger` still to unbox.
-    static func next(in ledger: CanLedger) -> CanEntry? {
-        ledger.unboxings(seen: seen).first
+    /// The oldest item of `persona` in `ledger` still to unbox.
+    static func next(in ledger: CanLedger, persona: Persona) -> CanEntry? {
+        ledger.unboxings(seen: seen, persona: persona).first
     }
 }

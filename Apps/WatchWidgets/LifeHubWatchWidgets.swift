@@ -93,6 +93,7 @@ struct WatchStatusView: View {
                 look: KuroLook(mode: mode),
                 energy: payload.snapshot.energy(at: entry.date)?.value,
                 bedtime: payload.bedtime.state(at: entry.date),
+                wearing: Set(payload.wardrobe.equipped.values),
                 framing: .head
             )
         } else if let payload = entry.payload, let mode = entry.mode {

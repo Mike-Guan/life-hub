@@ -2,10 +2,11 @@ import CompanionKit
 import HubCore
 import SwiftUI
 
-/// The shop: items to buy with cans, what's owned, and the keepsakes still to earn.
+/// The shop for `persona`: her items to buy with cans, what's owned, and the keepsakes still to earn.
 struct ShopView: View {
     let growth: GrowthStore
     @Binding var wardrobe: Wardrobe
+    let persona: Persona
     @Environment(\.dismiss) private var dismiss
     @State private var buyError: String?
     @State private var unboxing: CanEntry?
@@ -58,7 +59,7 @@ struct ShopView: View {
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
         .fullScreenCover(item: $unboxing) { entry in
-            UnboxCover(entry: entry, wardrobe: $wardrobe)
+            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
         }
     }
 
@@ -66,22 +67,22 @@ struct ShopView: View {
     private var owned: Set<String> { growth.ledger.owned }
 
     private var forSale: [ShopItem] {
-        ShopItem.catalog(for: .haku).filter { $0.price != nil && !owned.contains($0.id) }
+        ShopItem.catalog(for: persona).filter { $0.price != nil && !owned.contains($0.id) }
     }
 
     private var ownedFromShop: [ShopItem] {
-        ShopItem.catalog(for: .haku).filter { $0.price != nil && owned.contains($0.id) }
+        ShopItem.catalog(for: persona).filter { $0.price != nil && owned.contains($0.id) }
     }
 
     private var keepsakes: [ShopItem] {
-        ShopItem.catalog(for: .haku).filter { item in
+        ShopItem.catalog(for: persona).filter { item in
             guard let keepsake = item.keepsake else { return false }
             return Self.liveWins.contains(keepsake.win) || owned.contains(item.id)
         }
     }
 
     private var footer: String {
-        let wins = Self.liveWins.map { "\($0.shopTitle) +\($0.cans)" }.joined(separator: "，")
+        let wins = Self.liveWins.map { "\($0.shopTitle(for: persona)) +\($0.cans)" }.joined(separator: "，")
         return "能量罐只靠真的做到才有：\(wins)。不过期，也不会被扣。"
     }
 
@@ -105,9 +106,9 @@ struct ShopView: View {
 
     private var banner: some View {
         HStack(alignment: .bottom, spacing: 10) {
-            CompanionPortrait(mode: .chill)
+            PersonaPortrait(persona: persona, mode: .chill)
                 .frame(width: 88, height: 112)
-            Text("看上哪个了？……我只是随便问问。")
+            Text(persona == .kuro ? "……随便看看，不急。" : "看上哪个了？……我只是随便问问。")
                 .font(Toy.body(14, weight: .heavy))
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -117,13 +118,13 @@ struct ShopView: View {
         .padding(.horizontal, 12)
         .frame(height: 118)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .toyCard(fill: Mode.chill.color)
+        .toyCard(fill: Mode.chill.color(for: persona))
         .accessibilityElement(children: .combine)
     }
 
     private func itemCard(_ item: ShopItem) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            WardrobeItemIcon(item: item)
+            ShopItemIcon(item: item)
                 .frame(width: 56, height: 56)
                 .frame(maxWidth: .infinity)
                 .frame(height: 64)
@@ -160,7 +161,7 @@ struct ShopView: View {
 
     private func ownedRow(_ item: ShopItem) -> some View {
         HStack(spacing: 10) {
-            WardrobeItemIcon(item: item)
+            ShopItemIcon(item: item)
                 .frame(width: 32, height: 32)
             Text(item.title)
                 .font(Toy.body(14, weight: .heavy))
@@ -181,13 +182,13 @@ struct ShopView: View {
         let count = keepsake.map { min(growth.ledger.count($0.win), $0.count) } ?? 0
         let goal = keepsake?.count ?? 1
         return HStack(spacing: 10) {
-            WardrobeItemIcon(item: item)
+            ShopItemIcon(item: item)
                 .frame(width: 32, height: 32)
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(item.title)
                     Spacer()
-                    Text(isOwned ? "已拥有" : "\(keepsake?.win.shopTitle ?? "") \(count)/\(goal)")
+                    Text(isOwned ? "已拥有" : "\(keepsake?.win.shopTitle(for: persona) ?? "") \(count)/\(goal)")
                         .foregroundStyle(Toy.muted)
                 }
                 .font(Toy.body(14, weight: .heavy))
@@ -206,7 +207,7 @@ struct ShopView: View {
         do {
             try growth.buy(item)
             buyError = growth.lastError
-            unboxing = growth.ledger.unboxings(seen: UnboxLog.seen).last { $0.itemID == item.id }
+            unboxing = growth.ledger.unboxings(seen: UnboxLog.seen, persona: persona).last { $0.itemID == item.id }
         } catch {
             buyError =
                 switch error {
@@ -219,16 +220,44 @@ struct ShopView: View {
 }
 
 extension Win {
-    /// How the shop names the win.
-    var shopTitle: String {
+    /// How `persona`'s shop names the win.
+    func shopTitle(for persona: Persona) -> String {
         switch self {
         case .gym: "健身"
-        case .boxing: "周日拳击"
+        case .boxing: persona == .kuro ? "网球日" : "周日拳击"
         case .run5k: "跑完 5 km"
         case .gotUp: "被叫起来出门"
         case .daylight: "晒太阳"
         case .earlySleep: "按时睡"
         case .plannedTask: "做完定好的事"
+        }
+    }
+}
+
+/// A shop item's icon, drawn the way its character shows it.
+struct ShopItemIcon: View {
+    let item: ShopItem
+
+    var body: some View {
+        if let kuro = KuroItem(rawValue: item.id) {
+            KuroItemIcon(item: kuro)
+        } else {
+            WardrobeItemIcon(item: item)
+        }
+    }
+}
+
+/// `persona` standing still in `mode`'s look, wearing `wardrobe`.
+struct PersonaPortrait: View {
+    let persona: Persona
+    let mode: Mode
+    var wardrobe = Wardrobe()
+
+    var body: some View {
+        if persona == .kuro {
+            KuroPortrait(look: KuroLook(mode: mode), wearing: Set(wardrobe.equipped.values))
+        } else {
+            CompanionPortrait(mode: mode, wardrobe: wardrobe)
         }
     }
 }

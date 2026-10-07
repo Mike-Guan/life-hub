@@ -23,11 +23,12 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
         let session = WCSession.default
         guard session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return }
         guard let url = AppGroup.container.snapshotURL, let snapshot = WidgetSnapshot.read(from: url) else { return }
+        let persona = Persona.stored(in: AppGroup.defaults)
         let payload = WatchPayload(
             snapshot: snapshot,
-            wardrobe: Wardrobe.stored(in: AppGroup.defaults),
+            wardrobe: Wardrobe.stored(in: AppGroup.defaults, persona: persona),
             bedtime: BedtimeSchedule.stored(in: AppGroup.defaults),
-            persona: Persona.stored(in: AppGroup.defaults)
+            persona: persona
         )
         // Complication transfers have a daily budget (about 50), so they go out only when what the watch
         // face draws changed.

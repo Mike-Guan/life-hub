@@ -109,8 +109,8 @@ struct HubProvider: TimelineProvider {
         ]
         let needTimes = groups.flatMap { $0 }
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
-        let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
         let persona = Persona.stored(in: AppGroup.defaults)
+        let wardrobe = Wardrobe.stored(in: AppGroup.defaults, persona: persona)
         let backoff = NudgeBackoff.stored(in: AppGroup.defaults)
         let ledger = CanLedger.read(from: AppGroup.container.canLedgerURL)
         let changes = ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: ledger)
