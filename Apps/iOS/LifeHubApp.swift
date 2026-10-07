@@ -456,12 +456,18 @@ struct LifeHubApp: App {
     }
 
     private func sendToWatch() {
-        Self.sendToWatch(store: store, needs: needs, growth: growth)
+        let event = welcomeBack ?? needs.event ?? daily.done
+        Self.sendToWatch(store: store, needs: needs, growth: growth, event: event)
     }
 
     // The watch plays the home card's scenes, worked out from the same inputs as HomeView. Static, so
     // place events in the background can send too; settings come from the App Group, where they are saved.
-    private static func sendToWatch(store: ModeStore, needs: NeedTracker, growth: GrowthStore) {
+    private static func sendToWatch(
+        store: ModeStore,
+        needs: NeedTracker,
+        growth: GrowthStore,
+        event: CompanionEvent? = nil
+    ) {
         let inputs = HomeSceneInputs(
             log: store.log,
             rules: ModeRules.stored(in: AppGroup.defaults),
@@ -471,9 +477,12 @@ struct LifeHubApp: App {
             days: ActivityDays.stored(in: AppGroup.defaults).learningGym(from: growth.ledger, now: .now),
             departure: needs.departure,
             sit: needs.sit,
-            bathDoneAt: BathTime.doneAt(in: AppGroup.defaults)
+            bathDoneAt: BathTime.doneAt(in: AppGroup.defaults),
+            scrollSeenAt: needs.scrollSeenAt,
+            daily: DailyPlan.stored(in: AppGroup.defaults),
+            invite: needs.invite
         )
-        WatchSync.shared.send(scenes: inputs.timeline(from: .now))
+        WatchSync.shared.send(WatchPlay(scenes: inputs.timeline(from: .now), event: event ?? needs.event))
     }
 
     private func scheduleOffWork() async {

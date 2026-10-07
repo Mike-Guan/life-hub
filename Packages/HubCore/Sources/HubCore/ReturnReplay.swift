@@ -3,9 +3,9 @@ import Foundation
 // Issue #177, approved by Mike on 2026-10-07: opening the app after days away shows what real life
 // recorded meanwhile. It never names the days away, never compares, and the return itself gives no cans.
 /// What HAKU shows when Mike opens the app after several days away.
-public struct ReturnReplay: Equatable, Sendable {
+public struct ReturnReplay: Codable, Equatable, Sendable {
     /// How big the return is.
-    public enum Tier: Int, Sendable {
+    public enum Tier: Int, Codable, Sendable {
         /// 3 to 7 days away: HAKU looks up, then up to 3 cards.
         case glance = 1
         /// 8 days or more: the return animation, up to 5 cards and the cans opened together.
@@ -87,9 +87,9 @@ public struct ReturnReplay: Equatable, Sendable {
 }
 
 /// One thing recorded while Mike was away, said plainly.
-public struct ReturnCard: Equatable, Sendable {
+public struct ReturnCard: Codable, Equatable, Sendable {
     /// What the card is about.
-    public enum Kind: String, Sendable {
+    public enum Kind: String, Codable, Sendable {
         case boxing
         case run5k
         case gym

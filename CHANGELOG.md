@@ -7,6 +7,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - HAKU and KURO cheer after every kind of workout of 20 minutes or more (tennis, swimming, yoga and the
   rest), not only boxing, runs and the gym. Cans are unchanged.
+- The watch also plays the one-offs (a workout cheer, a Daily task done, getting up from the sofa, the
+  opening of coming back), the Daily task cue and the invite, and KURO's need and overtime sign, like the phone.
+- Groundwork for the watch commute: Life Hub can tell walking to work, riding the train and walking home
+  between home and the office. Nothing shows it yet.
 - The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
   lifting, running, morning, overtime, just home, the bath and the vibe-coding cans.
 - Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat shape.
