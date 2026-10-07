@@ -32,6 +32,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- On home, the line KURO says when tapped follows the current need, activity and moment of the day.
 - KURO has her own lines in her own quiet voice for every mode, need, moment and idle bit, plus after a workout
   and on unboxing. Tapping her shows one in a speech bubble.
 - KURO's own Lock Screen and widget lines for every scene HAKU has, plus her off-work line.
