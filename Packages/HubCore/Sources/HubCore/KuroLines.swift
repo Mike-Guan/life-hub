@@ -154,4 +154,7 @@ public enum KuroLines {
 
     /// KURO's off-work line when she leaves after her evening extension started.
     public static let eveningOffWorkLine = "……终于。"
+
+    /// What KURO says on the day an invite is paused.
+    public static let pauseLine = "……嗯，不说了。"
 }

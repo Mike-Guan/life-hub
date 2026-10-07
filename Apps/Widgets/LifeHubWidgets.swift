@@ -151,7 +151,7 @@ struct HubProvider: TimelineProvider {
                 activity: activity == .gymDay && moment != nil ? nil : activity,
                 moment: moment,
                 traces: snapshot?.traces(at: date) ?? [],
-                notice: backoff.notice(at: date),
+                notice: backoff.notice(at: date, persona: persona),
                 weekLine: ChangeEngine.sundayLine(times: changes, now: date),
                 offWork: snapshot?.offWorkLine(at: date, persona: persona, work: work),
                 nextTask: daily?.next(after: date).map { DailyAgenda.nextLine($0, title: false, now: date) },
