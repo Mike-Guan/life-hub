@@ -316,7 +316,7 @@ public struct CompanionView: View {
                     SpringKeyframe(0, duration: 0.45, spring: .bouncy)
                 }
             }
-            .modifier(WatchFigureFrame(isEnabled: style == .watch))
+            .modifier(WatchFigureFrame(isEnabled: false))
         } else {
             VStack(spacing: 10) {
                 Image(systemName: "sparkles")

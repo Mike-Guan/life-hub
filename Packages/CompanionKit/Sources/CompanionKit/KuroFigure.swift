@@ -322,7 +322,7 @@ public struct KuroView: View {
                     SpringKeyframe(1, duration: 0.35, spring: .bouncy)
                 }
             }
-            .modifier(WatchFigureFrame(isEnabled: style == .watch))
+            .modifier(WatchFigureFrame(isEnabled: false))
             .padding(.top, 24)
             .padding(.horizontal, 12)
 
