@@ -85,7 +85,7 @@ extension Win {
             case .boxing: win = .boxing
             case .running: win = .run5k
             case .strength: win = .gym
-            case .other: return nil
+            default: return nil
             }
             return EarnedWin(win: win, source: win.source(at: workout.start, calendar: calendar), at: workout.end)
         }

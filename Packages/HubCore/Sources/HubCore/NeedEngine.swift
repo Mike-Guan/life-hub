@@ -40,11 +40,33 @@ public enum CompanionEvent: Equatable, Sendable {
 
 /// A workout from the Health app, reduced to what the hub uses.
 public struct WorkoutSummary: Codable, Equatable, Sendable {
-    public enum Kind: String, Codable, Sendable {
-        case boxing
+    /// The group a workout belongs to. Only boxing, running and strength can earn cans.
+    public enum Kind: String, Codable, Sendable, CaseIterable {
+        case walking
         case running
+        case cycling
+        case swimming
         case strength
+        /// Boxing and kickboxing.
+        case boxing
+        /// Other martial arts, wrestling and fencing.
+        case martialArts
+        /// Tennis, badminton, squash, table tennis and other racket sports.
+        case racket
+        /// Team and ball sports.
+        case ball
+        /// Yoga, stretching, pilates and recovery.
+        case yoga
+        case dance
+        /// Hiking, climbing, snow, water and skating sports.
+        case outdoor
         case other
+
+        /// Decodes a kind; a name this build doesn't know becomes `.other`.
+        public init(from decoder: any Decoder) throws {
+            let name = try decoder.singleValueContainer().decode(String.self)
+            self = Kind(rawValue: name) ?? .other
+        }
     }
 
     /// The Health app's id for the workout, so each one is celebrated once.
@@ -455,7 +477,7 @@ public enum NeedEngine {
         case .running: (workout.meters ?? 0) >= rules.celebrateRunMeters
         case .boxing: workout.duration >= rules.celebrateBoxing
         case .strength: workout.duration >= rules.celebrateStrength
-        case .other: false
+        default: false
         }
     }
 
