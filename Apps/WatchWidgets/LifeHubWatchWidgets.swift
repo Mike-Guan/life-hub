@@ -44,8 +44,8 @@ struct WatchStatusWidget: Widget {
         StaticConfiguration(kind: "status", provider: WatchProvider()) { entry in
             WatchStatusView(entry: entry)
         }
-        .configurationDisplayName("HAKU")
-        .description("HAKU 现在在干什么。")
+        .configurationDisplayName("Life Hub")
+        .description("角色现在在干什么。")
         .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryRectangular])
     }
 }

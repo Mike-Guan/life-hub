@@ -53,7 +53,7 @@ struct HubEntry: TimelineEntry {
     var detail: String {
         if let offWork { return offWork }
         if bath { return "去洗澡" }
-        if let activity { return activity.reason }
+        if let activity { return activity.reason(for: persona) }
         if moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) {
             return HakuLines.line(scene, at: date, persona: persona)

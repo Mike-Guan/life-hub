@@ -21,6 +21,14 @@ extension Mode {
         }
     }
 
+    /// The SF Symbol for the mode as `persona` lives it: KURO's identity day is tennis.
+    public func symbol(for persona: Persona) -> String {
+        switch (persona, self) {
+        case (.kuro, .boxing): "figure.tennis"
+        default: symbol
+        }
+    }
+
     // The only place the Swift-to-Rive mode mapping lives (see Rive 搭建步骤).
     /// Value of the Rive view model `mode` enum.
     var riveValue: String {

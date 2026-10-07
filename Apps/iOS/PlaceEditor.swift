@@ -8,6 +8,7 @@ import SwiftUI
 /// Sets one place: its name and action for added places, its location and its radius.
 struct PlaceEditor: View {
     let monitor: PlaceMonitor
+    let persona: Persona
     let onSave: (HubPlace) -> Void
     let onDelete: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
@@ -18,15 +19,18 @@ struct PlaceEditor: View {
 
     /// - Parameters:
     ///   - place: the place to edit, or a new one with `hasLocation` false.
+    ///   - persona: the character whose names the editor uses.
     ///   - onDelete: removes the place; `nil` hides the button.
     init(
         place: HubPlace,
         hasLocation: Bool,
         monitor: PlaceMonitor,
+        persona: Persona,
         onSave: @escaping (HubPlace) -> Void,
         onDelete: (() -> Void)?
     ) {
         self.monitor = monitor
+        self.persona = persona
         self.onSave = onSave
         self.onDelete = onDelete
         _place = State(initialValue: place)
@@ -127,13 +131,13 @@ struct PlaceEditor: View {
             if place.kind == .custom {
                 Picker("到这里时", selection: $place.action) {
                     ForEach(HubPlace.Action.allCases, id: \.self) { action in
-                        Text(action.title).tag(action)
+                        Text(action.title(for: persona)).tag(action)
                     }
                 }
                 .pickerStyle(.inline)
                 .labelsHidden()
             } else {
-                Text(place.kind.summary)
+                Text(place.kind.summary(for: persona))
                     .font(Toy.body(15))
             }
         }
@@ -172,13 +176,13 @@ struct PlaceEditor: View {
 
 extension HubPlace.Kind {
     /// What arriving at the preset does, for Settings.
-    var summary: String {
+    func summary(for persona: Persona) -> String {
         switch self {
-        case .gym: "直接切到拳击日。"
+        case .gym: "直接切到\(Mode.boxing.title(for: persona))。"
         case .office: "切到上班。"
         case .home: "不切换，用来看你是不是窝在家。"
-        case .fitness: "HAKU 陪你举铁，待满 30 分钟算一次健身，得 \(Win.gym.cans) 个能量罐。"
-        case .custom: action.title
+        case .fitness: "\(persona.title) 陪你举铁，待满 30 分钟算一次健身，得 \(Win.gym.cans) 个能量罐。"
+        case .custom: action.title(for: persona)
         }
     }
 }

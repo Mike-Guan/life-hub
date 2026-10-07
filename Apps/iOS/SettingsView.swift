@@ -59,7 +59,7 @@ struct SettingsView: View {
                     .font(Toy.body(15))
                 DatePicker("起床", selection: time($bedtime.endMinute), displayedComponents: .hourAndMinute)
                     .font(Toy.body(15))
-                Text("睡觉时间到了发一条通知，HAKU 变困，一直到起床时间。只提醒一次。")
+                Text("睡觉时间到了发一条通知，\(persona.title) 变困，一直到起床时间。只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
             }
@@ -196,7 +196,7 @@ struct SettingsView: View {
                 }
                 .font(Toy.body(13, weight: .heavy))
             }
-            Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，HAKU 也瘫在沙发上；停下 20 分钟、走动或手动切模式，它就起来。")
+            Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             if let screenTimeError {
@@ -304,6 +304,7 @@ struct SettingsView: View {
                 place: edit.place,
                 hasLocation: !edit.isNew,
                 monitor: monitor,
+                persona: persona,
                 onSave: { places.save($0) },
                 onDelete: edit.isNew ? nil : { places.remove(id: edit.place.id) }
             )
@@ -312,7 +313,7 @@ struct SettingsView: View {
 
     private var placesNote: String {
         let full = places.canAdd ? "" : "iOS 最多同时看 \(PlaceSettings.limit) 个地点，删掉一个才能再加。"
-        return full + "点一个地点设置位置。右上角 + 加自己的地点，选到了 HAKU 做什么。"
+        return full + "点一个地点设置位置。右上角 + 加自己的地点，选到了 \(persona.title) 做什么。"
             + "地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。"
     }
 

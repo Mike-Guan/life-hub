@@ -316,6 +316,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Picking KURO in Settings now updates the widgets, the watch, the invite and the bedtime notification
+  right away, and ends a running boxing countdown. With KURO, the small widget, the mode buttons and the
+  activity line say 网球日 / 备课 / 网球场 with a tennis icon, and Settings and the bedtime notification
+  use her name instead of HAKU. The line under her home card is her own for each mode.
 - The welcome back after days away no longer gets stuck when you pull down Control Center, which had
   held back celebrations and keepsake unboxing. Leaving the big return halfway still counts toward its
   once-in-30-days limit, and a return kept from bedtime is dropped when KURO is picked.

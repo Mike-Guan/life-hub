@@ -51,7 +51,7 @@ struct ReportEnergyIntent: AppIntent {
 /// Tells HAKU that Mike is heading to the gym now.
 struct GoToGymIntent: AppIntent {
     static let title: LocalizedStringResource = "出发去健身"
-    static let description: IntentDescription? = "HAKU 背着包陪你走过去，最多一小时，到健身房为止。"
+    static let description: IntentDescription? = "背着包陪你走过去，最多一小时，到健身房为止。"
 
     func perform() async throws -> some IntentResult {
         GymDeparture(at: .now).store(in: AppGroup.defaults)

@@ -9,7 +9,7 @@ struct StatusWidget: Widget {
         StaticConfiguration(kind: "status", provider: HubProvider()) { entry in
             StatusView(entry: entry)
         }
-        .configurationDisplayName("HAKU")
+        .configurationDisplayName("Life Hub")
         .description("现在的模式和今天的电量。")
         .supportedFamilies([.accessoryCircular, .accessoryInline, .accessoryRectangular, .systemSmall])
     }
@@ -37,7 +37,10 @@ struct StatusView: View {
             }
         case .accessoryInline:
             if let mode = entry.mode {
-                Label("\(mode.title(for: entry.persona)) · \(entry.detail)", systemImage: mode.symbol)
+                Label(
+                    "\(mode.title(for: entry.persona)) · \(entry.detail)",
+                    systemImage: mode.symbol(for: entry.persona)
+                )
             } else {
                 Text("打开一次 Life Hub")
             }
@@ -98,7 +101,9 @@ struct StatusView: View {
             if let mode = entry.mode {
                 figure(mode, framing: .full)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                Text("\(mode.code) MODE").font(Toy.display(14))
+                // KURO's identity and side slots aren't boxing and money, so she shows her names.
+                Text(entry.persona == .haku ? "\(mode.code) MODE" : mode.title(for: entry.persona))
+                    .font(Toy.display(14))
                 Text(entry.detail).font(Toy.body(12, weight: .bold))
             } else {
                 Spacer()
