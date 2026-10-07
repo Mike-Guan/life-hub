@@ -42,11 +42,16 @@ public struct NudgeBackoff: Codable, Equatable, Sendable {
         return date >= at && date < at.addingTimeInterval(Self.pause)
     }
 
-    /// HAKU's line on the hub day an invite was paused, else `nil`.
-    public func notice(at date: Date, calendar: Calendar = .current) -> String? {
+    /// The character's line on the hub day an invite was paused, else `nil`.
+    /// - Parameters:
+    ///   - date: the time to check.
+    ///   - persona: whose voice says the line.
+    ///   - calendar: the calendar for hub days.
+    public func notice(at date: Date, persona: Persona = .haku, calendar: Calendar = .current) -> String? {
         let today = StateEngine.dayStart(for: date, calendar: calendar)
         let pausedToday = pausedAt.values.contains { StateEngine.dayStart(for: $0, calendar: calendar) == today }
-        return pausedToday ? Self.line : nil
+        guard pausedToday else { return nil }
+        return persona == .kuro ? KuroLines.pauseLine : Self.line
     }
 
     /// Records whether the invite for `need` sent at `sentAt` was followed. The third ignored one in a
