@@ -69,6 +69,13 @@ import Testing
         #expect(parts.filter { eyeParts.contains($0) }.count == 1)
     }
 
+    @Test func aPokeOnTheWatchPlaysOnce() {
+        let start = Date(timeIntervalSinceReferenceDate: 100)
+        #expect(KuroView.poke(since: nil, at: 100) == nil)
+        #expect(abs((KuroView.poke(since: start, at: 100.45) ?? 0) - 0.5) < 0.001)
+        #expect(KuroView.poke(since: start, at: 100 + KuroView.pokeDuration) == nil)
+    }
+
     @Test func eachLookHasItsOwnCardColor() {
         #expect(Set(KuroLook.allCases.map(\.color)).count == KuroLook.allCases.count)
     }
