@@ -46,12 +46,12 @@ struct ScreenshotHome: View {
             wardrobe: ScreenshotMode.wardrobe,
             persona: ScreenshotMode.persona
         )
-            .environment(store)
-            .environment(energy)
-            .onAppear {
-                // A fresh manual change, so the schedule's 2h hold keeps this mode on screen.
-                store.switchTo(mode)
-                energy.report(.full)
-            }
+        .environment(store)
+        .environment(energy)
+        .onAppear {
+            // A fresh manual change, so the schedule's 2h hold keeps this mode on screen.
+            store.switchTo(mode)
+            energy.report(.full)
+        }
     }
 }
