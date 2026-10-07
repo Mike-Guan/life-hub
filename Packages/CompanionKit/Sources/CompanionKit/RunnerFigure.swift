@@ -170,6 +170,8 @@ struct RunnerPose {
     var stayHome: CGFloat = -1
     /// Seconds into getting up from the sofa, or -1 when HAKU isn't getting up.
     var revive: CGFloat = -1
+    /// The welcome back scene, or nil when none is playing.
+    var welcome: Welcome?
     /// What HAKU wears from the wardrobe.
     var outfit = Outfit()
 
@@ -1088,6 +1090,9 @@ struct RunnerFigure: View {
                 if pose.unbox >= 0 {
                     GiftBox(progress: pose.unbox)
                 }
+                if let welcome = pose.welcome {
+                    WelcomeProps(welcome: welcome, shoulder: 82 + pose.shift, sleeve: Self.jacketColor(mode))
+                }
             }
         }
         .aspectRatio(RunnerArt.bounds.width / RunnerArt.bounds.height, contentMode: .fit)
@@ -1102,6 +1107,8 @@ struct RunnerFigure: View {
             visible = stayHomeParts(pose)
         } else if pose.reviving {
             visible = reviveParts(pose)
+        } else if let welcome = pose.welcome {
+            visible = welcomeParts(welcome)
         } else {
             visible = modeParts(for: mode, pose: pose)
         }
@@ -1363,6 +1370,22 @@ struct RunnerFigure: View {
         return visible
     }
 
+    /// On the sofa under the blanket, or at the desk with the headset on, holding the phone until it is turned
+    /// face down.
+    nonisolated private static func welcomeParts(_ welcome: RunnerPose.Welcome) -> Set<RunnerPart> {
+        var visible = baseParts.union([.earringNeon])
+        if welcome.scene == .desk {
+            visible.formUnion(headsetParts.union([.desk, .maskUp, .panelLines, .ledLine]))
+            visible.formUnion(welcome.awake ? [.eyesWork, .lidsWork, .browsWork] : [.eyesSleepy])
+        } else {
+            visible.formUnion([.sofaArm, .blanket, .maskDown, .mouthSmile])
+            visible.insert(welcome.awake ? .eyesChill : .eyesSleepy)
+        }
+        visible.formUnion(welcome.phoneFlip < 0.5 ? [.phone, .phoneFeed] : [.phoneBack])
+        if welcome.phoneFlip < 1 { visible.insert(.phoneHand) }
+        return visible
+    }
+
     nonisolated static let baseParts: Set<RunnerPart> = [
         .jacket, .stripeNeon, .hoodCollar, .hairBack, .earL, .earR, .faceBase, .hairFringe,
     ]
@@ -1438,6 +1461,8 @@ struct RunnerFigure: View {
                 moved(part, move, scale: scale)
             } else if let move = SceneMove.revive(part, at: pose.revive) {
                 moved(part, move, scale: scale)
+            } else if let move = SceneMove.welcome(part, pose: pose) {
+                moved(part, move, scale: scale)
             } else if part == .walkDust, pose.walkFrom != nil {
                 moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
             } else {
@@ -1454,7 +1479,7 @@ struct RunnerFigure: View {
 
     private func moved(_ part: RunnerPart, _ move: SceneMove, scale: CGFloat) -> some View {
         RunnerPartView(part: part)
-            .scaleEffect(move.scale, anchor: move.anchor)
+            .scaleEffect(x: move.scale, y: move.scale * move.scaleY, anchor: move.anchor)
             .rotationEffect(.degrees(move.angle), anchor: move.anchor)
             .offset(x: move.offset.width * scale, y: move.offset.height * scale)
             .opacity(move.opacity)
@@ -1909,6 +1934,67 @@ private struct GiftBox: View {
             context.fill(ribbon, with: .color(RunnerPalette.gold))
             context.stroke(ribbon, with: ink, lineWidth: 2)
             context.stroke(box, with: ink, lineWidth: 3)
+        }
+    }
+}
+
+// Drawn outside the figure so they stay put while HAKU leans and scoots.
+/// The crate with the cans and the arm patting the seat in the welcome back scene.
+private struct WelcomeProps: View {
+    var welcome: RunnerPose.Welcome
+    /// Where the patting arm leaves the body, in SVG units.
+    var shoulder: CGFloat
+    var sleeve: Color
+
+    private static let hingeL = RunnerFigure.unit(x: 39, y: 108)
+    private static let hingeR = RunnerFigure.unit(x: 81, y: 108)
+
+    var body: some View {
+        GeometryReader { geo in
+            let scale = geo.size.width / RunnerArt.bounds.width
+            ZStack {
+                if welcome.pat >= 0 {
+                    if welcome.pat < 0.25, welcome.time < 4.6 { RunnerPartView(part: .patLines) }
+                    PatArm(height: welcome.pat, shoulder: shoulder, sleeve: sleeve)
+                }
+                if welcome.crate >= 0 {
+                    ZStack {
+                        if welcome.cansOut {
+                            RunnerPartView(part: .crateCans).offset(y: welcome.canSink * scale)
+                        }
+                        RunnerPartView(part: .crateBox)
+                        RunnerPartView(part: .crateFlapL)
+                            .rotationEffect(.degrees(-150 * welcome.crateOpen), anchor: Self.hingeL)
+                        RunnerPartView(part: .crateFlapR)
+                            .rotationEffect(.degrees(150 * welcome.crateOpen), anchor: Self.hingeR)
+                    }
+                    .offset(x: 70 * (1 - welcome.crate) * scale)
+                    if welcome.glow > 0 { RunnerPartView(part: .sparkle).opacity(welcome.glow) }
+                }
+            }
+        }
+    }
+}
+
+// Drawn in code rather than the SVG because the arm bends with each pat.
+/// An arm reaching over to pat the seat; `height` lifts the hand, 0...1.
+private struct PatArm: View {
+    var height: CGFloat
+    var shoulder: CGFloat
+    var sleeve: Color
+
+    var body: some View {
+        Canvas { context, size in
+            RunnerDrawing.enterFigureSpace(&context, size: size)
+            let hand = CGPoint(x: 102, y: 117 - 6 * height)
+            var arm = Path()
+            arm.move(to: CGPoint(x: shoulder, y: 104))
+            arm.addQuadCurve(to: hand, control: CGPoint(x: shoulder + 14, y: 100))
+            context.stroke(arm, with: .color(RunnerPalette.ink), style: StrokeStyle(lineWidth: 11, lineCap: .round))
+            context.stroke(arm, with: .color(sleeve), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+            let palm = Path(ellipseIn: CGRect(x: 95, y: hand.y - 4, width: 14, height: 10))
+            context.fill(palm, with: .color(RunnerPalette.skin))
+            context.stroke(palm, with: .color(RunnerPalette.ink), lineWidth: 2.5)
         }
     }
 }

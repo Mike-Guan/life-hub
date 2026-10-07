@@ -97,6 +97,13 @@ enum CompanionLines {
         return ShopItem.item(itemID)?.keepsake != nil ? "……给你的。才不是特意挑的。" : "买了？……那我就勉强收下了。"
     }
 
+    /// The VoiceOver label for HAKU during the welcome back: its line, each card, and the cans opened.
+    static func welcomeLabel(_ replay: ReturnReplay) -> String {
+        var parts = ["HAKU：\(replay.line)"] + replay.cards.map(\.text)
+        if replay.tier == .box, replay.cans > 0 { parts.append("\(replay.cans) 罐，一起打开。") }
+        return parts.joined(separator: " ")
+    }
+
     /// The VoiceOver label for HAKU.
     static func accessibilityLabel(
         mode: Mode?,

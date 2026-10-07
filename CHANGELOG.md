@@ -32,6 +32,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- 回来的时候 (animation): HAKU looks up from the phone after a short absence. After a long one it dozes on
+  the sofa (or at the desk in Work), sits up, turns the phone face down, says "……又不是在等你。", pushes over a
+  crate, and the cards flip one by one before the cans open together. With nothing recorded it scoots over and
+  pats the seat: "……坐。". A tap skips it.
 - 回来的时候 (data side): after 3 or more days without opening the app, a replay of what was recorded while
   away, with up to 3 cards, or up to 5 cards and the cans earned meanwhile after 8 days or more (at most once in
   30 days). With nothing recorded, the quiet version. The return itself gives no cans. The animation comes with
