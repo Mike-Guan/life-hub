@@ -47,6 +47,10 @@ struct KuroPose: Sendable {
     var blinking = false
     /// Low energy: flat mouth and no blush.
     var tired = false
+    /// Waiting out a late end at the desk, chin on hand.
+    var overtime = false
+    /// The late end shown on a sign above her head, as HH:mm, or nil for no sign.
+    var sign: String?
 
     /// The resting pose for `look` at `energy` (0-100, or nil when unknown); `bedtime` makes her sleepy.
     init(look: KuroLook, energy: Double?, bedtime: Bedtime = .off) {
@@ -90,6 +94,9 @@ struct KuroFigure: View {
             ForEach(Self.parts(for: look, pose: pose), id: \.self) { part in
                 KuroPartView(part: part)
             }
+            if pose.overtime, let sign = pose.sign {
+                RunnerTextView(text: RunnerText(string: sign, x: 60, y: -1, size: 9, color: KuroPalette.ink))
+            }
         }
         .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
     }
@@ -100,6 +107,11 @@ struct KuroFigure: View {
         visible.formUnion(outfit(look))
         visible.insert(pose.blinking ? .eyesClosed : part(pose.eyes))
         if !pose.tired { visible.insert(.blush) }
+        if pose.overtime {
+            visible.remove(.workTablet)
+            visible.formUnion([.overtimeDesk, .overtimeHand])
+            if pose.sign != nil { visible.insert(.overtimeSign) }
+        }
         if look != .work { visible.insert(pose.tired ? .mouthFlat : look == .tennis ? .mouthSmile : .mouthCat) }
         return KuroPart.allCases.filter { visible.contains($0) }
     }
@@ -159,6 +171,7 @@ public struct KuroView: View {
     let need: CompanionNeed?
     let activity: CompanionActivity?
     let moment: CompanionMoment?
+    let overtimeUntil: Date?
     let showsBubble: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -172,7 +185,9 @@ public struct KuroView: View {
     ///   - bedtime: `.on` makes her sleepy and slows her to a breath.
     ///   - need: what the user needs, which picks her lines.
     ///   - activity: what the user is doing, which picks her lines before anything else.
-    ///   - moment: the moment of the day, which picks her lines unless an activity does.
+    ///   - moment: the moment of the day, which picks her lines unless an activity does. In the work look,
+    ///     `.overtime` sits her at the desk with her chin on her hand.
+    ///   - overtimeUntil: the late end of the work day, shown on a sign above her head during `.overtime`.
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
     public init(
         look: KuroLook,
@@ -181,6 +196,7 @@ public struct KuroView: View {
         need: CompanionNeed? = nil,
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
+        overtimeUntil: Date? = nil,
         showsBubble: Bool = true
     ) {
         self.look = look
@@ -189,6 +205,7 @@ public struct KuroView: View {
         self.need = need
         self.activity = activity
         self.moment = moment
+        self.overtimeUntil = overtimeUntil
         self.showsBubble = showsBubble
     }
 
@@ -197,9 +214,10 @@ public struct KuroView: View {
             let paused = reduceMotion || scenePhase != .active
             TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
                 let time = context.date.timeIntervalSinceReferenceDate
-                let pose = KuroPose(look: look, energy: energy, bedtime: bedtime)
+                let pose = self.pose
                 let pace = EnergyFace(energy: energy).speed
-                let motion = bedtime == .on ? IdleMotion.sleeping(time: time) : Self.motion(look, time: time * pace)
+                let sleepy = bedtime == .on || pose.overtime
+                let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(look, time: time * pace)
                 KuroFigure(look: look, pose: reduceMotion ? pose : pose.blink(at: time))
                     .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
                     .offset(y: reduceMotion ? 0 : motion.dy)
@@ -215,8 +233,35 @@ public struct KuroView: View {
         .onTapGesture { if showsBubble { say(Self.line(after: bubble, from: lines)) } }
         .onChange(of: look) { _, _ in say(nil) }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime))
+        .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime, pose: pose))
         .accessibilityAddTraits(showsBubble ? .isButton : [])
+    }
+
+    private var pose: KuroPose {
+        Self.pose(look, energy: energy, bedtime: bedtime, moment: moment, overtimeUntil: overtimeUntil)
+    }
+
+    /// Her pose for the inputs: during `.overtime` in the work look she waits at the desk with drowsy eyes.
+    nonisolated static func pose(
+        _ look: KuroLook,
+        energy: Double?,
+        bedtime: Bedtime,
+        moment: CompanionMoment?,
+        overtimeUntil: Date?,
+        calendar: Calendar = .current
+    ) -> KuroPose {
+        var pose = KuroPose(look: look, energy: energy, bedtime: bedtime)
+        guard bedtime == .off, look == .work, moment == .overtime else { return pose }
+        pose.overtime = true
+        pose.eyes = .drowsy
+        pose.sign = overtimeUntil.map { signText($0, calendar: calendar) }
+        return pose
+    }
+
+    /// `date` as HH:mm on a 24-hour clock in `calendar`'s time zone.
+    nonisolated static func signText(_ date: Date, calendar: Calendar = .current) -> String {
+        let time = calendar.dateComponents([.hour, .minute], from: date)
+        return String(format: "%02d:%02d", time.hour ?? 0, time.minute ?? 0)
     }
 
     private var lines: [String] {
@@ -250,8 +295,9 @@ public struct KuroView: View {
         }
     }
 
-    nonisolated static func accessibilityLabel(_ look: KuroLook, bedtime: Bedtime) -> String {
+    nonisolated static func accessibilityLabel(_ look: KuroLook, bedtime: Bedtime, pose: KuroPose? = nil) -> String {
         if bedtime == .on { return "KURO，困了" }
+        if let pose, pose.overtime { return pose.sign.map { "KURO，托着腮等到 \($0)" } ?? "KURO，托着腮等着" }
         return switch look {
         case .work: "KURO，在忙"
         case .chill: "KURO，捧着热饮"

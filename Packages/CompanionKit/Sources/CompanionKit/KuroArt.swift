@@ -27,6 +27,7 @@ enum KuroPalette {
     static let pupil = Color(hex: 0x3A2016)
     static let lashLine = Color(hex: 0x2A1A14)
     static let iris = Color(hex: 0x8B5A3C)
+    static let neonPink = Color(hex: 0xFF3EA5)
 }
 
 /// One named, separately movable piece of KURO, in back-to-front order.
@@ -64,6 +65,9 @@ enum KuroPart: String, CaseIterable, Sendable {
     case deskBooks = "desk_books"
     case deskPen = "desk_pen"
     case tennisRacket = "tennis_racket"
+    case overtimeDesk = "overtime_desk"
+    case overtimeHand = "overtime_hand"
+    case overtimeSign = "overtime_sign"
 }
 
 enum KuroArt {
@@ -105,6 +109,9 @@ enum KuroArt {
         case .deskBooks: deskBooks()
         case .deskPen: deskPen()
         case .tennisRacket: tennisRacket()
+        case .overtimeDesk: overtimeDesk()
+        case .overtimeHand: overtimeHand()
+        case .overtimeSign: overtimeSign()
         }
     }
 
@@ -3143,6 +3150,141 @@ enum KuroArt {
                 fill: KuroPalette.pink,
                 stroke: KuroPalette.ink,
                 lineWidth: 1.8
+            ),
+        ]
+    }
+
+    private static func overtimeDesk() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 8.5, y: 124))
+                    p.addLine(to: .init(x: 112.5, y: 124))
+                    p.addCurve(
+                        to: .init(x: 114.5, y: 126),
+                        control1: .init(x: 113.6, y: 124),
+                        control2: .init(x: 114.5, y: 124.9)
+                    )
+                    p.addLine(to: .init(x: 114.5, y: 136))
+                    p.addCurve(
+                        to: .init(x: 112.5, y: 138),
+                        control1: .init(x: 114.5, y: 137.1),
+                        control2: .init(x: 113.6, y: 138)
+                    )
+                    p.addLine(to: .init(x: 8.5, y: 138))
+                    p.addCurve(
+                        to: .init(x: 6.5, y: 136),
+                        control1: .init(x: 7.4, y: 138),
+                        control2: .init(x: 6.5, y: 137.1)
+                    )
+                    p.addLine(to: .init(x: 6.5, y: 126))
+                    p.addCurve(
+                        to: .init(x: 8.5, y: 124),
+                        control1: .init(x: 6.5, y: 124.9),
+                        control2: .init(x: 7.4, y: 124)
+                    )
+                    p.closeSubpath()
+                },
+                fill: KuroPalette.navy,
+                stroke: KuroPalette.ink,
+                lineWidth: 3,
+                cap: .butt,
+                join: .miter,
+                opacity: 1
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 9.5, y: 128.5))
+                    p.addLine(to: .init(x: 111.5, y: 128.5))
+                },
+                stroke: KuroPalette.neonPink,
+                lineWidth: 2.5,
+                cap: .butt,
+                join: .miter,
+                opacity: 1
+            ),
+        ]
+    }
+
+    private static func overtimeHand() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 24, y: 88))
+                    p.addQuadCurve(to: .init(x: 26, y: 64), control: .init(x: 20, y: 74))
+                    p.addQuadCurve(to: .init(x: 36, y: 63), control: .init(x: 31, y: 58))
+                    p.addQuadCurve(to: .init(x: 40, y: 78), control: .init(x: 40, y: 69))
+                    p.addQuadCurve(to: .init(x: 34, y: 92), control: .init(x: 41, y: 88))
+                    p.addQuadCurve(to: .init(x: 24, y: 88), control: .init(x: 27, y: 94))
+                    p.closeSubpath()
+                },
+                fill: KuroPalette.skin,
+                stroke: KuroPalette.ink,
+                lineWidth: 2.8,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 29, y: 66))
+                    p.addLine(to: .init(x: 31, y: 76))
+                    p.move(to: .init(x: 34, y: 64))
+                    p.addLine(to: .init(x: 36, y: 75))
+                },
+                stroke: KuroPalette.skinLine,
+                lineWidth: 1.8,
+                cap: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 24, y: 92))
+                    p.addLine(to: .init(x: 22, y: 104))
+                },
+                stroke: KuroPalette.ink,
+                lineWidth: 3,
+                cap: .round
+            ),
+        ]
+    }
+
+    private static func overtimeSign() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 50, y: -2))
+                    p.addLine(to: .init(x: 60, y: 10))
+                    p.addLine(to: .init(x: 70, y: -2))
+                },
+                stroke: KuroPalette.white,
+                lineWidth: 1.6
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 47, y: -10))
+                    p.addLine(to: .init(x: 73, y: -10))
+                    p.addCurve(
+                        to: .init(x: 76, y: -7),
+                        control1: .init(x: 74.66, y: -10),
+                        control2: .init(x: 76, y: -8.66)
+                    )
+                    p.addLine(to: .init(x: 76, y: -1))
+                    p.addCurve(to: .init(x: 73, y: 2), control1: .init(x: 76, y: 0.66), control2: .init(x: 74.66, y: 2))
+                    p.addLine(to: .init(x: 47, y: 2))
+                    p.addCurve(
+                        to: .init(x: 44, y: -1),
+                        control1: .init(x: 45.34, y: 2),
+                        control2: .init(x: 44, y: 0.66)
+                    )
+                    p.addLine(to: .init(x: 44, y: -7))
+                    p.addCurve(
+                        to: .init(x: 47, y: -10),
+                        control1: .init(x: 44, y: -8.66),
+                        control2: .init(x: 45.34, y: -10)
+                    )
+                    p.closeSubpath()
+                },
+                fill: KuroPalette.gold,
+                stroke: KuroPalette.ink,
+                lineWidth: 2.4
             ),
         ]
     }
