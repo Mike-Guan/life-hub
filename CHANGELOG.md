@@ -314,6 +314,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Before any mode is picked, the home title says "NO MODE", not "NO MODE MODE".
 - Leaving the office switches to 下班 Chill only from 17:30. Stepping out earlier, such as for lunch,
   keeps 上班.
 - Staying 30 minutes at the boxing gym counts as boxing, like the fitness gym: 5 cans once a week and
