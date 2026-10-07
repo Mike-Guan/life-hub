@@ -48,6 +48,13 @@ import Testing
         #expect(backoff.notice(at: date(6, 6), calendar: calendar) == nil)
     }
 
+    @Test func kuroSaysHerOwnPauseLine() {
+        var backoff = NudgeBackoff()
+        backoff.pausedAt["slacking"] = date(5, 14)
+        #expect(backoff.notice(at: date(5, 22), persona: .kuro, calendar: calendar) == "……嗯，不说了。")
+        #expect(backoff.notice(at: date(6, 6), persona: .kuro, calendar: calendar) == nil)
+    }
+
     @Test func couchInviteIsJudgedByWalkingAndScrolling() {
         let sent = date(5, 21)
         func followed(_ signals: NeedSignals, at now: Date) -> Bool? {
