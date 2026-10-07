@@ -140,6 +140,33 @@ import Testing
         #expect(store.ledger.only(.kuro).owned.isEmpty)
     }
 
+    @Test func oldKeepsakesOfKuroStayHers() throws {
+        let id = UUID().uuidString
+        let json = #"{"id":"\#(id)","kind":"granted","at":"2026-10-04T00:00:00Z","itemID":"kuro.celebrate.spin"}"#
+        let entry = try HubJSON.decoder().decode(CanEntry.self, from: Data(json.utf8))
+        #expect(entry.persona == .kuro)
+    }
+
+    @Test func aKeepsakeIsNeverGrantedTwice() throws {
+        let url = tempURL()
+        let spin = try item("kuro.celebrate.spin")
+        let grant = CanEntry(
+            id: .derived(from: "granted:\(spin.id)"),
+            kind: .granted,
+            at: at,
+            cans: 0,
+            itemID: spin.id,
+            persona: .haku,
+            deviceID: "t"
+        )
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try HubJSON.encoder().encode(CanLedger(entries: [grant])).write(to: url)
+        let store = GrowthStore(fileURL: url, deviceID: "t")
+        store.persona = .kuro
+        store.record(.gotUp, source: "invite-1", at: at)
+        #expect(store.ledger.entries.filter { $0.id == grant.id }.count == 1)
+    }
+
     @Test func entriesWithoutACharacterAreHakus() throws {
         let json = #"{"id":"\#(UUID().uuidString)","kind":"earned","at":"2026-10-04T00:00:00Z","win":"gym","cans":3}"#
         let entry = try HubJSON.decoder().decode(CanEntry.self, from: Data(json.utf8))

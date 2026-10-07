@@ -323,6 +323,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- KURO's keepsakes granted by the previous two builds stay hers, and a keepsake is never granted twice.
 - With KURO, the mode buttons, TODAY log, control and watch use her card colors, and her tennis and desk
   modes read TENNIS and DESK instead of BOXING and SIDE. Her desk time shows her tagline, not HAKU's
   side-hustle state.
