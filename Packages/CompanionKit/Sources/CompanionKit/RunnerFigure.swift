@@ -260,6 +260,14 @@ struct RunnerPose {
     var fistPump: CGFloat = -1
     /// Flare of the mask LED, 0...1.
     var ledFlare: CGFloat = 0
+    /// The watch poke HAKU reacts to, or nil.
+    var pokeKind: WatchPoke?
+    /// Progress of the watch poke, 0...1, or -1 when none is playing.
+    var pokeProgress: CGFloat = -1
+    /// How far the right headset cup is pushed up, 0...1.
+    var cupRUp: CGFloat = 0
+    /// Size of the can, 1 = as drawn; larger when held out to the screen.
+    var canScale: CGFloat = 1
     /// What today left in HAKU's world: a bandage, the monitor on, sunlight.
     var traces: Set<CompanionTrace> = []
 
@@ -1094,6 +1102,7 @@ struct RunnerFigure: View {
             visible.subtract(openEyes)
             visible.insert(.eyesClosed)
         }
+        poked(&visible, pose: pose)
         if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
@@ -1450,6 +1459,12 @@ struct RunnerFigure: View {
                     .shadow(color: RunnerPalette.neonCyan, radius: 4 * pose.ledFlare * scale)
             case .ledLine:
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
+            case .cupR where pose.cupRUp > 0:
+                // Pushed up off the ear, tilting back.
+                RunnerPartView(part: part)
+                    .rotationEffect(.degrees(-28 * pose.cupRUp), anchor: Self.unit(x: 108, y: 70))
+                    .offset(x: -6 * pose.cupRUp * scale, y: (-20 * pose.cupRUp - 24 * pose.headsetOff) * scale)
+                    .opacity(Double(1 - pose.headsetOff))
             case .headset, .cupL, .cupR, .mic:
                 RunnerPartView(part: part)
                     .offset(y: -24 * pose.headsetOff * scale)
@@ -1572,6 +1587,7 @@ struct RunnerFigure: View {
                     .opacity(Double(1 - pose.propHidden))
             case .monsterCan:
                 RunnerPartView(part: part)
+                    .scaleEffect(pose.canScale, anchor: Self.unit(x: 102, y: 136))
                     .rotationEffect(.degrees(pose.canAngle), anchor: Self.unit(x: 102, y: 136))
                     .offset(x: pose.canOffset.width * scale, y: pose.canOffset.height * scale)
                     .opacity(pose.canOpacity)

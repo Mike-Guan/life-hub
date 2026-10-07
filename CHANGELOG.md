@@ -32,6 +32,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Poking HAKU on the Apple Watch plays a reaction for its state, with a light tap on the wrist: a headset cup
+  pushed up ("在上班。") at work, the can held out to clink ("叮。") in Chill, a punch at boxing, the mask
+  flashing </> in 副业, a roll-over when asleep or out of energy, and a glare ("……干嘛。") while HAKU is busy.
+  Five pokes in a row turn HAKU's back for a few seconds ("……够了。"). Pokes change nothing.
 - After long couch scrolling, as the bath or vibe coding starts, HAKU drops the phone, gets up from the sofa,
   stretches, pulls its mask up with the </> lit and says "……活过来了？". It plays at most once a day, when
   you switch within 20 minutes of the last couch scrolling at home and open the app within 30 minutes.
