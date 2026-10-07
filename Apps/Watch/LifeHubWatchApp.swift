@@ -25,20 +25,32 @@ struct WatchHomeView: View {
     @State private var payload = WatchPayload.read(from: AppGroup.container.watchPayloadURL)
 
     @State private var failure: String?
+    /// False until the first frame is on screen; the second page waits for it.
+    @State private var showsPages = false
 
     var body: some View {
         TimelineView(.everyMinute) { context in
             if let payload, let mode = payload.snapshot.mode {
-                TabView {
+                // Launching straight into the paged view took longer than the watchdog allows with the screen
+                // off, so the first frame is the character alone and the pages come right after.
+                if showsPages {
+                    TabView {
+                        companionPage(payload, mode: mode, at: context.date)
+                        TodayPage(payload: payload, mode: mode, date: context.date)
+                    }
+                    .tabViewStyle(.verticalPage)
+                } else {
                     companionPage(payload, mode: mode, at: context.date)
-                    TodayPage(payload: payload, mode: mode, date: context.date)
                 }
-                .tabViewStyle(.verticalPage)
             } else {
                 Text(failure ?? "先在 iPhone 上打开一次 Life Hub")
                     .font(.footnote)
                     .multilineTextAlignment(.center)
             }
+        }
+        .task {
+            try? await Task.sleep(for: .milliseconds(500))
+            showsPages = true
         }
         .onReceive(NotificationCenter.default.publisher(for: WatchReceiver.didReceive)) { _ in
             payload = WatchPayload.read(from: AppGroup.container.watchPayloadURL)
