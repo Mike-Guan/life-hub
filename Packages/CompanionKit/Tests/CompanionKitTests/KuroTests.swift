@@ -84,10 +84,55 @@ import Testing
         let pose = KuroPose(look: .tennis, energy: 90, bedtime: .on)
         #expect(pose.eyes == .drowsy && !pose.blink(at: 0.05).blinking)
         #expect(KuroFigure.parts(for: .tennis, pose: pose).contains(.eyesDrowsy))
-        #expect(KuroView.accessibilityLabel(.tennis, bedtime: .on) == "KURO 困了")
+        #expect(KuroView.accessibilityLabel(.tennis, bedtime: .on) == "KURO，困了")
     }
 
     @Test func sheSharesHakusFrame() {
         #expect(KuroArt.bounds == RunnerArt.bounds)
+    }
+
+    @Test func sheHasHerOwnLines() {
+        for mode in [Mode?.none] + Mode.allCases.map(Optional.some) {
+            let hers = CompanionLines.lines(for: mode, persona: .kuro)
+            #expect(!hers.isEmpty && hers != CompanionLines.lines(for: mode))
+        }
+        #expect(CompanionLines.lines(for: .boxing, persona: .kuro).contains("正手，反手。"))
+        #expect(CompanionLines.lines(for: .chill, need: .boxingWarmup, persona: .kuro).contains("先拍两下球。"))
+        let peeking = CompanionLines.lines(for: .chill, need: .couchScroll, peeking: true, persona: .kuro)
+        #expect(peeking != CompanionLines.lines(for: .chill, need: .couchScroll, persona: .kuro))
+        #expect(CompanionLines.lines(for: .money, moment: .flow, persona: .kuro) == ["……"])
+        #expect(CompanionLines.lines(for: .chill, activity: .boxingAtGym, persona: .kuro).contains("……别看我，看球。"))
+        for life in IdleLife.allCases {
+            #expect(!CompanionLines.lines(for: .chill, life: life, persona: .kuro).isEmpty)
+        }
+    }
+
+    @Test func herMomentLinesDifferFromHakus() {
+        // Flow and blanket lines are the same for both.
+        for moment in CompanionMoment.allCases where ![.flow, .blanket].contains(moment) {
+            let hers = CompanionLines.lines(for: .chill, moment: moment, persona: .kuro)
+            #expect(!hers.isEmpty && hers != CompanionLines.lines(for: .chill, moment: moment))
+        }
+    }
+
+    @Test func sheCelebratesAndUnboxesQuietly() {
+        let kinds: [WorkoutSummary.Kind] = [.boxing, .running, .strength, .other]
+        let hers = kinds.map { CompanionLines.celebration($0, persona: .kuro) }
+        #expect(Set(hers).count == kinds.count && hers != kinds.map { CompanionLines.celebration($0) })
+        #expect(CompanionLines.unlock("gloves.gold", persona: .kuro) == "……给你的。不是特意挑的。")
+        #expect(CompanionLines.unlock("room.plant", persona: .kuro) == "……那就收下了。")
+    }
+
+    @Test func eachLookMapsBackToItsMode() {
+        #expect(KuroLook.allCases.allSatisfy { KuroLook(mode: $0.mode) == $0 })
+    }
+
+    @Test func aTapNeverRepeatsTheShownLine() {
+        let lines = CompanionLines.lines(for: .work, persona: .kuro)
+        for shown in lines {
+            #expect(KuroView.line(after: shown, from: lines) != shown)
+        }
+        #expect(KuroView.line(after: "……", from: ["……"]) == "……")
+        #expect(KuroView.line(after: nil, from: []) == nil)
     }
 }

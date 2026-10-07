@@ -1022,7 +1022,7 @@ struct IdleMotion {
     }
 }
 
-private struct SpeechBubble: View {
+struct SpeechBubble: View {
     let text: String
 
     var body: some View {

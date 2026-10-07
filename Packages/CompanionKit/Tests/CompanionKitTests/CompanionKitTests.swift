@@ -825,7 +825,8 @@ import Testing
         var boxing = RunnerPose()
         boxing.celebrate(.boxing, progress: 0.25)
         #expect(boxing.gloveR.height < -20)
-        let lines = Set([WorkoutSummary.Kind.boxing, .running, .strength, .other].map(CompanionLines.celebration))
+        let kinds: [WorkoutSummary.Kind] = [.boxing, .running, .strength, .other]
+        let lines = Set(kinds.map { CompanionLines.celebration($0) })
         #expect(lines.count == 4)
     }
 
