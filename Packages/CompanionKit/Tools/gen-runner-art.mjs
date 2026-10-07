@@ -40,6 +40,9 @@ const KURO_PALETTE = {
   '#FF8FA3': 'pink', '#FF3B4E': 'red', '#FFD23F': 'gold', '#7FB7FF': 'sky', '#E6E9EF': 'tablet',
   '#4A2A1A': 'irisTop', '#7A4A2E': 'irisMid', '#B07A4E': 'irisBottom', '#3A2016': 'pupil', '#2A1A14': 'lashLine',
   '#8B5A3C': 'iris', '#FF3EA5': 'neonPink',
+  // Shop items.
+  '#2E9E5B': 'leaf', '#FFE14D': 'yellow', '#FFC2D6': 'blanket', '#FFF6C8': 'goldStrings', '#C9F23A': 'tennisBall',
+  '#FFB7C5': 'sakura', '#FFD1DC': 'petal', '#B8860B': 'goldShade',
 };
 const PALETTE = kuro ? KURO_PALETTE : RUNNER_PALETTE;
 

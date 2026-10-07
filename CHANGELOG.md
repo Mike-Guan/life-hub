@@ -34,6 +34,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- The second preset character's shop items are drawn on her: a window flower, a scrunchie, a cat blanket, a cat-ear
+  lamp, a tennis bag and three keepsakes, each in its own look, with icons and her own unboxing (she pops out of the
+  box acting calm, with stars in a thought bubble). Data and screens follow in engineering's part of #192.
 - 回来的时候 (animation): HAKU looks up from the phone after a short absence. After a long one it dozes on
   the sofa (or at the desk in Work), sits up, turns the phone face down, says "……又不是在等你。", pushes over a
   crate, and the cards flip one by one before the cans open together. With nothing recorded it scoots over and
