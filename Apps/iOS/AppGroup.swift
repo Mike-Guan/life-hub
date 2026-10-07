@@ -29,6 +29,12 @@ enum AppGroup {
         return ActivityDays.stored(in: defaults).learningGym(from: ledger, now: now)
     }
 
+    /// The need rules for the chosen character, with KURO's tennis day learned from the can ledger.
+    static func needRules(now: Date = .now) -> NeedRules {
+        let ledger = CanLedger.read(from: container.canLedgerURL)
+        return NeedRules.standard(for: Persona.stored(in: defaults), ledger: ledger, now: now)
+    }
+
     /// User defaults both processes read, so they share one device id.
     static var defaults: UserDefaults {
         UserDefaults(suiteName: identifier) ?? .standard

@@ -61,7 +61,7 @@ struct WatchStatusView: View {
     @ViewBuilder private var content: some View {
         switch family {
         case .accessoryCorner:
-            head.widgetLabel(entry.mode?.title ?? "打开 iPhone")
+            head.widgetLabel(title ?? "打开 iPhone")
         case .accessoryRectangular:
             HStack(spacing: 6) {
                 head.frame(width: 40)
@@ -78,14 +78,24 @@ struct WatchStatusView: View {
     // PM spec (Issue #160): one line, the mode and how long it has run.
     @ViewBuilder private var modeAndTime: some View {
         if let mode = entry.mode, let since = entry.payload?.snapshot.since {
-            Text("\(mode.title) · \(Text(since, style: .relative))")
+            Text("\(mode.title(for: persona)) · \(Text(since, style: .relative))")
         } else {
-            Text(entry.mode?.title ?? "打开 iPhone")
+            Text(title ?? "打开 iPhone")
         }
     }
 
+    private var persona: Persona { entry.payload?.persona ?? .haku }
+    private var title: String? { entry.mode?.title(for: persona) }
+
     @ViewBuilder private var head: some View {
-        if let payload = entry.payload, let mode = entry.mode {
+        if let payload = entry.payload, let mode = entry.mode, payload.persona == .kuro {
+            KuroPortrait(
+                look: KuroLook(mode: mode),
+                energy: payload.snapshot.energy(at: entry.date)?.value,
+                bedtime: payload.bedtime.state(at: entry.date),
+                framing: .head
+            )
+        } else if let payload = entry.payload, let mode = entry.mode {
             let snapshot = payload.snapshot
             CompanionPortrait(
                 mode: mode,

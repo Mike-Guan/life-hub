@@ -37,7 +37,7 @@ struct StatusView: View {
             }
         case .accessoryInline:
             if let mode = entry.mode {
-                Label("\(mode.title) · \(entry.detail)", systemImage: mode.symbol)
+                Label("\(mode.title(for: entry.persona)) · \(entry.detail)", systemImage: mode.symbol)
             } else {
                 Text("打开一次 Life Hub")
             }
@@ -45,7 +45,7 @@ struct StatusView: View {
             HStack(spacing: 6) {
                 head.frame(width: 44)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(entry.mode?.title ?? "还没有模式").font(.headline)
+                    Text(entry.mode?.title(for: entry.persona) ?? "还没有模式").font(.headline)
                     Text(entry.mode == nil ? "打开一次 Life Hub" : entry.detail).font(.caption).lineLimit(2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -57,6 +57,22 @@ struct StatusView: View {
 
     @ViewBuilder private var head: some View {
         if let mode = entry.mode {
+            figure(mode, framing: .head)
+        } else {
+            Image(systemName: "circle.dashed").font(.title2)
+        }
+    }
+
+    // Issue #164: KURO's first step is her look per mode, her energy face and bedtime.
+    @ViewBuilder private func figure(_ mode: Mode, framing: CompanionPortrait.Framing) -> some View {
+        if entry.persona == .kuro {
+            KuroPortrait(
+                look: KuroLook(mode: mode),
+                energy: entry.energy?.value,
+                bedtime: entry.bedtime,
+                framing: framing
+            )
+        } else {
             CompanionPortrait(
                 mode: mode,
                 energy: entry.energy?.value,
@@ -72,33 +88,16 @@ struct StatusView: View {
                 daily: entry.daily,
                 walking: entry.walking,
                 bath: entry.bath,
-                framing: .head
+                framing: framing
             )
-        } else {
-            Image(systemName: "circle.dashed").font(.title2)
         }
     }
 
     private var small: some View {
         VStack(alignment: .leading, spacing: 2) {
             if let mode = entry.mode {
-                CompanionPortrait(
-                    mode: mode,
-                    energy: entry.energy?.value,
-                    need: entry.need,
-                    needSince: entry.needSince,
-                    activity: entry.activity,
-                    moment: entry.moment,
-                    traces: entry.traces,
-                    vitals: entry.vitals,
-                    date: entry.date,
-                    bedtime: entry.bedtime,
-                    wardrobe: entry.wardrobe,
-                    daily: entry.daily,
-                    walking: entry.walking,
-                    bath: entry.bath
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                figure(mode, framing: .full)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Text("\(mode.code) MODE").font(Toy.display(14))
                 Text(entry.detail).font(Toy.body(12, weight: .bold))
             } else {

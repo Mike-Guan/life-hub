@@ -7,7 +7,7 @@ import WidgetKit
 struct ModeWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "mode", provider: HubProvider()) { entry in
-            ModeButtons(current: entry.mode)
+            ModeButtons(current: entry.mode, persona: entry.persona)
                 .containerBackground(Toy.paper, for: .widget)
         }
         .configurationDisplayName("切换模式")
@@ -31,6 +31,7 @@ struct EnergyWidget: Widget {
 
 private struct ModeButtons: View {
     let current: Mode?
+    let persona: Persona
 
     var body: some View {
         Grid(horizontalSpacing: 10, verticalSpacing: 10) {
@@ -47,7 +48,7 @@ private struct ModeButtons: View {
 
     private func button(_ mode: Mode) -> some View {
         Button(intent: SwitchModeIntent(mode: mode)) {
-            Label(mode.title, systemImage: mode.symbol)
+            Label(mode.title(for: persona), systemImage: mode.symbol)
                 .font(Toy.body(14, weight: .heavy))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)

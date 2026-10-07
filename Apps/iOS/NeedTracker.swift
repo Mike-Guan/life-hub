@@ -70,7 +70,13 @@ final class NeedTracker {
             mode: mode
         )
         let days = AppGroup.activityDays(now: now)
-        reading = NeedEngine.need(signals, now: now, days: days, work: .stored(in: AppGroup.defaults))
+        reading = NeedEngine.need(
+            signals,
+            now: now,
+            rules: AppGroup.needRules(now: now),
+            days: days,
+            work: .stored(in: AppGroup.defaults)
+        )
         activitySignals = ActivitySignals(presence: presence, workouts: motion?.workouts ?? [])
         scrollSeenAt = ScrollWatch.seenAt ?? ScrollWatch.reachedAt
         InviteReminder.plan(reading, signals: signals, now: now)

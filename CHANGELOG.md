@@ -34,6 +34,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - KURO has her own lines in her own quiet voice for every mode, need, moment and idle bit, plus after a workout
   and on unboxing. Tapping her shows one in a speech bubble.
+- KURO's tennis day: the boxing day rules with her own lines. Her day is learned from her sessions at the
+  tennis court (a weekday in 2 of the last 4 weeks), Saturday until one qualifies. Her invites carry her name.
+- A second character, KURO, picked in Settings (HAKU stays the default). Home, the widgets and the watch draw
+  her in the outfit for the current mode with her energy face and bedtime look. For KURO the boxing slot
+  reads 网球日, the side slot reads 备课 and the boxing gym reads 网球场.
 - A second character, KURO 黒, can be drawn in CompanionKit in 4 outfits (work, chill, tennis, desk), with her
   face following energy, a sleepy face at bedtime and a gentle idle loop. It is not shown in the app yet.
 - HAKU on Apple Watch: a watch face widget (circular, corner and rectangular) and a watch app that shows

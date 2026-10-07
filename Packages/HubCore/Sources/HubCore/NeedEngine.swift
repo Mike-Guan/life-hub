@@ -109,6 +109,8 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var drowsyLasts: TimeInterval
     /// From this time, still at the office is overtime.
     public var overtimeMinute: Int
+    /// Whose lines the needs and invites use.
+    public var persona: Persona
 
     // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses.
     /// Couch after 19:00 and 60 still minutes, or until 20 min after the last Screen Time report; boxing Sunday
@@ -152,7 +154,8 @@ public struct NeedRules: Codable, Equatable, Sendable {
         drowsyStartMinute: Int = 14 * 60,
         drowsyAfterArrival: TimeInterval = 3 * 60 * 60,
         drowsyLasts: TimeInterval = 2 * 60 * 60,
-        overtimeMinute: Int = 19 * 60
+        overtimeMinute: Int = 19 * 60,
+        persona: Persona = .haku
     ) {
         self.eveningStartMinute = eveningStartMinute
         self.stillFor = stillFor
@@ -176,6 +179,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
         self.drowsyAfterArrival = drowsyAfterArrival
         self.drowsyLasts = drowsyLasts
         self.overtimeMinute = overtimeMinute
+        self.persona = persona
     }
 }
 
@@ -323,7 +327,7 @@ public enum NeedEngine {
             let start = time(rules.boxingWarmupStartMinute, on: day, calendar: calendar)
             let end = time(rules.boxingWarmupEndMinute, on: day, calendar: calendar)
             if start > now {
-                return ScheduledNeed(need: .boxingWarmup, from: start, until: end, line: boxingReason)
+                return ScheduledNeed(need: .boxingWarmup, from: start, until: end, line: boxingReason(rules.persona))
             }
         }
         return nil
@@ -394,9 +398,12 @@ public enum NeedEngine {
     }
 
     /// The invite's text for `need`. It goes on the Lock Screen, so it doesn't say what Mike was doing.
-    /// - Parameter taskSoon: whether a Daily task starts within `DailyAgenda.inviteLead`.
-    public static func inviteText(for need: CompanionNeed, taskSoon: Bool = false) -> String {
+    /// - Parameters:
+    ///   - taskSoon: whether a Daily task starts within `DailyAgenda.inviteLead`.
+    ///   - persona: whose voice the text is in.
+    public static func inviteText(for need: CompanionNeed, taskSoon: Bool = false, persona: Persona = .haku) -> String {
         switch need {
+        case .boxingWarmup where persona == .kuro: "……走吗。网球包拎好了。"
         case .couchScroll where taskSoon: "等下还有事，先起来收拾？"
         case .couchScroll: "去健身房，或者下楼走走？"
         case .boxingWarmup: "拳套戴好了，出发去拳馆？"
@@ -484,10 +491,15 @@ public enum NeedEngine {
         let midnight = calendar.startOfDay(for: now)
         let boxedToday = signals.workouts.contains { $0.kind == .boxing && $0.end >= midnight }
         guard !boxedToday else { return nil }
-        return NeedReading(need: .boxingWarmup, since: start, reasons: [boxingReason], until: end)
+        return NeedReading(need: .boxingWarmup, since: start, reasons: [boxingReason(rules.persona)], until: end)
     }
 
-    private static let boxingReason = "今天打拳，拳套我戴好了"
+    private static func boxingReason(_ persona: Persona) -> String {
+        switch persona {
+        case .haku: "今天打拳，拳套我戴好了"
+        case .kuro: "今天网球。……拍子带好了。"
+        }
+    }
 
     // Needs a known home: the invite is for still being at home, so an unknown place says nothing.
     private static func gymDay(

@@ -43,6 +43,8 @@ struct HomeView: View {
     var onShop: (() -> Void)?
     /// What HAKU wears.
     var wardrobe = Wardrobe()
+    /// Which character the card draws.
+    var persona = Persona.haku
     /// Earned cans, for the traces that stay.
     var ledger = CanLedger()
     /// Shows the wardrobe button on HAKU's card that calls this, when set.
@@ -90,33 +92,43 @@ struct HomeView: View {
                 }
 
                 TimelineView(.everyMinute) { context in
-                    CompanionView(
-                        mode: replaying ? replayFrom : store.current,
-                        energy: reading?.value,
-                        need: activeNeed(at: context.date)?.need,
-                        needSince: activeNeed(at: context.date)?.since,
-                        activity: shownActivity(at: context.date),
-                        moment: moment(at: context.date),
-                        codingCans: codingCans(at: context.date),
-                        traces: traces(at: context.date, energy: reading?.level),
-                        vitals: VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: context.date),
-                        event: event ?? revived(at: context.date) ?? sit?.stretched(at: context.date)
-                            ?? stayHome(at: context.date) ?? dailyDone,
-                        daily: daily?.cue(at: context.date),
-                        walking: activitySignals.flatMap { PlaceWalk.walk(in: $0.presence, now: context.date)?.from },
-                        bath: bath(at: context.date),
-                        invite: activeNeed(at: context.date) == nil ? nil : invite,
-                        cheer: cheer,
-                        bedtime: bedtime.state(at: context.date),
-                        wardrobe: wardrobe,
-                        onTap: tapAction,
-                        onBathDone: onBathDone
-                    )
+                    if persona == .kuro {
+                        // Issue #164: KURO's first step is her look per mode, her energy face and bedtime.
+                        KuroView(
+                            look: KuroLook(mode: (replaying ? replayFrom : store.current) ?? .chill),
+                            energy: reading?.value,
+                            bedtime: bedtime.state(at: context.date)
+                        )
+                        .padding(.vertical, 12)
+                    } else {
+                        CompanionView(
+                            mode: replaying ? replayFrom : store.current,
+                            energy: reading?.value,
+                            need: activeNeed(at: context.date)?.need,
+                            needSince: activeNeed(at: context.date)?.since,
+                            activity: shownActivity(at: context.date),
+                            moment: moment(at: context.date),
+                            codingCans: codingCans(at: context.date),
+                            traces: traces(at: context.date, energy: reading?.level),
+                            vitals: VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: context.date),
+                            event: event ?? revived(at: context.date) ?? sit?.stretched(at: context.date)
+                                ?? stayHome(at: context.date) ?? dailyDone,
+                            daily: daily?.cue(at: context.date),
+                            walking: walking(at: context.date),
+                            bath: bath(at: context.date),
+                            invite: activeNeed(at: context.date) == nil ? nil : invite,
+                            cheer: cheer,
+                            bedtime: bedtime.state(at: context.date),
+                            wardrobe: wardrobe,
+                            onTap: tapAction,
+                            onBathDone: onBathDone
+                        )
+                    }
                 }
                 .frame(height: 340)
                 .toyCard()
                 .overlay(alignment: .topTrailing) {
-                    if let onWardrobe {
+                    if let onWardrobe, persona == .haku {
                         Button(action: onWardrobe) {
                             Label("衣柜", systemImage: "tshirt")
                                 .font(Toy.body(15, weight: .heavy))
@@ -166,12 +178,12 @@ struct HomeView: View {
                     }
                 }
 
-                ModeSwitcher(current: store.current) { mode in
+                ModeSwitcher(current: store.current, persona: persona) { mode in
                     switchTo(mode)
                 }
 
                 TimelineView(.periodic(from: .now, by: 60)) { context in
-                    TodayTimeline(segments: store.segments(on: context.date, now: context.date))
+                    TodayTimeline(segments: store.segments(on: context.date, now: context.date), persona: persona)
                 }
 
                 if let money {
@@ -245,6 +257,11 @@ struct HomeView: View {
             atHome: activitySignals?.presence.since(.home) != nil,
             now: date
         )
+    }
+
+    /// The place Mike just left, while HAKU walks from it.
+    private func walking(at date: Date) -> HubPlace.Kind? {
+        activitySignals.flatMap { PlaceWalk.walk(in: $0.presence, now: date)?.from }
     }
 
     private func bath(at date: Date) -> Bool {
