@@ -32,6 +32,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- During the evening extension, KURO waits at her desk with a sign showing the picked end time.
 - KURO waits out a late work day at her desk, chin on hand, with the late end on a small sign above her head.
 - On home, the line KURO says when tapped follows the current need, activity and moment of the day.
 - 晚间延长 in Settings, off by default. On work days, still at the office in work mode after work hours, the

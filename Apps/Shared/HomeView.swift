@@ -100,7 +100,8 @@ struct HomeView: View {
                             bedtime: bedtime.state(at: context.date),
                             need: activeNeed(at: context.date)?.need,
                             activity: shownActivity(at: context.date),
-                            moment: moment(at: context.date)
+                            moment: moment(at: context.date),
+                            overtimeUntil: rules.eveningUntil(at: context.date)
                         )
                         .padding(.vertical, 12)
                     } else {
