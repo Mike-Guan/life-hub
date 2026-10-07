@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- With KURO picked, the can count, the shop and keepsake unboxing are hidden, since they still show HAKU's
+  items. Cans keep counting; unboxings wait until HAKU is picked again.
 - HAKU's blanket is now cream with a white folded hem, two small orange-and-white cats and faint paw prints,
   everywhere it shows.
 - After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.
