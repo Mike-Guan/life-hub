@@ -28,7 +28,10 @@ struct SettingsView: View {
             content
         }
         .foregroundStyle(Toy.ink)
+        .tint(Toy.pink)
         .background(Toy.paper.ignoresSafeArea())
+        // The page is drawn on light paper; dark system controls turn grey on it.
+        .preferredColorScheme(.light)
     }
 
     private var content: some View {
@@ -45,10 +48,20 @@ struct SettingsView: View {
                 Text("角色")
                     .font(Toy.body(16, weight: .heavy))
                 // Each character has her own cans and items, so a switch is confirmed first.
-                Picker("角色", selection: Binding(get: { persona }, set: { switchingTo = $0 == persona ? nil : $0 })) {
-                    ForEach(Persona.allCases, id: \.self) { Text($0.title).tag($0) }
+                HStack(spacing: 12) {
+                    ForEach(Persona.allCases, id: \.self) { choice in
+                        Button {
+                            switchingTo = choice == persona ? nil : choice
+                        } label: {
+                            Text(choice.title)
+                                .font(Toy.body(16, weight: .heavy))
+                                .frame(maxWidth: .infinity, minHeight: 40)
+                        }
+                        .buttonStyle(ToyButtonStyle(fill: Toy.pink, isSelected: persona == choice))
+                        .accessibilityAddTraits(persona == choice ? .isSelected : [])
+                    }
                 }
-                .pickerStyle(.segmented)
+                .padding(.trailing, 4)
                 .alert(
                     "换成 \(switchingTo?.title ?? "")？",
                     isPresented: Binding(get: { switchingTo != nil }, set: { if !$0 { switchingTo = nil } }),
@@ -67,10 +80,8 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("睡觉提醒")
                     .font(Toy.body(16, weight: .heavy))
-                DatePicker("睡觉", selection: time($bedtime.startMinute), displayedComponents: .hourAndMinute)
-                    .font(Toy.body(15))
-                DatePicker("起床", selection: time($bedtime.endMinute), displayedComponents: .hourAndMinute)
-                    .font(Toy.body(15))
+                timeRow("睡觉", selection: time($bedtime.startMinute))
+                timeRow("起床", selection: time($bedtime.endMinute))
                 Text("睡觉时间到了发一条通知，\(persona.title) 变困，一直到起床时间。只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
@@ -81,15 +92,12 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("上班时段")
                     .font(Toy.body(16, weight: .heavy))
-                DatePicker("上班", selection: time($rules.workStartMinute), displayedComponents: .hourAndMinute)
-                    .font(Toy.body(15))
-                DatePicker("下班", selection: time($rules.workEndMinute), displayedComponents: .hourAndMinute)
-                    .font(Toy.body(15))
+                timeRow("上班", selection: time($rules.workStartMinute))
+                timeRow("下班", selection: time($rules.workEndMinute))
                 Toggle("晚间延长", isOn: eveningBinding)
                     .font(Toy.body(15))
                 if rules.eveningUntilMinute != nil {
-                    DatePicker("延长到", selection: time(eveningMinute), displayedComponents: .hourAndMinute)
-                        .font(Toy.body(15))
+                    timeRow("延长到", selection: time(eveningMinute))
                 }
                 Text("到公司才切到上班。在上班的日子，下班前 \(ModeRules.offWorkLead) 分钟提醒一次。晚间延长打开后，下班后还在公司就托腮等到延长时间。")
                     .font(Toy.body(12))
@@ -274,6 +282,20 @@ struct SettingsView: View {
         } catch {
             screenTimeError = "Screen Time 监测没启动：\(error.localizedDescription)"
             Dogfood.note("screenTime", "监测没启动：\(error.localizedDescription)")
+        }
+    }
+
+    /// A time setting: the name on the left, the time in an outlined chip on the right.
+    private func timeRow(_ title: String, selection: Binding<Date>) -> some View {
+        HStack {
+            Text(title)
+                .font(Toy.body(15, weight: .bold))
+            Spacer()
+            DatePicker(title, selection: selection, displayedComponents: .hourAndMinute)
+                .labelsHidden()
+                .font(Toy.body(16, weight: .heavy))
+                .padding(3)
+                .toyCard(fill: Toy.card, radius: 10, shadow: 2)
         }
     }
 

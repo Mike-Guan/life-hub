@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat shape.
+- Settings: the character choice and the times use outlined Toy controls, so they no longer show as pale grey.
 - Each character has her own cans, items, keepsake progress, room traces and hidden stats. Cans go to the
   character picked when they are earned; switching asks first. Everything earned before stays HAKU's. Life
   records, sleep and the weekly changes are shared.
@@ -37,6 +38,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Tapping KURO plays a move for her look: the tablet over her face, a sip from her cup, a ball bounced on her
+  racket or a push of her glasses. When tired she rubs her eyes, 5 taps turn her back, and sometimes a heart pops up.
 - KURO's own shop items (five to buy at HAKU's prices, three keepsakes at HAKU's milestones) and her own
   wardrobe, kept apart from HAKU's. Both share one can balance. Not shown yet; her shop opens with its pictures.
 - The second preset character's shop items are drawn on her: a window flower, a scrunchie, a cat blanket, a cat-ear
@@ -324,6 +327,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- KURO's keepsakes granted by the previous two builds stay hers, and a keepsake is never granted twice.
 - With KURO, the mode buttons, TODAY log, control and watch use her card colors, and her tennis and desk
   modes read TENNIS and DESK instead of BOXING and SIDE. Her desk time shows her tagline, not HAKU's
   side-hustle state.
