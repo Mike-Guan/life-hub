@@ -45,12 +45,12 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
-      - name: Regenerate RunnerArt.swift and PartnerArt.swift and compare
+      - name: Regenerate RunnerArt.swift and KuroArt.swift and compare
         run: |
           node Packages/CompanionKit/Tools/gen-runner-art.mjs
-          node Packages/CompanionKit/Tools/gen-runner-art.mjs --partner
+          node Packages/CompanionKit/Tools/gen-runner-art.mjs --kuro
           if ! git diff --exit-code -- Packages/CompanionKit/Sources/CompanionKit/RunnerArt.swift \
-            Packages/CompanionKit/Sources/CompanionKit/PartnerArt.swift; then
+            Packages/CompanionKit/Sources/CompanionKit/KuroArt.swift; then
             echo "::error::Generated companion art is out of date. Run 'make art' and commit the result."
             exit 1
           fi

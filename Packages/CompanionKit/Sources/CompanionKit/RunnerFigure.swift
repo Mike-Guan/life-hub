@@ -1,7 +1,7 @@
 import HubCore
 import SwiftUI
 
-/// One filled and/or stroked shape of a `RunnerPart` or `PartnerPart`, in SVG units.
+/// One filled and/or stroked shape of a `RunnerPart` or `KuroPart`, in SVG units.
 struct RunnerInk: Sendable {
     var path: Path
     var fill: Color?

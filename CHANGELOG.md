@@ -32,8 +32,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
-- A second character, Partner, can be drawn in CompanionKit in 4 outfits (work, chill, tennis, desk), with her
-  face following energy and a gentle idle loop. It is not shown in the app yet.
+- A second character, KURO 黒, can be drawn in CompanionKit in 4 outfits (work, chill, tennis, desk), with her
+  face following energy, a sleepy face at bedtime and a gentle idle loop. It is not shown in the app yet.
 - HAKU on Apple Watch: a watch face widget (circular, corner and rectangular) and a watch app that shows
   HAKU as the iPhone last saw it. The iPhone sends the state; the watch changes nothing.
 - Poking HAKU on the Apple Watch plays a reaction for its state, with a light tap on the wrist: a headset cup
