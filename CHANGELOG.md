@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- Workouts from the Health app are sorted into about ten groups (walking, cycling, swimming, racket, ball,
+  yoga, dance, outdoor and more). Cans are unchanged: only boxing, 5 km runs and the gym earn.
 - Each character has her own cans, items, keepsake progress, room traces and hidden stats. Cans go to the
   character picked when they are earned; switching asks first. Everything earned before stays HAKU's. Life
   records, sleep and the weekly changes are shared.
