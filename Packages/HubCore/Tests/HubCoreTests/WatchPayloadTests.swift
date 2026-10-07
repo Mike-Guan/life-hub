@@ -56,6 +56,19 @@ import Testing
         #expect(WatchPayload.read(from: url) == payload())
     }
 
+    @Test func drawsLikeIgnoresWriteTimeAndWorkTime() {
+        var later = payload()
+        later.snapshot.updatedAt = date(7, 11)
+        later.snapshot.workedToday = 3600
+        #expect(payload().drawsLike(later))
+        var moved = payload()
+        moved.snapshot.mode = .chill
+        #expect(!payload().drawsLike(moved))
+        var dressed = payload()
+        dressed.wardrobe = Wardrobe()
+        #expect(!payload().drawsLike(dressed))
+    }
+
     @Test func redrawsWhenTheIPhoneWidgetsDo() {
         let now = date(7, 12)
         let expected = WidgetSnapshot.timelineDates(
