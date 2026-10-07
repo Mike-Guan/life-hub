@@ -28,6 +28,11 @@ while IFS= read -r line; do
   folders+=("${line#*$'\t'}")
 done < <(xcrun simctl get_app_container "$udid" "$bundle" groups 2>/dev/null || true)
 
+# CPU time of `pid` in hundredths of a second; ps prints [hh:]mm:ss.cc.
+cpu_centiseconds() {
+  ps -o cputime= -p "$1" | awk -F'[:.]' '{n = NF; print (($(n - 3) + 0) * 3600 + $(n - 2) * 60 + $(n - 1)) * 100 + $n}'
+}
+
 now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 failed=false
 for persona in haku kuro; do
@@ -47,11 +52,12 @@ JSON
   fi
   xcrun simctl io "$udid" screenshot "$out/watch-$persona.png"
   # A hung first frame spins the main thread; a drawn page mostly waits for the next animation frame.
-  before=$(ps -o cputime= -p "$pid" | awk -F'[:.]' '{print ($1 * 60 + $2) * 100 + $3}')
+  before=$(cpu_centiseconds "$pid")
   sleep 10
-  after=$(ps -o cputime= -p "$pid" | awk -F'[:.]' '{print ($1 * 60 + $2) * 100 + $3}')
+  after=$(cpu_centiseconds "$pid")
   busy=$(((after - before) / 10))
-  echo "$persona: CPU ${busy}% over 10 s"
+  # A real watch is many times slower than this Mac, so the CPU used at launch is the number to watch.
+  echo "::notice::$persona: ${before} cs CPU in the first 20 s, then ${busy}% over 10 s"
   if ((busy >= 80)); then
     echo "::error::The watch app kept the CPU at ${busy}% with $persona; its first frame may never finish"
     failed=true
