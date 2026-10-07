@@ -6,12 +6,20 @@ public struct ModeSegment: Identifiable, Equatable, Sendable {
     public var mode: Mode
     public var source: ModeChange.Source
     public var tag: String?
+    /// Start within the day shown, 05:00 at the latest for a mode carried over from the day before.
     public var start: Date
     public var end: Date
     /// True for the segment that is still running.
     public var isOngoing: Bool
+    /// When the mode was actually switched to, before `start` for a mode carried over from the day before.
+    public var startedAt: Date
 
+    /// Time inside the day shown.
     public var duration: TimeInterval { end.timeIntervalSince(start) }
+    /// Time since the mode was switched to, the day before included.
+    public var fullDuration: TimeInterval { end.timeIntervalSince(startedAt) }
+    /// True when the mode started before the day shown.
+    public var isCarriedOver: Bool { startedAt < start }
 }
 
 /// The append-only history of mode changes. This is the on-disk document.
@@ -89,7 +97,8 @@ public struct ModeLog: RecordLog, Equatable {
                     tag: change.tag,
                     start: start,
                     end: end,
-                    isOngoing: next == nil && end == now
+                    isOngoing: next == nil && end == now,
+                    startedAt: change.at
                 ))
         }
         return result
