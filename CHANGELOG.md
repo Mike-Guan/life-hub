@@ -328,6 +328,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Fixed
 - Switching mode and back within 2 minutes now updates the widgets and the Apple Watch too. Before, they
   kept showing the mode you had undone.
+- A night of sleep imported again with new numbers now updates HAKU's face in the widgets and on the watch.
+- The watch keeps the newest state from the iPhone when two arrive out of order.
 - KURO's keepsakes granted by the previous two builds stay hers, and a keepsake is never granted twice.
 - With KURO, the mode buttons, TODAY log, control and watch use her card colors, and her tennis and desk
   modes read TENNIS and DESK instead of BOXING and SIDE. Her desk time shows her tagline, not HAKU's

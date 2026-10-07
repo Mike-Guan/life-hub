@@ -31,6 +31,17 @@ import Testing
         #expect(WatchPayload(message: message) == payload())
     }
 
+    @Test func anOlderPayloadNeverReplacesANewerOne() {
+        let newer = payload()
+        var older = payload()
+        older.snapshot.mode = .boxing
+        older.snapshot.updatedAt = date(7, 9, 59)
+        #expect(newer.replaces(nil))
+        #expect(newer.replaces(older))
+        #expect(!older.replaces(newer))
+        #expect(newer.replaces(newer))
+    }
+
     @Test func ignoresAnEmptyOrUnreadableMessage() {
         #expect(WatchPayload(message: [:]) == nil)
         #expect(WatchPayload(message: [WatchPayload.messageKey: Data("{}".utf8)]) == nil)

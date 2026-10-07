@@ -239,13 +239,14 @@ struct LifeHubApp: App {
             WidgetCenter.shared.reloadAllTimelines()
             WatchSync.shared.send()
         }
-        // A manual mode change ends couch scrolling, so needs are worked out again. Watches the current
-        // change, not the count: undoing a quick switch soft-deletes it and adds nothing.
-        .onChange(of: store.log.current?.id) {
+        // A manual mode change ends couch scrolling, so needs are worked out again. Watches every write,
+        // not the count: undoing a quick switch soft-deletes it and adds nothing.
+        .onChange(of: store.revision) {
             refreshNeeds()
             Task { await scheduleOffWork() }
         }
-        .onChange(of: energy.log.events.count) { syncWidgets() }
+        // A sleep import updates its night in place, so this watches every write too.
+        .onChange(of: energy.revision) { syncWidgets() }
     }
 
     private var moneyCard: MoneyCard? {
