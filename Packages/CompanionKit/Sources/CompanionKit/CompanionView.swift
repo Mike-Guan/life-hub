@@ -92,10 +92,8 @@ public struct CompanionView: View {
     @State private var shakeTimes: [Date] = []
     @State private var dizzyStart: Date?
     @State private var closeUp = false
-    /// Where the eyes follow a press or the crown, -1 (left) ... 1 (right).
+    /// Where the eyes follow a press, -1 (left) ... 1 (right).
     @State private var look: CGFloat = 0
-    @State private var crown = 0.0
-    @State private var lookBack: Task<Void, Never>?
     @State private var pokeStart: Date?
     @State private var pokeKind: WatchPoke?
     @State private var pokes = 0
@@ -216,8 +214,6 @@ public struct CompanionView: View {
         .onTapGesture { react() }
         .task(id: listensForShakes) { await listenForShakes() }
         .gesture(pressAndLook, including: style == .notification ? .none : .all)
-        .modifier(CrownLook(isEnabled: style == .watch, crown: $crown))
-        .onChange(of: crown) { old, new in crowned(by: new - old) }
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: mode) { _, _ in
             pop += 1
@@ -514,7 +510,7 @@ public struct CompanionView: View {
         return pose
     }
 
-    /// `pose` with the eyes following a press or the crown, and dozing while the screen is dimmed (Always On).
+    /// `pose` with the eyes following a press, and dozing while the screen is dimmed (Always On).
     private func glance(_ pose: RunnerPose) -> RunnerPose {
         var pose = pose
         pose.eyesDx += 4 * look
@@ -540,17 +536,6 @@ public struct CompanionView: View {
                 closeUp = false
                 look = 0
             }
-    }
-
-    /// Moves the eyes with the crown and lets them drift back.
-    private func crowned(by amount: Double) {
-        look = max(-1, min(1, look + CGFloat(amount) / 4))
-        lookBack?.cancel()
-        lookBack = Task {
-            try? await Task.sleep(for: .seconds(1.2))
-            guard !Task.isCancelled else { return }
-            look = 0
-        }
     }
 
     /// Starts the notice turn as the app opens, as a slow look up when the app was closed for half a day.
@@ -1374,21 +1359,4 @@ struct SpeechBubble: View {
         .padding()
     }
     .background(Toy.paper)
-}
-
-/// Lets the Digital Crown on the watch turn `crown`.
-struct CrownLook: ViewModifier {
-    var isEnabled: Bool
-    @Binding var crown: Double
-
-    func body(content: Content) -> some View {
-        #if os(watchOS)
-        content
-            .focusable(isEnabled)
-            .focusEffectDisabled()
-            .digitalCrownRotation($crown)
-        #else
-        content
-        #endif
-    }
 }

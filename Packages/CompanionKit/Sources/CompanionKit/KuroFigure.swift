@@ -229,8 +229,6 @@ public struct KuroView: View {
     @AppStorage("companion.lastUnlock") private var lastUnlock = ""
     // Id of the last workout cheered, shared with HAKU's view so each plays once.
     @AppStorage("companion.lastCelebration") private var lastCelebration = ""
-    @State private var crown = 0.0
-    @State private var crownTurn = 0.0
 
     /// - Parameters:
     ///   - look: what she wears.
@@ -349,13 +347,11 @@ public struct KuroView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { react() }
-        // Until she has her own close-up and crown moves (新角色清单), both play her tap reaction.
+        // Until she has her own close-up (新角色清单), a long press plays her tap reaction.
         .gesture(
             LongPressGesture(minimumDuration: 0.4).onEnded { _ in react() },
             including: style == .notification ? .none : .all
         )
-        .modifier(CrownLook(isEnabled: style == .watch, crown: $crown))
-        .onChange(of: crown) { old, new in crowned(by: new - old) }
         .task(id: listensForShakes) { await listenForShakes() }
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: look) { _, _ in
@@ -401,14 +397,6 @@ public struct KuroView: View {
         }
         if talks { say(Self.line(after: bubble, from: lines)) }
         onTap?()
-    }
-
-    /// Plays her reaction once the crown has turned a full step, counting `delta` in either direction.
-    private func crowned(by delta: Double) {
-        crownTurn += abs(delta)
-        guard crownTurn >= 1 else { return }
-        crownTurn = 0
-        react()
     }
 
     /// Plays the unboxing or the workout cheer that `event` brings, if it is new.
