@@ -48,6 +48,8 @@ public struct CompanionView: View {
     let showsBubble: Bool
     /// Called after HAKU reacts to a tap, for example to switch the 副业 state.
     let onTap: (() -> Void)?
+    /// Called once the welcome back scene ends or is skipped with a tap.
+    let onWelcomeDone: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -109,6 +111,11 @@ public struct CompanionView: View {
     @State private var reviveStart: Date?
     // Id of the last time HAKU got up from the sofa, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastRevived") private var lastRevived = ""
+    @State private var welcomeStart: Date?
+    @State private var welcomeReplay: ReturnReplay?
+    @State private var welcomeTask: Task<Void, Never>?
+    // Id of the last welcome back, shared by every CompanionView so each plays once.
+    @AppStorage("companion.lastWelcome") private var lastWelcome = ""
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
 
@@ -133,7 +140,8 @@ public struct CompanionView: View {
         style: CompanionStyle = .standard,
         showsBubble: Bool = true,
         onTap: (() -> Void)? = nil,
-        onBathDone: (() -> Void)? = nil
+        onBathDone: (() -> Void)? = nil,
+        onWelcomeDone: (() -> Void)? = nil
     ) {
         self.mode = mode
         self.energy = energy
@@ -156,6 +164,7 @@ public struct CompanionView: View {
         self.showsBubble = showsBubble
         self.onTap = onTap
         self.onBathDone = onBathDone
+        self.onWelcomeDone = onWelcomeDone
     }
 
     public var body: some View {
@@ -169,6 +178,12 @@ public struct CompanionView: View {
             character
                 .padding(.top, 24)
                 .padding(.horizontal, 12)
+
+            if welcomeStart != nil, let replay = welcomeReplay {
+                TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+                    welcomeChips(replay, at: context.date.timeIntervalSinceReferenceDate)
+                }
+            }
 
             if showsBubble, let bubble {
                 SpeechBubble(text: bubble)
@@ -294,6 +309,7 @@ public struct CompanionView: View {
     private var shownMoment: CompanionMoment? { activity == nil ? moment : nil }
 
     private var accessibilityText: String {
+        if welcomeStart != nil, let replay = welcomeReplay { return CompanionLines.welcomeLabel(replay) }
         let life = mode.flatMap { idleLife($0, at: .now) }
         let peeking = couchStage(at: .now) == .peeking
         return CompanionLines.accessibilityLabel(
@@ -368,6 +384,13 @@ public struct CompanionView: View {
             // Reduced motion holds the last frame: standing with the mask up.
             let t = reduceMotion ? RunnerPose.reviveLength - 0.5 : CGFloat(progress) * RunnerPose.reviveLength
             return RunnerPose.revive(time: t, face: face)
+        }
+        if let replay = welcomeReplay, let t = welcome(at: time) {
+            let scene = WelcomeScene(replay, mode: mode)
+            let open = scene.open(cards: replay.cards.count, cans: replay.cans)
+            // Reduced motion holds the last frame.
+            let shown = reduceMotion ? scene.length(cards: replay.cards.count, cans: replay.cans) - 0.2 : t
+            return RunnerPose.welcome(scene, time: shown, open: open, face: face)
         }
         let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
         if reduceMotion {
@@ -552,6 +575,36 @@ public struct CompanionView: View {
         Self.progress(since: reviveStart, at: time, duration: Double(RunnerPose.reviveLength))
     }
 
+    /// Seconds into the welcome back scene at `time`, or nil when none is playing.
+    private func welcome(at time: TimeInterval) -> CGFloat? {
+        guard let start = welcomeStart?.timeIntervalSinceReferenceDate, let replay = welcomeReplay else { return nil }
+        let length = WelcomeScene(replay, mode: mode ?? .chill).length(cards: replay.cards.count, cans: replay.cans)
+        let t = CGFloat(time - start)
+        return t >= 0 && t < length ? t : nil
+    }
+
+    /// The card flipped over at the top, or at the bottom when there is no crate, then the cans chip.
+    @ViewBuilder private func welcomeChips(_ replay: ReturnReplay, at time: TimeInterval) -> some View {
+        let scene = WelcomeScene(replay, mode: mode ?? .chill)
+        let open = scene.open(cards: replay.cards.count, cans: replay.cans)
+        if let t = welcome(at: time) {
+            let shown = reduceMotion ? scene.length(cards: replay.cards.count, cans: replay.cans) - 0.2 : t
+            Group {
+                if let open, shown >= open + WelcomeScene.cansChip {
+                    CansChip(cans: replay.cans)
+                } else if let index = scene.card(at: shown, count: replay.cards.count, open: open) {
+                    let flip = min((shown - scene.firstCard - CGFloat(index) * WelcomeScene.cardGap) / 0.3, 1)
+                    ReturnCardChip(card: replay.cards[index])
+                        .rotation3DEffect(.degrees(reduceMotion ? 0 : 90 * Double(1 - flip)), axis: (x: 0, y: 1, z: 0))
+                        .id(index)
+                }
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: scene.crate ? .top : .bottom)
+            .allowsHitTesting(false)
+        }
+    }
+
     /// Progress of turning away after being tapped too often at `time`, 0..<1, or nil when not turned away.
     private func turnAway(at time: TimeInterval) -> Double? {
         let duration = style == .watch ? WatchPoke.turnAwayDuration : Self.turnAwayDuration
@@ -584,10 +637,11 @@ public struct CompanionView: View {
     }
 
     /// Whether a one-off animation that holds HAKU still is playing: off work, unboxing, staying home,
-    /// stretching, rolling the shoulders or getting up from the sofa.
+    /// stretching, rolling the shoulders, getting up from the sofa or the welcome back.
     private func stillOneOff(at time: TimeInterval) -> Bool {
         offWork(at: time) != nil || unlock(at: time) != nil || stayHome(at: time) != nil
             || stretchUp(at: time) != nil || limber(at: time) != nil || revive(at: time) != nil
+            || welcome(at: time) != nil
     }
 
     private static func progress(since start: Date?, at time: TimeInterval, duration: Double) -> Double? {
@@ -718,6 +772,12 @@ public struct CompanionView: View {
         return id
     }
 
+    /// The welcome back id to play for `event`, or nil when there is none or it already played.
+    nonisolated static func newWelcome(_ event: CompanionEvent?, last: String) -> String? {
+        guard case .welcomeBack(let id, _) = event, id != last else { return nil }
+        return id
+    }
+
     /// The planned task id to cheer for `event`, or nil when there is none or it already played.
     nonisolated static func newTaskDone(_ event: CompanionEvent?, last: String) -> String? {
         guard case .taskDone(let id, _) = event, id != last else { return nil }
@@ -782,6 +842,10 @@ public struct CompanionView: View {
                 say(Self.reviveLine, for: 2)
             }
         }
+        if let id = Self.newWelcome(event, last: lastWelcome), case .welcomeBack(_, let replay) = event {
+            lastWelcome = id
+            startWelcome(replay)
+        }
         if let id = Self.newTaskDone(event, last: lastTaskDone), case .taskDone(_, let focus) = event {
             lastTaskDone = id
             doneFocus = focus
@@ -796,6 +860,35 @@ public struct CompanionView: View {
         }
     }
     private static let notificationLoop = 2.4
+
+    /// Plays the welcome back scene for `replay`, with its line, and calls `onWelcomeDone` as it ends.
+    private func startWelcome(_ replay: ReturnReplay) {
+        let scene = WelcomeScene(replay, mode: mode ?? .chill)
+        welcomeReplay = replay
+        welcomeStart = .now
+        say(nil)
+        bubbleTask = Task {
+            try? await Task.sleep(for: .seconds(scene.line.at))
+            guard !Task.isCancelled else { return }
+            say(replay.line, for: scene.line.hold)
+        }
+        welcomeTask?.cancel()
+        welcomeTask = Task {
+            try? await Task.sleep(for: .seconds(Double(scene.length(cards: replay.cards.count, cans: replay.cans))))
+            guard !Task.isCancelled else { return }
+            endWelcome()
+        }
+    }
+
+    /// Ends the welcome back scene, early on a tap, and tells the app.
+    private func endWelcome() {
+        guard welcomeStart != nil else { return }
+        welcomeTask?.cancel()
+        welcomeStart = nil
+        welcomeReplay = nil
+        say(nil)
+        onWelcomeDone?()
+    }
 
     /// Whether the good-night animation last played within the past 12 hours.
     nonisolated static func playedTonight(last: TimeInterval, now: Date) -> Bool {
@@ -820,6 +913,11 @@ public struct CompanionView: View {
     private func react() {
         if style == .watch {
             reactToPoke()
+            return
+        }
+        if welcome(at: Date.now.timeIntervalSinceReferenceDate) != nil {
+            // A tap skips the welcome back.
+            endWelcome()
             return
         }
         if bath, dryStart == nil {
@@ -913,6 +1011,23 @@ public struct CompanionView: View {
         }
     }
 }
+
+// Made-up records for the previews.
+private let previewWelcomes: [(String, Mode, ReturnReplay)] = {
+    let cards = [
+        ReturnCard(kind: .boxing, count: 2, text: "打了 2 次拳。"),
+        ReturnCard(kind: .run5k, count: 1, text: "跑了 1 次 5 公里。"),
+        ReturnCard(kind: .sleptWell, count: 3, text: "有几天睡得挺好。"),
+        ReturnCard(kind: .trace, count: 1, item: CompanionTrace.runningShoes.rawValue, text: "门口多了双跑鞋。"),
+        ReturnCard(kind: .keepsake, count: 1, item: "gloves.gold", text: "拿到了金拳套。"),
+    ]
+    return [
+        ("preview-glance", .chill, ReturnReplay(tier: .glance, cards: Array(cards.prefix(3)), cans: 6)),
+        ("preview-sofa", .chill, ReturnReplay(tier: .box, cards: cards, cans: 23)),
+        ("preview-desk", .work, ReturnReplay(tier: .box, cards: cards, cans: 23)),
+        ("preview-quiet", .chill, ReturnReplay(tier: .box, cards: [], cans: 0)),
+    ]
+}()
 
 private struct Squash {
     var x: CGFloat = 1
@@ -1057,6 +1172,11 @@ struct SpeechBubble: View {
             CompanionView(mode: .chill, event: .stayHome(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .work, event: .stretched(id: "preview")).frame(height: 180).toyCard()
             CompanionView(mode: .money, event: .revived(id: "preview")).frame(height: 180).toyCard()
+            ForEach(previewWelcomes, id: \.0) { welcome in
+                CompanionView(mode: welcome.1, event: .welcomeBack(id: welcome.0, replay: welcome.2))
+                    .frame(height: 340)
+                    .toyCard()
+            }
             ForEach(DailyProp.allCases, id: \.self) { prop in
                 CompanionView(mode: .work, daily: DailyCue(stage: .soon, prop: prop, id: "preview-\(prop)"))
                     .frame(height: 180)

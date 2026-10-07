@@ -44,6 +44,8 @@ struct SceneMove {
     var scale: CGFloat = 1
     var anchor = UnitPoint.center
     var opacity = 1.0
+    /// Vertical squash on top of `scale`.
+    var scaleY: CGFloat = 1
 
     /// The move of `part` in `scene` at `time` seconds, or nil when the scene doesn't show the part.
     static func of(_ part: RunnerPart, in scene: DailyScene, at time: CGFloat) -> SceneMove? {
@@ -326,6 +328,183 @@ extension SceneMove {
             move.opacity = Double(1 - drop)
         case .sofaArm:
             move.offset.height = 24 * ease(RunnerPose.ramp(t, from: 2.2, to: 3))
+        default:
+            return nil
+        }
+        return move
+    }
+}
+
+// Coming back after days away (Mike approved the preview 2026-10-07, Issue #177): HAKU looks up from the
+// phone, or dozes, sits up, turns the phone face down and pushes over a crate whose cans open together. With
+// nothing recorded it scoots over and pats the seat.
+/// What HAKU acts out when Mike comes back after days away.
+enum WelcomeScene: Sendable {
+    /// A short absence: a look up from the phone on the sofa.
+    case glance
+    /// A long absence: dozing on the sofa under the blanket, then the crate.
+    case sofa
+    /// A long absence in work mode: dozing at the desk with the headset on, then the crate.
+    case desk
+    /// Nothing recorded: HAKU scoots over and pats the seat.
+    case quiet
+
+    /// The scene for `replay` while in `mode`.
+    init(_ replay: ReturnReplay, mode: Mode) {
+        if replay.isQuiet {
+            self = .quiet
+        } else if replay.tier == .glance {
+            self = .glance
+        } else {
+            self = mode == .work ? .desk : .sofa
+        }
+    }
+
+    /// Whether HAKU pushes over the crate.
+    var crate: Bool { self == .sofa || self == .desk }
+
+    /// Seconds in when the first card flips over.
+    var firstCard: CGFloat { crate ? 6 : 2.4 }
+
+    /// Seconds in when HAKU says its line, and how long the bubble stays.
+    var line: (at: Double, hold: Double) {
+        switch self {
+        case .glance: (1.7, 2.5)
+        case .sofa, .desk: (3, 1.7)
+        case .quiet: (3.6, 3)
+        }
+    }
+
+    /// Seconds in when the crate opens after `cards` cards, or nil when there are no cans to open.
+    func open(cards: Int, cans: Int) -> CGFloat? {
+        guard crate, cans > 0 else { return nil }
+        return firstCard + CGFloat(cards) * Self.cardGap + 0.2
+    }
+
+    /// How long the scene lasts with `cards` cards and `cans` cans, in seconds.
+    func length(cards: Int, cans: Int) -> CGFloat {
+        if self == .quiet { return 7.5 }
+        if let open = open(cards: cards, cans: cans) { return open + 3.3 }
+        return firstCard + CGFloat(cards) * Self.cardGap + 3
+    }
+
+    /// The card showing `time` seconds in, as an index into `count` cards, or nil before the first one and
+    /// once the crate opens.
+    func card(at time: CGFloat, count: Int, open: CGFloat?) -> Int? {
+        guard count > 0, time >= firstCard, time < open ?? .infinity else { return nil }
+        return min(Int((time - firstCard) / Self.cardGap), count - 1)
+    }
+
+    /// Seconds between two cards.
+    static let cardGap: CGFloat = 1.1
+    /// Seconds after the crate opens when the cans chip shows.
+    static let cansChip: CGFloat = 0.7
+}
+
+extension RunnerPose {
+    /// What the welcome back scene shows besides HAKU.
+    struct Welcome {
+        var scene: WelcomeScene
+        /// Seconds into the scene.
+        var time: CGFloat
+        /// Eyes open; before that they are sleepy.
+        var awake = false
+        /// How far the phone and the hands holding it have dropped, in SVG units.
+        var phoneDrop: CGFloat = 0
+        /// 0 = phone screen up, 1 = turned face down.
+        var phoneFlip: CGFloat = 0
+        /// How far the crate has slid in: 0 = off to the right, 1 = in front, -1 = hidden.
+        var crate: CGFloat = -1
+        /// 0 = flaps shut, 1 = folded open.
+        var crateOpen: CGFloat = 0
+        /// Whether the cans have popped up out of the crate.
+        var cansOut = false
+        /// How far the cans sit below their pile, in SVG units.
+        var canSink: CGFloat = 0
+        /// Opacity of the sparkles over the open crate.
+        var glow: Double = 0
+        /// Height of the hand patting the seat, 0...1, or -1 when it isn't patting.
+        var pat: CGFloat = -1
+    }
+
+    /// HAKU `time` seconds into `scene`; the crate opens at `open`, or stays shut when nil.
+    static func welcome(_ scene: WelcomeScene, time t: CGFloat, open: CGFloat?, face: EnergyFace) -> RunnerPose {
+        var pose = RunnerPose(face: face)
+        var w = Welcome(scene: scene, time: t)
+        pose.feed = frac(t * 0.8)
+        let slump = 5 + sin(t * 1.2)
+        switch scene {
+        case .glance:
+            let look = ease(ramp(t, from: 1.2, to: 1.6))
+            pose.bounce = slump * (1 - 0.4 * look)
+            pose.lean = -3 * Double(1 - 0.4 * look)
+            pose.headDy = 4 - 6 * look
+            w.phoneDrop = 6 * look
+            w.awake = t >= 1.3
+        case .sofa, .desk:
+            let desk = scene == .desk
+            let up = ease(ramp(t, from: 2.4, to: 2.9))
+            let doze = 1 - ease(ramp(t, from: 1.5, to: 1.7))
+            let twitch = t > 1.5 && t < 1.8 ? 2.5 * sin(t * 90) : 0
+            let push = bump(t, from: 4.4, to: 5.9)
+            pose.bounce = slump * (1 - up) - 2 * up
+            pose.lean = -3 * Double(1 - up) + 6 * Double(push)
+            pose.shift = 6 * push
+            pose.headDy = ((desk ? 10 : 6) * doze + 2 * (1 - doze)) * (1 - up) - 3 * bump(t, from: 1.5, to: 2.2)
+            pose.headTilt = Double(twitch + (desk ? 8 : 4) * doze)
+            pose.eyesShut = t < 1.55 && loop(t, 2.4) < 0.9
+            w.awake = t >= 1.55
+            w.phoneFlip = ease(ramp(t, from: 2.5, to: 2.9))
+            if t >= 4.6 { w.crate = ease(ramp(t, from: 4.6, to: 5.6)) }
+            if let open {
+                w.crateOpen = ease(ramp(t, from: open, to: open + 0.5))
+                let pop = ease(ramp(t, from: open + 0.3, to: open + 1.1))
+                w.cansOut = pop > 0
+                w.canSink = 26 * (1 - pop) - 10 * bump(t, from: open + 0.3, to: open + 1.4)
+                w.glow = t > open + 0.8 ? Double(0.6 + 0.4 * abs(sin(t * 5))) : 0
+            }
+        case .quiet:
+            let look = ease(ramp(t, from: 1.4, to: 1.8))
+            let scoot = ease(ramp(t, from: 2.1, to: 2.9))
+            pose.shift = -18 * scoot
+            pose.bounce = slump * (1 - 0.6 * look) + 2 * bump(t, from: 2.1, to: 2.9)
+            pose.lean = -3 * Double(1 - look)
+            pose.headDy = 4 - 6 * look
+            w.awake = t >= 1.5
+            w.phoneDrop = 14 * ease(ramp(t, from: 2.9, to: 3.2))
+            if t > 3.2 { w.pat = abs(sin((t - 3.2) * .pi * 2.2)) }
+        }
+        pose.welcome = w
+        return pose
+    }
+}
+
+extension SceneMove {
+    /// The move of the phone, the hands holding it or the furniture in the welcome back scene, or nil when
+    /// `part` isn't one.
+    static func welcome(_ part: RunnerPart, pose: RunnerPose) -> SceneMove? {
+        guard let w = pose.welcome else { return nil }
+        var move = SceneMove()
+        let box = RunnerArt.bounds
+        let anchor = { (x: CGFloat, y: CGFloat) in
+            UnitPoint(x: (x - box.minX) / box.width, y: (y - box.minY) / box.height)
+        }
+        switch part {
+        case .phone, .phoneFeed, .phoneBack:
+            // Squashed flat halfway through the flip, then the back shows, lying on the lap.
+            let f = w.phoneFlip
+            move.offset.height = w.phoneDrop + 30 * f - (part == .phoneFeed ? 5 * pose.feed : 0)
+            move.scaleY = abs(1 - 2 * f) * (1 - 0.4 * f) + 0.01
+            move.anchor = anchor(59, 102)
+            if part == .phoneFeed { move.opacity = Double(1 - 0.6 * pose.feed) }
+        case .phoneHand:
+            move.offset.height = w.phoneDrop + 22 * w.phoneFlip
+            move.opacity = Double(1 - w.phoneFlip)
+        case .sofaArm, .desk:
+            // The furniture stays put while HAKU leans and scoots.
+            move.offset = CGSize(width: -pose.shift, height: -pose.bounce)
+            move.angle = -pose.lean
+            move.anchor = anchor(60, 140)
         default:
             return nil
         }
