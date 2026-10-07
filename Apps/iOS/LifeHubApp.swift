@@ -215,8 +215,13 @@ struct LifeHubApp: App {
         }
         .onChange(of: persona) {
             persona.store(in: AppGroup.defaults)
-            WidgetCenter.shared.reloadAllTimelines()
-            WatchSync.shared.send()
+            // Settings is a sheet, so the scene stays active: refresh here what an open would refresh.
+            // Needs reschedule the invite, and the widgets and the watch get the new lines.
+            refreshNeeds()
+            Task {
+                await scheduleReminder()
+                countdownError = await BoxingCountdown.update(for: needs.reading)
+            }
         }
         .onChange(of: wardrobe) {
             wardrobe.store(in: AppGroup.defaults)
@@ -441,7 +446,7 @@ struct LifeHubApp: App {
     }
 
     private func scheduleReminder() async {
-        reminderError = await BedtimeReminder.schedule(bedtime)
+        reminderError = await BedtimeReminder.schedule(bedtime, persona: persona)
         // The bedtime call asks for permission; without it this would fail the same way.
         if reminderError == nil { await scheduleOffWork() }
     }

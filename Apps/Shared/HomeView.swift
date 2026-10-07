@@ -155,7 +155,7 @@ struct HomeView: View {
                 }
 
                 if let state = store.sideHustle {
-                    Text("\(state.title) 中 · 点 HAKU 换状态")
+                    Text("\(state.title) 中 · 点 \(persona.title) 换状态")
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
                 } else if let mode = store.current {
@@ -180,7 +180,7 @@ struct HomeView: View {
                     let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
                     let leftWork = HakuLines.offWorkUntil(store.log, now: context.date)
                     let offWork = leftWork.map { HakuLines.offWorkLine(for: persona, until: $0, work: rules) }
-                    let activityLine = activity(at: context.date)?.reason
+                    let activityLine = activity(at: context.date)?.reason(for: persona)
                     if let line = offWork ?? activityLine ?? workLine ?? notice ?? sunday ?? why {
                         Text(line)
                             .font(Toy.body(13, weight: .bold))

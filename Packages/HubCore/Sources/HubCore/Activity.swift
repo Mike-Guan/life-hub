@@ -23,6 +23,14 @@ public enum CompanionActivity: String, Sendable {
         case .runDay: "跑步日，傍晚了"
         }
     }
+
+    /// Why `persona` is doing it: KURO's identity place is a tennis court.
+    public func reason(for persona: Persona) -> String {
+        switch (persona, self) {
+        case (.kuro, .boxingAtGym): "你在网球场"
+        default: reason
+        }
+    }
 }
 
 // PRD section 16. The state logic picks one; CompanionKit draws it.
