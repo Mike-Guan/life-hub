@@ -182,13 +182,18 @@ public struct KuroView: View {
     let activity: CompanionActivity?
     let moment: CompanionMoment?
     let overtimeUntil: Date?
+    let style: CompanionStyle
     let showsBubble: Bool
+    /// Called after KURO reacts to a tap, for example to switch the 副业 state.
+    let onTap: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
     @State private var pop = 0
+    @State private var pokeStart: Date?
+    @State private var pokes = 0
 
     /// - Parameters:
     ///   - look: what she wears.
@@ -199,7 +204,9 @@ public struct KuroView: View {
     ///   - moment: the moment of the day, which picks her lines unless an activity does. In the work look,
     ///     `.overtime` sits her at the desk with her chin on her hand.
     ///   - overtimeUntil: the late end of the work day, shown on a sign above her head during `.overtime`.
+    ///   - style: `.watch` makes a tap a poke: a happy hop and a light tap on the wrist instead of a line.
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
+    ///   - onTap: called after she reacts to a tap.
     public init(
         look: KuroLook,
         energy: Double? = nil,
@@ -208,7 +215,9 @@ public struct KuroView: View {
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
         overtimeUntil: Date? = nil,
-        showsBubble: Bool = true
+        style: CompanionStyle = .standard,
+        showsBubble: Bool = true,
+        onTap: (() -> Void)? = nil
     ) {
         self.look = look
         self.energy = energy
@@ -217,7 +226,9 @@ public struct KuroView: View {
         self.activity = activity
         self.moment = moment
         self.overtimeUntil = overtimeUntil
+        self.style = style
         self.showsBubble = showsBubble
+        self.onTap = onTap
     }
 
     public var body: some View {
@@ -232,13 +243,15 @@ public struct KuroView: View {
             let paused = reduceMotion || scenePhase != .active
             TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
                 let time = context.date.timeIntervalSinceReferenceDate
-                let pose = self.pose
+                let poke = Self.poke(since: pokeStart, at: time)
+                let pose = poke == nil ? self.pose : self.pose.showing(.happy)
                 let pace = EnergyFace(energy: energy).speed
                 let sleepy = bedtime == .on || pose.overtime
                 let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(look, time: time * pace)
-                KuroFigure(look: look, pose: reduceMotion ? pose : pose.blink(at: time))
+                let hop: CGFloat = reduceMotion ? 0 : -10 * CGFloat(sin((poke ?? 0) * .pi))
+                KuroFigure(look: look, pose: reduceMotion || poke != nil ? pose : pose.blink(at: time))
                     .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                    .offset(y: reduceMotion ? 0 : motion.dy)
+                    .offset(y: (reduceMotion ? 0 : motion.dy) + hop)
             }
             .id(look)
             .transition(.opacity)
@@ -265,14 +278,37 @@ public struct KuroView: View {
             }
         }
         .contentShape(Rectangle())
-        .onTapGesture { if showsBubble { say(Self.line(after: bubble, from: lines)) } }
+        .onTapGesture { react() }
+        .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: look) { _, _ in
             pop += 1
             say(nil)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime, pose: pose))
-        .accessibilityAddTraits(showsBubble ? .isButton : [])
+        .accessibilityAddTraits(showsBubble || style == .watch || onTap != nil ? .isButton : [])
+    }
+
+    /// On the watch a tap is a poke; elsewhere it shows a line.
+    private func react() {
+        if style == .watch {
+            pokes += 1
+            pop += 1
+            pokeStart = .now
+        } else if showsBubble {
+            say(Self.line(after: bubble, from: lines))
+        }
+        onTap?()
+    }
+
+    /// How long a poke on the watch plays, in seconds.
+    nonisolated static let pokeDuration: TimeInterval = 0.9
+
+    /// Progress of the poke that started at `start` at `time`, 0..<1, or nil when none is playing.
+    nonisolated static func poke(since start: Date?, at time: TimeInterval) -> Double? {
+        guard let start = start?.timeIntervalSinceReferenceDate else { return nil }
+        let progress = (time - start) / pokeDuration
+        return (0..<1).contains(progress) ? progress : nil
     }
 
     private var pose: KuroPose {

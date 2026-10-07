@@ -52,9 +52,10 @@ struct HubEntry: TimelineEntry {
     /// task, else the app's line for now, else today's energy.
     var detail: String {
         if let offWork { return offWork }
-        if bath { return "去洗澡" }
+        // The second character's picture shows neither of these, so her line skips them.
+        if persona == .haku && bath { return "去洗澡" }
         if let activity { return activity.reason(for: persona) }
-        if moment == .heading { return "出发了，包我背着" }
+        if persona == .haku && moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) {
             return HakuLines.line(scene, at: date, persona: persona)
         }

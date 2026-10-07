@@ -5,9 +5,10 @@ import UIKit
 import UserNotifications
 import UserNotificationsUI
 
-/// Shows RUNNER in the expanded notification: sleepy at bedtime, getting up for an invite, off duty after work.
+/// Shows the chosen character in the expanded notification: sleepy at bedtime, getting up for an invite, off duty
+/// after work.
 final class NotificationViewController: UIViewController, UNNotificationContentExtension {
-    private var host: UIHostingController<CompanionView>?
+    private var host: UIHostingController<AnyView>?
 
     nonisolated func didReceive(_ notification: UNNotification) {
         let content = notification.request.content
@@ -29,15 +30,32 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
             case .sitting: .stiff
             default: GymDeparture.moment(activity: nil, need: need, departing: false)
             }
-        let runner = CompanionView(
-            mode: mode,
-            need: need,
-            moment: moment,
-            invite: invite,
-            bedtime: bedtime,
-            style: .notification,
-            showsBubble: false
-        )
+        let runner =
+            switch Persona.stored(in: AppGroup.defaults) {
+            case .haku:
+                AnyView(
+                    CompanionView(
+                        mode: mode,
+                        need: need,
+                        moment: moment,
+                        invite: invite,
+                        bedtime: bedtime,
+                        style: .notification,
+                        showsBubble: false
+                    )
+                )
+            case .kuro:
+                AnyView(
+                    KuroView(
+                        look: KuroLook(mode: mode ?? .chill),
+                        bedtime: bedtime,
+                        need: need,
+                        moment: moment,
+                        style: .notification,
+                        showsBubble: false
+                    )
+                )
+            }
         // didReceive runs again when the notification is updated; reuse the view then.
         if let host {
             host.rootView = runner

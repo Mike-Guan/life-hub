@@ -40,7 +40,8 @@ struct WatchHomeView: View {
                             KuroView(
                                 look: KuroLook(mode: mode),
                                 energy: snapshot.energy(at: context.date)?.value,
-                                bedtime: payload.bedtime.state(at: context.date)
+                                bedtime: payload.bedtime.state(at: context.date),
+                                style: .watch
                             )
                         } else {
                             CompanionView(

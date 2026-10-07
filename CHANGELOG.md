@@ -333,6 +333,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character's card now fills with her own color per mode (mint, sky, pink, lavender, as in
   the approved preview), dims at bedtime and squashes as the mode changes, on the home screen and the watch.
   Before, it stayed white.
+- With the second preset character chosen, a tap on her on the watch is a poke: a happy hop and a light tap on
+  the wrist. Expanded notifications draw her instead of HAKU, and the widget line no longer mentions HAKU's
+  bath, walks or activities she doesn't show.
+- The second preset character can take a tap action like HAKU's, so the app can switch the 副业 state from her.
+- A mode change during the welcome back no longer clears its line.
 - Leaving the office switches to 下班 Chill only from 17:30. Stepping out earlier, such as for lunch,
   keeps 上班.
 - Staying 30 minutes at the boxing gym counts as boxing, like the fitness gym: 5 cans once a week and

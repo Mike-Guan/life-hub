@@ -197,7 +197,8 @@ public struct CompanionView: View {
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: mode) { _, _ in
             pop += 1
-            say(nil)
+            // The welcome back keeps its line through a mode change (issue #184).
+            if welcomeStart == nil { say(nil) }
         }
         .onAppear {
             startNotice()
