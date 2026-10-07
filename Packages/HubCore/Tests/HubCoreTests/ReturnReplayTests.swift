@@ -112,6 +112,12 @@ import Testing
         #expect(cards.first?.count == 3)
     }
 
+    @Test func theReplayTravelsAsAnEvent() throws {
+        let back = try #require(replay(seen: date(1), now: date(10)))
+        let event = CompanionEvent.welcomeBack(id: "a", replay: back)
+        #expect(event != .welcomeBack(id: "b", replay: back))
+    }
+
     @Test func theLastBoxIsStored() throws {
         let defaults = try #require(UserDefaults(suiteName: "ReturnReplayTests"))
         defaults.removePersistentDomain(forName: "ReturnReplayTests")

@@ -33,6 +33,9 @@ public enum CompanionEvent: Equatable, Sendable {
     /// Getting up from the sofa after long couch scrolling, as Mike starts the bath or vibe coding; `id` is the
     /// switch, so it plays once.
     case revived(id: String)
+    /// Coming back after days away: what was recorded meanwhile; `id` is when the app last closed, so it
+    /// plays once.
+    case welcomeBack(id: String, replay: ReturnReplay)
 }
 
 /// A workout from the Health app, reduced to what the hub uses.
