@@ -11,14 +11,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   between home and the office. Nothing shows it yet.
 - The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
   lifting, running, morning, overtime, just home, the bath and the vibe-coding cans.
-- Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat shape.
+- Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat
+  shape.
 - Workouts from the Health app are sorted into about ten groups (walking, cycling, swimming, racket, ball,
   yoga, dance, outdoor and more). Cans are unchanged: only boxing, 5 km runs and the gym earn.
 - Settings: the character choice and the times use outlined Toy controls, so they no longer show as pale grey.
 - Each character has her own cans, items, keepsake progress, room traces and hidden stats. Cans go to the
   character picked when they are earned; switching asks first. Everything earned before stays HAKU's. Life
   records, sleep and the weekly changes are shared.
-- KURO has her own shop, wardrobe and unboxing: her 5 items and 3 keepsakes, at the same can prices. Each character keeps what she wears; the home card, widgets and watch show it.
+- KURO has her own shop, wardrobe and unboxing: her 5 items and 3 keepsakes, at the same can prices. Each
+  character keeps what she wears; the home card, widgets and watch show it.
 - HAKU's blanket is now cream with a white folded hem, two small orange-and-white cats and faint paw prints,
   everywhere it shows.
 - After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.
@@ -44,6 +46,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Cans have caps: Sunday boxing earns once a week; runs, the gym and other wins once a day.
 - The companion is called HAKU everywhere you see it: the widget name, notifications, Settings and
   VoiceOver. Code names stay RUNNER.
+- Tapping HAKU on the phone plays the same body move as on the watch (pushes up a headset cup, clinks the can,
+  punches, flashes the mask, glares, rolls over). Five taps in 30 seconds turn him away for a few seconds with
+  "……够了。" on both.
+- HAKU wears only the blue earring everywhere. The white earbud in chill, at night under the blanket and on
+  walks is gone.
+- HAKU and KURO cheer after every kind of workout of 20 minutes or more (tennis, swimming, yoga and the
+  rest), not only boxing, runs and the gym. Cans are unchanged.
+- The home card and the watch know the commute: walking from home to the office or back, riding the train or
+  bus, and the moment of arriving. Life Hub asks for Motion & Fitness once; motion stays on the iPhone.
+- After a workout the watch cheers for it as soon as the Health app saves it, without opening the iPhone app.
+  The iPhone home still cheers the next time it opens.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
@@ -134,7 +147,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   after 走, or earned a keepsake within a day of being one win away. On Sunday HAKU says one line about
   the week's moments on the home screen and widgets; a week with none gets no line. Getting up after an
   invite now also earns its can and the 起身庆祝 keepsake.
-- Tap HAKU while it snacks or draws: after it hides the snack or sketchbook, it looks away and whistles a little note.
+- Tap HAKU while it snacks or draws: after it hides the snack or sketchbook, it looks away and whistles a little
+  note.
 - At home HAKU now and then scratches its head and a tuft of hair sticks up, then slowly settles.
 - When HAKU's 元气 is high (good sleep, sunlight) a little music note now and then floats up as it hums.
 - When HAKU's 元气 is low (short sleep, no sun) it now and then rubs an eye with its fist.
@@ -335,6 +349,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tired look below 30 energy. `CompanionPortrait` gives a still version for widgets.
 - Energy data model: sleep and self-report events, a rule-based state engine that gives today's
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
+- Shaking the phone or the watch makes HAKU dizzy: swirl eyes, stars around the head and a wobble, with a line
+  per mode. On a boxing day he gets pumped instead, asleep he glares and sleeps on, and three shakes in a minute
+  turn him away. KURO plays her tap reaction for now.
+- Press and hold HAKU for a close-up of his face; drag sideways while holding and his eyes follow. On the watch
+  the Digital Crown moves his eyes too, and on the Always On screen he dozes with his eyes shut.
+- After a workout HAKU celebrates in the group's own way: towel and panting for walks, a helmet for rides,
+  goggles for swims, kicks, a racket, a spinning ball, a big stretch, dancing and mountains. Each has its own
+  line.
+- The watch app has two pages: HAKU or KURO full screen in the mode's color from the chest up, with a mode and
+  how-long chip, then swipe up for today's mode time, energy and line.
 
 ### Fixed
 - Leaving the office in the evening ends work even if that leave was missed: from 17:30, being away from the
