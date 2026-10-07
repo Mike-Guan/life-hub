@@ -107,7 +107,6 @@ struct HomeView: View {
                             moment: moment(at: context.date),
                             overtimeUntil: rules.eveningUntil(at: context.date)
                         )
-                        .padding(.vertical, 12)
                     } else {
                         CompanionView(
                             mode: replaying ? replayFrom : store.current,

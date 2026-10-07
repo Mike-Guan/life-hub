@@ -316,6 +316,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- The second preset character's colored card fills the whole home card, with no white strips above and below.
 - The second preset character's card now fills with her own color per mode (mint, sky, pink, lavender, as in
   the approved preview), dims at bedtime and squashes as the mode changes, on the home screen and the watch.
   Before, it stayed white.
