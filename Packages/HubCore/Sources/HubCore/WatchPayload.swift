@@ -13,23 +13,27 @@ public struct WatchPayload: Codable, Equatable, Sendable {
     public var wardrobe: Wardrobe
     public var bedtime: BedtimeSchedule
     public var persona: Persona
+    /// What the home card acts out over the next hours, so the watch plays the same scene.
+    public var scenes: [TimedScene]
 
     public init(
         snapshot: WidgetSnapshot,
         wardrobe: Wardrobe = Wardrobe(),
         bedtime: BedtimeSchedule = .standard,
-        persona: Persona = .haku
+        persona: Persona = .haku,
+        scenes: [TimedScene] = []
     ) {
         self.schemaVersion = Self.currentSchemaVersion
         self.snapshot = snapshot
         self.wardrobe = wardrobe
         self.bedtime = bedtime
         self.persona = persona
+        self.scenes = scenes
     }
 
-    private enum CodingKeys: String, CodingKey { case schemaVersion, snapshot, wardrobe, bedtime, persona }
+    private enum CodingKeys: String, CodingKey { case schemaVersion, snapshot, wardrobe, bedtime, persona, scenes }
 
-    /// Decodes the payload; a missing wardrobe, bedtime or persona falls back to the defaults.
+    /// Decodes the payload; a missing wardrobe, bedtime, persona or scenes fall back to the defaults.
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try values.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
@@ -37,9 +41,11 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         wardrobe = (try? values.decodeIfPresent(Wardrobe.self, forKey: .wardrobe)) ?? Wardrobe()
         bedtime = (try? values.decodeIfPresent(BedtimeSchedule.self, forKey: .bedtime)) ?? .standard
         persona = (try? values.decodeIfPresent(Persona.self, forKey: .persona)) ?? .haku
+        scenes = (try? values.decodeIfPresent([TimedScene].self, forKey: .scenes)) ?? []
     }
 
-    /// Whether `other` draws the same watch face: equal apart from the write time and the work time.
+    /// Whether `other` draws the same watch face: equal apart from the write time, the work time and the
+    /// scenes, which only the watch app plays.
     public func drawsLike(_ other: WatchPayload) -> Bool {
         var mine = self
         var theirs = other
@@ -48,6 +54,8 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         theirs.snapshot.updatedAt = .distantPast
         mine.snapshot.workedToday = nil
         theirs.snapshot.workedToday = nil
+        mine.scenes = []
+        theirs.scenes = []
         return mine == theirs
     }
 

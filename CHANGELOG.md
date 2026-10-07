@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
+  lifting, running, morning, overtime, just home, the bath and the vibe-coding cans.
 - Settings: the character choice and the times use outlined Toy controls, so they no longer show as pale grey.
 - Each character has her own cans, items, keepsake progress, room traces and hidden stats. Cans go to the
   character picked when they are earned; switching asks first. Everything earned before stays HAKU's. Life

@@ -134,7 +134,7 @@ struct LifeHubApp: App {
                 BathTime.markDone(at: .now, in: AppGroup.defaults)
                 bathDoneAt = .now
                 WidgetCenter.shared.reloadAllTimelines()
-                WatchSync.shared.send()
+                sendToWatch()
             }
         )
         .environment(store)
@@ -237,7 +237,7 @@ struct LifeHubApp: App {
         .onChange(of: wardrobe) {
             wardrobe.store(in: AppGroup.defaults, persona: persona)
             WidgetCenter.shared.reloadAllTimelines()
-            WatchSync.shared.send()
+            sendToWatch()
         }
         // A manual mode change ends couch scrolling, so needs are worked out again.
         .onChange(of: store.log.changes.count) {
@@ -372,7 +372,7 @@ struct LifeHubApp: App {
             widgets.workouts = needs.workouts
             widgets.sync(mode: store, energy: energy)
             WidgetCenter.shared.reloadAllTimelines()
-            WatchSync.shared.send()
+            sendToWatch()
             // Arriving at the gym ends the countdown, even with the app in the background.
             Task { _ = await BoxingCountdown.update(for: needs.reading) }
             // Arriving at or leaving the office decides today's off-work notice.
@@ -411,7 +411,7 @@ struct LifeHubApp: App {
         widgets.rules = AppGroup.needRules()
         widgets.sync(mode: store, energy: energy)
         WidgetCenter.shared.reloadAllTimelines()
-        WatchSync.shared.send()
+        sendToWatch()
     }
 
     // Builds before the report ladder watched a single 30-minute event; restarting swaps in the ladder.
@@ -449,7 +449,23 @@ struct LifeHubApp: App {
     private func syncWidgets() {
         widgets.sync(mode: store, energy: energy, expenses: expenses)
         WidgetCenter.shared.reloadAllTimelines()
-        WatchSync.shared.send()
+        sendToWatch()
+    }
+
+    // The watch plays the home card's scenes, worked out from the same inputs as HomeView.
+    private func sendToWatch() {
+        let inputs = HomeSceneInputs(
+            log: store.log,
+            rules: rules,
+            bedtime: bedtime,
+            need: needs.reading,
+            signals: needs.activitySignals,
+            days: ActivityDays.stored(in: AppGroup.defaults).learningGym(from: growth.ledger, now: .now),
+            departure: needs.departure,
+            sit: needs.sit,
+            bathDoneAt: bathDoneAt
+        )
+        WatchSync.shared.send(scenes: inputs.timeline(from: .now))
     }
 
     private func scheduleOffWork() async {
