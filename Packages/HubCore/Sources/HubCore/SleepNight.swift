@@ -54,6 +54,37 @@ public struct SleepNight: Equatable, Sendable {
         return SleepNight(id: nightID(dayStart, calendar: calendar), minutes: Int(total / 60), endedAt: endedAt)
     }
 
+    /// The span to read sleep from for every hub day from `start` to `end`.
+    public static func window(from start: Date, to end: Date, calendar: Calendar = .current) -> DateInterval {
+        let first = window(for: start, calendar: calendar).start
+        return DateInterval(start: first, end: max(first, end))
+    }
+
+    /// One night per hub day from `start` to `end`, for days with sleep.
+    /// - Parameters:
+    ///   - intervals: the asleep intervals read for `window(from:to:)`.
+    ///   - start: the first moment to cover.
+    ///   - end: the last moment to cover.
+    ///   - calendar: the calendar for hub days.
+    public static func nights(
+        _ intervals: [SleepInterval],
+        from start: Date,
+        to end: Date,
+        calendar: Calendar = .current
+    ) -> [SleepNight] {
+        var nights: [SleepNight] = []
+        var day = StateEngine.dayStart(for: start, calendar: calendar)
+        while day <= end {
+            let now = min(end, day.addingTimeInterval(latestEnd))
+            if let night = from(intervals, now: now, calendar: calendar), night.endedAt > start {
+                nights.append(night)
+            }
+            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = next
+        }
+        return nights
+    }
+
     // A fixed prefix plus the date, so the id depends only on the night.
     static func nightID(_ dayStart: Date, calendar: Calendar) -> UUID {
         let parts = calendar.dateComponents([.year, .month, .day], from: dayStart)
