@@ -50,6 +50,7 @@ struct LifeHubApp: App {
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
         let needs = NeedTracker()
+        WatchSync.shared.activate()
         let growth = GrowthStore.live(in: container, defaults: AppGroup.defaults)
         _store = State(initialValue: store)
         // The Focus filter switches mode through this store, so the app keeps one writer for the log.
@@ -124,6 +125,7 @@ struct LifeHubApp: App {
                 BathTime.markDone(at: .now, in: AppGroup.defaults)
                 bathDoneAt = .now
                 WidgetCenter.shared.reloadAllTimelines()
+                WatchSync.shared.send()
             }
         )
         .environment(store)
@@ -204,6 +206,7 @@ struct LifeHubApp: App {
         .onChange(of: wardrobe) {
             wardrobe.store(in: AppGroup.defaults)
             WidgetCenter.shared.reloadAllTimelines()
+            WatchSync.shared.send()
         }
         // A manual mode change ends couch scrolling, so needs are worked out again.
         .onChange(of: store.log.changes.count) {
@@ -297,6 +300,7 @@ struct LifeHubApp: App {
             widgets.workouts = needs.workouts
             widgets.sync(mode: store, energy: energy)
             WidgetCenter.shared.reloadAllTimelines()
+            WatchSync.shared.send()
             // Arriving at the gym ends the countdown, even with the app in the background.
             Task { _ = await BoxingCountdown.update(for: needs.reading) }
             // Arriving at or leaving the office decides today's off-work notice.
@@ -334,6 +338,7 @@ struct LifeHubApp: App {
         widgets.need = needs.reading
         widgets.sync(mode: store, energy: energy)
         WidgetCenter.shared.reloadAllTimelines()
+        WatchSync.shared.send()
     }
 
     // Builds before the report ladder watched a single 30-minute event; restarting swaps in the ladder.
@@ -370,6 +375,7 @@ struct LifeHubApp: App {
     private func syncWidgets() {
         widgets.sync(mode: store, energy: energy, expenses: expenses)
         WidgetCenter.shared.reloadAllTimelines()
+        WatchSync.shared.send()
     }
 
     private func scheduleOffWork() async {

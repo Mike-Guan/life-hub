@@ -27,6 +27,8 @@ public struct HubContainer: Sendable {
     public var expenseLogURL: URL? { file("expense-log.json") }
     public var canLedgerURL: URL? { file("can-ledger.json") }
     public var snapshotURL: URL? { file("widget-snapshot.json") }
+    /// What the Apple Watch last got from the iPhone, in the watch's own container.
+    public var watchPayloadURL: URL? { file("watch-payload.json") }
     /// The public card, kept apart from every private log.
     public var publicCardURL: URL? { file("public-card.json") }
     public var inbox: EventInbox { EventInbox(folder: folder?.appending(path: "inbox", directoryHint: .isDirectory)) }

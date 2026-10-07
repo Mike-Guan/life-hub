@@ -32,6 +32,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- HAKU on Apple Watch: a watch face widget (circular, corner and rectangular) and a watch app that shows
+  HAKU as the iPhone last saw it. The iPhone sends the state; the watch changes nothing.
 - After long couch scrolling, as the bath or vibe coding starts, HAKU drops the phone, gets up from the sofa,
   stretches, pulls its mask up with the </> lit and says "……活过来了？". It plays at most once a day, when
   you switch within 20 minutes of the last couch scrolling at home and open the app within 30 minutes.
