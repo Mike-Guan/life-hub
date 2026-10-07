@@ -19,6 +19,10 @@ struct HomeView: View {
     var departure: GymDeparture?
     /// A one-off animation for RUNNER, such as celebrating a workout.
     var event: CompanionEvent?
+    /// What was recorded while Mike was away for days, played before any other event.
+    var welcomeBack: CompanionEvent?
+    /// Called once the welcome back scene ends or is skipped.
+    var onWelcomeDone: (() -> Void)?
     /// The mode to show for a moment before the current one, so a switch made while the app was closed plays.
     var replayFrom: Mode?
     /// Today's invite text while its need lasts, so RUNNER gets up and says it.
@@ -115,7 +119,8 @@ struct HomeView: View {
                             codingCans: codingCans(at: context.date),
                             traces: traces(at: context.date, energy: reading?.level),
                             vitals: VitalsEngine.vitals(ledger: ledger, energy: energy.log, now: context.date),
-                            event: event ?? revived(at: context.date) ?? sit?.stretched(at: context.date)
+                            event: welcomeBack ?? event ?? revived(at: context.date)
+                                ?? sit?.stretched(at: context.date)
                                 ?? stayHome(at: context.date) ?? dailyDone,
                             daily: daily?.cue(at: context.date),
                             walking: walking(at: context.date),
@@ -125,7 +130,8 @@ struct HomeView: View {
                             bedtime: bedtime.state(at: context.date),
                             wardrobe: wardrobe,
                             onTap: tapAction,
-                            onBathDone: onBathDone
+                            onBathDone: onBathDone,
+                            onWelcomeDone: onWelcomeDone
                         )
                     }
                 }
