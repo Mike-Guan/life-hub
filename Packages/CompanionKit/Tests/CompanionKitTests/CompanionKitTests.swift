@@ -825,9 +825,49 @@ import Testing
         var boxing = RunnerPose()
         boxing.celebrate(.boxing, progress: 0.25)
         #expect(boxing.gloveR.height < -20)
-        let kinds: [WorkoutSummary.Kind] = [.boxing, .running, .strength, .other]
-        let lines = Set(kinds.map { CompanionLines.celebration($0) })
-        #expect(lines.count == 4)
+        let lines = Set(WorkoutSummary.Kind.allCases.map { CompanionLines.celebration($0) })
+        #expect(lines.count == WorkoutSummary.Kind.allCases.count)
+    }
+
+    @Test func eachWorkoutGroupShowsItsProps() {
+        func cheering(_ kind: WorkoutSummary.Kind) -> Set<RunnerPart> {
+            var pose = RunnerPose()
+            pose.celebrate(kind, progress: 0.25)
+            return Set(RunnerFigure.parts(for: .chill, pose: pose))
+        }
+        let props: [WorkoutSummary.Kind: RunnerPart] = [
+            .walking: .cheerLegLines, .cycling: .cheerHelmet, .swimming: .cheerGoggles, .martialArts: .cheerKick,
+            .racket: .cheerRacket, .ball: .cheerBall, .yoga: .cheerStretchArms, .dance: .cheerNotes,
+            .outdoor: .cheerMountains,
+        ]
+        for (kind, part) in props {
+            #expect(cheering(kind).contains(part))
+            #expect(!cheering(kind).contains(.monsterCan))
+        }
+        #expect(cheering(.walking).isSuperset(of: [.towel, .eyesClosed, .mouthYawn]))
+        #expect(!cheering(.walking).contains(.mouthSmile))
+        #expect(cheering(.cycling).contains(.eyesSleepy) && !cheering(.cycling).contains(.eyesChill))
+        #expect(cheering(.martialArts).isSuperset(of: [.cateyeL, .cateyeR, .mouthFang]))
+        #expect(cheering(.martialArts).isDisjoint(with: [.eyesChill, .mouthSmile]))
+        for kind in [WorkoutSummary.Kind.swimming, .yoga, .dance] {
+            #expect(cheering(kind).contains(.eyesClosed) && !cheering(kind).contains(.eyesChill))
+        }
+        #expect(cheering(.ball).contains(.cheerBallHand))
+        #expect(cheering(.outdoor).contains(.cheerWind))
+    }
+
+    @Test func everyWorkoutGroupCelebrationMoves() {
+        func motion(_ kind: WorkoutSummary.Kind, at progress: CGFloat) -> [Double] {
+            var pose = RunnerPose()
+            pose.celebrate(kind, progress: progress)
+            return [pose.lean, Double(pose.bounce), Double(pose.stretch), pose.headTilt]
+        }
+        let kinds: [WorkoutSummary.Kind] = [
+            .walking, .cycling, .swimming, .martialArts, .racket, .ball, .yoga, .dance, .outdoor,
+        ]
+        for kind in kinds {
+            #expect(motion(kind, at: 0.1) != motion(kind, at: 0.3))
+        }
     }
 
     @Test func couchStagesFollowTimeAndInvite() {

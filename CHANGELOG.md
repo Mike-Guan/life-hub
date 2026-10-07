@@ -42,6 +42,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- After a workout HAKU celebrates in the group's own way: towel and panting for walks, a helmet for rides,
+  goggles for swims, kicks, a racket, a spinning ball, a big stretch, dancing and mountains. Each has its own line.
 - Tapping KURO plays a move for her look: the tablet over her face, a sip from her cup, a ball bounced on her
   racket or a push of her glasses. When tired she rubs her eyes, 5 taps turn her back, and sometimes a heart pops up.
 - KURO's own shop items (five to buy at HAKU's prices, three keepsakes at HAKU's milestones) and her own
