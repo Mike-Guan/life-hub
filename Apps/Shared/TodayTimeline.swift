@@ -19,7 +19,7 @@ struct TodayTimeline: View {
                     .foregroundStyle(Toy.muted)
             } else {
                 ForEach(segments.reversed()) { segment in
-                    Row(segment: segment)
+                    Row(segment: segment, persona: persona)
                 }
             }
         }
@@ -30,6 +30,7 @@ struct TodayTimeline: View {
 
     private struct Row: View {
         let segment: ModeSegment
+        let persona: Persona
 
         var body: some View {
             HStack(spacing: 12) {
