@@ -359,6 +359,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   line.
 - The watch app has two pages: HAKU or KURO full screen in the mode's color from the chest up, with a mode and
   how-long chip, then swipe up for today's mode time, energy and line.
+- KURO reacts when the watch's crown is turned, when she's pressed and held, and after a workout: her look's
+  tap move, with a heart and a line after a workout.
 
 ### Fixed
 - Leaving the office in the evening ends work even if that leave was missed: from 17:30, being away from the
