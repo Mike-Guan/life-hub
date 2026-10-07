@@ -57,6 +57,8 @@ struct HomeView: View {
     var bathDoneAt: Date?
     /// The last Screen Time report of couch scrolling, from the iOS app.
     var scrollSeenAt: Date?
+    /// How Mike moved since leaving home or the office, from the iOS app.
+    var commuteMotion: [MotionSample] = []
     /// Records that Mike tapped HAKU's bath away.
     var onBathDone: (() -> Void)?
 
@@ -232,7 +234,8 @@ struct HomeView: View {
             bathDoneAt: bathDoneAt,
             scrollSeenAt: scrollSeenAt,
             daily: daily,
-            invite: invite
+            invite: invite,
+            motion: commuteMotion
         )
     }
 

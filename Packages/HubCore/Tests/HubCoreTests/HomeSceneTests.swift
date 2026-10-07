@@ -22,6 +22,25 @@ import Testing
         #expect(scenes.scene(at: left + 45 * 60)?.walking == nil)
     }
 
+    @Test func theWayHomeFollowsMotionAndEndsAtTheDoor() {
+        let store = ModeStore(fileURL: nil, deviceID: "test")
+        let left = at + 8 * 3600
+        store.switchTo(.chill, at: left)
+        var presence = PlacePresence()
+        presence.record(.office, entered: true, at: at)
+        presence.record(.office, entered: false, at: left)
+        let train = MotionSample(kind: .transit, start: left + 10 * 60)
+        var inputs = HomeSceneInputs(log: store.log, signals: ActivitySignals(presence: presence), motion: [train])
+        #expect(inputs.scene(at: left + 5 * 60).commute == CommutePhase(leg: .home, stage: .walking, since: left))
+        let riding = CommutePhase(leg: .home, stage: .onTransit, since: train.start)
+        #expect(inputs.scene(at: left + 15 * 60).commute == riding)
+        let home = left + 40 * 60
+        presence.record(.home, entered: true, at: home)
+        inputs.signals = ActivitySignals(presence: presence)
+        #expect(inputs.scene(at: home + 60).commute == CommutePhase(leg: .home, stage: .arrived, since: home))
+        #expect(inputs.scene(at: home + CommuteEngine.arrivedLasts + 60).commute == nil)
+    }
+
     @Test func timelineKeepsOnlyChangesAndStartsAtNow() {
         let store = ModeStore(fileURL: nil, deviceID: "test")
         store.switchTo(.money, at: at)

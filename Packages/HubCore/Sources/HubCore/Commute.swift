@@ -15,6 +15,8 @@ public struct CommutePhase: Codable, Equatable, Sendable {
         case walking
         /// On a train, bus or car.
         case onTransit
+        /// Just arrived at the other end; `since` is the arrival, so it plays once.
+        case arrived
     }
 
     public var leg: Leg
@@ -51,6 +53,8 @@ public struct MotionSample: Equatable, Sendable {
 public enum CommuteEngine {
     /// After this long without arriving anywhere, the trip is no longer a commute.
     public static let longest: TimeInterval = 2 * 60 * 60
+    /// How long the arrival shows after reaching the other end.
+    public static let arrivedLasts: TimeInterval = 3 * 60
 
     /// The commute at `now`.
     /// - Parameters:
@@ -65,6 +69,9 @@ public enum CommuteEngine {
         work: ModeRules = .standard,
         calendar: Calendar = .current
     ) -> CommutePhase? {
+        if let arrived = arrival(presence: presence, mode: mode, now: now, work: work, calendar: calendar) {
+            return arrived
+        }
         let leaves = [HubPlace.Kind.home, .office].compactMap { kind in presence.left(kind).map { (kind, $0) } }
         guard let latest = leaves.max(by: { $0.1 < $1.1 }) else { return nil }
         let (from, left) = latest
@@ -91,5 +98,29 @@ public enum CommuteEngine {
         // Walking again after the train starts a new walking stage.
         let rode = moving.contains { $0.kind == .transit }
         return CommutePhase(leg: leg, stage: .walking, since: rode ? last.start : left)
+    }
+
+    // Arriving at the office after leaving home on a work day, or at home after leaving the office.
+    private static func arrival(
+        presence: PlacePresence,
+        mode: Mode?,
+        now: Date,
+        work: ModeRules,
+        calendar: Calendar
+    ) -> CommutePhase? {
+        let trips: [(to: HubPlace.Kind, from: HubPlace.Kind, leg: CommutePhase.Leg)] = [
+            (.office, .home, .toWork), (.home, .office, .home),
+        ]
+        for trip in trips {
+            guard let at = presence.since(trip.to), now >= at, now < at.addingTimeInterval(arrivedLasts),
+                let left = presence.left(trip.from), left <= at, at.timeIntervalSince(left) < longest
+            else { continue }
+            switch trip.leg {
+            case .toWork: guard work.workdays.contains(calendar.component(.weekday, from: left)) else { continue }
+            case .home: guard mode != .work else { continue }
+            }
+            return CommutePhase(leg: trip.leg, stage: .arrived, since: at)
+        }
+        return nil
     }
 }

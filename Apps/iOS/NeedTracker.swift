@@ -20,6 +20,8 @@ final class NeedTracker {
     private(set) var sit: SitState?
     /// The last Screen Time report of couch scrolling, `nil` when there was none.
     private(set) var scrollSeenAt: Date?
+    /// How Mike moved since he left home or the office, while that may be the commute; empty otherwise.
+    private(set) var commuteMotion: [MotionSample] = []
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
     @ObservationIgnored private var motion: HealthMotion.Reading?
@@ -42,6 +44,26 @@ final class NeedTracker {
             lastError = nil
         } catch {
             lastError = "读不到健康 App 里的运动和步数：\(error.localizedDescription)"
+        }
+    }
+
+    // Asked only after leaving home or the office, so the motion coprocessor is read once per event, not watched.
+    /// Reads how Mike moved since the latest leave from home or the office, within the commute's limit.
+    func importCommuteMotion(now: Date = .now) async {
+        let presence = PlacePresence.stored(in: AppGroup.defaults)
+        let leaves = [HubPlace.Kind.home, .office].compactMap { presence.since($0) == nil ? presence.left($0) : nil }
+        guard let left = leaves.max(), now.timeIntervalSince(left) < CommuteEngine.longest else {
+            commuteMotion = []
+            return
+        }
+        do {
+            commuteMotion = try await CommuteMotion.samples(from: left, to: now)
+        } catch is CommuteMotion.NotAuthorized {
+            commuteMotion = []
+            lastError = "没开「运动与健身」权限：通勤路上 HAKU 只会走路。可以在设置 > 隐私与安全性里打开。"
+        } catch {
+            commuteMotion = []
+            lastError = "读不到通勤路上的运动状态：\(error.localizedDescription)"
         }
     }
 
