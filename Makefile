@@ -27,13 +27,15 @@ check: lint coverage
 hooks:
 	git config core.hooksPath scripts/git-hooks
 
-# Regenerate RunnerArt.swift from docs/03 Product/companion/runner-v5-layers.svg.
+# Regenerate RunnerArt.swift and PartnerArt.swift from their layered SVGs in docs/03 Product/companion/.
 art:
 	node Packages/CompanionKit/Tools/gen-runner-art.mjs
+	node Packages/CompanionKit/Tools/gen-runner-art.mjs --partner
 
-# Fail if RunnerArt.swift is out of date with the SVG.
+# Fail if the generated art is out of date with the SVGs.
 art-check: art
-	git diff --exit-code -- Packages/CompanionKit/Sources/CompanionKit/RunnerArt.swift
+	git diff --exit-code -- Packages/CompanionKit/Sources/CompanionKit/RunnerArt.swift \
+		Packages/CompanionKit/Sources/CompanionKit/PartnerArt.swift
 
 # Redraw the README images in docs/screenshots/ (iOS simulator + Mac window, one per mode).
 screenshots:
