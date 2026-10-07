@@ -14,10 +14,11 @@ import Testing
         calendar.date(from: DateComponents(year: 2026, month: 10, day: day, hour: hour)) ?? .distantPast
     }
 
-    @Test func dailyScenesLastAWeekAndLinesAreShort() {
+    @Test(arguments: [HakuLines.library, KuroLines.library])
+    func dailyScenesLastAWeekAndLinesAreShort(library: [LineScene: [String]]) {
         let weekly: Set<LineScene> = [.boxing, .boxingWarmup, .gymDay]
         for scene in LineScene.allCases {
-            let lines = HakuLines.library[scene] ?? []
+            let lines = library[scene] ?? []
             #expect(lines.count >= (weekly.contains(scene) ? 3 : 7), "\(scene)")
             #expect(Set(lines).count == lines.count, "\(scene)")
             #expect(lines.allSatisfy { $0.count <= 14 }, "\(scene)")
@@ -46,5 +47,13 @@ import Testing
         #expect(HakuLines.scene(mode: .work, need: nil, energy: .okay, bedtime: .off) == .work)
         #expect(HakuLines.scene(mode: .chill, need: nil, energy: nil, bedtime: .off) == .chill)
         #expect(HakuLines.scene(mode: nil, need: nil, energy: nil, bedtime: .off) == nil)
+    }
+
+    @Test func kuroSpeaksInHerOwnLines() {
+        let line = HakuLines.line(.chill, at: date(5, 12), calendar: calendar, persona: .kuro)
+        #expect(KuroLines.library[.chill]?.contains(line) == true)
+        #expect(HakuLines.line(.chill, at: date(5, 12), calendar: calendar, persona: .haku) != line)
+        #expect(HakuLines.offWorkLine(for: .kuro) == KuroLines.offWorkLine)
+        #expect(HakuLines.offWorkLine(for: .haku) == HakuLines.offWorkLine)
     }
 }

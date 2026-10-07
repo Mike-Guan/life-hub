@@ -173,9 +173,14 @@ public enum HakuLines {
     // after all the others in its scene have had a day. Daily scenes have 7 or more lines, so none
     // repeats within a week. No history to store, and widgets get the
     // same answer as the app.
-    /// The line for `scene` on the hub day containing `date`.
-    public static func line(_ scene: LineScene, at date: Date, calendar: Calendar = .current) -> String {
-        let lines = library[scene] ?? []
+    /// The line for `scene` on the hub day containing `date`, in `persona`'s voice.
+    public static func line(
+        _ scene: LineScene,
+        at date: Date,
+        calendar: Calendar = .current,
+        persona: Persona = .haku
+    ) -> String {
+        let lines = (persona == .kuro ? KuroLines.library : library)[scene] ?? []
         guard !lines.isEmpty else { return "" }
         let day = StateEngine.dayStart(for: date, calendar: calendar)
         let origin = Date(timeIntervalSinceReferenceDate: 0)
@@ -185,6 +190,11 @@ public enum HakuLines {
 
     /// HAKU's one line when leaving the office ends work.
     public static let offWorkLine = "……收工。"
+
+    /// The off-work line in `persona`'s voice.
+    public static func offWorkLine(for persona: Persona) -> String {
+        persona == .kuro ? KuroLines.offWorkLine : offWorkLine
+    }
     /// How long the off-work line stays after Mike leaves the office.
     public static let offWorkLasts: TimeInterval = 30 * 60
 

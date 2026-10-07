@@ -160,9 +160,9 @@ extension WidgetSnapshot {
         return [needUntil, nextNeed?.from, nextNeed?.until, peek, offWorkUntil].compactMap { $0 }
     }
 
-    /// HAKU's off-work line while it lasts at `date`, else `nil`.
-    public func offWorkLine(at date: Date) -> String? {
-        offWorkUntil.flatMap { date < $0 ? HakuLines.offWorkLine : nil }
+    /// The off-work line in `persona`'s voice while it lasts at `date`, else `nil`.
+    public func offWorkLine(at date: Date, persona: Persona = .haku) -> String? {
+        offWorkUntil.flatMap { date < $0 ? HakuLines.offWorkLine(for: persona) : nil }
     }
 
     // HAKU's idle bits change every 15 minutes, counted from the reference date. A widget only redraws at
