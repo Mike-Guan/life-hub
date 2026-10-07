@@ -17,6 +17,8 @@ public struct HomeScene: Codable, Equatable, Sendable {
     public var invite: String?
     /// The late end of the work day during the evening extension.
     public var overtimeUntil: Date?
+    /// The trip between home and the office.
+    public var commute: CommutePhase?
 
     public init(
         activity: CompanionActivity? = nil,
@@ -27,7 +29,8 @@ public struct HomeScene: Codable, Equatable, Sendable {
         event: CompanionEvent? = nil,
         daily: DailyCue? = nil,
         invite: String? = nil,
-        overtimeUntil: Date? = nil
+        overtimeUntil: Date? = nil,
+        commute: CommutePhase? = nil
     ) {
         self.activity = activity
         self.moment = moment
@@ -38,10 +41,11 @@ public struct HomeScene: Codable, Equatable, Sendable {
         self.daily = daily
         self.invite = invite
         self.overtimeUntil = overtimeUntil
+        self.commute = commute
     }
 
     private enum CodingKeys: String, CodingKey {
-        case activity, moment, walking, bath, codingCans, event, daily, invite, overtimeUntil
+        case activity, moment, walking, bath, codingCans, event, daily, invite, overtimeUntil, commute
     }
 
     /// Decodes a scene; a missing or unknown value falls back to nothing going on.
@@ -56,6 +60,7 @@ public struct HomeScene: Codable, Equatable, Sendable {
         daily = try? values.decodeIfPresent(DailyCue.self, forKey: .daily)
         invite = try? values.decodeIfPresent(String.self, forKey: .invite)
         overtimeUntil = try? values.decodeIfPresent(Date.self, forKey: .overtimeUntil)
+        commute = try? values.decodeIfPresent(CommutePhase.self, forKey: .commute)
     }
 }
 
@@ -86,6 +91,8 @@ public struct HomeSceneInputs {
     public var daily: DailyPlan?
     /// Today's invite text, shown only while its need lasts.
     public var invite: String?
+    /// How Mike moved since leaving home or the office.
+    public var motion: [MotionSample]
 
     public init(
         log: ModeLog,
@@ -99,7 +106,8 @@ public struct HomeSceneInputs {
         bathDoneAt: Date? = nil,
         scrollSeenAt: Date? = nil,
         daily: DailyPlan? = nil,
-        invite: String? = nil
+        invite: String? = nil,
+        motion: [MotionSample] = []
     ) {
         self.log = log
         self.rules = rules
@@ -113,6 +121,7 @@ public struct HomeSceneInputs {
         self.scrollSeenAt = scrollSeenAt
         self.daily = daily
         self.invite = invite
+        self.motion = motion
     }
 
     private var mode: Mode? { log.current?.mode }
@@ -199,6 +208,13 @@ public struct HomeSceneInputs {
         return MomentEngine.stayHome(mode: mode, signals: home, now: date, work: rules)
     }
 
+    /// The trip between home and the office at `date`.
+    public func commute(at date: Date) -> CommutePhase? {
+        signals.flatMap {
+            CommuteEngine.phase(presence: $0.presence, mode: mode, motion: motion, now: date, work: rules)
+        }
+    }
+
     /// The one-off the time picks at `date`, in the home card's order.
     public func timedEvent(at date: Date) -> CompanionEvent? {
         revived(at: date) ?? sit?.stretched(at: date) ?? stayHome(at: date)
@@ -215,7 +231,8 @@ public struct HomeSceneInputs {
             event: timedEvent(at: date),
             daily: daily?.cue(at: date),
             invite: activeNeed(at: date) == nil ? nil : invite,
-            overtimeUntil: rules.eveningUntil(at: date)
+            overtimeUntil: rules.eveningUntil(at: date),
+            commute: commute(at: date)
         )
     }
 

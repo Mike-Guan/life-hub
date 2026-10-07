@@ -130,6 +130,7 @@ struct LifeHubApp: App {
             onWardrobe: { showsWardrobe = true },
             bathDoneAt: bathDoneAt,
             scrollSeenAt: needs.scrollSeenAt,
+            commuteMotion: needs.commuteMotion,
             onBathDone: {
                 BathTime.markDone(at: .now, in: AppGroup.defaults)
                 bathDoneAt = .now
@@ -161,6 +162,7 @@ struct LifeHubApp: App {
                 await scheduleReminder()
                 await importSleep()
                 await needs.importMotion()
+                await needs.importCommuteMotion()
                 await daily.read()
                 syncWidgets()
                 earnWins()
@@ -375,6 +377,13 @@ struct LifeHubApp: App {
             widgets.sync(mode: store, energy: energy)
             WidgetCenter.shared.reloadAllTimelines()
             Self.sendToWatch(store: store, needs: needs, growth: growth)
+            if place.kind == .home || place.kind == .office {
+                // Leaving starts the commute and arriving ends it; motion since the leave picks walking or transit.
+                Task {
+                    await needs.importCommuteMotion()
+                    Self.sendToWatch(store: store, needs: needs, growth: growth)
+                }
+            }
             // Arriving at the gym ends the countdown, even with the app in the background.
             Task { _ = await BoxingCountdown.update(for: needs.reading) }
             // Arriving at or leaving the office decides today's off-work notice.
@@ -480,7 +489,8 @@ struct LifeHubApp: App {
             bathDoneAt: BathTime.doneAt(in: AppGroup.defaults),
             scrollSeenAt: needs.scrollSeenAt,
             daily: DailyPlan.stored(in: AppGroup.defaults),
-            invite: needs.invite
+            invite: needs.invite,
+            motion: needs.commuteMotion
         )
         WatchSync.shared.send(WatchPlay(scenes: inputs.timeline(from: .now), event: event ?? needs.event))
     }
