@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- Tapping HAKU on the phone plays the same body move as on the watch
+  (pushes up a headset cup, clinks the can, punches, flashes the mask, glares, rolls over).
+  Five taps in 30 seconds turn him away for a few seconds with "……够了。" on both.
 - Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat shape.
 - Workouts from the Health app are sorted into about ten groups (walking, cycling, swimming, racket, ball,
   yoga, dance, outdoor and more). Cans are unchanged: only boxing, 5 km runs and the gym earn.

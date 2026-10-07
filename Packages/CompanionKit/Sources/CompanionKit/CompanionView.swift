@@ -608,8 +608,7 @@ public struct CompanionView: View {
 
     /// Progress of turning away after being tapped too often at `time`, 0..<1, or nil when not turned away.
     private func turnAway(at time: TimeInterval) -> Double? {
-        let duration = style == .watch ? WatchPoke.turnAwayDuration : Self.turnAwayDuration
-        return Self.progress(since: turnAwayStart, at: time, duration: duration)
+        Self.progress(since: turnAwayStart, at: time, duration: WatchPoke.turnAwayDuration)
     }
 
     /// Progress of the reaction to a watch poke at `time`, 0..<1, or nil when none is playing.
@@ -672,7 +671,6 @@ public struct CompanionView: View {
     private static let swapDuration = 0.5
     private var noticeDuration: TimeInterval { noticeLookUp ? 1.6 : 0.9 }
     private static let lateNightDuration = 2.6
-    private static let turnAwayDuration = 2.2
     private static let whistleDuration = 2.6
     private static let stretchUpDuration = 6.0
     private static let limberDuration = 4.6
@@ -940,11 +938,12 @@ public struct CompanionView: View {
         }
         rollStart = nil
         tapTimes = tapTimes.filter { Date.now.timeIntervalSince($0) < Self.pesterWindow } + [.now]
-        if bedtime == .off, Self.pestered(tapTimes, now: .now) {
+        if bedtime == .off, Self.pestered(tapTimes, now: .now, count: WatchPoke.tooMany) {
             tapTimes = []
+            pokeKind = nil
             turnAwayStart = .now
             pop += 1
-            say("……干嘛。")
+            say(WatchPoke.tooManyLine)
             onTap?()
             return
         }
@@ -965,6 +964,11 @@ public struct CompanionView: View {
         // Taps during a one-off animation only get HAKU's reaction.
         let time = Date.now.timeIntervalSinceReferenceDate
         guard celebration(at: time) == nil, taskDone(at: time) == nil, !stillOneOff(at: time) else { return }
+        // The same body move as a poke on the watch (Mike 2026-10-07: one action library for phone and watch).
+        if let mode {
+            pokeKind = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on, busy: isBusy(life))
+            pokeStart = .now
+        }
         onTap?()
     }
 
@@ -984,14 +988,18 @@ public struct CompanionView: View {
             return
         }
         let life = idleLife(mode, at: now)
-        let busy =
-            shownNeed != nil || activity != nil || shownMoment != nil || life != nil || daily != nil
-            || walking != nil || bath || invite != nil
-        let kind = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on || life == .nap, busy: busy)
+        let asleep = bedtime == .on || life == .nap
+        let kind = WatchPoke.pick(mode: mode, energy: energy, asleep: asleep, busy: isBusy(life))
         pokeKind = kind
         pokeStart = now
         if kind != .rollOver { pop += 1 }
         say(kind.line)
+    }
+
+    /// Whether HAKU acts out something other than the plain mode, given its idle `life`.
+    private func isBusy(_ life: IdleLife?) -> Bool {
+        shownNeed != nil || activity != nil || shownMoment != nil || life != nil || daily != nil || walking != nil
+            || bath || invite != nil
     }
 
     private func startInvite() {
