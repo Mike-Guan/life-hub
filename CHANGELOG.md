@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- HAKU and KURO cheer after every kind of workout of 20 minutes or more (tennis, swimming, yoga and the
+  rest), not only boxing, runs and the gym. Cans are unchanged.
 - The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
   lifting, running, morning, overtime, just home, the bath and the vibe-coding cans.
 - Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat shape.
