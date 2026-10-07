@@ -32,6 +32,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- On home, the line KURO says when tapped follows the current need, activity and moment of the day.
 - 晚间延长 in Settings, off by default. On work days, still at the office in work mode after work hours, the
   character waits at the desk until the picked time. If KURO leaves after work hours on such a day, she says
   "……终于。" instead of her usual off-work line. The off-work notice stays at the end of work hours.
