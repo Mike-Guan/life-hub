@@ -22,6 +22,7 @@ struct LifeHubApp: App {
     @State private var showsShop = false
     @State private var showsWardrobe = false
     @State private var unboxing: CanEntry?
+    @State private var welcomeBack: CompanionEvent?
     @State private var wardrobe = Wardrobe.stored(in: AppGroup.defaults)
     @State private var persona = Persona.stored(in: AppGroup.defaults)
     @State private var healthError: String?
@@ -106,6 +107,8 @@ struct LifeHubApp: App {
             activityDays: ActivityDays.stored(in: AppGroup.defaults).learningGym(from: growth.ledger, now: .now),
             departure: needs.departure,
             event: needs.event,
+            welcomeBack: welcomeBack,
+            onWelcomeDone: welcomeDone,
             replayFrom: replayFrom,
             invite: needs.invite,
             sit: needs.sit,
@@ -136,6 +139,7 @@ struct LifeHubApp: App {
             if phase == .background {
                 AppGroup.defaults.set(Date.now, forKey: Self.lastBackgroundKey)
                 replayFrom = nil
+                welcomeBack = nil
             }
             guard phase == .active else { return }
             let away = AppGroup.defaults.object(forKey: Self.lastBackgroundKey) as? Date
@@ -154,10 +158,13 @@ struct LifeHubApp: App {
                 syncWidgets()
                 earnWins()
                 refreshNeeds()
+                // After earnWins, so wins imported on this open count toward the cards and cans.
+                await welcome(away: away)
                 // The awaits above can include a permission sheet; celebrate only if still on screen.
                 if UIApplication.shared.applicationState == .active {
                     needs.celebrate(bedtime: bedtime.state(at: .now))
-                    showNextUnboxing()
+                    // Keepsakes open after the welcome back, which may show the same keepsake as a card.
+                    if welcomeBack == nil { showNextUnboxing() }
                 }
                 countdownError = await BoxingCountdown.update(for: needs.reading)
             }
@@ -246,6 +253,44 @@ struct LifeHubApp: App {
         }
     }
 
+    // Issue #177: after days away, HAKU shows what was recorded meanwhile. HAKU only until KURO's version is
+    // previewed. Events don't play at bedtime, so a return opened then waits for the next open after it.
+    private func welcome(away: Date?) async {
+        let pending = AppGroup.defaults.object(forKey: Self.returnPendingKey) as? Date
+        guard let since = pending ?? away, persona == .haku else { return }
+        guard bedtime.state(at: .now) == .off else {
+            AppGroup.defaults.set(since, forKey: Self.returnPendingKey)
+            return
+        }
+        AppGroup.defaults.removeObject(forKey: Self.returnPendingKey)
+        var nights: [SleepNight] = []
+        do {
+            nights = try await HealthSleep.nights(from: since, to: .now)
+        } catch {
+            healthError = "读不到健康 App 里的睡眠：\(error.localizedDescription)"
+        }
+        let replay = ReturnReplay.make(
+            lastSeen: since,
+            lastBox: ReturnLog.lastBox(in: AppGroup.defaults),
+            ledger: growth.ledger,
+            nights: nights,
+            log: store.log,
+            now: .now
+        )
+        guard let replay else { return }
+        replayFrom = nil
+        welcomeBack = .welcomeBack(id: since.ISO8601Format(), replay: replay)
+    }
+
+    // The 30-day limit counts a box return only once it has actually played.
+    private func welcomeDone() {
+        if case .welcomeBack(_, let replay) = welcomeBack, replay.tier == .box {
+            ReturnLog.markBox(at: .now, in: AppGroup.defaults)
+        }
+        welcomeBack = nil
+        showNextUnboxing()
+    }
+
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.
     private func showNextUnboxing() {
         guard !showsShop, !showsWardrobe, !showsSettings else { return }
@@ -319,6 +364,7 @@ struct LifeHubApp: App {
     }
 
     private static let lastBackgroundKey = "lastBackground"
+    private static let returnPendingKey = "returnPendingSince"
 
     // A notice still in Notification Center was never tapped, so its animation never played.
     private func replayOffWork() async {
