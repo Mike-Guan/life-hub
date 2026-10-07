@@ -25,6 +25,8 @@ Linux 上的检查不占 Mac 额度（私有仓库 Mac 分钟按 10 倍算）。
 
 改了 RUNNER 的 SVG 之后跑 `make art` 重新生成 `RunnerArt.swift`，`make art-check` 和 CI 用同样的方式检查。需要 Node。
 
+合并时 PR 已经绿、GitHub 显示没有冲突，就直接合，不合新 `main` 重跑（Mike 2026-10-07，见 [[开发流程]]）。依据：332 次运行里 30 次真失败，29 次在第一次推送就抓到；95 次合并后重跑只多抓到 1 次。CI 配置本身没改。
+
 ## 发版（`.github/workflows/release.yml`）
 
 | 触发 | 环境 | 做什么 |
