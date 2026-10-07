@@ -19,6 +19,8 @@ struct HubEntry: TimelineEntry {
     let snapshot: WidgetSnapshot?
     let bedtime: Bedtime
     var wardrobe = Wardrobe()
+    /// Which character the widgets draw.
+    var persona = Persona.haku
     /// What HAKU does alongside Mike at `date`, `nil` while `moment` replaces the gym bag.
     var activity: CompanionActivity?
     /// The state within the mode HAKU acts out at `date`, such as vibe coding or walking to the gym.
@@ -105,6 +107,7 @@ struct HubProvider: TimelineProvider {
         let needTimes = groups.flatMap { $0 }
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults)
+        let persona = Persona.stored(in: AppGroup.defaults)
         let backoff = NudgeBackoff.stored(in: AppGroup.defaults)
         let ledger = CanLedger.read(from: AppGroup.container.canLedgerURL)
         let changes = ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: ledger)
@@ -142,6 +145,7 @@ struct HubProvider: TimelineProvider {
                 snapshot: snapshot,
                 bedtime: schedule.state(at: date),
                 wardrobe: wardrobe,
+                persona: persona,
                 activity: activity == .gymDay && moment != nil ? nil : activity,
                 moment: moment,
                 traces: snapshot?.traces(at: date) ?? [],

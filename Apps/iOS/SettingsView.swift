@@ -11,6 +11,7 @@ struct SettingsView: View {
     @Binding var rules: ModeRules
     @Binding var places: PlaceSettings
     @Binding var budget: BudgetSettings
+    @Binding var persona: Persona
     let monitor: PlaceMonitor
     let daily: DailyLink
     @Environment(\.dismiss) private var dismiss
@@ -37,6 +38,18 @@ struct SettingsView: View {
                 Spacer()
                 Button("好了") { dismiss() }
                     .font(Toy.body(15, weight: .heavy))
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("角色")
+                    .font(Toy.body(16, weight: .heavy))
+                Picker("角色", selection: $persona) {
+                    ForEach(Persona.allCases, id: \.self) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                Text("换的是首页、小组件和手表上的角色。记录和规则都不变。")
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.muted)
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -264,13 +277,13 @@ struct SettingsView: View {
             }
             ForEach(HubPlace.Kind.presets, id: \.self) { kind in
                 let place = places[kind]
-                placeRow(title: kind.title, detail: place == nil ? "没设" : "已设") {
+                placeRow(title: kind.title(for: persona), detail: place == nil ? "没设" : "已设") {
                     let blank = HubPlace(kind: kind, latitude: 0, longitude: 0)
                     editing = PlaceEdit(place: place ?? blank, isNew: place == nil)
                 }
             }
             ForEach(places.custom) { place in
-                placeRow(title: place.title, detail: place.action.title) {
+                placeRow(title: place.title, detail: place.action.title(for: persona)) {
                     editing = PlaceEdit(place: place, isNew: false)
                 }
             }

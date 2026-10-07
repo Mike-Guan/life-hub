@@ -47,7 +47,7 @@ private struct ModeButtons: View {
 
     private func button(_ mode: Mode) -> some View {
         Button(intent: SwitchModeIntent(mode: mode)) {
-            Label(mode.title, systemImage: mode.symbol)
+            Label(mode.title(for: Persona.stored(in: AppGroup.defaults)), systemImage: mode.symbol)
                 .font(Toy.body(14, weight: .heavy))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
