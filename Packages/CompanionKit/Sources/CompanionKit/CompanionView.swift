@@ -53,6 +53,7 @@ public struct CompanionView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.isLuminanceReduced) private var dozing
     @State private var pop = 0
     @State private var taps = 0
     @State private var goodnightStart: Date?
@@ -85,6 +86,11 @@ public struct CompanionView: View {
     @State private var rollStart: Date?
     @State private var tapTimes: [Date] = []
     @State private var turnAwayStart: Date?
+    @State private var closeUp = false
+    /// Where the eyes follow a press or the crown, -1 (left) ... 1 (right).
+    @State private var look: CGFloat = 0
+    @State private var crown = 0.0
+    @State private var lookBack: Task<Void, Never>?
     @State private var pokeStart: Date?
     @State private var pokeKind: WatchPoke?
     @State private var pokes = 0
@@ -178,6 +184,8 @@ public struct CompanionView: View {
             character
                 .padding(.top, 24)
                 .padding(.horizontal, 12)
+                .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
+                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: closeUp)
 
             if welcomeStart != nil, let replay = welcomeReplay {
                 TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
@@ -192,8 +200,12 @@ public struct CompanionView: View {
                     .transition(.scale(scale: 0.6, anchor: .bottomTrailing).combined(with: .opacity))
             }
         }
+        .clipped()
         .contentShape(Rectangle())
         .onTapGesture { react() }
+        .gesture(pressAndLook, including: style == .notification ? .none : .all)
+        .modifier(CrownLook(isEnabled: style == .watch, crown: $crown))
+        .onChange(of: crown) { old, new in crowned(by: new - old) }
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: mode) { _, _ in
             pop += 1
@@ -253,7 +265,9 @@ public struct CompanionView: View {
                     let motion = idleMotion(mode, life: life, time: time)
                     RunnerFigure(
                         mode: mode,
-                        pose: pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe)).leaving(traces)
+                        pose: glance(
+                            pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe)).leaving(traces)
+                        )
                     )
                     .saturation(vitals.saturation)
                     .brightness(vitals.brightness)
@@ -343,7 +357,7 @@ public struct CompanionView: View {
         return IdleLife.at(date, stamina: vitals.stamina)
     }
 
-    private var paused: Bool { reduceMotion || scenePhase != .active }
+    private var paused: Bool { reduceMotion || scenePhase != .active || dozing }
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
         if pokeKind == .rollOver, let progress = poke(at: time) {
@@ -474,6 +488,45 @@ public struct CompanionView: View {
             pose.blink = min(pose.blink, 0.4)
         }
         return pose
+    }
+
+    /// `pose` with the eyes following a press or the crown, and dozing while the screen is dimmed (Always On).
+    private func glance(_ pose: RunnerPose) -> RunnerPose {
+        var pose = pose
+        pose.eyesDx += 4 * look
+        pose.headTilt += 4 * Double(look)
+        if closeUp { pose.eyesDy -= 1 }
+        if dozing {
+            pose.eyesShut = true
+            pose.headDy += 1.5
+        }
+        return pose
+    }
+
+    /// Press and hold for a close-up of the face; dragging sideways while holding moves the eyes.
+    private var pressAndLook: some Gesture {
+        LongPressGesture(minimumDuration: 0.4)
+            .sequenced(before: DragGesture(minimumDistance: 0))
+            .onChanged { value in
+                guard case .second(true, let drag) = value else { return }
+                closeUp = true
+                look = max(-1, min(1, (drag?.translation.width ?? 0) / 60))
+            }
+            .onEnded { _ in
+                closeUp = false
+                look = 0
+            }
+    }
+
+    /// Moves the eyes with the crown and lets them drift back.
+    private func crowned(by amount: Double) {
+        look = max(-1, min(1, look + CGFloat(amount) / 4))
+        lookBack?.cancel()
+        lookBack = Task {
+            try? await Task.sleep(for: .seconds(1.2))
+            guard !Task.isCancelled else { return }
+            look = 0
+        }
     }
 
     /// Starts the notice turn as the app opens, as a slow look up when the app was closed for half a day.
@@ -1222,4 +1275,21 @@ struct SpeechBubble: View {
         .padding()
     }
     .background(Toy.paper)
+}
+
+/// Turns the Digital Crown into eye movement on the watch.
+private struct CrownLook: ViewModifier {
+    var isEnabled: Bool
+    @Binding var crown: Double
+
+    func body(content: Content) -> some View {
+        #if os(watchOS)
+        content
+            .focusable(isEnabled)
+            .focusEffectDisabled()
+            .digitalCrownRotation($crown)
+        #else
+        content
+        #endif
+    }
 }
