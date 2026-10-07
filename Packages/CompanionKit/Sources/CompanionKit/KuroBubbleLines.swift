@@ -82,6 +82,7 @@ enum KuroBubbleLines {
 
     /// What KURO says when unboxing the item with `itemID`.
     static func unlock(_ itemID: String) -> String {
-        ShopItem.item(itemID)?.keepsake != nil ? "……给你的。不是特意挑的。" : "……那就收下了。"
+        let keepsake = KuroItem(rawValue: itemID)?.isKeepsake ?? (ShopItem.item(itemID)?.keepsake != nil)
+        return keepsake ? "……给你的。不是特意挑的。" : "……还行吧。"
     }
 }

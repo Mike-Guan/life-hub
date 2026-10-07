@@ -131,7 +131,7 @@ import Testing
         let hers = kinds.map { CompanionLines.celebration($0, persona: .kuro) }
         #expect(Set(hers).count == kinds.count && hers != kinds.map { CompanionLines.celebration($0) })
         #expect(CompanionLines.unlock("gloves.gold", persona: .kuro) == "……给你的。不是特意挑的。")
-        #expect(CompanionLines.unlock("room.plant", persona: .kuro) == "……那就收下了。")
+        #expect(CompanionLines.unlock("room.plant", persona: .kuro) == "……还行吧。")
     }
 
     @Test func eachLookMapsBackToItsMode() {

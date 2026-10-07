@@ -61,6 +61,10 @@ struct KuroPose: Sendable {
     var overtime = false
     /// The late end shown on a sign above her head, as HH:mm, or nil for no sign.
     var sign: String?
+    /// Shop items she wears; each shows only in its own look.
+    var items: Set<KuroItem> = []
+    /// Acting calm: flat mouth, blush kept.
+    var calm = false
 
     /// The resting pose for `look` at `energy` (0-100, or nil when unknown); `bedtime` makes her sleepy.
     init(look: KuroLook, energy: Double?, bedtime: Bedtime = .off) {
@@ -122,7 +126,13 @@ struct KuroFigure: View {
             visible.formUnion([.overtimeDesk, .overtimeHand])
             if pose.sign != nil { visible.insert(.overtimeSign) }
         }
-        if look != .work { visible.insert(pose.tired ? .mouthFlat : look == .tennis ? .mouthSmile : .mouthCat) }
+        if look != .work {
+            visible.insert(pose.tired || pose.calm ? .mouthFlat : look == .tennis ? .mouthSmile : .mouthCat)
+        }
+        for item in pose.items where item.look == look {
+            visible.insert(item.part)
+            if let replaced = item.replaces { visible.remove(replaced) }
+        }
         return KuroPart.allCases.filter { visible.contains($0) }
     }
 
@@ -183,6 +193,8 @@ public struct KuroView: View {
     let moment: CompanionMoment?
     let overtimeUntil: Date?
     let style: CompanionStyle
+    let wearing: Set<KuroItem>
+    let event: CompanionEvent?
     let showsBubble: Bool
     /// Called after KURO reacts to a tap, for example to switch the 副业 state.
     let onTap: (() -> Void)?
@@ -194,6 +206,10 @@ public struct KuroView: View {
     @State private var pop = 0
     @State private var pokeStart: Date?
     @State private var pokes = 0
+    @State private var unboxStart: Date?
+    @State private var unboxItem: KuroItem?
+    // Id of the last unboxing, shared with HAKU's view so each plays once.
+    @AppStorage("companion.lastUnlock") private var lastUnlock = ""
 
     /// - Parameters:
     ///   - look: what she wears.
@@ -205,6 +221,9 @@ public struct KuroView: View {
     ///     `.overtime` sits her at the desk with her chin on her hand.
     ///   - overtimeUntil: the late end of the work day, shown on a sign above her head during `.overtime`.
     ///   - style: `.watch` makes a tap a poke: a happy hop and a light tap on the wrist instead of a line.
+    ///   - wearing: ids of her shop items she wears; each shows only in its own look.
+    ///   - event: a one-off animation. `.unlock` with one of her items plays the unboxing once per id;
+    ///     pass the item's `look` so it shows.
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
     ///   - onTap: called after she reacts to a tap.
     public init(
@@ -216,6 +235,8 @@ public struct KuroView: View {
         moment: CompanionMoment? = nil,
         overtimeUntil: Date? = nil,
         style: CompanionStyle = .standard,
+        wearing: Set<String> = [],
+        event: CompanionEvent? = nil,
         showsBubble: Bool = true,
         onTap: (() -> Void)? = nil
     ) {
@@ -227,6 +248,9 @@ public struct KuroView: View {
         self.moment = moment
         self.overtimeUntil = overtimeUntil
         self.style = style
+        // The spin is a celebration, not something she wears.
+        self.wearing = KuroItem.items(wearing).subtracting([.spin])
+        self.event = event
         self.showsBubble = showsBubble
         self.onTap = onTap
     }
@@ -244,14 +268,23 @@ public struct KuroView: View {
             TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
                 let time = context.date.timeIntervalSinceReferenceDate
                 let poke = Self.poke(since: pokeStart, at: time)
-                let pose = poke == nil ? self.pose : self.pose.showing(.happy)
+                let unbox = unbox(at: time)
+                let pose = unbox != nil ? unboxPose : poke == nil ? self.pose : self.pose.showing(.happy)
                 let pace = EnergyFace(energy: energy).speed
                 let sleepy = bedtime == .on || pose.overtime
+                let still = reduceMotion || unbox != nil
                 let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(look, time: time * pace)
-                let hop: CGFloat = reduceMotion ? 0 : -10 * CGFloat(sin((poke ?? 0) * .pi))
-                KuroFigure(look: look, pose: reduceMotion || poke != nil ? pose : pose.blink(at: time))
-                    .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                    .offset(y: (reduceMotion ? 0 : motion.dy) + hop)
+                let hop: CGFloat = still ? 0 : -10 * CGFloat(sin((poke ?? 0) * .pi))
+                ZStack {
+                    KuroFigure(look: look, pose: still || poke != nil ? pose : pose.blink(at: time))
+                        .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
+                    if let unbox {
+                        GiftBox(progress: unbox.box, fill: RunnerPalette.cardboard, ribbon: KuroPalette.pink)
+                    }
+                }
+                .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
+                .rotationEffect(.degrees(still ? 0 : motion.angle), anchor: .bottom)
+                .offset(y: (still ? 0 : motion.dy) + hop)
             }
             .id(look)
             .transition(.opacity)
@@ -270,6 +303,16 @@ public struct KuroView: View {
             .padding(.top, 24)
             .padding(.horizontal, 12)
 
+            if unboxStart != nil {
+                TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+                    let time = context.date.timeIntervalSinceReferenceDate
+                    if unbox(at: time)?.stars == true {
+                        KuroStarBubble(time: time).frame(width: 72).padding(10)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            }
+
             if showsBubble, let bubble {
                 SpeechBubble(text: bubble)
                     .padding(12)
@@ -282,8 +325,10 @@ public struct KuroView: View {
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: look) { _, _ in
             pop += 1
-            say(nil)
+            if unboxStart == nil { say(nil) }
         }
+        .onAppear { playUnboxIfNew() }
+        .onChange(of: event) { _, _ in playUnboxIfNew() }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime, pose: pose))
         .accessibilityAddTraits(showsBubble || style == .watch || onTap != nil ? .isButton : [])
@@ -312,7 +357,50 @@ public struct KuroView: View {
     }
 
     private var pose: KuroPose {
-        Self.pose(look, energy: energy, bedtime: bedtime, moment: moment, overtimeUntil: overtimeUntil)
+        var pose = Self.pose(look, energy: energy, bedtime: bedtime, moment: moment, overtimeUntil: overtimeUntil)
+        pose.items = wearing
+        return pose
+    }
+
+    /// Her pose while unboxing: acting calm in the new item, with low eyes and a flat mouth.
+    private var unboxPose: KuroPose {
+        var pose = KuroPose(look: look, energy: nil).showing(.low)
+        pose.calm = true
+        pose.items = wearing.union(unboxItem.map { [$0] } ?? [])
+        return pose
+    }
+
+    /// The unboxing at `time`, or nil when none is playing.
+    private func unbox(at time: TimeInterval) -> KuroUnbox? {
+        guard let item = unboxItem, let start = unboxStart?.timeIntervalSinceReferenceDate else { return nil }
+        let progress = (time - start) / KuroUnbox.duration
+        return (0..<1).contains(progress) ? KuroUnbox(item, progress: progress) : nil
+    }
+
+    /// Starts the unboxing when `event` brings a new one of her items.
+    private func playUnboxIfNew() {
+        guard let (id, item) = Self.newUnbox(event, last: lastUnlock) else { return }
+        lastUnlock = id
+        unboxItem = item
+        unboxStart = .now
+        say(nil)
+        bubbleTask = Task {
+            try? await Task.sleep(for: .seconds(KuroUnbox.duration * KuroUnbox.lineAt))
+            guard !Task.isCancelled else { return }
+            say(KuroBubbleLines.unlock(item.rawValue), for: 4)
+        }
+        Task {
+            try? await Task.sleep(for: .seconds(KuroUnbox.duration))
+            if unboxItem == item { unboxStart = nil }
+        }
+    }
+
+    /// The unboxing id and item to play for `event`, or nil when there is none, it isn't hers, or it already played.
+    nonisolated static func newUnbox(_ event: CompanionEvent?, last: String) -> (String, KuroItem)? {
+        guard case .unlock(let id, let itemID) = event, id != last, let item = KuroItem(rawValue: itemID) else {
+            return nil
+        }
+        return (id, item)
     }
 
     /// Her pose for the inputs: during `.overtime` in the work look she waits at the desk with drowsy eyes.
@@ -348,12 +436,12 @@ public struct KuroView: View {
         return (fresh.isEmpty ? lines : fresh).randomElement()
     }
 
-    private func say(_ text: String?) {
+    private func say(_ text: String?, for seconds: Double = 2.4) {
         bubbleTask?.cancel()
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
         guard text != nil else { return }
         bubbleTask = Task {
-            try? await Task.sleep(for: .seconds(2.4))
+            try? await Task.sleep(for: .seconds(seconds))
             guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: 0.2)) { bubble = nil }
         }
@@ -386,28 +474,34 @@ public struct KuroPortrait: View {
     let look: KuroLook
     let energy: Double?
     let bedtime: Bedtime
+    let wearing: Set<KuroItem>
     let framing: CompanionPortrait.Framing
 
     /// - Parameters:
     ///   - look: what she wears.
     ///   - energy: energy 0-100, or nil when unknown.
     ///   - bedtime: `.on` gives her sleepy eyes.
+    ///   - wearing: ids of her shop items she wears; each shows only in its own look.
     ///   - framing: head to waist, or head only for small round widgets.
     public init(
         look: KuroLook,
         energy: Double? = nil,
         bedtime: Bedtime = .off,
+        wearing: Set<String> = [],
         framing: CompanionPortrait.Framing = .full
     ) {
         self.look = look
         self.energy = energy
         self.bedtime = bedtime
+        self.wearing = KuroItem.items(wearing).subtracting([.spin])
         self.framing = framing
     }
 
     public var body: some View {
-        let figure = KuroFigure(look: look, pose: KuroPose(look: look, energy: energy, bedtime: bedtime))
-        Group {
+        var pose = KuroPose(look: look, energy: energy, bedtime: bedtime)
+        pose.items = wearing
+        let figure = KuroFigure(look: look, pose: pose)
+        return Group {
             switch framing {
             case .full: figure
             case .head: HeadCrop { figure }
@@ -431,6 +525,15 @@ public struct KuroPortrait: View {
                 .background(Toy.paper)
         }
         KuroPortrait(look: .tennis, framing: .head).frame(width: 80).background(Toy.paper)
+        let all = Set(KuroItem.allCases.map(\.rawValue))
+        ForEach([KuroLook.chill, .tennis, .desk], id: \.self) { look in
+            KuroView(look: look, wearing: all).padding(8).background(Toy.paper)
+        }
+        KuroView(look: .tennis, event: .unlock(id: "preview", item: KuroItem.scrunchie.rawValue))
+            .frame(height: 260)
+        ForEach(KuroItem.allCases, id: \.self) { item in
+            KuroItemIcon(item: item).frame(width: 48, height: 48).background(item.look.color)
+        }
     }
     .padding()
 }

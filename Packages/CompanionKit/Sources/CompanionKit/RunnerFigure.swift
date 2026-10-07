@@ -1903,9 +1903,11 @@ private struct StretchArms: View {
 }
 
 // Drawn in code rather than the SVG because it only exists for the unboxing.
-/// The gift box HAKU pops out of; `progress` runs 0...1.
-private struct GiftBox: View {
+/// The gift box a character pops out of; `progress` runs 0...1.
+struct GiftBox: View {
     var progress: CGFloat
+    var fill = Toy.pink
+    var ribbon = RunnerPalette.gold
 
     var body: some View {
         Canvas { context, size in
@@ -1925,14 +1927,14 @@ private struct GiftBox: View {
                 flap.rotate(by: .degrees(Double(120 * open * side)))
                 let rect = CGRect(x: side < 0 ? 0 : -36.5, y: -9, width: 36.5, height: 9)
                 let path = Path(roundedRect: rect, cornerRadius: 2)
-                flap.fill(path, with: .color(Toy.pink))
+                flap.fill(path, with: .color(fill))
                 flap.stroke(path, with: ink, lineWidth: 3)
             }
             let box = Path(roundedRect: CGRect(x: 24, y: 104, width: 73, height: 38), cornerRadius: 4)
-            context.fill(box, with: .color(Toy.pink))
-            let ribbon = Path(CGRect(x: 55, y: 104, width: 11, height: 38))
-            context.fill(ribbon, with: .color(RunnerPalette.gold))
-            context.stroke(ribbon, with: ink, lineWidth: 2)
+            context.fill(box, with: .color(fill))
+            let band = Path(CGRect(x: 55, y: 104, width: 11, height: 38))
+            context.fill(band, with: .color(ribbon))
+            context.stroke(band, with: ink, lineWidth: 2)
             context.stroke(box, with: ink, lineWidth: 3)
         }
     }
