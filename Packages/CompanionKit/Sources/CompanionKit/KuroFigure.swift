@@ -227,6 +227,10 @@ public struct KuroView: View {
     @State private var unboxItem: KuroItem?
     // Id of the last unboxing, shared with HAKU's view so each plays once.
     @AppStorage("companion.lastUnlock") private var lastUnlock = ""
+    // Id of the last workout cheered, shared with HAKU's view so each plays once.
+    @AppStorage("companion.lastCelebration") private var lastCelebration = ""
+    @State private var crown = 0.0
+    @State private var crownTurn = 0.0
 
     /// - Parameters:
     ///   - look: what she wears.
@@ -240,7 +244,7 @@ public struct KuroView: View {
     ///   - style: `.watch` gives a tap a light tap on the wrist instead of a line.
     ///   - wearing: ids of her shop items she wears; each shows only in its own look.
     ///   - event: a one-off animation. `.unlock` with one of her items plays the unboxing once per id;
-    ///     pass the item's `look` so it shows.
+    ///     pass the item's `look` so it shows. `.celebrate` plays her look's tap move with a heart once per id.
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
     ///   - onTap: called after she reacts to a tap.
     public init(
@@ -345,14 +349,21 @@ public struct KuroView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { react() }
+        // Until she has her own close-up and crown moves (新角色清单), both play her tap reaction.
+        .gesture(
+            LongPressGesture(minimumDuration: 0.4).onEnded { _ in react() },
+            including: style == .notification ? .none : .all
+        )
+        .modifier(CrownLook(isEnabled: style == .watch, crown: $crown))
+        .onChange(of: crown) { old, new in crowned(by: new - old) }
         .task(id: listensForShakes) { await listenForShakes() }
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: look) { _, _ in
             pop += 1
             if unboxStart == nil { say(nil) }
         }
-        .onAppear { playUnboxIfNew() }
-        .onChange(of: event) { _, _ in playUnboxIfNew() }
+        .onAppear { playEventIfNew() }
+        .onChange(of: event) { _, _ in playEventIfNew() }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime, pose: pose))
         .accessibilityAddTraits(showsBubble || style == .watch || onTap != nil ? .isButton : [])
@@ -390,6 +401,32 @@ public struct KuroView: View {
         }
         if talks { say(Self.line(after: bubble, from: lines)) }
         onTap?()
+    }
+
+    /// Plays her reaction once the crown has turned a full step, counting `delta` in either direction.
+    private func crowned(by delta: Double) {
+        crownTurn += abs(delta)
+        guard crownTurn >= 1 else { return }
+        crownTurn = 0
+        react()
+    }
+
+    /// Plays the unboxing or the workout cheer that `event` brings, if it is new.
+    private func playEventIfNew() {
+        playUnboxIfNew()
+        guard bedtime == .off, let (id, kind) = Self.newCelebration(event, last: lastCelebration) else { return }
+        lastCelebration = id
+        // Until she has her own cheer per workout group (新角色清单), she plays her tap move with a heart.
+        play(KuroTap(look: look, sleepy: false), at: .now)
+        tapHeart = true
+        if style == .watch { pokes += 1 }
+        if showsBubble { say(KuroBubbleLines.celebration(kind), for: 4) }
+    }
+
+    /// The workout id and group to cheer for `event`, or nil when there is none or it already played.
+    nonisolated static func newCelebration(_ event: CompanionEvent?, last: String) -> (String, WorkoutSummary.Kind)? {
+        guard case .celebrate(let id, let kind) = event, id != last else { return nil }
+        return (id, kind)
     }
 
     private func play(_ kind: KuroTap, at now: Date) {

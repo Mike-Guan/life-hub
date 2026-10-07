@@ -109,7 +109,8 @@ struct HomeView: View {
                             activity: shownActivity(at: context.date),
                             moment: moment(at: context.date),
                             overtimeUntil: rules.eveningUntil(at: context.date),
-                            wearing: Set(wardrobe.equipped.values)
+                            wearing: Set(wardrobe.equipped.values),
+                            event: event
                         )
                     } else {
                         CompanionView(
