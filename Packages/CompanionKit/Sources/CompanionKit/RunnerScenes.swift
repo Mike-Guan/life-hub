@@ -174,6 +174,9 @@ extension RunnerPose {
         case .onTransit:
             lean = 2 * Double(sin(t * .pi / 1.6))
             headDy += toWork ? 0 : 1.5 * abs(sin(t * .pi / 3))
+        case .arrived:
+            // The arrival moment is drawn in the UI thread's next round; until then the leg's mood alone shows.
+            break
         }
         commuteLeg = phase.leg
         if toWork {
