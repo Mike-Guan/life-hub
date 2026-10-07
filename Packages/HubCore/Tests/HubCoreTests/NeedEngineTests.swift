@@ -238,6 +238,11 @@ import Testing
         #expect(NeedEngine.celebration([run], celebrated: [], now: date(5, 7, 15)) == nil)
         let shortBoxing = workout(.boxing, date(5, 9), minutes: 20)
         #expect(NeedEngine.celebration([shortBoxing], celebrated: [], now: date(5, 10)) == nil)
+        // Every other group gets a cheer after 20 minutes; `.other` never does.
+        let tennis = workout(.racket, date(5, 9), minutes: 60)
+        #expect(NeedEngine.celebration([tennis], celebrated: [], now: date(5, 10)) == tennis)
+        let shortSwim = workout(.swimming, date(5, 9), minutes: 10)
+        #expect(NeedEngine.celebration([shortSwim], celebrated: [], now: date(5, 10)) == nil)
     }
 
     @Test func whyLinePrefersBedtimeThenNeedThenEnergy() {

@@ -201,6 +201,30 @@ public enum ModeEngine {
     /// Leaving the office ends work only from this minute after midnight.
     public static let offWorkFromMinute = 17 * 60 + 30
 
+    // Mike, 2026-10-07: place comes first. A leave can be held by a manual change, come before 17:30, or be
+    // reported before he really left, and then no second event comes. So the app checks again at every place
+    // event and every open, not only at the moment of leaving.
+    /// Ends work when, from 17:30 today, Mike left the office or came home and nothing changed the mode since.
+    /// - Returns: the switch to chill, or `nil` to leave the mode alone.
+    public static func settle(
+        log: ModeLog,
+        presence: PlacePresence,
+        now: Date,
+        calendar: Calendar = .current
+    ) -> ModeDecision? {
+        guard let current = log.active.last(where: { $0.at <= now }), current.mode == .work,
+            presence.since(.office) == nil,
+            let evening = calendar.date(
+                bySettingHour: offWorkFromMinute / 60, minute: offWorkFromMinute % 60, second: 0, of: now
+            )
+        else { return nil }
+        let moves = [(presence.left(.office), "离开公司了"), (presence.since(.home), "到家了")]
+            .compactMap { at, reason in at.map { (at: $0, reason: reason) } }
+            .filter { $0.at >= evening && $0.at <= now && $0.at > current.at }
+        guard let move = moves.max(by: { $0.at < $1.at }) else { return nil }
+        return ModeDecision(mode: .chill, source: .location, reason: move.reason)
+    }
+
     private static func isGymVisit(_ change: ModeChange) -> Bool {
         change.mode == .boxing && change.source == .location
     }

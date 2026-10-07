@@ -154,6 +154,10 @@ struct LifeHubApp: App {
             replayFrom = OpenReplay.switchFrom(log: store.log, lastSeen: away, now: .now)
             // Mike may have changed location access in Settings while away.
             placeMonitor.checkAccess(places)
+            // A missed or held leave still ends work when Mike opens the app in the evening.
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
+                Dogfood.note("settle", "\(settled.reason)，切到\(settled.mode.title)")
+            }
             syncWidgets()
             // One after the other, so the two permission prompts don't overlap.
             Task {
@@ -364,7 +368,9 @@ struct LifeHubApp: App {
             } else {
                 decision = nil
             }
-            let outcome = decision.map { "切到\($0.mode.title)" } ?? "不切"
+            // Place comes first: a leave that was held or came early still ends work once it's evening.
+            let made = decision ?? store.settle(presence: presence)
+            let outcome = made.map { "切到\($0.mode.title)" } ?? "不切（\(Self.keptBecause(store: store, rules: rules))）"
             Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
             needs.refresh(
                 places: places,
@@ -393,6 +399,15 @@ struct LifeHubApp: App {
     }
 
     private static let lastBackgroundKey = "lastBackground"
+
+    // The decision log says what kept the mode, so a missed switch can be traced (2026-10-07).
+    private static func keptBecause(store: ModeStore, rules: ModeRules) -> String {
+        let mode = store.current.map { "现在是\($0.title)" } ?? "还没有模式"
+        guard let manual = store.log.active.last(where: \.source.isManual),
+            Date.now.timeIntervalSince(manual.at) < rules.manualHold
+        else { return mode }
+        return "\(mode)，\(manual.at.formatted(date: .omitted, time: .shortened)) 手动切过"
+    }
 
     // A notice still in Notification Center was never tapped, so its animation never played.
     private func replayOffWork() async {
