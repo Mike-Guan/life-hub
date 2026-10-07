@@ -154,9 +154,35 @@ public struct ReturnCard: Equatable, Sendable {
     }
 }
 
-/// When the last `.box` return played, so it plays at most once in `ReturnReplay.boxEvery`.
+/// When the last `.box` return played, so it plays at most once in `ReturnReplay.boxEvery`, and which
+/// time away was already looked at, so one stay in the background is one return.
 public enum ReturnLog {
     static let defaultsKey = "returnBoxAt"
+    static let pendingKey = "returnPendingSince"
+    static let handledKey = "returnHandledAway"
+
+    // Control Center, a permission sheet or Face ID make the app active again without a stay in the
+    // background. Without this, the same return would start again and never finish (Issue #184).
+    /// The start of the return to look at on this open, `nil` when this open isn't a return.
+    /// A pending return comes first. Marks `away` as looked at, so the next call with it returns `nil`.
+    /// - Parameters:
+    ///   - away: when the app last went to the background, `nil` if never.
+    ///   - defaults: where the pending and looked-at times are stored.
+    public static func since(away: Date?, in defaults: UserDefaults) -> Date? {
+        let pending = defaults.object(forKey: pendingKey) as? Date
+        let handled = defaults.object(forKey: handledKey) as? Date
+        if let away { defaults.set(away, forKey: handledKey) }
+        return pending ?? (away == handled ? nil : away)
+    }
+
+    /// Keeps the return starting at `since` for a later open, or drops the kept one when `nil`.
+    public static func setPending(_ since: Date?, in defaults: UserDefaults) {
+        if let since {
+            defaults.set(since, forKey: pendingKey)
+        } else {
+            defaults.removeObject(forKey: pendingKey)
+        }
+    }
 
     /// When the last `.box` return played, `nil` if never.
     public static func lastBox(in defaults: UserDefaults) -> Date? {

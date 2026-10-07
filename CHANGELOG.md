@@ -316,6 +316,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- The welcome back after days away no longer gets stuck when you pull down Control Center, which had
+  held back celebrations and keepsake unboxing. Leaving the big return halfway still counts toward its
+  once-in-30-days limit, and a return kept from bedtime is dropped when KURO is picked.
 - Before any mode is picked, the home title says "NO MODE", not "NO MODE MODE".
 - The second preset character's card now fills with her own color per mode (mint, sky, pink, lavender, as in
   the approved preview), dims at bedtime and squashes as the mode changes, on the home screen and the watch.
