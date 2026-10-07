@@ -127,6 +127,7 @@ struct HomeView: View {
                                 ?? stayHome(at: context.date) ?? dailyDone,
                             daily: daily?.cue(at: context.date),
                             walking: walking(at: context.date),
+                            commute: inputs.commute(at: context.date),
                             bath: bath(at: context.date),
                             invite: activeNeed(at: context.date) == nil ? nil : invite,
                             cheer: cheer,
