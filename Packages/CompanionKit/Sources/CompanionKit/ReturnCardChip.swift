@@ -67,7 +67,7 @@ struct ReturnCardIcon: View {
     }
 
     /// The parts that picture `card`.
-    static func parts(_ card: ReturnCard) -> [RunnerPart] {
+    nonisolated static func parts(_ card: ReturnCard) -> [RunnerPart] {
         switch card.kind {
         case .boxing: [.backFist]
         case .run5k: [.runShoe]
@@ -89,7 +89,7 @@ struct ReturnCardIcon: View {
     }
 
     /// The square of figure space around `parts`, in SVG units.
-    static func crop(_ parts: [RunnerPart]) -> CGRect {
+    nonisolated static func crop(_ parts: [RunnerPart]) -> CGRect {
         let box = parts.flatMap(RunnerArt.cachedInks).reduce(CGRect.null) { $0.union($1.path.boundingRect) }
         guard !box.isNull else { return RunnerArt.bounds }
         let side = max(box.width, box.height) + 6
