@@ -63,8 +63,10 @@ struct ShopView: View {
         }
     }
 
-    private var balance: Int { growth.ledger.balance }
-    private var owned: Set<String> { growth.ledger.owned }
+    // Each character spends and collects with her own cans.
+    private var ledger: CanLedger { growth.ledger.only(persona) }
+    private var balance: Int { ledger.balance }
+    private var owned: Set<String> { ledger.owned }
 
     private var forSale: [ShopItem] {
         ShopItem.catalog(for: persona).filter { $0.price != nil && !owned.contains($0.id) }
@@ -179,7 +181,7 @@ struct ShopView: View {
     private func keepsakeRow(_ item: ShopItem) -> some View {
         let isOwned = owned.contains(item.id)
         let keepsake = item.keepsake
-        let count = keepsake.map { min(growth.ledger.count($0.win), $0.count) } ?? 0
+        let count = keepsake.map { min(ledger.count($0.win), $0.count) } ?? 0
         let goal = keepsake?.count ?? 1
         return HStack(spacing: 10) {
             ShopItemIcon(item: item)
@@ -207,7 +209,7 @@ struct ShopView: View {
         do {
             try growth.buy(item)
             buyError = growth.lastError
-            unboxing = growth.ledger.unboxings(seen: UnboxLog.seen, persona: persona).last { $0.itemID == item.id }
+            unboxing = ledger.unboxings(seen: UnboxLog.seen, persona: persona).last { $0.itemID == item.id }
         } catch {
             buyError =
                 switch error {
