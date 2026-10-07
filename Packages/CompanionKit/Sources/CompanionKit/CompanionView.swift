@@ -1171,13 +1171,14 @@ struct WatchFigureFrame: ViewModifier {
 
     @ViewBuilder func body(content: Content) -> some View {
         if isEnabled {
-            // The approved C layout shows him from the chest up, so the figure takes the whole width and the
-            // screen edge crops the rest. The 12 pt side and 24 pt top padding of the card are undone here.
+            // The approved C layout shows him from the chest up and the screen edge crops the rest. At the full
+            // width he filled the screen and his hair ran into the mode chip, so he is drawn at 80% of it,
+            // centered and lowered. The 12 pt side and 24 pt top padding of the card are undone here.
             GeometryReader { proxy in
-                let width = proxy.size.width + 24
+                let width = (proxy.size.width + 24) * 0.8
                 content
                     .frame(width: width, height: width * 2, alignment: .top)
-                    .offset(x: -12, y: 6)
+                    .offset(x: (proxy.size.width - width) / 2, y: 22)
             }
         } else {
             content

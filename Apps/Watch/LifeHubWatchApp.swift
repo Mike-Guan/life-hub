@@ -25,32 +25,30 @@ struct WatchHomeView: View {
     @State private var payload = WatchPayload.read(from: AppGroup.container.watchPayloadURL)
 
     @State private var failure: String?
-    /// False until the first frame is on screen; the second page waits for it.
-    @State private var showsPages = false
+    /// 0 is the character, 1 is today's card.
+    @State private var page = 0
 
     var body: some View {
         TimelineView(.everyMinute) { context in
             if let payload, let mode = payload.snapshot.mode {
-                // Launching straight into the paged view took longer than the watchdog allows with the screen
-                // off, so the first frame is the character alone and the pages come right after.
-                if showsPages {
-                    TabView {
+                // A vertical-page TabView kept the main thread busy past the watchdog when launched with the screen
+                // off, so the two pages are switched by hand: swipe up for the card, down for the character.
+                ZStack {
+                    if page == 0 {
                         companionPage(payload, mode: mode, at: context.date)
+                            .transition(.move(edge: .top))
+                    } else {
                         TodayPage(payload: payload, mode: mode, date: context.date)
+                            .transition(.move(edge: .bottom))
                     }
-                    .tabViewStyle(.verticalPage)
-                } else {
-                    companionPage(payload, mode: mode, at: context.date)
                 }
+                .overlay(alignment: .trailing) { PageDots(page: page).padding(.trailing, 3) }
+                .simultaneousGesture(pageSwipe)
             } else {
                 Text(failure ?? "先在 iPhone 上打开一次 Life Hub")
                     .font(.footnote)
                     .multilineTextAlignment(.center)
             }
-        }
-        .task {
-            try? await Task.sleep(for: .milliseconds(500))
-            showsPages = true
         }
         .onReceive(NotificationCenter.default.publisher(for: WatchReceiver.didReceive)) { _ in
             payload = WatchPayload.read(from: AppGroup.container.watchPayloadURL)
@@ -58,6 +56,15 @@ struct WatchHomeView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: WatchReceiver.didFail)) { note in
             failure = note.object as? String
+        }
+    }
+
+    /// A vertical swipe: up shows today's card, down goes back to the character.
+    private var pageSwipe: some Gesture {
+        DragGesture(minimumDistance: 20).onEnded { value in
+            let next = value.translation.height < -30 ? 1 : value.translation.height > 30 ? 0 : page
+            guard next != page else { return }
+            withAnimation(.easeOut(duration: 0.25)) { page = next }
         }
     }
 
@@ -114,6 +121,22 @@ struct WatchHomeView: View {
             }
             .padding(.leading, 4)
         }
+    }
+}
+
+/// Two small dots on the right edge; the filled one is the page on screen.
+private struct PageDots: View {
+    let page: Int
+
+    var body: some View {
+        VStack(spacing: 4) {
+            ForEach(0..<2, id: \.self) { index in
+                Circle()
+                    .fill(Toy.ink.opacity(index == page ? 1 : 0.3))
+                    .frame(width: 5, height: 5)
+            }
+        }
+        .accessibilityHidden(true)
     }
 }
 
