@@ -164,6 +164,26 @@ extension RunnerPose {
         if place == .office { bagLift = 1 }
     }
 
+    /// On the way between home and the office at `time` seconds: a brisk walk to work with a yawn every 4 s, a
+    /// slow drag home with sleepy eyes. On a train or bus HAKU stands and sways with the ride instead of stepping.
+    mutating func commute(_ phase: CommutePhase, time t: CGFloat) {
+        let toWork = phase.leg == .toWork
+        switch phase.stage {
+        case .walking:
+            walk(from: toWork ? .home : .office, time: toWork ? t : 0.6 * t)
+        case .onTransit:
+            lean = 2 * Double(sin(t * .pi / 1.6))
+            headDy += toWork ? 0 : 1.5 * abs(sin(t * .pi / 3))
+        }
+        commuteLeg = phase.leg
+        if toWork {
+            yawn = max(yawn, bump(loop(t, 4), from: 0, to: 1.2))
+        } else {
+            blink = min(blink, 0.35)
+            headDy += 1.5
+        }
+    }
+
     /// HAKU's head and body in `scene` at `time` seconds, eased in by `propRaise`.
     mutating func playScene(_ scene: DailyScene, time t: CGFloat) {
         let r = propRaise

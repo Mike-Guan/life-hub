@@ -229,7 +229,10 @@ struct HomeView: View {
             days: activityDays,
             departure: departure,
             sit: sit,
-            bathDoneAt: bathDoneAt
+            bathDoneAt: bathDoneAt,
+            scrollSeenAt: scrollSeenAt,
+            daily: daily,
+            invite: invite
         )
     }
 
@@ -237,25 +240,11 @@ struct HomeView: View {
 
     private func moment(at date: Date) -> CompanionMoment? { inputs.moment(at: date) }
 
-    private func home(at date: Date) -> HomeSignals? { inputs.home(at: date) }
-
-    // When HAKU stops waiting at the door it gives up once, if nothing else is going on.
-    private func stayHome(at date: Date) -> CompanionEvent? {
-        guard activity(at: date) == nil, activeNeed(at: date) == nil, let home = home(at: date) else { return nil }
-        return MomentEngine.stayHome(mode: store.current, signals: home, now: date, work: rules)
-    }
+    private func stayHome(at date: Date) -> CompanionEvent? { inputs.stayHome(at: date) }
 
     private func shownActivity(at date: Date) -> CompanionActivity? { inputs.shownActivity(at: date) }
 
-    private func revived(at date: Date) -> CompanionEvent? {
-        let window = bath(at: date) ? BathTime.window(at: date, bedtime: bedtime) : nil
-        return ReviveEngine.revived(
-            switchedAt: ReviveEngine.switchedAt(change: store.log.current, bath: window),
-            scrollSeenAt: scrollSeenAt,
-            atHome: activitySignals?.presence.since(.home) != nil,
-            now: date
-        )
-    }
+    private func revived(at date: Date) -> CompanionEvent? { inputs.revived(at: date) }
 
     private func walking(at date: Date) -> HubPlace.Kind? { inputs.walking(at: date) }
 

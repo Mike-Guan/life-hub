@@ -5,7 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
-- HAKU wears only the blue earring everywhere. The white earbud in chill, at night under the blanket and on walks is gone.
+- The watch also plays the one-offs (a workout cheer, a Daily task done, getting up from the sofa, the
+  opening of coming back), the Daily task cue and the invite, and KURO's need and overtime sign, like the phone.
 - Groundwork for the watch commute: Life Hub can tell walking to work, riding the train and walking home
   between home and the office. Nothing shows it yet.
 - The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
@@ -45,6 +46,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
+  feet with sleepy eyes. On a train or bus he stands and sways instead of stepping.
 - Tapping KURO plays a move for her look: the tablet over her face, a sip from her cup, a ball bounced on her
   racket or a push of her glasses. When tired she rubs her eyes, 5 taps turn her back, and sometimes a heart pops up.
 - KURO's own shop items (five to buy at HAKU's prices, three keepsakes at HAKU's milestones) and her own

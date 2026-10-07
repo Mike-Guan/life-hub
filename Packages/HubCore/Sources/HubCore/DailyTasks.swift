@@ -270,8 +270,8 @@ public enum DailyAgenda {
 }
 
 /// What HAKU does about a Daily task around its start.
-public struct DailyCue: Equatable, Sendable {
-    public enum Stage: Sendable {
+public struct DailyCue: Codable, Equatable, Sendable {
+    public enum Stage: String, Codable, Sendable {
         /// From `DailyAgenda.soonLead` before the start: looks at its watch and holds up the prop.
         case soon
         /// For `DailyAgenda.nowLasts` from the start: slaps a sticky note on the screen once.
