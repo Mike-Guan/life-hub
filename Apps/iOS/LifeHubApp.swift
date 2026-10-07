@@ -119,7 +119,8 @@ struct LifeHubApp: App {
             money: moneyCard,
             onSettings: { showsSettings = true },
             cans: growth.ledger.balance,
-            onShop: { showsShop = true },
+            // The shop and its unboxing sell HAKU's items; KURO's own come after their preview.
+            onShop: persona == .haku ? { showsShop = true } : nil,
             wardrobe: wardrobe,
             persona: persona,
             ledger: growth.ledger,
@@ -293,7 +294,7 @@ struct LifeHubApp: App {
 
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.
     private func showNextUnboxing() {
-        guard !showsShop, !showsWardrobe, !showsSettings else { return }
+        guard !showsShop, !showsWardrobe, !showsSettings, persona == .haku else { return }
         unboxing = UnboxLog.next(in: growth.ledger)
     }
 
