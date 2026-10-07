@@ -76,7 +76,7 @@ enum KuroBubbleLines {
         case .boxing: "……还行。"
         case .running: "……真跑完了。"
         case .strength: "……不错。"
-        case .other: "嗯。……还行。"
+        default: "嗯。……还行。"
         }
     }
 

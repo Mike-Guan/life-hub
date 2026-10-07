@@ -54,6 +54,26 @@ import Testing
         #expect(store.ledger.count(.gym) == 1)
     }
 
+    @Test func onlyBoxingRunningAndStrengthEarn() {
+        let earning: Set<WorkoutSummary.Kind> = [.boxing, .running, .strength]
+        let workouts = WorkoutSummary.Kind.allCases.map { workout($0.rawValue, $0, minutes: 90, meters: 10_000) }
+        let wins = Win.wins(in: workouts)
+        #expect(wins.count == earning.count)
+        let others = workouts.filter { !earning.contains($0.kind) }
+        #expect(others.count == WorkoutSummary.Kind.allCases.count - earning.count)
+        #expect(Win.wins(in: others).isEmpty)
+    }
+
+    @Test func workoutKindsDecodeAndUnknownOnesBecomeOther() throws {
+        let decoder = JSONDecoder()
+        for kind in WorkoutSummary.Kind.allCases {
+            let data = try JSONEncoder().encode(kind)
+            #expect(try decoder.decode(WorkoutSummary.Kind.self, from: data) == kind)
+        }
+        let unknown = Data(#""skydiving""#.utf8)
+        #expect(try decoder.decode(WorkoutSummary.Kind.self, from: unknown) == .other)
+    }
+
     @Test func boxingEarnsOnceAWeekAndTheRestOnceADay() {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "Asia/Tokyo") ?? .gmt
