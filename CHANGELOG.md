@@ -34,6 +34,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- KURO's own shop items (five to buy at HAKU's prices, three keepsakes at HAKU's milestones) and her own
+  wardrobe, kept apart from HAKU's. Both share one can balance. Not shown yet; her shop opens with its pictures.
 - 回来的时候 (animation): HAKU looks up from the phone after a short absence. After a long one it dozes on
   the sofa (or at the desk in Work), sits up, turns the phone face down, says "……又不是在等你。", pushes over a
   crate, and the cards flip one by one before the cans open together. With nothing recorded it scoots over and

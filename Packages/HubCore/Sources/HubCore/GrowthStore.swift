@@ -30,6 +30,7 @@ public final class GrowthStore {
         self.lastError = error
     }
 
+    // Both characters' keepsakes are granted, so switching character later finds them already earned.
     /// Records `win` once per `source`, then grants any keepsake it completes.
     /// - Returns: keepsakes granted by this win; empty when it was already recorded.
     @discardableResult

@@ -89,11 +89,12 @@ import Testing
         #expect(store.remaining(for: headband) == 1)
         #expect(store.ledger.ownedAt(headband.id) == nil)
         let fourth = at.addingTimeInterval(3_600)
-        #expect(store.record(.run5k, source: "run-3", at: fourth) == [headband])
+        let sakura = try item("keepsake.hair.sakura")
+        #expect(store.record(.run5k, source: "run-3", at: fourth) == [headband, sakura])
         #expect(store.ledger.ownedAt(headband.id) == fourth)
         #expect(store.remaining(for: headband) == nil)
         #expect(store.record(.run5k, source: "run-4", at: at).isEmpty)
-        #expect(store.ledger.owned == ["keepsake.headband.runner"])
+        #expect(store.ledger.owned == ["keepsake.headband.runner", "keepsake.hair.sakura"])
         // Keepsakes are free.
         #expect(store.ledger.balance == 5 * Win.run5k.cans)
         #expect(store.remaining(for: try item("room.plant")) == nil)
@@ -107,6 +108,25 @@ import Testing
         #expect(pending.compactMap(\.itemID) == ["keepsake.headband.runner", "room.plant"])
         let seen = Set(pending.prefix(1).map(\.id))
         #expect(store.ledger.unboxings(seen: seen).compactMap(\.itemID) == ["room.plant"])
+    }
+
+    @Test func eachCharacterUnboxesOnlyHerOwnItems() throws {
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        for run in 0..<4 { store.record(.run5k, source: "run-\(run)", at: at.addingTimeInterval(Double(run))) }
+        try store.buy(try item("room.flower.pink"), at: at.addingTimeInterval(10))
+        #expect(store.ledger.unboxings(seen: []).compactMap(\.itemID) == ["keepsake.headband.runner"])
+        let kuro = store.ledger.unboxings(seen: [], persona: .kuro).compactMap(\.itemID)
+        #expect(kuro == ["keepsake.hair.sakura", "room.flower.pink"])
+        // One balance for both shops.
+        #expect(store.ledger.balance == 4 * Win.run5k.cans - 10)
+    }
+
+    @Test func kuroHasHerOwnCatalogAtHakusPrices() {
+        let haku = ShopItem.catalog(for: .haku)
+        let kuro = ShopItem.catalog(for: .kuro)
+        #expect(haku.count + kuro.count == ShopItem.catalog.count)
+        #expect(kuro.compactMap(\.price).sorted() == haku.compactMap(\.price).sorted())
+        #expect(kuro.compactMap(\.keepsake).map(\.win) == [.gotUp, .run5k, .boxing])
     }
 
     @Test func ledgerPersistsAndKeepsUnreadableEntries() throws {
@@ -155,6 +175,11 @@ import Testing
         wardrobe.equip(try item("room.plant"))
         wardrobe.clear(.room)
         wardrobe.store(in: defaults)
+        #expect(Wardrobe.stored(in: defaults).equipped == [.gloves: "gloves.gold"])
+        // KURO's wardrobe is kept apart from HAKU's.
+        #expect(Wardrobe.stored(in: defaults, persona: .kuro) == Wardrobe())
+        Wardrobe(equipped: [.gloves: "racket.gold"]).store(in: defaults, persona: .kuro)
+        #expect(Wardrobe.stored(in: defaults, persona: .kuro).equipped == [.gloves: "racket.gold"])
         #expect(Wardrobe.stored(in: defaults).equipped == [.gloves: "gloves.gold"])
     }
 
