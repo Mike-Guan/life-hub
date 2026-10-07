@@ -318,27 +318,27 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             keepsake: Keepsake(win: .run5k, count: 4)
         ),
         ShopItem(id: "celebrate.up", slot: .celebration, title: "起身庆祝", keepsake: Keepsake(win: .gotUp, count: 1)),
-        ShopItem(id: "room.flower.pink", slot: .room, title: "窗台小粉花", price: 10, persona: .kuro),
-        ShopItem(id: "hair.tie.pink", slot: .headband, title: "粉色发圈", price: 15, persona: .kuro),
-        ShopItem(id: "blanket.cat.pink", slot: .mask, title: "粉色猫猫毯", price: 20, persona: .kuro),
-        ShopItem(id: "room.lamp.cat", slot: .room, title: "猫耳台灯", price: 25, persona: .kuro),
-        ShopItem(id: "bag.tennis.pink", slot: .gloves, title: "粉色网球包", price: 30, persona: .kuro),
+        ShopItem(id: "kuro.room.flower", slot: .room, title: "窗台小粉花", price: 10, persona: .kuro),
+        ShopItem(id: "kuro.hair.scrunchie", slot: .headband, title: "粉色发圈", price: 15, persona: .kuro),
+        ShopItem(id: "kuro.blanket.cats", slot: .mask, title: "粉色猫猫毯", price: 20, persona: .kuro),
+        ShopItem(id: "kuro.room.lamp", slot: .room, title: "猫耳台灯", price: 25, persona: .kuro),
+        ShopItem(id: "kuro.bag.tennis", slot: .gloves, title: "粉色网球包", price: 30, persona: .kuro),
         ShopItem(
-            id: "celebrate.spin",
+            id: "kuro.celebrate.spin",
             slot: .celebration,
             title: "藏不住转一圈",
             keepsake: Keepsake(win: .gotUp, count: 1),
             persona: .kuro
         ),
         ShopItem(
-            id: "keepsake.hair.sakura",
+            id: "kuro.headband.sakura",
             slot: .headband,
             title: "樱色运动发带",
             keepsake: Keepsake(win: .run5k, count: 4),
             persona: .kuro
         ),
         ShopItem(
-            id: "racket.gold",
+            id: "kuro.racket.gold",
             slot: .gloves,
             title: "金色网球拍",
             keepsake: Keepsake(win: .boxing, count: 10),
