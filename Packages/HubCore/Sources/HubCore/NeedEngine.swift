@@ -15,7 +15,7 @@ public enum CompanionNeed: String, Codable, CaseIterable, Sendable {
 }
 
 /// A short animation RUNNER plays once, then goes back to its usual look.
-public enum CompanionEvent: Equatable, Sendable {
+public enum CompanionEvent: Codable, Equatable, Sendable {
     /// Celebrate a workout of `kind`; `id` is the workout's id, so each one plays once.
     case celebrate(id: String, kind: WorkoutSummary.Kind)
     /// The off-work animation after the off-work notification is tapped; `id` is the day, "yyyy-MM-dd".

@@ -32,6 +32,9 @@ public struct CompanionView: View {
     /// The place Mike just left: HAKU walks with what it carries from there, unless a task scene or an activity
     /// shows.
     let walking: HubPlace.Kind?
+    /// On the way between home and the office: HAKU walks or rides with the leg's own look, unless a task scene
+    /// or an activity shows.
+    let commute: CommutePhase?
     /// Bath time before bed: HAKU carries shampoo and a rubber duck out of the frame; a tap dries its hair.
     let bath: Bool
     /// Called after HAKU dries its hair on a tap during bath time.
@@ -134,6 +137,7 @@ public struct CompanionView: View {
         event: CompanionEvent? = nil,
         daily: DailyCue? = nil,
         walking: HubPlace.Kind? = nil,
+        commute: CommutePhase? = nil,
         bath: Bool = false,
         invite: String? = nil,
         cheer: Int = 0,
@@ -157,6 +161,7 @@ public struct CompanionView: View {
         self.event = event
         self.daily = daily
         self.walking = walking
+        self.commute = commute
         self.bath = bath
         self.invite = invite
         self.cheer = cheer
@@ -404,7 +409,11 @@ public struct CompanionView: View {
             if stage == .up { pose.bagLift = 1 }
             pose.headDy += vitals.slouch
             if turnAway(at: time) != nil { pose.turnedAway = true }
-            if let walking, daily?.scene == nil, activity == nil { pose.walk(from: walking, time: 0.2) }
+            if let commute, daily?.scene == nil, activity == nil {
+                pose.commute(commute, time: 0.2)
+            } else if let walking, daily?.scene == nil, activity == nil {
+                pose.walk(from: walking, time: 0.2)
+            }
             if bath { pose.callToBath(time: 0.5) }
             if let daily { pose.cue(daily, time: 5, slap: nil) }
             return pose
@@ -427,7 +436,11 @@ public struct CompanionView: View {
             // Switching state: a quick burst of sparkles over the squash.
             pose.burst = CGFloat(progress)
         }
-        if let walking, daily?.scene == nil, activity == nil { pose.walk(from: walking, time: CGFloat(time)) }
+        if let commute, daily?.scene == nil, activity == nil {
+            pose.commute(commute, time: CGFloat(time))
+        } else if let walking, daily?.scene == nil, activity == nil {
+            pose.walk(from: walking, time: CGFloat(time))
+        }
         if let progress = Self.progress(since: dryStart, at: time, duration: RunnerPose.bathDryLength) {
             pose.dryHair(time: CGFloat(progress * RunnerPose.bathDryLength))
         } else if bath {
@@ -1236,6 +1249,10 @@ struct SpeechBubble: View {
             CompanionView(mode: .chill, bath: true).frame(height: 180).toyCard()
             ForEach([HubPlace.Kind.home, .office, .fitness, .gym], id: \.self) { place in
                 CompanionView(mode: place == .office ? .work : .chill, walking: place).frame(height: 180).toyCard()
+            }
+            ForEach([CommutePhase.Leg.toWork, .home], id: \.self) { leg in
+                CompanionView(mode: .chill, commute: CommutePhase(leg: leg, stage: .walking, since: .now))
+                    .frame(height: 180).toyCard()
             }
             ForEach(DailyScene.allCases, id: \.self) { scene in
                 let cue = DailyCue(stage: .now, prop: .note, scene: scene, id: "preview-\(scene)")
