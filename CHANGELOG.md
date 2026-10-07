@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat shape.
 - KURO has her own shop, wardrobe and unboxing: her 5 items and 3 keepsakes, at the same can prices and from
   the same can balance. Each character keeps what she wears; the home card, widgets and watch show it.
 - HAKU's blanket is now cream with a white folded hem, two small orange-and-white cats and faint paw prints,
