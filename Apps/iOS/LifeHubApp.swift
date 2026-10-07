@@ -88,6 +88,12 @@ struct LifeHubApp: App {
         Self.watch(
             places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs, growth: growth
         )
+        // Registered at launch, so HealthKit can wake the app in the background when a workout is saved.
+        WorkoutObserver.start {
+            await needs.importMotion()
+            let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults).state(at: .now)
+            Self.sendToWatch(store: store, needs: needs, growth: growth, event: needs.dueCelebration(bedtime: bedtime))
+        }
     }
 
     var body: some Scene {
