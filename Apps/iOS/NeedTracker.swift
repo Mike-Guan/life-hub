@@ -86,15 +86,25 @@ final class NeedTracker {
     // Only called while the app is on screen, so a celebration isn't spent in the background.
     /// Picks the newest workout worth celebrating that hasn't been, and remembers it.
     func celebrate(bedtime: Bedtime, now: Date = .now) {
+        guard let due = due(bedtime: bedtime, now: now) else { return }
+        AppGroup.defaults.set(Array(due.celebrated.union([due.workout.id])), forKey: Self.celebratedKey)
+        event = .celebrate(id: due.workout.id, kind: due.workout.kind)
+    }
+
+    // The watch cheers when HealthKit wakes the app; the iPhone home still cheers on the next open.
+    /// The workout cheer due at `now`, without spending it; `nil` at bedtime or when none is due.
+    func dueCelebration(bedtime: Bedtime, now: Date = .now) -> CompanionEvent? {
+        due(bedtime: bedtime, now: now).map { .celebrate(id: $0.workout.id, kind: $0.workout.kind) }
+    }
+
+    private func due(bedtime: Bedtime, now: Date) -> (workout: WorkoutSummary, celebrated: Set<String>)? {
         // Without a reading the remembered ids would all look stale and be dropped.
-        guard bedtime == .off, let workouts = motion?.workouts else { return }
+        guard bedtime == .off, let workouts = motion?.workouts else { return nil }
         let recent = Set(workouts.map(\.id))
         // Ids of workouts that dropped out of the last two days are forgotten, so the list stays short.
-        var celebrated = Set(AppGroup.defaults.stringArray(forKey: Self.celebratedKey) ?? []).intersection(recent)
-        guard let workout = NeedEngine.celebration(workouts, celebrated: celebrated, now: now) else { return }
-        celebrated.insert(workout.id)
-        AppGroup.defaults.set(Array(celebrated), forKey: Self.celebratedKey)
-        event = .celebrate(id: workout.id, kind: workout.kind)
+        let celebrated = Set(AppGroup.defaults.stringArray(forKey: Self.celebratedKey) ?? []).intersection(recent)
+        guard let workout = NeedEngine.celebration(workouts, celebrated: celebrated, now: now) else { return nil }
+        return (workout, celebrated)
     }
 
     /// Plays the off-work animation for the day of `date`; HAKU plays it once per day.
