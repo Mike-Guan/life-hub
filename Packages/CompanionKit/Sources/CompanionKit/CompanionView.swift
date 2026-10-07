@@ -85,6 +85,8 @@ public struct CompanionView: View {
     @State private var rollStart: Date?
     @State private var tapTimes: [Date] = []
     @State private var turnAwayStart: Date?
+    @State private var shakeTimes: [Date] = []
+    @State private var dizzyStart: Date?
     @State private var pokeStart: Date?
     @State private var pokeKind: WatchPoke?
     @State private var pokes = 0
@@ -194,6 +196,7 @@ public struct CompanionView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { react() }
+        .task(id: listensForShakes) { await listenForShakes() }
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: mode) { _, _ in
             pop += 1
@@ -447,6 +450,9 @@ public struct CompanionView: View {
             pose.notice(progress: progress, lookUp: noticeLookUp)
         }
         if let pokeKind, let progress = poke(at: time) { pose.poke(pokeKind, progress: progress) }
+        if let progress = Self.progress(since: dizzyStart, at: time, duration: ShakeReaction.duration) {
+            pose.dizzy(progress: progress)
+        }
         if let progress = turnAway(at: time) { pose.turnAway(progress: progress) }
         if shownMoment == .stiff, let progress = stretchUp(at: time) { pose.stretchUp(progress: progress) }
         if shownMoment == .packingUp, let start = packUpStart?.timeIntervalSinceReferenceDate,
@@ -992,6 +998,49 @@ public struct CompanionView: View {
         pokeStart = now
         if kind != .rollOver { pop += 1 }
         say(kind.line)
+    }
+
+    private var listensForShakes: Bool { style != .notification && scenePhase == .active && !reduceMotion }
+
+    /// Reacts to each shake of the phone or the watch while the view is on screen and the app is active.
+    private func listenForShakes() async {
+        #if os(iOS) || os(watchOS)
+        guard listensForShakes else { return }
+        for await _ in DeviceShakes.stream() { shaken() }
+        #endif
+    }
+
+    /// Plays HAKU's reaction to a shake; too many in a minute turn it away.
+    private func shaken() {
+        guard let mode else { return }
+        let now = Date.now
+        let time = now.timeIntervalSinceReferenceDate
+        guard turnAway(at: time) == nil,
+            Self.progress(since: dizzyStart, at: time, duration: ShakeReaction.duration) == nil
+        else { return }
+        if style == .watch { pokes += 1 }
+        shakeTimes = shakeTimes.filter { now.timeIntervalSince($0) < ShakeReaction.window } + [now]
+        if bedtime == .off, ShakeReaction.isTooMany(shakeTimes, now: now) {
+            shakeTimes = []
+            pokeKind = nil
+            turnAwayStart = now
+            pop += 1
+            say(WatchPoke.tooManyLine)
+            return
+        }
+        let reaction = ShakeReaction.pick(mode: mode, asleep: bedtime == .on || idleLife(mode, at: now) == .nap)
+        switch reaction {
+        case .dizzy:
+            dizzyStart = now
+        case .pumped:
+            pokeKind = .punch
+            pokeStart = now
+            pop += 1
+        case .woken:
+            pokeKind = .glare
+            pokeStart = now
+        }
+        say(reaction.line(for: mode))
     }
 
     private func startInvite() {

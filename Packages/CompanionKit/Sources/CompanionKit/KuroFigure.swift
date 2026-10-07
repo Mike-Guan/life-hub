@@ -340,6 +340,7 @@ public struct KuroView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { react() }
+        .task(id: listensForShakes) { await listenForShakes() }
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: look) { _, _ in
             pop += 1
@@ -350,6 +351,17 @@ public struct KuroView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime, pose: pose))
         .accessibilityAddTraits(showsBubble || style == .watch || onTap != nil ? .isButton : [])
+    }
+
+    private var listensForShakes: Bool { style != .notification && scenePhase == .active && !reduceMotion }
+
+    // Until she has her own shake move (新角色清单), a shake plays her tap reaction.
+    /// Reacts to each shake of the phone or the watch while the view is on screen and the app is active.
+    private func listenForShakes() async {
+        #if os(iOS) || os(watchOS)
+        guard listensForShakes else { return }
+        for await _ in DeviceShakes.stream() { react() }
+        #endif
     }
 
     /// Plays her reaction to a tap: a body move for her look, and a line except on the watch. Taps during a move

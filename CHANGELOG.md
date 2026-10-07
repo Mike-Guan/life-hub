@@ -42,6 +42,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- Shaking the phone or the watch makes HAKU dizzy: swirl eyes, stars around the head and a wobble, with a line
+  per mode. On a boxing day he gets pumped instead, asleep he glares and sleeps on, and three shakes in a minute
+  turn him away. KURO plays her tap reaction for now.
 - Tapping KURO plays a move for her look: the tablet over her face, a sip from her cup, a ball bounced on her
   racket or a push of her glasses. When tired she rubs her eyes, 5 taps turn her back, and sometimes a heart pops up.
 - KURO's own shop items (five to buy at HAKU's prices, three keepsakes at HAKU's milestones) and her own

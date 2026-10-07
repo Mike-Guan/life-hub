@@ -1,0 +1,114 @@
+import Foundation
+import HubCore
+
+// Mike 2026-10-07: shaking the phone or the watch makes HAKU react, the same on both. Play only: a shake never
+// switches the mode, gives cans or counts anything.
+/// HAKU's reaction to the phone or the watch being shaken.
+enum ShakeReaction: Sendable, Equatable, CaseIterable {
+    /// Swirl eyes and stars around the head, the body wobbling.
+    case dizzy
+    /// Pumped up on a boxing day: a hop and a punch.
+    case pumped
+    /// Woken from sleep: a glare, then back to sleep.
+    case woken
+
+    /// How long one reaction plays, in seconds.
+    static let duration: TimeInterval = 2.4
+    /// Shakes within `window` that make HAKU turn its back.
+    static let limit = 3
+    /// The window for `limit`, in seconds.
+    static let window: TimeInterval = 60
+
+    /// The reaction for HAKU in `mode`; `asleep` covers bedtime and naps.
+    static func pick(mode: Mode, asleep: Bool) -> ShakeReaction {
+        if asleep { return .woken }
+        return mode == .boxing ? .pumped : .dizzy
+    }
+
+    /// Whether `shakes` within `window` before `now` reach `limit`.
+    static func isTooMany(_ shakes: [Date], now: Date) -> Bool {
+        shakes.filter { now.timeIntervalSince($0) < window }.count >= limit
+    }
+
+    /// What HAKU says for this reaction in `mode`, or nil for a silent one.
+    func line(for mode: Mode) -> String? {
+        switch self {
+        case .woken: nil
+        case .pumped: "再来！"
+        case .dizzy:
+            switch mode {
+            case .work: "……喂喂喂。"
+            case .chill: "……别晃了。我要吐了。"
+            case .money: "……代码全乱了。"
+            case .boxing: "再来！"
+            }
+        }
+    }
+}
+
+/// Turns acceleration samples into shakes: two hard jolts in quick succession, then a pause.
+struct ShakeDetector: Sendable {
+    /// Acceleration a jolt must reach, in g, gravity excluded.
+    static let threshold = 1.8
+    /// Time between the two jolts of one shake, in seconds.
+    static let pairGap: ClosedRange<TimeInterval> = 0.12...0.6
+    /// Time after a shake before the next one counts, in seconds.
+    static let cooldown: TimeInterval = 1.5
+
+    private var lastJolt = -TimeInterval.infinity
+    private var lastShake = -TimeInterval.infinity
+
+    /// Adds a sample.
+    /// - Parameters:
+    ///   - magnitude: acceleration in g, gravity excluded.
+    ///   - time: when it was measured, in seconds.
+    /// - Returns: true when the sample completes a shake.
+    mutating func add(magnitude: Double, at time: TimeInterval) -> Bool {
+        guard magnitude >= Self.threshold, time - lastShake >= Self.cooldown else { return false }
+        let gap = time - lastJolt
+        lastJolt = time
+        guard Self.pairGap.contains(gap) else { return false }
+        lastShake = time
+        lastJolt = -.infinity
+        return true
+    }
+}
+
+#if os(iOS) || os(watchOS)
+import CoreMotion
+
+/// Shakes of the phone or the watch.
+enum DeviceShakes {
+    /// A stream that yields once per shake and stops listening when it is cancelled.
+    static func stream() -> AsyncStream<Void> {
+        AsyncStream { continuation in
+            let listener = Listener()
+            guard listener.manager.isDeviceMotionAvailable else {
+                continuation.finish()
+                return
+            }
+            listener.manager.deviceMotionUpdateInterval = 1.0 / 30
+            listener.manager.startDeviceMotionUpdates(to: listener.queue) { motion, _ in
+                guard let motion else { return }
+                let a = motion.userAcceleration
+                let magnitude = (a.x * a.x + a.y * a.y + a.z * a.z).squareRoot()
+                if listener.detector.add(magnitude: magnitude, at: motion.timestamp) {
+                    continuation.yield()
+                }
+            }
+            continuation.onTermination = { _ in listener.manager.stopDeviceMotionUpdates() }
+        }
+    }
+
+    // CoreMotion calls back on `queue` only, one sample at a time, so `detector` is never shared.
+    private final class Listener: @unchecked Sendable {
+        let manager = CMMotionManager()
+        let queue: OperationQueue = {
+            let queue = OperationQueue()
+            queue.maxConcurrentOperationCount = 1
+            return queue
+        }()
+        var detector = ShakeDetector()
+    }
+}
+#endif
