@@ -1384,9 +1384,6 @@ struct CrownLook: ViewModifier {
     func body(content: Content) -> some View {
         #if os(watchOS)
         content
-            .focusable(isEnabled)
-            .focusEffectDisabled()
-            .digitalCrownRotation($crown)
         #else
         content
         #endif
