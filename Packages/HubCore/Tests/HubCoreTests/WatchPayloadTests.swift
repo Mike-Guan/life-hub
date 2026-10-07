@@ -43,6 +43,7 @@ import Testing
         let decoded = try HubJSON.decoder().decode(WatchPayload.self, from: Data(json.utf8))
         #expect(decoded.wardrobe == Wardrobe())
         #expect(decoded.bedtime == .standard)
+        #expect(decoded.persona == .haku)
         #expect(decoded.snapshot == payload().snapshot)
     }
 
@@ -78,5 +79,11 @@ import Testing
             calendar: calendar
         )
         #expect(payload().timelineDates(after: now, calendar: calendar) == expected)
+    }
+
+    @Test func carriesThePersona() throws {
+        let sent = WatchPayload(snapshot: payload().snapshot, persona: .kuro)
+        let message = try #require(sent.message)
+        #expect(WatchPayload(message: message)?.persona == .kuro)
     }
 }

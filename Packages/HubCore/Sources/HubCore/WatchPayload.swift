@@ -12,23 +12,31 @@ public struct WatchPayload: Codable, Equatable, Sendable {
     public var snapshot: WidgetSnapshot
     public var wardrobe: Wardrobe
     public var bedtime: BedtimeSchedule
+    public var persona: Persona
 
-    public init(snapshot: WidgetSnapshot, wardrobe: Wardrobe = Wardrobe(), bedtime: BedtimeSchedule = .standard) {
+    public init(
+        snapshot: WidgetSnapshot,
+        wardrobe: Wardrobe = Wardrobe(),
+        bedtime: BedtimeSchedule = .standard,
+        persona: Persona = .haku
+    ) {
         self.schemaVersion = Self.currentSchemaVersion
         self.snapshot = snapshot
         self.wardrobe = wardrobe
         self.bedtime = bedtime
+        self.persona = persona
     }
 
-    private enum CodingKeys: String, CodingKey { case schemaVersion, snapshot, wardrobe, bedtime }
+    private enum CodingKeys: String, CodingKey { case schemaVersion, snapshot, wardrobe, bedtime, persona }
 
-    /// Decodes the payload; a missing wardrobe or bedtime falls back to the defaults.
+    /// Decodes the payload; a missing wardrobe, bedtime or persona falls back to the defaults.
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try values.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
         snapshot = try values.decode(WidgetSnapshot.self, forKey: .snapshot)
         wardrobe = (try? values.decodeIfPresent(Wardrobe.self, forKey: .wardrobe)) ?? Wardrobe()
         bedtime = (try? values.decodeIfPresent(BedtimeSchedule.self, forKey: .bedtime)) ?? .standard
+        persona = (try? values.decodeIfPresent(Persona.self, forKey: .persona)) ?? .haku
     }
 
     /// Whether `other` draws the same watch face: equal apart from the write time and the work time.
