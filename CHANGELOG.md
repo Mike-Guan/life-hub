@@ -32,6 +32,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- 回来的时候 (data side): after 3 or more days without opening the app, a replay of what was recorded while
+  away, with up to 3 cards, or up to 5 cards and the cans earned meanwhile after 8 days or more (at most once in
+  30 days). With nothing recorded, the quiet version. The return itself gives no cans. The animation comes with
+  the UI part.
 - During the evening extension, KURO waits at her desk with a sign showing the picked end time.
 - KURO waits out a late work day at her desk, chin on hand, with the late end on a small sign above her head.
 - On home, the line KURO says when tapped follows the current need, activity and moment of the day.
