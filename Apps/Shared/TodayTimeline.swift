@@ -34,10 +34,18 @@ struct TodayTimeline: View {
 
         var body: some View {
             HStack(spacing: 12) {
-                Text(segment.start, format: .dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits))
-                    .font(Toy.body(13, weight: .bold).monospacedDigit())
-                    .foregroundStyle(Toy.muted)
-                    .frame(width: 48, alignment: .leading)
+                // Mike 2026-10-07: a mode carried over past 05:00 keeps its real start, marked as yesterday's.
+                VStack(alignment: .leading, spacing: 0) {
+                    if segment.isCarriedOver {
+                        Text("昨天")
+                            .font(Toy.body(10, weight: .heavy))
+                            .foregroundStyle(Toy.muted)
+                    }
+                    Text(segment.startedAt, format: .dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits))
+                        .font(Toy.body(13, weight: .bold).monospacedDigit())
+                        .foregroundStyle(Toy.muted)
+                }
+                .frame(width: 48, alignment: .leading)
 
                 RoundedRectangle(cornerRadius: 4)
                     .fill(segment.mode.color(for: persona))
@@ -67,7 +75,7 @@ struct TodayTimeline: View {
         }
 
         private var durationText: String {
-            let minutes = Int(segment.duration / 60)
+            let minutes = Int(segment.fullDuration / 60)
             let text = minutes >= 60 ? "\(minutes / 60)h \(minutes % 60)m" : "\(minutes)m"
             return segment.isOngoing ? "\(text) · 进行中" : text
         }
