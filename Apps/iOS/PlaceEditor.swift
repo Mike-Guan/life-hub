@@ -182,7 +182,7 @@ extension HubPlace.Kind {
         case .office: "切到上班。"
         case .home: "不切换，用来看你是不是窝在家。"
         case .fitness: "\(persona.title) 陪你举铁，待满 30 分钟算一次健身，得 \(Win.gym.cans) 个能量罐。"
-        case .custom: action.title
+        case .custom: action.title(for: persona)
         }
     }
 }
