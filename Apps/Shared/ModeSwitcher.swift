@@ -25,12 +25,12 @@ struct ModeSwitcher: View {
 
     @ViewBuilder private func label(for mode: Mode) -> some View {
         if compact {
-            Image(systemName: mode.symbol)
+            Image(systemName: mode.symbol(for: persona))
                 .font(.system(size: 18, weight: .bold))
                 .frame(maxWidth: .infinity, minHeight: 40)
         } else {
             HStack(spacing: 10) {
-                Image(systemName: mode.symbol)
+                Image(systemName: mode.symbol(for: persona))
                     .font(.system(size: 20, weight: .bold))
                     .frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {

@@ -141,4 +141,25 @@ import Testing
         ReturnLog.markBox(at: date(5), in: defaults)
         #expect(ReturnLog.lastBox(in: defaults) == date(5))
     }
+
+    @Test func oneStayAwayIsOneReturn() throws {
+        let defaults = try #require(UserDefaults(suiteName: "ReturnLogSince"))
+        defaults.removePersistentDomain(forName: "ReturnLogSince")
+        #expect(ReturnLog.since(away: nil, in: defaults) == nil)
+        #expect(ReturnLog.since(away: date(1), in: defaults) == date(1))
+        // Active again after Control Center, with no stay in the background.
+        #expect(ReturnLog.since(away: date(1), in: defaults) == nil)
+        #expect(ReturnLog.since(away: date(9), in: defaults) == date(9))
+    }
+
+    @Test func aPendingReturnWaitsForALaterOpen() throws {
+        let defaults = try #require(UserDefaults(suiteName: "ReturnLogPending"))
+        defaults.removePersistentDomain(forName: "ReturnLogPending")
+        #expect(ReturnLog.since(away: date(1), in: defaults) == date(1))
+        ReturnLog.setPending(date(1), in: defaults)
+        #expect(ReturnLog.since(away: date(1), in: defaults) == date(1))
+        #expect(ReturnLog.since(away: date(4), in: defaults) == date(1))
+        ReturnLog.setPending(nil, in: defaults)
+        #expect(ReturnLog.since(away: date(4), in: defaults) == nil)
+    }
 }

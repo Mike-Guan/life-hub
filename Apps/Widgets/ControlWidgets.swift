@@ -48,7 +48,7 @@ private struct ModeButtons: View {
 
     private func button(_ mode: Mode) -> some View {
         Button(intent: SwitchModeIntent(mode: mode)) {
-            Label(mode.title(for: persona), systemImage: mode.symbol)
+            Label(mode.title(for: persona), systemImage: mode.symbol(for: persona))
                 .font(Toy.body(14, weight: .heavy))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
@@ -87,6 +87,6 @@ struct GoToGymControl: ControlWidget {
             }
         }
         .displayName("出发去健身")
-        .description("HAKU 背着包陪你走过去。")
+        .description("背着包陪你走过去。")
     }
 }

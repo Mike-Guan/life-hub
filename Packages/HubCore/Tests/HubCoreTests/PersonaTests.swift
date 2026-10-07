@@ -20,6 +20,8 @@ import Testing
         #expect(Mode.chill.title(for: .kuro) == Mode.chill.title)
         for mode in Mode.allCases {
             #expect(mode.title(for: .haku) == mode.title)
+            #expect(mode.tagline(for: .haku) == mode.tagline)
+            #expect(mode.tagline(for: .kuro) != mode.tagline)
         }
     }
 
@@ -31,5 +33,13 @@ import Testing
         #expect(HubPlace.Action.work.title(for: .kuro) == HubPlace.Action.work.title)
         #expect(HubPlace.Action.boxing.title(for: .haku) == HubPlace.Action.boxing.title)
         #expect(Persona.allCases.map(\.title) == ["HAKU", "KURO"])
+    }
+
+    @Test func kuroIsAtTheTennisCourtNotTheBoxingGym() {
+        #expect(CompanionActivity.boxingAtGym.reason(for: .kuro) == "你在网球场")
+        #expect(CompanionActivity.running.reason(for: .kuro) == CompanionActivity.running.reason)
+        for activity in [CompanionActivity.boxingAtGym, .gymSession, .running, .gymDay, .runDay] {
+            #expect(activity.reason(for: .haku) == activity.reason)
+        }
     }
 }

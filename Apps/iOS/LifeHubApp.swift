@@ -136,10 +136,13 @@ struct LifeHubApp: App {
         )
         .environment(store)
         .environment(energy)
-        .onChange(of: scenePhase, initial: true) { _, phase in
+        .onChange(of: scenePhase, initial: true) { old, phase in
             if phase == .background {
-                AppGroup.defaults.set(Date.now, forKey: Self.lastBackgroundKey)
+                // Launched straight into the background (a place event) isn't Mike leaving the app.
+                if old != .background { AppGroup.defaults.set(Date.now, forKey: Self.lastBackgroundKey) }
                 replayFrom = nil
+                // A box return left halfway was still seen, so it counts toward the 30 days.
+                markBoxIfShown()
                 welcomeBack = nil
             }
             guard phase == .active else { return }
@@ -216,8 +219,13 @@ struct LifeHubApp: App {
         }
         .onChange(of: persona) {
             persona.store(in: AppGroup.defaults)
-            WidgetCenter.shared.reloadAllTimelines()
-            WatchSync.shared.send()
+            // Settings is a sheet, so the scene stays active: refresh here what an open would refresh.
+            // Needs reschedule the invite, and the widgets and the watch get the new lines.
+            refreshNeeds()
+            Task {
+                await scheduleReminder()
+                countdownError = await BoxingCountdown.update(for: needs.reading)
+            }
         }
         .onChange(of: wardrobe) {
             wardrobe.store(in: AppGroup.defaults)
@@ -257,13 +265,11 @@ struct LifeHubApp: App {
     // Issue #177: after days away, HAKU shows what was recorded meanwhile. HAKU only until KURO's version is
     // previewed. Events don't play at bedtime, so a return opened then waits for the next open after it.
     private func welcome(away: Date?) async {
-        let pending = AppGroup.defaults.object(forKey: Self.returnPendingKey) as? Date
-        guard let since = pending ?? away, persona == .haku else { return }
-        guard bedtime.state(at: .now) == .off else {
-            AppGroup.defaults.set(since, forKey: Self.returnPendingKey)
-            return
-        }
-        AppGroup.defaults.removeObject(forKey: Self.returnPendingKey)
+        guard let since = ReturnLog.since(away: away, in: AppGroup.defaults) else { return }
+        // A return kept from bedtime is dropped once KURO is picked, so it can't play weeks later.
+        let playsNow = persona == .haku && bedtime.state(at: .now) == .off
+        ReturnLog.setPending(persona == .haku && !playsNow ? since : nil, in: AppGroup.defaults)
+        guard playsNow else { return }
         var nights: [SleepNight] = []
         do {
             nights = try await HealthSleep.nights(from: since, to: .now)
@@ -285,11 +291,15 @@ struct LifeHubApp: App {
 
     // The 30-day limit counts a box return only once it has actually played.
     private func welcomeDone() {
+        markBoxIfShown()
+        welcomeBack = nil
+        showNextUnboxing()
+    }
+
+    private func markBoxIfShown() {
         if case .welcomeBack(_, let replay) = welcomeBack, replay.tier == .box {
             ReturnLog.markBox(at: .now, in: AppGroup.defaults)
         }
-        welcomeBack = nil
-        showNextUnboxing()
     }
 
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.
@@ -365,7 +375,6 @@ struct LifeHubApp: App {
     }
 
     private static let lastBackgroundKey = "lastBackground"
-    private static let returnPendingKey = "returnPendingSince"
 
     // A notice still in Notification Center was never tapped, so its animation never played.
     private func replayOffWork() async {
@@ -442,7 +451,7 @@ struct LifeHubApp: App {
     }
 
     private func scheduleReminder() async {
-        reminderError = await BedtimeReminder.schedule(bedtime)
+        reminderError = await BedtimeReminder.schedule(bedtime, persona: persona)
         // The bedtime call asks for permission; without it this would fail the same way.
         if reminderError == nil { await scheduleOffWork() }
     }

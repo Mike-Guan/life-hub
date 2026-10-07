@@ -9,9 +9,9 @@ enum BedtimeReminder {
     static let category = "bedtime"
     static let requestID = "bedtime-daily"
 
-    /// Asks for permission, then replaces the daily reminder with one at `schedule`'s start time.
+    /// Asks for permission, then replaces the daily reminder with one at `schedule`'s start time, in `persona`'s name.
     /// - Returns: an error message for the UI, or `nil` when the reminder is set.
-    static func schedule(_ schedule: BedtimeSchedule) async -> String? {
+    static func schedule(_ schedule: BedtimeSchedule, persona: Persona) async -> String? {
         let center = UNUserNotificationCenter.current()
         // This replaces every category, so the invite's is registered here too.
         center.setNotificationCategories([
@@ -30,7 +30,7 @@ enum BedtimeReminder {
             }
             let content = UNMutableNotificationContent()
             content.title = "该睡了"
-            content.body = "HAKU 已经在打哈欠了。"
+            content.body = "\(persona.title) 已经在打哈欠了。"
             content.sound = .default
             content.categoryIdentifier = category
             let trigger = UNCalendarNotificationTrigger(dateMatching: schedule.startComponents, repeats: true)
