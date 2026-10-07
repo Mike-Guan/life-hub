@@ -26,7 +26,7 @@ import Testing
         #expect(WelcomeScene.sofa.length(cards: 3, cans: 9) == (open ?? 0) + 3.3)
         #expect(WelcomeScene.sofa.card(at: 5.9, count: 3, open: open) == nil)
         #expect(WelcomeScene.sofa.card(at: 6, count: 3, open: open) == 0)
-        #expect(WelcomeScene.sofa.card(at: 6 + WelcomeScene.cardGap, count: 3, open: open) == 1)
+        #expect(WelcomeScene.sofa.card(at: 6 + WelcomeScene.cardGap * 1.5, count: 3, open: open) == 1)
         #expect(WelcomeScene.sofa.card(at: open ?? 0, count: 3, open: open) == nil)
         // No cans: the crate stays shut and the last card stays up.
         #expect(WelcomeScene.desk.open(cards: 3, cans: 0) == nil)
