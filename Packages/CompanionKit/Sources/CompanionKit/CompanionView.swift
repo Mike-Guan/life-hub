@@ -83,6 +83,9 @@ public struct CompanionView: View {
     @State private var rollStart: Date?
     @State private var tapTimes: [Date] = []
     @State private var turnAwayStart: Date?
+    @State private var pokeStart: Date?
+    @State private var pokeKind: WatchPoke?
+    @State private var pokes = 0
     @State private var whistleStart: Date?
     @State private var stretchUpStart: Date?
     // Seconds since the reference date of the last stretch on opening while stiff, shared by every CompanionView.
@@ -176,6 +179,7 @@ public struct CompanionView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { react() }
+        .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: mode) { _, _ in
             pop += 1
             say(nil)
@@ -325,6 +329,9 @@ public struct CompanionView: View {
     private var paused: Bool { reduceMotion || scenePhase != .active }
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
+        if pokeKind == .rollOver, let progress = poke(at: time) {
+            return IdleMotion.rollingOver(time: time, progress: progress)
+        }
         if bedtime == .off, life == .nap,
             let progress = Self.progress(since: rollStart, at: time, duration: Self.rollDuration)
         {
@@ -415,6 +422,7 @@ public struct CompanionView: View {
         {
             pose.notice(progress: progress, lookUp: noticeLookUp)
         }
+        if let pokeKind, let progress = poke(at: time) { pose.poke(pokeKind, progress: progress) }
         if let progress = turnAway(at: time) { pose.turnAway(progress: progress) }
         if shownMoment == .stiff, let progress = stretchUp(at: time) { pose.stretchUp(progress: progress) }
         if shownMoment == .packingUp, let start = packUpStart?.timeIntervalSinceReferenceDate,
@@ -546,7 +554,13 @@ public struct CompanionView: View {
 
     /// Progress of turning away after being tapped too often at `time`, 0..<1, or nil when not turned away.
     private func turnAway(at time: TimeInterval) -> Double? {
-        Self.progress(since: turnAwayStart, at: time, duration: Self.turnAwayDuration)
+        let duration = style == .watch ? WatchPoke.turnAwayDuration : Self.turnAwayDuration
+        return Self.progress(since: turnAwayStart, at: time, duration: duration)
+    }
+
+    /// Progress of the reaction to a watch poke at `time`, 0..<1, or nil when none is playing.
+    private func poke(at time: TimeInterval) -> Double? {
+        Self.progress(since: pokeStart, at: time, duration: WatchPoke.duration)
     }
 
     /// Progress of the celebration at `time`, 0..<1, or nil when none is playing.
@@ -585,7 +599,7 @@ public struct CompanionView: View {
     private func bedtimePose(time: TimeInterval) -> RunnerPose {
         if reduceMotion { return RunnerPose.bedtimeStill() }
         switch style {
-        case .standard:
+        case .standard, .watch:
             let start = goodnightStart?.timeIntervalSinceReferenceDate ?? -.infinity
             let goodnight = (time - start) / Self.goodnightDuration
             return RunnerPose.bedtime(time: time, goodnight: goodnight, liesDown: true)
@@ -629,9 +643,9 @@ public struct CompanionView: View {
     /// How far back taps count towards pestering HAKU, in seconds.
     nonisolated static let pesterWindow: TimeInterval = 30
 
-    /// Whether `taps` hold 3 or more taps within `pesterWindow` before `now`.
-    nonisolated static func pestered(_ taps: [Date], now: Date) -> Bool {
-        taps.filter { now.timeIntervalSince($0) < pesterWindow }.count >= 3
+    /// Whether `taps` hold `count` or more taps within `pesterWindow` before `now`.
+    nonisolated static func pestered(_ taps: [Date], now: Date, count: Int = 3) -> Bool {
+        taps.filter { now.timeIntervalSince($0) < pesterWindow }.count >= count
     }
 
     /// The night to say "还不睡。" for when the app opens at `date`, or nil outside 0:00 to 5:00 or when it was
@@ -790,7 +804,7 @@ public struct CompanionView: View {
 
     private func startGoodnight() {
         goodnightStart = .now
-        guard style == .standard else { return }
+        guard style != .notification else { return }
         lastGoodnight = Date.now.timeIntervalSinceReferenceDate
         bubbleTask?.cancel()
         bubbleTask = Task {
@@ -804,6 +818,10 @@ public struct CompanionView: View {
     static let reviveLine = "……活过来了？"
 
     private func react() {
+        if style == .watch {
+            reactToPoke()
+            return
+        }
         if bath, dryStart == nil {
             dryStart = .now
             pop += 1
@@ -851,6 +869,32 @@ public struct CompanionView: View {
         onTap?()
     }
 
+    /// Plays the reaction to a poke on the watch with a light tap on the wrist; 5 pokes in a row turn HAKU away.
+    private func reactToPoke() {
+        guard let mode else { return }
+        let now = Date.now
+        pokes += 1
+        guard turnAway(at: now.timeIntervalSinceReferenceDate) == nil else { return }
+        tapTimes = tapTimes.filter { now.timeIntervalSince($0) < Self.pesterWindow } + [now]
+        if Self.pestered(tapTimes, now: now, count: WatchPoke.tooMany) {
+            tapTimes = []
+            pokeKind = nil
+            turnAwayStart = now
+            pop += 1
+            say(WatchPoke.tooManyLine)
+            return
+        }
+        let life = idleLife(mode, at: now)
+        let busy =
+            shownNeed != nil || activity != nil || shownMoment != nil || life != nil || daily != nil
+            || walking != nil || bath || invite != nil
+        let kind = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on || life == .nap, busy: busy)
+        pokeKind = kind
+        pokeStart = now
+        if kind != .rollOver { pop += 1 }
+        say(kind.line)
+    }
+
     private func startInvite() {
         guard bedtime == .off, let invite else { return }
         pop += 1
@@ -881,6 +925,8 @@ public enum CompanionStyle: Sendable {
     case standard
     /// Notification content: a short bedtime loop.
     case notification
+    /// Apple Watch app: a tap plays a poke reaction with a light tap on the wrist instead of a line.
+    case watch
 }
 
 // Timings match the Rive build guide.
@@ -1045,6 +1091,11 @@ private struct SpeechBubble: View {
             CompanionView(mode: .chill, bedtime: .on, style: .notification, showsBubble: false)
                 .frame(height: 180)
                 .toyCard()
+            ForEach(Mode.allCases) { mode in
+                CompanionView(mode: mode, style: .watch)
+                    .frame(width: 176, height: 194)
+                    .clipShape(RoundedRectangle(cornerRadius: 30))
+            }
         }
         .padding()
     }
