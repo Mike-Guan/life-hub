@@ -90,6 +90,8 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - Manual mode changes always win. Automatic sources (Focus filter, calendar, geofence)
   may suggest, or switch only under rules Mike enabled; no auto-switch for 2h after a manual change.
   The clock never switches the mode: work starts by arriving at the office, ends by leaving it from 17:30.
+  Place comes first: from 17:30, having left the office or come home ends work even within the 2h window,
+  unless the mode changed after that move. The app re-checks this at every place event and every open.
 - Every ModeChange is stored with its source.
 - Exception: entering the boxing gym geofence (CLMonitor, ~100 m) switches straight to boxing with no
   prompt, even within the 2h window. Leaving after 30+ min restores the previous mode unless Mike
@@ -208,3 +210,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   so nothing (shop, colors, tap reactions, surfaces) is found missing after an install.
 - 2026-10-07: Mike (via PM): each character keeps her own cans, items, keepsakes, room traces and hidden stats;
   a win pays only the character picked at the time; switching asks first. Life records stay shared.
+- 2026-10-07: Mike: "状态切换优先看地点". A held or early leave from the office no longer keeps 上班 all
+  evening: from 17:30, being away from the office or arriving home ends work unless the mode changed after.
