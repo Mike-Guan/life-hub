@@ -193,7 +193,8 @@ public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
     }
 
     // An unknown kind or win throws, so the ledger keeps the raw record instead of guessing.
-    // Entries from before characters had their own cans have no persona; they were all HAKU's.
+    // Entries from before characters had their own cans have no persona. Those were HAKU's, except KURO's
+    // keepsakes, which builds a10bf72 and a1c25ea granted alongside HAKU's; they stay hers.
     /// Decodes an entry. `id`, `kind` and `at` are required.
     /// - Throws: `DecodingError` when a required field is missing or invalid.
     public init(from decoder: Decoder) throws {
@@ -205,7 +206,9 @@ public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
         cans = try values.decodeIfPresent(Int.self, forKey: .cans) ?? 0
         win = try values.decodeIfPresent(Win.self, forKey: .win)
         itemID = try values.decodeIfPresent(String.self, forKey: .itemID)
-        persona = try values.decodeIfPresent(Persona.self, forKey: .persona) ?? .haku
+        persona =
+            try values.decodeIfPresent(Persona.self, forKey: .persona)
+            ?? itemID.flatMap(ShopItem.item)?.persona ?? .haku
         createdAt = try values.decodeIfPresent(Date.self, forKey: .createdAt) ?? at
         updatedAt = try values.decodeIfPresent(Date.self, forKey: .updatedAt) ?? createdAt
         updatedBy = try values.decodeIfPresent(String.self, forKey: .updatedBy) ?? "unknown"

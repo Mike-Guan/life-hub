@@ -46,6 +46,7 @@ public final class GrowthStore {
         }
         for item in granted {
             let id = UUID.derived(from: "granted:\(item.id)")
+            guard !ledger.entries.contains(where: { $0.id == id }) else { continue }
             let grant = CanEntry(
                 id: id,
                 kind: .granted,
