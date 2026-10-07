@@ -154,7 +154,8 @@ struct HomeView: View {
                     }
                 }
 
-                if let state = store.sideHustle {
+                // Side-hustle states are HAKU's; KURO's desk time shows her tagline.
+                if let state = store.sideHustle, persona == .haku {
                     Text("\(state.title) 中 · 点 \(persona.title) 换状态")
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
@@ -407,7 +408,7 @@ private struct Header: View {
 
     private var subtitle: String {
         let date = Date.now.formatted(.dateTime.month().day().weekday(.wide))
-        return "\(date) · \(mode.map { "\($0.code) MODE" } ?? "NO MODE")"
+        return "\(date) · \(mode.map { "\($0.code(for: persona)) MODE" } ?? "NO MODE")"
     }
 }
 

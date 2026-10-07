@@ -16,7 +16,7 @@ struct ModeSwitcher: View {
                 } label: {
                     label(for: mode)
                 }
-                .buttonStyle(ToyButtonStyle(fill: mode.color, isSelected: mode == current))
+                .buttonStyle(ToyButtonStyle(fill: mode.color(for: persona), isSelected: mode == current))
                 .accessibilityLabel(mode.title(for: persona))
                 .accessibilityAddTraits(mode == current ? .isSelected : [])
             }
@@ -35,7 +35,7 @@ struct ModeSwitcher: View {
                     .frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(mode.title(for: persona)).font(Toy.body(16, weight: .heavy))
-                    Text(mode.code).font(Toy.body(11, weight: .bold)).opacity(0.6)
+                    Text(mode.code(for: persona)).font(Toy.body(11, weight: .bold)).opacity(0.6)
                 }
                 Spacer(minLength: 0)
             }

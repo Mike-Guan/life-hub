@@ -40,7 +40,7 @@ struct TodayTimeline: View {
                     .frame(width: 48, alignment: .leading)
 
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(segment.mode.color)
+                    .fill(segment.mode.color(for: persona))
                     .overlay(RoundedRectangle(cornerRadius: 4).stroke(Toy.ink, lineWidth: 2))
                     .frame(width: 16, height: 16)
 
