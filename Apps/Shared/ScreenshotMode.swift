@@ -3,21 +3,28 @@ import SwiftUI
 
 // Used by .github/workflows/screenshots.yml to draw the README images. Debug builds only.
 /// Launch argument `-screenshot-mode <mode>` shows the home screen with fixed, in-memory data.
+/// `-screenshot-persona <persona>` picks the character, HAKU by default.
 enum ScreenshotMode {
     static var mode: Mode? {
+        value(after: "-screenshot-mode").flatMap(Mode.init(rawValue:))
+    }
+
+    static var persona: Persona {
+        value(after: "-screenshot-persona").flatMap(Persona.init(rawValue:)) ?? .haku
+    }
+
+    private static func value(after flag: String) -> String? {
         #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
-        guard let index = arguments.firstIndex(of: "-screenshot-mode"), index + 1 < arguments.count else {
-            return nil
-        }
-        return Mode(rawValue: arguments[index + 1])
+        guard let index = arguments.firstIndex(of: flag), index + 1 < arguments.count else { return nil }
+        return arguments[index + 1]
         #else
         nil
         #endif
     }
 }
 
-/// The home screen in `mode`, with no files, permissions or widgets touched.
+/// The home screen in `mode` for `ScreenshotMode.persona`, with no files, permissions or widgets touched.
 struct ScreenshotHome: View {
     let mode: Mode
     @State private var store = ModeStore(fileURL: nil, deviceID: "screenshot")
@@ -25,7 +32,7 @@ struct ScreenshotHome: View {
 
     var body: some View {
         // An empty bedtime window, so RUNNER is awake whatever time CI runs.
-        HomeView(bedtime: BedtimeSchedule(startMinute: 0, endMinute: 0))
+        HomeView(bedtime: BedtimeSchedule(startMinute: 0, endMinute: 0), persona: ScreenshotMode.persona)
             .environment(store)
             .environment(energy)
             .onAppear {

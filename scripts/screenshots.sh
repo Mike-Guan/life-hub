@@ -26,6 +26,11 @@ for mode in "${modes[@]}"; do
   xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode"
   sleep 4
   xcrun simctl io "$udid" screenshot "$out/ios-$mode.png"
+  # The same mode with KURO picked, for checking the second character before an install.
+  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode" \
+    -screenshot-persona kuro
+  sleep 4
+  xcrun simctl io "$udid" screenshot "$out/ios-kuro-$mode.png"
 done
 xcrun simctl terminate "$udid" "$bundle" || true
 
