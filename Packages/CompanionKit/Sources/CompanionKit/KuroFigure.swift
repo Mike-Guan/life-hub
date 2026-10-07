@@ -184,7 +184,7 @@ public struct KuroView: View {
         }
     }
 
-    static func accessibilityLabel(_ look: KuroLook, bedtime: Bedtime) -> String {
+    nonisolated static func accessibilityLabel(_ look: KuroLook, bedtime: Bedtime) -> String {
         if bedtime == .on { return "KURO 困了" }
         return switch look {
         case .work: "KURO 在忙"
