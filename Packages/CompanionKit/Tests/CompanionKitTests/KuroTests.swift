@@ -69,6 +69,10 @@ import Testing
         #expect(parts.filter { eyeParts.contains($0) }.count == 1)
     }
 
+    @Test func eachLookHasItsOwnCardColor() {
+        #expect(Set(KuroLook.allCases.map(\.color)).count == KuroLook.allCases.count)
+    }
+
     @Test(arguments: KuroLook.allCases)
     func partsKeepDrawingOrder(_ look: KuroLook) {
         let parts = KuroFigure.parts(for: look, pose: KuroPose(look: look, energy: nil))
