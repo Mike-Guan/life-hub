@@ -213,7 +213,9 @@ public struct CompanionView: View {
         .contentShape(Rectangle())
         .onTapGesture { react() }
         .task(id: listensForShakes) { await listenForShakes() }
-        .gesture(pressAndLook, including: style == .notification ? .none : .all)
+        .gesture(pressAndLook, including: style == .standard ? .all : .none)
+        // On the watch a drag would take the swipe from the pages, so a long press only shows the close-up.
+        .simultaneousGesture(watchPress, including: style == .watch ? .all : .none)
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: mode) { _, _ in
             pop += 1
@@ -535,6 +537,18 @@ public struct CompanionView: View {
             .onEnded { _ in
                 closeUp = false
                 look = 0
+            }
+    }
+
+    /// A long press on the watch: the close-up for a moment, then back.
+    private var watchPress: some Gesture {
+        LongPressGesture(minimumDuration: 0.4)
+            .onEnded { _ in
+                closeUp = true
+                Task {
+                    try? await Task.sleep(for: .seconds(1.5))
+                    closeUp = false
+                }
             }
     }
 

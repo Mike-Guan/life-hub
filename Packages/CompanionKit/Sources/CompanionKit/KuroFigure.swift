@@ -350,7 +350,12 @@ public struct KuroView: View {
         // Until she has her own close-up (新角色清单), a long press plays her tap reaction.
         .gesture(
             LongPressGesture(minimumDuration: 0.4).onEnded { _ in react() },
-            including: style == .notification ? .none : .all
+            including: style == .standard ? .all : .none
+        )
+        // On the watch the press must not take the swipe from the pages.
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.4).onEnded { _ in react() },
+            including: style == .watch ? .all : .none
         )
         .task(id: listensForShakes) { await listenForShakes() }
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)

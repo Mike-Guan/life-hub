@@ -86,14 +86,17 @@ enum DeviceShakes {
     static func stream() -> AsyncStream<Void> {
         AsyncStream { continuation in
             let listener = Listener()
-            guard listener.manager.isDeviceMotionAvailable else {
-                continuation.finish()
-                return
-            }
-            // Started on the listener's queue, so the main thread never waits for CoreMotion.
+            // Everything CoreMotion does happens on the listener's queue, so the main thread never waits for it,
+            // also when the app comes back from the background.
             listener.queue.addOperation {
-                listener.manager.deviceMotionUpdateInterval = 1.0 / 30
-                listener.manager.startDeviceMotionUpdates(to: listener.queue) { motion, _ in
+                let manager = CMMotionManager()
+                guard manager.isDeviceMotionAvailable else {
+                    continuation.finish()
+                    return
+                }
+                listener.manager = manager
+                manager.deviceMotionUpdateInterval = 1.0 / 30
+                manager.startDeviceMotionUpdates(to: listener.queue) { motion, _ in
                     guard let motion else { return }
                     let a = motion.userAcceleration
                     let magnitude = (a.x * a.x + a.y * a.y + a.z * a.z).squareRoot()
@@ -103,14 +106,14 @@ enum DeviceShakes {
                 }
             }
             continuation.onTermination = { _ in
-                listener.queue.addOperation { listener.manager.stopDeviceMotionUpdates() }
+                listener.queue.addOperation { listener.manager?.stopDeviceMotionUpdates() }
             }
         }
     }
 
-    // CoreMotion calls back on `queue` only, one sample at a time, so `detector` is never shared.
+    // Only `queue` touches `manager` and `detector`, one operation at a time, so they are never shared.
     private final class Listener: @unchecked Sendable {
-        let manager = CMMotionManager()
+        var manager: CMMotionManager?
         let queue: OperationQueue = {
             let queue = OperationQueue()
             queue.maxConcurrentOperationCount = 1
