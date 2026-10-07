@@ -31,16 +31,6 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         bedtime = (try? values.decodeIfPresent(BedtimeSchedule.self, forKey: .bedtime)) ?? .standard
     }
 
-    // The same order as the iPhone widget's line, minus what only the iPhone knows (places, Daily tasks).
-    /// HAKU's one line on the watch at `date`: its bedtime line, else the app's line, else today's energy.
-    public func line(at date: Date, calendar: Calendar = .current) -> String {
-        if bedtime.state(at: date, calendar: calendar) == .on {
-            return HakuLines.line(.bedtime, at: date, calendar: calendar)
-        }
-        if let line = snapshot.line(at: date, calendar: calendar) { return line }
-        return snapshot.energy(at: date, calendar: calendar).map { "电量\($0.title)" } ?? "电量未知"
-    }
-
     /// When the watch widgets redraw: the iPhone widgets' times for this snapshot.
     public func timelineDates(after date: Date, calendar: Calendar = .current) -> [Date] {
         WidgetSnapshot.timelineDates(after: date, bedtime: bedtime, needTimes: snapshot.needTimes, calendar: calendar)
