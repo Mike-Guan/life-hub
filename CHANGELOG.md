@@ -314,6 +314,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- KURO's card now fills with the mode's color like HAKU's, dims at bedtime and squashes as the mode changes,
+  on the home screen and the watch. Before, it stayed white.
 - Leaving the office switches to 下班 Chill only from 17:30. Stepping out earlier, such as for lunch,
   keeps 上班.
 - Staying 30 minutes at the boxing gym counts as boxing, like the fitness gym: 5 cans once a week and

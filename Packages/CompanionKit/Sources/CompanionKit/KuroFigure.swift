@@ -178,6 +178,7 @@ public struct KuroView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
+    @State private var pop = 0
 
     /// - Parameters:
     ///   - look: what she wears.
@@ -211,6 +212,13 @@ public struct KuroView: View {
 
     public var body: some View {
         ZStack {
+            // The same card as HAKU's: the mode's color fills it, dimmed at bedtime.
+            Rectangle()
+                .fill(look.mode.color)
+                .overlay { Toy.ink.opacity(bedtime == .on ? 0.35 : 0) }
+                .animation(.easeInOut(duration: 0.25), value: look)
+                .animation(.easeInOut(duration: 0.8), value: bedtime)
+
             let paused = reduceMotion || scenePhase != .active
             TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
                 let time = context.date.timeIntervalSinceReferenceDate
@@ -222,16 +230,36 @@ public struct KuroView: View {
                     .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
                     .offset(y: reduceMotion ? 0 : motion.dy)
             }
+            .id(look)
+            .transition(.opacity)
+            .keyframeAnimator(initialValue: Squash(), trigger: pop) { content, value in
+                content.scaleEffect(x: value.x, y: value.y, anchor: .bottom)
+            } keyframes: { _ in
+                KeyframeTrack(\.x) {
+                    CubicKeyframe(1.07, duration: 0.08)
+                    SpringKeyframe(1, duration: 0.35, spring: .bouncy)
+                }
+                KeyframeTrack(\.y) {
+                    CubicKeyframe(0.9, duration: 0.08)
+                    SpringKeyframe(1, duration: 0.35, spring: .bouncy)
+                }
+            }
+            .padding(.top, 24)
+            .padding(.horizontal, 12)
 
             if showsBubble, let bubble {
                 SpeechBubble(text: bubble)
+                    .padding(12)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .transition(.scale(scale: 0.6, anchor: .bottomTrailing).combined(with: .opacity))
             }
         }
         .contentShape(Rectangle())
         .onTapGesture { if showsBubble { say(Self.line(after: bubble, from: lines)) } }
-        .onChange(of: look) { _, _ in say(nil) }
+        .onChange(of: look) { _, _ in
+            pop += 1
+            say(nil)
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime, pose: pose))
         .accessibilityAddTraits(showsBubble ? .isButton : [])
