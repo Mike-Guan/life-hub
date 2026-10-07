@@ -32,6 +32,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- KURO has her own lines in her own quiet voice for every mode, need, moment and idle bit, plus after a workout
+  and on unboxing. Tapping her shows one in a speech bubble.
 - A second character, KURO 黒, can be drawn in CompanionKit in 4 outfits (work, chill, tennis, desk), with her
   face following energy, a sleepy face at bedtime and a gentle idle loop. It is not shown in the app yet.
 - HAKU on Apple Watch: a watch face widget (circular, corner and rectangular) and a watch app that shows

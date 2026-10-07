@@ -23,6 +23,16 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .money: self = .desk
         }
     }
+
+    /// The mode that dresses her in this look.
+    var mode: Mode {
+        switch self {
+        case .work: .work
+        case .chill: .chill
+        case .tennis: .boxing
+        case .desk: .money
+        }
+    }
 }
 
 /// KURO's eyes.
@@ -141,37 +151,93 @@ struct KuroPartView: View {
     }
 }
 
-/// KURO with an idle loop for her look; energy picks her face.
+/// KURO with an idle loop for her look; energy picks her face and a tap gets a line.
 public struct KuroView: View {
     let look: KuroLook
     let energy: Double?
     let bedtime: Bedtime
+    let need: CompanionNeed?
+    let activity: CompanionActivity?
+    let moment: CompanionMoment?
+    let showsBubble: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
+    @State private var bubble: String?
+    @State private var bubbleTask: Task<Void, Never>?
 
     /// - Parameters:
     ///   - look: what she wears.
     ///   - energy: energy 0-100, or nil when unknown. Below 30 she looks tired; from 70 she looks bright.
     ///   - bedtime: `.on` makes her sleepy and slows her to a breath.
-    public init(look: KuroLook, energy: Double? = nil, bedtime: Bedtime = .off) {
+    ///   - need: what the user needs, which picks her lines.
+    ///   - activity: what the user is doing, which picks her lines before anything else.
+    ///   - moment: the moment of the day, which picks her lines unless an activity does.
+    ///   - showsBubble: whether a tap shows a line in a speech bubble.
+    public init(
+        look: KuroLook,
+        energy: Double? = nil,
+        bedtime: Bedtime = .off,
+        need: CompanionNeed? = nil,
+        activity: CompanionActivity? = nil,
+        moment: CompanionMoment? = nil,
+        showsBubble: Bool = true
+    ) {
         self.look = look
         self.energy = energy
         self.bedtime = bedtime
+        self.need = need
+        self.activity = activity
+        self.moment = moment
+        self.showsBubble = showsBubble
     }
 
     public var body: some View {
-        TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion || scenePhase != .active)) { context in
-            let time = context.date.timeIntervalSinceReferenceDate
-            let pose = KuroPose(look: look, energy: energy, bedtime: bedtime)
-            let pace = EnergyFace(energy: energy).speed
-            let motion = bedtime == .on ? IdleMotion.sleeping(time: time) : Self.motion(look, time: time * pace)
-            KuroFigure(look: look, pose: reduceMotion ? pose : pose.blink(at: time))
-                .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                .offset(y: reduceMotion ? 0 : motion.dy)
+        ZStack {
+            let paused = reduceMotion || scenePhase != .active
+            TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+                let time = context.date.timeIntervalSinceReferenceDate
+                let pose = KuroPose(look: look, energy: energy, bedtime: bedtime)
+                let pace = EnergyFace(energy: energy).speed
+                let motion = bedtime == .on ? IdleMotion.sleeping(time: time) : Self.motion(look, time: time * pace)
+                KuroFigure(look: look, pose: reduceMotion ? pose : pose.blink(at: time))
+                    .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
+                    .offset(y: reduceMotion ? 0 : motion.dy)
+            }
+
+            if showsBubble, let bubble {
+                SpeechBubble(text: bubble)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .transition(.scale(scale: 0.6, anchor: .bottomTrailing).combined(with: .opacity))
+            }
         }
+        .contentShape(Rectangle())
+        .onTapGesture { if showsBubble { say(Self.line(after: bubble, from: lines)) } }
+        .onChange(of: look) { _, _ in say(nil) }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime))
+        .accessibilityAddTraits(showsBubble ? .isButton : [])
+    }
+
+    private var lines: [String] {
+        CompanionLines.lines(for: look.mode, need: need, activity: activity, moment: moment, persona: .kuro)
+    }
+
+    /// A random line from `lines` that isn't `shown`, unless it is the only one.
+    nonisolated static func line(after shown: String?, from lines: [String]) -> String? {
+        let fresh = lines.filter { $0 != shown }
+        return (fresh.isEmpty ? lines : fresh).randomElement()
+    }
+
+    private func say(_ text: String?) {
+        bubbleTask?.cancel()
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
+        guard text != nil else { return }
+        bubbleTask = Task {
+            try? await Task.sleep(for: .seconds(2.4))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeOut(duration: 0.2)) { bubble = nil }
+        }
     }
 
     /// The idle loop for `look`: work nods like HAKU at work, chill sways, tennis hops and desk breathes.
@@ -185,12 +251,12 @@ public struct KuroView: View {
     }
 
     nonisolated static func accessibilityLabel(_ look: KuroLook, bedtime: Bedtime) -> String {
-        if bedtime == .on { return "KURO 困了" }
+        if bedtime == .on { return "KURO，困了" }
         return switch look {
-        case .work: "KURO 在忙"
-        case .chill: "KURO 捧着热饮"
-        case .tennis: "KURO 拿着网球拍"
-        case .desk: "KURO 戴着眼镜在桌前"
+        case .work: "KURO，在忙"
+        case .chill: "KURO，捧着热饮"
+        case .tennis: "KURO，拿着网球拍"
+        case .desk: "KURO，戴着眼镜在批改"
         }
     }
 }

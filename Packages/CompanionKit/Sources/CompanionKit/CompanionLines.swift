@@ -10,8 +10,19 @@ enum CompanionLines {
         peeking: Bool = false,
         life: IdleLife? = nil,
         activity: CompanionActivity? = nil,
-        moment: CompanionMoment? = nil
+        moment: CompanionMoment? = nil,
+        persona: Persona = .haku
     ) -> [String] {
+        if persona == .kuro {
+            return KuroLines.lines(
+                for: mode,
+                need: need,
+                peeking: peeking,
+                life: life,
+                activity: activity,
+                moment: moment
+            )
+        }
         if let activity { return lines(for: activity) }
         if let moment { return lines(for: moment) }
         if need == .couchScroll, peeking { return ["所以……我们今天是真的不动了吗？", "那个包……算了。", "再刷五分钟。"] }
@@ -69,9 +80,10 @@ enum CompanionLines {
         }
     }
 
-    /// What HAKU says after a workout: plays it cool.
-    static func celebration(_ kind: WorkoutSummary.Kind) -> String {
-        switch kind {
+    /// What the companion says after a workout: plays it cool.
+    static func celebration(_ kind: WorkoutSummary.Kind, persona: Persona = .haku) -> String {
+        if persona == .kuro { return KuroLines.celebration(kind) }
+        return switch kind {
         case .boxing: "……其实还挺爽的。"
         case .running: "居然真跑完了。"
         case .strength: "不错嘛。"
@@ -79,9 +91,10 @@ enum CompanionLines {
         }
     }
 
-    /// What HAKU says when unboxing the item with `itemID`: a keepsake it pretends it didn't pick.
-    static func unlock(_ itemID: String) -> String {
-        ShopItem.item(itemID)?.keepsake != nil ? "……给你的。才不是特意挑的。" : "买了？……那我就勉强收下了。"
+    /// What the companion says when unboxing the item with `itemID`: a keepsake it pretends it didn't pick.
+    static func unlock(_ itemID: String, persona: Persona = .haku) -> String {
+        if persona == .kuro { return KuroLines.unlock(itemID) }
+        return ShopItem.item(itemID)?.keepsake != nil ? "……给你的。才不是特意挑的。" : "买了？……那我就勉强收下了。"
     }
 
     /// The VoiceOver label for HAKU.
