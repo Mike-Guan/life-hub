@@ -5,8 +5,8 @@ import Foundation
 /// Which preset character the app draws.
 public enum Persona: String, Codable, CaseIterable, Sendable {
     case haku
-    /// The second preset character: a cat-eared character whose identity activity is tennis.
-    case partner
+    /// The second preset character, KURO: cat-eared, whose identity activity is tennis.
+    case kuro
 
     static let defaultsKey = "persona"
 
@@ -14,7 +14,7 @@ public enum Persona: String, Codable, CaseIterable, Sendable {
     public var title: String {
         switch self {
         case .haku: "HAKU"
-        case .partner: "猫耳角色"
+        case .kuro: "KURO"
         }
     }
 
@@ -30,21 +30,21 @@ public enum Persona: String, Codable, CaseIterable, Sendable {
 }
 
 extension Mode {
-    /// The mode's name for `persona`: the partner's identity slot is tennis and her side slot is lesson prep.
+    /// The mode's name for `persona`: KURO's identity slot is tennis and her side slot is lesson prep.
     public func title(for persona: Persona) -> String {
         switch (persona, self) {
-        case (.partner, .boxing): "网球日"
-        case (.partner, .money): "备课"
+        case (.kuro, .boxing): "网球日"
+        case (.kuro, .money): "备课"
         default: title
         }
     }
 }
 
 extension HubPlace.Kind {
-    /// The place's name for `persona`: the partner's identity place is a tennis court.
+    /// The place's name for `persona`: KURO's identity place is a tennis court.
     public func title(for persona: Persona) -> String {
         switch (persona, self) {
-        case (.partner, .gym): "网球场"
+        case (.kuro, .gym): "网球场"
         default: title
         }
     }
@@ -54,7 +54,7 @@ extension HubPlace.Action {
     /// What the action is called for `persona`.
     public func title(for persona: Persona) -> String {
         switch (persona, self) {
-        case (.partner, .boxing): "当网球场"
+        case (.kuro, .boxing): "当网球场"
         default: title
         }
     }

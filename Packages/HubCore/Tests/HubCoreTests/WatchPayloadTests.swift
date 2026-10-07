@@ -69,8 +69,8 @@ import Testing
     }
 
     @Test func carriesThePersona() throws {
-        let sent = WatchPayload(snapshot: payload().snapshot, persona: .partner)
+        let sent = WatchPayload(snapshot: payload().snapshot, persona: .kuro)
         let message = try #require(sent.message)
-        #expect(WatchPayload(message: message)?.persona == .partner)
+        #expect(WatchPayload(message: message)?.persona == .kuro)
     }
 }
