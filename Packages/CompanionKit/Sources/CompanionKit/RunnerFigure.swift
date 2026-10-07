@@ -231,6 +231,8 @@ struct RunnerPose {
     var turnedAway = false
     /// Horizontal squeeze while turning around, 1 = full width.
     var turnSqueeze: CGFloat = 1
+    /// Progress of being dizzy after a shake, 0...1, or -1 when not dizzy.
+    var dizziness: CGFloat = -1
     /// Progress of rubbing an eye with the fist, 0...1, or -1 when not rubbing.
     var rubEye: CGFloat = -1
     /// Rise of a hummed music note, 0...1, or -1 when hidden.
@@ -1035,6 +1037,17 @@ struct RunnerPose {
         turnSqueeze = max(0.05, min(1, abs(p - 0.12) / 0.12, abs(p - 0.88) / 0.12))
     }
 
+    /// Dizzy after a shake at `progress` (0...1): swirl eyes, stars around the head, the body wobbling and
+    /// settling down.
+    mutating func dizzy(progress: Double) {
+        let p = CGFloat(min(max(progress, 0), 1))
+        dizziness = p
+        let settle = 1 - Self.ramp(p, from: 0.6, to: 1)
+        lean += 7 * Double(sin(p * 6 * .pi) * settle)
+        shift += 3 * sin(p * 3 * .pi) * settle
+        headTilt += 6 * Double(sin(p * 4 * .pi + 1) * settle)
+    }
+
     /// Rubbing an eye at `progress` (0...1): the fist comes up, rubs, and goes down; eyes nearly shut.
     mutating func rubEyes(progress: Double) {
         rubEye = CGFloat(min(max(progress, 0), 1))
@@ -1172,6 +1185,11 @@ struct RunnerFigure: View {
         if pose.eyesShut {
             visible.subtract(openEyes)
             visible.insert(.eyesClosed)
+        }
+        if pose.dizziness >= 0 {
+            visible.subtract(openEyes)
+            visible.remove(.eyesClosed)
+            visible.formUnion([.eyeSwirlL, .eyeSwirlR, .dizzyStar])
         }
         poked(&visible, pose: pose)
         if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
@@ -1760,6 +1778,22 @@ struct RunnerFigure: View {
                                 .mask { RunnerPartView(part: part) }
                         }
                     }
+            case .eyeSwirlL, .eyeSwirlR:
+                // Spinning while dizzy.
+                RunnerPartView(part: part)
+                    .rotationEffect(
+                        .degrees(900 * Double(pose.dizziness)),
+                        anchor: Self.unit(x: part == .eyeSwirlL ? 45.5 : 74.5, y: 65)
+                    )
+            case .dizzyStar:
+                // Three stars circling the head.
+                ZStack {
+                    ForEach(0..<3, id: \.self) { index in
+                        let angle = 4 * .pi * Double(pose.dizziness) + 2 * .pi * Double(index) / 3
+                        RunnerPartView(part: part)
+                            .offset(x: 26 * cos(angle) * scale, y: 6 * sin(angle) * scale)
+                    }
+                }
             case .coin:
                 RunnerPartView(part: part)
                     .rotation3DEffect(
@@ -1846,7 +1880,8 @@ struct RunnerFigure: View {
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
-        .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap,
+        .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
+        .dizzyStar,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
