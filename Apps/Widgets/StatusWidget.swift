@@ -101,9 +101,7 @@ struct StatusView: View {
             if let mode = entry.mode {
                 figure(mode, framing: .full)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                // KURO's identity and side slots aren't boxing and money, so she shows her names.
-                Text(entry.persona == .haku ? "\(mode.code) MODE" : mode.title(for: entry.persona))
-                    .font(Toy.display(14))
+                Text("\(mode.code(for: entry.persona)) MODE").font(Toy.display(14))
                 Text(entry.detail).font(Toy.body(12, weight: .bold))
             } else {
                 Spacer()

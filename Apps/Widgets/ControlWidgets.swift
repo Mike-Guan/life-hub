@@ -54,7 +54,7 @@ private struct ModeButtons: View {
                 .minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .buttonStyle(ToyButtonStyle(fill: mode.color, isSelected: mode == current))
+        .buttonStyle(ToyButtonStyle(fill: mode.color(for: persona), isSelected: mode == current))
     }
 }
 
