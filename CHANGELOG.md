@@ -5,8 +5,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
-- HAKU and KURO cheer after every kind of workout of 20 minutes or more (tennis, swimming, yoga and the
-  rest), not only boxing, runs and the gym. Cans are unchanged.
 - The watch also plays the one-offs (a workout cheer, a Daily task done, getting up from the sofa, the
   opening of coming back), the Daily task cue and the invite, and KURO's need and overtime sign, like the phone.
 - Groundwork for the watch commute: Life Hub can tell walking to work, riding the train and walking home
