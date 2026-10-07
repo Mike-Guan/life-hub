@@ -12,7 +12,9 @@ enum BoxingCountdown {
     /// - Returns: an error message for the UI, or `nil`.
     static func update(for reading: NeedReading?, now: Date = .now) async -> String? {
         let running = Activity<BoxingActivityAttributes>.activities
-        guard let start = NeedEngine.boxingCountdown(to: reading, now: now) else {
+        // KURO's tennis day has no class time to count down to.
+        let haku = Persona.stored(in: AppGroup.defaults) == .haku
+        guard haku, let start = NeedEngine.boxingCountdown(to: reading, now: now) else {
             for activity in running {
                 await activity.end(nil, dismissalPolicy: .immediate)
             }
