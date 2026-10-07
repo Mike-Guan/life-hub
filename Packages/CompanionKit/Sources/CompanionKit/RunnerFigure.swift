@@ -1,7 +1,7 @@
 import HubCore
 import SwiftUI
 
-/// One filled and/or stroked shape of a `RunnerPart`, in SVG units.
+/// One filled and/or stroked shape of a `RunnerPart` or `KuroPart`, in SVG units.
 struct RunnerInk: Sendable {
     var path: Path
     var fill: Color?
@@ -11,6 +11,12 @@ struct RunnerInk: Sendable {
     var join: CGLineJoin
     var dash: [CGFloat]
     var opacity: Double
+    /// Opacity of the fill alone.
+    var fillOpacity: Double
+    /// Fills the shape instead of `fill`.
+    var gradient: RunnerGradient?
+    /// Only the inside of this path is painted.
+    var clip: Path?
 
     init(
         path: Path,
@@ -20,7 +26,10 @@ struct RunnerInk: Sendable {
         cap: CGLineCap = .butt,
         join: CGLineJoin = .miter,
         dash: [CGFloat] = [],
-        opacity: Double = 1
+        opacity: Double = 1,
+        fillOpacity: Double = 1,
+        gradient: RunnerGradient? = nil,
+        clip: Path? = nil
     ) {
         self.path = path
         self.fill = fill
@@ -30,6 +39,23 @@ struct RunnerInk: Sendable {
         self.join = join
         self.dash = dash
         self.opacity = opacity
+        self.fillOpacity = fillOpacity
+        self.gradient = gradient
+        self.clip = clip
+    }
+}
+
+/// A linear gradient fill, with end points in SVG units.
+struct RunnerGradient: Sendable {
+    var colors: [Color]
+    var locations: [CGFloat]
+    var start: CGPoint
+    var end: CGPoint
+
+    /// The gradient as a SwiftUI shading.
+    var shading: GraphicsContext.Shading {
+        let stops = zip(colors, locations).map { Gradient.Stop(color: $0, location: $1) }
+        return .linearGradient(Gradient(stops: stops), startPoint: start, endPoint: end)
     }
 }
 
@@ -1731,20 +1757,31 @@ enum RunnerDrawing {
     ///   - red: replaces boxing red fills.
     ///   - fillOverride: replaces every fill.
     static func draw(_ part: RunnerPart, in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil) {
-        for ink in RunnerArt.cachedInks(part) {
+        draw(RunnerArt.cachedInks(part), in: context, red: red, fillOverride: fillOverride)
+        if let text = RunnerArt.text(part) {
+            draw(text, in: context)
+        }
+    }
+
+    /// Draws `inks` in figure space.
+    /// - Parameters:
+    ///   - red: replaces boxing red fills.
+    ///   - fillOverride: replaces every fill.
+    static func draw(_ inks: [RunnerInk], in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil) {
+        for ink in inks {
             var layer = context
             layer.opacity = ink.opacity
-            if let fill = ink.fill {
+            if let clip = ink.clip { layer.clip(to: clip) }
+            if let gradient = ink.gradient {
+                layer.fill(ink.path, with: gradient.shading)
+            } else if let fill = ink.fill {
                 let swapped = fill == RunnerPalette.boxingRed ? red ?? fill : fill
-                layer.fill(ink.path, with: .color(fillOverride ?? swapped))
+                layer.fill(ink.path, with: .color((fillOverride ?? swapped).opacity(ink.fillOpacity)))
             }
             if let stroke = ink.stroke {
                 let style = StrokeStyle(lineWidth: ink.lineWidth, lineCap: ink.cap, lineJoin: ink.join, dash: ink.dash)
                 layer.stroke(ink.path, with: .color(stroke), style: style)
             }
-        }
-        if let text = RunnerArt.text(part) {
-            draw(text, in: context)
         }
     }
 
@@ -2012,7 +2049,7 @@ public struct CompanionPortrait: View {
 }
 
 /// Shows only `RunnerFigure.headBox` of the figure.
-private struct HeadCrop<Content: View>: View {
+struct HeadCrop<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {

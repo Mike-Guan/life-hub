@@ -1,21 +1,26 @@
-// Generates Sources/CompanionKit/RunnerArt.swift from the layered RUNNER SVG.
+// Generates Sources/CompanionKit/RunnerArt.swift from the layered RUNNER SVG, or KuroArt.swift from the
+// KURO SVG with `--kuro`.
 //
-//   node Packages/CompanionKit/Tools/gen-runner-art.mjs [--preview out.svg]
+//   node Packages/CompanionKit/Tools/gen-runner-art.mjs [--kuro] [--preview out.svg]
 //
-// Every <g id="…"> that directly contains shapes becomes one RunnerPart. Shapes are flattened to
+// Every <g id="…"> that directly contains shapes becomes one part. Shapes are flattened to
 // absolute move/line/quad/cubic commands (arcs, circles, ellipses and rounded rects become cubics,
-// group transforms are baked in), so the Swift side only has to replay them.
+// group transforms are baked in), so the Swift side only has to replay them. Clip paths and linear
+// gradients are kept per shape.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '../../..');
-const SRC = path.join(repo, 'docs/03 Product/companion/runner-v5-layers.svg');
-const OUT = path.join(here, '../Sources/CompanionKit/RunnerArt.swift');
+const kuro = process.argv.includes('--kuro');
+const NAME = kuro ? 'Kuro' : 'Runner';
+const SVG = kuro ? 'kuro-v1-layers.svg' : 'runner-v5-layers.svg';
+const SRC = path.join(repo, 'docs/03 Product/companion', SVG);
+const OUT = path.join(here, `../Sources/CompanionKit/${NAME}Art.swift`);
 
 // Named colors. Every color in the SVG must be listed here.
-const PALETTE = {
+const RUNNER_PALETTE = {
   '#111111': 'ink', '#111': 'ink',
   '#F2F4FA': 'hair', '#AFC6E3': 'hairShade', '#F3CFAE': 'skin', '#B98B6E': 'eyebag',
   '#FFFFFF': 'white', '#FFF': 'white', '#fff': 'white',
@@ -27,6 +32,15 @@ const PALETTE = {
   // Not in the SVG: per-mode jacket colors from the RUNNER v5 sheet.
   '#3A6B58': 'jacketChill', '#121219': 'jacketMoney',
 };
+const KURO_PALETTE = {
+  '#111111': 'ink', '#111': 'ink', '#FFFFFF': 'white', '#fff': 'white',
+  '#2A2438': 'hair', '#7B5CFF': 'violet', '#C9B8FF': 'lilac', '#B9A2FF': 'lavender', '#F2E8FF': 'mist',
+  '#15161F': 'mask', '#2D3250': 'navy', '#FDDCC4': 'skin', '#B98B6E': 'skinLine', '#C9A07E': 'lowLid',
+  '#FF8FA3': 'pink', '#FF3B4E': 'red', '#FFD23F': 'gold', '#7FB7FF': 'sky', '#E6E9EF': 'tablet',
+  '#4A2A1A': 'irisTop', '#7A4A2E': 'irisMid', '#B07A4E': 'irisBottom', '#3A2016': 'pupil', '#2A1A14': 'lashLine',
+  '#8B5A3C': 'iris',
+};
+const PALETTE = kuro ? KURO_PALETTE : RUNNER_PALETTE;
 
 const raw = fs.readFileSync(SRC, 'utf8').replace(/<metadata>[\s\S]*?<\/metadata>/g, '');
 
@@ -107,17 +121,34 @@ const parts = []; // {id, inks: []}
 const texts = [];
 const stack = [{ id: null, m: I, style: {} }];
 let pendingText = null;
-const STYLE_KEYS = ['fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'opacity', 'font-size', 'font-weight'];
+const gradients = {}; // id → {x1, y1, x2, y2, stops: [[offset, color]]}
+const clips = {}; // id → [cmds]
+let gradient = null, clip = null;
+const STYLE_KEYS = ['fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'opacity', 'fill-opacity', 'clip-path', 'font-size', 'font-weight'];
 function partFor(id) { let p = parts.find(q => q.id === id); if (!p) { p = { id, inks: [] }; parts.push(p); } return p; }
 for (const mt of raw.matchAll(tagRe)) {
   const [, close, tag, attrStr, selfClose, text] = mt;
   const top = stack[stack.length - 1];
   if (text !== undefined) { if (pendingText && text.trim()) pendingText.text += text.trim(); continue; }
-  if (close) { if (tag === 'text') { texts.push(pendingText); pendingText = null; } if (tag === 'g' || tag === 'svg') stack.pop(); continue; }
+  if (close) {
+    if (tag === 'text') { texts.push(pendingText); pendingText = null; }
+    if (tag === 'g' || tag === 'svg' || tag === 'defs') stack.pop();
+    if (tag === 'linearGradient') gradient = null;
+    if (tag === 'clipPath') clip = null;
+    continue;
+  }
   const a = attrs(attrStr || '');
   const style = { ...top.style }; for (const k of STYLE_KEYS) if (a[k] !== undefined) style[k] = a[k];
   const m = mul(top.m, parseTransform(a.transform));
   if (tag === 'svg') { stack.push({ id: null, m, style }); continue; }
+  if (tag === 'defs') { if (!selfClose) stack.push({ ...top, m, style }); continue; }
+  if (tag === 'linearGradient') {
+    gradient = gradients[a.id] = { x1: +(a.x1 ?? 0), y1: +(a.y1 ?? 0), x2: +(a.x2 ?? 1), y2: +(a.y2 ?? 0), stops: [] };
+    if (selfClose) gradient = null;
+    continue;
+  }
+  if (tag === 'stop') { gradient.stops.push([Number(a.offset), a['stop-color']]); continue; }
+  if (tag === 'clipPath') { clip = clips[a.id] = []; if (selfClose) clip = null; continue; }
   if (tag === 'g') { const g = { id: a.id || top.id, m, style }; if (!selfClose) stack.push(g); continue; }
   if (tag === 'text') { const [x, y] = ap(m, Number(a.x || 0), Number(a.y || 0)); partFor(top.id); pendingText = { part: top.id, x, y, size: Number(style['font-size']), fill: style.fill, text: '' }; continue; }
   let cmds;
@@ -127,6 +158,7 @@ for (const mt of raw.matchAll(tagRe)) {
   else if (tag === 'rect') cmds = rect(+(a.x || 0), +(a.y || 0), +a.width, +a.height, +(a.rx || 0));
   else if (tag === 'line') cmds = [['M', +a.x1, +a.y1], ['L', +a.x2, +a.y2]];
   else throw new Error('unsupported tag ' + tag);
+  if (clip) { clip.push(...xform(cmds, m)); continue; }
   if (!top.id) throw new Error(tag + ' outside a named group');
   partFor(top.id).inks.push({ cmds: xform(cmds, m), style });
 }
@@ -149,38 +181,79 @@ minX = Math.floor(minX) - 2; minY = Math.floor(minY) - 2; maxX = Math.ceil(maxX)
 const usedColors = [...new Set(Object.values(PALETTE))];
 const hexOf = n => Object.entries(PALETTE).find(([h, v]) => v === n && h.length === 7)[0].slice(1).toUpperCase();
 const lines = [];
-lines.push('// Generated by Tools/gen-runner-art.mjs from docs/03 Product/companion/runner-v5-layers.svg.');
+lines.push(`// Generated by Tools/gen-runner-art.mjs from docs/03 Product/companion/${SVG}.`);
 lines.push('// Do not edit by hand: change the SVG (or the generator) and run the script again.');
 lines.push('import SwiftUI', '');
-lines.push('/// RUNNER v5 colors, named after what they paint.');
-lines.push('enum RunnerPalette {');
+lines.push(kuro ? '/// KURO colors, named after what they paint.' : '/// RUNNER v5 colors, named after what they paint.');
+lines.push(`enum ${NAME}Palette {`);
 for (const n of usedColors) lines.push(`    static let ${n} = Color(hex: 0x${hexOf(n)})`);
 lines.push('}', '');
-lines.push('/// One named, separately movable piece of RUNNER, in back-to-front order.');
-lines.push('enum RunnerPart: String, CaseIterable, Sendable {');
+lines.push(`/// One named, separately movable piece of ${kuro ? 'KURO' : 'RUNNER'}, in back-to-front order.`);
+lines.push(`enum ${NAME}Part: String, CaseIterable, Sendable {`);
 for (const p of parts) lines.push(p.id === camel(p.id) ? `    case ${p.id}` : `    case ${camel(p.id)} = "${p.id}"`);
 lines.push('}', '');
-lines.push('enum RunnerArt {');
+lines.push(`enum ${NAME}Art {`);
 lines.push(`    /// Drawing space of every part, in SVG units.`);
-lines.push(`    static let bounds = CGRect(x: ${minX}, y: ${minY}, width: ${maxX - minX}, height: ${maxY - minY})`);
+if (kuro) {
+  // Same frame as RUNNER, so both characters stand at the same size and place.
+  lines.push('    static let bounds = RunnerArt.bounds');
+} else {
+  lines.push(`    static let bounds = CGRect(x: ${minX}, y: ${minY}, width: ${maxX - minX}, height: ${maxY - minY})`);
+}
 lines.push('');
-lines.push('    static func inks(_ part: RunnerPart) -> [RunnerInk] {');
+lines.push(`    static func inks(_ part: ${NAME}Part) -> [RunnerInk] {`);
 lines.push('        switch part {');
 for (const p of parts) lines.push(`        case .${camel(p.id)}: ${camel(p.id)}()`);
 lines.push('        }');
 lines.push('    }');
-lines.push('');
-lines.push('    static func text(_ part: RunnerPart) -> RunnerText? {');
-lines.push('        switch part {');
-for (const t of texts) lines.push(`        case .${camel(t.part)}: ${camel(t.part)}Text`);
-lines.push('        default: nil');
-lines.push('        }');
-lines.push('    }');
+if (texts.length) {
+  lines.push('');
+  lines.push(`    static func text(_ part: ${NAME}Part) -> RunnerText? {`);
+  lines.push('        switch part {');
+  for (const t of texts) lines.push(`        case .${camel(t.part)}: ${camel(t.part)}Text`);
+  lines.push('        default: nil');
+  lines.push('        }');
+  lines.push('    }');
+}
 for (const t of texts) {
   lines.push('');
   lines.push(`    /// Text drawn by \`${camel(t.part)}\`: baseline-centered at (x, y) in SVG units.`);
   lines.push(`    static let ${camel(t.part)}Text = RunnerText(`);
-  lines.push(`        string: "${t.text}", x: ${f(t.x)}, y: ${f(t.y)}, size: ${f(t.size)}, color: RunnerPalette.${color(t.fill)})`);
+  lines.push(`        string: "${t.text}", x: ${f(t.x)}, y: ${f(t.y)}, size: ${f(t.size)}, color: ${NAME}Palette.${color(t.fill)})`);
+}
+function pushPath(cmds) {
+  for (const [c, ...v] of cmds) {
+    let st;
+    if (c === 'M') st = `p.move(to: ${pt(v[0], v[1])})`;
+    else if (c === 'L') st = `p.addLine(to: ${pt(v[0], v[1])})`;
+    else if (c === 'Q') st = `p.addQuadCurve(to: ${pt(v[2], v[3])}, control: ${pt(v[0], v[1])})`;
+    else if (c === 'C') st = `p.addCurve(to: ${pt(v[4], v[5])}, control1: ${pt(v[0], v[1])}, control2: ${pt(v[2], v[3])})`;
+    else st = 'p.closeSubpath()';
+    if (st.length + 20 > 120) {
+      // Keep generated lines inside swift-format's 120 columns.
+      const call = st.slice(0, st.indexOf('(') + 1);
+      const args = st.slice(st.indexOf('(') + 1, -1).split(/, (?=(?:to|control1|control2|control): )/);
+      lines.push(`                    ${call}`);
+      args.forEach((x, i) => lines.push(`                        ${x}${i < args.length - 1 ? ',' : ''}`));
+      lines.push('                    )');
+    } else lines.push(`                    ${st}`);
+  }
+}
+// Gradients use objectBoundingBox units, so the end points come from the shape's bounds.
+function gradientArg(g, cmds) {
+  const xs = cmds.flatMap(([, ...v]) => v.filter((_, j) => j % 2 === 0));
+  const ys = cmds.flatMap(([, ...v]) => v.filter((_, j) => j % 2 === 1));
+  const x0 = Math.min(...xs), y0 = Math.min(...ys), w = Math.max(...xs) - x0, h = Math.max(...ys) - y0;
+  const colors = g.stops.map(([, c]) => `${NAME}Palette.${color(c)}`).join(', ');
+  const stops = g.stops.map(([o]) => f(o)).join(', ');
+  return [
+    'gradient: RunnerGradient(',
+    `    colors: [${colors}],`,
+    `    locations: [${stops}],`,
+    `    start: ${pt(x0 + g.x1 * w, y0 + g.y1 * h)},`,
+    `    end: ${pt(x0 + g.x2 * w, y0 + g.y2 * h)}`,
+    ')',
+  ].join('\n                ');
 }
 for (const p of parts) {
   lines.push('');
@@ -188,36 +261,31 @@ for (const p of parts) {
   if (!p.inks.length) { lines.push('        []', '    }'); continue; }
   lines.push('        [');
   p.inks.forEach((ink, inkIndex) => {
-    const s = ink.style, stroke = color(s.stroke), fill = color(s.fill ?? (stroke ? 'none' : '#111111'));
+    const s = ink.style, stroke = color(s.stroke);
+    const gradientId = /^url\(#(\w+)\)$/.exec(s.fill ?? '')?.[1];
+    const fill = gradientId ? null : color(s.fill ?? (stroke ? 'none' : '#111111'));
     lines.push('            RunnerInk(');
     lines.push('                path: Path { p in');
-    for (const [c, ...v] of ink.cmds) {
-      let st;
-      if (c === 'M') st = `p.move(to: ${pt(v[0], v[1])})`;
-      else if (c === 'L') st = `p.addLine(to: ${pt(v[0], v[1])})`;
-      else if (c === 'Q') st = `p.addQuadCurve(to: ${pt(v[2], v[3])}, control: ${pt(v[0], v[1])})`;
-      else if (c === 'C') st = `p.addCurve(to: ${pt(v[4], v[5])}, control1: ${pt(v[0], v[1])}, control2: ${pt(v[2], v[3])})`;
-      else st = 'p.closeSubpath()';
-      if (st.length + 20 > 120) {
-        // Keep generated lines inside swift-format's 120 columns.
-        const call = st.slice(0, st.indexOf('(') + 1);
-        const args = st.slice(st.indexOf('(') + 1, -1).split(/, (?=(?:to|control1|control2|control): )/);
-        lines.push(`                    ${call}`);
-        args.forEach((x, i) => lines.push(`                        ${x}${i < args.length - 1 ? ',' : ''}`));
-        lines.push('                    )');
-      } else lines.push(`                    ${st}`);
-    }
+    pushPath(ink.cmds);
     lines.push('                },');
     const args = [];
-    if (fill) args.push(`fill: RunnerPalette.${fill}`);
+    if (fill) args.push(`fill: ${NAME}Palette.${fill}`);
     if (stroke) {
-      args.push(`stroke: RunnerPalette.${stroke}`, `lineWidth: ${f(Number(s['stroke-width'] || 1))}`);
+      args.push(`stroke: ${NAME}Palette.${stroke}`, `lineWidth: ${f(Number(s['stroke-width'] || 1))}`);
       if (s['stroke-linecap']) args.push(`cap: .${s['stroke-linecap']}`);
       if (s['stroke-linejoin']) args.push(`join: .${s['stroke-linejoin']}`);
       if (s['stroke-dasharray']) args.push(`dash: [${s['stroke-dasharray'].split(/[\s,]+/).map(Number).map(f).join(', ')}]`);
     }
     if (s.opacity !== undefined) args.push(`opacity: ${f(Number(s.opacity))}`);
-    args.forEach((x, i) => lines.push(`                ${x}${i < args.length - 1 ? ',' : ''}`));
+    if (s['fill-opacity'] !== undefined) args.push(`fillOpacity: ${f(Number(s['fill-opacity']))}`);
+    if (gradientId) args.push(gradientArg(gradients[gradientId], ink.cmds));
+    args.forEach((x, i) => lines.push(`                ${x}${i < args.length - 1 || s['clip-path'] ? ',' : ''}`));
+    if (s['clip-path']) {
+      const clipId = /^url\(#(\w+)\)$/.exec(s['clip-path'])[1];
+      lines.push('                clip: Path { p in');
+      pushPath(clips[clipId]);
+      lines.push('                }');
+    }
     // swift-format keeps trailing commas only in multi-element collections.
     lines.push(p.inks.length > 1 ? '            ),' : '            )');
   });
@@ -233,8 +301,10 @@ const pi = process.argv.indexOf('--preview');
 if (pi > 0) {
   const d = cmds => cmds.map(([c, ...v]) => c + v.map(f).join(' ')).join('');
   const show = new Set(process.argv[pi + 2] ? process.argv[pi + 2].split(',') : parts.map(p => p.id));
-  const body = parts.filter(p => show.has(p.id)).map(p => p.inks.map(({ cmds, style: s }) =>
-    `<path d="${d(cmds)}" fill="${s.fill ?? (s.stroke && s.stroke !== 'none' ? 'none' : '#111')}" stroke="${s.stroke ?? 'none'}" stroke-width="${s['stroke-width'] ?? 1}" stroke-linecap="${s['stroke-linecap'] ?? 'butt'}" stroke-linejoin="${s['stroke-linejoin'] ?? 'miter'}"${s['stroke-dasharray'] ? ` stroke-dasharray="${s['stroke-dasharray']}"` : ''} opacity="${s.opacity ?? 1}"/>`).join('')).join('');
+  const defs = Object.entries(gradients).map(([id, g]) => `<linearGradient id="${id}" x1="${g.x1}" y1="${g.y1}" x2="${g.x2}" y2="${g.y2}">${g.stops.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join('')}</linearGradient>`).join('') +
+    Object.entries(clips).map(([id, cmds]) => `<clipPath id="${id}"><path d="${d(cmds)}"/></clipPath>`).join('');
+  const body = `<defs>${defs}</defs>` + parts.filter(p => show.has(p.id)).map(p => p.inks.map(({ cmds, style: s }) =>
+    `<path d="${d(cmds)}"${s['clip-path'] ? ` clip-path="${s['clip-path']}"` : ''}${s['fill-opacity'] ? ` fill-opacity="${s['fill-opacity']}"` : ''} fill="${s.fill ?? (s.stroke && s.stroke !== 'none' ? 'none' : '#111')}" stroke="${s.stroke ?? 'none'}" stroke-width="${s['stroke-width'] ?? 1}" stroke-linecap="${s['stroke-linecap'] ?? 'butt'}" stroke-linejoin="${s['stroke-linejoin'] ?? 'miter'}"${s['stroke-dasharray'] ? ` stroke-dasharray="${s['stroke-dasharray']}"` : ''} opacity="${s.opacity ?? 1}"/>`).join('')).join('');
   const tx = texts.filter(t => show.has(t.part)).map(t => `<text x="${f(t.x)}" y="${f(t.y)}" text-anchor="middle" font-size="${t.size}" font-weight="700" font-family="sans-serif" fill="${t.fill}">${t.text}</text>`).join('');
   fs.writeFileSync(process.argv[pi + 1], `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${minX} ${minY} ${maxX - minX} ${maxY - minY}" width="${(maxX - minX) * 3}" height="${(maxY - minY) * 3}"><rect x="${minX}" y="${minY}" width="${maxX - minX}" height="${maxY - minY}" fill="#7FB7FF"/>${body}${tx}</svg>`);
 }
