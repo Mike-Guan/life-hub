@@ -143,7 +143,7 @@ import Testing
         try JSONSerialization.data(withJSONObject: json).write(to: url)
 
         let reloaded = GrowthStore(fileURL: url, deviceID: "t")
-        #expect(reloaded.ledger.owned == ["celebrate.up"])
+        #expect(reloaded.ledger.owned == ["celebrate.up", "kuro.celebrate.spin"])
         #expect(reloaded.ledger.unreadable.count == 1)
         reloaded.record(.daylight, source: "day-1", at: at)
         let again = GrowthStore(fileURL: url, deviceID: "t")
