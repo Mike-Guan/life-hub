@@ -105,6 +105,16 @@ public final class ModeStore {
         return switchTo(decision.mode, source: decision.source, tag: decision.tag, at: now) ? decision : nil
     }
 
+    /// Ends work once Mike has left the office or come home from 17:30, as `ModeEngine.settle` decides.
+    /// - Returns: the decision applied, or `nil` when the mode stays.
+    @discardableResult
+    public func settle(presence: PlacePresence, now: Date = .now, calendar: Calendar = .current) -> ModeDecision? {
+        guard let decision = ModeEngine.settle(log: log, presence: presence, now: now, calendar: calendar) else {
+            return nil
+        }
+        return switchTo(decision.mode, source: decision.source, tag: decision.tag, at: now) ? decision : nil
+    }
+
     public func segments(on day: Date, now: Date = .now) -> [ModeSegment] {
         log.segments(on: day, now: now)
     }
