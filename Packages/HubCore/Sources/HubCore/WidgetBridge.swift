@@ -14,6 +14,8 @@ public final class WidgetBridge {
     // Kept in memory; only the day of the last workout of each kind goes into the snapshot.
     /// Workouts from the last HealthKit reading; the app sets it before syncing.
     public var workouts: [WorkoutSummary] = []
+    /// The need rules for the chosen character; the app sets it before syncing.
+    public var rules = NeedRules.standard
 
     public init(container: HubContainer, bedtime: BedtimeSchedule = .standard) {
         self.container = container
@@ -78,8 +80,8 @@ public final class WidgetBridge {
         let after = HakuLines.scene(mode: current, need: nil, energy: reading?.level, bedtime: state)
         snapshot.line = scene.map { HakuLines.line($0, at: now, calendar: calendar) }
         snapshot.lineAfterNeed = after.map { HakuLines.line($0, at: now, calendar: calendar) }
-        snapshot.nextNeed = NeedEngine.nextScheduled(after: now, calendar: calendar)
-        if let next = snapshot.nextNeed {
+        snapshot.nextNeed = NeedEngine.nextScheduled(after: now, rules: rules, calendar: calendar)
+        if let next = snapshot.nextNeed, rules.persona == .haku {
             snapshot.nextNeed?.line = HakuLines.line(.boxingWarmup, at: next.from, calendar: calendar)
         }
         do {

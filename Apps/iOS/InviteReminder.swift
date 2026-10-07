@@ -28,17 +28,23 @@ enum InviteReminder {
         log.pendingNeed = nil
         let bedtime = BedtimeSchedule.stored(in: defaults)
         let energy = EnergyLog.read(from: AppGroup.container.energyLogURL)
+        let rules = AppGroup.needRules(now: now)
         let at = NeedEngine.inviteTime(
             for: reading,
             now: now,
             lastInviteAt: log.lastSentAt,
             bedtime: bedtime,
-            sleptShort: StateEngine.sleptShort(events: energy.events, now: now)
+            sleptShort: StateEngine.sleptShort(events: energy.events, now: now),
+            rules: rules
         )
         if let reading, let at, !backoff.isPaused(reading.need, at: at) {
             let content = UNMutableNotificationContent()
-            content.title = "HAKU"
-            content.body = NeedEngine.inviteText(for: reading.need, taskSoon: taskSoon(after: at))
+            content.title = rules.persona.title
+            content.body = NeedEngine.inviteText(
+                for: reading.need,
+                taskSoon: taskSoon(after: at),
+                persona: rules.persona
+            )
             content.sound = .default
             // Work-time notices have no 走 button.
             let atWork = reading.need == .slacking || reading.need == .sitting
@@ -78,7 +84,9 @@ enum InviteReminder {
     /// The text of the invite sent for `reading`, or `nil` when none went out for it.
     static func sent(for reading: NeedReading?) -> String? {
         guard let reading, let sent = InviteLog.stored(in: AppGroup.defaults).lastSentAt else { return nil }
-        return sent >= reading.since ? NeedEngine.inviteText(for: reading.need, taskSoon: taskSoon(after: sent)) : nil
+        guard sent >= reading.since else { return nil }
+        let persona = Persona.stored(in: AppGroup.defaults)
+        return NeedEngine.inviteText(for: reading.need, taskSoon: taskSoon(after: sent), persona: persona)
     }
 
     /// Whether a Daily task starts within the hour after `date`.

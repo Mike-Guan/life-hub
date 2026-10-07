@@ -305,6 +305,7 @@ struct LifeHubApp: App {
                 mode: store.current
             )
             widgets.need = needs.reading
+            widgets.rules = AppGroup.needRules()
             widgets.workouts = needs.workouts
             widgets.sync(mode: store, energy: energy)
             WidgetCenter.shared.reloadAllTimelines()
@@ -344,6 +345,7 @@ struct LifeHubApp: App {
             mode: store.current
         )
         widgets.need = needs.reading
+        widgets.rules = AppGroup.needRules()
         widgets.sync(mode: store, energy: energy)
         WidgetCenter.shared.reloadAllTimelines()
         WatchSync.shared.send()
@@ -375,6 +377,7 @@ struct LifeHubApp: App {
             mode: store.current
         )
         widgets.need = needs.reading
+        widgets.rules = AppGroup.needRules()
         widgets.workouts = needs.workouts
         syncWidgets()
     }

@@ -32,6 +32,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   VoiceOver. Code names stay RUNNER.
 
 ### Added
+- KURO's tennis day: the boxing day rules with her own lines. Her day is learned from her sessions at the
+  tennis court (a weekday in 2 of the last 4 weeks), Saturday until one qualifies. Her invites carry her name.
 - A second character, KURO, picked in Settings (HAKU stays the default). Home, the widgets and the watch draw
   her in the outfit for the current mode with her energy face and bedtime look. For KURO the boxing slot
   reads 网球日, the side slot reads 备课 and the boxing gym reads 网球场.
