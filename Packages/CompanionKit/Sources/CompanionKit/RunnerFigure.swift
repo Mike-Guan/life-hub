@@ -144,7 +144,7 @@ struct RunnerPose {
     var sparkle: Double = 1
     /// Progress of the celebration sparkle burst, 0..<1, or -1 when none is playing.
     var burst: CGFloat = -1
-    /// The workout being celebrated, which picks the move: gloves up, a peace sign or a lift.
+    /// The workout being celebrated, which picks the move and the props, such as gloves up or a helmet.
     var cheerKind: WorkoutSummary.Kind?
     /// Scroll position of the feed on the phone screen while couch scrolling, 0...1.
     var feed: CGFloat = 0
@@ -895,12 +895,47 @@ struct RunnerPose {
     mutating func celebrate(_ kind: WorkoutSummary.Kind?, progress: CGFloat) {
         burst = progress
         cheerKind = kind
-        guard kind == .boxing else { return }
-        // Acts cool, then the right glove pumps up twice anyway.
-        let pump = abs(sin(progress * 2 * .pi))
-        gloveL = CGSize(width: 0, height: -6 * pump)
-        gloveR = CGSize(width: -6 * pump, height: -24 * pump)
-        gloveRScale = 1
+        guard let kind else { return }
+        let p = progress
+        switch kind {
+        case .boxing:
+            // Acts cool, then the right glove pumps up twice anyway.
+            let pump = abs(sin(p * 2 * .pi))
+            gloveL = CGSize(width: 0, height: -6 * pump)
+            gloveR = CGSize(width: -6 * pump, height: -24 * pump)
+            gloveRScale = 1
+        case .walking:
+            // Out of breath: three heavy pants, mouth open, eyes shut.
+            let pant = abs(sin(p * 3 * .pi))
+            stretch = -0.5 * pant
+            yawn = 0.6 + 0.4 * pant
+            eyesShut = true
+        case .cycling, .racket, .outdoor:
+            // A slow sway; the prop sways along.
+            lean = 2.5 * Double(sin(p * 2 * .pi))
+        case .swimming:
+            // Tilts the head twice to get the water out of an ear.
+            let tilt = abs(sin(p * 2 * .pi))
+            headTilt = -10 * Double(tilt)
+            shift = -2 * tilt
+            eyesShut = true
+        case .martialArts:
+            // Hops on the spot.
+            bounce = -6 * max(0, sin(p * 4 * .pi))
+        case .ball:
+            // Sways while the ball spins on a finger.
+            lean = 2 * Double(sin(p * 4 * .pi))
+        case .yoga:
+            // Reaches up once, then lets go.
+            stretch = 0.7 * sin(p * .pi)
+            eyesShut = true
+        case .dance:
+            // Rocks side to side with the eyes shut.
+            lean = 4 * Double(sin(p * 4 * .pi))
+            eyesShut = true
+        case .running, .strength, .other:
+            break
+        }
     }
 
     /// Plays the unboxing at `progress` (0...1) on top of the current pose: the box shakes and opens,
@@ -1169,7 +1204,8 @@ struct RunnerFigure: View {
             visible.insert(.maskStripes)
         }
         if outfit.stripedMask, visible.contains(.maskDown) { visible.insert(.maskStripesDown) }
-        // The room item stays home: hidden while HAKU carries the gym bag or is out boxing, lifting or running.
+        // The room item stays home: hidden while HAKU carries the gym bag, is out boxing, lifting or running, or
+        // stands in the mountains.
         if mode == .chill, let room = outfit.room, visible.isDisjoint(with: awayParts) { visible.insert(room) }
         if outfit.peaceSign, pose.burst >= 0, !pose.bedtime { visible.insert(.peaceHand) }
         // Today's traces: the bandage goes everywhere, the monitor and the sunlight are in the room at home.
@@ -1187,11 +1223,11 @@ struct RunnerFigure: View {
     }
 
     // The bag from the office comes with `bagLift`.
-    /// Speed lines and dust while walking, with what HAKU carries away from `place`: earbuds from home, a towel
+    /// Speed lines and dust while walking, with what HAKU carries away from `place`: a towel
     /// from the gym, a bandage from boxing.
     nonisolated private static func walkParts(_ place: HubPlace.Kind) -> Set<RunnerPart> {
         switch place {
-        case .home: [.speedLines, .walkDust, .earbud]
+        case .home: [.speedLines, .walkDust]
         case .fitness: [.speedLines, .walkDust, .towel]
         case .gym: [.speedLines, .walkDust, .bandage]
         case .office, .custom: [.speedLines, .walkDust]
@@ -1243,7 +1279,9 @@ struct RunnerFigure: View {
         visible.remove(.monsterCan)
     }
 
-    nonisolated private static let awayParts: Set<RunnerPart> = [.gymBag, .heavyBag, .dumbbell, .speedLines]
+    nonisolated private static let awayParts: Set<RunnerPart> = [
+        .gymBag, .heavyBag, .dumbbell, .speedLines, .cheerMountains,
+    ]
 
     nonisolated private static func modeParts(for mode: Mode, pose: RunnerPose) -> Set<RunnerPart> {
         var visible = baseParts
@@ -1290,6 +1328,7 @@ struct RunnerFigure: View {
             visible.formUnion(added)
         }
         if pose.burst >= 0, !pose.bedtime, let kind = pose.cheerKind, let props = cheerParts[kind] {
+            visible.subtract(cheerHides[kind] ?? [])
             visible.remove(.monsterCan)
             visible.formUnion(props)
         }
@@ -1343,7 +1382,7 @@ struct RunnerFigure: View {
         case .collapsed:
             visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .sofaArm])
         case .blanket:
-            visible.formUnion([.blanket, .eyesSleepy, .maskDown, .earringNeon, .earbud])
+            visible.formUnion([.blanket, .eyesSleepy, .maskDown, .earringNeon])
         case .morning:
             visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .toothbrush])
         case .timeToLeave:
@@ -1433,7 +1472,7 @@ struct RunnerFigure: View {
         .eyesWork, .lidsWork, .eyebags, .browsWork, .maskUp, .panelLines, .headset, .cupL, .cupR, .mic,
     ]
     nonisolated private static let chillParts: Set<RunnerPart> = [
-        .eyesChill, .mouthSmile, .maskDown, .earringNeon, .earbud, .monsterCan,
+        .eyesChill, .mouthSmile, .maskDown, .earringNeon, .monsterCan,
     ]
     nonisolated private static let boxingParts: Set<RunnerPart> = [
         .cateyeL, .cateyeR, .browsBox, .mouthFang, .maskDown, .earringNeon, .headband, .gloveL, .gloveR,
@@ -1466,6 +1505,21 @@ struct RunnerFigure: View {
         .boxing: [.gloveL, .gloveR],
         .running: [.peaceHand],
         .strength: [.dumbbell],
+        .walking: [.towel, .dropsL, .dropsR, .mouthYawn, .cheerLegLines],
+        .cycling: [.eyesSleepy, .cheerHelmet],
+        .swimming: [.cheerGoggles, .cheerEarTap, .cheerSplash],
+        .martialArts: [.cateyeL, .cateyeR, .browsBox, .mouthFang, .cheerKick],
+        .racket: [.cheerRacket],
+        .ball: [.cheerBallHand, .cheerBall],
+        .yoga: [.cheerStretchArms, .cheerCrack],
+        .dance: [.cheerNotes],
+        .outdoor: [.cheerMountains, .cheerWind],
+    ]
+    /// The face a celebration swaps out before adding its props.
+    nonisolated private static let cheerHides: [WorkoutSummary.Kind: Set<RunnerPart>] = [
+        .walking: [.mouthSmile, .mouthFang],
+        .cycling: openEyes,
+        .martialArts: openEyes.union([.browsWork, .mouthSmile]),
     ]
     nonisolated private static let deadpanEyes: Set<RunnerPart> = [.eyesWork, .lidsWork, .browsWork]
 
@@ -1653,6 +1707,10 @@ struct RunnerFigure: View {
                     .rotationEffect(.degrees(Double(sin(pose.burst * 6 * .pi)) * 8), anchor: Self.unit(x: 96, y: 84))
             case .handWeight:
                 RunnerPartView(part: part).offset(y: -8 * pose.lift * scale)
+            case .dropsL where pose.burst >= 0, .dropsR where pose.burst >= 0, .cheerLegLines, .cheerHelmet,
+                .cheerSplash, .cheerEarTap, .cheerKick, .cheerRacket, .cheerBall, .cheerStretchArms, .cheerNotes,
+                .cheerWind:
+                cheerView(part, scale: scale)
             case .dumbbell:
                 // Two quick reps in a celebration, or the curl at the gym.
                 RunnerPartView(part: part).offset(y: -12 * pose.dumbbellRise * scale)
@@ -1749,6 +1807,56 @@ struct RunnerFigure: View {
         }
     }
 
+    /// Draws a workout celebration prop, moved by the celebration's progress.
+    @ViewBuilder private func cheerView(_ part: RunnerPart, scale: CGFloat) -> some View {
+        let p = max(pose.burst, 0)
+        switch part {
+        case .dropsL, .dropsR:
+            // Panting: the sweat flies off to the sides.
+            let fling = 3 * abs(sin(p * 3 * .pi))
+            RunnerPartView(part: part).offset(x: (part == .dropsL ? -fling : fling) * scale)
+        case .cheerLegLines:
+            // The legs are still shaking.
+            RunnerPartView(part: part).offset(x: sin(p * 12 * .pi) * scale)
+        case .cheerHelmet:
+            // Swings from the hand.
+            let swing = 6 * Double(sin(p * 4 * .pi))
+            RunnerPartView(part: part).rotationEffect(.degrees(swing), anchor: Self.unit(x: 96, y: 128))
+        case .cheerRacket:
+            // A small swing from the wrist.
+            let swing = -10 * Double(sin(p * 4 * .pi))
+            RunnerPartView(part: part).rotationEffect(.degrees(swing), anchor: Self.unit(x: 95, y: 122))
+        case .cheerSplash:
+            // Water flies out from the head.
+            RunnerPartView(part: part)
+                .scaleEffect(1 + 0.25 * p, anchor: Self.unit(x: 60, y: 60))
+                .opacity(Double(1 - 0.5 * p))
+        case .cheerEarTap:
+            // Pats the ear.
+            RunnerPartView(part: part).offset(x: 2 * abs(sin(p * 8 * .pi)) * scale)
+        case .cheerKick:
+            // The kick lines flash.
+            RunnerPartView(part: part).opacity(sin(p * 8 * .pi) > 0 ? 1 : 0.35)
+        case .cheerBall:
+            // Spins twice on the fingertip.
+            RunnerPartView(part: part).rotationEffect(.degrees(720 * Double(p)), anchor: Self.unit(x: 104, y: 78))
+        case .cheerStretchArms:
+            RunnerPartView(part: part).offset(y: -4 * sin(p * .pi) * scale)
+        case .cheerNotes:
+            // Float up and sway as they fade.
+            RunnerPartView(part: part)
+                .offset(x: 2 * sin(p * 4 * .pi) * scale, y: -8 * p * scale)
+                .opacity(Double(1 - 0.6 * p))
+        case .cheerWind:
+            // Blows past.
+            RunnerPartView(part: part)
+                .offset(x: 8 * p * scale)
+                .opacity(Double(0.4 + 0.6 * sin(p * .pi)))
+        default:
+            RunnerPartView(part: part)
+        }
+    }
+
     private static let dots = RunnerText(
         string: "•••",
         x: 60,
@@ -1772,7 +1880,8 @@ struct RunnerFigure: View {
         .ledLine, .ledYen, .hairFringe, .earringNeon, .earbud, .headband, .headset, .cupL, .cupR, .mic,
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
-        .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .eyeSwirlL, .eyeSwirlR, .dizzyStar,
+        .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
+        .dizzyStar,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.

@@ -87,7 +87,16 @@ enum CompanionLines {
         case .boxing: "……其实还挺爽的。"
         case .running: "居然真跑完了。"
         case .strength: "不错嘛。"
-        default: "哦。……不错嘛。"
+        case .walking: "……腿还是你的吗。"
+        case .cycling: "屁股……先让我缓缓。"
+        case .swimming: "耳朵进水了。……不过不错。"
+        case .martialArts: "……我也想踢两脚。"
+        case .racket: "那一拍……还行吧。"
+        case .ball: "球呢？……算了，赢了就行。"
+        case .yoga: "……骨头咔了一声。舒服。"
+        case .dance: "我没跳。……我没跳。"
+        case .outdoor: "风好大。……景还行。"
+        case .other: "哦。……不错嘛。"
         }
     }
 

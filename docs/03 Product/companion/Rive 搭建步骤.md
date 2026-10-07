@@ -77,7 +77,7 @@ Solo 一次只显示一个子元素，正好用来切表情和面罩。在 Hiera
 | 时间线 | 类型 | 时长 | 内容 |
 |---|---|---|---|
 | `idle_work` | Loop | 2.4s | 第 0 帧：eyes_work，mask_up，led_line，headset 显示，外套 #1B1C26，背景 #7FB7FF。之后头每 0.5s 点一下，LED 透明度 60↔100 呼吸，2s 处眼皮慢慢眨一次 |
-| `idle_chill` | Loop | 8s | 第 0 帧：eyes_chill，mouth_smile，mask_down，monster_can 和 earbud 显示，外套 #3A6B58，背景 #8FDB9E。全程身体左右晃，周期 3s；6.8s 到 8s 举罐喝一口 |
+| `idle_chill` | Loop | 8s | 第 0 帧：eyes_chill，mouth_smile，mask_down，monster_can 显示（earbud 不再用，耳朵上只留蓝色耳钉 earring_neon），外套 #3A6B58，背景 #8FDB9E。全程身体左右晃，周期 3s；6.8s 到 8s 举罐喝一口 |
 | `idle_box` | Loop | 2s | 第 0 帧：eyes_box，mouth_fang，mask_down，headband 和两只拳套显示，背景 #FF7A6B。每 0.6s 小跳一次，拳套交替上下，右眼光晕透明度 20↔60 |
 | `idle_money` | Loop | 4s | 第 0 帧：eyes_money，mask_up，led_yen，chain_gold 显示，外套 #121219，背景 #FFD25C。链子上一道白色高光从左扫到右，¥¥ 左右缓慢平移 |
 | `pop` | One shot | 0.12s | 整个 RUNNER 压扁到 105% × 92% 再弹回，旁边一颗黑色四角星闪一下。每次切 mode 先播它 |
