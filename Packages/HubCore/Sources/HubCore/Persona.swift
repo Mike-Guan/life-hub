@@ -30,7 +30,7 @@ public enum Persona: String, Codable, CaseIterable, Sendable {
 }
 
 extension Mode {
-    /// The mode's name for `persona`: KURO's identity slot is tennis and her side slot is lesson prep.
+    /// The mode's name for `persona`: KURO has her own names for the identity and side slots.
     public func title(for persona: Persona) -> String {
         switch (persona, self) {
         case (.kuro, .boxing): "网球日"
