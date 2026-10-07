@@ -65,11 +65,7 @@ struct WatchStatusView: View {
         case .accessoryRectangular:
             HStack(spacing: 6) {
                 head.frame(width: 40)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(entry.mode?.title ?? "还没有模式").font(.headline)
-                    Text(line).font(.caption2).lineLimit(2)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                modeAndTime.font(.headline).lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
             }
         default:
             ZStack {
@@ -79,9 +75,13 @@ struct WatchStatusView: View {
         }
     }
 
-    private var line: String {
-        guard let payload = entry.payload, entry.mode != nil else { return "在 iPhone 上打开一次 Life Hub" }
-        return payload.line(at: entry.date)
+    // PM spec (Issue #160): one line, the mode and how long it has run.
+    @ViewBuilder private var modeAndTime: some View {
+        if let mode = entry.mode, let since = entry.payload?.snapshot.since {
+            Text("\(mode.title) · \(Text(since, style: .relative))")
+        } else {
+            Text(entry.mode?.title ?? "打开 iPhone")
+        }
     }
 
     @ViewBuilder private var head: some View {

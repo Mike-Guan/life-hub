@@ -15,12 +15,12 @@ import Testing
         return calendar.date(from: parts) ?? .distantPast
     }
 
-    func payload(line: String? = "上班中", energy: EnergyLevel? = .okay) -> WatchPayload {
+    func payload() -> WatchPayload {
         let snapshot = WidgetSnapshot(
             mode: .work,
             since: date(7, 9),
-            energy: energy,
-            line: line,
+            energy: .okay,
+            line: "上班中",
             updatedAt: date(7, 10)
         )
         return WatchPayload(snapshot: snapshot, wardrobe: Wardrobe(equipped: [.gloves: "gloves.gold"]))
@@ -54,14 +54,6 @@ import Testing
         #expect(WatchPayload.read(from: nil) == nil)
         try payload().write(to: url)
         #expect(WatchPayload.read(from: url) == payload())
-    }
-
-    @Test func lineIsBedtimeThenTheAppsLineThenEnergy() {
-        #expect(payload().line(at: date(7, 12), calendar: calendar) == "上班中")
-        #expect(payload(line: nil).line(at: date(7, 12), calendar: calendar) == "电量\(EnergyLevel.okay.title)")
-        #expect(payload(line: nil, energy: nil).line(at: date(7, 12), calendar: calendar) == "电量未知")
-        let bedtime = HakuLines.line(.bedtime, at: date(7, 23, 45), calendar: calendar)
-        #expect(payload().line(at: date(7, 23, 45), calendar: calendar) == bedtime)
     }
 
     @Test func redrawsWhenTheIPhoneWidgetsDo() {
