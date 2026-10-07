@@ -29,11 +29,7 @@ struct WatchHomeView: View {
     var body: some View {
         TimelineView(.everyMinute) { context in
             if let payload, let mode = payload.snapshot.mode {
-                TabView {
-                    companionPage(payload, mode: mode, at: context.date)
-                    TodayPage(payload: payload, mode: mode, date: context.date)
-                }
-                .tabViewStyle(.verticalPage)
+                companionPage(payload, mode: mode, at: context.date)
             } else {
                 Text(failure ?? "先在 iPhone 上打开一次 Life Hub")
                     .font(.footnote)
