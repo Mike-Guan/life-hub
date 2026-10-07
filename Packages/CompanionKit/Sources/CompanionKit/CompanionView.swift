@@ -1029,7 +1029,8 @@ private let previewWelcomes: [(String, Mode, ReturnReplay)] = {
     ]
 }()
 
-private struct Squash {
+/// The squash and stretch as the character switches look.
+struct Squash {
     var x: CGFloat = 1
     var y: CGFloat = 1
 }

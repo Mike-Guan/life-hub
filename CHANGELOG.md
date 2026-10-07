@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- With KURO picked, the can count, the shop and keepsake unboxing are hidden, since they still show HAKU's
+  items. Cans keep counting; unboxings wait until HAKU is picked again.
 - HAKU's blanket is now cream with a white folded hem, two small orange-and-white cats and faint paw prints,
   everywhere it shows.
 - After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.
@@ -317,6 +319,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The welcome back after days away no longer gets stuck when you pull down Control Center, which had
   held back celebrations and keepsake unboxing. Leaving the big return halfway still counts toward its
   once-in-30-days limit, and a return kept from bedtime is dropped when KURO is picked.
+- Before any mode is picked, the home title says "NO MODE", not "NO MODE MODE".
+- The second preset character's card now fills with her own color per mode (mint, sky, pink, lavender, as in
+  the approved preview), dims at bedtime and squashes as the mode changes, on the home screen and the watch.
+  Before, it stayed white.
 - Leaving the office switches to 下班 Chill only from 17:30. Stepping out earlier, such as for lunch,
   keeps 上班.
 - Staying 30 minutes at the boxing gym counts as boxing, like the fitness gym: 5 cans once a week and
