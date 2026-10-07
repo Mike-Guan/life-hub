@@ -1,5 +1,6 @@
 import Foundation
 import HubCore
+import Synchronization
 import WatchConnectivity
 
 // Issue #160. Sends what the iPhone widgets read to the Apple Watch app, which stores it for its own
@@ -7,8 +8,10 @@ import WatchConnectivity
 // next launch; complication transfers wake the watch app while HAKU is on the watch face.
 /// Sends HAKU's state to the Apple Watch.
 final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
-    // No stored state besides the session, which WatchConnectivity makes safe to use from any thread.
+    // Besides the session, which WatchConnectivity makes safe to use from any thread, only the last scenes
+    // the app worked out, behind a lock, so a send from a session callback still carries them.
     static let shared = WatchSync()
+    private let scenes = Mutex<[TimedScene]>([])
 
     /// Starts the session; the latest state goes out once it is active.
     func activate() {
@@ -17,8 +20,10 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
         WCSession.default.activate()
     }
 
-    /// Sends the snapshot the widgets read, with the wardrobe and bedtime, when a watch app is installed.
-    func send() {
+    /// Sends the snapshot the widgets read, with the wardrobe, bedtime and scenes, when a watch app is installed.
+    /// - Parameter scenes: what the home card plays next; `nil` sends the last ones given.
+    func send(scenes newScenes: [TimedScene]? = nil) {
+        if let newScenes { scenes.withLock { $0 = newScenes } }
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
         guard session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return }
@@ -28,7 +33,8 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
             snapshot: snapshot,
             wardrobe: Wardrobe.stored(in: AppGroup.defaults, persona: persona),
             bedtime: BedtimeSchedule.stored(in: AppGroup.defaults),
-            persona: persona
+            persona: persona,
+            scenes: scenes.withLock { $0 }
         )
         // Complication transfers have a daily budget (about 50), so they go out only when what the watch
         // face draws changed.

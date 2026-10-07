@@ -1,7 +1,7 @@
 import Foundation
 
 /// Something HAKU is doing because Mike is doing it, or is about to. Takes precedence over needs.
-public enum CompanionActivity: String, Sendable {
+public enum CompanionActivity: String, Codable, Sendable {
     /// At the boxing gym: heavy-bag combos.
     case boxingAtGym
     /// At the fitness gym: lifting.

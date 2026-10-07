@@ -8,6 +8,8 @@ public final class EnergyStore {
     public private(set) var log: EnergyLog
     /// Last load or save failure, for the UI to show.
     public private(set) var lastError: String?
+    /// Goes up on every write to the log, including a sleep import that updates its night in place.
+    public private(set) var revision = 0
     public let deviceID: String
 
     @ObservationIgnored private var file: LogFile<EnergyLog>
@@ -30,6 +32,7 @@ public final class EnergyStore {
         guard !log.events.contains(where: { $0.id == event.id }) else { return false }
         log.events.append(event)
         lastError = file.save(&log)
+        revision += 1
         return true
     }
 
@@ -50,6 +53,7 @@ public final class EnergyStore {
         event.updatedBy = deviceID
         log.events[index] = event
         lastError = file.save(&log)
+        revision += 1
         return true
     }
 

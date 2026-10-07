@@ -86,9 +86,13 @@ import Testing
         #expect(store.log.changes[1].deletedAt == at.addingTimeInterval(660))
 
         // Switching back to the mode before undoes the tap; the automatic one is current again.
+        // The undo adds nothing, so the app watches the revision, not the count.
+        let revision = store.revision
         #expect(store.switchTo(.work, at: at.addingTimeInterval(700)))
         #expect(store.log.active.map(\.mode) == [.work])
         #expect(store.log.current?.source == .schedule)
+        #expect(store.log.changes.count == 3)
+        #expect(store.revision == revision + 1)
 
         // After the window a switch is kept.
         store.switchTo(.money, at: at.addingTimeInterval(800))

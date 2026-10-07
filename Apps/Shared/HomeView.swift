@@ -218,36 +218,26 @@ struct HomeView: View {
         }
     }
 
-    // The tracker refreshes on open and on place events, so a need can end while the app stays open.
-    private func activeNeed(at date: Date) -> NeedReading? {
-        need.flatMap { $0.isActive(at: date) ? $0 : nil }
-    }
-
-    private func moment(at date: Date) -> CompanionMoment? {
-        let presence = activitySignals?.presence
-        return MomentEngine.moment(
-            mode: store.current,
-            sideHustle: store.sideHustle,
-            activity: activity(at: date),
-            need: activeNeed(at: date)?.need,
-            departing: presence.map { departure?.isActive(at: date, presence: $0) ?? false } ?? false,
-            officeSince: presence?.since(.office),
-            home: home(at: date),
-            stiff: sit?.isStiff(mode: store.current, at: date) ?? false,
-            now: date,
-            work: rules
+    // The scene rules live in HubCore, so the watch plays the same scene as this card.
+    private var inputs: HomeSceneInputs {
+        HomeSceneInputs(
+            log: store.log,
+            rules: rules,
+            bedtime: bedtime,
+            need: need,
+            signals: activitySignals,
+            days: activityDays,
+            departure: departure,
+            sit: sit,
+            bathDoneAt: bathDoneAt
         )
     }
 
-    private func home(at date: Date) -> HomeSignals? {
-        activitySignals?.presence.since(.home).map {
-            HomeSignals(
-                since: $0,
-                workedToday: MomentEngine.workedToday(store.log, now: date),
-                manualAt: store.log.active.last(where: \.source.isManual)?.at
-            )
-        }
-    }
+    private func activeNeed(at date: Date) -> NeedReading? { inputs.activeNeed(at: date) }
+
+    private func moment(at date: Date) -> CompanionMoment? { inputs.moment(at: date) }
+
+    private func home(at date: Date) -> HomeSignals? { inputs.home(at: date) }
 
     // When HAKU stops waiting at the door it gives up once, if nothing else is going on.
     private func stayHome(at date: Date) -> CompanionEvent? {
@@ -255,11 +245,7 @@ struct HomeView: View {
         return MomentEngine.stayHome(mode: store.current, signals: home, now: date, work: rules)
     }
 
-    // On gym days HAKU waits at the door during the invite and walks after 走, instead of the plain bag.
-    private func shownActivity(at date: Date) -> CompanionActivity? {
-        let activity = activity(at: date)
-        return activity == .gymDay && moment(at: date) != nil ? nil : activity
-    }
+    private func shownActivity(at date: Date) -> CompanionActivity? { inputs.shownActivity(at: date) }
 
     private func revived(at date: Date) -> CompanionEvent? {
         let window = bath(at: date) ? BathTime.window(at: date, bedtime: bedtime) : nil
@@ -271,43 +257,18 @@ struct HomeView: View {
         )
     }
 
-    /// The place Mike just left, while HAKU walks from it.
-    private func walking(at date: Date) -> HubPlace.Kind? {
-        activitySignals.flatMap { PlaceWalk.walk(in: $0.presence, now: date)?.from }
-    }
+    private func walking(at date: Date) -> HubPlace.Kind? { inputs.walking(at: date) }
 
-    private func bath(at date: Date) -> Bool {
-        BathTime.isOn(
-            at: date,
-            bedtime: bedtime,
-            mode: store.current,
-            atHome: activitySignals?.presence.since(.home) != nil,
-            doneAt: bathDoneAt
-        )
-    }
+    private func bath(at date: Date) -> Bool { inputs.bath(at: date) }
 
-    private func activity(at date: Date) -> CompanionActivity? {
-        activitySignals.flatMap {
-            ActivityEngine.activity(
-                $0,
-                mode: store.current,
-                days: activityDays,
-                work: rules,
-                bedtime: bedtime,
-                now: date
-            )
-        }
-    }
+    private func activity(at date: Date) -> CompanionActivity? { inputs.activity(at: date) }
 
     private func traces(at date: Date, energy: EnergyLevel?) -> Set<CompanionTrace> {
         let today = MomentEngine.traces(log: store.log, workouts: workouts, energy: energy, now: date)
         return today.union(MomentEngine.lastingTraces(log: store.log, ledger: ledger, now: date))
     }
 
-    private func codingCans(at date: Date) -> Int {
-        guard store.sideHustle == .vibeCoding, let since = store.currentSince else { return 0 }
-        return SideHustle.codingCans(since: since, now: date)
-    }
+    private func codingCans(at date: Date) -> Int { inputs.codingCans(at: date) }
 
     // In 副业 a tap switches the state. It is manual, so it earns nothing and holds automatic switches.
     private var tapAction: (() -> Void)? {
