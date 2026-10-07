@@ -20,6 +20,7 @@ struct SettingsView: View {
     @State private var scrollApps = ScrollWatch.selection
     @State private var pickingApps = false
     @State private var screenTimeError: String?
+    @State private var switchingTo: Persona?
     @FocusState private var editingAmount: String?
 
     var body: some View {
@@ -46,10 +47,11 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("角色")
                     .font(Toy.body(16, weight: .heavy))
+                // Each character has her own cans and items, so a switch is confirmed first.
                 HStack(spacing: 12) {
                     ForEach(Persona.allCases, id: \.self) { choice in
                         Button {
-                            persona = choice
+                            switchingTo = choice == persona ? nil : choice
                         } label: {
                             Text(choice.title)
                                 .font(Toy.body(16, weight: .heavy))
@@ -60,7 +62,17 @@ struct SettingsView: View {
                     }
                 }
                 .padding(.trailing, 4)
-                Text("换的是首页、小组件和手表上的角色。记录和规则都不变。")
+                .alert(
+                    "换成 \(switchingTo?.title ?? "")？",
+                    isPresented: Binding(get: { switchingTo != nil }, set: { if !$0 { switchingTo = nil } }),
+                    presenting: switchingTo
+                ) { next in
+                    Button("换") { persona = next }
+                    Button("先不换", role: .cancel) {}
+                } message: { next in
+                    Text(Self.switchMessage(from: persona, to: next))
+                }
+                Text("每个角色有自己的能量罐和东西，换过去从零开始，原来的都留着。生活记录和规则都不变。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
             }
@@ -392,4 +404,22 @@ private struct PlaceEdit: Identifiable {
     var isNew = true
 
     var id: String { place.id }
+}
+
+extension SettingsView {
+    // Wording from the PM thread, 2026-10-07.
+    /// The confirmation shown before switching from `old` to `new`.
+    static func switchMessage(from old: Persona, to new: Persona) -> String {
+        "\(old.title) 会留在家里，\(old.pronoun)的罐子和东西都在。\(new.title) 用\(new.pronoun)自己的罐子，第一次从零开始。随时可以换回来。"
+    }
+}
+
+extension Persona {
+    /// How lines refer to the character: 他 or 她.
+    fileprivate var pronoun: String {
+        switch self {
+        case .haku: "他"
+        case .kuro: "她"
+        }
+    }
 }

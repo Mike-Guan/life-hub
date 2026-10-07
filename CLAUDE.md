@@ -202,3 +202,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-05: Mike: leaving the office ends work only from 17:30; an earlier leave (lunch) keeps 上班.
 - 2026-10-05: Mike (via PM, PRD §16): arriving at the fitness gym in Work or 副业 switches to Chill (location,
   2h manual hold applies). Lifting shows only in Chill; the gym can is mode-independent; leaving keeps the mode.
+- 2026-10-07: Mike (via PM): each character keeps her own cans, items, keepsakes, room traces and hidden stats;
+  a win pays only the character picked at the time; switching asks first. Life records stay shared.
