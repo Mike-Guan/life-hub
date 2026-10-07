@@ -2,7 +2,7 @@ import HubCore
 import SwiftUI
 
 // Approved Apple Watch preview (Issue #160): a poke never switches the mode, gives cans or counts anything.
-/// HAKU's reaction to a poke on the Apple Watch.
+/// HAKU's body move when tapped, the same on the phone and the Apple Watch.
 enum WatchPoke: Sendable, Equatable, CaseIterable {
     /// A startled hop, then a glare.
     case glare

@@ -114,6 +114,59 @@ import Testing
         #expect(decide(.leftOffice, day, at: date(5, 17, 30))?.mode == .chill)
     }
 
+    func settle(_ log: ModeLog, _ presence: PlacePresence, at now: Date) -> ModeDecision? {
+        ModeEngine.settle(log: log, presence: presence, now: now, calendar: calendar)
+    }
+
+    func away(from kind: HubPlace.Kind, arrived: Date, left: Date) -> PlacePresence {
+        var presence = PlacePresence()
+        presence.record(kind, entered: true, at: arrived)
+        presence.record(kind, entered: false, at: left)
+        return presence
+    }
+
+    @Test func aHeldEveningLeaveStillEndsWorkLater() {
+        // 2026-10-07: the leave came at 17:33 within 2 hours of a manual change, and no second leave followed.
+        let day = log((.work, .location, date(5, 10, 51)), (.work, .manual, date(5, 16)))
+        let presence = away(from: .office, arrived: date(5, 10, 51), left: date(5, 17, 33))
+        #expect(decide(.leftOffice, day, at: date(5, 17, 33)) == nil)
+        let decision = settle(day, presence, at: date(5, 18, 13))
+        #expect(decision == ModeDecision(mode: .chill, source: .location, reason: "离开公司了"))
+    }
+
+    @Test func settlingKeepsWorkAtTheOfficeBeforeEveningAndAfterALaterChange() {
+        let day = log((.work, .location, date(5, 9)))
+        var inside = PlacePresence()
+        inside.record(.office, entered: true, at: date(5, 9))
+        #expect(settle(day, inside, at: date(5, 19)) == nil)
+        let lunch = away(from: .office, arrived: date(5, 9), left: date(5, 12))
+        #expect(settle(day, lunch, at: date(5, 13)) == nil)
+        #expect(settle(day, lunch, at: date(5, 18)) == nil)
+        let evening = away(from: .office, arrived: date(5, 9), left: date(5, 18))
+        let picked = log((.work, .location, date(5, 9)), (.work, .manual, date(5, 18, 30)))
+        #expect(settle(picked, evening, at: date(5, 19)) == nil)
+        #expect(settle(log((.money, .location, date(5, 9))), evening, at: date(5, 19)) == nil)
+        #expect(settle(day, evening, at: date(6, 1)) == nil)
+    }
+
+    @Test func comingHomeInTheEveningEndsWork() {
+        let day = log((.work, .location, date(5, 9)))
+        var presence = away(from: .office, arrived: date(5, 9), left: date(5, 17, 20))
+        #expect(settle(day, presence, at: date(5, 17, 25)) == nil)
+        presence.record(.home, entered: true, at: date(5, 18))
+        let decision = settle(day, presence, at: date(5, 18, 1))
+        #expect(decision == ModeDecision(mode: .chill, source: .location, reason: "到家了"))
+    }
+
+    @MainActor @Test func storeSettlesOnce() {
+        let store = ModeStore(fileURL: nil, deviceID: "test")
+        store.switchTo(.work, source: .location, at: date(5, 9))
+        let presence = away(from: .office, arrived: date(5, 9), left: date(5, 18))
+        #expect(store.settle(presence: presence, now: date(5, 18, 5), calendar: calendar)?.mode == .chill)
+        #expect(store.current == .chill)
+        #expect(store.settle(presence: presence, now: date(5, 18, 10), calendar: calendar) == nil)
+    }
+
     @Test func addedPlacesSwitchUnlessHeld() {
         let studio = ModeTrigger.enteredPlace(.money, name: "工作室")
         let decision = decide(studio, log((.chill, .schedule, date(3, 14))), at: date(3, 15))

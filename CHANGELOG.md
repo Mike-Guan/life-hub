@@ -337,6 +337,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   energy with its reason, the 23:30 to 05:00 bedtime window, and both in the widget snapshot.
 
 ### Fixed
+- Leaving the office in the evening ends work even if that leave was missed: from 17:30, being away from the
+  office or arriving home switches to Chill at the next place event or app open, also within 2 hours of a
+  manual change, unless you changed the mode after leaving. The debug log now says why a place event kept the mode.
 - Switching mode and back within 2 minutes now updates the widgets and the Apple Watch too. Before, they
   kept showing the mode you had undone.
 - A night of sleep imported again with new numbers now updates HAKU's face in the widgets and on the watch.
