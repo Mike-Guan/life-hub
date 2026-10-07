@@ -161,8 +161,19 @@ extension WidgetSnapshot {
     }
 
     /// The off-work line in `persona`'s voice while it lasts at `date`, else `nil`.
-    public func offWorkLine(at date: Date, persona: Persona = .haku) -> String? {
-        offWorkUntil.flatMap { date < $0 ? HakuLines.offWorkLine(for: persona) : nil }
+    /// - Parameters:
+    ///   - date: the time the line is for.
+    ///   - persona: whose voice says the line.
+    ///   - work: the rules that say when the evening extension starts.
+    ///   - calendar: the calendar for the time of day.
+    public func offWorkLine(
+        at date: Date,
+        persona: Persona = .haku,
+        work: ModeRules = .standard,
+        calendar: Calendar = .current
+    ) -> String? {
+        guard let offWorkUntil, date < offWorkUntil else { return nil }
+        return HakuLines.offWorkLine(for: persona, until: offWorkUntil, work: work, calendar: calendar)
     }
 
     // HAKU's idle bits change every 15 minutes, counted from the reference date. A widget only redraws at

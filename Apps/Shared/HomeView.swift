@@ -172,7 +172,7 @@ struct HomeView: View {
                     }
                     let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
                     let leftWork = HakuLines.offWorkUntil(store.log, now: context.date)
-                    let offWork = leftWork.map { _ in HakuLines.offWorkLine(for: persona) }
+                    let offWork = leftWork.map { HakuLines.offWorkLine(for: persona, until: $0, work: rules) }
                     let activityLine = activity(at: context.date)?.reason
                     if let line = offWork ?? activityLine ?? workLine ?? notice ?? sunday ?? why {
                         Text(line)

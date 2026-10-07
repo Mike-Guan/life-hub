@@ -10,6 +10,8 @@ public struct ModeRules: Codable, Equatable, Sendable {
     public var manualHold: TimeInterval
     /// How long Mike must stay at the gym before leaving restores the earlier mode.
     public var gymMinimumStay: TimeInterval
+    /// When the evening extension ends on work days, `nil` when it is off.
+    public var eveningUntilMinute: Int?
 
     // Defaults from Issue #4, approved by Mike on 2026-10-03.
     /// Monday to Friday 9:30 to 18:30 is work, other times chill; 2 h hold; 30 min gym stay.
@@ -26,13 +28,15 @@ public struct ModeRules: Codable, Equatable, Sendable {
         workStartMinute: Int,
         workEndMinute: Int,
         manualHold: TimeInterval,
-        gymMinimumStay: TimeInterval
+        gymMinimumStay: TimeInterval,
+        eveningUntilMinute: Int? = nil
     ) {
         self.workdays = workdays
         self.workStartMinute = workStartMinute
         self.workEndMinute = workEndMinute
         self.manualHold = manualHold
         self.gymMinimumStay = gymMinimumStay
+        self.eveningUntilMinute = eveningUntilMinute
     }
 }
 
@@ -54,6 +58,29 @@ extension ModeRules {
         let midnight = calendar.startOfDay(for: now)
         guard let time = calendar.date(byAdding: .minute, value: minute, to: midnight), time > now else { return nil }
         return time
+    }
+
+    /// The end time a newly turned on evening extension starts with.
+    public static let eveningDefaultMinute = 19 * 60
+
+    // Issue #164: some work days go on into the evening. The off-work notice stays at the end of work hours.
+    /// When today's evening extension ends, if `date` falls in it: a work day with the extension on, from
+    /// the end of work hours to `eveningUntilMinute`. Else `nil`.
+    public func eveningUntil(at date: Date, calendar: Calendar = .current) -> Date? {
+        guard let until = eveningUntilMinute, isEvening(date, calendar: calendar) else { return nil }
+        let parts = calendar.dateComponents([.hour, .minute], from: date)
+        guard (parts.hour ?? 0) * 60 + (parts.minute ?? 0) < until else { return nil }
+        return calendar.date(byAdding: .minute, value: until, to: calendar.startOfDay(for: date))
+    }
+
+    /// Whether `date` is at or after the start of today's evening extension: a work day with the
+    /// extension on, from the end of work hours.
+    public func isEvening(_ date: Date, calendar: Calendar = .current) -> Bool {
+        guard eveningUntilMinute != nil, workdays.contains(calendar.component(.weekday, from: date)) else {
+            return false
+        }
+        let parts = calendar.dateComponents([.hour, .minute], from: date)
+        return (parts.hour ?? 0) * 60 + (parts.minute ?? 0) >= workEndMinute
     }
 
     static let defaultsKey = "modeRules"
