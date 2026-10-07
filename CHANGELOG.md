@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Tapping HAKU on the phone plays the same body move as on the watch
   (pushes up a headset cup, clinks the can, punches, flashes the mask, glares, rolls over).
   Five taps in 30 seconds turn him away for a few seconds with "……够了。" on both.
+- Groundwork for the watch commute: Life Hub can tell walking to work, riding the train and walking home
+  between home and the office. Nothing shows it yet.
 - The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
   lifting, running, morning, overtime, just home, the bath and the vibe-coding cans.
 - Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat shape.
