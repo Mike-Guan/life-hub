@@ -81,6 +81,7 @@ struct WatchHomeView: View {
                     event: payload.event ?? scene?.event,
                     daily: scene?.daily,
                     walking: scene?.walking,
+                    commute: scene?.commute,
                     bath: scene?.bath ?? false,
                     invite: scene?.invite,
                     bedtime: payload.bedtime.state(at: date),
