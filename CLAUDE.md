@@ -76,7 +76,8 @@ Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/æŠ€æœ
   `CompanionView` API. Never edit `RunnerArt.swift` by hand; change the SVG and rerun the script.
 
 ## Layout
-- `Apps/iOS`, `Apps/macOS`: UI and platform glue only.
+- `Apps/iOS`, `Apps/macOS`, `Apps/Watch`, `Apps/WatchWidgets`: UI and platform glue only. The watch
+  computes nothing; it shows the `WatchPayload` the iPhone sends.
 - `Packages/HubCore`: models, ModeEngine, StateEngine, sync, App Intents, Assistant protocol.
 - `Packages/CompanionKit`: CompanionView / CompanionController wrapping Rive.
 - `Packages/SideHustleKit` (planned): macOS-only side-hustle UI. P0 is a read-only board over
