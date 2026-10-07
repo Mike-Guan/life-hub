@@ -9,22 +9,40 @@ public struct HomeScene: Codable, Equatable, Sendable {
     public var bath: Bool
     /// Cans HAKU has coded up in vibe coding.
     public var codingCans: Int
+    /// A one-off the time picks: getting up from the sofa, stretching after a long sit, giving up at the door.
+    public var event: CompanionEvent?
+    /// The Daily task about to start or just started.
+    public var daily: DailyCue?
+    /// The invite text while its need lasts.
+    public var invite: String?
+    /// The late end of the work day during the evening extension.
+    public var overtimeUntil: Date?
 
     public init(
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
         walking: HubPlace.Kind? = nil,
         bath: Bool = false,
-        codingCans: Int = 0
+        codingCans: Int = 0,
+        event: CompanionEvent? = nil,
+        daily: DailyCue? = nil,
+        invite: String? = nil,
+        overtimeUntil: Date? = nil
     ) {
         self.activity = activity
         self.moment = moment
         self.walking = walking
         self.bath = bath
         self.codingCans = codingCans
+        self.event = event
+        self.daily = daily
+        self.invite = invite
+        self.overtimeUntil = overtimeUntil
     }
 
-    private enum CodingKeys: String, CodingKey { case activity, moment, walking, bath, codingCans }
+    private enum CodingKeys: String, CodingKey {
+        case activity, moment, walking, bath, codingCans, event, daily, invite, overtimeUntil
+    }
 
     /// Decodes a scene; a missing or unknown value falls back to nothing going on.
     public init(from decoder: Decoder) throws {
@@ -34,6 +52,10 @@ public struct HomeScene: Codable, Equatable, Sendable {
         walking = try? values.decodeIfPresent(HubPlace.Kind.self, forKey: .walking)
         bath = (try? values.decodeIfPresent(Bool.self, forKey: .bath)) ?? false
         codingCans = (try? values.decodeIfPresent(Int.self, forKey: .codingCans)) ?? 0
+        event = try? values.decodeIfPresent(CompanionEvent.self, forKey: .event)
+        daily = try? values.decodeIfPresent(DailyCue.self, forKey: .daily)
+        invite = try? values.decodeIfPresent(String.self, forKey: .invite)
+        overtimeUntil = try? values.decodeIfPresent(Date.self, forKey: .overtimeUntil)
     }
 }
 
@@ -59,6 +81,11 @@ public struct HomeSceneInputs {
     public var departure: GymDeparture?
     public var sit: SitState?
     public var bathDoneAt: Date?
+    /// The last Screen Time report of couch scrolling.
+    public var scrollSeenAt: Date?
+    public var daily: DailyPlan?
+    /// Today's invite text, shown only while its need lasts.
+    public var invite: String?
 
     public init(
         log: ModeLog,
@@ -69,7 +96,10 @@ public struct HomeSceneInputs {
         days: ActivityDays = .standard,
         departure: GymDeparture? = nil,
         sit: SitState? = nil,
-        bathDoneAt: Date? = nil
+        bathDoneAt: Date? = nil,
+        scrollSeenAt: Date? = nil,
+        daily: DailyPlan? = nil,
+        invite: String? = nil
     ) {
         self.log = log
         self.rules = rules
@@ -80,6 +110,9 @@ public struct HomeSceneInputs {
         self.departure = departure
         self.sit = sit
         self.bathDoneAt = bathDoneAt
+        self.scrollSeenAt = scrollSeenAt
+        self.daily = daily
+        self.invite = invite
     }
 
     private var mode: Mode? { log.current?.mode }
@@ -148,6 +181,29 @@ public struct HomeSceneInputs {
         return SideHustle.codingCans(since: since, now: date)
     }
 
+    /// Getting up from the sofa at `date`, after long couch scrolling.
+    public func revived(at date: Date) -> CompanionEvent? {
+        let window = bath(at: date) ? BathTime.window(at: date, bedtime: bedtime) : nil
+        return ReviveEngine.revived(
+            switchedAt: ReviveEngine.switchedAt(change: log.current, bath: window),
+            scrollSeenAt: scrollSeenAt,
+            atHome: atHome,
+            now: date
+        )
+    }
+
+    // When HAKU stops waiting at the door it gives up once, if nothing else is going on.
+    /// Giving up on leaving at `date`.
+    public func stayHome(at date: Date) -> CompanionEvent? {
+        guard activity(at: date) == nil, activeNeed(at: date) == nil, let home = home(at: date) else { return nil }
+        return MomentEngine.stayHome(mode: mode, signals: home, now: date, work: rules)
+    }
+
+    /// The one-off the time picks at `date`, in the home card's order.
+    public func timedEvent(at date: Date) -> CompanionEvent? {
+        revived(at: date) ?? sit?.stretched(at: date) ?? stayHome(at: date)
+    }
+
     /// The scene at `date`.
     public func scene(at date: Date) -> HomeScene {
         HomeScene(
@@ -155,7 +211,11 @@ public struct HomeSceneInputs {
             moment: moment(at: date),
             walking: walking(at: date),
             bath: bath(at: date),
-            codingCans: codingCans(at: date)
+            codingCans: codingCans(at: date),
+            event: timedEvent(at: date),
+            daily: daily?.cue(at: date),
+            invite: activeNeed(at: date) == nil ? nil : invite,
+            overtimeUntil: rules.eveningUntil(at: date)
         )
     }
 
