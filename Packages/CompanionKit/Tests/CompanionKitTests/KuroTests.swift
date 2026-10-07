@@ -135,4 +135,39 @@ import Testing
         #expect(KuroView.line(after: "……", from: ["……"]) == "……")
         #expect(KuroView.line(after: nil, from: []) == nil)
     }
+
+    @Test func overtimeSitsHerAtTheDeskWithHerSign() throws {
+        var tokyo = Calendar(identifier: .gregorian)
+        tokyo.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        let until = try #require(tokyo.date(from: DateComponents(year: 2026, month: 10, day: 7, hour: 20, minute: 30)))
+        let pose = KuroView.pose(
+            .work, energy: 60, bedtime: .off, moment: .overtime, overtimeUntil: until, calendar: tokyo)
+        #expect(pose.overtime && pose.eyes == .drowsy && pose.sign == "20:30")
+        let parts = Set(KuroFigure.parts(for: .work, pose: pose))
+        #expect(parts.isSuperset(of: [.overtimeDesk, .overtimeHand, .overtimeSign, .maskWork]))
+        #expect(!parts.contains(.workTablet))
+        #expect(KuroView.accessibilityLabel(.work, bedtime: .off, pose: pose) == "KURO，托着腮等到 20:30")
+    }
+
+    @Test func overtimeWithoutAnEndHasNoSign() {
+        let pose = KuroView.pose(.work, energy: nil, bedtime: .off, moment: .overtime, overtimeUntil: nil)
+        let parts = KuroFigure.parts(for: .work, pose: pose)
+        #expect(parts.contains(.overtimeDesk) && !parts.contains(.overtimeSign))
+        #expect(KuroView.accessibilityLabel(.work, bedtime: .off, pose: pose) == "KURO，托着腮等着")
+    }
+
+    @Test func overtimeOnlyShowsInTheWorkLookBeforeBedtime() {
+        for look in KuroLook.allCases where look != .work {
+            #expect(!KuroView.pose(look, energy: nil, bedtime: .off, moment: .overtime, overtimeUntil: .now).overtime)
+        }
+        #expect(!KuroView.pose(.work, energy: nil, bedtime: .on, moment: .overtime, overtimeUntil: .now).overtime)
+        #expect(!KuroView.pose(.work, energy: nil, bedtime: .off, moment: .drowsy, overtimeUntil: .now).overtime)
+    }
+
+    @Test func signTextUsesA24HourClock() {
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = .gmt
+        #expect(KuroView.signText(Date(timeIntervalSince1970: 21 * 3600 + 5 * 60), calendar: utc) == "21:05")
+        #expect(KuroView.signText(Date(timeIntervalSince1970: 0), calendar: utc) == "00:00")
+    }
 }
