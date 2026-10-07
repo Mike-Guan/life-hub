@@ -74,7 +74,8 @@ struct HomeView: View {
                     error: store.lastError ?? energy.lastError ?? extraError,
                     cans: cans,
                     onShop: onShop,
-                    onSettings: onSettings
+                    onSettings: onSettings,
+                    persona: persona
                 )
 
                 // PRD section 15: the title shows here only, never on the Lock Screen.
@@ -107,7 +108,6 @@ struct HomeView: View {
                             moment: moment(at: context.date),
                             overtimeUntil: rules.eveningUntil(at: context.date)
                         )
-                        .padding(.vertical, 12)
                     } else {
                         CompanionView(
                             mode: replaying ? replayFrom : store.current,
@@ -344,6 +344,7 @@ private struct Header: View {
     let cans: Int?
     let onShop: (() -> Void)?
     let onSettings: (() -> Void)?
+    let persona: Persona
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {

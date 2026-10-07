@@ -319,6 +319,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - With KURO, the mode buttons, TODAY log, control and watch use her card colors, and her tennis and desk
   modes read TENNIS and DESK instead of BOXING and SIDE. Her desk time shows her tagline, not HAKU's
   side-hustle state.
+- The second preset character's colored card fills the whole home card, with no white strips above and below.
 - Picking KURO in Settings now updates the widgets, the watch, the invite and the bedtime notification
   right away, and ends a running boxing countdown. With KURO, the small widget, the mode buttons and the
   activity line say 网球日 / 备课 / 网球场 with a tennis icon, and Settings and the bedtime notification
