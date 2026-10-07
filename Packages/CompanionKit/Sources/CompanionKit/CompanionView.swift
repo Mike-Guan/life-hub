@@ -201,7 +201,11 @@ public struct CompanionView: View {
             if showsBubble, let bubble {
                 SpeechBubble(text: bubble)
                     .padding(12)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: style == .watch ? .bottom : .topLeading
+                    )
                     .transition(.scale(scale: 0.6, anchor: .bottomTrailing).combined(with: .opacity))
             }
         }
@@ -309,6 +313,7 @@ public struct CompanionView: View {
                     SpringKeyframe(0, duration: 0.45, spring: .bouncy)
                 }
             }
+            .modifier(WatchFigureFrame(isEnabled: style == .watch))
         } else {
             VStack(spacing: 10) {
                 Image(systemName: "sparkles")
@@ -1108,6 +1113,26 @@ private let previewWelcomes: [(String, Mode, ReturnReplay)] = {
 struct Squash {
     var x: CGFloat = 1
     var y: CGFloat = 1
+}
+
+/// Lays the figure out for the watch's full-screen page: full width, 30 pt from the top, running off the bottom.
+struct WatchFigureFrame: ViewModifier {
+    let isEnabled: Bool
+
+    @ViewBuilder func body(content: Content) -> some View {
+        if isEnabled {
+            // The approved C layout shows him from the chest up, so the figure takes the whole width and the
+            // screen edge crops the rest. The 12 pt side and 24 pt top padding of the card are undone here.
+            GeometryReader { proxy in
+                let width = proxy.size.width + 24
+                content
+                    .frame(width: width, height: width * 2, alignment: .top)
+                    .offset(x: -12, y: 6)
+            }
+        } else {
+            content
+        }
+    }
 }
 
 /// How `CompanionView` plays.

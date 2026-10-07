@@ -318,6 +318,7 @@ public struct KuroView: View {
                     SpringKeyframe(1, duration: 0.35, spring: .bouncy)
                 }
             }
+            .modifier(WatchFigureFrame(isEnabled: style == .watch))
             .padding(.top, 24)
             .padding(.horizontal, 12)
 
@@ -334,7 +335,11 @@ public struct KuroView: View {
             if showsBubble, let bubble {
                 SpeechBubble(text: bubble)
                     .padding(12)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: style == .watch ? .bottom : .topLeading
+                    )
                     .transition(.scale(scale: 0.6, anchor: .bottomTrailing).combined(with: .opacity))
             }
         }
