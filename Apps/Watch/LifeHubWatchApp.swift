@@ -37,7 +37,7 @@ struct WatchHomeView: View {
                     vitals: snapshot.vitals ?? HakuVitals(),
                     bedtime: payload.bedtime.state(at: context.date),
                     wardrobe: payload.wardrobe,
-                    showsBubble: false
+                    style: .watch
                 )
             } else {
                 Text("先在 iPhone 上打开一次 Life Hub")
