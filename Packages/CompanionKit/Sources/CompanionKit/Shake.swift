@@ -46,18 +46,20 @@ enum ShakeReaction: Sendable, Equatable, CaseIterable {
     }
 }
 
-/// Turns acceleration samples into shakes: two hard jolts in quick succession, then a pause.
+/// Turns acceleration samples into shakes: three hard jolts within a second, then a pause.
 struct ShakeDetector: Sendable {
     /// Acceleration a jolt must reach, in g, gravity excluded.
     static let threshold = 1.4
-    /// Time between the starts of the two jolts of one shake, in seconds.
-    static let pairGap: ClosedRange<TimeInterval> = 0.08...0.6
+    /// Jolts that make a shake.
+    static let jolts = 3
+    /// Time the jolts of one shake fall within, in seconds.
+    static let window: TimeInterval = 1
     /// Samples closer than this to the previous strong one belong to the same jolt, in seconds.
     static let joltSpan: TimeInterval = 0.05
     /// Time after a shake before the next one counts, in seconds.
     static let cooldown: TimeInterval = 1.5
 
-    private var joltStart = -TimeInterval.infinity
+    private var joltStarts: [TimeInterval] = []
     private var lastStrong = -TimeInterval.infinity
     private var lastShake = -TimeInterval.infinity
 
@@ -68,16 +70,15 @@ struct ShakeDetector: Sendable {
     /// - Returns: true when the sample completes a shake.
     mutating func add(magnitude: Double, at time: TimeInterval) -> Bool {
         guard magnitude >= Self.threshold, time - lastShake >= Self.cooldown else { return false }
-        // A jolt lasts several samples. Measuring from its last sample made a quick back-and-forth look too fast
-        // to count, so the gap is measured between the starts of two jolts.
+        // A jolt lasts several samples, and a quick back-and-forth has a new one every tenth of a second. Jolts are
+        // counted by their start; three are needed so one punch (a push and a stop) is not a shake.
         let sameJolt = time - lastStrong < Self.joltSpan
         lastStrong = time
         guard !sameJolt else { return false }
-        let gap = time - joltStart
-        joltStart = time
-        guard Self.pairGap.contains(gap) else { return false }
+        joltStarts = joltStarts.filter { time - $0 < Self.window } + [time]
+        guard joltStarts.count >= Self.jolts else { return false }
         lastShake = time
-        joltStart = -.infinity
+        joltStarts = []
         return true
     }
 }
