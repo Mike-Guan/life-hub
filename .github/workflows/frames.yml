@@ -29,10 +29,15 @@ jobs:
           sudo xcode-select -s "$XCODE"
           xcodebuild -version
 
+      - name: Build tests
+        run: swift build --build-tests --package-path Packages/CompanionKit
+
       - name: Draw frame sheets
+        timeout-minutes: 10
         run: |
           mkdir -p frames
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --package-path Packages/CompanionKit --filter FrameSheets
+          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.lockScreenHeads
+          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets
           ls -l frames
 
       - name: Upload frame sheets

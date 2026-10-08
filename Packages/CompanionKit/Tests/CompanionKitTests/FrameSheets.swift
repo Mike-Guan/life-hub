@@ -134,6 +134,20 @@ struct FrameSheets {
         try write("kuro-2-watch", rows, size: CGSize(width: 198, height: 242))
     }
 
+    @Test func lockScreenHeads() throws {
+        let poses: [(String, CompanionPortrait)] = [
+            ("lockscreen-half-awake", CompanionPortrait(mode: .chill, energy: 20, moment: .morning, framing: .head)),
+            ("lockscreen-off-work", CompanionPortrait(mode: .work, energy: 50, moment: .packingUp, framing: .head)),
+            (
+                "lockscreen-asleep",
+                CompanionPortrait(mode: .chill, energy: 50, moment: .blanket, bedtime: .on, framing: .head)
+            ),
+        ]
+        for (name, portrait) in poses {
+            try save(portrait.frame(width: 160, height: 160), as: name, scale: 3)
+        }
+    }
+
     /// The first time from `base` whose idle slot shows `life` in chill.
     static func start(for life: IdleLife?) -> Date {
         var date = base
@@ -145,7 +159,6 @@ struct FrameSheets {
 
     /// Renders `rows` into `<name>.png`: one row per case, `frames` frames `step` apart.
     func write(_ name: String, _ rows: [Row], size: CGSize = CGSize(width: 180, height: 240)) throws {
-        let folder = try #require(ProcessInfo.processInfo.environment["FRAME_SHEETS"])
         let commit = ProcessInfo.processInfo.environment["FRAME_SHA"].map { String($0.prefix(7)) } ?? "local"
         let sheet = VStack(alignment: .leading, spacing: 10) {
             let frame = "\(Int(size.width))×\(Int(size.height)) pt"
@@ -177,10 +190,17 @@ struct FrameSheets {
         }
         .padding(16)
         .background(Color.white)
-        let renderer = ImageRenderer(content: sheet)
-        renderer.scale = 2
+        try save(sheet, as: name, scale: 2)
+    }
+
+    /// Writes `view` to `<name>.png` in the sheets folder.
+    func save(_ view: some View, as name: String, scale: CGFloat) throws {
+        let folder = try #require(ProcessInfo.processInfo.environment["FRAME_SHEETS"])
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = scale
         let image = try #require(renderer.cgImage)
         let url = URL(fileURLWithPath: folder).appendingPathComponent("\(name).png")
+        print("frame sheet \(name): \(image.width)×\(image.height)")
         let type = UTType.png.identifier as CFString
         let destination = try #require(CGImageDestinationCreateWithURL(url as CFURL, type, 1, nil))
         CGImageDestinationAddImage(destination, image, nil)
