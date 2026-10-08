@@ -148,9 +148,7 @@ struct FrameSheets {
         for look in KuroLook.allCases {
             for (name, need, activity, moment) in picks {
                 guard let slot = KuroSlot(need: need, activity: activity, moment: moment, look: look) else { continue }
-                let next = ((Self.base.timeIntervalSinceReferenceDate / slot.period).rounded(.down) + 1) * slot.period
-                let start = Date(timeIntervalSinceReferenceDate: next - 0.4)
-                rows.append(Row(label: "kuro \(look) · \(name)", start: start) {
+                rows.append(Row(label: "kuro \(look) · \(name)", start: Self.slotStart(slot, lead: 0.4)) {
                     AnyView(KuroView(look: look, energy: 50, need: need, activity: activity, moment: moment))
                 })
             }
@@ -158,7 +156,50 @@ struct FrameSheets {
         rows.append(Row(label: "kuro work · overtime 点一下", start: Self.base) {
             AnyView(ChinTapFrame(start: Self.base.addingTimeInterval(0.4)))
         })
+        for look in KuroLook.allCases {
+            rows.append(Row(label: "kuro \(look) · 减弱动态", start: Self.slotStart(.invite, lead: 0.4)) {
+                AnyView(
+                    KuroView(look: look, energy: 50, need: .sitting)
+                        .environment(\.accessibilityReduceMotion, true)
+                )
+            })
+        }
         try write("kuro-3-slots", rows)
+    }
+
+    // UI 审核 round 1: every look's invite move at 0.1 s a frame, so the cup pickup and putdown can be checked.
+    @Test func kuroSlotMovesFine() throws {
+        let rows = KuroLook.allCases.map { look in
+            Row(label: "kuro \(look) · need sitting", start: Self.slotStart(.invite, lead: 0.1)) {
+                AnyView(KuroView(look: look, energy: 50, need: .sitting))
+            }
+        }
+        try write("kuro-4-slots-fine", rows, frames: 13, step: 0.1)
+    }
+
+    @Test func kuroSlotsWatch() throws {
+        let picks: [(String, CompanionNeed?, CompanionActivity?, CompanionMoment?)] = [
+            ("sitting", .sitting, nil, nil), ("running", nil, .running, nil), ("drowsy", nil, nil, .drowsy),
+            ("flow", nil, nil, .flow), ("packingUp", nil, nil, .packingUp),
+        ]
+        var rows: [Row] = []
+        for look in KuroLook.allCases {
+            for (name, need, activity, moment) in picks {
+                guard let slot = KuroSlot(need: need, activity: activity, moment: moment, look: look) else { continue }
+                rows.append(Row(label: "watch · \(look) · \(name)", start: Self.slotStart(slot, lead: 0.4)) {
+                    AnyView(
+                        KuroView(look: look, energy: 50, need: need, activity: activity, moment: moment, style: .watch)
+                    )
+                })
+            }
+        }
+        try write("kuro-5-slots-watch", rows, size: CGSize(width: 198, height: 242))
+    }
+
+    /// `lead` seconds before the first time after `base` that `slot` starts its move.
+    static func slotStart(_ slot: KuroSlot, lead: TimeInterval) -> Date {
+        let next = ((base.timeIntervalSinceReferenceDate / slot.period).rounded(.down) + 1) * slot.period
+        return Date(timeIntervalSinceReferenceDate: next - lead)
     }
 
     @Test func lockScreenHeads() throws {
@@ -185,16 +226,19 @@ struct FrameSheets {
     }
 
     /// Renders `rows` into `<name>.png`: one row per case, `frames` frames `step` apart.
-    func write(_ name: String, _ rows: [Row], size: CGSize = CGSize(width: 180, height: 240)) throws {
+    func write(
+        _ name: String, _ rows: [Row], size: CGSize = CGSize(width: 180, height: 240), frames: Int = Self.frames,
+        step: TimeInterval = Self.step
+    ) throws {
         let commit = ProcessInfo.processInfo.environment["FRAME_SHA"].map { String($0.prefix(7)) } ?? "local"
         let sheet = VStack(alignment: .leading, spacing: 10) {
             let frame = "\(Int(size.width))×\(Int(size.height)) pt"
-            Text("\(name) · \(commit) · \(frame) · 每格 \(Self.step, specifier: "%.1f") s")
+            Text("\(name) · \(commit) · \(frame) · 每格 \(step, specifier: "%.1f") s")
                 .font(.system(size: 15, weight: .bold, design: .monospaced))
             HStack(spacing: 6) {
                 Text("").frame(width: 190)
-                ForEach(0..<Self.frames, id: \.self) { index in
-                    Text(String(format: "%.1f s", Double(index) * Self.step))
+                ForEach(0..<frames, id: \.self) { index in
+                    Text(String(format: "%.1f s", Double(index) * step))
                         .font(.system(size: 12, weight: .bold, design: .monospaced))
                         .frame(width: size.width)
                 }
@@ -205,9 +249,9 @@ struct FrameSheets {
                     Text(row.label)
                         .font(.system(size: 13, weight: .bold, design: .monospaced))
                         .frame(width: 190, alignment: .leading)
-                    ForEach(0..<Self.frames, id: \.self) { frame in
+                    ForEach(0..<frames, id: \.self) { frame in
                         row.draw()
-                            .environment(\.frameClock, row.start + Double(frame) * Self.step)
+                            .environment(\.frameClock, row.start + Double(frame) * step)
                             .environment(\.scenePhase, .active)
                             .frame(width: size.width, height: size.height)
                             .clipShape(RoundedRectangle(cornerRadius: 16))

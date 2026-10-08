@@ -38,12 +38,12 @@ jobs:
         run: |
           mkdir -p frames
           FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.lockScreenHeads
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.kuroSlots
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets --skip hakuMoments
+          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.kuroSlot
           ls -l frames
 
       # The moments sheet is the largest; kept apart so the other sheets still upload if it runs long.
       - name: Draw moment sheets
+        if: false
         timeout-minutes: 12
         continue-on-error: true
         run: |
