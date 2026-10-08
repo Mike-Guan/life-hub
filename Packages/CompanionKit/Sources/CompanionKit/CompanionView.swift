@@ -55,7 +55,8 @@ public struct CompanionView: View {
     let onWelcomeDone: (() -> Void)?
 
     @Environment(\.frameClock) private var frameClock
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.frameReduceMotion) private var frameReduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
     /// True for a moment after the watch screen comes back on, while the figure stays still.
@@ -135,6 +136,8 @@ public struct CompanionView: View {
     @AppStorage("companion.lastWelcome") private var lastWelcome = ""
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
+
+    private var reduceMotion: Bool { frameReduceMotion ?? systemReduceMotion }
 
     public init(
         mode: Mode?,
