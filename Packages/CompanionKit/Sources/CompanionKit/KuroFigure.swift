@@ -310,8 +310,8 @@ public struct KuroView: View {
                 let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate
                 let tap = reaction(at: time)
                 let unbox = unbox(at: time)
-                // Her slot's own move plays between taps.
-                let slotMove = tap == nil && unbox == nil ? slot?.move(in: look, at: time) : nil
+                // Her slot's own move plays between taps; with reduced motion she keeps only the slot's face.
+                let slotMove = tap == nil && unbox == nil && !reduceMotion ? slot?.move(in: look, at: time) : nil
                 let reacting = (tap ?? slotMove).map {
                     self.pose.reacting($0.0, progress: $0.1, heart: tap != nil && tapHeart)
                 }
