@@ -15,6 +15,8 @@ enum KuroTap: Equatable, Sendable {
     case rub
     /// Tapped too often: she turns her back with a "…" thought bubble.
     case turnAway
+    /// Chin on her hand at the desk (overtime): she looks up and taps her cheek twice.
+    case chinTap
 
     /// The reaction to a tap in `look`; when `sleepy` she rubs her eyes instead.
     init(look: KuroLook, sleepy: Bool) {
@@ -62,6 +64,8 @@ extension KuroPose {
             pose.eyes = p < 0.65 ? .closed : .drowsy
             pose.mouthO = p < 0.65
             pose.calm = p >= 0.65
+        case .chinTap:
+            pose.eyes = p < 0.75 ? .open : .drowsy
         case .turnAway:
             break
         }
@@ -100,6 +104,8 @@ extension KuroFigure {
             }
         case .rub:
             if p < 0.65 { visible.insert(.tapRub) }
+        case .chinTap:
+            break
         case .turnAway:
             visible.formIntersection(backView)
             visible.formUnion([.backHead, .tapDots])
@@ -120,6 +126,10 @@ extension KuroFigure {
             return CGSize(width: 0, height: -40 * abs(sin(p / 0.8 * 2 * .pi)))
         case (.glasses, .deskGlasses):
             return CGSize(width: 0, height: p >= 0.2 ? -2 : 0)
+        case (.chinTap, .overtimeHand):
+            // Two taps on the cheek between 0.15 and 0.75.
+            guard (0.15..<0.75).contains(p) else { return .zero }
+            return CGSize(width: 0, height: -2.5 * abs(sin((p - 0.15) / 0.6 * 2 * .pi)))
         default:
             return .zero
         }
