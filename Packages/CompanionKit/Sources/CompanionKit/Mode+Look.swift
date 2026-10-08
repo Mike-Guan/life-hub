@@ -26,11 +26,15 @@ extension Mode {
         persona == .kuro ? KuroLook(mode: self).color : color
     }
 
-    /// The SF Symbol for the mode as `persona` lives it: KURO's identity day is tennis.
+    // UI-32 (UI 审核 2026-10-08): KURO showed HAKU's headphones, can and yen sign.
+    /// The SF Symbol for the mode as `persona` lives it: KURO's are her own props.
     public func symbol(for persona: Persona) -> String {
-        switch (persona, self) {
-        case (.kuro, .boxing): "figure.tennis"
-        default: symbol
+        guard persona == .kuro else { return symbol }
+        switch self {
+        case .work: return "ipad"
+        case .chill: return "cup.and.saucer.fill"
+        case .boxing: return "figure.tennis"
+        case .money: return "pencil.and.ruler.fill"
         }
     }
 

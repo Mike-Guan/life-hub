@@ -144,6 +144,7 @@ struct FrameSheets {
         try write("kuro-2-watch", rows, size: CGSize(width: 198, height: 242))
     }
 
+<<<<<<< HEAD
     // Preview for KURO-03 / KURO-04 one-offs: each event plays her look's tap move once, from 0.4 s.
     @Test func kuroOneOffs() throws {
         let kinds: [(String, Bool)] = [("offWork", false)] + KuroOneOff.Kind.allCases.map {
@@ -184,6 +185,31 @@ struct FrameSheets {
         try save(sheet, as: "shop-tiles", scale: 2)
     }
 
+=======
+>>>>>>> fix/kuro-mode-names
+    // Preview for UI-32: each mode's name and icon for each character.
+    @Test func modeLabels() throws {
+        let sheet = VStack(alignment: .leading, spacing: 12) {
+            ForEach(Persona.allCases, id: \.self) { persona in
+                HStack(spacing: 12) {
+                    Text(persona.rawValue)
+                        .font(.system(size: 15, weight: .bold, design: .monospaced))
+                        .frame(width: 70, alignment: .leading)
+                    ForEach(Mode.allCases, id: \.self) { mode in
+                        Label(mode.title(for: persona), systemImage: mode.symbol(for: persona))
+                            .font(.system(size: 17, weight: .heavy))
+                            .padding(10)
+                            .frame(width: 150, alignment: .leading)
+                            .toyCard(fill: mode.color(for: persona), radius: 12, shadow: 0)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        try save(sheet, as: "mode-labels", scale: 2)
+    }
+
     @Test func lockScreenHeads() throws {
         let poses: [(String, CompanionPortrait)] = [
             ("lockscreen-half-awake", CompanionPortrait(mode: .chill, energy: 20, moment: .morning, framing: .head)),
@@ -212,7 +238,11 @@ struct FrameSheets {
         for persona in Persona.allCases {
             for (name, tint, wallpaper) in tints {
                 let row = try Mode.allCases.map { mode in
+<<<<<<< HEAD
                     let renderer = ImageRenderer(content: Self.head(persona, mode, lineArt: true).frame(width: 68, height: 68))
+=======
+                    let renderer = ImageRenderer(content: Self.head(persona, mode).frame(width: 68, height: 68))
+>>>>>>> fix/kuro-mode-names
                     renderer.scale = 3
                     let head = try #require(renderer.cgImage)
                     return try #require(Self.tinted(head, tint: tint, wallpaper: wallpaper))
@@ -276,9 +306,15 @@ struct FrameSheets {
         return context.makeImage()
     }
 
+<<<<<<< HEAD
     @ViewBuilder static func head(_ persona: Persona, _ mode: Mode, lineArt: Bool = false) -> some View {
         if persona == .kuro {
             KuroPortrait(look: KuroLook(mode: mode), energy: 50, framing: .head, lineArt: lineArt)
+=======
+    @ViewBuilder static func head(_ persona: Persona, _ mode: Mode) -> some View {
+        if persona == .kuro {
+            KuroPortrait(look: KuroLook(mode: mode), energy: 50, framing: .head)
+>>>>>>> fix/kuro-mode-names
         } else {
             CompanionPortrait(mode: mode, energy: 50, framing: .head)
         }
@@ -346,6 +382,7 @@ struct FrameSheets {
         #expect(CGImageDestinationFinalize(destination))
     }
 }
+<<<<<<< HEAD
 
 /// KURO in `look` playing her one-off move from `start`: her look's tap move with its hop.
 struct OneOffFrame: View {
@@ -369,4 +406,6 @@ struct OneOffFrame: View {
         }
     }
 }
+=======
+>>>>>>> fix/kuro-mode-names
 #endif

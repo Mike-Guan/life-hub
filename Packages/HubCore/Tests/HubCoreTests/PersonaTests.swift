@@ -20,7 +20,7 @@ import Testing
         #expect(Mode.money.code(for: .kuro) == "DESK")
         #expect(Mode.work.code(for: .kuro) == Mode.work.code)
         #expect(Mode.work.title(for: .kuro) == Mode.work.title)
-        #expect(Mode.chill.title(for: .kuro) == Mode.chill.title)
+        #expect(Mode.chill.title(for: .kuro) == "下班")
         for mode in Mode.allCases {
             #expect(mode.title(for: .haku) == mode.title)
             #expect(mode.tagline(for: .haku) == mode.tagline)

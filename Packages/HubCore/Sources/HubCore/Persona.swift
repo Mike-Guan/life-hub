@@ -1,6 +1,6 @@
 import Foundation
 
-// Issue #164. The persona changes only the look, the lines and the names of two modes. Mode values,
+// Issue #164. The persona changes only the look, the lines and the names of three modes. Mode values,
 // stored records and every rule stay the same, so switching needs no migration.
 /// Which preset character the app draws.
 public enum Persona: String, Codable, CaseIterable, Sendable {
@@ -30,9 +30,11 @@ public enum Persona: String, Codable, CaseIterable, Sendable {
 }
 
 extension Mode {
-    /// The mode's name for `persona`: KURO has her own names for the identity and side slots.
+    /// The mode's name for `persona`: KURO has her own names for the chill, identity and side slots.
     public func title(for persona: Persona) -> String {
         switch (persona, self) {
+        // UI-32 (PM 2026-10-08): KURO's chill is plain 下班; work keeps HAKU's name.
+        case (.kuro, .chill): "下班"
         case (.kuro, .boxing): "网球日"
         case (.kuro, .money): "备课"
         default: title
