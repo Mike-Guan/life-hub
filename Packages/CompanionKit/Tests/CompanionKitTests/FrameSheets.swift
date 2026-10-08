@@ -161,35 +161,35 @@ struct FrameSheets {
     // UI-03: the tinted Lock Screen keeps only alpha. StatusWidget turns the head into a line drawing with
     // colorInvert + luminanceToAlpha; this draws that result as the system would, in white (vibrant) and blue
     // (accented), on a dark and a light wallpaper.
+    // ImageRenderer ignores luminanceToAlpha inside a mask, so the tinted look is computed per pixel here:
+    // the same colorInvert + luminanceToAlpha the widget applies, then the tint over a wallpaper.
     @Test func lockScreenTinted() throws {
-        let tints: [(String, Color, Color)] = [
-            ("vibrant 深", .white.opacity(0.9), Color(white: 0.15)),
-            ("vibrant 浅", .white.opacity(0.9), Color(white: 0.7)),
-            ("accented", Color(red: 0.35, green: 0.6, blue: 1), Color(white: 0.1)),
+        let tints: [(String, (Double, Double, Double, Double), Double)] = [
+            ("vibrant 深", (1, 1, 1, 0.9), 0.15), ("vibrant 浅", (1, 1, 1, 0.9), 0.7),
+            ("accented", (0.35, 0.6, 1, 1), 0.1),
         ]
+        var images: [(String, [CGImage])] = []
+        for persona in Persona.allCases {
+            for (name, tint, wallpaper) in tints {
+                let row = try Mode.allCases.map { mode in
+                    let renderer = ImageRenderer(content: Self.head(persona, mode).frame(width: 68, height: 68))
+                    renderer.scale = 3
+                    let head = try #require(renderer.cgImage)
+                    return try #require(Self.tinted(head, tint: tint, wallpaper: wallpaper))
+                }
+                images.append(("\(persona.rawValue) · \(name)", row))
+            }
+        }
         let sheet = VStack(alignment: .leading, spacing: 10) {
-            Text("lockscreen-tinted · 锁屏着色模拟（StatusWidget head）")
+            Text("lockscreen-tinted · 锁屏着色（StatusWidget head，逐像素算 colorInvert + luminanceToAlpha）")
                 .font(.system(size: 15, weight: .bold, design: .monospaced))
-            ForEach(Persona.allCases, id: \.self) { persona in
-                ForEach(tints.indices, id: \.self) { index in
-                    let (name, tint, wallpaper) = tints[index]
-                    HStack(spacing: 6) {
-                        Text("\(persona.rawValue) · \(name)")
-                            .font(.system(size: 13, weight: .bold, design: .monospaced))
-                            .frame(width: 190, alignment: .leading)
-                        ForEach(Mode.allCases, id: \.self) { mode in
-                            ZStack {
-                                wallpaper
-                                Circle().fill(.white.opacity(0.18)).frame(width: 76, height: 76)
-                                tint.mask {
-                                    Self.head(persona, mode)
-                                        .colorInvert()
-                                        .luminanceToAlpha()
-                                }
-                                .frame(width: 68, height: 68)
-                            }
-                            .frame(width: 110, height: 110)
-                        }
+            ForEach(images.indices, id: \.self) { index in
+                HStack(spacing: 6) {
+                    Text(images[index].0)
+                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                        .frame(width: 190, alignment: .leading)
+                    ForEach(images[index].1.indices, id: \.self) { column in
+                        Image(decorative: images[index].1[column], scale: 3)
                     }
                 }
             }
@@ -199,7 +199,43 @@ struct FrameSheets {
         try save(sheet, as: "lockscreen-tinted", scale: 3)
     }
 
-    /// The Lock Screen head for `persona` in `mode`.
+    /// `head` as a tinted Lock Screen shows it: alpha from the inverted luminance, filled with `tint`
+    /// (r, g, b, opacity) over a gray `wallpaper` with a faint circle behind, as `AccessoryWidgetBackground`.
+    static func tinted(_ head: CGImage, tint: (Double, Double, Double, Double), wallpaper: Double) -> CGImage? {
+        let (width, height) = (head.width, head.height)
+        let space = CGColorSpaceCreateDeviceRGB()
+        let info = CGImageAlphaInfo.premultipliedLast.rawValue
+        guard
+            let context = CGContext(
+                data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
+                space: space, bitmapInfo: info
+            )
+        else { return nil }
+        context.draw(head, in: CGRect(x: 0, y: 0, width: width, height: height))
+        guard let data = context.data else { return nil }
+        let pixels = data.bindMemory(to: UInt8.self, capacity: width * height * 4)
+        let center = (Double(width) / 2, Double(height) / 2)
+        for index in stride(from: 0, to: width * height * 4, by: 4) {
+            let alpha = Double(pixels[index + 3]) / 255
+            // Premultiplied channels: inverting keeps alpha, so the inverted color is alpha - channel.
+            let red = alpha - Double(pixels[index]) / 255
+            let green = alpha - Double(pixels[index + 1]) / 255
+            let blue = alpha - Double(pixels[index + 2]) / 255
+            let mask = min(max(0.2126 * red + 0.7152 * green + 0.0722 * blue, 0), 1) * tint.3
+            let pixel = index / 4
+            let dx = Double(pixel % width) - center.0
+            let dy = Double(pixel / width) - center.1
+            let ring = (dx * dx + dy * dy).squareRoot() < Double(width) / 2 ? 0.18 : 0
+            let back = wallpaper + (1 - wallpaper) * ring
+            let channels = [tint.0, tint.1, tint.2]
+            for channel in 0..<3 {
+                pixels[index + channel] = UInt8(((channels[channel] * mask + back * (1 - mask)) * 255).rounded())
+            }
+            pixels[index + 3] = 255
+        }
+        return context.makeImage()
+    }
+
     @ViewBuilder static func head(_ persona: Persona, _ mode: Mode) -> some View {
         if persona == .kuro {
             KuroPortrait(look: KuroLook(mode: mode), energy: 50, framing: .head)
