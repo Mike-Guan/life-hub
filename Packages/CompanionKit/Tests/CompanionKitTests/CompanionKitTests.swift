@@ -512,13 +512,18 @@ import Testing
         #expect(SceneMove.of(.camera, in: .coffee, at: 0) == nil)
     }
 
+    // HAKU-36 (UI 审核 2026-10-08, Mike 10-07: blue earring only): the white earbud is gone from the art.
+    @Test func hakuHasNoWhiteEarbud() {
+        #expect(RunnerPart(rawValue: "earbud") == nil)
+        #expect(RunnerPart.allCases.allSatisfy { !$0.rawValue.lowercased().contains("earbud") })
+    }
+
     @Test @MainActor func hakuWalksAwayFromAPlace() {
         var home = RunnerPose(mode: .chill, time: 0, face: .mid, react: 0)
         home.walk(from: .home, time: 0.2)
         let homeParts = Set(RunnerFigure.parts(for: .chill, pose: home))
         #expect(home.lean == 4 && home.bounce < 0)
         #expect(homeParts.isSuperset(of: [.speedLines, .walkDust]))
-        #expect(!homeParts.contains(.earbud))
         let office = CompanionPortrait(mode: .work, walking: .office).pose
         #expect(office.bagLift == 1 && RunnerFigure.parts(for: .work, pose: office).contains(.gymBag))
         let boxing = CompanionPortrait(mode: .chill, walking: .gym).pose

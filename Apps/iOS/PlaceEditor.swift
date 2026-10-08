@@ -53,9 +53,7 @@ struct PlaceEditor: View {
                 locationCard
                 actionCard
                 if let error {
-                    Text(error)
-                        .font(Toy.body(12))
-                        .foregroundStyle(Toy.alert)
+                    ErrorLine(text: error)
                 }
                 Button {
                     onSave(place)
