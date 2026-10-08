@@ -30,9 +30,10 @@ struct FrameSheets {
         var rows: [Row] = []
         for mode in Mode.allCases {
             for (name, energy) in Self.energies {
-                rows.append(Row(label: "\(mode.rawValue) · \(name)", start: Self.base) {
-                    AnyView(CompanionView(mode: mode, energy: energy))
-                })
+                rows.append(
+                    Row(label: "\(mode.rawValue) · \(name)", start: Self.base) {
+                        AnyView(CompanionView(mode: mode, energy: energy))
+                    })
             }
         }
         try write("haku-1-modes", rows)
@@ -87,9 +88,10 @@ struct FrameSheets {
             }
         }
         for mode in Mode.allCases {
-            rows.append(Row(label: "\(mode.rawValue) · bedtime", start: Self.base) {
-                AnyView(CompanionView(mode: mode, energy: 50, bedtime: .on))
-            })
+            rows.append(
+                Row(label: "\(mode.rawValue) · bedtime", start: Self.base) {
+                    AnyView(CompanionView(mode: mode, energy: 50, bedtime: .on))
+                })
         }
         try write("haku-5-activities-bedtime", rows)
     }
@@ -98,9 +100,10 @@ struct FrameSheets {
         var rows: [Row] = []
         for mode in Mode.allCases {
             for (name, energy) in Self.energies {
-                rows.append(Row(label: "watch · \(mode.rawValue) · \(name)", start: Self.base) {
-                    AnyView(CompanionView(mode: mode, energy: energy, style: .watch))
-                })
+                rows.append(
+                    Row(label: "watch · \(mode.rawValue) · \(name)", start: Self.base) {
+                        AnyView(CompanionView(mode: mode, energy: energy, style: .watch))
+                    })
             }
         }
         try write("haku-6-watch", rows, size: CGSize(width: 198, height: 242))
@@ -110,18 +113,21 @@ struct FrameSheets {
         var rows: [Row] = []
         for look in KuroLook.allCases {
             for (name, energy) in Self.energies {
-                rows.append(Row(label: "kuro \(look) · \(name)", start: Self.base) {
-                    AnyView(KuroView(look: look, energy: energy))
-                })
+                rows.append(
+                    Row(label: "kuro \(look) · \(name)", start: Self.base) {
+                        AnyView(KuroView(look: look, energy: energy))
+                    })
             }
-            rows.append(Row(label: "kuro \(look) · bedtime", start: Self.base) {
-                AnyView(KuroView(look: look, energy: 50, bedtime: .on))
-            })
+            rows.append(
+                Row(label: "kuro \(look) · bedtime", start: Self.base) {
+                    AnyView(KuroView(look: look, energy: 50, bedtime: .on))
+                })
         }
-        rows.append(Row(label: "kuro work · overtime", start: Self.base) {
-            let until = Self.base.addingTimeInterval(9 * 3600)
-            return AnyView(KuroView(look: .work, energy: 50, moment: .overtime, overtimeUntil: until))
-        })
+        rows.append(
+            Row(label: "kuro work · overtime", start: Self.base) {
+                let until = Self.base.addingTimeInterval(9 * 3600)
+                return AnyView(KuroView(look: .work, energy: 50, moment: .overtime, overtimeUntil: until))
+            })
         try write("kuro-1-looks", rows)
     }
 
@@ -129,9 +135,10 @@ struct FrameSheets {
         var rows: [Row] = []
         for look in KuroLook.allCases {
             for (name, energy) in Self.energies {
-                rows.append(Row(label: "watch · kuro \(look) · \(name)", start: Self.base) {
-                    AnyView(KuroView(look: look, energy: energy, style: .watch))
-                })
+                rows.append(
+                    Row(label: "watch · kuro \(look) · \(name)", start: Self.base) {
+                        AnyView(KuroView(look: look, energy: energy, style: .watch))
+                    })
             }
         }
         try write("kuro-2-watch", rows, size: CGSize(width: 198, height: 242))
