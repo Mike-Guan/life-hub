@@ -66,12 +66,15 @@ struct FrameSheets {
             (.timeToLeave, .work), (.stiff, .work), (.packingUp, .work), (.vibeCoding, .money), (.flow, .money),
             (.lateCoding, .money), (.shooting, .money), (.collapsed, .chill), (.blanket, .chill), (.morning, .chill),
         ]
-        let rows = moments.map { moment, mode in
-            Row(label: "\(mode.rawValue) · moment \(moment)", start: Self.base) {
+        // One sheet per moment, with a line on stderr before each, so a moment that hangs the renderer
+        // shows up by name in the log and the others still get drawn.
+        for (moment, mode) in moments {
+            FileHandle.standardError.write(Data("drawing moment \(moment)\n".utf8))
+            let row = Row(label: "\(mode.rawValue) · moment \(moment)", start: Self.base) {
                 AnyView(CompanionView(mode: mode, energy: 50, moment: moment))
             }
+            try write("haku-4-moment-\(moment)", [row])
         }
-        try write("haku-4-moments", rows)
     }
 
     @Test func hakuActivitiesAndBedtime() throws {

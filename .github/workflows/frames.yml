@@ -37,7 +37,15 @@ jobs:
         run: |
           mkdir -p frames
           FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.lockScreenHeads
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets
+          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets --skip hakuMoments
+          ls -l frames
+
+      # Run 37827080383 hung here for 10 minutes; kept apart so the other sheets still upload.
+      - name: Draw moment sheets
+        timeout-minutes: 8
+        continue-on-error: true
+        run: |
+          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.hakuMoments
           ls -l frames
 
       - name: Upload frame sheets
