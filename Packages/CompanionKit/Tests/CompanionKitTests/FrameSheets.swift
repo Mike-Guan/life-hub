@@ -212,7 +212,7 @@ struct FrameSheets {
         for persona in Persona.allCases {
             for (name, tint, wallpaper) in tints {
                 let row = try Mode.allCases.map { mode in
-                    let renderer = ImageRenderer(content: Self.head(persona, mode).frame(width: 68, height: 68))
+                    let renderer = ImageRenderer(content: Self.head(persona, mode, lineArt: true).frame(width: 68, height: 68))
                     renderer.scale = 3
                     let head = try #require(renderer.cgImage)
                     return try #require(Self.tinted(head, tint: tint, wallpaper: wallpaper))
@@ -276,9 +276,9 @@ struct FrameSheets {
         return context.makeImage()
     }
 
-    @ViewBuilder static func head(_ persona: Persona, _ mode: Mode) -> some View {
+    @ViewBuilder static func head(_ persona: Persona, _ mode: Mode, lineArt: Bool = false) -> some View {
         if persona == .kuro {
-            KuroPortrait(look: KuroLook(mode: mode), energy: 50, framing: .head)
+            KuroPortrait(look: KuroLook(mode: mode), energy: 50, framing: .head, lineArt: lineArt)
         } else {
             CompanionPortrait(mode: mode, energy: 50, framing: .head)
         }
