@@ -137,6 +137,30 @@ struct FrameSheets {
         try write("kuro-2-watch", rows, size: CGSize(width: 198, height: 242))
     }
 
+    // Preview for KURO-01 / KURO-02: one input per fallback family in each look, starting just before a move.
+    @Test func kuroSlots() throws {
+        let picks: [(String, CompanionNeed?, CompanionActivity?, CompanionMoment?)] = [
+            ("need sitting", .sitting, nil, nil), ("activity running", nil, .running, nil),
+            ("moment drowsy", nil, nil, .drowsy), ("moment flow", nil, nil, .flow),
+            ("moment packingUp", nil, nil, .packingUp),
+        ]
+        var rows: [Row] = []
+        for look in KuroLook.allCases {
+            for (name, need, activity, moment) in picks {
+                guard let slot = KuroSlot(need: need, activity: activity, moment: moment, look: look) else { continue }
+                let next = ((Self.base.timeIntervalSinceReferenceDate / slot.period).rounded(.down) + 1) * slot.period
+                let start = Date(timeIntervalSinceReferenceDate: next - 0.4)
+                rows.append(Row(label: "kuro \(look) · \(name)", start: start) {
+                    AnyView(KuroView(look: look, energy: 50, need: need, activity: activity, moment: moment))
+                })
+            }
+        }
+        rows.append(Row(label: "kuro work · overtime 点一下", start: Self.base) {
+            AnyView(ChinTapFrame(start: Self.base.addingTimeInterval(0.4)))
+        })
+        try write("kuro-3-slots", rows)
+    }
+
     @Test func lockScreenHeads() throws {
         let poses: [(String, CompanionPortrait)] = [
             ("lockscreen-half-awake", CompanionPortrait(mode: .chill, energy: 20, moment: .morning, framing: .head)),
@@ -208,6 +232,24 @@ struct FrameSheets {
         let destination = try #require(CGImageDestinationCreateWithURL(url as CFURL, type, 1, nil))
         CGImageDestinationAddImage(destination, image, nil)
         #expect(CGImageDestinationFinalize(destination))
+    }
+}
+/// KURO at the desk with her chin on her hand, playing the chin tap from `start`.
+struct ChinTapFrame: View {
+    let start: Date
+    @Environment(\.frameClock) private var frameClock
+
+    var body: some View {
+        let until = start.addingTimeInterval(9 * 3600)
+        let pose = KuroView.pose(.work, energy: 50, bedtime: .off, moment: .overtime, overtimeUntil: until)
+        let progress = ((frameClock ?? start).timeIntervalSince(start)) / KuroTap.chinTap.duration
+        ZStack {
+            Rectangle().fill(KuroLook.work.color)
+            let tapped = (0..<1).contains(progress) ? pose.reacting(.chinTap, progress: progress) : pose
+            KuroFigure(look: .work, pose: tapped)
+                .padding(.top, 24)
+                .padding(.horizontal, 12)
+        }
     }
 }
 #endif
