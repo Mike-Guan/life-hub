@@ -80,6 +80,9 @@ enum KuroBubbleLines {
         }
     }
 
+    /// What KURO says when the off-work notice is tapped (KURO 台词表 `offWorkLine`).
+    static let offWork = "……お疲れ。"
+
     /// What KURO says when unboxing the item with `itemID`.
     static func unlock(_ itemID: String) -> String {
         let keepsake = KuroItem(rawValue: itemID)?.isKeepsake ?? (ShopItem.item(itemID)?.keepsake != nil)

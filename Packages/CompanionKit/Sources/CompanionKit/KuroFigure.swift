@@ -237,6 +237,8 @@ public struct KuroView: View {
     @AppStorage("companion.lastUnlock") private var lastUnlock = ""
     // Id of the last workout cheered, shared with HAKU's view so each plays once.
     @AppStorage("companion.lastCelebration") private var lastCelebration = ""
+    // Day of the last off-work move, shared with HAKU's view so it plays once a day.
+    @AppStorage("companion.lastOffWork") private var lastOffWork = ""
 
     /// - Parameters:
     ///   - look: what she wears.
@@ -251,6 +253,7 @@ public struct KuroView: View {
     ///   - wearing: ids of her shop items she wears; each shows only in its own look.
     ///   - event: a one-off animation. `.unlock` with one of her items plays the unboxing once per id;
     ///     pass the item's `look` so it shows. `.celebrate` plays her look's tap move with a heart once per id.
+    ///     `.offWork` plays her look's tap move once per day.
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
     ///   - onTap: called after she reacts to a tap.
     public init(
@@ -468,16 +471,30 @@ public struct KuroView: View {
         onTap?()
     }
 
-    /// Plays the unboxing or the workout cheer that `event` brings, if it is new.
+    /// Plays the unboxing, the workout cheer or the off-work move that `event` brings, if it is new.
     private func playEventIfNew() {
         playUnboxIfNew()
-        guard bedtime == .off, let (id, kind) = Self.newCelebration(event, last: lastCelebration) else { return }
-        lastCelebration = id
-        // Until she has her own cheer per workout group (新角色清单), she plays her tap move with a heart.
-        play(KuroTap(look: look, sleepy: false), at: .now)
-        tapHeart = true
-        if style == .watch { pokes += 1 }
-        if showsBubble { say(KuroBubbleLines.celebration(kind), for: 4) }
+        guard bedtime == .off else { return }
+        if let (id, kind) = Self.newCelebration(event, last: lastCelebration) {
+            lastCelebration = id
+            // Until she has her own cheer per workout group (新角色清单), she plays her tap move with a heart.
+            play(KuroTap(look: look, sleepy: false), at: .now)
+            tapHeart = true
+            if style == .watch { pokes += 1 }
+            if showsBubble { say(KuroBubbleLines.celebration(kind), for: 4) }
+        }
+        if let day = Self.newOffWork(event, last: lastOffWork) {
+            lastOffWork = day
+            // KURO-03: until she has her own off-work animation (新角色清单), she plays her tap move.
+            play(KuroTap(look: look, sleepy: false), at: .now)
+            if style == .watch { pokes += 1 }
+            if showsBubble { say(KuroBubbleLines.offWork, for: 4) }
+        }
+    }
+
+    /// The work day to play the off-work move for `event`, or nil when there is none or it already played that day.
+    nonisolated static func newOffWork(_ event: CompanionEvent?, last: String) -> String? {
+        CompanionView.newOffWork(event, last: last)
     }
 
     /// The workout id and group to cheer for `event`, or nil when there is none or it already played.

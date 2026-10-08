@@ -127,6 +127,17 @@ import Testing
         #expect(CompanionLines.unlock("room.plant", persona: .kuro) == "……还行吧。")
     }
 
+    // KURO-03 (UI 审核 2026-10-08): tapping the off-work notice played nothing for her.
+    @Test func herOffWorkPlaysOncePerDay() {
+        #expect(KuroView.newOffWork(.offWork(id: "2026-10-05"), last: "") == "2026-10-05")
+        #expect(KuroView.newOffWork(.offWork(id: "2026-10-05"), last: "2026-10-05") == nil)
+        #expect(KuroView.newOffWork(.offWork(id: "2026-10-06"), last: "2026-10-05") == "2026-10-06")
+        #expect(KuroView.newOffWork(.celebrate(id: "run-1", kind: .running), last: "") == nil)
+        #expect(KuroView.newCelebration(.offWork(id: "2026-10-05"), last: "") == nil)
+        #expect(KuroView.newUnbox(.offWork(id: "2026-10-05"), last: "") == nil)
+        #expect(KuroBubbleLines.offWork == "……お疲れ。")
+    }
+
     @Test func eachLookMapsBackToItsMode() {
         #expect(KuroLook.allCases.allSatisfy { KuroLook(mode: $0.mode) == $0 })
     }
