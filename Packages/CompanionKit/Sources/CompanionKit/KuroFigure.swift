@@ -213,6 +213,7 @@ public struct KuroView: View {
     /// Called after KURO reacts to a tap, for example to switch the 副业 state.
     let onTap: (() -> Void)?
 
+    @Environment(\.frameClock) private var frameClock
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
@@ -293,7 +294,7 @@ public struct KuroView: View {
 
             let paused = reduceMotion || asleep || settling
             TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
-                let time = context.date.timeIntervalSinceReferenceDate
+                let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate
                 let tap = reaction(at: time)
                 let unbox = unbox(at: time)
                 let reacting = tap.map { self.pose.reacting($0.0, progress: $0.1, heart: tapHeart) }
@@ -334,7 +335,7 @@ public struct KuroView: View {
 
             if unboxStart != nil {
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
-                    let time = context.date.timeIntervalSinceReferenceDate
+                    let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate
                     if unbox(at: time)?.stars == true {
                         KuroStarBubble(time: time).frame(width: 72).padding(10)
                     }

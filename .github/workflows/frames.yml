@@ -1,0 +1,45 @@
+name: frames
+
+# Draws the companion's animations frame by frame from the real views, for the UI review.
+# The sheets go to the run's artifacts only; nothing is committed. Never runs on main.
+on:
+  workflow_dispatch:
+  push:
+    branches: [chore/frames]
+
+concurrency:
+  group: frames-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frames:
+    name: Draw frame sheets
+    if: github.ref != 'refs/heads/main'
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Select Xcode 26
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Draw frame sheets
+        run: |
+          mkdir -p frames
+          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --package-path Packages/CompanionKit --filter FrameSheets
+          ls -l frames
+
+      - name: Upload frame sheets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frames
+          path: frames
+          if-no-files-found: ignore
+          retention-days: 7

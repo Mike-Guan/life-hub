@@ -54,6 +54,7 @@ public struct CompanionView: View {
     /// Called once the welcome back scene ends or is skipped with a tap.
     let onWelcomeDone: (() -> Void)?
 
+    @Environment(\.frameClock) private var frameClock
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
@@ -201,7 +202,7 @@ public struct CompanionView: View {
 
             if welcomeStart != nil, let replay = welcomeReplay {
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
-                    welcomeChips(replay, at: context.date.timeIntervalSinceReferenceDate)
+                    welcomeChips(replay, at: (frameClock ?? context.date).timeIntervalSinceReferenceDate)
                 }
             }
 
@@ -293,8 +294,8 @@ public struct CompanionView: View {
         if let mode {
             KeyframeAnimator(initialValue: 0.0, trigger: taps) { react in
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
-                    let time = context.date.timeIntervalSinceReferenceDate
-                    let life = idleLife(mode, at: context.date)
+                    let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate
+                    let life = idleLife(mode, at: frameClock ?? context.date)
                     let motion = idleMotion(mode, life: life, time: time)
                     RunnerFigure(
                         mode: mode,
