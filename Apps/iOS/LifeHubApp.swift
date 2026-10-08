@@ -265,7 +265,7 @@ struct LifeHubApp: App {
         guard let target = budget.savingsTarget, let gap = budget.savingsGap(expenses: expenses.log.active) else {
             return nil
         }
-        return MoneyCard(gap: gap, target: target)
+        return MoneyCard(gap: gap, target: target, persona: persona)
     }
 
     // The ledger counts each source once, so re-reading the same workouts earns nothing new.

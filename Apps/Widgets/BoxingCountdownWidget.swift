@@ -17,7 +17,7 @@ struct BoxingCountdownWidget: Widget {
                 Spacer()
             }
             .padding()
-            .activityBackgroundTint(Mode.boxing.color)
+            .activityBackgroundTint(Mode.boxing.color)  // HAKU only: KURO has no countdown.
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
