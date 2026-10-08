@@ -296,13 +296,19 @@ public struct KuroView: View {
                 let time = context.date.timeIntervalSinceReferenceDate
                 let tap = reaction(at: time)
                 let unbox = unbox(at: time)
-                let reacting = tap.map { self.pose.reacting($0.0, progress: $0.1, heart: tapHeart) }
+                // Her slot's own move plays between taps.
+                let slotMove = tap == nil && unbox == nil ? slot?.move(in: look, at: time) : nil
+                let reacting = (tap ?? slotMove).map {
+                    self.pose.reacting($0.0, progress: $0.1, heart: tap != nil && tapHeart)
+                }
                 let pose = unbox != nil ? unboxPose : reacting ?? self.pose
                 let pace = EnergyFace(energy: energy).speed
-                let sleepy = bedtime == .on || pose.overtime
+                let sleepy = bedtime == .on || pose.overtime || slot == .tired
                 let still = reduceMotion || unbox != nil
-                let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(look, time: time * pace)
-                let hop: CGFloat = still ? 0 : Self.hop(tap)
+                // Out being active she bounces like on her tennis day.
+                let loop = slot == .active ? KuroLook.tennis : look
+                let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(loop, time: time * pace)
+                let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 ZStack {
                     KuroFigure(look: look, pose: still || tap != nil ? pose : pose.blink(at: time))
                         .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
@@ -460,9 +466,10 @@ public struct KuroView: View {
             onTap?()
             return
         }
-        if reaction(at: now.timeIntervalSinceReferenceDate) == nil, unboxStart == nil, !pose.overtime {
+        if reaction(at: now.timeIntervalSinceReferenceDate) == nil, unboxStart == nil {
             let sleepy = bedtime == .on || EnergyFace(energy: energy) == .low
-            play(KuroTap(look: look, sleepy: sleepy), at: now)
+            // KURO-02: at the desk with her chin on her hand she stays seated and taps her cheek.
+            play(pose.overtime ? .chinTap : KuroTap(look: look, sleepy: sleepy), at: now)
         }
         if talks { say(Self.line(after: bubble, from: lines)) }
         onTap?()
@@ -500,16 +507,22 @@ public struct KuroView: View {
         return (0..<1).contains(progress) ? (kind, progress) : nil
     }
 
-    /// How far she hops at the start of a tap reaction, in points; turning away has no hop.
+    /// How far she hops at the start of a tap reaction, in points; turning away and the chin tap have no hop.
     nonisolated static func hop(_ tap: (KuroTap, Double)?) -> CGFloat {
-        guard let tap, tap.0 != .turnAway, tap.1 < 0.35 else { return 0 }
+        guard let tap, tap.0 != .turnAway, tap.0 != .chinTap, tap.1 < 0.35 else { return 0 }
         return -8 * CGFloat(sin(tap.1 / 0.35 * .pi))
     }
 
     private var pose: KuroPose {
         var pose = Self.pose(look, energy: energy, bedtime: bedtime, moment: moment, overtimeUntil: overtimeUntil)
         pose.items = wearing
-        return pose
+        return slot?.dressing(pose) ?? pose
+    }
+
+    /// The fallback body language for her need, activity or moment; none at bedtime.
+    private var slot: KuroSlot? {
+        guard bedtime == .off else { return nil }
+        return KuroSlot(need: need, activity: activity, moment: moment, look: look)
     }
 
     /// Her pose while unboxing: acting calm in the new item, with low eyes and a flat mouth.
