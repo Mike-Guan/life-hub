@@ -206,6 +206,8 @@ struct FrameSheets {
             ("vibrant 深", .white.opacity(0.9), Color(white: 0.15)),
             ("vibrant 浅", .white.opacity(0.9), Color(white: 0.7)),
             ("accented", Color(red: 0.35, green: 0.6, blue: 1), Color(white: 0.1)),
+            ("白底 vibrant 深", .white.opacity(0.9), Color(white: 0.15)),
+            ("白底 accented", Color(red: 0.35, green: 0.6, blue: 1), Color(white: 0.1)),
         ]
         let sheet = VStack(alignment: .leading, spacing: 10) {
             Text("lockscreen-tinted · 锁屏着色模拟（StatusWidget head）")
@@ -223,6 +225,7 @@ struct FrameSheets {
                                 Circle().fill(.white.opacity(0.18)).frame(width: 76, height: 76)
                                 tint.mask {
                                     Self.head(persona, mode)
+                                        .background(index < 3 ? Color.clear : Color.white)
                                         .colorInvert()
                                         .luminanceToAlpha()
                                 }
