@@ -57,6 +57,13 @@ public struct CompanionView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
+    /// True for a moment after the watch screen comes back on, while the figure stays still.
+    @State private var settling = false
+    /// Set when the watch screen has been dimmed too long to keep listening for shakes.
+    @State private var shakeGraceOver = false
+    /// When the watch felt a shake with its screen dimmed, to play once the screen is back on.
+    @State private var pendingShake: Date?
+    @State private var dimmedID = UUID()
     @State private var pop = 0
     @State private var taps = 0
     @State private var goodnightStart: Date?
@@ -92,10 +99,8 @@ public struct CompanionView: View {
     @State private var shakeTimes: [Date] = []
     @State private var dizzyStart: Date?
     @State private var closeUp = false
-    /// Where the eyes follow a press or the crown, -1 (left) ... 1 (right).
+    /// Where the eyes follow a press, -1 (left) ... 1 (right).
     @State private var look: CGFloat = 0
-    @State private var crown = 0.0
-    @State private var lookBack: Task<Void, Never>?
     @State private var pokeStart: Date?
     @State private var pokeKind: WatchPoke?
     @State private var pokes = 0
@@ -195,7 +200,7 @@ public struct CompanionView: View {
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: closeUp)
 
             if welcomeStart != nil, let replay = welcomeReplay {
-                TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+                TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                     welcomeChips(replay, at: context.date.timeIntervalSinceReferenceDate)
                 }
             }
@@ -215,9 +220,9 @@ public struct CompanionView: View {
         .contentShape(Rectangle())
         .onTapGesture { react() }
         .task(id: listensForShakes) { await listenForShakes() }
-        .gesture(pressAndLook, including: style == .notification ? .none : .all)
-        .modifier(CrownLook(isEnabled: style == .watch, crown: $crown))
-        .onChange(of: crown) { old, new in crowned(by: new - old) }
+        .gesture(pressAndLook, including: style == .standard ? .all : .none)
+        // On the watch a drag would take the swipe from the pages, so a long press only shows the close-up.
+        .simultaneousGesture(watchPress, including: style == .watch ? .all : .none)
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: mode) { _, _ in
             pop += 1
@@ -263,6 +268,22 @@ public struct CompanionView: View {
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
         }
+        .onChange(of: asleep) { _, new in
+            guard style == .watch else { return }
+            if new {
+                listenAfterDimming()
+                return
+            }
+            dimmedID = UUID()
+            shakeGraceOver = false
+            // Waking the watch screen and starting 146 parts at once froze the app, so he holds still for a second.
+            settling = true
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                settling = false
+                playPendingShake()
+            }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
         .accessibilityAddTraits(.isButton)
@@ -271,7 +292,7 @@ public struct CompanionView: View {
     @ViewBuilder private var character: some View {
         if let mode {
             KeyframeAnimator(initialValue: 0.0, trigger: taps) { react in
-                TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+                TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                     let time = context.date.timeIntervalSinceReferenceDate
                     let life = idleLife(mode, at: context.date)
                     let motion = idleMotion(mode, life: life, time: time)
@@ -370,7 +391,13 @@ public struct CompanionView: View {
         return IdleLife.at(date, stamina: vitals.stamina)
     }
 
-    private var paused: Bool { reduceMotion || scenePhase != .active || dozing }
+    private var paused: Bool { reduceMotion || asleep || settling }
+
+    /// The app is in the background or the watch screen is dimmed.
+    private var asleep: Bool { scenePhase != .active || dozing }
+
+    /// Seconds between animation frames: fewer on the watch.
+    private var frameInterval: Double { style == .watch ? 1 / 15 : 1 / 30 }
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
         if pokeKind == .rollOver, let progress = poke(at: time) {
@@ -514,7 +541,7 @@ public struct CompanionView: View {
         return pose
     }
 
-    /// `pose` with the eyes following a press or the crown, and dozing while the screen is dimmed (Always On).
+    /// `pose` with the eyes following a press, and dozing while the screen is dimmed (Always On).
     private func glance(_ pose: RunnerPose) -> RunnerPose {
         var pose = pose
         pose.eyesDx += 4 * look
@@ -542,15 +569,16 @@ public struct CompanionView: View {
             }
     }
 
-    /// Moves the eyes with the crown and lets them drift back.
-    private func crowned(by amount: Double) {
-        look = max(-1, min(1, look + CGFloat(amount) / 4))
-        lookBack?.cancel()
-        lookBack = Task {
-            try? await Task.sleep(for: .seconds(1.2))
-            guard !Task.isCancelled else { return }
-            look = 0
-        }
+    /// A long press on the watch: the close-up for a moment, then back.
+    private var watchPress: some Gesture {
+        LongPressGesture(minimumDuration: 0.4)
+            .onEnded { _ in
+                closeUp = true
+                Task {
+                    try? await Task.sleep(for: .seconds(1.5))
+                    closeUp = false
+                }
+            }
     }
 
     /// Starts the notice turn as the app opens, as a slow look up when the app was closed for half a day.
@@ -1073,12 +1101,37 @@ public struct CompanionView: View {
         say(kind.line)
     }
 
-    private var listensForShakes: Bool { style != .notification && scenePhase == .active && !reduceMotion }
+    // QA §5.1: a shake drops the wrist and dims the watch screen, so the watch listens for up to 5 s more after
+    // dimming, then stops until the app is active again; in the background it stops at once.
+    private var listensForShakes: Bool {
+        guard style != .notification, !reduceMotion else { return false }
+        guard style == .watch else { return scenePhase == .active }
+        return scenePhase != .background && (!asleep || !shakeGraceOver)
+    }
+
+    /// Plays a shake felt while the watch screen was dimmed, if it was recent.
+    private func playPendingShake() {
+        guard let shake = pendingShake else { return }
+        pendingShake = nil
+        if Date.now.timeIntervalSince(shake) < 10 { shaken() }
+    }
+
+    /// Stops listening for shakes 5 s after the watch screen dims, unless it comes back on first.
+    private func listenAfterDimming() {
+        let id = UUID()
+        dimmedID = id
+        Task {
+            try? await Task.sleep(for: .seconds(5))
+            if dimmedID == id { shakeGraceOver = true }
+        }
+    }
 
     /// Reacts to each shake of the phone or the watch while the view is on screen and the app is active.
     private func listenForShakes() async {
         #if os(iOS) || os(watchOS)
         guard listensForShakes else { return }
+        try? await Task.sleep(for: DeviceShakes.startDelay)
+        guard !Task.isCancelled else { return }
         for await _ in DeviceShakes.stream() { shaken() }
         #endif
     }
@@ -1087,6 +1140,11 @@ public struct CompanionView: View {
     private func shaken() {
         guard let mode else { return }
         let now = Date.now
+        // Shaking the wrist dims the watch screen, so the reaction waits until he can be seen.
+        if style == .watch, asleep || settling {
+            pendingShake = now
+            return
+        }
         let time = now.timeIntervalSinceReferenceDate
         guard turnAway(at: time) == nil,
             Self.progress(since: dizzyStart, at: time, duration: ShakeReaction.duration) == nil
@@ -1170,13 +1228,14 @@ struct WatchFigureFrame: ViewModifier {
 
     @ViewBuilder func body(content: Content) -> some View {
         if isEnabled {
-            // The approved C layout shows him from the chest up, so the figure takes the whole width and the
-            // screen edge crops the rest. The 12 pt side and 24 pt top padding of the card are undone here.
+            // The approved C layout shows him from the chest up and the screen edge crops the rest. At the full
+            // width he filled the screen and his hair ran into the mode chip, so the card width is scaled to 80%,
+            // centered and lowered (values tried on Mike's watch). The card padding is undone here.
             GeometryReader { proxy in
-                let width = proxy.size.width + 24
+                let width = proxy.size.width * 0.8 + 24
                 content
                     .frame(width: width, height: width * 2, alignment: .top)
-                    .offset(x: -12, y: 6)
+                    .offset(x: (proxy.size.width - width) / 2, y: 24)
             }
         } else {
             content
@@ -1374,21 +1433,4 @@ struct SpeechBubble: View {
         .padding()
     }
     .background(Toy.paper)
-}
-
-/// Lets the Digital Crown on the watch turn `crown`.
-struct CrownLook: ViewModifier {
-    var isEnabled: Bool
-    @Binding var crown: Double
-
-    func body(content: Content) -> some View {
-        #if os(watchOS)
-        content
-            .focusable(isEnabled)
-            .focusEffectDisabled()
-            .digitalCrownRotation($crown)
-        #else
-        content
-        #endif
-    }
 }

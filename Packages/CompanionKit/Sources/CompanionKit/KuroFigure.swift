@@ -215,6 +215,14 @@ public struct KuroView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.isLuminanceReduced) private var dozing
+    /// True for a moment after the watch screen comes back on, while the figure stays still.
+    @State private var settling = false
+    /// Set when the watch screen has been dimmed too long to keep listening for shakes.
+    @State private var shakeGraceOver = false
+    /// When the watch felt a shake with its screen dimmed, to play once the screen is back on.
+    @State private var pendingShake: Date?
+    @State private var dimmedID = UUID()
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
     @State private var pop = 0
@@ -229,8 +237,6 @@ public struct KuroView: View {
     @AppStorage("companion.lastUnlock") private var lastUnlock = ""
     // Id of the last workout cheered, shared with HAKU's view so each plays once.
     @AppStorage("companion.lastCelebration") private var lastCelebration = ""
-    @State private var crown = 0.0
-    @State private var crownTurn = 0.0
 
     /// - Parameters:
     ///   - look: what she wears.
@@ -285,8 +291,8 @@ public struct KuroView: View {
                 .animation(.easeInOut(duration: 0.25), value: look)
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
 
-            let paused = reduceMotion || scenePhase != .active
-            TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+            let paused = reduceMotion || asleep || settling
+            TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                 let time = context.date.timeIntervalSinceReferenceDate
                 let tap = reaction(at: time)
                 let unbox = unbox(at: time)
@@ -327,7 +333,7 @@ public struct KuroView: View {
             .padding(.horizontal, 12)
 
             if unboxStart != nil {
-                TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+                TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                     let time = context.date.timeIntervalSinceReferenceDate
                     if unbox(at: time)?.stars == true {
                         KuroStarBubble(time: time).frame(width: 72).padding(10)
@@ -349,13 +355,16 @@ public struct KuroView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { react() }
-        // Until she has her own close-up and crown moves (新角色清单), both play her tap reaction.
+        // Until she has her own close-up (新角色清单), a long press plays her tap reaction.
         .gesture(
             LongPressGesture(minimumDuration: 0.4).onEnded { _ in react() },
-            including: style == .notification ? .none : .all
+            including: style == .standard ? .all : .none
         )
-        .modifier(CrownLook(isEnabled: style == .watch, crown: $crown))
-        .onChange(of: crown) { old, new in crowned(by: new - old) }
+        // On the watch the press must not take the swipe from the pages.
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.4).onEnded { _ in react() },
+            including: style == .watch ? .all : .none
+        )
         .task(id: listensForShakes) { await listenForShakes() }
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: look) { _, _ in
@@ -364,19 +373,75 @@ public struct KuroView: View {
         }
         .onAppear { playEventIfNew() }
         .onChange(of: event) { _, _ in playEventIfNew() }
+        .onChange(of: asleep) { _, new in
+            guard style == .watch else { return }
+            if new {
+                listenAfterDimming()
+                return
+            }
+            dimmedID = UUID()
+            shakeGraceOver = false
+            // Same as HAKU: she holds still for a second after the watch screen comes back on.
+            settling = true
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                settling = false
+                playPendingShake()
+            }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime, pose: pose))
         .accessibilityAddTraits(showsBubble || style == .watch || onTap != nil ? .isButton : [])
     }
 
-    private var listensForShakes: Bool { style != .notification && scenePhase == .active && !reduceMotion }
+    /// The app is in the background or the watch screen is dimmed.
+    private var asleep: Bool { scenePhase != .active || dozing }
+
+    /// Seconds between animation frames: fewer on the watch.
+    private var frameInterval: Double { style == .watch ? 1 / 15 : 1 / 30 }
+
+    // QA §5.1: a shake drops the wrist and dims the watch screen, so the watch listens for up to 5 s more after
+    // dimming, then stops until the app is active again; in the background it stops at once.
+    private var listensForShakes: Bool {
+        guard style != .notification, !reduceMotion else { return false }
+        guard style == .watch else { return scenePhase == .active }
+        return scenePhase != .background && (!asleep || !shakeGraceOver)
+    }
+
+    /// Plays her reaction to a shake, or keeps it for when the dimmed watch screen comes back on.
+    private func shaken() {
+        if style == .watch, asleep || settling {
+            pendingShake = .now
+            return
+        }
+        react()
+    }
+
+    /// Plays a shake felt while the watch screen was dimmed, if it was recent.
+    private func playPendingShake() {
+        guard let shake = pendingShake else { return }
+        pendingShake = nil
+        if Date.now.timeIntervalSince(shake) < 10 { react() }
+    }
+
+    /// Stops listening for shakes 5 s after the watch screen dims, unless it comes back on first.
+    private func listenAfterDimming() {
+        let id = UUID()
+        dimmedID = id
+        Task {
+            try? await Task.sleep(for: .seconds(5))
+            if dimmedID == id { shakeGraceOver = true }
+        }
+    }
 
     // Until she has her own shake move (新角色清单), a shake plays her tap reaction.
     /// Reacts to each shake of the phone or the watch while the view is on screen and the app is active.
     private func listenForShakes() async {
         #if os(iOS) || os(watchOS)
         guard listensForShakes else { return }
-        for await _ in DeviceShakes.stream() { react() }
+        try? await Task.sleep(for: DeviceShakes.startDelay)
+        guard !Task.isCancelled else { return }
+        for await _ in DeviceShakes.stream() { shaken() }
         #endif
     }
 
@@ -401,14 +466,6 @@ public struct KuroView: View {
         }
         if talks { say(Self.line(after: bubble, from: lines)) }
         onTap?()
-    }
-
-    /// Plays her reaction once the crown has turned a full step, counting `delta` in either direction.
-    private func crowned(by delta: Double) {
-        crownTurn += abs(delta)
-        guard crownTurn >= 1 else { return }
-        crownTurn = 0
-        react()
     }
 
     /// Plays the unboxing or the workout cheer that `event` brings, if it is new.

@@ -46,16 +46,23 @@ enum ShakeReaction: Sendable, Equatable, CaseIterable {
     }
 }
 
-/// Turns acceleration samples into shakes: two hard jolts in quick succession, then a pause.
+/// Turns acceleration samples into shakes: enough time spent hard-moving within a short window, then a pause.
 struct ShakeDetector: Sendable {
-    /// Acceleration a jolt must reach, in g, gravity excluded.
-    static let threshold = 1.8
-    /// Time between the two jolts of one shake, in seconds.
-    static let pairGap: ClosedRange<TimeInterval> = 0.12...0.6
-    /// Time after a shake before the next one counts, in seconds.
+    /// Acceleration that counts as hard-moving, in g, gravity excluded.
+    static let threshold = 2.0
+    /// The window the hard-moving time is counted in, in seconds.
+    static let window: TimeInterval = 0.8
+    /// Hard-moving time within `window` that makes a shake, in seconds.
+    static let needed: TimeInterval = 0.2
+    /// The longest gap between two samples that is counted as hard-moving time, in seconds.
+    static let maxStep: TimeInterval = 0.1
+    /// Calm time after a shake before the next one counts, in seconds.
     static let cooldown: TimeInterval = 1.5
 
-    private var lastJolt = -TimeInterval.infinity
+    // A shake is measured as time above the threshold rather than as separate jolts. Real wrist flicks on the watch
+    // peaked at 2.6 to 9.6 g, so the threshold sits at 2 g. Running may cross it; that is not measured yet.
+    private var strong: [(time: TimeInterval, length: TimeInterval)] = []
+    private var lastSample: TimeInterval?
     private var lastShake = -TimeInterval.infinity
 
     /// Adds a sample.
@@ -64,12 +71,21 @@ struct ShakeDetector: Sendable {
     ///   - time: when it was measured, in seconds.
     /// - Returns: true when the sample completes a shake.
     mutating func add(magnitude: Double, at time: TimeInterval) -> Bool {
-        guard magnitude >= Self.threshold, time - lastShake >= Self.cooldown else { return false }
-        let gap = time - lastJolt
-        lastJolt = time
-        guard Self.pairGap.contains(gap) else { return false }
+        // A gap longer than `maxStep` (a missed update, a pause) adds nothing.
+        let gap = lastSample.map { time - $0 } ?? 0
+        let step = gap > 0 && gap <= Self.maxStep ? gap : 0
+        lastSample = time
+        strong.removeAll { time - $0.time >= Self.window }
+        guard magnitude >= Self.threshold else { return false }
+        // Still shaking after a shake keeps it the same shake: the cooldown starts again.
+        guard time - lastShake >= Self.cooldown else {
+            lastShake = time
+            return false
+        }
+        strong.append((time, step))
+        guard strong.reduce(0, { $0 + $1.length }) >= Self.needed else { return false }
         lastShake = time
-        lastJolt = -.infinity
+        strong = []
         return true
     }
 }
@@ -79,30 +95,41 @@ import CoreMotion
 
 /// Shakes of the phone or the watch.
 enum DeviceShakes {
+    /// How long a view waits after it appears before it starts listening, so launch is not slowed down.
+    static let startDelay: Duration = .seconds(2)
+
     /// A stream that yields once per shake and stops listening when it is cancelled.
     static func stream() -> AsyncStream<Void> {
         AsyncStream { continuation in
             let listener = Listener()
-            guard listener.manager.isDeviceMotionAvailable else {
-                continuation.finish()
-                return
-            }
-            listener.manager.deviceMotionUpdateInterval = 1.0 / 30
-            listener.manager.startDeviceMotionUpdates(to: listener.queue) { motion, _ in
-                guard let motion else { return }
-                let a = motion.userAcceleration
-                let magnitude = (a.x * a.x + a.y * a.y + a.z * a.z).squareRoot()
-                if listener.detector.add(magnitude: magnitude, at: motion.timestamp) {
-                    continuation.yield()
+            // Everything CoreMotion does happens on the listener's queue, so the main thread never waits for it,
+            // also when the app comes back from the background.
+            listener.queue.addOperation {
+                let manager = CMMotionManager()
+                guard manager.isDeviceMotionAvailable else {
+                    continuation.finish()
+                    return
+                }
+                listener.manager = manager
+                manager.deviceMotionUpdateInterval = 1.0 / 50
+                manager.startDeviceMotionUpdates(to: listener.queue) { motion, _ in
+                    guard let motion else { return }
+                    let a = motion.userAcceleration
+                    let magnitude = (a.x * a.x + a.y * a.y + a.z * a.z).squareRoot()
+                    if listener.detector.add(magnitude: magnitude, at: motion.timestamp) {
+                        continuation.yield()
+                    }
                 }
             }
-            continuation.onTermination = { _ in listener.manager.stopDeviceMotionUpdates() }
+            continuation.onTermination = { _ in
+                listener.queue.addOperation { listener.manager?.stopDeviceMotionUpdates() }
+            }
         }
     }
 
-    // CoreMotion calls back on `queue` only, one sample at a time, so `detector` is never shared.
+    // Only `queue` touches `manager` and `detector`, one operation at a time, so they are never shared.
     private final class Listener: @unchecked Sendable {
-        let manager = CMMotionManager()
+        var manager: CMMotionManager?
         let queue: OperationQueue = {
             let queue = OperationQueue()
             queue.maxConcurrentOperationCount = 1

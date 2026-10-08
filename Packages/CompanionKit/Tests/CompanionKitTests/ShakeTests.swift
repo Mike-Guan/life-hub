@@ -28,32 +28,74 @@ import Testing
         #expect(!ShakeReaction.isTooMany([now.addingTimeInterval(-ShakeReaction.window)] + two, now: now))
     }
 
-    @Test func twoJoltsMakeOneShake() {
-        var detector = ShakeDetector()
-        let shake1 = detector.add(magnitude: 2.5, at: 10)
-        #expect(!shake1)
-        // Samples of the same jolt are too close together.
-        let shake2 = detector.add(magnitude: 2.5, at: 10.03)
-        #expect(!shake2)
-        let shake3 = detector.add(magnitude: 2.4, at: 10.3)
-        #expect(shake3)
-        // Cooling down after a shake.
-        let shake4 = detector.add(magnitude: 3, at: 10.6)
-        #expect(!shake4)
-        let shake5 = detector.add(magnitude: 3, at: 10.9)
-        #expect(!shake5)
+    /// Feeds `detector` `seconds` of samples at `rate` per second from `start`, with `magnitude` at each time.
+    private func feed(
+        _ detector: inout ShakeDetector, from start: TimeInterval, seconds: Double, rate: Double = 51,
+        magnitude: (TimeInterval) -> Double
+    ) -> [TimeInterval] {
+        (0..<Int(seconds * rate)).compactMap { index in
+            let time = start + Double(index) / rate
+            return detector.add(magnitude: magnitude(time), at: time) ? time : nil
+        }
     }
 
-    @Test func gentleOrSlowMovesAreNotShakes() {
+    @Test func aRoundOfShakingIsOneShake() {
         var detector = ShakeDetector()
-        let shake6 = detector.add(magnitude: 1.2, at: 1)
-        #expect(!shake6)
-        let shake7 = detector.add(magnitude: 1.2, at: 1.3)
-        #expect(!shake7)
-        let shake8 = detector.add(magnitude: 2.5, at: 5)
-        #expect(!shake8)
-        let shake9 = detector.add(magnitude: 2.5, at: 6)
-        #expect(!shake9)
+        // Like a real shake on the watch: 7 to 12 g for a 2.5 s round, never dropping in between.
+        let shakes = feed(&detector, from: 10, seconds: 2.5) { 7 + 5 * abs(sin($0 * 20)) }
+        #expect(shakes.count == 1)
+        #expect(shakes.first.map { $0 - 10 < 0.3 } == true)
+    }
+
+    @Test func shakingAgainAfterTheCooldownCountsAgain() {
+        var detector = ShakeDetector()
+        let first = feed(&detector, from: 10, seconds: 0.5) { _ in 8 }
+        let second = feed(&detector, from: 12.5, seconds: 0.5) { _ in 8 }
+        #expect(first.count == 1 && second.count == 1)
+    }
+
+    @Test func theSlowerRateWorksToo() {
+        var detector = ShakeDetector()
+        let shakes = feed(&detector, from: 20, seconds: 0.5, rate: 17) { _ in 8 }
+        #expect(shakes.count == 1)
+    }
+
+    @Test func aKnockIsNotAShake() {
+        var detector = ShakeDetector()
+        // Shaking once and stopping: under 0.2 s above the threshold.
+        let shakes = feed(&detector, from: 5, seconds: 1) { $0 < 5.12 ? 8 : 0.2 }
+        #expect(shakes.isEmpty)
+    }
+
+    @Test func everydayMovesAreNotShakes() {
+        var detector = ShakeDetector()
+        // Raising the wrist, typing: measured at 0.8 g at most.
+        let shakes = feed(&detector, from: 0, seconds: 30) { 0.8 * abs(sin($0 * 3)) }
+        #expect(shakes.isEmpty)
+    }
+
+    @Test func aLightFlickIsOneShake() {
+        var detector = ShakeDetector()
+        // Like the lightest real flick: three short flicks a second peaking at 2.6 g, with about 40% of the samples
+        // above the threshold, for a 2.5 s round.
+        let shakes = feed(&detector, from: 10, seconds: 2.5) { 0.8 + 1.8 * pow(sin($0 * 3 * .pi), 2) }
+        #expect(shakes.count == 1)
+    }
+
+    @Test func armSwingBelowTheThresholdIsNotAShake() {
+        var detector = ShakeDetector()
+        // Three swings a second, each a 0.15 s peak of 1.8 g, for 10 s.
+        let shakes = feed(&detector, from: 0, seconds: 10) { time in
+            time.truncatingRemainder(dividingBy: 1.0 / 3) < 0.15 ? 1.8 : 0.5
+        }
+        #expect(shakes.isEmpty)
+    }
+
+    @Test func walkingIsNotAShake() {
+        var detector = ShakeDetector()
+        // Swinging arms while walking: under 1 g, two steps a second, for 10 s.
+        let shakes = feed(&detector, from: 0, seconds: 10) { 0.9 * abs(sin($0 * 2 * .pi)) }
+        #expect(shakes.isEmpty)
     }
 
     @Test @MainActor func dizzyShowsSwirlEyesAndStars() {
