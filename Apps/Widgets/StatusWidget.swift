@@ -18,12 +18,13 @@ struct StatusWidget: Widget {
 struct StatusView: View {
     let entry: HubEntry
     @Environment(\.widgetFamily) private var family
+    @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
         content
             .containerBackground(for: .widget) {
                 if family == .systemSmall {
-                    entry.mode?.color ?? Toy.paper
+                    entry.mode?.color(for: entry.persona) ?? Toy.paper
                 }
             }
     }
@@ -58,9 +59,16 @@ struct StatusView: View {
         }
     }
 
+    // Same as the watch faces: a tinted Lock Screen keeps only each pixel's alpha, so the filled figure
+    // would read as one flat blob. There the outlines become the opaque part, like a line drawing.
     @ViewBuilder private var head: some View {
-        if let mode = entry.mode {
+        if let mode = entry.mode, renderingMode == .fullColor {
             figure(mode, framing: .head)
+        } else if let mode = entry.mode {
+            figure(mode, framing: .head)
+                .colorInvert()
+                .luminanceToAlpha()
+                .widgetAccentable()
         } else {
             Image(systemName: "circle.dashed").font(.title2)
         }
