@@ -6,6 +6,8 @@ owner: PM thread「Hub 功能设计(PM)」
 tags: [product, prd, hub]
 ---
 
+> 这是 2026-10-08 前的旧副本，仓库里不再更新。最新版只在 Mike 的 Obsidian（项目文件夹 `energy-bank/`）。
+
 # Hub 功能设计（PRD 初稿）
 
 > 依据：[[Life Hub 方向]]、两个副业笔记、已锁定的 companion（RUNNER v5，见 `companion/`）、Mike 工作中的 Attention Hub（截图 + 技术文档，见第 11 节）。技术框架线程「Hub 技术框架（工程）」读这份文档对齐，本文会原地更新。

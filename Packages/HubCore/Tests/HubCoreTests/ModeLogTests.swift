@@ -34,6 +34,11 @@ import Testing
         #expect(segments.map(\.mode) == [.chill, .work])
         #expect(segments[0].start == date(2, 5))
         #expect(segments[0].duration == 4 * 3600)
+        #expect(segments[0].startedAt == date(1, 22))
+        #expect(segments[0].fullDuration == 11 * 3600)
+        #expect(segments[0].isCarriedOver)
+        #expect(!segments[1].isCarriedOver)
+        #expect(segments[1].fullDuration == segments[1].duration)
     }
 
     @Test func pastDayEndsAtFiveAndIsNotOngoing() {
