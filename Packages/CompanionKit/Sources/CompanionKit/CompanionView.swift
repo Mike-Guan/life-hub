@@ -59,6 +59,9 @@ public struct CompanionView: View {
     @Environment(\.isLuminanceReduced) private var dozing
     /// True for a moment after the watch screen comes back on, while the figure stays still.
     @State private var settling = false
+    /// Set when the watch screen has been dimmed too long to keep listening for shakes.
+    @State private var shakeGraceOver = false
+    @State private var dimmedID = UUID()
     @State private var pop = 0
     @State private var taps = 0
     @State private var goodnightStart: Date?
@@ -264,8 +267,14 @@ public struct CompanionView: View {
             if new == .on { startGoodnight() }
         }
         .onChange(of: asleep) { _, new in
+            guard style == .watch else { return }
+            if new {
+                listenAfterDimming()
+                return
+            }
+            dimmedID = UUID()
+            shakeGraceOver = false
             // Waking the watch screen and starting 146 parts at once froze the app, so he holds still for a second.
-            guard !new, style == .watch else { return }
             settling = true
             Task {
                 try? await Task.sleep(for: .seconds(1))
@@ -1089,11 +1098,22 @@ public struct CompanionView: View {
         say(kind.line)
     }
 
-    // A shake drops the wrist and dims the watch screen, which makes the scene inactive, so the watch keeps
-    // listening until the app goes to the background.
+    // QA §5.1: a shake drops the wrist and dims the watch screen, so the watch listens for up to 5 s more after
+    // dimming, then stops until the app is active again; in the background it stops at once.
     private var listensForShakes: Bool {
         guard style != .notification, !reduceMotion else { return false }
-        return style == .watch ? scenePhase != .background : scenePhase == .active
+        guard style == .watch else { return scenePhase == .active }
+        return scenePhase != .background && (!asleep || !shakeGraceOver)
+    }
+
+    /// Stops listening for shakes 5 s after the watch screen dims, unless it comes back on first.
+    private func listenAfterDimming() {
+        let id = UUID()
+        dimmedID = id
+        Task {
+            try? await Task.sleep(for: .seconds(5))
+            if dimmedID == id { shakeGraceOver = true }
+        }
     }
 
     /// Reacts to each shake of the phone or the watch while the view is on screen and the app is active.

@@ -218,6 +218,9 @@ public struct KuroView: View {
     @Environment(\.isLuminanceReduced) private var dozing
     /// True for a moment after the watch screen comes back on, while the figure stays still.
     @State private var settling = false
+    /// Set when the watch screen has been dimmed too long to keep listening for shakes.
+    @State private var shakeGraceOver = false
+    @State private var dimmedID = UUID()
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
     @State private var pop = 0
@@ -369,8 +372,14 @@ public struct KuroView: View {
         .onAppear { playEventIfNew() }
         .onChange(of: event) { _, _ in playEventIfNew() }
         .onChange(of: asleep) { _, new in
+            guard style == .watch else { return }
+            if new {
+                listenAfterDimming()
+                return
+            }
+            dimmedID = UUID()
+            shakeGraceOver = false
             // Same as HAKU: she holds still for a second after the watch screen comes back on.
-            guard !new, style == .watch else { return }
             settling = true
             Task {
                 try? await Task.sleep(for: .seconds(1))
@@ -388,11 +397,22 @@ public struct KuroView: View {
     /// Seconds between animation frames: fewer on the watch.
     private var frameInterval: Double { style == .watch ? 1 / 15 : 1 / 30 }
 
-    // A shake drops the wrist and dims the watch screen, which makes the scene inactive, so the watch keeps
-    // listening until the app goes to the background.
+    // QA §5.1: a shake drops the wrist and dims the watch screen, so the watch listens for up to 5 s more after
+    // dimming, then stops until the app is active again; in the background it stops at once.
     private var listensForShakes: Bool {
         guard style != .notification, !reduceMotion else { return false }
-        return style == .watch ? scenePhase != .background : scenePhase == .active
+        guard style == .watch else { return scenePhase == .active }
+        return scenePhase != .background && (!asleep || !shakeGraceOver)
+    }
+
+    /// Stops listening for shakes 5 s after the watch screen dims, unless it comes back on first.
+    private func listenAfterDimming() {
+        let id = UUID()
+        dimmedID = id
+        Task {
+            try? await Task.sleep(for: .seconds(5))
+            if dimmedID == id { shakeGraceOver = true }
+        }
     }
 
     // Until she has her own shake move (新角色清单), a shake plays her tap reaction.
