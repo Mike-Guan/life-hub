@@ -144,6 +144,46 @@ struct FrameSheets {
         try write("kuro-2-watch", rows, size: CGSize(width: 198, height: 242))
     }
 
+    // Preview for KURO-03 / KURO-04 one-offs: each event plays her look's tap move once, from 0.4 s.
+    @Test func kuroOneOffs() throws {
+        let kinds: [(String, Bool)] = [("offWork", false)] + KuroOneOff.Kind.allCases.map {
+            ("\($0)", KuroOneOff(kind: $0, id: "x").heart)
+        }
+        var rows: [Row] = []
+        for look in KuroLook.allCases {
+            for (name, heart) in kinds {
+                rows.append(Row(label: "kuro \(look) · \(name)", start: Self.base) {
+                    AnyView(OneOffFrame(look: look, heart: heart, start: Self.base.addingTimeInterval(0.4)))
+                })
+            }
+        }
+        try write("kuro-6-oneoffs", rows, frames: 8, step: 0.2)
+    }
+
+    // Preview for UI-01: the shop and wardrobe tile behind each slot, for each character.
+    @Test func shopTiles() throws {
+        let sheet = VStack(alignment: .leading, spacing: 12) {
+            ForEach(Persona.allCases, id: \.self) { persona in
+                HStack(spacing: 12) {
+                    Text(persona.rawValue)
+                        .font(.system(size: 15, weight: .bold, design: .monospaced))
+                        .frame(width: 80, alignment: .leading)
+                    ForEach(Slot.allCases, id: \.self) { slot in
+                        VStack(spacing: 6) {
+                            Color.clear
+                                .frame(width: 96, height: 64)
+                                .toyCard(fill: slot.tileColor(for: persona), radius: 12, shadow: 0)
+                            Text(slot.rawValue).font(.system(size: 12, weight: .bold, design: .monospaced))
+                        }
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        try save(sheet, as: "shop-tiles", scale: 2)
+    }
+
     @Test func lockScreenHeads() throws {
         let poses: [(String, CompanionPortrait)] = [
             ("lockscreen-half-awake", CompanionPortrait(mode: .chill, energy: 20, moment: .morning, framing: .head)),
@@ -265,6 +305,29 @@ struct FrameSheets {
         let destination = try #require(CGImageDestinationCreateWithURL(url as CFURL, type, 1, nil))
         CGImageDestinationAddImage(destination, image, nil)
         #expect(CGImageDestinationFinalize(destination))
+    }
+}
+
+/// KURO in `look` playing her one-off move from `start`: her look's tap move with its hop.
+struct OneOffFrame: View {
+    let look: KuroLook
+    let heart: Bool
+    let start: Date
+    @Environment(\.frameClock) private var frameClock
+
+    var body: some View {
+        let tap = KuroTap(look: look, sleepy: false)
+        let progress = ((frameClock ?? start).timeIntervalSince(start)) / tap.duration
+        let playing = (0..<1).contains(progress) ? (tap, progress) : nil
+        let base = KuroPose(look: look, energy: 50)
+        ZStack {
+            Rectangle().fill(look.color)
+            KuroFigure(look: look, pose: playing.map { base.reacting($0.0, progress: $0.1, heart: heart) } ?? base)
+                .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
+                .offset(y: KuroView.hop(playing))
+                .padding(.top, 24)
+                .padding(.horizontal, 12)
+        }
     }
 }
 #endif
