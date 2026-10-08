@@ -5,11 +5,7 @@ name: frames
 on:
   workflow_dispatch:
   push:
-<<<<<<< HEAD
     branches: [chore/frames, "preview/**"]
-=======
-    branches: [chore/frames]
->>>>>>> fix/kuro-mode-names
 
 concurrency:
   group: frames-${{ github.ref }}
@@ -41,20 +37,12 @@ jobs:
         timeout-minutes: 25
         run: |
           mkdir -p frames
-<<<<<<< HEAD
           FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter "FrameSheets.modeLabels"
-=======
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter "FrameSheets.lockScreen"
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets --skip hakuMoments
->>>>>>> fix/kuro-mode-names
           ls -l frames
 
       # The moments sheet is the largest; kept apart so the other sheets still upload if it runs long.
       - name: Draw moment sheets
-<<<<<<< HEAD
         if: false
-=======
->>>>>>> fix/kuro-mode-names
         timeout-minutes: 12
         continue-on-error: true
         run: |
