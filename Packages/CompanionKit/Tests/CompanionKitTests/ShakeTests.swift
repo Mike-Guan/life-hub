@@ -74,11 +74,19 @@ import Testing
         #expect(shakes.isEmpty)
     }
 
-    @Test func runningArmSwingIsNotAShake() {
+    @Test func aLightFlickIsOneShake() {
         var detector = ShakeDetector()
-        // Three swings a second, each a 0.1 s peak of 3 g, for 10 s.
+        // Like the lightest real flick: three short flicks a second peaking at 2.6 g, with about 40% of the samples
+        // above the threshold, for a 2.5 s round.
+        let shakes = feed(&detector, from: 10, seconds: 2.5) { 0.8 + 1.8 * pow(sin($0 * 3 * .pi), 2) }
+        #expect(shakes.count == 1)
+    }
+
+    @Test func armSwingBelowTheThresholdIsNotAShake() {
+        var detector = ShakeDetector()
+        // Three swings a second, each a 0.15 s peak of 1.8 g, for 10 s.
         let shakes = feed(&detector, from: 0, seconds: 10) { time in
-            time.truncatingRemainder(dividingBy: 1.0 / 3) < 0.1 ? 3 : 0.5
+            time.truncatingRemainder(dividingBy: 1.0 / 3) < 0.15 ? 1.8 : 0.5
         }
         #expect(shakes.isEmpty)
     }
