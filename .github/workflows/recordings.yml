@@ -33,7 +33,9 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
+      # Leaves time for the upload and push steps when a simulator hangs.
       - name: Record clips
+        timeout-minutes: 45
         run: scripts/recordings.sh
 
       - name: Upload clips
