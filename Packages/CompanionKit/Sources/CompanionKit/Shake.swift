@@ -49,7 +49,7 @@ enum ShakeReaction: Sendable, Equatable, CaseIterable {
 /// Turns acceleration samples into shakes: enough time spent hard-moving within a short window, then a pause.
 struct ShakeDetector: Sendable {
     /// Acceleration that counts as hard-moving, in g, gravity excluded.
-    static let threshold = 1.5
+    static let threshold = 4.0
     /// The window the hard-moving time is counted in, in seconds.
     static let window: TimeInterval = 0.8
     /// Hard-moving time within `window` that makes a shake, in seconds.
@@ -60,7 +60,7 @@ struct ShakeDetector: Sendable {
     static let cooldown: TimeInterval = 1.5
 
     // A real shake on Mike's watch stays at 7 to 12 g for the whole round without dropping in between, so it is
-    // measured as time above the threshold rather than as separate jolts.
+    // measured as time above the threshold rather than as separate jolts. Running swings the arm at 2 to 3 g.
     private var strong: [(time: TimeInterval, length: TimeInterval)] = []
     private var lastSample: TimeInterval?
     private var lastShake = -TimeInterval.infinity

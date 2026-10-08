@@ -63,7 +63,7 @@ import Testing
     @Test func aKnockIsNotAShake() {
         var detector = ShakeDetector()
         // Shaking once and stopping: under 0.2 s above the threshold.
-        let shakes = feed(&detector, from: 5, seconds: 1) { $0 < 5.12 ? 4 : 0.2 }
+        let shakes = feed(&detector, from: 5, seconds: 1) { $0 < 5.12 ? 8 : 0.2 }
         #expect(shakes.isEmpty)
     }
 
@@ -71,6 +71,15 @@ import Testing
         var detector = ShakeDetector()
         // Raising the wrist, typing: measured at 0.8 g at most.
         let shakes = feed(&detector, from: 0, seconds: 30) { 0.8 * abs(sin($0 * 3)) }
+        #expect(shakes.isEmpty)
+    }
+
+    @Test func runningArmSwingIsNotAShake() {
+        var detector = ShakeDetector()
+        // Three swings a second, each a 0.1 s peak of 3 g, for 10 s.
+        let shakes = feed(&detector, from: 0, seconds: 10) { time in
+            time.truncatingRemainder(dividingBy: 1.0 / 3) < 0.1 ? 3 : 0.5
+        }
         #expect(shakes.isEmpty)
     }
 
