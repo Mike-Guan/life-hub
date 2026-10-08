@@ -100,14 +100,22 @@ struct ItemPicture: Equatable {
 }
 
 extension Slot {
-    /// The tile color behind items of this slot in the shop and wardrobe.
-    public var tileColor: Color {
+    /// The tile color behind items of this slot in HAKU's shop and wardrobe.
+    public var tileColor: Color { tileColor(for: .haku) }
+
+    /// The tile color behind items of this slot in `persona`'s shop and wardrobe: a color of her own looks.
+    public func tileColor(for persona: Persona) -> Color {
+        tileMode?.color(for: persona) ?? Toy.pink
+    }
+
+    /// The mode whose color fills this slot's tiles, or nil for the shared pink.
+    var tileMode: Mode? {
         switch self {
-        case .gloves: Mode.boxing.color
-        case .headband: Mode.work.color
-        case .mask: Mode.money.color
-        case .room: Mode.chill.color
-        case .celebration: Toy.pink
+        case .gloves: .boxing
+        case .headband: .work
+        case .mask: .money
+        case .room: .chill
+        case .celebration: nil
         }
     }
 

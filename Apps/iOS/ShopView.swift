@@ -130,7 +130,7 @@ struct ShopView: View {
                 .frame(width: 56, height: 56)
                 .frame(maxWidth: .infinity)
                 .frame(height: 64)
-                .toyCard(fill: item.slot.tileColor, radius: 12, shadow: 0)
+                .toyCard(fill: item.slot.tileColor(for: persona), radius: 12, shadow: 0)
             Text(item.title)
                 .font(Toy.body(14, weight: .heavy))
             if let price = item.price {
@@ -196,7 +196,7 @@ struct ShopView: View {
                 .font(Toy.body(14, weight: .heavy))
                 if !isOwned {
                     ProgressView(value: Double(count), total: Double(goal))
-                        .tint(item.slot.tileColor)
+                        .tint(item.slot.tileColor(for: persona))
                         .accessibilityHidden(true)
                 }
             }
