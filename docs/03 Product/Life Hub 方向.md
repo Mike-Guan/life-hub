@@ -5,6 +5,8 @@ status: 当前方向
 tags: [product, direction, hub]
 ---
 
+> 这是 2026-10-08 前的旧副本，仓库里不再更新。最新版只在 Mike 的 Obsidian（项目文件夹 `energy-bank/`）。
+
 # Life Hub 方向
 
 > 2026-10-02 Mike 定下的新方向，**取代** [[个人项目计划]] 和 [[MVP 计划草稿]] 里与之冲突的部分。以下是 Mike 原话的整理，细节之后再讨论。

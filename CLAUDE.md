@@ -6,8 +6,9 @@ Then read `PRODUCT_PRINCIPLES.md`: what Life Hub is for. Every feature and line 
 
 Personal life hub for one user (Mike). iOS + macOS, native SwiftUI. A companion
 character (RUNNER, Rive) mirrors the current mode and energy.
-Docs (Obsidian markdown, mirrored from Mike's vault): `docs/05 Engineering/技术架构.md` (architecture),
-`docs/05 Engineering/范围文档.md` (scope), `docs/03 Product/Hub PRD.md` (features).
+Product docs (PRD, scope, architecture, direction) live only in Mike's Obsidian vault (project folder
+`energy-bank/`). The copies under `docs/` stopped updating on 2026-10-08; don't sync them again.
+Engineering process docs (`docs/05 Engineering/开发流程.md`, `CI-CD.md`, `docs/交接.md`) stay in the repo.
 
 ## Stack
 - Swift 6, SwiftUI, deployment targets iOS 26 / macOS 26. No cross-platform frameworks.
@@ -212,3 +213,6 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   a win pays only the character picked at the time; switching asks first. Life records stay shared.
 - 2026-10-07: Mike: "状态切换优先看地点". A held or early leave from the office no longer keeps 上班 all
   evening: from 17:30, being away from the office or arriving home ends work unless the mode changed after.
+- 2026-10-08: Mike agreed: the repo stays public during the freeze, and product docs (PRD, 技术架构,
+  范围文档, 方向) are no longer synced into `docs/`. The character SVG stays (CI generates code from it).
+  Before the second user: go private and move CI to a self-hosted runner on Mike's Mac.
