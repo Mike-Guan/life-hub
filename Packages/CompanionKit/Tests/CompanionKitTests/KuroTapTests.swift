@@ -26,7 +26,9 @@ import Testing
         let pose = KuroPose(look: .work, energy: nil)
         let up = pose.reacting(.tablet, progress: 0.3)
         let parts = KuroFigure.parts(for: .work, pose: up)
-        #expect(parts.contains(.tapTablet) && !parts.contains(.workTablet) && parts.contains(.eyesSurprised))
+        #expect(parts.contains(.tapTablet) && !parts.contains(.workTablet) && parts.contains(.eyesBright))
+        // UI 审核 2026-10-08: her own eyes, and the stylus stays on the desk.
+        #expect(!parts.contains(.eyesSurprised) && parts.contains(.workStylus))
         // Drawn after her mask, so it covers it.
         #expect((parts.firstIndex(of: .maskWork) ?? 99) < (parts.firstIndex(of: .tapTablet) ?? 0))
         #expect(KuroFigure.shift(.tapTablet, pose: up).height == 0)
@@ -49,6 +51,22 @@ import Testing
         #expect(sip.isSuperset(of: [.tapCup, .tapPuff, .eyesClosed, .mouthO]) && !sip.contains(.chillCup))
         let after = Set(KuroFigure.parts(for: .chill, pose: pose.reacting(.sip, progress: 0.9)))
         #expect(after.isSuperset(of: [.chillCup, .eyesHappy]) && !after.contains(.tapCup))
+        // The cup travels: it starts at the table, is at her lips while she blows, then goes back down.
+        let travel = [0.0, 0.1, 0.3, 0.65].map { KuroFigure.shift(.tapCup, pose: pose.reacting(.sip, progress: $0)) }
+        #expect(travel[0] == CGSize(width: 26, height: 36) && travel[2] == .zero)
+        #expect(travel[1].height > 0 && travel[1].height < 36 && travel[3].height > 0)
+        #expect(!KuroFigure.parts(for: .chill, pose: pose.reacting(.sip, progress: 0.1)).contains(.tapPuff))
+    }
+
+    // UI 审核 2026-10-08: the rubbing hand floated, and in the chill look a second hand held the cup on that side.
+    @Test(arguments: KuroLook.allCases)
+    func herRubbingHandComesUpOnHerSleeve(_ look: KuroLook) {
+        let rubbing = KuroPose(look: look, energy: 10).reacting(.rub, progress: 0.3)
+        let parts = Set(KuroFigure.parts(for: look, pose: rubbing))
+        let sleeves: Set<KuroPart> = [.tapRubSleeveWork, .tapRubSleeveChill, .tapRubSleeveTennis, .tapRubSleeveDesk]
+        #expect(parts.contains(.tapRub) && parts.intersection(sleeves).count == 1)
+        let rest = Set(KuroFigure.parts(for: look, pose: KuroPose(look: look, energy: 10)))
+        #expect(rest.isDisjoint(with: sleeves))
     }
 
     @Test func sheTurnsHerBackWithADotsBubble() {

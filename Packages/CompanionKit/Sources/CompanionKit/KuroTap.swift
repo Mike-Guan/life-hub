@@ -52,10 +52,12 @@ extension KuroPose {
         pose.blinking = false
         switch tap {
         case .tablet:
-            pose.eyes = p < 0.5 ? .surprised : .down
+            // Her own wide eyes behind the tablet, not the dot eyes (UI 审核 2026-10-08).
+            pose.eyes = p < 0.5 ? .bright : .down
         case .sip:
-            pose.eyes = p < 0.75 ? .closed : .happy
-            pose.mouthO = p < 0.75
+            // Lifts the cup (0-0.2), blows with her eyes shut (0.2-0.55), puts it down (0.55-0.75).
+            pose.eyes = p < 0.2 ? pose.eyes : p < 0.55 ? .closed : .happy
+            pose.mouthO = (0.2..<0.55).contains(p)
         case .bounce:
             pose.eyes = p < 0.8 ? .bright : .happy
         case .glasses:
@@ -91,7 +93,7 @@ extension KuroFigure {
             visible.remove(.chillCup)
             visible.remove(.itemBlanket)
             visible.insert(.tapCup)
-            if p >= 0.2 { visible.insert(.tapPuff) }
+            if (0.2..<0.55).contains(p) { visible.insert(.tapPuff) }
         case .bounce:
             visible.insert(.tapBall)
             if p >= 0.8 { visible.insert(.tapSparkle) }
@@ -124,6 +126,10 @@ extension KuroFigure {
         case (.bounce, .tapBall):
             guard p < 0.8 else { return .zero }
             return CGSize(width: 0, height: -40 * abs(sin(p / 0.8 * 2 * .pi)))
+        case (.sip, .tapCup):
+            // The cup travels from the table to her lips and back instead of jumping (UI 审核 2026-10-08).
+            let lift = p < 0.2 ? ease(p / 0.2) : p < 0.55 ? 1 : ease(1 - (p - 0.55) / 0.2)
+            return CGSize(width: 26 * (1 - lift), height: 36 * (1 - lift))
         case (.glasses, .deskGlasses):
             return CGSize(width: 0, height: p >= 0.2 ? -2 : 0)
         case (.chinTap, .overtimeHand):
@@ -134,4 +140,10 @@ extension KuroFigure {
             return .zero
         }
     }
+}
+
+/// Smoothstep from 0 to 1 over `x` in 0...1.
+private func ease(_ x: Double) -> Double {
+    let t = min(max(x, 0), 1)
+    return t * t * (3 - 2 * t)
 }
