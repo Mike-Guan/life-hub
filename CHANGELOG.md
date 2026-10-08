@@ -363,6 +363,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- Watch: the app opens without the system killing it (a hand-made pager replaces the vertical page view),
+  HAKU is a little smaller, waking is smoother, and a shake still counts right after the screen dims. (#231)
+- Watch: the app has its own icon. (#230)
+- A mode carried over from yesterday shows when it really started in the TODAY log. (#232)
+- The iPhone launch screen shows HAKU. (#233)
+- HAKU no longer grows a peace-sign hand inside boxing gloves. (#239)
+- With KURO picked, the small widget, the money bar and the unboxing sheet use her colours. On a tinted or
+  monochrome Lock Screen the widget head is drawn as line art. (#238)
+- The iPhone app stays light when the system is dark; the boxing countdown text stays dark on its coral card;
+  the watch mode chip shrinks instead of running under the clock. (#240)
+- The settings gear and small Settings buttons are at least 44 pt. Error messages show dark text with a red
+  warning icon. (#241)
 - Leaving the office in the evening ends work even if that leave was missed: from 17:30, being away from the
   office or arriving home switches to Chill at the next place event or app open, also within 2 hours of a
   manual change, unless you changed the mode after leaving. The debug log now says why a place event kept the mode.
