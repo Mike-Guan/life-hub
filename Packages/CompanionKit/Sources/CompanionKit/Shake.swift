@@ -46,22 +46,23 @@ enum ShakeReaction: Sendable, Equatable, CaseIterable {
     }
 }
 
-/// Turns acceleration samples into shakes: three hard jolts within a second, then a pause.
+/// Turns acceleration samples into shakes: enough time spent hard-moving within a short window, then a pause.
 struct ShakeDetector: Sendable {
-    /// Acceleration a jolt must reach, in g, gravity excluded.
-    static let threshold = 1.4
-    /// Jolts that make a shake.
-    static let jolts = 3
-    /// Time the jolts of one shake fall within, in seconds.
-    static let window: TimeInterval = 1
-    /// A strong sample this long after the previous one starts a new jolt even without a dip between, in seconds.
-    static let joltGap: TimeInterval = 0.15
+    /// Acceleration that counts as hard-moving, in g, gravity excluded.
+    static let threshold = 1.5
+    /// The window the hard-moving time is counted in, in seconds.
+    static let window: TimeInterval = 0.8
+    /// Hard-moving time within `window` that makes a shake, in seconds.
+    static let needed: TimeInterval = 0.2
+    /// The longest gap between two samples that is counted as hard-moving time, in seconds.
+    static let maxStep: TimeInterval = 0.1
     /// Time after a shake before the next one counts, in seconds.
     static let cooldown: TimeInterval = 1.5
 
-    private var joltStarts: [TimeInterval] = []
-    private var lastStrong = -TimeInterval.infinity
-    private var dipped = true
+    // A real shake on Mike's watch stays at 7 to 12 g for the whole round without dropping in between, so it is
+    // measured as time above the threshold rather than as separate jolts.
+    private var strong: [(time: TimeInterval, length: TimeInterval)] = []
+    private var lastSample: TimeInterval?
     private var lastShake = -TimeInterval.infinity
 
     /// Adds a sample.
@@ -70,21 +71,16 @@ struct ShakeDetector: Sendable {
     ///   - time: when it was measured, in seconds.
     /// - Returns: true when the sample completes a shake.
     mutating func add(magnitude: Double, at time: TimeInterval) -> Bool {
-        guard magnitude >= Self.threshold else {
-            dipped = true
-            return false
-        }
-        guard time - lastShake >= Self.cooldown else { return false }
-        // A jolt lasts one or more samples; the watch delivers only about 17 a second. A new jolt starts after the
-        // reading drops below the threshold, so three are needed and one punch (a push and a stop) is not a shake.
-        let newJolt = dipped || time - lastStrong > Self.joltGap
-        lastStrong = time
-        dipped = false
-        guard newJolt else { return false }
-        joltStarts = joltStarts.filter { time - $0 < Self.window } + [time]
-        guard joltStarts.count >= Self.jolts else { return false }
+        // A gap longer than `maxStep` (a missed update, a pause) adds nothing.
+        let gap = lastSample.map { time - $0 } ?? 0
+        let step = gap > 0 && gap <= Self.maxStep ? gap : 0
+        lastSample = time
+        strong.removeAll { time - $0.time >= Self.window }
+        guard magnitude >= Self.threshold, time - lastShake >= Self.cooldown else { return false }
+        strong.append((time, step))
+        guard strong.reduce(0, { $0 + $1.length }) >= Self.needed else { return false }
         lastShake = time
-        joltStarts = []
+        strong = []
         return true
     }
 }
