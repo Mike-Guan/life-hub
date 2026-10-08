@@ -111,7 +111,8 @@ struct WatchStatusView: View {
                 energy: payload.snapshot.energy(at: entry.date)?.value,
                 bedtime: payload.bedtime.state(at: entry.date),
                 wearing: Set(payload.wardrobe.equipped.values),
-                framing: .head
+                framing: .head,
+                lineArt: renderingMode != .fullColor
             )
         } else if let payload = entry.payload, let mode = entry.mode {
             let snapshot = payload.snapshot

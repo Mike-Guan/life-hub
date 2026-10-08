@@ -82,7 +82,8 @@ struct StatusView: View {
                 energy: entry.energy?.value,
                 bedtime: entry.bedtime,
                 wearing: Set(entry.wardrobe.equipped.values),
-                framing: framing
+                framing: framing,
+                lineArt: renderingMode != .fullColor
             )
         } else {
             CompanionPortrait(
