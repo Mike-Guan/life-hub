@@ -148,6 +148,13 @@ import Testing
         #expect(KuroOneOff(.offWork(id: "2026-10-05")) == nil && KuroOneOff(nil) == nil)
         #expect(KuroOneOff(.celebrate(id: "run-1", kind: .running)) == nil)
         #expect(KuroOneOff(kind: .taskDone, id: "d").heart && !KuroOneOff(kind: .stayHome, id: "a").heart)
+        #expect(events.allSatisfy { !KuroBubbleLines.oneOff($0).isEmpty })
+        #expect(KuroBubbleLines.oneOff(.taskDone(id: "d", focus: true)) == ["……刚才很认真。"])
+        let quiet = ReturnReplay(tier: .box, cards: [], cans: 0)
+        #expect(KuroBubbleLines.oneOff(.welcomeBack(id: "w", replay: quiet)) == ["……坐这边。"])
+        #expect(KuroBubbleLines.oneOff(.welcomeBack(id: "w", replay: ReturnReplay(tier: .box, cards: [], cans: 3)))
+            == ["……没在等。真的。"])
+        #expect(KuroBubbleLines.oneOff(.offWork(id: "x")).isEmpty)
         // Each one plays her look's tap move, which never leaves her pose unchanged.
         for look in KuroLook.allCases {
             let rest = KuroPose(look: look, energy: 50)

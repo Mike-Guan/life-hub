@@ -13,7 +13,7 @@ struct KuroOneOff: Equatable, Sendable {
     let id: String
 
     /// Seconds after a welcome back event before the app is told she is done.
-    static let welcomeLength: TimeInterval = 1.6
+    static let welcomeLength: TimeInterval = 2.4
 
     /// The one-off `event` brings, or nil for none or an event with its own handling.
     init?(_ event: CompanionEvent?) {

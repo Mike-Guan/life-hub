@@ -519,10 +519,11 @@ public struct KuroView: View {
         }
         if let oneOff = KuroOneOff(event), oneOff.id != last(oneOff) {
             markPlayed(oneOff)
-            // KURO-04: until she has her own animation for each (新角色清单), she plays her tap move, no line yet.
+            // KURO-04: until she has her own animation for each (新角色清单), she plays her tap move.
             play(KuroTap(look: look, sleepy: false), at: .now)
             tapHeart = oneOff.heart
             if style == .watch { pokes += 1 }
+            if showsBubble, let line = KuroBubbleLines.oneOff(event).randomElement() { say(line, for: 3) }
         }
     }
 
