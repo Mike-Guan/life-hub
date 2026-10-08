@@ -61,7 +61,7 @@ Linux 上的检查不占 Mac 额度（私有仓库 Mac 分钟按 10 倍算）。
 
 ## 动画录屏（`.github/workflows/recordings.yml`）
 
-手动触发，或推送到 `chore/recordings` 分支时跑，不在 PR 和 `main` 上跑。iPhone 首页和手表表盘，每个模式 × 每个角色录 10 秒（不开减弱动态效果），手表另录加班，每段附一张最后一帧的截图，作为产物 `recordings` 上传，保留 14 天，不提交进仓库。用来审动画。脚本 `scripts/recordings.sh`。
+手动触发，或推送到 `chore/recordings` 分支时跑，不在 PR 和 `main` 上跑。iPhone 首页和手表表盘，每个模式 × 每个角色录 10 秒（不开减弱动态效果），手表另录加班，每段附一张最后一帧的截图，作为产物 `recordings` 上传（保留 14 天），同时强推到一次性分支 `out/recordings`（只有一个提交，不合并），给下载不了产物的线程用 git 取。不进 `main`。用来审动画。脚本 `scripts/recordings.sh`。
 
 ## 本地
 

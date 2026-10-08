@@ -1,7 +1,8 @@
 name: recordings
 
 # Records 10 s clips of the iPhone home screen and the watch face in each mode and character, with motion
-# on, for reviewing animation. Clips are uploaded as an artifact only, never committed.
+# on, for reviewing animation. Clips go to the artifact and to the throwaway branch out/recordings (force-pushed,
+# one commit, never merged), because some readers can't download artifacts. Never committed to main.
 on:
   workflow_dispatch:
   push:
@@ -13,13 +14,13 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   recordings:
     name: Record animation clips
     runs-on: macos-15
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
 
@@ -43,3 +44,17 @@ jobs:
           path: build/recordings
           retention-days: 14
           if-no-files-found: ignore
+
+      - name: Push clips to out/recordings
+        if: always()
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          [ -d build/recordings ] || exit 0
+          cd build/recordings
+          git init -q -b out/recordings
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Animation clips from ${GITHUB_SHA::7}"
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" out/recordings
