@@ -290,8 +290,6 @@ public struct KuroView: View {
 
     private var reduceMotion: Bool { frameReduceMotion ?? systemReduceMotion }
 
-    private var reduceMotion: Bool { frameReduceMotion ?? systemReduceMotion }
-
     /// - Parameters:
     ///   - look: what she wears.
     ///   - energy: energy 0-100, or nil when unknown. Below 30 she looks tired; from 70 she looks bright.
