@@ -215,6 +215,9 @@ public struct KuroView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.isLuminanceReduced) private var dozing
+    /// True for a moment after the watch screen comes back on, while the figure stays still.
+    @State private var settling = false
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
     @State private var pop = 0
@@ -283,8 +286,8 @@ public struct KuroView: View {
                 .animation(.easeInOut(duration: 0.25), value: look)
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
 
-            let paused = reduceMotion || scenePhase != .active
-            TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+            let paused = reduceMotion || asleep || settling
+            TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                 let time = context.date.timeIntervalSinceReferenceDate
                 let tap = reaction(at: time)
                 let unbox = unbox(at: time)
@@ -325,7 +328,7 @@ public struct KuroView: View {
             .padding(.horizontal, 12)
 
             if unboxStart != nil {
-                TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+                TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                     let time = context.date.timeIntervalSinceReferenceDate
                     if unbox(at: time)?.stars == true {
                         KuroStarBubble(time: time).frame(width: 72).padding(10)
@@ -365,10 +368,25 @@ public struct KuroView: View {
         }
         .onAppear { playEventIfNew() }
         .onChange(of: event) { _, _ in playEventIfNew() }
+        .onChange(of: asleep) { _, new in
+            // Same as HAKU: she holds still for a second after the watch screen comes back on.
+            guard !new, style == .watch else { return }
+            settling = true
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                settling = false
+            }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(look, bedtime: bedtime, pose: pose))
         .accessibilityAddTraits(showsBubble || style == .watch || onTap != nil ? .isButton : [])
     }
+
+    /// The app is in the background or the watch screen is dimmed.
+    private var asleep: Bool { scenePhase != .active || dozing }
+
+    /// Seconds between animation frames: fewer on the watch.
+    private var frameInterval: Double { style == .watch ? 1 / 15 : 1 / 30 }
 
     private var listensForShakes: Bool { style != .notification && scenePhase == .active && !reduceMotion }
 

@@ -57,6 +57,8 @@ public struct CompanionView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
+    /// True for a moment after the watch screen comes back on, while the figure stays still.
+    @State private var settling = false
     @State private var pop = 0
     @State private var taps = 0
     @State private var goodnightStart: Date?
@@ -193,7 +195,7 @@ public struct CompanionView: View {
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: closeUp)
 
             if welcomeStart != nil, let replay = welcomeReplay {
-                TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+                TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                     welcomeChips(replay, at: context.date.timeIntervalSinceReferenceDate)
                 }
             }
@@ -261,6 +263,15 @@ public struct CompanionView: View {
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
         }
+        .onChange(of: asleep) { _, new in
+            // Waking the watch screen and starting 146 parts at once froze the app, so he holds still for a second.
+            guard !new, style == .watch else { return }
+            settling = true
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                settling = false
+            }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
         .accessibilityAddTraits(.isButton)
@@ -269,7 +280,7 @@ public struct CompanionView: View {
     @ViewBuilder private var character: some View {
         if let mode {
             KeyframeAnimator(initialValue: 0.0, trigger: taps) { react in
-                TimelineView(.animation(minimumInterval: 1 / 30, paused: paused)) { context in
+                TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                     let time = context.date.timeIntervalSinceReferenceDate
                     let life = idleLife(mode, at: context.date)
                     let motion = idleMotion(mode, life: life, time: time)
@@ -368,7 +379,13 @@ public struct CompanionView: View {
         return IdleLife.at(date, stamina: vitals.stamina)
     }
 
-    private var paused: Bool { reduceMotion || scenePhase != .active || dozing }
+    private var paused: Bool { reduceMotion || asleep || settling }
+
+    /// The app is in the background or the watch screen is dimmed.
+    private var asleep: Bool { scenePhase != .active || dozing }
+
+    /// Seconds between animation frames: fewer on the watch.
+    private var frameInterval: Double { style == .watch ? 1 / 15 : 1 / 30 }
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
         if pokeKind == .rollOver, let progress = poke(at: time) {
