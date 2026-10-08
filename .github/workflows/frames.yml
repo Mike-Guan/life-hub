@@ -37,13 +37,7 @@ jobs:
         timeout-minutes: 25
         run: |
           mkdir -p frames
-<<<<<<< HEAD
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.lockScreenHeads
           FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.kuroSlot
-=======
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter "FrameSheets.lockScreen"
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets --skip hakuMoments
->>>>>>> chore/frames
           ls -l frames
 
       # The moments sheet is the largest; kept apart so the other sheets still upload if it runs long.
