@@ -56,7 +56,7 @@ struct ShakeDetector: Sendable {
     static let needed: TimeInterval = 0.2
     /// The longest gap between two samples that is counted as hard-moving time, in seconds.
     static let maxStep: TimeInterval = 0.1
-    /// Time after a shake before the next one counts, in seconds.
+    /// Calm time after a shake before the next one counts, in seconds.
     static let cooldown: TimeInterval = 1.5
 
     // A real shake on Mike's watch stays at 7 to 12 g for the whole round without dropping in between, so it is
@@ -76,7 +76,12 @@ struct ShakeDetector: Sendable {
         let step = gap > 0 && gap <= Self.maxStep ? gap : 0
         lastSample = time
         strong.removeAll { time - $0.time >= Self.window }
-        guard magnitude >= Self.threshold, time - lastShake >= Self.cooldown else { return false }
+        guard magnitude >= Self.threshold else { return false }
+        // Still shaking after a shake keeps it the same shake: the cooldown starts again.
+        guard time - lastShake >= Self.cooldown else {
+            lastShake = time
+            return false
+        }
         strong.append((time, step))
         guard strong.reduce(0, { $0 + $1.length }) >= Self.needed else { return false }
         lastShake = time

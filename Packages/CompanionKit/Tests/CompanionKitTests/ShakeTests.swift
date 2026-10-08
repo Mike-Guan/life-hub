@@ -41,8 +41,8 @@ import Testing
 
     @Test func aRoundOfShakingIsOneShake() {
         var detector = ShakeDetector()
-        // Measured on the watch: 7 to 12 g for the whole round, never dropping in between.
-        let shakes = feed(&detector, from: 10, seconds: 1.2) { 7 + 5 * abs(sin($0 * 20)) }
+        // Like a real shake on the watch: 7 to 12 g for a 2.5 s round, never dropping in between.
+        let shakes = feed(&detector, from: 10, seconds: 2.5) { 7 + 5 * abs(sin($0 * 20)) }
         #expect(shakes.count == 1)
         #expect(shakes.first.map { $0 - 10 < 0.3 } == true)
     }
@@ -50,7 +50,7 @@ import Testing
     @Test func shakingAgainAfterTheCooldownCountsAgain() {
         var detector = ShakeDetector()
         let first = feed(&detector, from: 10, seconds: 0.5) { _ in 8 }
-        let second = feed(&detector, from: 12, seconds: 0.5) { _ in 8 }
+        let second = feed(&detector, from: 12.5, seconds: 0.5) { _ in 8 }
         #expect(first.count == 1 && second.count == 1)
     }
 
@@ -62,7 +62,7 @@ import Testing
 
     @Test func aKnockIsNotAShake() {
         var detector = ShakeDetector()
-        // Under 0.2 s above the threshold, like setting the phone down hard.
+        // Shaking once and stopping: under 0.2 s above the threshold.
         let shakes = feed(&detector, from: 5, seconds: 1) { $0 < 5.12 ? 4 : 0.2 }
         #expect(shakes.isEmpty)
     }
