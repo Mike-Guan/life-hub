@@ -8,6 +8,8 @@ struct MoneyCard: View {
     let gap: Int
     /// The target in yen.
     let target: Int
+    /// The character whose money color fills the bar.
+    let persona: Persona
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -22,7 +24,7 @@ struct MoneyCard: View {
                 ZStack(alignment: .leading) {
                     Capsule().fill(Toy.card)
                     Capsule()
-                        .fill(Mode.money.color)
+                        .fill(Mode.money.color(for: persona))
                         .frame(width: proxy.size.width * progress)
                 }
                 .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))

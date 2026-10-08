@@ -18,7 +18,7 @@ struct UnboxSheet: View {
                     .foregroundStyle(Toy.ink)
                     .padding(.horizontal, 14)
                     .frame(height: 30)
-                    .background(Capsule().fill(Mode.money.color))
+                    .background(Capsule().fill(Mode.money.color(for: persona)))
                     .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
             }
             Text("新东西：\(item.title)")
@@ -58,7 +58,7 @@ struct UnboxSheet: View {
                     .foregroundStyle(Toy.ink)
                     .frame(maxWidth: .infinity, minHeight: 56)
             }
-            .buttonStyle(UnboxButtonStyle(fill: Mode.money.color, shadow: Toy.pink))
+            .buttonStyle(UnboxButtonStyle(fill: Mode.money.color(for: persona), shadow: Toy.pink))
             Button {
                 dismiss()
             } label: {

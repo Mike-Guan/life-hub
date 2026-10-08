@@ -54,6 +54,8 @@ jobs:
             echo "::error::Generated companion art is out of date. Run 'make art' and commit the result."
             exit 1
           fi
+      - name: Character colors in app code
+        run: scripts/persona-colors.sh
 
   lint:
     name: Format and lint

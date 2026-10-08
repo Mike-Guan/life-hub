@@ -1192,6 +1192,8 @@ struct RunnerFigure: View {
             visible.formUnion([.eyeSwirlL, .eyeSwirlR, .dizzyStar])
         }
         poked(&visible, pose: pose)
+        // Gloves fill both hands, so the peace sign never adds a third one (Mike 2026-10-07).
+        if !visible.isDisjoint(with: [.gloveL, .gloveR]) { visible.remove(.peaceHand) }
         if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }

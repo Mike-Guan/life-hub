@@ -17,7 +17,10 @@ struct BoxingCountdownWidget: Widget {
                 Spacer()
             }
             .padding()
-            .activityBackgroundTint(Mode.boxing.color)
+            // The tint is always light coral, so the text stays ink even when the system is dark.
+            .foregroundStyle(Toy.ink)
+            .activityBackgroundTint(Mode.boxing.color)  // HAKU only: KURO has no countdown.
+            .activitySystemActionForegroundColor(Toy.ink)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
