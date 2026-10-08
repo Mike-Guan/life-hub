@@ -19,6 +19,7 @@ tags: [engineering, ci, cd, quality]
 | 单元测试 | HubCore 和 CompanionKit 的测试，编译警告一律当错误 | Mac |
 | 覆盖率门槛 | HubCore（数据契约、mode 逻辑）的行覆盖率低于 80% | Mac |
 | App 编译 | iOS 和 Mac 两个 App 都要能编译，警告当错误 | Mac |
+| 手表启动 | 手表 App 在模拟器上开不起来、20 秒后进程没了，或者 10 秒里 CPU 忙到 80% 以上（HAKU 和 KURO 各开一次，截图作为产物上传）。脚本 `scripts/watch-launch-check.sh` | Mac |
 | Companion 画法 | `RunnerArt.swift` 和 `runner-v5-layers.svg` 不一致（改了 SVG 没重新生成，或手改了生成文件） | Linux，几秒 |
 
 Linux 上的检查不占 Mac 额度（私有仓库 Mac 分钟按 10 倍算）。
@@ -75,5 +76,6 @@ make hooks    # 装 pre-commit：提交前自动 lint 改动的 Swift 文件
 
 ## 已知限制
 
+- 手表启动检查只能挡住模拟器上的明显卡死。真表熄屏启动的卡死在模拟器上复现不出来（2026-10-07），装手表前要按装机前 QA 清单 §5 在真表上检查。
 - 目前只有 iOS 会上传 TestFlight。Mac 要先加 App Sandbox 权限，到 M1b 再接进发布流程。
 - CI 的格式检查用 Swift 6.2 容器里的 swift-format，本地 `make format` 用的是 Xcode 自带的版本。两边版本不同时，可能本地格式没问题、CI 却报格式错误。这时以 CI 日志为准，或者把本地 Xcode 升级到和 CI 一样的 Swift 版本。
