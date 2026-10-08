@@ -37,7 +37,7 @@ jobs:
         timeout-minutes: 25
         run: |
           mkdir -p frames
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter "FrameSheets.lockScreenTinted"
+          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter "FrameSheets.(lockScreenTinted|kuroOneOffs)"
           ls -l frames
 
       # The moments sheet is the largest; kept apart so the other sheets still upload if it runs long.
