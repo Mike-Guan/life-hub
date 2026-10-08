@@ -210,8 +210,12 @@ public struct KuroView: View {
     let wearing: Set<KuroItem>
     let event: CompanionEvent?
     let showsBubble: Bool
+    /// Increment to play her cheer: her look's move with a hop.
+    let cheer: Int
     /// Called after KURO reacts to a tap, for example to switch the 副业 state.
     let onTap: (() -> Void)?
+    /// Called once she has answered a welcome back event.
+    let onWelcomeDone: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -239,6 +243,12 @@ public struct KuroView: View {
     @AppStorage("companion.lastCelebration") private var lastCelebration = ""
     // Day of the last off-work move, shared with HAKU's view so it plays once a day.
     @AppStorage("companion.lastOffWork") private var lastOffWork = ""
+    // Ids of the last one-off moments, shared with HAKU's view so each plays once.
+    @AppStorage("companion.lastStayHome") private var lastStayHome = ""
+    @AppStorage("companion.lastStretched") private var lastStretched = ""
+    @AppStorage("companion.lastRevived") private var lastRevived = ""
+    @AppStorage("companion.lastTaskDone") private var lastTaskDone = ""
+    @AppStorage("companion.lastWelcome") private var lastWelcome = ""
 
     /// - Parameters:
     ///   - look: what she wears.
@@ -253,9 +263,12 @@ public struct KuroView: View {
     ///   - wearing: ids of her shop items she wears; each shows only in its own look.
     ///   - event: a one-off animation. `.unlock` with one of her items plays the unboxing once per id;
     ///     pass the item's `look` so it shows. `.celebrate` plays her look's tap move with a heart once per id.
-    ///     `.offWork` plays her look's tap move once per day.
+    ///     `.offWork` plays her look's tap move once per day. Staying home, stretching, reviving, a planned task
+    ///     done and a welcome back each play her look's tap move once per id.
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
+    ///   - cheer: increment to play her cheer.
     ///   - onTap: called after she reacts to a tap.
+    ///   - onWelcomeDone: called once she has answered a `.welcomeBack` event, even one already played.
     public init(
         look: KuroLook,
         energy: Double? = nil,
@@ -268,7 +281,9 @@ public struct KuroView: View {
         wearing: Set<String> = [],
         event: CompanionEvent? = nil,
         showsBubble: Bool = true,
-        onTap: (() -> Void)? = nil
+        cheer: Int = 0,
+        onTap: (() -> Void)? = nil,
+        onWelcomeDone: (() -> Void)? = nil
     ) {
         self.look = look
         self.energy = energy
@@ -282,7 +297,9 @@ public struct KuroView: View {
         self.wearing = KuroItem.items(wearing).subtracting([.spin])
         self.event = event
         self.showsBubble = showsBubble
+        self.cheer = cheer
         self.onTap = onTap
+        self.onWelcomeDone = onWelcomeDone
     }
 
     public var body: some View {
@@ -374,8 +391,18 @@ public struct KuroView: View {
             pop += 1
             if unboxStart == nil { say(nil) }
         }
-        .onAppear { playEventIfNew() }
-        .onChange(of: event) { _, _ in playEventIfNew() }
+        .onAppear {
+            playEventIfNew()
+            finishWelcomeIfNeeded()
+        }
+        .onChange(of: event) { _, _ in
+            playEventIfNew()
+            finishWelcomeIfNeeded()
+        }
+        .onChange(of: cheer) { _, _ in
+            guard bedtime == .off, unboxStart == nil else { return }
+            play(KuroTap(look: look, sleepy: false), at: .now)
+        }
         .onChange(of: asleep) { _, new in
             guard style == .watch else { return }
             if new {
@@ -489,6 +516,43 @@ public struct KuroView: View {
             play(KuroTap(look: look, sleepy: false), at: .now)
             if style == .watch { pokes += 1 }
             if showsBubble { say(KuroBubbleLines.offWork, for: 4) }
+        }
+        if let oneOff = KuroOneOff(event), oneOff.id != last(oneOff) {
+            markPlayed(oneOff)
+            // KURO-04: until she has her own animation for each (新角色清单), she plays her tap move, no line yet.
+            play(KuroTap(look: look, sleepy: false), at: .now)
+            tapHeart = oneOff.heart
+            if style == .watch { pokes += 1 }
+        }
+    }
+
+    /// Ends the welcome back for the app once her move has played, so what waits on it (unboxing) can show.
+    private func finishWelcomeIfNeeded() {
+        guard case .welcomeBack = event else { return }
+        Task {
+            try? await Task.sleep(for: .seconds(KuroOneOff.welcomeLength))
+            onWelcomeDone?()
+        }
+    }
+
+    /// The id stored for the last `oneOff` of its kind.
+    private func last(_ oneOff: KuroOneOff) -> String {
+        switch oneOff.kind {
+        case .stayHome: lastStayHome
+        case .stretched: lastStretched
+        case .revived: lastRevived
+        case .taskDone: lastTaskDone
+        case .welcomeBack: lastWelcome
+        }
+    }
+
+    private func markPlayed(_ oneOff: KuroOneOff) {
+        switch oneOff.kind {
+        case .stayHome: lastStayHome = oneOff.id
+        case .stretched: lastStretched = oneOff.id
+        case .revived: lastRevived = oneOff.id
+        case .taskDone: lastTaskDone = oneOff.id
+        case .welcomeBack: lastWelcome = oneOff.id
         }
     }
 

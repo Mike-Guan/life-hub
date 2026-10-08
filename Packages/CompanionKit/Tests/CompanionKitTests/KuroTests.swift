@@ -138,6 +138,24 @@ import Testing
         #expect(KuroBubbleLines.offWork == "……お疲れ。")
     }
 
+    // KURO-04 (UI 审核 2026-10-08): staying home, stretching, reviving, Daily done and welcome back played nothing.
+    @Test func herOneOffsEachGetAMove() {
+        let events: [CompanionEvent] = [
+            .stayHome(id: "a"), .stretched(id: "b"), .revived(id: "c"), .taskDone(id: "d", focus: false),
+        ]
+        #expect(events.compactMap { KuroOneOff($0)?.kind } == [.stayHome, .stretched, .revived, .taskDone])
+        #expect(KuroOneOff(.taskDone(id: "d", focus: true)) == KuroOneOff(kind: .taskDone, id: "d"))
+        #expect(KuroOneOff(.offWork(id: "2026-10-05")) == nil && KuroOneOff(nil) == nil)
+        #expect(KuroOneOff(.celebrate(id: "run-1", kind: .running)) == nil)
+        #expect(KuroOneOff(kind: .taskDone, id: "d").heart && !KuroOneOff(kind: .stayHome, id: "a").heart)
+        // Each one plays her look's tap move, which never leaves her pose unchanged.
+        for look in KuroLook.allCases {
+            let rest = KuroPose(look: look, energy: 50)
+            let moving = rest.reacting(KuroTap(look: look, sleepy: false), progress: 0.3)
+            #expect(KuroFigure.parts(for: look, pose: moving) != KuroFigure.parts(for: look, pose: rest))
+        }
+    }
+
     @Test func eachLookMapsBackToItsMode() {
         #expect(KuroLook.allCases.allSatisfy { KuroLook(mode: $0.mode) == $0 })
     }

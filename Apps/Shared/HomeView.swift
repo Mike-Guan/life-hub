@@ -110,7 +110,11 @@ struct HomeView: View {
                             moment: moment(at: context.date),
                             overtimeUntil: rules.eveningUntil(at: context.date),
                             wearing: Set(wardrobe.equipped.values),
-                            event: event
+                            event: welcomeBack ?? event ?? revived(at: context.date)
+                                ?? sit?.stretched(at: context.date)
+                                ?? stayHome(at: context.date) ?? dailyDone,
+                            cheer: cheer,
+                            onWelcomeDone: onWelcomeDone
                         )
                     } else {
                         CompanionView(
