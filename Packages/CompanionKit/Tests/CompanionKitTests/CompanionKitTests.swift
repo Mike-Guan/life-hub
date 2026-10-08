@@ -997,8 +997,20 @@ import Testing
         #expect(ItemPicture(slot: .room, outfit: Outfit(), itemID: nil).parts.isEmpty)
     }
 
-    @Test func slotsHaveTheirOwnTileColors() {
-        #expect(Set(Slot.allCases.map(\.tileColor)).count == Slot.allCases.count)
+    @Test(arguments: Persona.allCases)
+    func slotsHaveTheirOwnTileColors(_ persona: Persona) {
+        #expect(Set(Slot.allCases.map { $0.tileColor(for: persona) }).count == Slot.allCases.count)
+    }
+
+    // UI-01 (UI 审核 2026-10-08, regression of 10-07): KURO's shop and wardrobe tiles used HAKU's mode colors.
+    @Test func kurosTilesUseHerLookColors() {
+        let hers = Set(KuroLook.allCases.map(\.color))
+        for slot in Slot.allCases where slot.tileMode != nil {
+            #expect(hers.contains(slot.tileColor(for: .kuro)))
+            #expect(slot.tileColor(for: .kuro) != slot.tileColor)
+        }
+        #expect(Slot.gloves.tileColor(for: .kuro) == KuroLook.tennis.color)
+        #expect(Slot.allCases.map(\.tileColor) == Slot.allCases.map { $0.tileColor(for: .haku) })
     }
 
     @Test func eachUnboxingPlaysOnce() {
