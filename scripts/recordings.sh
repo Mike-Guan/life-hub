@@ -56,8 +56,6 @@ udid=$(xcrun simctl list devices available -j |
 xcrun simctl boot "$udid" || true
 note "booting iPhone"
 bounded 300 xcrun simctl bootstatus "$udid" -b || true
-xcrun simctl spawn "$udid" defaults write -g AppleLanguages -array zh-Hans
-xcrun simctl spawn "$udid" defaults write -g AppleLocale zh_CN
 xcrun simctl spawn "$udid" defaults write com.apple.Accessibility ReduceMotionEnabled -bool false
 xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100
 note "building iPhone app"
@@ -70,7 +68,7 @@ bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$ios_app/Info.pl
 for persona in "${personas[@]}"; do
   for mode in "${modes[@]}"; do
     bounded 60 xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode" \
-      -screenshot-persona "$persona" || continue
+      -screenshot-persona "$persona" -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN || continue
     sleep 3
     record "$udid" "$out/ios-$persona-$mode"
   done
@@ -90,8 +88,6 @@ fi
 xcrun simctl boot "$watch_udid" || true
 note "booting watch"
 bounded 300 xcrun simctl bootstatus "$watch_udid" -b || true
-xcrun simctl spawn "$watch_udid" defaults write -g AppleLanguages -array zh-Hans
-xcrun simctl spawn "$watch_udid" defaults write -g AppleLocale zh_CN
 note "building watch app"
 xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-Watch -configuration Debug \
   -destination "id=$watch_udid" -derivedDataPath build CODE_SIGNING_ALLOWED=NO
@@ -119,7 +115,8 @@ watch_clip() {
 "energy":"okay","line":"","updatedAt":"$now"},"scenes":$3}
 JSON
   done
-  bounded 60 xcrun simctl launch --terminate-running-process "$watch_udid" "$watch_bundle" >/dev/null || return 0
+  bounded 60 xcrun simctl launch --terminate-running-process "$watch_udid" "$watch_bundle" \
+    -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN >/dev/null || return 0
   sleep 4
   record "$watch_udid" "$out/$4"
 }
