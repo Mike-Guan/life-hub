@@ -1,0 +1,45 @@
+name: recordings
+
+# Records 10 s clips of the iPhone home screen and the watch face in each mode and character, with motion
+# on, for reviewing animation. Clips are uploaded as an artifact only, never committed.
+on:
+  workflow_dispatch:
+  push:
+    branches: [chore/recordings]
+    paths: [.github/workflows/recordings.yml, scripts/recordings.sh]
+
+concurrency:
+  group: recordings-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  recordings:
+    name: Record animation clips
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Select Xcode 26
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Record clips
+        run: scripts/recordings.sh
+
+      - name: Upload clips
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recordings
+          path: build/recordings
+          retention-days: 14
+          if-no-files-found: ignore

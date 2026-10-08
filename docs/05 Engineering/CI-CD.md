@@ -59,6 +59,10 @@ Linux 上的检查不占 Mac 额度（私有仓库 Mac 分钟按 10 倍算）。
 - 上 TestFlight 和正式版要先用 Mike 的开发者账号向 Apple 申请 Family Controls 分发权限（Issue #23）。批下来之前，Staging 和 Release 的 entitlements 里没有它（`project.yml` 只在 Debug 用 `*-Debug.entitlements`），这样上传不会因为签名失败；这两个版本里点「选 App」会显示 Screen Time 没打开，RUNNER 用「晚上在家 + 没走动」兜底。
 - 批下来以后：把 `com.apple.developer.family-controls` 加进 `Apps/iOS/LifeHub.entitlements` 和 `Apps/ScreenTime/LifeHubScreenTime.entitlements`，删掉两个 `-Debug` 文件和 `project.yml` 里的 Debug 覆盖。
 
+## 动画录屏（`.github/workflows/recordings.yml`）
+
+手动触发，或推送到 `chore/recordings` 分支时跑，不在 PR 和 `main` 上跑。iPhone 首页和手表表盘，每个模式 × 每个角色录 10 秒（不开减弱动态效果），作为产物 `recordings` 上传，保留 14 天，不提交进仓库。用来审动画。脚本 `scripts/recordings.sh`。
+
 ## 本地
 
 ```bash
