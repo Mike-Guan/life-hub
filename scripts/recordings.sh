@@ -56,6 +56,8 @@ udid=$(xcrun simctl list devices available -j |
 xcrun simctl boot "$udid" || true
 note "booting iPhone"
 bounded 300 xcrun simctl bootstatus "$udid" -b || true
+xcrun simctl spawn "$udid" defaults write -g AppleLanguages -array zh-Hans
+xcrun simctl spawn "$udid" defaults write -g AppleLocale zh_CN
 xcrun simctl spawn "$udid" defaults write com.apple.Accessibility ReduceMotionEnabled -bool false
 xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100
 note "building iPhone app"
@@ -88,6 +90,8 @@ fi
 xcrun simctl boot "$watch_udid" || true
 note "booting watch"
 bounded 300 xcrun simctl bootstatus "$watch_udid" -b || true
+xcrun simctl spawn "$watch_udid" defaults write -g AppleLanguages -array zh-Hans
+xcrun simctl spawn "$watch_udid" defaults write -g AppleLocale zh_CN
 note "building watch app"
 xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-Watch -configuration Debug \
   -destination "id=$watch_udid" -derivedDataPath build CODE_SIGNING_ALLOWED=NO
@@ -123,8 +127,9 @@ for persona in "${personas[@]}"; do
   for mode in "${modes[@]}"; do
     watch_clip "$persona" "$mode" "[]" "watch-$persona-$mode"
   done
-  # Working late: the scene's overtimeUntil is set.
-  watch_clip "$persona" work "[{\"from\":\"$now\",\"scene\":{\"overtimeUntil\":\"$later\"}}]" \
+    # HAKU shows it as the overtime moment, KURO from overtimeUntil; the iPhone sends both.
+  watch_clip "$persona" work \
+    "[{\"from\":\"$now\",\"scene\":{\"moment\":\"overtime\",\"overtimeUntil\":\"$later\"}}]" \
     "watch-$persona-overtime"
 done
 note "done"
