@@ -49,6 +49,16 @@ struct WatchHomeView: View {
         }
     }
 
+    // Used by scripts/recordings.sh for promo stills. Debug builds only.
+    /// Launch argument `-clean-frame` hides the mode chip, so only the character shows.
+    private static var cleanFrame: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-clean-frame")
+        #else
+        false
+        #endif
+    }
+
     /// Page 1: the mode's color to every edge, the character from the chest up, and a small mode chip.
     private func companionPage(_ payload: WatchPayload, mode: Mode, at date: Date) -> some View {
         let snapshot = payload.snapshot
@@ -95,7 +105,9 @@ struct WatchHomeView: View {
         .ignoresSafeArea()
         .overlay(alignment: .topLeading) {
             VStack(alignment: .leading, spacing: 4) {
-                ModeChip(mode: mode, persona: payload.persona, since: snapshot.since)
+                if !Self.cleanFrame {
+                    ModeChip(mode: mode, persona: payload.persona, since: snapshot.since)
+                }
                 if let failure {
                     Text(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2)
                 }

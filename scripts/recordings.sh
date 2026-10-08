@@ -106,6 +106,7 @@ done < <(xcrun simctl get_app_container "$watch_udid" "$watch_bundle" groups 2>/
 now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 later=$(date -u -v+2H +%Y-%m-%dT%H:%M:%SZ)
 # Writes a payload for `persona` in `mode`, with `scenes` JSON, launches the app and records it as `name`.
+# Extra arguments go to the app.
 watch_clip() {
   local folder
   for folder in "${folders[@]}"; do
@@ -116,7 +117,7 @@ watch_clip() {
 JSON
   done
   bounded 60 xcrun simctl launch --terminate-running-process "$watch_udid" "$watch_bundle" \
-    -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN >/dev/null || return 0
+    -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN "${@:5}" >/dev/null || return 0
   sleep 4
   record "$watch_udid" "$out/$4"
 }
@@ -128,6 +129,16 @@ for persona in "${personas[@]}"; do
   watch_clip "$persona" work \
     "[{\"from\":\"$now\",\"scene\":{\"moment\":\"overtime\",\"overtimeUntil\":\"$later\"}}]" \
     "watch-$persona-overtime"
+done
+
+# Promo stills: HAKU with no mode chip, and the top strip with the clock cropped off.
+overtime="[{\"from\":\"$now\",\"scene\":{\"moment\":\"overtime\",\"overtimeUntil\":\"$later\"}}]"
+watch_clip haku work "[]" watch-haku-work-clean -clean-frame
+watch_clip haku work "$overtime" watch-haku-overtime-clean -clean-frame
+for name in watch-haku-work-clean watch-haku-overtime-clean; do
+  height=$(sips -g pixelHeight "$out/$name.png" | awk '/pixelHeight/ {print $2}')
+  width=$(sips -g pixelWidth "$out/$name.png" | awk '/pixelWidth/ {print $2}')
+  sips -c $((height - 60)) "$width" --cropOffset 60 0 "$out/$name.png" --out "$out/$name.png" >/dev/null || true
 done
 note "done"
 ls -l "$out"
