@@ -44,6 +44,14 @@ import Testing
         #expect(!shake5)
     }
 
+    @Test func aQuickBackAndForthIsAShake() {
+        var detector = ShakeDetector()
+        // Two jolts of three samples each at 50 Hz, the second starting 0.12 s after the first.
+        let samples: [TimeInterval] = [20, 20.02, 20.04, 20.12, 20.14]
+        let shakes = samples.map { detector.add(magnitude: 1.6, at: $0) }
+        #expect(shakes == [false, false, false, true, false])
+    }
+
     @Test func gentleOrSlowMovesAreNotShakes() {
         var detector = ShakeDetector()
         let shake6 = detector.add(magnitude: 1.2, at: 1)

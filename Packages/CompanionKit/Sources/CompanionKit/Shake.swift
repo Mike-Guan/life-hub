@@ -50,12 +50,15 @@ enum ShakeReaction: Sendable, Equatable, CaseIterable {
 struct ShakeDetector: Sendable {
     /// Acceleration a jolt must reach, in g, gravity excluded.
     static let threshold = 1.4
-    /// Time between the two jolts of one shake, in seconds.
-    static let pairGap: ClosedRange<TimeInterval> = 0.12...0.6
+    /// Time between the starts of the two jolts of one shake, in seconds.
+    static let pairGap: ClosedRange<TimeInterval> = 0.08...0.6
+    /// Samples closer than this to the previous strong one belong to the same jolt, in seconds.
+    static let joltSpan: TimeInterval = 0.05
     /// Time after a shake before the next one counts, in seconds.
     static let cooldown: TimeInterval = 1.5
 
-    private var lastJolt = -TimeInterval.infinity
+    private var joltStart = -TimeInterval.infinity
+    private var lastStrong = -TimeInterval.infinity
     private var lastShake = -TimeInterval.infinity
 
     /// Adds a sample.
@@ -65,11 +68,16 @@ struct ShakeDetector: Sendable {
     /// - Returns: true when the sample completes a shake.
     mutating func add(magnitude: Double, at time: TimeInterval) -> Bool {
         guard magnitude >= Self.threshold, time - lastShake >= Self.cooldown else { return false }
-        let gap = time - lastJolt
-        lastJolt = time
+        // A jolt lasts several samples. Measuring from its last sample made a quick back-and-forth look too fast
+        // to count, so the gap is measured between the starts of two jolts.
+        let sameJolt = time - lastStrong < Self.joltSpan
+        lastStrong = time
+        guard !sameJolt else { return false }
+        let gap = time - joltStart
+        joltStart = time
         guard Self.pairGap.contains(gap) else { return false }
         lastShake = time
-        lastJolt = -.infinity
+        joltStart = -.infinity
         return true
     }
 }
