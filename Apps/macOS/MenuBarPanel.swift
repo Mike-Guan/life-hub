@@ -31,9 +31,7 @@ struct MenuBarPanel: View {
             }
 
             if let error = store.lastError {
-                Text(error)
-                    .font(Toy.body(11))
-                    .foregroundStyle(Toy.alert)
+                ErrorLine(text: error, size: 11)
             }
         }
         .padding(16)

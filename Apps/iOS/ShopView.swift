@@ -31,9 +31,7 @@ struct ShopView: View {
                     ownedRow(item)
                 }
                 if let buyError {
-                    Text(buyError)
-                        .font(Toy.body(12))
-                        .foregroundStyle(Toy.alert)
+                    ErrorLine(text: buyError)
                 }
                 if !keepsakes.isEmpty {
                     Text("纪念品 · 只能靠做到拿")

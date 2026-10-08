@@ -93,7 +93,6 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case scratchHand = "scratch_hand"
     case rubHand = "rub_hand"
     case earringNeon = "earring_neon"
-    case earbud
     case headband
     case headset
     case cupL = "cup_L"
@@ -261,7 +260,6 @@ enum RunnerArt {
         case .scratchHand: scratchHand()
         case .rubHand: rubHand()
         case .earringNeon: earringNeon()
-        case .earbud: earbud()
         case .headband: headband()
         case .headset: headset()
         case .cupL: cupL()
@@ -3502,40 +3500,6 @@ enum RunnerArt {
                 fill: RunnerPalette.neonCyan,
                 stroke: RunnerPalette.ink,
                 lineWidth: 1.8
-            )
-        ]
-    }
-
-    private static func earbud() -> [RunnerInk] {
-        [
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 34.5, y: 70))
-                    p.addCurve(
-                        to: .init(x: 31, y: 73.5),
-                        control1: .init(x: 34.5, y: 71.93),
-                        control2: .init(x: 32.93, y: 73.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 27.5, y: 70),
-                        control1: .init(x: 29.07, y: 73.5),
-                        control2: .init(x: 27.5, y: 71.93)
-                    )
-                    p.addCurve(
-                        to: .init(x: 31, y: 66.5),
-                        control1: .init(x: 27.5, y: 68.07),
-                        control2: .init(x: 29.07, y: 66.5)
-                    )
-                    p.addCurve(
-                        to: .init(x: 34.5, y: 70),
-                        control1: .init(x: 32.93, y: 66.5),
-                        control2: .init(x: 34.5, y: 68.07)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.white,
-                stroke: RunnerPalette.ink,
-                lineWidth: 2
             )
         ]
     }

@@ -110,7 +110,11 @@ struct HomeView: View {
                             moment: moment(at: context.date),
                             overtimeUntil: rules.eveningUntil(at: context.date),
                             wearing: Set(wardrobe.equipped.values),
-                            event: event
+                            event: welcomeBack ?? event ?? revived(at: context.date)
+                                ?? sit?.stretched(at: context.date)
+                                ?? stayHome(at: context.date) ?? dailyDone,
+                            cheer: cheer,
+                            onWelcomeDone: onWelcomeDone
                         )
                     } else {
                         CompanionView(
@@ -338,6 +342,8 @@ private struct Header: View {
                         Image(systemName: "gearshape.fill")
                             .font(Toy.body(18, weight: .heavy))
                             .foregroundStyle(Toy.ink)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("设置")
@@ -347,9 +353,7 @@ private struct Header: View {
                 .font(Toy.body(13, weight: .bold))
                 .foregroundStyle(Toy.muted)
             if let error {
-                Text(error)
-                    .font(Toy.body(12))
-                    .foregroundStyle(Toy.alert)
+                ErrorLine(text: error)
             }
         }
     }
