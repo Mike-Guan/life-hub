@@ -129,7 +129,7 @@ extension KuroFigure {
         case (.chinTap, .overtimeHand):
             // Two taps on the cheek between 0.15 and 0.75.
             guard (0.15..<0.75).contains(p) else { return .zero }
-            return CGSize(width: 0, height: -2.5 * abs(sin((p - 0.15) / 0.6 * 2 * .pi)))
+            return CGSize(width: 0, height: -4 * abs(sin((p - 0.15) / 0.6 * 2 * .pi)))
         default:
             return .zero
         }
