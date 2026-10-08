@@ -87,7 +87,7 @@ enum KuroBubbleLines {
     static func oneOff(_ event: CompanionEvent?) -> [String] {
         switch event {
         case .stayHome: ["……今天不出门。", "门外的事，明天再说。", "……就在家。嗯。"]
-        case .stretched: ["……腰，好一点了。", "ちょっと休憩、おしまい。"]
+        case .stretched: ["……腰，好一点了。", "ちょっと休憩。……好了。"]
         case .revived: ["……电量，回来一格。", "嗯。又活了。"]
         case .taskDone(_, let focus): focus ? ["……刚才很认真。"] : ["……划掉了。", "做完了。……不错。"]
         case .welcomeBack(_, let replay):
