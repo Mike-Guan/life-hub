@@ -227,7 +227,8 @@ public struct KuroView: View {
     let onTap: (() -> Void)?
 
     @Environment(\.frameClock) private var frameClock
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.frameReduceMotion) private var frameReduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
     /// True for a moment after the watch screen comes back on, while the figure stays still.
@@ -251,6 +252,8 @@ public struct KuroView: View {
     @AppStorage("companion.lastUnlock") private var lastUnlock = ""
     // Id of the last workout cheered, shared with HAKU's view so each plays once.
     @AppStorage("companion.lastCelebration") private var lastCelebration = ""
+
+    private var reduceMotion: Bool { frameReduceMotion ?? systemReduceMotion }
 
     /// - Parameters:
     ///   - look: what she wears.

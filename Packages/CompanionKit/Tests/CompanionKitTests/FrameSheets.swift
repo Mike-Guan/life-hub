@@ -30,9 +30,10 @@ struct FrameSheets {
         var rows: [Row] = []
         for mode in Mode.allCases {
             for (name, energy) in Self.energies {
-                rows.append(Row(label: "\(mode.rawValue) · \(name)", start: Self.base) {
-                    AnyView(CompanionView(mode: mode, energy: energy))
-                })
+                rows.append(
+                    Row(label: "\(mode.rawValue) · \(name)", start: Self.base) {
+                        AnyView(CompanionView(mode: mode, energy: energy))
+                    })
             }
         }
         try write("haku-1-modes", rows)
@@ -87,9 +88,10 @@ struct FrameSheets {
             }
         }
         for mode in Mode.allCases {
-            rows.append(Row(label: "\(mode.rawValue) · bedtime", start: Self.base) {
-                AnyView(CompanionView(mode: mode, energy: 50, bedtime: .on))
-            })
+            rows.append(
+                Row(label: "\(mode.rawValue) · bedtime", start: Self.base) {
+                    AnyView(CompanionView(mode: mode, energy: 50, bedtime: .on))
+                })
         }
         try write("haku-5-activities-bedtime", rows)
     }
@@ -98,9 +100,10 @@ struct FrameSheets {
         var rows: [Row] = []
         for mode in Mode.allCases {
             for (name, energy) in Self.energies {
-                rows.append(Row(label: "watch · \(mode.rawValue) · \(name)", start: Self.base) {
-                    AnyView(CompanionView(mode: mode, energy: energy, style: .watch))
-                })
+                rows.append(
+                    Row(label: "watch · \(mode.rawValue) · \(name)", start: Self.base) {
+                        AnyView(CompanionView(mode: mode, energy: energy, style: .watch))
+                    })
             }
         }
         try write("haku-6-watch", rows, size: CGSize(width: 198, height: 242))
@@ -110,18 +113,21 @@ struct FrameSheets {
         var rows: [Row] = []
         for look in KuroLook.allCases {
             for (name, energy) in Self.energies {
-                rows.append(Row(label: "kuro \(look) · \(name)", start: Self.base) {
-                    AnyView(KuroView(look: look, energy: energy))
-                })
+                rows.append(
+                    Row(label: "kuro \(look) · \(name)", start: Self.base) {
+                        AnyView(KuroView(look: look, energy: energy))
+                    })
             }
-            rows.append(Row(label: "kuro \(look) · bedtime", start: Self.base) {
-                AnyView(KuroView(look: look, energy: 50, bedtime: .on))
-            })
+            rows.append(
+                Row(label: "kuro \(look) · bedtime", start: Self.base) {
+                    AnyView(KuroView(look: look, energy: 50, bedtime: .on))
+                })
         }
-        rows.append(Row(label: "kuro work · overtime", start: Self.base) {
-            let until = Self.base.addingTimeInterval(9 * 3600)
-            return AnyView(KuroView(look: .work, energy: 50, moment: .overtime, overtimeUntil: until))
-        })
+        rows.append(
+            Row(label: "kuro work · overtime", start: Self.base) {
+                let until = Self.base.addingTimeInterval(9 * 3600)
+                return AnyView(KuroView(look: .work, energy: 50, moment: .overtime, overtimeUntil: until))
+            })
         try write("kuro-1-looks", rows)
     }
 
@@ -129,9 +135,10 @@ struct FrameSheets {
         var rows: [Row] = []
         for look in KuroLook.allCases {
             for (name, energy) in Self.energies {
-                rows.append(Row(label: "watch · kuro \(look) · \(name)", start: Self.base) {
-                    AnyView(KuroView(look: look, energy: energy, style: .watch))
-                })
+                rows.append(
+                    Row(label: "watch · kuro \(look) · \(name)", start: Self.base) {
+                        AnyView(KuroView(look: look, energy: energy, style: .watch))
+                    })
             }
         }
         try write("kuro-2-watch", rows, size: CGSize(width: 198, height: 242))
@@ -160,7 +167,7 @@ struct FrameSheets {
             rows.append(Row(label: "kuro \(look) · 减弱动态", start: Self.slotStart(.invite, lead: 0.4)) {
                 AnyView(
                     KuroView(look: look, energy: 50, need: .sitting)
-                        .environment(\.accessibilityReduceMotion, true)
+                        .environment(\.frameReduceMotion, true)
                 )
             })
         }
@@ -213,6 +220,56 @@ struct FrameSheets {
         ]
         for (name, portrait) in poses {
             try save(portrait.frame(width: 160, height: 160), as: name, scale: 3)
+        }
+    }
+
+    // UI-03: the tinted Lock Screen keeps only alpha. StatusWidget turns the head into a line drawing with
+    // colorInvert + luminanceToAlpha; this draws that result as the system would, in white (vibrant) and blue
+    // (accented), on a dark and a light wallpaper.
+    @Test func lockScreenTinted() throws {
+        let tints: [(String, Color, Color)] = [
+            ("vibrant 深", .white.opacity(0.9), Color(white: 0.15)),
+            ("vibrant 浅", .white.opacity(0.9), Color(white: 0.7)),
+            ("accented", Color(red: 0.35, green: 0.6, blue: 1), Color(white: 0.1)),
+        ]
+        let sheet = VStack(alignment: .leading, spacing: 10) {
+            Text("lockscreen-tinted · 锁屏着色模拟（StatusWidget head）")
+                .font(.system(size: 15, weight: .bold, design: .monospaced))
+            ForEach(Persona.allCases, id: \.self) { persona in
+                ForEach(tints.indices, id: \.self) { index in
+                    let (name, tint, wallpaper) = tints[index]
+                    HStack(spacing: 6) {
+                        Text("\(persona.rawValue) · \(name)")
+                            .font(.system(size: 13, weight: .bold, design: .monospaced))
+                            .frame(width: 190, alignment: .leading)
+                        ForEach(Mode.allCases, id: \.self) { mode in
+                            ZStack {
+                                wallpaper
+                                Circle().fill(.white.opacity(0.18)).frame(width: 76, height: 76)
+                                tint.mask {
+                                    Self.head(persona, mode)
+                                        .colorInvert()
+                                        .luminanceToAlpha()
+                                }
+                                .frame(width: 68, height: 68)
+                            }
+                            .frame(width: 110, height: 110)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        try save(sheet, as: "lockscreen-tinted", scale: 3)
+    }
+
+    /// The Lock Screen head for `persona` in `mode`.
+    @ViewBuilder static func head(_ persona: Persona, _ mode: Mode) -> some View {
+        if persona == .kuro {
+            KuroPortrait(look: KuroLook(mode: mode), energy: 50, framing: .head)
+        } else {
+            CompanionPortrait(mode: mode, energy: 50, framing: .head)
         }
     }
 
