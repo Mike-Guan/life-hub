@@ -30,7 +30,8 @@ done < <(xcrun simctl get_app_container "$udid" "$bundle" groups 2>/dev/null || 
 
 # CPU time of `pid` in hundredths of a second; ps prints [hh:]mm:ss.cc.
 cpu_centiseconds() {
-  ps -o cputime= -p "$1" | awk -F'[:.]' '{n = NF; print (($(n - 3) + 0) * 3600 + $(n - 2) * 60 + $(n - 1)) * 100 + $n}'
+  # cputime is mm:ss.cc or hh:mm:ss.cc.
+  ps -o cputime= -p "$1" | awk -F'[:.]' '{s = 0; for (i = 1; i < NF; i++) s = s * 60 + $i; print s * 100 + $NF}'
 }
 
 now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
