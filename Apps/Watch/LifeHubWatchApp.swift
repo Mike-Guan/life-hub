@@ -164,6 +164,10 @@ private struct ModeChip: View {
         .font(Toy.body(12, weight: .heavy))
         .foregroundStyle(Toy.ink)
         .lineLimit(1)
+        .minimumScaleFactor(0.75)
+        // The clock sits top right; a long relative time must shrink, not run under it.
+        .frame(maxWidth: 112, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal, 9)
         .padding(.vertical, 3)
         .background(Capsule().fill(Toy.card))

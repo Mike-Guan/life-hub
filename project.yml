@@ -71,6 +71,8 @@ targets:
         # The launch screen (dark background, HAKU icon) lives in this file; the other keys are generated.
         INFOPLIST_FILE: Apps/iOS/Info.plist
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        # Style E is drawn on light paper only; in dark mode the status bar text turned white on cream.
+        INFOPLIST_KEY_UIUserInterfaceStyle: Light
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_NSSupportsLiveActivities: YES
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Life Hub 用位置判断你是不是到了拳馆、公司或家：到拳馆和公司自动切模式，在家用来看你是不是窝着。位置只在这台 iPhone 上用，不会上传。"
