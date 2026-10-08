@@ -46,16 +46,23 @@ enum ShakeReaction: Sendable, Equatable, CaseIterable {
     }
 }
 
-/// Turns acceleration samples into shakes: two hard jolts in quick succession, then a pause.
+// Real shaking is a run of jolts well under 0.12 s apart, so the first rule (two jolts with a pause between
+// them) never fired on a phone or a watch: the harder the shake, the less it counted.
+/// Turns acceleration samples into shakes: a few hard jolts within a second.
 struct ShakeDetector: Sendable {
     /// Acceleration a jolt must reach, in g, gravity excluded.
-    static let threshold = 1.8
-    /// Time between the two jolts of one shake, in seconds.
-    static let pairGap: ClosedRange<TimeInterval> = 0.12...0.6
+    static let threshold = 1.4
+    /// Acceleration below which a jolt is over, so the samples of one jolt count once.
+    static let release = 0.7
+    /// Jolts that make one shake.
+    static let jolts = 3
+    /// Time the jolts of one shake must fit in, in seconds.
+    static let window: TimeInterval = 1
     /// Time after a shake before the next one counts, in seconds.
     static let cooldown: TimeInterval = 1.5
 
-    private var lastJolt = -TimeInterval.infinity
+    private var isInJolt = false
+    private var joltTimes: [TimeInterval] = []
     private var lastShake = -TimeInterval.infinity
 
     /// Adds a sample.
@@ -64,12 +71,14 @@ struct ShakeDetector: Sendable {
     ///   - time: when it was measured, in seconds.
     /// - Returns: true when the sample completes a shake.
     mutating func add(magnitude: Double, at time: TimeInterval) -> Bool {
-        guard magnitude >= Self.threshold, time - lastShake >= Self.cooldown else { return false }
-        let gap = time - lastJolt
-        lastJolt = time
-        guard Self.pairGap.contains(gap) else { return false }
+        if magnitude < Self.release { isInJolt = false }
+        guard magnitude >= Self.threshold, !isInJolt else { return false }
+        isInJolt = true
+        guard time - lastShake >= Self.cooldown else { return false }
+        joltTimes = joltTimes.filter { time - $0 <= Self.window } + [time]
+        guard joltTimes.count >= Self.jolts else { return false }
         lastShake = time
-        lastJolt = -.infinity
+        joltTimes = []
         return true
     }
 }

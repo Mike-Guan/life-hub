@@ -363,6 +363,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- Shaking the phone or the watch makes HAKU react. It never did on a real device: the rule wanted two
+  jolts with a pause between them, and real shaking has no pause. Three hard jolts within a second count now.
 - Leaving the office in the evening ends work even if that leave was missed: from 17:30, being away from the
   office or arriving home switches to Chill at the next place event or app open, also within 2 hours of a
   manual change, unless you changed the mode after leaving. The debug log now says why a place event kept the mode.
