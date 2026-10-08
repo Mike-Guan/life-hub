@@ -130,7 +130,7 @@ struct KuroFigure: View {
         visible.insert(pose.blinking ? .eyesClosed : part(pose.eyes))
         if !pose.tired { visible.insert(.blush) }
         if pose.overtime {
-            visible.remove(.workTablet)
+            visible.subtract([.workTablet, .workStylus])
             visible.formUnion([.overtimeDesk, .overtimeHand])
             if pose.sign != nil { visible.insert(.overtimeSign) }
         }
@@ -142,7 +142,11 @@ struct KuroFigure: View {
             visible.insert(item.part)
             if let replaced = item.replaces { visible.remove(replaced) }
         }
-        if let tap = pose.tap { apply(tap, progress: pose.tapProgress, to: &visible) }
+        if let tap = pose.tap {
+            apply(tap, progress: pose.tapProgress, to: &visible)
+            // The rubbing hand comes up on her arm, in her look's sleeve.
+            if visible.contains(.tapRub) { visible.insert(rubSleeve(look)) }
+        }
         if pose.heart { visible.insert(.tapHeart) }
         return KuroPart.allCases.filter { visible.contains($0) }
     }
@@ -150,10 +154,19 @@ struct KuroFigure: View {
     /// The parts only `look` wears.
     nonisolated private static func outfit(_ look: KuroLook) -> Set<KuroPart> {
         switch look {
-        case .work: [.jacketWork, .workTablet, .maskWork, .workBadge]
+        case .work: [.jacketWork, .workTablet, .workStylus, .maskWork, .workBadge]
         case .chill: [.jacketChill, .chillCup]
         case .tennis: [.tennisPonytail, .jacketTennis, .tennisHeadband, .tennisRacket]
         case .desk: [.jacketDesk, .deskGlasses, .deskBooks, .deskPen]
+        }
+    }
+
+    nonisolated private static func rubSleeve(_ look: KuroLook) -> KuroPart {
+        switch look {
+        case .work: .tapRubSleeveWork
+        case .chill: .tapRubSleeveChill
+        case .tennis: .tapRubSleeveTennis
+        case .desk: .tapRubSleeveDesk
         }
     }
 
