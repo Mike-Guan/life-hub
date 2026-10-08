@@ -46,6 +46,21 @@ import Testing
         #expect(shakes == [false, false, false, false, false, true, false])
     }
 
+    @Test func shakingAgainAfterTheCooldownCountsAgain() {
+        var detector = ShakeDetector()
+        let first = [10, 10.1, 10.2].map { detector.add(magnitude: 2.2, at: $0) }
+        #expect(first == [false, false, true])
+        let second = [12, 12.1, 12.2].map { detector.add(magnitude: 2.2, at: $0) }
+        #expect(second == [false, false, true])
+    }
+
+    @Test func oneLongJoltIsNotAShake() {
+        var detector = ShakeDetector()
+        // Held above the threshold at 30 Hz without a break: one jolt, however long.
+        let samples = stride(from: 5.0, to: 6.0, by: 0.033).map { detector.add(magnitude: 2.5, at: $0) }
+        #expect(!samples.contains(true))
+    }
+
     @Test func gentleOrSlowMovesAreNotShakes() {
         var detector = ShakeDetector()
         let gentle = [1, 1.3, 1.6].map { detector.add(magnitude: 1.2, at: $0) }
