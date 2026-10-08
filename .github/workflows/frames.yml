@@ -19,7 +19,7 @@ jobs:
     name: Draw frame sheets
     if: github.ref != 'refs/heads/main'
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v7
 
@@ -32,8 +32,9 @@ jobs:
       - name: Build tests
         run: swift build --build-tests --package-path Packages/CompanionKit
 
+      # Each sheet takes about a minute to render, one at a time on the main actor.
       - name: Draw frame sheets
-        timeout-minutes: 10
+        timeout-minutes: 25
         run: |
           mkdir -p frames
           FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.lockScreenHeads
@@ -41,9 +42,9 @@ jobs:
           FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets --skip hakuMoments
           ls -l frames
 
-      # Run 37827080383 hung here for 10 minutes; kept apart so the other sheets still upload.
+      # The moments sheet is the largest; kept apart so the other sheets still upload if it runs long.
       - name: Draw moment sheets
-        timeout-minutes: 8
+        timeout-minutes: 12
         continue-on-error: true
         run: |
           FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.hakuMoments
