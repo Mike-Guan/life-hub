@@ -42,6 +42,7 @@ struct SettingsView: View {
                 Spacer()
                 Button("好了") { dismiss() }
                     .font(Toy.body(15, weight: .heavy))
+                    .frame(minWidth: 44, minHeight: 44)
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -55,7 +56,7 @@ struct SettingsView: View {
                         } label: {
                             Text(choice.title)
                                 .font(Toy.body(16, weight: .heavy))
-                                .frame(maxWidth: .infinity, minHeight: 40)
+                                .frame(maxWidth: .infinity, minHeight: 44)
                         }
                         .buttonStyle(ToyButtonStyle(fill: Toy.pink, isSelected: persona == choice))
                         .accessibilityAddTraits(persona == choice ? .isSelected : [])
@@ -146,9 +147,7 @@ struct SettingsView: View {
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             if let error = daily.lastError {
-                Text(error)
-                    .font(Toy.body(12))
-                    .foregroundStyle(Toy.alert)
+                ErrorLine(text: error)
             }
         }
         .padding(16)
@@ -183,6 +182,7 @@ struct SettingsView: View {
                 if editingAmount == title {
                     Button("完成") { editingAmount = nil }
                         .font(Toy.body(14, weight: .heavy))
+                        .frame(minWidth: 44, minHeight: 44)
                 }
             }
             .padding(.horizontal, 14)
@@ -215,14 +215,13 @@ struct SettingsView: View {
                     Task { await pickApps() }
                 }
                 .font(Toy.body(13, weight: .heavy))
+                .frame(minHeight: 44)
             }
             Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             if let screenTimeError {
-                Text(screenTimeError)
-                    .font(Toy.body(12))
-                    .foregroundStyle(Toy.alert)
+                ErrorLine(text: screenTimeError)
             }
         }
         .padding(16)
