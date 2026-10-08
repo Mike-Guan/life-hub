@@ -1089,7 +1089,12 @@ public struct CompanionView: View {
         say(kind.line)
     }
 
-    private var listensForShakes: Bool { style != .notification && scenePhase == .active && !reduceMotion }
+    // A shake drops the wrist and dims the watch screen, which makes the scene inactive, so the watch keeps
+    // listening until the app goes to the background.
+    private var listensForShakes: Bool {
+        guard style != .notification, !reduceMotion else { return false }
+        return style == .watch ? scenePhase != .background : scenePhase == .active
+    }
 
     /// Reacts to each shake of the phone or the watch while the view is on screen and the app is active.
     private func listenForShakes() async {

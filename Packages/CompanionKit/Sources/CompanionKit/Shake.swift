@@ -49,7 +49,7 @@ enum ShakeReaction: Sendable, Equatable, CaseIterable {
 /// Turns acceleration samples into shakes: two hard jolts in quick succession, then a pause.
 struct ShakeDetector: Sendable {
     /// Acceleration a jolt must reach, in g, gravity excluded.
-    static let threshold = 1.8
+    static let threshold = 1.4
     /// Time between the two jolts of one shake, in seconds.
     static let pairGap: ClosedRange<TimeInterval> = 0.12...0.6
     /// Time after a shake before the next one counts, in seconds.
@@ -95,7 +95,7 @@ enum DeviceShakes {
                     return
                 }
                 listener.manager = manager
-                manager.deviceMotionUpdateInterval = 1.0 / 30
+                manager.deviceMotionUpdateInterval = 1.0 / 50
                 manager.startDeviceMotionUpdates(to: listener.queue) { motion, _ in
                     guard let motion else { return }
                     let a = motion.userAcceleration
