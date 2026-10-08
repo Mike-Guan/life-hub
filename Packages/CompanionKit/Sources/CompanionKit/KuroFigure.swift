@@ -220,6 +220,8 @@ public struct KuroView: View {
     @State private var settling = false
     /// Set when the watch screen has been dimmed too long to keep listening for shakes.
     @State private var shakeGraceOver = false
+    /// When the watch felt a shake with its screen dimmed, to play once the screen is back on.
+    @State private var pendingShake: Date?
     @State private var dimmedID = UUID()
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
@@ -384,6 +386,7 @@ public struct KuroView: View {
             Task {
                 try? await Task.sleep(for: .seconds(1))
                 settling = false
+                playPendingShake()
             }
         }
         .accessibilityElement(children: .ignore)
@@ -405,6 +408,22 @@ public struct KuroView: View {
         return scenePhase != .background && (!asleep || !shakeGraceOver)
     }
 
+    /// Plays her reaction to a shake, or keeps it for when the dimmed watch screen comes back on.
+    private func shaken() {
+        if style == .watch, asleep || settling {
+            pendingShake = .now
+            return
+        }
+        react()
+    }
+
+    /// Plays a shake felt while the watch screen was dimmed, if it was recent.
+    private func playPendingShake() {
+        guard let shake = pendingShake else { return }
+        pendingShake = nil
+        if Date.now.timeIntervalSince(shake) < 10 { react() }
+    }
+
     /// Stops listening for shakes 5 s after the watch screen dims, unless it comes back on first.
     private func listenAfterDimming() {
         let id = UUID()
@@ -422,7 +441,7 @@ public struct KuroView: View {
         guard listensForShakes else { return }
         try? await Task.sleep(for: DeviceShakes.startDelay)
         guard !Task.isCancelled else { return }
-        for await _ in DeviceShakes.stream() { react() }
+        for await _ in DeviceShakes.stream() { shaken() }
         #endif
     }
 

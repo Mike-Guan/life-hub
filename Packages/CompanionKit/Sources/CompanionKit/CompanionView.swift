@@ -61,6 +61,8 @@ public struct CompanionView: View {
     @State private var settling = false
     /// Set when the watch screen has been dimmed too long to keep listening for shakes.
     @State private var shakeGraceOver = false
+    /// When the watch felt a shake with its screen dimmed, to play once the screen is back on.
+    @State private var pendingShake: Date?
     @State private var dimmedID = UUID()
     @State private var pop = 0
     @State private var taps = 0
@@ -279,6 +281,7 @@ public struct CompanionView: View {
             Task {
                 try? await Task.sleep(for: .seconds(1))
                 settling = false
+                playPendingShake()
             }
         }
         .accessibilityElement(children: .ignore)
@@ -1106,6 +1109,13 @@ public struct CompanionView: View {
         return scenePhase != .background && (!asleep || !shakeGraceOver)
     }
 
+    /// Plays a shake felt while the watch screen was dimmed, if it was recent.
+    private func playPendingShake() {
+        guard let shake = pendingShake else { return }
+        pendingShake = nil
+        if Date.now.timeIntervalSince(shake) < 10 { shaken() }
+    }
+
     /// Stops listening for shakes 5 s after the watch screen dims, unless it comes back on first.
     private func listenAfterDimming() {
         let id = UUID()
@@ -1130,6 +1140,11 @@ public struct CompanionView: View {
     private func shaken() {
         guard let mode else { return }
         let now = Date.now
+        // Shaking the wrist dims the watch screen, so the reaction waits until he can be seen.
+        if style == .watch, asleep || settling {
+            pendingShake = now
+            return
+        }
         let time = now.timeIntervalSinceReferenceDate
         guard turnAway(at: time) == nil,
             Self.progress(since: dizzyStart, at: time, duration: ShakeReaction.duration) == nil
