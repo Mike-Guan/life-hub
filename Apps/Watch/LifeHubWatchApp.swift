@@ -29,11 +29,11 @@ struct WatchHomeView: View {
     var body: some View {
         TimelineView(.everyMinute) { context in
             if let payload, let mode = payload.snapshot.mode {
-                TabView {
+                WatchPager {
                     companionPage(payload, mode: mode, at: context.date)
+                } second: {
                     TodayPage(payload: payload, mode: mode, date: context.date)
                 }
-                .tabViewStyle(.verticalPage)
             } else {
                 Text(failure ?? "先在 iPhone 上打开一次 Life Hub")
                     .font(.footnote)
@@ -102,6 +102,48 @@ struct WatchHomeView: View {
             }
             .padding(.leading, 4)
         }
+    }
+}
+
+// A vertical-page TabView hung the main thread at launch on a real watch (scene-create watchdog), so the
+// two pages are swapped by hand.
+/// Two full-screen pages: swipe up for the second, down for the first.
+private struct WatchPager<First: View, Second: View>: View {
+    @State private var page = 0
+    private let first: First
+    private let second: Second
+
+    init(@ViewBuilder first: () -> First, @ViewBuilder second: () -> Second) {
+        self.first = first()
+        self.second = second()
+    }
+
+    var body: some View {
+        ZStack {
+            if page == 0 {
+                first.transition(.move(edge: .top))
+            } else {
+                second.transition(.move(edge: .bottom))
+            }
+        }
+        .overlay(alignment: .trailing) {
+            VStack(spacing: 4) {
+                ForEach(0..<2, id: \.self) { index in
+                    Circle().fill(Toy.ink.opacity(index == page ? 0.9 : 0.25)).frame(width: 5, height: 5)
+                }
+            }
+            .padding(.trailing, 3)
+        }
+        .animation(.easeInOut(duration: 0.25), value: page)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 20).onEnded { drag in
+                if drag.translation.height < -30 {
+                    page = 1
+                } else if drag.translation.height > 30 {
+                    page = 0
+                }
+            }
+        )
     }
 }
 

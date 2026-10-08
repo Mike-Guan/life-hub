@@ -363,6 +363,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- Apple Watch app: it no longer hangs on opening or after the screen sleeps. The two pages are swapped
+  by hand (swipe up and down, two dots on the right) instead of the system pager, which froze the app on a
+  real watch. The character is a little smaller and lower, so the hair no longer runs into the mode chip.
 - Leaving the office in the evening ends work even if that leave was missed: from 17:30, being away from the
   office or arriving home switches to Chill at the next place event or app open, also within 2 hours of a
   manual change, unless you changed the mode after leaving. The debug log now says why a place event kept the mode.
