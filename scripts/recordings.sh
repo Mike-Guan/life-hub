@@ -131,14 +131,9 @@ for persona in "${personas[@]}"; do
     "watch-$persona-overtime"
 done
 
-# Promo stills: HAKU with no mode chip, and the top strip with the clock cropped off.
+# Promo stills: HAKU with no mode chip. The system clock stays; crop the top strip off by hand.
 overtime="[{\"from\":\"$now\",\"scene\":{\"moment\":\"overtime\",\"overtimeUntil\":\"$later\"}}]"
 watch_clip haku work "[]" watch-haku-work-clean -clean-frame
 watch_clip haku work "$overtime" watch-haku-overtime-clean -clean-frame
-for name in watch-haku-work-clean watch-haku-overtime-clean; do
-  height=$(sips -g pixelHeight "$out/$name.png" | awk '/pixelHeight/ {print $2}')
-  width=$(sips -g pixelWidth "$out/$name.png" | awk '/pixelWidth/ {print $2}')
-  sips -c $((height - 60)) "$width" --cropOffset 60 0 "$out/$name.png" --out "$out/$name.png" >/dev/null || true
-done
 note "done"
 ls -l "$out"
