@@ -258,16 +258,19 @@ struct FrameSheets {
     }
 
     /// Renders `rows` into `<name>.png`: one row per case, `frames` frames `step` apart.
-    func write(_ name: String, _ rows: [Row], size: CGSize = CGSize(width: 180, height: 240)) throws {
+    func write(
+        _ name: String, _ rows: [Row], size: CGSize = CGSize(width: 180, height: 240), frames: Int = Self.frames,
+        step: TimeInterval = Self.step
+    ) throws {
         let commit = ProcessInfo.processInfo.environment["FRAME_SHA"].map { String($0.prefix(7)) } ?? "local"
         let sheet = VStack(alignment: .leading, spacing: 10) {
             let frame = "\(Int(size.width))×\(Int(size.height)) pt"
-            Text("\(name) · \(commit) · \(frame) · 每格 \(Self.step, specifier: "%.1f") s")
+            Text("\(name) · \(commit) · \(frame) · 每格 \(step, specifier: "%.1f") s")
                 .font(.system(size: 15, weight: .bold, design: .monospaced))
             HStack(spacing: 6) {
                 Text("").frame(width: 190)
-                ForEach(0..<Self.frames, id: \.self) { index in
-                    Text(String(format: "%.1f s", Double(index) * Self.step))
+                ForEach(0..<frames, id: \.self) { index in
+                    Text(String(format: "%.1f s", Double(index) * step))
                         .font(.system(size: 12, weight: .bold, design: .monospaced))
                         .frame(width: size.width)
                 }
@@ -278,9 +281,9 @@ struct FrameSheets {
                     Text(row.label)
                         .font(.system(size: 13, weight: .bold, design: .monospaced))
                         .frame(width: 190, alignment: .leading)
-                    ForEach(0..<Self.frames, id: \.self) { frame in
+                    ForEach(0..<frames, id: \.self) { frame in
                         row.draw()
-                            .environment(\.frameClock, row.start + Double(frame) * Self.step)
+                            .environment(\.frameClock, row.start + Double(frame) * step)
                             .environment(\.scenePhase, .active)
                             .frame(width: size.width, height: size.height)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
