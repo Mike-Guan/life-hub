@@ -54,13 +54,14 @@ struct ShakeDetector: Sendable {
     static let jolts = 3
     /// Time the jolts of one shake fall within, in seconds.
     static let window: TimeInterval = 1
-    /// Samples closer than this to the previous strong one belong to the same jolt, in seconds.
-    static let joltSpan: TimeInterval = 0.05
+    /// A strong sample this long after the previous one starts a new jolt even without a dip between, in seconds.
+    static let joltGap: TimeInterval = 0.15
     /// Time after a shake before the next one counts, in seconds.
     static let cooldown: TimeInterval = 1.5
 
     private var joltStarts: [TimeInterval] = []
     private var lastStrong = -TimeInterval.infinity
+    private var dipped = true
     private var lastShake = -TimeInterval.infinity
 
     /// Adds a sample.
@@ -69,12 +70,17 @@ struct ShakeDetector: Sendable {
     ///   - time: when it was measured, in seconds.
     /// - Returns: true when the sample completes a shake.
     mutating func add(magnitude: Double, at time: TimeInterval) -> Bool {
-        guard magnitude >= Self.threshold, time - lastShake >= Self.cooldown else { return false }
-        // A jolt lasts several samples, and a quick back-and-forth has a new one every tenth of a second. Jolts are
-        // counted by their start; three are needed so one punch (a push and a stop) is not a shake.
-        let sameJolt = time - lastStrong < Self.joltSpan
+        guard magnitude >= Self.threshold else {
+            dipped = true
+            return false
+        }
+        guard time - lastShake >= Self.cooldown else { return false }
+        // A jolt lasts one or more samples; the watch delivers only about 17 a second. A new jolt starts after the
+        // reading drops below the threshold, so three are needed and one punch (a push and a stop) is not a shake.
+        let newJolt = dipped || time - lastStrong > Self.joltGap
         lastStrong = time
-        guard !sameJolt else { return false }
+        dipped = false
+        guard newJolt else { return false }
         joltStarts = joltStarts.filter { time - $0 < Self.window } + [time]
         guard joltStarts.count >= Self.jolts else { return false }
         lastShake = time

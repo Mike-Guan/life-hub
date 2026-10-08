@@ -28,45 +28,55 @@ import Testing
         #expect(!ShakeReaction.isTooMany([now.addingTimeInterval(-ShakeReaction.window)] + two, now: now))
     }
 
-    @Test func threeJoltsMakeOneShake() {
-        var detector = ShakeDetector()
-        // Samples of the same jolt are close together; the third jolt completes the shake, then it cools down.
-        let samples: [(Double, TimeInterval)] = [
-            (2.5, 10), (2.5, 10.03), (2.4, 10.3), (2.6, 10.55), (3, 10.8), (3, 11.2),
-        ]
-        let shakes = samples.map { detector.add(magnitude: $0.0, at: $0.1) }
-        #expect(shakes == [false, false, false, true, false, false])
+    /// Feeds `detector` one jolt sampled at `rate` per second: `strong` samples at `peak`, then one dip.
+    private func jolt(
+        _ detector: inout ShakeDetector, at time: TimeInterval, rate: Double = 50, strong: Int = 2, peak: Double = 2.2
+    ) -> Bool {
+        var fired = false
+        for index in 0...strong {
+            let shake = detector.add(magnitude: index < strong ? peak : 0.3, at: time + Double(index) / rate)
+            fired = fired || shake
+        }
+        return fired
     }
 
-    @Test func aQuickBackAndForthIsAShake() {
+    @Test func threeJoltsMakeOneShake() {
         var detector = ShakeDetector()
-        // Jolts of two or three samples at 50 Hz, a new one every 0.12 s.
-        let samples: [TimeInterval] = [20, 20.02, 20.04, 20.12, 20.14, 20.24, 20.26]
-        let shakes = samples.map { detector.add(magnitude: 1.6, at: $0) }
-        #expect(shakes == [false, false, false, false, false, true, false])
+        let shakes = [10, 10.12, 10.24, 10.36, 10.48].map { jolt(&detector, at: $0) }
+        // The third jolt completes the shake; still shaking during the cooldown stays one shake.
+        #expect(shakes == [false, false, true, false, false])
+    }
+
+    @Test func theWatchRateIsEnough() {
+        var detector = ShakeDetector()
+        // The watch gives about 17 samples a second, so a jolt is one or two of them.
+        let shakes = [20, 20.18, 20.36].map { jolt(&detector, at: $0, rate: 17, strong: 1) }
+        #expect(shakes == [false, false, true])
     }
 
     @Test func shakingAgainAfterTheCooldownCountsAgain() {
         var detector = ShakeDetector()
-        let first = [10, 10.1, 10.2].map { detector.add(magnitude: 2.2, at: $0) }
+        let first = [10, 10.12, 10.24].map { jolt(&detector, at: $0) }
         #expect(first == [false, false, true])
-        let second = [12, 12.1, 12.2].map { detector.add(magnitude: 2.2, at: $0) }
+        let second = [12, 12.12, 12.24].map { jolt(&detector, at: $0) }
         #expect(second == [false, false, true])
     }
 
     @Test func oneLongJoltIsNotAShake() {
         var detector = ShakeDetector()
-        // Held above the threshold at 30 Hz without a break: one jolt, however long.
-        let samples = stride(from: 5.0, to: 6.0, by: 0.033).map { detector.add(magnitude: 2.5, at: $0) }
-        #expect(!samples.contains(true))
+        // Held above the threshold without a dip, at the watch's rate and at the phone's: one jolt.
+        let watch = stride(from: 5.0, to: 6.0, by: 1.0 / 17).map { detector.add(magnitude: 2.5, at: $0) }
+        let phone = stride(from: 8.0, to: 9.0, by: 1.0 / 50).map { detector.add(magnitude: 2.5, at: $0) }
+        #expect(!watch.contains(true) && !phone.contains(true))
     }
 
     @Test func gentleOrSlowMovesAreNotShakes() {
         var detector = ShakeDetector()
-        let gentle = [1, 1.3, 1.6].map { detector.add(magnitude: 1.2, at: $0) }
-        #expect(gentle == [false, false, false])
-        let slow = [5, 6, 7, 8].map { detector.add(magnitude: 2.5, at: $0) }
-        #expect(slow == [false, false, false, false])
+        let gentle = [1, 1.12, 1.24, 1.36].map { jolt(&detector, at: $0, peak: 1.2) }
+        #expect(!gentle.contains(true))
+        // Hard enough but too far apart, like setting the phone down a few times.
+        let slow = [5, 5.7, 6.4, 7.1].map { jolt(&detector, at: $0) }
+        #expect(!slow.contains(true))
     }
 
     @Test func walkingIsNotAShake() {
@@ -81,10 +91,10 @@ import Testing
 
     @Test func onePunchIsNotAShake() {
         var detector = ShakeDetector()
-        // The push forward, then the stop at the end of the reach.
-        let samples: [(Double, TimeInterval)] = [(3, 30), (3.2, 30.02), (2.8, 30.04), (2.5, 30.16), (2.2, 30.18)]
-        let shakes = samples.map { detector.add(magnitude: $0.0, at: $0.1) }
-        #expect(!shakes.contains(true))
+        // The push forward, then the stop at the end of the reach, at the phone's and the watch's rate.
+        let phone = jolt(&detector, at: 30, strong: 3, peak: 3) || jolt(&detector, at: 30.16, peak: 2.5)
+        let watch = jolt(&detector, at: 40, rate: 17, peak: 3) || jolt(&detector, at: 40.18, rate: 17, peak: 2.5)
+        #expect(!phone && !watch)
     }
 
     @Test @MainActor func dizzyShowsSwirlEyesAndStars() {
