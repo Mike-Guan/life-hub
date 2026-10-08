@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Records 10 s of the iPhone home screen and the watch face in each mode, once per character, into
-# build/recordings/. Motion stays on, so the clips show the real animation. Needs Xcode 26 and XcodeGen.
+# Records 10 s of the iPhone home screen and the watch face in each mode, once per character, plus the
+# watch working late, into build/recordings/, each with a still of its last frame. Motion stays on, so
+# the clips show the real animation. Needs Xcode 26 and XcodeGen.
 set -euo pipefail
 
 modes=(work chill boxing money)
@@ -10,13 +11,14 @@ out=build/recordings
 mkdir -p "$out"
 xcodegen generate
 
-# Records `seconds` of the simulator `udid` into `file`.
+# Records `seconds` of the simulator `udid` into `name`.mp4, then a still into `name`.png.
 record() {
-  xcrun simctl io "$1" recordVideo --codec=h264 --force "$2" &
+  xcrun simctl io "$1" recordVideo --codec=h264 --force "$2.mp4" &
   local pid=$!
   sleep "$seconds"
   kill -INT "$pid"
   wait "$pid" || true
+  xcrun simctl io "$1" screenshot "$2.png"
 }
 
 # iPhone: the Debug build's -screenshot-mode home screen.
@@ -37,7 +39,7 @@ for persona in "${personas[@]}"; do
     xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode" \
       -screenshot-persona "$persona"
     sleep 3
-    record "$udid" "$out/ios-$persona-$mode.mp4"
+    record "$udid" "$out/ios-$persona-$mode"
   done
 done
 xcrun simctl terminate "$udid" "$bundle" || true
@@ -68,18 +70,27 @@ while IFS= read -r line; do
 done < <(xcrun simctl get_app_container "$watch_udid" "$watch_bundle" groups 2>/dev/null || true)
 
 now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+later=$(date -u -v+2H +%Y-%m-%dT%H:%M:%SZ)
+# Writes a payload for `persona` in `mode`, with `scenes` JSON, launches the app and records it as `name`.
+watch_clip() {
+  local folder
+  for folder in "${folders[@]}"; do
+    mkdir -p "$folder"
+    cat >"$folder/watch-payload.json" <<JSON
+{"schemaVersion":1,"persona":"$1","snapshot":{"schemaVersion":1,"mode":"$2","since":"$now",
+"energy":"okay","line":"","updatedAt":"$now"},"scenes":$3}
+JSON
+  done
+  xcrun simctl launch --terminate-running-process "$watch_udid" "$watch_bundle" >/dev/null
+  sleep 4
+  record "$watch_udid" "$out/$4"
+}
 for persona in "${personas[@]}"; do
   for mode in "${modes[@]}"; do
-    for folder in "${folders[@]}"; do
-      mkdir -p "$folder"
-      cat >"$folder/watch-payload.json" <<JSON
-{"schemaVersion":1,"persona":"$persona","snapshot":{"schemaVersion":1,"mode":"$mode","since":"$now",
-"energy":"okay","line":"","updatedAt":"$now"}}
-JSON
-    done
-    xcrun simctl launch --terminate-running-process "$watch_udid" "$watch_bundle" >/dev/null
-    sleep 4
-    record "$watch_udid" "$out/watch-$persona-$mode.mp4"
+    watch_clip "$persona" "$mode" "[]" "watch-$persona-$mode"
   done
+  # Working late: the scene's overtimeUntil is set.
+  watch_clip "$persona" work "[{\"from\":\"$now\",\"scene\":{\"overtimeUntil\":\"$later\"}}]" \
+    "watch-$persona-overtime"
 done
 ls -l "$out"
