@@ -25,25 +25,15 @@ struct WatchHomeView: View {
     @State private var payload = WatchPayload.read(from: AppGroup.container.watchPayloadURL)
 
     @State private var failure: String?
-    /// 0 is the character, 1 is today's card.
-    @State private var page = 0
 
     var body: some View {
         TimelineView(.everyMinute) { context in
             if let payload, let mode = payload.snapshot.mode {
-                // A vertical-page TabView kept the main thread busy past the watchdog when launched with the screen
-                // off, so the two pages are switched by hand: swipe up for the card, down for the character.
-                ZStack {
-                    if page == 0 {
-                        companionPage(payload, mode: mode, at: context.date)
-                            .transition(.move(edge: .top))
-                    } else {
-                        TodayPage(payload: payload, mode: mode, date: context.date)
-                            .transition(.move(edge: .bottom))
-                    }
+                WatchPager {
+                    companionPage(payload, mode: mode, at: context.date)
+                } second: {
+                    TodayPage(payload: payload, mode: mode, date: context.date)
                 }
-                .overlay(alignment: .trailing) { PageDots(page: page).padding(.trailing, 3) }
-                .simultaneousGesture(pageSwipe)
             } else {
                 Text(failure ?? "先在 iPhone 上打开一次 Life Hub")
                     .font(.footnote)
@@ -56,15 +46,6 @@ struct WatchHomeView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: WatchReceiver.didFail)) { note in
             failure = note.object as? String
-        }
-    }
-
-    /// A vertical swipe: up shows today's card, down goes back to the character.
-    private var pageSwipe: some Gesture {
-        DragGesture(minimumDistance: 20).onEnded { value in
-            let next = value.translation.height < -30 ? 1 : value.translation.height > 30 ? 0 : page
-            guard next != page else { return }
-            withAnimation(.easeOut(duration: 0.25)) { page = next }
         }
     }
 
@@ -124,19 +105,45 @@ struct WatchHomeView: View {
     }
 }
 
-/// Two small dots on the right edge; the filled one is the page on screen.
-private struct PageDots: View {
-    let page: Int
+// A vertical-page TabView hung the main thread at launch on a real watch (scene-create watchdog), so the
+// two pages are swapped by hand.
+/// Two full-screen pages: swipe up for the second, down for the first.
+private struct WatchPager<First: View, Second: View>: View {
+    @State private var page = 0
+    private let first: First
+    private let second: Second
+
+    init(@ViewBuilder first: () -> First, @ViewBuilder second: () -> Second) {
+        self.first = first()
+        self.second = second()
+    }
 
     var body: some View {
-        VStack(spacing: 4) {
-            ForEach(0..<2, id: \.self) { index in
-                Circle()
-                    .fill(Toy.ink.opacity(index == page ? 1 : 0.3))
-                    .frame(width: 5, height: 5)
+        ZStack {
+            if page == 0 {
+                first.transition(.move(edge: .top))
+            } else {
+                second.transition(.move(edge: .bottom))
             }
         }
-        .accessibilityHidden(true)
+        .overlay(alignment: .trailing) {
+            VStack(spacing: 4) {
+                ForEach(0..<2, id: \.self) { index in
+                    Circle().fill(Toy.ink.opacity(index == page ? 0.9 : 0.25)).frame(width: 5, height: 5)
+                }
+            }
+            .padding(.trailing, 3)
+        }
+        .animation(.easeInOut(duration: 0.25), value: page)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 20).onEnded { drag in
+                if drag.translation.height < -30 {
+                    page = 1
+                } else if drag.translation.height > 30 {
+                    page = 0
+                }
+            }
+        )
     }
 }
 
