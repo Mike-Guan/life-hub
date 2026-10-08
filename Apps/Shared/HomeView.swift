@@ -338,6 +338,8 @@ private struct Header: View {
                         Image(systemName: "gearshape.fill")
                             .font(Toy.body(18, weight: .heavy))
                             .foregroundStyle(Toy.ink)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("设置")
@@ -347,9 +349,7 @@ private struct Header: View {
                 .font(Toy.body(13, weight: .bold))
                 .foregroundStyle(Toy.muted)
             if let error {
-                Text(error)
-                    .font(Toy.body(12))
-                    .foregroundStyle(Toy.alert)
+                ErrorLine(text: error)
             }
         }
     }
