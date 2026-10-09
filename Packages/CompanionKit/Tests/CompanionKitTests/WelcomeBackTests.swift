@@ -69,6 +69,18 @@ import Testing
         #expect(SceneMove.welcome(.phone, pose: RunnerPose(face: .mid)) == nil)
     }
 
+    // HAKU-17 (UI 审核 2026-10-08): at the office the short scenes play at the desk, never on the sofa.
+    @Test(arguments: [WelcomeScene.glance, .quiet])
+    func atWorkTheShortScenesPlayAtTheDesk(_ scene: WelcomeScene) {
+        let atWork = RunnerPose.welcome(scene, time: 4, open: nil, face: .mid, mode: .work)
+        let office = Set(RunnerFigure.parts(for: .work, pose: atWork))
+        #expect(office.isSuperset(of: [.desk, .headset, .maskUp, .eyesWork]))
+        #expect(office.isDisjoint(with: [.sofaArm, .blanket, .eyesChill]))
+        let atHome = RunnerPose.welcome(scene, time: 4, open: nil, face: .mid, mode: .chill)
+        let home = Set(RunnerFigure.parts(for: .chill, pose: atHome))
+        #expect(home.isSuperset(of: [.sofaArm, .blanket]) && !home.contains(.desk))
+    }
+
     @Test func eachWelcomePlaysOnce() {
         let replay = ReturnReplay(tier: .glance, cards: cards, cans: 0)
         #expect(CompanionView.newWelcome(.welcomeBack(id: "w", replay: replay), last: "") == "w")
