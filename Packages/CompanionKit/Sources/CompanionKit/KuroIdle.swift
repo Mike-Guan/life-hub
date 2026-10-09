@@ -80,11 +80,11 @@ enum KuroIdle: CaseIterable, Sendable {
         let twice = CGFloat(abs(sin(p * 2 * .pi)))
         let held = CGFloat(Self.hold(p))
         switch self {
-        case .ears where part == .catEars: return CGSize(width: 0, height: -2.5 * twice)
-        case .stylus where part == .workStylus: return CGSize(width: 0, height: 3 * twice)
-        case .pen where part == .deskPen: return CGSize(width: 0, height: 3 * twice)
-        case .racket where part == .tennisRacket: return CGSize(width: 0, height: -4 * twice)
-        case .lookUp where Self.eyes.contains(part): return CGSize(width: 0, height: -2.5 * held)
+        case .ears where part == .catEars: return CGSize(width: 0, height: -3.5 * twice)
+        case .stylus where part == .workStylus: return CGSize(width: 0, height: 5 * twice)
+        case .pen where part == .deskPen: return CGSize(width: 0, height: 5 * twice)
+        case .racket where part == .tennisRacket: return CGSize(width: 0, height: -6 * twice)
+        case .lookUp where Self.eyes.contains(part): return CGSize(width: 0, height: -3 * held)
         case .aside where Self.eyes.contains(part): return CGSize(width: 3 * held, height: 0)
         case .blow where part == .chillCup: return CGSize(width: 0, height: -6 * held)
         case .glasses where part == .deskGlasses:
