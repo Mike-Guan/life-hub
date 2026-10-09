@@ -73,10 +73,10 @@ struct LifeHubApp: App {
         _placeMonitor = State(initialValue: placeMonitor)
         _needs = State(initialValue: needs)
         // Set before the session starts, so a check that launched the app is answered.
+        // Only a changed mode reloads, since background widget reloads have a daily budget.
         WatchSync.shared.onWatchCheck {
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
-                Dogfood.note("settle", "手表打开，\(settled.reason)，切到\(settled.mode.title)")
-            }
+            guard let settled = store.settle(presence: .stored(in: AppGroup.defaults)) else { return }
+            Dogfood.note("settle", "手表打开，\(settled.reason)，切到\(settled.mode.title)")
             widgets.sync(mode: store, energy: energy)
             WidgetCenter.shared.reloadAllTimelines()
             Self.sendToWatch(store: store, needs: needs, growth: growth)
