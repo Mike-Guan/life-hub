@@ -1182,6 +1182,8 @@ struct RunnerFigure: View {
         // things in one place). The monitor stands by the left ear, where the pillow and the headphone cup go.
         if !visible.isDisjoint(with: cornerTakers) { visible.subtract([.roomPlant, .roomBag, .runningShoes]) }
         if !visible.isDisjoint(with: [.pillow, .cupL]) { visible.remove(.roomPc) }
+        // The bandage sits on the cheek, so the raised mask covers it.
+        if visible.contains(.maskUp) { visible.remove(.bandage) }
         if pose.bathDry >= 0 {
             visible.subtract(bathHides)
             visible.formUnion([.bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .rubTowelL, .rubTowelR])

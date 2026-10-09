@@ -1160,6 +1160,11 @@ import Testing
         #expect(boxing.isDisjoint(with: [.roomPc, .sunlight]))
         let home = Set(RunnerFigure.parts(for: .chill, pose: pose))
         #expect(home.isSuperset(of: [.bandage, .roomPc, .sunlight]))
+        // The raised mask covers the cheek the bandage sits on.
+        for mode in [Mode.work, .money] {
+            let masked = Set(RunnerFigure.parts(for: mode, pose: pose))
+            #expect(masked.contains(.maskUp) && !masked.contains(.bandage))
+        }
         let heading = RunnerPose(moment: .heading).leaving([.sunlight])
         #expect(!RunnerFigure.parts(for: .chill, pose: heading).contains(.sunlight))
         #expect(RunnerFigure.parts(for: .chill, pose: RunnerPose()).contains(.roomPc) == false)
