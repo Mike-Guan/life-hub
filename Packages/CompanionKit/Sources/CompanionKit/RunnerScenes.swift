@@ -428,6 +428,8 @@ extension RunnerPose {
     /// What the welcome back scene shows besides HAKU.
     struct Welcome {
         var scene: WelcomeScene
+        /// At the desk with the headset on instead of on the sofa under the blanket.
+        var atDesk = false
         /// Seconds into the scene.
         var time: CGFloat
         /// Eyes open; before that they are sleepy.
@@ -450,10 +452,14 @@ extension RunnerPose {
         var pat: CGFloat = -1
     }
 
-    /// HAKU `time` seconds into `scene`; the crate opens at `open`, or stays shut when nil.
-    static func welcome(_ scene: WelcomeScene, time t: CGFloat, open: CGFloat?, face: EnergyFace) -> RunnerPose {
+    /// HAKU `time` seconds into `scene`; the crate opens at `open`, or stays shut when nil. In `mode` work the
+    /// glance and the quiet scene play at the desk.
+    static func welcome(
+        _ scene: WelcomeScene, time t: CGFloat, open: CGFloat?, face: EnergyFace, mode: Mode = .chill
+    ) -> RunnerPose {
         var pose = RunnerPose(face: face)
-        var w = Welcome(scene: scene, time: t)
+        // HAKU-17 (UI 审核 2026-10-08): opening the app at the office showed the sofa and blanket.
+        var w = Welcome(scene: scene, atDesk: scene == .desk || mode == .work, time: t)
         pose.feed = frac(t * 0.8)
         let slump = 5 + sin(t * 1.2)
         switch scene {
