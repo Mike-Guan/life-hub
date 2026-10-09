@@ -174,4 +174,11 @@ import Testing
         #expect(KuroView.signText(Date(timeIntervalSince1970: 21 * 3600 + 5 * 60), calendar: utc) == "21:05")
         #expect(KuroView.signText(Date(timeIntervalSince1970: 0), calendar: utc) == "00:00")
     }
+
+    // UI-32 (UI 审核 2026-10-08): KURO's mode icons were HAKU's headphones, can and yen sign.
+    @Test(arguments: Mode.allCases)
+    func herModeIconsAreHerOwn(_ mode: Mode) {
+        #expect(mode.symbol(for: .haku) == mode.symbol)
+        #expect(mode.symbol(for: .kuro) != mode.symbol)
+    }
 }
