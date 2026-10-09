@@ -80,6 +80,23 @@ enum KuroBubbleLines {
         }
     }
 
+    /// What KURO says when the off-work notice is tapped (KURO 台词表 `offWorkLine`).
+    static let offWork = "……お疲れ。"
+
+    /// What KURO may say for a one-off `event` (KURO 台词表 B “一次性事件”), or none for other events.
+    static func oneOff(_ event: CompanionEvent?) -> [String] {
+        switch event {
+        case .stayHome: ["……今天不出门。", "门外的事，明天再说。", "……就在家。嗯。"]
+        case .stretched: ["……腰，好一点了。", "ちょっと休憩。……好了。"]
+        case .revived: ["……电量，回来一格。", "嗯。又活了。"]
+        case .taskDone(_, let focus): focus ? ["……刚才很认真。"] : ["……划掉了。", "做完了。……不错。"]
+        case .welcomeBack(_, let replay):
+            // Never asks where he was and never says it has been a while.
+            [replay.isQuiet ? "……坐这边。" : replay.tier == .box ? "……没在等。真的。" : "……回来了。"]
+        default: []
+        }
+    }
+
     /// What KURO says when unboxing the item with `itemID`.
     static func unlock(_ itemID: String) -> String {
         let keepsake = KuroItem(rawValue: itemID)?.isKeepsake ?? (ShopItem.item(itemID)?.keepsake != nil)

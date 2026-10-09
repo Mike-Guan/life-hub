@@ -127,6 +127,42 @@ import Testing
         #expect(CompanionLines.unlock("room.plant", persona: .kuro) == "……还行吧。")
     }
 
+    // KURO-03 (UI 审核 2026-10-08): tapping the off-work notice played nothing for her.
+    @Test func herOffWorkPlaysOncePerDay() {
+        #expect(KuroView.newOffWork(.offWork(id: "2026-10-05"), last: "") == "2026-10-05")
+        #expect(KuroView.newOffWork(.offWork(id: "2026-10-05"), last: "2026-10-05") == nil)
+        #expect(KuroView.newOffWork(.offWork(id: "2026-10-06"), last: "2026-10-05") == "2026-10-06")
+        #expect(KuroView.newOffWork(.celebrate(id: "run-1", kind: .running), last: "") == nil)
+        #expect(KuroView.newCelebration(.offWork(id: "2026-10-05"), last: "") == nil)
+        #expect(KuroView.newUnbox(.offWork(id: "2026-10-05"), last: "") == nil)
+        #expect(KuroBubbleLines.offWork == "……お疲れ。")
+    }
+
+    // KURO-04 (UI 审核 2026-10-08): staying home, stretching, reviving, Daily done and welcome back played nothing.
+    @Test func herOneOffsEachGetAMove() {
+        let events: [CompanionEvent] = [
+            .stayHome(id: "a"), .stretched(id: "b"), .revived(id: "c"), .taskDone(id: "d", focus: false),
+        ]
+        #expect(events.compactMap { KuroOneOff($0)?.kind } == [.stayHome, .stretched, .revived, .taskDone])
+        #expect(KuroOneOff(.taskDone(id: "d", focus: true)) == KuroOneOff(kind: .taskDone, id: "d"))
+        #expect(KuroOneOff(.offWork(id: "2026-10-05")) == nil && KuroOneOff(nil) == nil)
+        #expect(KuroOneOff(.celebrate(id: "run-1", kind: .running)) == nil)
+        #expect(KuroOneOff(kind: .taskDone, id: "d").heart && !KuroOneOff(kind: .stayHome, id: "a").heart)
+        #expect(events.allSatisfy { !KuroBubbleLines.oneOff($0).isEmpty })
+        #expect(KuroBubbleLines.oneOff(.taskDone(id: "d", focus: true)) == ["……刚才很认真。"])
+        let quiet = ReturnReplay(tier: .box, cards: [], cans: 0)
+        #expect(KuroBubbleLines.oneOff(.welcomeBack(id: "w", replay: quiet)) == ["……坐这边。"])
+        let full = ReturnReplay(tier: .box, cards: [], cans: 3)
+        #expect(KuroBubbleLines.oneOff(.welcomeBack(id: "w", replay: full)) == ["……没在等。真的。"])
+        #expect(KuroBubbleLines.oneOff(.offWork(id: "x")).isEmpty)
+        // Each one plays her look's tap move, which never leaves her pose unchanged.
+        for look in KuroLook.allCases {
+            let rest = KuroPose(look: look, energy: 50)
+            let moving = rest.reacting(KuroTap(look: look, sleepy: false), progress: 0.3)
+            #expect(KuroFigure.parts(for: look, pose: moving) != KuroFigure.parts(for: look, pose: rest))
+        }
+    }
+
     @Test func eachLookMapsBackToItsMode() {
         #expect(KuroLook.allCases.allSatisfy { KuroLook(mode: $0.mode) == $0 })
     }
