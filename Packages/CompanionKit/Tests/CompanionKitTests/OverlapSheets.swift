@@ -62,8 +62,14 @@ extension FrameSheets {
             row("H6 blanket · plant + shoes", .chill, room: .roomPlant, traces: shoes) {
                 RunnerPose(mode: .chill, time: $0, face: .mid, moment: .blanket, react: 0)
             },
+            row("H7 nap · pc + plant", .chill, room: .roomPlant, traces: [.pcGlow, .runningShoes]) {
+                RunnerPose(mode: .chill, time: $0, face: .mid, life: .nap, react: 0)
+            },
+            row("H8 runDay · bag + shoes", .chill, room: .roomBag, traces: shoes) {
+                RunnerPose(mode: .chill, time: $0, face: .mid, activity: .runDay, react: 0)
+            },
             row("H9 flow · desk monitor", .money, room: nil, traces: [.deskMonitor]) {
-                RunnerPose(mode: .money, time: $0 * 6, face: .mid, moment: .flow, react: 0)
+                RunnerPose(mode: .money, time: 7.5 + $0, face: .mid, moment: .flow, react: 0)
             },
             Row(label: "K1 KURO chill · flower + blanket", start: Self.base) {
                 AnyView(
@@ -77,7 +83,7 @@ extension FrameSheets {
                     })
             },
         ]
-        try write("overlap-candidates", rows, frames: 8, step: 0.5)
+        try write("overlap-after", rows, frames: 8, step: 0.5)
     }
 }
 #endif
