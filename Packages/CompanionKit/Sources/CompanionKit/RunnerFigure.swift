@@ -1178,6 +1178,12 @@ struct RunnerFigure: View {
         if let prop = pose.dailyProp, !pose.bedtime { holdUp(prop, pose: pose, on: &visible) }
         if let place = pose.walkFrom, pose.dailyScene == nil, !pose.bedtime { visible.formUnion(walkParts(place)) }
         if let leg = pose.commuteLeg, !pose.bedtime { commuted(leg, pose: pose, on: &visible) }
+        // Room things step aside for what stands, is carried or is tucked in their spot (Mike 2026-10-09: no two
+        // things in one place). The monitor stands by the left ear, where the pillow and the headphone cup go.
+        if !visible.isDisjoint(with: cornerTakers) { visible.subtract([.roomPlant, .roomBag, .runningShoes]) }
+        if !visible.isDisjoint(with: [.pillow, .cupL]) { visible.remove(.roomPc) }
+        // The bandage sits on the cheek, so the raised mask covers it.
+        if visible.contains(.maskUp) { visible.remove(.bandage) }
         if pose.bathDry >= 0 {
             visible.subtract(bathHides)
             visible.formUnion([.bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .rubTowelL, .rubTowelR])
@@ -1288,6 +1294,11 @@ struct RunnerFigure: View {
         // The right hand holds the note or taps the watch, so the can goes.
         visible.remove(.monsterCan)
     }
+
+    /// Parts that fill the bottom left corner, where the room item and the running shoes stand.
+    nonisolated private static let cornerTakers: Set<RunnerPart> = [
+        .door, .gymBag, .shopBag, .toteBag, .paperBagL, .blanket,
+    ]
 
     nonisolated private static let awayParts: Set<RunnerPart> = [
         .gymBag, .heavyBag, .dumbbell, .speedLines, .cheerMountains,

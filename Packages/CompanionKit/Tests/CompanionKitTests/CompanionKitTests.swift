@@ -1160,9 +1160,44 @@ import Testing
         #expect(boxing.isDisjoint(with: [.roomPc, .sunlight]))
         let home = Set(RunnerFigure.parts(for: .chill, pose: pose))
         #expect(home.isSuperset(of: [.bandage, .roomPc, .sunlight]))
+        // The raised mask covers the cheek the bandage sits on.
+        for mode in [Mode.work, .money] {
+            let masked = Set(RunnerFigure.parts(for: mode, pose: pose))
+            #expect(masked.contains(.maskUp) && !masked.contains(.bandage))
+        }
         let heading = RunnerPose(moment: .heading).leaving([.sunlight])
         #expect(!RunnerFigure.parts(for: .chill, pose: heading).contains(.sunlight))
         #expect(RunnerFigure.parts(for: .chill, pose: RunnerPose()).contains(.roomPc) == false)
+    }
+
+    // The room item and the running shoes stand in the bottom left corner; what fills it takes their spot.
+    @Test func theRoomCornerStepsAsideForWhatFillsIt() {
+        var outfit = Outfit()
+        outfit.room = .roomPlant
+        let home = RunnerPose().wearing(outfit).leaving([.runningShoes])
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: home)).isSuperset(of: [.roomPlant, .runningShoes]))
+        var carrying = home
+        carrying.dailyProp = .gymBag
+        let wrapped = RunnerPose(moment: .blanket).wearing(outfit).leaving([.runningShoes])
+        let leaving = RunnerPose(moment: .timeToLeave).wearing(outfit).leaving([.runningShoes])
+        for pose in [carrying, wrapped, leaving] {
+            #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).isDisjoint(with: [.roomPlant, .runningShoes]))
+        }
+    }
+
+    // The monitor sits by the left ear, so it steps aside for the pillow and the headphone cup.
+    @Test func theMonitorStepsAsideForThePillowAndTheHeadphones() {
+        let napping = RunnerPose(mode: .chill, time: 1.5, face: .mid, life: .nap, react: 0).leaving([.pcGlow])
+        let nap = Set(RunnerFigure.parts(for: .chill, pose: napping))
+        #expect(nap.contains(.pillow) && !nap.contains(.roomPc))
+        let lying = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: true).leaving([.pcGlow])
+        let bed = Set(RunnerFigure.parts(for: .chill, pose: lying))
+        #expect(bed.contains(.pillow) && !bed.contains(.roomPc))
+        let awake = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: false).leaving([.pcGlow])
+        #expect(RunnerFigure.parts(for: .chill, pose: awake).contains(.roomPc))
+        var listening = RunnerPose().leaving([.pcGlow])
+        listening.dailyProp = .headphones
+        #expect(!RunnerFigure.parts(for: .chill, pose: listening).contains(.roomPc))
     }
 
     @Test func collapsedDropsTheHeadOntoTheSofaArm() {
