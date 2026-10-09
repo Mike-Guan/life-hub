@@ -231,7 +231,7 @@ struct WardrobeView: View {
         VStack(spacing: 6, content: content)
             .padding(8)
             .frame(maxWidth: .infinity, minHeight: 128)
-            .toyCard(fill: isWorn ? slot.tileColor : Toy.card, radius: 16, shadow: isWorn ? 1 : 4)
+            .toyCard(fill: isWorn ? slot.tileColor(for: persona) : Toy.card, radius: 16, shadow: isWorn ? 1 : 4)
             .overlay(alignment: .topTrailing) {
                 if isWorn {
                     Text("穿着")
