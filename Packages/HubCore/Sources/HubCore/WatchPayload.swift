@@ -7,6 +7,8 @@ public struct WatchPayload: Codable, Equatable, Sendable {
     public static let currentSchemaVersion = 1
     /// The key the payload's JSON travels under in a WatchConnectivity dictionary.
     public static let messageKey = "payload"
+    /// The key of the message the watch sends to ask the iPhone to re-check the mode.
+    public static let checkKey = "check"
 
     public var schemaVersion: Int
     public var snapshot: WidgetSnapshot
