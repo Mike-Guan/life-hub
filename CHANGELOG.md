@@ -7,7 +7,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - HAKU's room no longer stacks two things in one spot: the glowing monitor steps aside while HAKU naps or
   lies on the pillow, the room item and the running shoes step aside while the door, a bag or the blanket
-  fills their corner, and in flow the can is handed over clear of the monitor.
+  fills their corner.
 - The watch also plays the one-offs (a workout cheer, a Daily task done, getting up from the sofa, the
   opening of coming back), the Daily task cue and the invite, and KURO's need and overtime sign, like the phone.
 - Groundwork for the watch commute: Life Hub can tell walking to work, riding the train and walking home

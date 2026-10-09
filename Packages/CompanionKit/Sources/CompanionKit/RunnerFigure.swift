@@ -586,8 +586,7 @@ struct RunnerPose {
             codeGlow = 0.5 + 0.5 * sin(t * 2 * .pi / 2)
             let hand = Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 10)), from: 8, to: 10)
             canOpacity = hand > 0 ? 1 : 0
-            // Handed over in front of the laptop, clear of the monitor beside it (Mike 2026-10-09).
-            canOffset = CGSize(width: -24 * hand, height: 24 * (1 - hand) - 6)
+            canOffset = CGSize(width: -14 * hand, height: 24 * (1 - hand) - 6)
             canAngle = Double(-12 * hand)
         case .shooting:
             break
