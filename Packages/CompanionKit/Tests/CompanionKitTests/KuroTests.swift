@@ -51,13 +51,26 @@ import Testing
         #expect(parts.contains(.eyesLow) && parts.contains(.mouthFlat) && !parts.contains(.blush))
     }
 
-    @Test func sheBlinksEveryFourAndAHalfSecondsUnlessTired() {
+    @Test func sheBlinksOnHerOwnStreamSlowerWhenTired() throws {
         let pose = KuroPose(look: .chill, energy: nil)
-        #expect(pose.blink(at: 9.05).blinking)
-        #expect(!pose.blink(at: 9.5).blinking)
-        #expect(!KuroPose(look: .chill, energy: 10).blink(at: 9.05).blinking)
-        let parts = KuroFigure.parts(for: .chill, pose: pose.blink(at: 0.05))
+        let times = stride(from: 0.0, to: 60, by: 0.01)
+        let shut = try #require(times.first { pose.blink(at: $0).blinking })
+        let parts = KuroFigure.parts(for: .chill, pose: pose.blink(at: shut))
         #expect(parts.contains(.eyesClosed) && !parts.contains(.eyesOpen))
+        // Not on HAKU's beat.
+        #expect(times.contains { pose.blink(at: $0).blinking != (RunnerPose.blink(at: $0) < 0.5) })
+        // KURO-22: tired she still blinks, each blink longer.
+        let low = KuroPose(look: .chill, energy: 10)
+        let lowShut = times.filter { low.blink(at: $0).blinking }.count
+        let openShut = times.filter { pose.blink(at: $0).blinking }.count
+        #expect(lowShut > 0 && lowShut < openShut * 2)
+        let longest = { (p: KuroPose) in
+            times.reduce((run: 0, best: 0)) { acc, t in
+                let run = p.blink(at: t).blinking ? acc.run + 1 : 0
+                return (run, max(acc.best, run))
+            }.best
+        }
+        #expect(longest(low) > longest(pose))
     }
 
     @Test(arguments: KuroEyes.allCases)

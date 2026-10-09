@@ -116,7 +116,7 @@ extension KuroFigure {
 
     /// How far `part` moves from where the SVG draws it, in SVG units.
     nonisolated static func shift(_ part: KuroPart, pose: KuroPose) -> CGSize {
-        guard let tap = pose.tap else { return .zero }
+        guard let tap = pose.tap else { return pose.idle?.shift(part, progress: pose.idleProgress) ?? .zero }
         let p = pose.tapProgress
         switch (tap, part) {
         case (.tablet, .tapTablet):
