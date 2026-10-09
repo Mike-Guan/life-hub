@@ -361,10 +361,12 @@ public struct KuroView: View {
                 let reacting = (tap ?? slotMove).map {
                     self.pose.reacting($0.0, progress: $0.1, heart: tap != nil && tapHeart)
                 }
-                let pose = unbox != nil ? unboxPose : reacting ?? self.pose
+                // KURO-04 (UI 审核 2026-10-09): with the watch screen dimmed she dozes, eyes shut and body still,
+                // instead of freezing mid-hop or mid-blink.
+                let pose = dozing ? self.pose.showing(.closed) : unbox != nil ? unboxPose : reacting ?? self.pose
                 let pace = EnergyFace(energy: energy).speed
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
-                let still = reduceMotion || unbox != nil
+                let still = reduceMotion || unbox != nil || dozing
                 // Out being active she bounces like on her tennis day.
                 let loop = slot == .active ? KuroLook.tennis : look
                 let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(loop, time: time * pace)
