@@ -712,6 +712,15 @@ import Testing
         #expect(slots.map { IdleLife.at($0, stamina: .mid) } == slots.map { IdleLife.at($0) })
     }
 
+    // HAKU-04: the first half second of each 15-minute slot is where a new bit squashes in.
+    @Test func aNewBitAtHomeTurnsInOverHalfASecond() {
+        let slot = IdleLife.slotLength * 1000
+        #expect(CompanionView.slotTurn(at: slot, length: 0.5) == 0)
+        #expect(CompanionView.slotTurn(at: slot + 0.25, length: 0.5) == 0.5)
+        #expect(CompanionView.slotTurn(at: slot + 0.5, length: 0.5) == nil)
+        #expect(CompanionView.slotTurn(at: slot - 0.1, length: 0.5) == nil)
+    }
+
     @Test func vitalsOnlyChangeTheLook() {
         let tired = HakuVitals(stamina: .low, spirit: .low)
         let fit = HakuVitals(stamina: .high, spirit: .high)
