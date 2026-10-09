@@ -300,6 +300,8 @@ public struct CompanionView: View {
                     let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate
                     let life = idleLife(mode, at: frameClock ?? context.date)
                     let motion = idleMotion(mode, life: life, time: time)
+                    // HAKU-04: a new bit at home starts with a quick squash instead of parts just swapping.
+                    let turn = reduceMotion ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
                     RunnerFigure(
                         mode: mode,
                         pose: glance(
@@ -310,6 +312,7 @@ public struct CompanionView: View {
                     .brightness(vitals.brightness)
                     .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
                     .offset(y: reduceMotion ? 0 : motion.dy)
+                    .scaleEffect(x: 1 + 0.07 * turn, y: 1 - 0.1 * turn, anchor: .bottom)
                 }
             } keyframes: { _ in
                 KeyframeTrack {
@@ -393,6 +396,20 @@ public struct CompanionView: View {
             return nil
         }
         return IdleLife.at(date, stamina: vitals.stamina)
+    }
+
+    /// How far into the switch to a new bit HAKU is (0..<1): the first `swapDuration` of a slot whose bit
+    /// differs from the one before. Nil otherwise.
+    private func lifeSwap(_ mode: Mode, life: IdleLife?, at time: TimeInterval) -> Double? {
+        guard let progress = Self.slotTurn(at: time, length: Self.swapDuration) else { return nil }
+        let before = idleLife(mode, at: Date(timeIntervalSinceReferenceDate: time - progress * Self.swapDuration - 1))
+        return before != life ? progress : nil
+    }
+
+    /// How far into the first `length` seconds of an `IdleLife` slot `time` is (0..<1), or nil after it.
+    nonisolated static func slotTurn(at time: TimeInterval, length: TimeInterval) -> Double? {
+        let since = time - floor(time / IdleLife.slotLength) * IdleLife.slotLength
+        return since < length ? since / length : nil
     }
 
     private var paused: Bool { reduceMotion || asleep || settling }
@@ -486,6 +503,7 @@ public struct CompanionView: View {
             // Switching state: a quick burst of sparkles over the squash.
             pose.burst = CGFloat(progress)
         }
+        if let progress = lifeSwap(mode, life: life, at: time) { pose.burst = CGFloat(progress) }
         if let commute, daily?.scene == nil, activity == nil {
             pose.commute(commute, time: CGFloat(time))
         } else if let walking, daily?.scene == nil, activity == nil {
