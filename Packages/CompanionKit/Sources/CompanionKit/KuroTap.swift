@@ -15,6 +15,8 @@ enum KuroTap: Equatable, Sendable {
     case rub
     /// Tapped too often: she turns her back with a "…" thought bubble.
     case turnAway
+    /// Chin on her hand at the desk (overtime): she looks up and taps her cheek twice.
+    case chinTap
 
     /// The reaction to a tap in `look`; when `sleepy` she rubs her eyes instead.
     init(look: KuroLook, sleepy: Bool) {
@@ -50,10 +52,12 @@ extension KuroPose {
         pose.blinking = false
         switch tap {
         case .tablet:
-            pose.eyes = p < 0.5 ? .surprised : .down
+            // Her own wide eyes behind the tablet, not the dot eyes (UI 审核 2026-10-08).
+            pose.eyes = p < 0.5 ? .bright : .down
         case .sip:
-            pose.eyes = p < 0.75 ? .closed : .happy
-            pose.mouthO = p < 0.75
+            // Lifts the cup (0-0.2), blows with her eyes shut (0.2-0.55), puts it down (0.55-0.75).
+            pose.eyes = p < 0.2 ? pose.eyes : p < 0.55 ? .closed : .happy
+            pose.mouthO = (0.2..<0.55).contains(p)
         case .bounce:
             pose.eyes = p < 0.8 ? .bright : .happy
         case .glasses:
@@ -62,6 +66,8 @@ extension KuroPose {
             pose.eyes = p < 0.65 ? .closed : .drowsy
             pose.mouthO = p < 0.65
             pose.calm = p >= 0.65
+        case .chinTap:
+            pose.eyes = p < 0.75 ? .open : .drowsy
         case .turnAway:
             break
         }
@@ -87,7 +93,7 @@ extension KuroFigure {
             visible.remove(.chillCup)
             visible.remove(.itemBlanket)
             visible.insert(.tapCup)
-            if p >= 0.2 { visible.insert(.tapPuff) }
+            if (0.2..<0.55).contains(p) { visible.insert(.tapPuff) }
         case .bounce:
             visible.insert(.tapBall)
             if p >= 0.8 { visible.insert(.tapSparkle) }
@@ -100,6 +106,8 @@ extension KuroFigure {
             }
         case .rub:
             if p < 0.65 { visible.insert(.tapRub) }
+        case .chinTap:
+            break
         case .turnAway:
             visible.formIntersection(backView)
             visible.formUnion([.backHead, .tapDots])
@@ -118,10 +126,24 @@ extension KuroFigure {
         case (.bounce, .tapBall):
             guard p < 0.8 else { return .zero }
             return CGSize(width: 0, height: -40 * abs(sin(p / 0.8 * 2 * .pi)))
+        case (.sip, .tapCup):
+            // The cup travels from the table to her lips and back instead of jumping (UI 审核 2026-10-08).
+            let lift = p < 0.2 ? ease(p / 0.2) : p < 0.55 ? 1 : ease(1 - (p - 0.55) / 0.2)
+            return CGSize(width: 26 * (1 - lift), height: 36 * (1 - lift))
         case (.glasses, .deskGlasses):
             return CGSize(width: 0, height: p >= 0.2 ? -2 : 0)
+        case (.chinTap, .overtimeHand):
+            // Two taps on the cheek between 0.15 and 0.75.
+            guard (0.15..<0.75).contains(p) else { return .zero }
+            return CGSize(width: 0, height: -4 * abs(sin((p - 0.15) / 0.6 * 2 * .pi)))
         default:
             return .zero
         }
     }
+}
+
+/// Smoothstep from 0 to 1 over `x` in 0...1.
+private func ease(_ x: Double) -> Double {
+    let t = min(max(x, 0), 1)
+    return t * t * (3 - 2 * t)
 }
