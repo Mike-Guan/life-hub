@@ -1166,17 +1166,19 @@ import Testing
     }
 
     // The monitor sits where the pillow goes, so it steps aside while HAKU naps or lies down at bedtime.
-    // The running shoes stand in the bottom left corner; what is carried or tucked there takes their spot.
-    @Test func theRunningShoesStepAsideForWhatFillsTheirCorner() {
-        let home = RunnerPose().leaving([.runningShoes])
-        #expect(RunnerFigure.parts(for: .chill, pose: home).contains(.runningShoes))
-        for prop in [DailyProp.bag, .gymBag] {
-            var carrying = home
-            carrying.dailyProp = prop
-            #expect(!RunnerFigure.parts(for: .chill, pose: carrying).contains(.runningShoes))
+    // The room item and the running shoes stand in the bottom left corner; what fills it takes their spot.
+    @Test func theRoomCornerStepsAsideForWhatFillsIt() {
+        var outfit = Outfit()
+        outfit.room = .roomPlant
+        let home = RunnerPose().wearing(outfit).leaving([.runningShoes])
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: home)).isSuperset(of: [.roomPlant, .runningShoes]))
+        var carrying = home
+        carrying.dailyProp = .gymBag
+        let wrapped = RunnerPose(moment: .blanket).wearing(outfit).leaving([.runningShoes])
+        let leaving = RunnerPose(moment: .timeToLeave).wearing(outfit).leaving([.runningShoes])
+        for pose in [carrying, wrapped, leaving] {
+            #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).isDisjoint(with: [.roomPlant, .runningShoes]))
         }
-        let wrapped = RunnerPose(moment: .blanket).leaving([.runningShoes])
-        #expect(!RunnerFigure.parts(for: .chill, pose: wrapped).contains(.runningShoes))
     }
 
     @Test func theMonitorStepsAsideForThePillow() {

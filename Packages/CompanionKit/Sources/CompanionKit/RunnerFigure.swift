@@ -586,7 +586,8 @@ struct RunnerPose {
             codeGlow = 0.5 + 0.5 * sin(t * 2 * .pi / 2)
             let hand = Self.bump(CGFloat(t.truncatingRemainder(dividingBy: 10)), from: 8, to: 10)
             canOpacity = hand > 0 ? 1 : 0
-            canOffset = CGSize(width: -14 * hand, height: 24 * (1 - hand) - 6)
+            // Handed over in front of the laptop, clear of the monitor beside it (Mike 2026-10-09).
+            canOffset = CGSize(width: -24 * hand, height: 24 * (1 - hand) - 6)
             canAngle = Double(-12 * hand)
         case .shooting:
             break
@@ -1178,9 +1179,9 @@ struct RunnerFigure: View {
         if let prop = pose.dailyProp, !pose.bedtime { holdUp(prop, pose: pose, on: &visible) }
         if let place = pose.walkFrom, pose.dailyScene == nil, !pose.bedtime { visible.formUnion(walkParts(place)) }
         if let leg = pose.commuteLeg, !pose.bedtime { commuted(leg, pose: pose, on: &visible) }
-        // The running shoes step aside for what is carried or tucked in their corner (Mike 2026-10-09: no two
-        // things in one place).
-        if !visible.isDisjoint(with: shoeCornerTakers) { visible.remove(.runningShoes) }
+        // The room item and the running shoes step aside for what stands, is carried or is tucked in their corner
+        // (Mike 2026-10-09: no two things in one place).
+        if !visible.isDisjoint(with: cornerTakers) { visible.subtract([.roomPlant, .roomBag, .runningShoes]) }
         if pose.bathDry >= 0 {
             visible.subtract(bathHides)
             visible.formUnion([.bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .rubTowelL, .rubTowelR])
@@ -1294,9 +1295,9 @@ struct RunnerFigure: View {
         visible.remove(.monsterCan)
     }
 
-    /// Parts that fill the bottom left corner, where the running shoes stand.
-    nonisolated private static let shoeCornerTakers: Set<RunnerPart> = [
-        .gymBag, .shopBag, .toteBag, .paperBagL, .blanket,
+    /// Parts that fill the bottom left corner, where the room item and the running shoes stand.
+    nonisolated private static let cornerTakers: Set<RunnerPart> = [
+        .door, .gymBag, .shopBag, .toteBag, .paperBagL, .blanket,
     ]
 
     nonisolated private static let awayParts: Set<RunnerPart> = [
