@@ -182,17 +182,40 @@ extension KuroArt {
     )
 }
 
+extension KuroArt {
+    // UI-03 (UI 审核 2026-10-08): a tinted Lock Screen keeps only the inverted brightness, so her near-black
+    // hair, mask and navy top came out as one solid block. Drawn white, they read as outlines like HAKU.
+    /// `inks` with the dark fills turned white, for the line-art look on tinted Lock Screens and faces.
+    static func lineArt(_ inks: [RunnerInk]) -> [RunnerInk] {
+        inks.map { ink in
+            var ink = ink
+            if let fill = ink.fill, darkFills.contains(fill) { ink.fill = KuroPalette.white }
+            return ink
+        }
+    }
+
+    /// Fills too dark to read once a tinted Lock Screen inverts them.
+    static let darkFills: Set<Color> = [KuroPalette.hair, KuroPalette.mask, KuroPalette.navy]
+}
+
+extension EnvironmentValues {
+    /// Whether KURO's parts draw as line art.
+    @Entry var kuroLineArt = false
+}
+
 /// Draws one `KuroPart` across the whole figure frame.
 struct KuroPartView: View {
     let part: KuroPart
     /// How far the part moves, in SVG units.
     var shift: CGSize = .zero
+    @Environment(\.kuroLineArt) private var lineArt
 
     var body: some View {
         Canvas { context, size in
             RunnerDrawing.enterFigureSpace(&context, size: size)
             context.translateBy(x: shift.width, y: shift.height)
-            RunnerDrawing.draw(KuroArt.cachedInks(part), in: context)
+            let inks = KuroArt.cachedInks(part)
+            RunnerDrawing.draw(lineArt ? KuroArt.lineArt(inks) : inks, in: context)
         }
     }
 }
@@ -630,6 +653,7 @@ public struct KuroPortrait: View {
     let bedtime: Bedtime
     let wearing: Set<KuroItem>
     let framing: CompanionPortrait.Framing
+    let lineArt: Bool
 
     /// - Parameters:
     ///   - look: what she wears.
@@ -637,18 +661,21 @@ public struct KuroPortrait: View {
     ///   - bedtime: `.on` gives her sleepy eyes.
     ///   - wearing: ids of her shop items she wears; each shows only in its own look.
     ///   - framing: head to waist, or head only for small round widgets.
+    ///   - lineArt: draws her dark fills white, for tinted Lock Screens and watch faces.
     public init(
         look: KuroLook,
         energy: Double? = nil,
         bedtime: Bedtime = .off,
         wearing: Set<String> = [],
-        framing: CompanionPortrait.Framing = .full
+        framing: CompanionPortrait.Framing = .full,
+        lineArt: Bool = false
     ) {
         self.look = look
         self.energy = energy
         self.bedtime = bedtime
         self.wearing = KuroItem.items(wearing).subtracting([.spin])
         self.framing = framing
+        self.lineArt = lineArt
     }
 
     public var body: some View {
@@ -661,6 +688,7 @@ public struct KuroPortrait: View {
             case .head: HeadCrop { figure }
             }
         }
+        .environment(\.kuroLineArt, lineArt)
         .accessibilityLabel(KuroView.accessibilityLabel(look, bedtime: bedtime))
     }
 }
