@@ -449,7 +449,7 @@ public struct CompanionView: View {
             let open = scene.open(cards: replay.cards.count, cans: replay.cans)
             // Reduced motion holds the last frame.
             let shown = reduceMotion ? scene.length(cards: replay.cards.count, cans: replay.cans) - 0.2 : t
-            return RunnerPose.welcome(scene, time: shown, open: open, face: face)
+            return RunnerPose.welcome(scene, time: shown, open: open, face: face, mode: mode)
         }
         let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
         if reduceMotion {

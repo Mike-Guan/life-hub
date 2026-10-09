@@ -1463,7 +1463,7 @@ struct RunnerFigure: View {
     /// face down.
     nonisolated private static func welcomeParts(_ welcome: RunnerPose.Welcome) -> Set<RunnerPart> {
         var visible = baseParts.union([.earringNeon])
-        if welcome.scene == .desk {
+        if welcome.atDesk {
             visible.formUnion(headsetParts.union([.desk, .maskUp, .panelLines, .ledLine]))
             visible.formUnion(welcome.awake ? [.eyesWork, .lidsWork, .browsWork] : [.eyesSleepy])
         } else {

@@ -55,7 +55,6 @@ struct LifeHubApp: App {
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
         let needs = NeedTracker()
-        WatchSync.shared.activate()
         let growth = GrowthStore.live(in: container, defaults: AppGroup.defaults)
         growth.persona = Persona.stored(in: AppGroup.defaults)
         _store = State(initialValue: store)
@@ -73,6 +72,16 @@ struct LifeHubApp: App {
         _budget = State(initialValue: BudgetSettings.stored(in: AppGroup.defaults))
         _placeMonitor = State(initialValue: placeMonitor)
         _needs = State(initialValue: needs)
+        // Set before the session starts, so a check that launched the app is answered.
+        // Only a changed mode reloads, since background widget reloads have a daily budget.
+        WatchSync.shared.onWatchCheck {
+            guard let settled = store.settle(presence: .stored(in: AppGroup.defaults)) else { return }
+            Dogfood.note("settle", "手表打开，\(settled.reason)，切到\(settled.mode.title)")
+            widgets.sync(mode: store, energy: energy)
+            WidgetCenter.shared.reloadAllTimelines()
+            Self.sendToWatch(store: store, needs: needs, growth: growth)
+        }
+        WatchSync.shared.activate()
         // Set during launch so a tap that opens the app is delivered too. The center keeps it weakly.
         let taps = NotificationTaps(
             onOffWork: { needs.offWork(at: $0) },

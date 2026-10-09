@@ -25,6 +25,7 @@ struct WatchHomeView: View {
     @State private var payload = WatchPayload.read(from: AppGroup.container.watchPayloadURL)
 
     @State private var failure: String?
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         TimelineView(.everyMinute) { context in
@@ -46,6 +47,9 @@ struct WatchHomeView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: WatchReceiver.didFail)) { note in
             failure = note.object as? String
+        }
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            if phase == .active { WatchReceiver.shared.askPhoneToCheck() }
         }
     }
 

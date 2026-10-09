@@ -12,6 +12,12 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
     // the app worked out, behind a lock, so a send from a session callback still carries them.
     static let shared = WatchSync()
     private let played = Mutex(WatchPlay())
+    private let onCheck = Mutex<(@MainActor @Sendable () -> Void)?>(nil)
+
+    /// Sets what runs when the watch app opens and asks for a re-check; it should send the result.
+    func onWatchCheck(_ action: @escaping @MainActor @Sendable () -> Void) {
+        onCheck.withLock { $0 = action }
+    }
 
     /// Starts the session; the latest state goes out once it is active.
     func activate() {
@@ -60,6 +66,17 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
     ) {
         if let error { Dogfood.note("watch", "手表连接没建立：\(error.localizedDescription)") }
         send()
+    }
+
+    // This message launches the app in the background when it isn't running.
+    func session(
+        _ session: WCSession,
+        didReceiveMessage message: [String: Any],
+        replyHandler: @escaping ([String: Any]) -> Void
+    ) {
+        replyHandler([:])
+        guard message[WatchPayload.checkKey] != nil, let action = onCheck.withLock({ $0 }) else { return }
+        Task { @MainActor in action() }
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {}
