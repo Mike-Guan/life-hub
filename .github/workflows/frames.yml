@@ -5,7 +5,7 @@ name: frames
 on:
   workflow_dispatch:
   push:
-    branches: [chore/frames]
+    branches: [chore/frames, 'preview/**']
 
 concurrency:
   group: frames-${{ github.ref }}
@@ -37,12 +37,12 @@ jobs:
         timeout-minutes: 25
         run: |
           mkdir -p frames
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter "FrameSheets.lockScreen"
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets --skip hakuMoments
+          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.idle
           ls -l frames
 
       # The moments sheet is the largest; kept apart so the other sheets still upload if it runs long.
       - name: Draw moment sheets
+        if: false
         timeout-minutes: 12
         continue-on-error: true
         run: |
