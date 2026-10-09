@@ -121,6 +121,8 @@ struct RunnerPose {
     var headDy: CGFloat = 0
     /// 1 = eyes open, near 0 = closed.
     var blink: CGFloat = 1
+    /// The blink alone, without tired lids: 1 = no blink. Closed smiling eyes squeeze with it.
+    var squeeze: CGFloat = 1
     /// Eyes looking up (work tap: eye roll).
     var eyesDy: CGFloat = 0
     /// Eyes looking sideways; negative is toward the door on the left.
@@ -428,53 +430,56 @@ struct RunnerPose {
         let open: CGFloat = tired ? 0.75 : 1
         let r = CGFloat(react)
         blink = open * Self.blink(at: t)
+        squeeze = Self.blink(at: t)
         // Sparkles twinkle out of step with the blink, 1.6 s period.
         sparkle = 0.55 + 0.45 * sin(time * 2 * .pi / 1.6)
 
         // Shooting keeps the ¥¥ look of the old money mode, motion included.
         switch self.moment == .shooting ? .money : mode {
         case .work:
-            // Nod to the music every 0.5 s; LED breathes over 2.4 s; tap = eye roll + "•••".
-            headDy = CGFloat(abs(sin(t * .pi / 0.5))) * 1.5
+            // Nod to the music, a beat every 0.5 s, eased and now and then held; LED breathes over 2.4 s;
+            // tap = eye roll + "•••".
+            headDy = 1.5 * IdleClock.nod(at: t, period: 0.5, seed: Self.seed)
             let breath = 0.5 + 0.5 * sin(t * 2 * .pi / 2.4)
             ledOpacity = (0.6 + 0.4 * breath) * (tired ? 0.5 : 1)
             eyesDy = -2 * r
             ledDots = react > 0.05
-            // Every third 12 s cycle: two bigger nods, a still beat, then a push of the headset.
-            let cycle = (t / 12).rounded(.down)
-            let phase = t - cycle * 12
+            // Every 8-20 s, one of: two bigger nods, a still beat, then a push of the headset; or a quick
+            // look at the phone, then it's away.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
-            if plain, r == 0, cycle.truncatingRemainder(dividingBy: 3) == 2, phase >= 8, phase < 11 {
-                headDy = phase < 9 ? CGFloat(abs(sin(phase * .pi / 0.5))) * 2.5 : 0
-                headsetOff = 0.1 * Self.bump(CGFloat(phase), from: 10, to: 11)
-            }
-            // Every third cycle, offset from the headset push: a quick look at the phone, then it's away.
-            if plain, r == 0, cycle > 0, cycle.truncatingRemainder(dividingBy: 3) == 0, phase >= 4.3, phase < 5.5 {
-                phoneGlance = true
-                eyesDy = 2
-                headDy = 1
+            if plain, r == 0, let beat = IdleClock.beat(at: t, lengths: Self.workBeats, seed: Self.seed) {
+                if beat.kind == 0 {
+                    let phase = beat.phase
+                    let nod = IdleClock.dip(CGFloat(phase.truncatingRemainder(dividingBy: 0.5) / 0.5))
+                    headDy = phase < 1 ? 2.5 * nod : 0
+                    headsetOff = 0.1 * Self.bump(CGFloat(phase), from: 2, to: 3)
+                } else {
+                    phoneGlance = true
+                    eyesDy = 2
+                    headDy = 1
+                }
             }
         case .chill:
-            // A sip every 8 s; tap = raise the can.
-            let phase = t.truncatingRemainder(dividingBy: 8)
-            let sip = CGFloat(phase > 6.8 ? sin((phase - 6.8) / 1.2 * .pi) : 0)
+            // A sip every 6.5-9.5 s; tap = raise the can.
+            let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
+            let pause = plain && r == 0 ? IdleClock.beat(at: t, lengths: Self.chillBeats, seed: Self.seed) : nil
+            let sipBeat = IdleClock.beat(at: t, every: 8, spread: 1.5, lengths: [1.2], seed: Self.seed &+ 0x20)
+            let sip = pause == nil ? CGFloat(sipBeat.map { sin($0.phase / 1.2 * .pi) } ?? 0) : 0
             canAngle = Double(-28 * sip - 22 * r + (tired ? 14 : 0))
             canOffset = CGSize(width: -6 * sip, height: -6 * sip - 10 * r + (tired ? 4 : 0))
-            // After every fourth sip the can is empty: a shake by the ear, then a deadpan stare at it.
-            let cycle = (t / 8).rounded(.down)
-            let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
-            if plain, cycle > 0, cycle.truncatingRemainder(dividingBy: 4) == 0, phase < Self.emptyCanLength {
+            // Every 8-20 s, one of: the can is empty, a shake by the ear, then a deadpan stare at it; or a
+            // scratch of the head, then a tuft of hair that settles slowly.
+            if let pause, pause.kind == 0 {
+                let phase = pause.phase
                 let shake = max(0, 1 - phase / 1.2)
                 canAngle = Double(-8 + 10 * sin(phase * 2 * .pi / 0.3) * shake)
                 canOffset = CGSize(width: -6, height: -10)
                 emptyCan = phase >= 1.2
                 eyesDx = emptyCan ? 3 : 0
-            }
-            // Every 18 s: a scratch of the head, then a tuft of hair that settles slowly.
-            let itch = t.truncatingRemainder(dividingBy: 18)
-            if plain, r == 0, !emptyCan, itch >= 5, itch < 12 {
-                if itch < 7 { scratch = CGFloat((itch - 5) / 2) }
-                tuft = Self.ramp(CGFloat(itch), from: 5.5, to: 7) * (1 - Self.ramp(CGFloat(itch), from: 7, to: 12))
+            } else if let pause {
+                let itch = pause.phase
+                if itch < 2 { scratch = CGFloat(itch / 2) }
+                tuft = Self.ramp(CGFloat(itch), from: 0.5, to: 2) * (1 - Self.ramp(CGFloat(itch), from: 2, to: 7))
             }
         case .boxing:
             // Guard bounce every 0.6 s, gloves alternate; tap = right jab.
@@ -482,17 +487,16 @@ struct RunnerPose {
             gloveL = CGSize(width: 0, height: bounce)
             gloveR = CGSize(width: -14 * r, height: -bounce - 10 * r)
             gloveRScale = 1 + 0.2 * r
-            // Every third 10 s cycle: shake the wrists out, then a glove up to fix the headband.
-            let cycle = (t / 10).rounded(.down)
-            let phase = t - cycle * 10
+            // Every 18-30 s: shake the wrists out, then a glove up to fix the headband.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
-            if plain, r == 0, cycle.truncatingRemainder(dividingBy: 3) == 1, phase >= 6, phase < 9.5 {
-                if phase < 7.5 {
+            if plain, r == 0, let beat = IdleClock.beat(at: t, every: 24, spread: 6, lengths: [3.5], seed: Self.seed) {
+                let phase = beat.phase
+                if phase < 1.5 {
                     let shake = CGFloat(sin(phase * 2 * .pi / 0.15)) * 3
                     gloveL = CGSize(width: shake, height: 8)
                     gloveR = CGSize(width: -shake, height: 8)
                 } else {
-                    let fix = Self.bump(CGFloat(phase), from: 7.5, to: 9.5)
+                    let fix = Self.bump(CGFloat(phase), from: 1.5, to: 3.5)
                     gloveL = .zero
                     gloveR = CGSize(width: 10 * fix, height: -70 * fix)
                     eyesDx = 3 * fix
@@ -514,12 +518,18 @@ struct RunnerPose {
         if self.need == nil, self.moment == nil, self.life == nil, activity == nil { eyesDx += Self.drift(at: t) }
     }
 
-    /// Now and then the eyes drift off to one side and come back: every 13 s, left and right in turn.
+    /// Now and then the eyes drift off to a random side and come back, 8-20 s apart.
     static func drift(at t: TimeInterval) -> CGFloat {
-        let cycle = (t / 13).rounded(.down)
-        let side: CGFloat = cycle.truncatingRemainder(dividingBy: 2) == 0 ? 1 : -1
-        return 3 * side * bump(CGFloat(t - cycle * 13), from: 9, to: 10.4)
+        guard let beat = IdleClock.beat(at: t, lengths: [1.4], seed: seed &+ 0x10) else { return 0 }
+        return 3 * (beat.variant < 0.5 ? 1 : -1) * bump(CGFloat(beat.phase), from: 0, to: 1.4)
     }
+
+    /// HAKU's idle stream; KURO has her own, so the two never blink together.
+    static let seed: UInt64 = 0x4841
+    /// Work pool beats: big nods then a headset push, a look at the phone.
+    static let workBeats: [TimeInterval] = [3, 1.2]
+    /// Chill pool beats: the empty can, a scratch of the head.
+    static let chillBeats: [TimeInterval] = [emptyCanLength, 7]
 
     /// The state within the mode: peeking, dozing, slumped, at the door, walking, or vibe coding.
     private mutating func play(_ moment: CompanionMoment, time t: TimeInterval) {
@@ -1093,11 +1103,9 @@ struct RunnerPose {
         return sin((x - a) / (b - a) * .pi)
     }
 
-    /// A quick blink every 4.5 s.
-    private static func blink(at t: TimeInterval) -> CGFloat {
-        let phase = t.truncatingRemainder(dividingBy: 4.5)
-        guard phase < 0.16 else { return 1 }
-        return max(0.1, CGFloat(abs(phase - 0.08) / 0.08))
+    /// A quick blink, 2.5-6 s apart, now and then doubled.
+    static func blink(at t: TimeInterval) -> CGFloat {
+        IdleClock.blink(at: t, seed: seed)
     }
 }
 
@@ -1589,8 +1597,11 @@ struct RunnerFigure: View {
                     .scaleEffect(x: 1, y: pose.blink, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale, y: pose.eyesDy * scale)
             case .eyesChill:
-                // Closed smiling eyes don't blink, but they still look at the door while warming up.
-                RunnerPartView(part: part).offset(x: pose.eyesDx * scale)
+                // HAKU-21: closed smiling eyes squeeze shut a little on each blink; they still look at the
+                // door while warming up.
+                RunnerPartView(part: part)
+                    .scaleEffect(x: 1, y: 0.5 + 0.5 * pose.squeeze, anchor: Self.unit(x: 60, y: 65))
+                    .offset(x: pose.eyesDx * scale)
             case .maskUp where pose.unmasking, .panelLines where pose.unmasking, .ledLine where pose.unmasking,
                 .maskStripes where pose.unmasking:
                 // Off work or staying home: the mask slides down to the chin.

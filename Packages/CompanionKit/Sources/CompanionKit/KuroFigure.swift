@@ -73,6 +73,10 @@ struct KuroPose: Sendable {
     var tapProgress = 0.0
     /// Whether the heart thought bubble shows.
     var heart = false
+    /// The small idle move she is playing, if any.
+    var idle: KuroIdle?
+    /// How far into `idle` she is, 0..<1.
+    var idleProgress = 0.0
 
     /// The resting pose for `look` at `energy` (0-100, or nil when unknown); `bedtime` makes her sleepy.
     init(look: KuroLook, energy: Double?, bedtime: Bedtime = .off) {
@@ -98,10 +102,20 @@ struct KuroPose: Sendable {
         return pose
     }
 
-    /// The same pose blinking at `time`: every 4.5 s, except with low or drowsy eyes.
+    /// The same pose blinking at `time`, 2.5-6 s apart on her own stream; slow and heavy with low eyes,
+    /// never with drowsy eyes.
     func blink(at time: TimeInterval) -> KuroPose {
         var pose = self
-        pose.blinking = eyes != .low && eyes != .drowsy && time.truncatingRemainder(dividingBy: 4.5) < 0.16
+        switch eyes {
+        case .drowsy:
+            // Bedtime eyes are already half shut; a blink would read as falling asleep.
+            break
+        case .low:
+            // KURO-22: tired, she still blinks, just slower and longer.
+            pose.blinking = IdleClock.blink(at: time * 0.6, seed: KuroIdle.seed) < 0.5
+        default:
+            pose.blinking = IdleClock.blink(at: time, seed: KuroIdle.seed) < 0.5
+        }
         return pose
     }
 }
@@ -148,6 +162,7 @@ struct KuroFigure: View {
             if visible.contains(.tapRub) { visible.insert(rubSleeve(look)) }
         }
         if pose.heart { visible.insert(.tapHeart) }
+        if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
         return KuroPart.allCases.filter { visible.contains($0) }
     }
 
@@ -275,6 +290,10 @@ public struct KuroView: View {
     @State private var pokes = 0
     @State private var unboxStart: Date?
     @State private var unboxItem: KuroItem?
+    /// When the last unboxing ended, so her idle eases back in instead of jumping.
+    @State private var unboxEnd: Date?
+    /// Her idle time since her pace last changed; nil until it does.
+    @State private var idlePace: IdlePace?
     // Id of the last unboxing, shared with HAKU's view so each plays once.
     @AppStorage("companion.lastUnlock") private var lastUnlock = ""
     // Id of the last workout cheered, shared with HAKU's view so each plays once.
@@ -364,23 +383,28 @@ public struct KuroView: View {
                 // KURO-04 (UI 审核 2026-10-09): with the watch screen dimmed she dozes, eyes shut and body still,
                 // instead of freezing mid-hop or mid-blink.
                 let pose = dozing ? self.pose.showing(.closed) : unbox != nil ? unboxPose : reacting ?? self.pose
-                let pace = EnergyFace(energy: energy).speed
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
                 let still = reduceMotion || unbox != nil || dozing
+                // KURO-16: her idle runs on from where it was when her pace changes, and eases back in after
+                // an unboxing.
+                let idleTime = idlePace?.phase(at: time) ?? time * pace
+                let ease = Self.settle(since: unboxEnd, at: time)
                 // Out being active she bounces like on her tennis day.
                 let loop = slot == .active ? KuroLook.tennis : look
-                let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(loop, time: time * pace)
+                let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(loop, time: idleTime)
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
+                // Her small idle moves play only in the plain idle.
+                let fidget = still || tap != nil || slot != nil || sleepy ? nil : KuroIdle.at(idleTime, look: look)
                 ZStack {
-                    KuroFigure(look: look, pose: still || tap != nil ? pose : pose.blink(at: time))
+                    KuroFigure(look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget))
                         .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
                     if let unbox {
                         GiftBox(progress: unbox.box, fill: RunnerPalette.cardboard, ribbon: KuroPalette.pink)
                     }
                 }
                 .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
-                .rotationEffect(.degrees(still ? 0 : motion.angle), anchor: .bottom)
-                .offset(y: (still ? 0 : motion.dy) + hop)
+                .rotationEffect(.degrees(still ? 0 : motion.angle * ease), anchor: .bottom)
+                .offset(y: (still ? 0 : motion.dy * ease) + hop)
             }
             .id(look)
             .transition(.opacity)
@@ -435,6 +459,10 @@ public struct KuroView: View {
         )
         .task(id: listensForShakes) { await listenForShakes() }
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
+        .onChange(of: pace) { old, new in
+            let now = Date.now.timeIntervalSinceReferenceDate
+            idlePace = (idlePace ?? IdlePace(time: 0, phase: 0, pace: old)).changing(to: new, at: now)
+        }
         .onChange(of: look) { _, _ in
             pop += 1
             if unboxStart == nil { say(nil) }
@@ -678,7 +706,10 @@ public struct KuroView: View {
         }
         Task {
             try? await Task.sleep(for: .seconds(KuroUnbox.duration))
-            if unboxItem == item { unboxStart = nil }
+            if unboxItem == item {
+                unboxStart = nil
+                unboxEnd = .now
+            }
         }
     }
 
@@ -734,15 +765,27 @@ public struct KuroView: View {
         }
     }
 
-    /// The idle loop for `look`: work nods like HAKU at work, chill sways, tennis hops and desk breathes.
-    static func motion(_ look: KuroLook, time t: TimeInterval) -> IdleMotion {
+    /// The idle loop for `look`: work breathes and shifts her weight, chill sways, tennis hops and at the desk
+    /// she nods slowly over the page.
+    nonisolated static func motion(_ look: KuroLook, time t: TimeInterval) -> IdleMotion {
         switch look {
-        case .work: IdleMotion(mode: .work, time: t)
+        case .work: IdleMotion(dy: CGFloat(sin(t * 2 * .pi / 3.4)) * 1.5, angle: sin(t * 2 * .pi / 6.8))
         case .chill: IdleMotion(mode: .chill, time: t)
         case .tennis: IdleMotion(mode: .boxing, time: t)
-        case .desk: IdleMotion.sleeping(time: t)
+        case .desk: IdleMotion(dy: 2 * IdleClock.nod(at: t, period: 1.6, seed: KuroIdle.seed), angle: 0)
         }
     }
+
+    /// How much of her idle motion shows `t` seconds after an unboxing ended at `end`: eased from 0 to 1
+    /// over half a second.
+    nonisolated static func settle(since end: Date?, at t: TimeInterval) -> CGFloat {
+        guard let end else { return 1 }
+        let x = min(max((t - end.timeIntervalSinceReferenceDate) / 0.5, 0), 1)
+        return CGFloat(x * x * (3 - 2 * x))
+    }
+
+    /// How fast her idle runs.
+    private var pace: Double { EnergyFace(energy: energy).speed }
 
     nonisolated static func accessibilityLabel(_ look: KuroLook, bedtime: Bedtime, pose: KuroPose? = nil) -> String {
         if bedtime == .on { return "KURO，困了" }
