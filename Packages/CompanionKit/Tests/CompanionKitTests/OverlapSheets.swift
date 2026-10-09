@@ -36,54 +36,38 @@ extension FrameSheets {
             }
         }
         let shoes: Set<CompanionTrace> = [.runningShoes]
+        let all: Set<CompanionTrace> = [.pcGlow, .bandage, .runningShoes]
         let rows = [
-            row("H1 home · plant + shoes", .chill, room: .roomPlant, traces: shoes) {
+            row("R1 home · pc + bandage + plant", .chill, room: .roomPlant, traces: all) {
                 RunnerPose(mode: .chill, time: $0, face: .mid, react: 0)
             },
-            row("H1 home · bag + shoes + bandage", .chill, room: .roomBag, traces: shoes.union([.bandage])) {
-                RunnerPose(mode: .chill, time: $0, face: .mid, react: 0)
+            row("R2 home · scratch beat", .chill, room: nil, traces: all) {
+                RunnerPose(mode: .chill, time: 33.6 + $0, face: .mid, react: 0)
             },
-            row("H2 collapsed · plant + shoes", .chill, room: .roomPlant, traces: shoes) {
-                RunnerPose(mode: .chill, time: $0, face: .mid, moment: .collapsed, react: 0)
-            },
-            row("H3 prop bag · plant + shoes", .chill, room: .roomPlant, traces: shoes) {
+            row("R3 home · headphones prop", .chill, room: nil, traces: all) {
                 var pose = RunnerPose(mode: .chill, time: $0, face: .mid, react: 0)
-                pose.dailyProp = .bag
+                pose.dailyProp = .headphones
                 return pose
             },
-            row("H4 prop gymBag · bag + shoes", .chill, room: .roomBag, traces: shoes) {
+            row("R4 swim cheer · pc", .chill, room: nil, traces: all) {
                 var pose = RunnerPose(mode: .chill, time: $0, face: .mid, react: 0)
-                pose.dailyProp = .gymBag
+                pose.celebrate(.swimming, progress: CGFloat($0 / 4))
                 return pose
             },
-            row("H5 timeToLeave · plant + shoes", .chill, room: .roomPlant, traces: shoes) {
-                RunnerPose(mode: .chill, time: $0, face: .mid, moment: .timeToLeave, react: 0)
+            row("R5 work · bandage", .work, room: nil, traces: [.bandage]) {
+                RunnerPose(mode: .work, time: $0, face: .mid, react: 0)
             },
-            row("H6 blanket · plant + shoes", .chill, room: .roomPlant, traces: shoes) {
-                RunnerPose(mode: .chill, time: $0, face: .mid, moment: .blanket, react: 0)
+            row("R6 boxing · bandage", .boxing, room: nil, traces: [.bandage]) {
+                RunnerPose(mode: .boxing, time: $0, face: .mid, react: 0)
             },
-            row("H7 nap · pc + plant", .chill, room: .roomPlant, traces: [.pcGlow, .runningShoes]) {
+            row("R7 money · bandage", .money, room: nil, traces: [.bandage]) {
+                RunnerPose(mode: .money, time: $0, face: .mid, react: 0)
+            },
+            row("R8 nap · pc hidden", .chill, room: .roomPlant, traces: all) {
                 RunnerPose(mode: .chill, time: $0, face: .mid, life: .nap, react: 0)
             },
-            row("H8 runDay · bag + shoes", .chill, room: .roomBag, traces: shoes) {
-                RunnerPose(mode: .chill, time: $0, face: .mid, activity: .runDay, react: 0)
-            },
-            row("H9 flow · desk monitor", .money, room: nil, traces: [.deskMonitor]) {
-                RunnerPose(mode: .money, time: 7.5 + $0, face: .mid, moment: .flow, react: 0)
-            },
-            Row(label: "K1 KURO chill · flower + blanket", start: Self.base) {
-                AnyView(
-                    ZStack {
-                        Rectangle().fill(Color(red: 0.55, green: 0.85, blue: 0.6))
-                        KuroFigure(look: .chill, pose: {
-                            var pose = KuroPose(look: .chill, energy: 50)
-                            pose.items = [.flower, .blanket]
-                            return pose
-                        }()).padding(14)
-                    })
-            },
         ]
-        try write("overlap-after", rows, frames: 8, step: 0.5)
+        try write("overlap-r2", rows, frames: 8, step: 0.5)
     }
 }
 #endif
