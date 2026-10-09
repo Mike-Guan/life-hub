@@ -25,15 +25,15 @@ private struct WelcomeAt: View {
 extension FrameSheets {
     @Test func welcomeByPlace() throws {
         var rows: [Row] = []
-        for scene in [WelcomeScene.glance, .quiet] {
-            for mode in [Mode.work, .chill] {
+        for scene in [WelcomeScene.quiet] {
+            for mode in [Mode.work] {
                 rows.append(
                     Row(label: "\(scene) · \(mode.rawValue)", start: Self.base) {
                         AnyView(WelcomeAt(scene: scene, mode: mode))
                     })
             }
         }
-        try write("welcome-place", rows, frames: 14, step: 0.4)
+        try write("welcome-place-r2", rows, frames: 14, step: 0.4)
     }
 }
 #endif
