@@ -1178,6 +1178,9 @@ struct RunnerFigure: View {
         if let prop = pose.dailyProp, !pose.bedtime { holdUp(prop, pose: pose, on: &visible) }
         if let place = pose.walkFrom, pose.dailyScene == nil, !pose.bedtime { visible.formUnion(walkParts(place)) }
         if let leg = pose.commuteLeg, !pose.bedtime { commuted(leg, pose: pose, on: &visible) }
+        // The running shoes step aside for what is carried or tucked in their corner (Mike 2026-10-09: no two
+        // things in one place).
+        if !visible.isDisjoint(with: shoeCornerTakers) { visible.remove(.runningShoes) }
         if pose.bathDry >= 0 {
             visible.subtract(bathHides)
             visible.formUnion([.bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .rubTowelL, .rubTowelR])
@@ -1290,6 +1293,11 @@ struct RunnerFigure: View {
         // The right hand holds the note or taps the watch, so the can goes.
         visible.remove(.monsterCan)
     }
+
+    /// Parts that fill the bottom left corner, where the running shoes stand.
+    nonisolated private static let shoeCornerTakers: Set<RunnerPart> = [
+        .gymBag, .shopBag, .toteBag, .paperBagL, .blanket,
+    ]
 
     nonisolated private static let awayParts: Set<RunnerPart> = [
         .gymBag, .heavyBag, .dumbbell, .speedLines, .cheerMountains,
