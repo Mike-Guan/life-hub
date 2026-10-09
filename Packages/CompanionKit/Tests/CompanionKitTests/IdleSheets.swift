@@ -7,6 +7,20 @@ import Testing
 @testable import CompanionKit
 
 // Preview only (batch 1, idle): not for main.
+private struct PackingUpAt: View {
+    @Environment(\.frameClock) private var clock
+
+    var body: some View {
+        let t = (clock ?? FrameSheets.base).timeIntervalSinceReferenceDate
+        let motion = IdleMotion(moment: .packingUp, mode: .work, time: t)
+        ZStack {
+            Rectangle().fill(Color(red: 0.5, green: 0.72, blue: 1))
+            RunnerFigure(mode: .work, pose: RunnerPose(mode: .work, time: t, face: .mid, moment: .packingUp, react: 0))
+                .offset(y: motion.dy)
+                .padding(14)
+        }
+    }
+}
 extension FrameSheets {
     typealias Tick = (label: String, color: Color, on: (RunnerPose) -> Bool)
 
@@ -133,6 +147,25 @@ extension FrameSheets {
             }
         }
         try write("idle-3-breath", breaths, frames: 10, step: 0.4)
+    }
+
+    // Round 2: only the rows UI 审核 sent back. Packing up is drawn from the pose itself: the view's own
+    // pack-up sequence starts from the real clock, which the sheet's fixed date can't line up with.
+    @Test func idleRound2() throws {
+        let rows = [KuroLook.desk, .chill].map { look in
+            let pool = KuroIdle.pool(look)
+            let move: KuroIdle = look == .desk ? .glasses : .blow
+            let kind = pool.firstIndex(of: move) ?? 0
+            let start = Self.beatStart(after: Self.base, kind: kind, lengths: pool.map(\.length), seed: KuroIdle.seed)
+            return Row(label: "\(look.rawValue) · \(move)", start: start - 0.1) {
+                AnyView(KuroView(look: look, energy: 50))
+            }
+        }
+        try write("idle-r2-kuro", rows, frames: 12, step: 0.2)
+        let breath = Row(label: "work · packingUp(pose)", start: Self.base) {
+            AnyView(PackingUpAt())
+        }
+        try write("idle-r2-breath", [breath], frames: 10, step: 0.4)
     }
 
     @Test func idleKuro() throws {

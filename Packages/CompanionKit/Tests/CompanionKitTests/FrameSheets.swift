@@ -261,12 +261,12 @@ struct FrameSheets {
         let commit = ProcessInfo.processInfo.environment["FRAME_SHA"].map { String($0.prefix(7)) } ?? "local"
         let sheet = VStack(alignment: .leading, spacing: 10) {
             let frame = "\(Int(size.width))×\(Int(size.height)) pt"
-            Text("\(name) · \(commit) · \(frame) · 每格 \(step, specifier: "%.1f") s")
+            Text("\(name) · \(commit) · \(frame) · 每格 \(step, specifier: step < 0.1 ? "%.2f" : "%.1f") s")
                 .font(.system(size: 15, weight: .bold, design: .monospaced))
             HStack(spacing: 6) {
                 Text("").frame(width: 190)
                 ForEach(0..<frames, id: \.self) { index in
-                    Text(String(format: "%.1f s", Double(index) * step))
+                    Text(String(format: step < 0.1 ? "%.2f s" : "%.1f s", Double(index) * step))
                         .font(.system(size: 12, weight: .bold, design: .monospaced))
                         .frame(width: size.width)
                 }
