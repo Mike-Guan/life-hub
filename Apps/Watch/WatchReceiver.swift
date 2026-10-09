@@ -1,13 +1,16 @@
 import Foundation
 import HubCore
+import Synchronization
 import WatchConnectivity
 import WidgetKit
 
 // The iPhone is the only writer; the watch keeps the last payload so its widgets can read it.
 /// Receives HAKU's state from the iPhone and stores it for the watch app and widgets.
 final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
-    // No stored state besides the session, which WatchConnectivity makes safe to use from any thread.
+    // Besides the session, which WatchConnectivity makes safe to use from any thread, only whether an ask
+    // waits for activation, behind a lock.
     static let shared = WatchReceiver()
+    private let askPending = Mutex(false)
     /// Posted after a new payload is stored.
     static let didReceive = Notification.Name("WatchReceiver.didReceive")
     /// Posted with a message for the watch app when a payload could not be stored.
@@ -32,12 +35,32 @@ final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
         }
     }
 
+    // The iPhone only re-checks the mode at a place event or when its app opens. A message from the watch
+    // wakes the iPhone app in the background, so opening the watch app is a check too.
+    /// Asks the iPhone to re-check the mode and send the result; sent once the session is active.
+    func askPhoneToCheck() {
+        guard WCSession.isSupported() else { return }
+        let session = WCSession.default
+        guard session.activationState == .activated else {
+            askPending.withLock { $0 = true }
+            return
+        }
+        // Not reachable means the iPhone is away; the watch keeps showing the last payload.
+        guard session.isReachable else { return }
+        session.sendMessage([WatchPayload.checkKey: true], replyHandler: { _ in }, errorHandler: { _ in })
+    }
+
     func session(
         _ session: WCSession,
         activationDidCompleteWith activationState: WCSessionActivationState,
         error: Error?
     ) {
         store(session.receivedApplicationContext)
+        let ask = askPending.withLock { pending in
+            defer { pending = false }
+            return pending
+        }
+        if ask { askPhoneToCheck() }
     }
 
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
