@@ -67,7 +67,7 @@ extension FrameSheets {
                 RunnerPose(mode: .chill, time: $0, face: .mid, life: .nap, react: 0)
             },
         ]
-        try write("overlap-r2", rows, frames: 8, step: 0.5)
+        try write("overlap-r2b", rows, frames: 8, step: 0.5)
     }
 }
 #endif
