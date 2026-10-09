@@ -1178,9 +1178,10 @@ struct RunnerFigure: View {
         if let prop = pose.dailyProp, !pose.bedtime { holdUp(prop, pose: pose, on: &visible) }
         if let place = pose.walkFrom, pose.dailyScene == nil, !pose.bedtime { visible.formUnion(walkParts(place)) }
         if let leg = pose.commuteLeg, !pose.bedtime { commuted(leg, pose: pose, on: &visible) }
-        // The room item and the running shoes step aside for what stands, is carried or is tucked in their corner
-        // (Mike 2026-10-09: no two things in one place).
+        // Room things step aside for what stands, is carried or is tucked in their spot (Mike 2026-10-09: no two
+        // things in one place). The monitor stands by the left ear, where the pillow and the headphone cup go.
         if !visible.isDisjoint(with: cornerTakers) { visible.subtract([.roomPlant, .roomBag, .runningShoes]) }
+        if !visible.isDisjoint(with: [.pillow, .cupL]) { visible.remove(.roomPc) }
         if pose.bathDry >= 0 {
             visible.subtract(bathHides)
             visible.formUnion([.bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .rubTowelL, .rubTowelR])
@@ -1224,9 +1225,7 @@ struct RunnerFigure: View {
         // Today's traces: the bandage goes everywhere, the monitor and the sunlight are in the room at home.
         if pose.traces.contains(.bandage) { visible.insert(.bandage) }
         let home = mode == .chill && visible.isDisjoint(with: awayParts.union([.door]))
-        // The monitor stands where the pillow goes; with HAKU's head on the pillow it would poke out behind his
-        // head (Mike 2026-10-09).
-        if home, pose.traces.contains(.pcGlow), !visible.contains(.pillow) { visible.insert(.roomPc) }
+        if home, pose.traces.contains(.pcGlow) { visible.insert(.roomPc) }
         if home, pose.traces.contains(.sunlight) { visible.insert(.sunlight) }
         // Lasting traces: worn gloves wherever the gloves are, the monitor while vibe coding, shoes at home.
         if pose.traces.contains(.wornGloves) {

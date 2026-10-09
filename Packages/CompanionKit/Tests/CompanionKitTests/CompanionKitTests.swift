@@ -1165,7 +1165,6 @@ import Testing
         #expect(RunnerFigure.parts(for: .chill, pose: RunnerPose()).contains(.roomPc) == false)
     }
 
-    // The monitor sits where the pillow goes, so it steps aside while HAKU naps or lies down at bedtime.
     // The room item and the running shoes stand in the bottom left corner; what fills it takes their spot.
     @Test func theRoomCornerStepsAsideForWhatFillsIt() {
         var outfit = Outfit()
@@ -1181,7 +1180,8 @@ import Testing
         }
     }
 
-    @Test func theMonitorStepsAsideForThePillow() {
+    // The monitor sits by the left ear, so it steps aside for the pillow and the headphone cup.
+    @Test func theMonitorStepsAsideForThePillowAndTheHeadphones() {
         let napping = RunnerPose(mode: .chill, time: 1.5, face: .mid, life: .nap, react: 0).leaving([.pcGlow])
         let nap = Set(RunnerFigure.parts(for: .chill, pose: napping))
         #expect(nap.contains(.pillow) && !nap.contains(.roomPc))
@@ -1190,6 +1190,9 @@ import Testing
         #expect(bed.contains(.pillow) && !bed.contains(.roomPc))
         let awake = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: false).leaving([.pcGlow])
         #expect(RunnerFigure.parts(for: .chill, pose: awake).contains(.roomPc))
+        var listening = RunnerPose().leaving([.pcGlow])
+        listening.dailyProp = .headphones
+        #expect(!RunnerFigure.parts(for: .chill, pose: listening).contains(.roomPc))
     }
 
     @Test func collapsedDropsTheHeadOntoTheSofaArm() {
