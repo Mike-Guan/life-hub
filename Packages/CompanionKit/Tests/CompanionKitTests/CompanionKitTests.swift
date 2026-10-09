@@ -1166,6 +1166,19 @@ import Testing
     }
 
     // The monitor sits where the pillow goes, so it steps aside while HAKU naps or lies down at bedtime.
+    // The running shoes stand in the bottom left corner; what is carried or tucked there takes their spot.
+    @Test func theRunningShoesStepAsideForWhatFillsTheirCorner() {
+        let home = RunnerPose().leaving([.runningShoes])
+        #expect(RunnerFigure.parts(for: .chill, pose: home).contains(.runningShoes))
+        for prop in [DailyProp.bag, .gymBag] {
+            var carrying = home
+            carrying.dailyProp = prop
+            #expect(!RunnerFigure.parts(for: .chill, pose: carrying).contains(.runningShoes))
+        }
+        let wrapped = RunnerPose(moment: .blanket).leaving([.runningShoes])
+        #expect(!RunnerFigure.parts(for: .chill, pose: wrapped).contains(.runningShoes))
+    }
+
     @Test func theMonitorStepsAsideForThePillow() {
         let napping = RunnerPose(mode: .chill, time: 1.5, face: .mid, life: .nap, react: 0).leaving([.pcGlow])
         let nap = Set(RunnerFigure.parts(for: .chill, pose: napping))
