@@ -134,5 +134,33 @@ extension FrameSheets {
         }
         try write("idle-3-breath", breaths, frames: 10, step: 0.4)
     }
+
+    @Test func idleKuro() throws {
+        var rows: [Row] = []
+        for look in KuroLook.allCases {
+            let pool = KuroIdle.pool(look)
+            for (kind, move) in pool.enumerated() {
+                let start = Self.beatStart(after: Self.base, kind: kind, lengths: pool.map(\.length), seed: KuroIdle.seed)
+                rows.append(
+                    Row(label: "\(look.rawValue) · \(move)", start: start - 0.1) {
+                        AnyView(KuroView(look: look, energy: 50))
+                    })
+            }
+        }
+        try write("idle-4-kuro", rows, frames: 10, step: 0.2)
+        let blinks = [("chill · 眨眼", 50.0), ("chill · 累了慢眨", 10.0)].map { label, energy in
+            let pose = KuroPose(look: .chill, energy: energy)
+            var t = Self.base.timeIntervalSinceReferenceDate
+            while !pose.blink(at: t).blinking { t += 0.01 }
+            return Row(label: label, start: Date(timeIntervalSinceReferenceDate: t - 0.12)) {
+                AnyView(KuroView(look: .chill, energy: energy))
+            }
+        }
+        try write("idle-5-kuro-blinks", blinks, frames: 12, step: 0.04)
+        let looks = KuroLook.allCases.map { look in
+            Row(label: "\(look.rawValue) · 待机", start: Self.base) { AnyView(KuroView(look: look, energy: 50)) }
+        }
+        try write("idle-6-kuro-loops", looks, frames: 10, step: 0.4)
+    }
 }
 #endif
