@@ -8,9 +8,13 @@ import WidgetKit
 /// Receives HAKU's state from the iPhone and stores it for the watch app and widgets.
 final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
     // Besides the session, which WatchConnectivity makes safe to use from any thread, only whether an ask
-    // waits for activation, behind a lock.
+    // waits for activation and when the last one went, behind locks.
     static let shared = WatchReceiver()
     private let askPending = Mutex(false)
+    private let lastAsk = Mutex<ContinuousClock.Instant?>(nil)
+    // Raising the wrist again and again sends one ask.
+    /// The shortest time between two asks.
+    private static let askGap: Duration = .seconds(300)
     /// Posted after a new payload is stored.
     static let didReceive = Notification.Name("WatchReceiver.didReceive")
     /// Posted with a message for the watch app when a payload could not be stored.
@@ -47,6 +51,13 @@ final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
         }
         // Not reachable means the iPhone is away; the watch keeps showing the last payload.
         guard session.isReachable else { return }
+        let now = ContinuousClock.now
+        let due = lastAsk.withLock { last in
+            guard last.map({ now - $0 >= Self.askGap }) ?? true else { return false }
+            last = now
+            return true
+        }
+        guard due else { return }
         session.sendMessage([WatchPayload.checkKey: true], replyHandler: { _ in }, errorHandler: { _ in })
     }
 
