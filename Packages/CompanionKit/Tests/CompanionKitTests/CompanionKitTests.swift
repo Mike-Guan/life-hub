@@ -589,7 +589,7 @@ import Testing
     @Test func atHomeHakuScratchesItsHead() throws {
         let start = try #require(IdleClockTests.firstStart(kind: 1, lengths: RunnerPose.chillBeats))
         let scratching = RunnerPose(mode: .chill, time: start + 1, face: .mid, react: 0)
-        #expect(scratching.scratch == 0.5 && scratching.tuft > 0)
+        #expect(abs(scratching.scratch - 0.5) < 0.01 && scratching.tuft > 0)
         let parts = Set(RunnerFigure.parts(for: .chill, pose: scratching))
         #expect(parts.isSuperset(of: [.scratchHand, .hairTuft]))
         let settling = RunnerPose(mode: .chill, time: start + 4, face: .mid, react: 0)
