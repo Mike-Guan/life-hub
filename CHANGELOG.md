@@ -375,6 +375,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   the watch mode chip shrinks instead of running under the clock. (#240)
 - The settings gear and small Settings buttons are at least 44 pt. Error messages show dark text with a red
   warning icon. (#241)
+- With KURO picked, her shop and wardrobe tiles use her own colours. (#243)
+- With KURO picked, a tinted Lock Screen or watch face draws her head as line art instead of one solid shape. (#248)
+- With KURO picked, chill is called "下班" and the four modes show her own icons. (#250)
+- KURO now plays a move and says her own line for the off-work notice and the one-offs (staying in, a stretch,
+  coming back, a Daily task done, a cheer). (#242)
+- KURO's body moves for every need, activity and moment, not only her line; tapping her while she rests her chin
+  at the desk makes her look up. (#247)
 - Leaving the office in the evening ends work even if that leave was missed: from 17:30, being away from the
   office or arriving home switches to Chill at the next place event or app open, also within 2 hours of a
   manual change, unless you changed the mode after leaving. The debug log now says why a place event kept the mode.
