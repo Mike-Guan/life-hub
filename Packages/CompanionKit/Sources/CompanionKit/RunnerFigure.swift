@@ -1221,7 +1221,9 @@ struct RunnerFigure: View {
         // Today's traces: the bandage goes everywhere, the monitor and the sunlight are in the room at home.
         if pose.traces.contains(.bandage) { visible.insert(.bandage) }
         let home = mode == .chill && visible.isDisjoint(with: awayParts.union([.door]))
-        if home, pose.traces.contains(.pcGlow) { visible.insert(.roomPc) }
+        // The monitor stands where the pillow goes; with HAKU's head on the pillow it would poke out behind his
+        // head (Mike 2026-10-09).
+        if home, pose.traces.contains(.pcGlow), !visible.contains(.pillow) { visible.insert(.roomPc) }
         if home, pose.traces.contains(.sunlight) { visible.insert(.sunlight) }
         // Lasting traces: worn gloves wherever the gloves are, the monitor while vibe coding, shoes at home.
         if pose.traces.contains(.wornGloves) {

@@ -1165,6 +1165,18 @@ import Testing
         #expect(RunnerFigure.parts(for: .chill, pose: RunnerPose()).contains(.roomPc) == false)
     }
 
+    // The monitor sits where the pillow goes, so it steps aside while HAKU naps or lies down at bedtime.
+    @Test func theMonitorStepsAsideForThePillow() {
+        let napping = RunnerPose(mode: .chill, time: 1.5, face: .mid, life: .nap, react: 0).leaving([.pcGlow])
+        let nap = Set(RunnerFigure.parts(for: .chill, pose: napping))
+        #expect(nap.contains(.pillow) && !nap.contains(.roomPc))
+        let lying = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: true).leaving([.pcGlow])
+        let bed = Set(RunnerFigure.parts(for: .chill, pose: lying))
+        #expect(bed.contains(.pillow) && !bed.contains(.roomPc))
+        let awake = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: false).leaving([.pcGlow])
+        #expect(RunnerFigure.parts(for: .chill, pose: awake).contains(.roomPc))
+    }
+
     @Test func collapsedDropsTheHeadOntoTheSofaArm() {
         let pose = RunnerPose(moment: .collapsed)
         #expect(pose.slump > 0.5)
