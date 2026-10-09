@@ -10,7 +10,7 @@ enum KuroIdle: CaseIterable, Sendable {
     case stylus
     /// She looks up from the tablet and back down.
     case lookUp
-    /// The drink comes up and she blows on it.
+    /// The drink comes up to her lips, she blows on it and puts it down.
     case blow
     /// She looks off to the side and back.
     case aside
@@ -18,7 +18,7 @@ enum KuroIdle: CaseIterable, Sendable {
     case racket
     /// The ponytail swishes and settles.
     case ponytail
-    /// A finger pushes the glasses up; they catch the light.
+    /// The glasses nudge up and catch the light.
     case glasses
     /// The red pen taps the notebooks twice.
     case pen
@@ -32,7 +32,7 @@ enum KuroIdle: CaseIterable, Sendable {
         case .ears: 0.6
         case .stylus, .pen, .racket, .ponytail, .glasses: 1
         case .lookUp, .aside: 1.4
-        case .blow: 1.6
+        case .blow: 2
         }
     }
 
@@ -58,17 +58,17 @@ enum KuroIdle: CaseIterable, Sendable {
     func apply(_ p: Double, to visible: inout Set<KuroPart>) {
         switch self {
         case .blow:
-            if (0.3..<0.8).contains(p) {
+            // The same cup and puff as her sip tap (UI 审核 2026-10-09: the puff must leave the lips).
+            guard p < 0.9 else { return }
+            visible.subtract([.chillCup, .itemBlanket])
+            visible.insert(.tapCup)
+            if (0.3..<0.65).contains(p) {
                 visible.subtract([.mouthCat, .mouthFlat])
                 visible.formUnion([.mouthO, .tapPuff])
             }
         case .glasses:
-            if p < 0.5 {
-                visible.remove(.deskPen)
-                visible.insert(.tapFinger)
-            } else if p < 0.8 {
-                visible.insert(.tapGlint)
-            }
+            // No hand: a finger with no arm read as floating (UI 审核 2026-10-09).
+            if (0.5..<0.8).contains(p) { visible.insert(.tapGlint) }
         default:
             break
         }
@@ -86,7 +86,9 @@ enum KuroIdle: CaseIterable, Sendable {
         case .racket where part == .tennisRacket: return CGSize(width: 0, height: -6 * twice)
         case .lookUp where Self.eyes.contains(part): return CGSize(width: 0, height: -3 * held)
         case .aside where Self.eyes.contains(part): return CGSize(width: 3 * held, height: 0)
-        case .blow where part == .chillCup: return CGSize(width: 0, height: -6 * held)
+        case .blow where part == .tapCup:
+            let lift = CGFloat(Self.hold(p, rise: 0.2, fall: 0.2, end: 0.9))
+            return CGSize(width: 26 * (1 - lift), height: 36 * (1 - lift))
         case .glasses where part == .deskGlasses:
             return CGSize(width: 0, height: -2 * CGFloat(Self.hold(p, from: 0.25)))
         case .ponytail where part == .tennisPonytail:
@@ -100,10 +102,12 @@ enum KuroIdle: CaseIterable, Sendable {
         .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow,
     ]
 
-    /// 0 → 1 eased in from `from`, held, eased back to 0 over the last fifth.
-    private static func hold(_ p: Double, from start: Double = 0) -> Double {
-        let up = (p - start) / 0.2
-        let down = (1 - p) / 0.2
+    /// 0 → 1 eased in over `rise` from `start`, held, eased back to 0 over `fall` before `end`.
+    private static func hold(
+        _ p: Double, from start: Double = 0, rise: Double = 0.2, fall: Double = 0.2, end: Double = 1
+    ) -> Double {
+        let up = (p - start) / rise
+        let down = (end - p) / fall
         let x = min(max(min(up, down), 0), 1)
         return x * x * (3 - 2 * x)
     }
