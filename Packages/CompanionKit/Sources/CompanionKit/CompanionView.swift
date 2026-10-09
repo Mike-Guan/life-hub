@@ -1303,8 +1303,9 @@ struct IdleMotion {
         case .overtime:
             let breath = IdleMotion.sleeping(time: t)
             self.init(dy: breath.dy, angle: breath.angle)
-        case .slacking:
-            self.init(dy: 0, angle: 0)
+        case .slacking, .packingUp:
+            // HAKU-21: barely moving, but still breathing.
+            self.init(dy: CGFloat(sin(t * 2 * .pi / 3.6)) * 1.2, angle: 0)
         case .drowsy:
             self.init(dy: CGFloat(sin(t * 2 * .pi / 4)) * 1.5, angle: sin(t * 2 * .pi / 6) * 1.5)
         case .gymInvite:
@@ -1323,16 +1324,14 @@ struct IdleMotion {
         case .stiff:
             let sway = RunnerPose.stiffSway(at: t)
             self.init(dy: sway.dy, angle: sway.angle)
-        case .packingUp:
-            self.init(dy: 0, angle: 0)
         }
     }
 
     init(mode: Mode, time t: TimeInterval) {
         switch mode {
         case .work:
-            // Slow nod to the music, every 0.5 s, very small.
-            dy = CGFloat(abs(sin(t * .pi / 0.5))) * 3
+            // The body follows the head's nod 0.1 s late.
+            dy = 3 * IdleClock.nod(at: t - 0.1, period: 0.5, seed: RunnerPose.seed)
             angle = 0
         case .chill:
             // Sway left and right, 3 s period.

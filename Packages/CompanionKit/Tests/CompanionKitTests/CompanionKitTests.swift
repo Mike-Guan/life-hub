@@ -322,14 +322,16 @@ import Testing
         #expect(plain.isDisjoint(with: [.gloveTapeLeft, .gloveTapeRight]))
     }
 
-    @Test func eyesDriftNowAndThenAndComeBack() {
-        #expect(RunnerPose.drift(at: 5) == 0)
-        #expect(RunnerPose.drift(at: 9.7) > 2.9)
-        #expect(RunnerPose.drift(at: 13 + 9.7) < -2.9)
-        #expect(RunnerPose.drift(at: 11) == 0)
-        let plain = RunnerPose(mode: .work, time: 9.7, face: .mid, react: 0)
-        #expect(plain.eyesDx > 2.9)
-        let peeking = RunnerPose(mode: .work, time: 9.7, face: .mid, moment: .slacking, react: 0)
+    @Test func eyesDriftNowAndThenAndComeBack() throws {
+        let start = try #require(IdleClockTests.firstStart(lengths: [1.4], seed: RunnerPose.seed &+ 0x10))
+        #expect(RunnerPose.drift(at: start - 0.5) == 0)
+        #expect(abs(RunnerPose.drift(at: start + 0.7)) > 2.9)
+        #expect(RunnerPose.drift(at: start + 1.5) == 0)
+        let looks = stride(from: 0.0, to: 600, by: 0.05).map { RunnerPose.drift(at: $0) }
+        #expect(looks.contains { $0 > 2.5 } && looks.contains { $0 < -2.5 })
+        let plain = RunnerPose(mode: .work, time: start + 0.7, face: .mid, react: 0)
+        #expect(abs(plain.eyesDx) > 2.9)
+        let peeking = RunnerPose(mode: .work, time: start + 0.7, face: .mid, moment: .slacking, react: 0)
         #expect(peeking.eyesDx != plain.eyesDx)
     }
 
@@ -345,42 +347,42 @@ import Testing
         #expect(done.eyesDx == 0 && done.headDy == 0)
     }
 
-    @Test func boxingHakuShakesOutAndFixesTheHeadband() {
-        // Cycle 1 of 10 s starts at 10 s; the fidget runs from 16 s to 19.5 s.
-        let shaking = RunnerPose(mode: .boxing, time: 16.5, face: .mid, react: 0)
+    @Test func boxingHakuShakesOutAndFixesTheHeadband() throws {
+        let start = try #require(IdleClockTests.firstStart(lengths: [3.5], every: 24, spread: 6))
+        let shaking = RunnerPose(mode: .boxing, time: start + 0.5, face: .mid, react: 0)
         #expect(shaking.gloveL.height == 8 && shaking.gloveR.height == 8)
-        let fixing = RunnerPose(mode: .boxing, time: 18.5, face: .mid, react: 0)
+        let fixing = RunnerPose(mode: .boxing, time: start + 2.5, face: .mid, react: 0)
         #expect(fixing.gloveR.height < -69 && fixing.gloveL == .zero)
-        let guarding = RunnerPose(mode: .boxing, time: 28.5, face: .mid, react: 0)
+        let guarding = RunnerPose(mode: .boxing, time: start + 12.5, face: .mid, react: 0)
         #expect(guarding.gloveR.height > -4)
-        let jab = RunnerPose(mode: .boxing, time: 18.5, face: .mid, react: 0.5)
+        let jab = RunnerPose(mode: .boxing, time: start + 2.5, face: .mid, react: 0.5)
         #expect(jab.gloveR.height > -69)
     }
 
-    @Test func atWorkHakuSneaksALookAtThePhone() {
-        // Cycle 3 of 12 s starts at 36 s; the glance runs from 40.3 s to 41.5 s.
-        let glance = RunnerPose(mode: .work, time: 41, face: .mid, react: 0)
+    @Test func atWorkHakuSneaksALookAtThePhone() throws {
+        let start = try #require(IdleClockTests.firstStart(kind: 1, lengths: RunnerPose.workBeats))
+        let glance = RunnerPose(mode: .work, time: start + 0.7, face: .mid, react: 0)
         #expect(glance.phoneGlance && glance.eyesDy == 2)
         let parts = Set(RunnerFigure.parts(for: .work, pose: glance))
         #expect(parts.isSuperset(of: [.phone, .phoneHand]) && !parts.contains(.phoneFeed))
-        let after = RunnerPose(mode: .work, time: 42, face: .mid, react: 0)
+        let after = RunnerPose(mode: .work, time: start + 1.7, face: .mid, react: 0)
         #expect(!after.phoneGlance && !RunnerFigure.parts(for: .work, pose: after).contains(.phone))
-        #expect(!RunnerPose(mode: .work, time: 5, face: .mid, react: 0).phoneGlance)
-        #expect(!RunnerPose(mode: .work, time: 41, face: .mid, moment: .drowsy, react: 0).phoneGlance)
+        #expect(!RunnerPose(mode: .work, time: start - 3, face: .mid, react: 0).phoneGlance)
+        #expect(!RunnerPose(mode: .work, time: start + 0.7, face: .mid, moment: .drowsy, react: 0).phoneGlance)
     }
 
-    @Test func atWorkHakuPausesAndPushesTheHeadset() {
-        // Cycle 2 of 12 s starts at 24 s; the pause runs from 32 s to 35 s.
-        let nod = RunnerPose(mode: .work, time: 32.25, face: .mid, react: 0)
+    @Test func atWorkHakuPausesAndPushesTheHeadset() throws {
+        let start = try #require(IdleClockTests.firstStart(kind: 0, lengths: RunnerPose.workBeats))
+        let nod = RunnerPose(mode: .work, time: start + 0.17, face: .mid, react: 0)
         #expect(nod.headDy > 2.4)
-        let still = RunnerPose(mode: .work, time: 33.5, face: .mid, react: 0)
+        let still = RunnerPose(mode: .work, time: start + 1.5, face: .mid, react: 0)
         #expect(still.headDy == 0 && still.headsetOff == 0)
-        let push = RunnerPose(mode: .work, time: 34.5, face: .mid, react: 0)
+        let push = RunnerPose(mode: .work, time: start + 2.5, face: .mid, react: 0)
         #expect(push.headsetOff > 0.09 && push.headsetOff < 1)
         #expect(RunnerFigure.parts(for: .work, pose: push) == RunnerFigure.parts(for: .work, pose: still))
-        let otherCycle = RunnerPose(mode: .work, time: 22.5, face: .mid, react: 0)
+        let otherCycle = RunnerPose(mode: .work, time: start - 2, face: .mid, react: 0)
         #expect(otherCycle.headsetOff == 0)
-        let slacking = RunnerPose(mode: .work, time: 34.5, face: .mid, moment: .slacking, react: 0)
+        let slacking = RunnerPose(mode: .work, time: start + 2.5, face: .mid, moment: .slacking, react: 0)
         #expect(slacking.headsetOff == 0)
     }
 
@@ -584,17 +586,18 @@ import Testing
         #expect(CompanionView.newTaskDone(.stretched(id: "t"), last: "") == nil)
     }
 
-    @Test func atHomeHakuScratchesItsHead() {
-        let scratching = RunnerPose(mode: .chill, time: 6, face: .mid, react: 0)
+    @Test func atHomeHakuScratchesItsHead() throws {
+        let start = try #require(IdleClockTests.firstStart(kind: 1, lengths: RunnerPose.chillBeats))
+        let scratching = RunnerPose(mode: .chill, time: start + 1, face: .mid, react: 0)
         #expect(scratching.scratch == 0.5 && scratching.tuft > 0)
         let parts = Set(RunnerFigure.parts(for: .chill, pose: scratching))
         #expect(parts.isSuperset(of: [.scratchHand, .hairTuft]))
-        let settling = RunnerPose(mode: .chill, time: 9, face: .mid, react: 0)
+        let settling = RunnerPose(mode: .chill, time: start + 4, face: .mid, react: 0)
         #expect(settling.scratch < 0 && settling.tuft > 0 && settling.tuft < 1)
         #expect(!RunnerFigure.parts(for: .chill, pose: settling).contains(.scratchHand))
-        let calm = RunnerPose(mode: .chill, time: 14, face: .mid, react: 0)
+        let calm = RunnerPose(mode: .chill, time: start + 8, face: .mid, react: 0)
         #expect(calm.tuft == 0 && !RunnerFigure.parts(for: .chill, pose: calm).contains(.hairTuft))
-        let napping = RunnerPose(mode: .chill, time: 6, face: .mid, life: .nap, react: 0)
+        let napping = RunnerPose(mode: .chill, time: start + 1, face: .mid, life: .nap, react: 0)
         #expect(napping.scratch < 0)
     }
 
@@ -685,18 +688,18 @@ import Testing
         #expect(IdleMotion.rollingOver(time: 0, progress: 0).angle == 0)
     }
 
-    @Test func everyFourthSipTheCanIsEmpty() {
-        // Cycle 4 (32 s) follows the fourth sip: shake, then stare.
-        let shaking = RunnerPose(mode: .chill, time: 32.5, face: .mid, react: 0)
+    @Test func nowAndThenTheCanIsEmpty() throws {
+        let start = try #require(IdleClockTests.firstStart(kind: 0, lengths: RunnerPose.chillBeats))
+        let shaking = RunnerPose(mode: .chill, time: start + 0.5, face: .mid, react: 0)
         #expect(!shaking.emptyCan && shaking.canOffset.height == -10)
-        let staring = RunnerPose(mode: .chill, time: 34, face: .mid, react: 0)
+        let staring = RunnerPose(mode: .chill, time: start + 2, face: .mid, react: 0)
         #expect(staring.emptyCan)
         let parts = Set(RunnerFigure.parts(for: .chill, pose: staring))
         #expect(parts.isSuperset(of: [.eyesWork, .monsterCan]))
         #expect(!parts.contains(.eyesChill))
-        #expect(!RunnerPose(mode: .chill, time: 36, face: .mid, react: 0).emptyCan)
-        #expect(!RunnerPose(mode: .chill, time: 2, face: .mid, react: 0).emptyCan)
-        #expect(!RunnerPose(mode: .chill, time: 34, face: .mid, life: .snack, react: 0).emptyCan)
+        #expect(!RunnerPose(mode: .chill, time: start + 4, face: .mid, react: 0).emptyCan)
+        #expect(!RunnerPose(mode: .chill, time: start - 3, face: .mid, react: 0).emptyCan)
+        #expect(!RunnerPose(mode: .chill, time: start + 2, face: .mid, life: .snack, react: 0).emptyCan)
     }
 
     @Test func staminaNudgesWhatHakuDoesOnItsOwn() {
