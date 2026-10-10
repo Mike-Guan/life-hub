@@ -123,6 +123,15 @@ public final class ModeStore {
         WidgetSnapshot(log: log, now: now)
     }
 
+    /// Deletes the changes `matching` picks (#237). The current mode then comes from what is left.
+    /// - Returns: how many changes were deleted.
+    @discardableResult
+    public func forget(at date: Date = .now, where matching: (ModeChange) -> Bool) -> Int {
+        let count = log.forget(at: date, by: deviceID, where: matching)
+        if count > 0 { save() }
+        return count
+    }
+
     private func save() {
         lastError = file.save(&log)
         revision += 1
