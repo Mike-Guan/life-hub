@@ -79,6 +79,15 @@ targets:
         INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "选「始终」后，App 关着时到了拳馆、公司或家也能知道。位置只在这台 iPhone 上用，不会上传。"
         INFOPLIST_KEY_NSHealthShareUsageDescription: "Life Hub 只读取昨晚的睡眠时长、运动记录、最近几小时的步数和今天的站立小时，用来估计电量、判断你是不是窝在家、打完拳庆祝、坐太久时陪你伸懒腰。健康数据不会离开这台 iPhone。"
         INFOPLIST_KEY_NSMotionUsageDescription: "Life Hub 只在你从家去公司、从公司回家的路上看一眼你是在走路还是在车上，让 HAKU 跟着演。运动数据只在这台 iPhone 上用，不会上传。"
+    # Without Family Controls in Staging and Release, App Store Connect warns about the Screen Time
+    # extension (ITMS-90897). It can't run there anyway, so only Debug ships it; see CI-CD.md.
+    postBuildScripts:
+      - name: Drop the Screen Time extension outside Debug
+        basedOnDependencyAnalysis: false
+        script: |
+          if [ "$CONFIGURATION" != "Debug" ]; then
+            rm -rf "$TARGET_BUILD_DIR/$PLUGINS_FOLDER_PATH/LifeHubScreenTime.appex"
+          fi
     scheme: {}
   LifeHub-macOS:
     type: application

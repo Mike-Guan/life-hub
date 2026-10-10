@@ -57,8 +57,8 @@ Linux 上的检查不占 Mac 额度（私有仓库 Mac 分钟按 10 倍算）。
 ### Screen Time（Family Controls）权限
 
 - 「刷手机」用到 Family Controls。开发版（Debug，Xcode 直接装）自带开发权限，可以直接用。
-- 上 TestFlight 和正式版要先用 Mike 的开发者账号向 Apple 申请 Family Controls 分发权限（Issue #23）。批下来之前，Staging 和 Release 的 entitlements 里没有它（`project.yml` 只在 Debug 用 `*-Debug.entitlements`），这样上传不会因为签名失败；这两个版本里点「选 App」会显示 Screen Time 没打开，RUNNER 用「晚上在家 + 没走动」兜底。
-- 批下来以后：把 `com.apple.developer.family-controls` 加进 `Apps/iOS/LifeHub.entitlements` 和 `Apps/ScreenTime/LifeHubScreenTime.entitlements`，删掉两个 `-Debug` 文件和 `project.yml` 里的 Debug 覆盖。
+- 上 TestFlight 和正式版要先用 Mike 的开发者账号向 Apple 申请 Family Controls 分发权限（Issue #23）。批下来之前，Staging 和 Release 的 entitlements 里没有它（`project.yml` 只在 Debug 用 `*-Debug.entitlements`），这样上传不会因为签名失败；这两个版本里点「选 App」会显示 Screen Time 没打开，RUNNER 用「晚上在家 + 没走动」兜底。Staging 和 Release 也不打包 Screen Time 扩展（`LifeHub-iOS` 的构建后脚本删掉 `LifeHubScreenTime.appex`），否则 App Store Connect 每次上传都发 ITMS-90897 警告。
+- 批下来以后：把 `com.apple.developer.family-controls` 加进 `Apps/iOS/LifeHub.entitlements` 和 `Apps/ScreenTime/LifeHubScreenTime.entitlements`，删掉两个 `-Debug` 文件、`project.yml` 里的 Debug 覆盖和删扩展的构建后脚本。
 
 ## 动画录屏（`.github/workflows/recordings.yml`）
 
