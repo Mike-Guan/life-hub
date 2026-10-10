@@ -149,7 +149,7 @@ struct MemoryView: View {
                 note("从你的记录里自己记下的，只能看。")
             }
 
-            section("\(persona.title) 的判断") {
+            section("判断和纠正") {
                 HStack(spacing: 10) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(judgements)
@@ -239,7 +239,7 @@ struct MemoryView: View {
     private func question(_ item: Forget) -> String {
         switch item {
         case .habit(let habit): "忘掉\(habit.title)？"
-        case .decisions: "删掉 \(persona.title) 的所有判断？"
+        case .decisions: "删掉所有判断和纠正？"
         case .everything: "删掉所有记忆？"
         }
     }
@@ -249,8 +249,8 @@ struct MemoryView: View {
         case .habit: "回到默认，再慢慢重新学。"
         case .decisions: "包括你说过「不对」的记录。删了不能恢复。"
         case .everything:
-            "习惯、长期记得的事、每天的记录和判断都会删掉，\(persona.title) 像第一次认识你。"
-                + "能量罐和物品留着。删了不能恢复。"
+            "习惯、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。"
+                + "罐子、东西和纪念品不受影响。删了不能恢复。"
         }
     }
 
