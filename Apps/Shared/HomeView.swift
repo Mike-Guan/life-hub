@@ -283,7 +283,11 @@ struct HomeView: View {
                     .ignoresSafeArea()
                     .onTapGesture { closeCheck() }
                 EnergyCheckCard(guess: checking, persona: persona, error: checkError) { answer($0, to: checking) }
-                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { checkHeight = $0 }
+                    .onGeometryChange(for: CGFloat.self) {
+                        $0.size.height
+                    } action: {
+                        checkHeight = $0
+                    }
                     .padding(.horizontal, 20)
                     .offset(y: checkTop(switcher: switcher, height: height))
                     .gesture(
