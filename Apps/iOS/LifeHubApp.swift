@@ -94,7 +94,7 @@ struct LifeHubApp: App {
         UNUserNotificationCenter.current().delegate = taps
         _taps = State(initialValue: taps)
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
-        guard ScreenshotMode.mode == nil else { return }
+        guard !ScreenshotMode.isOn else { return }
         _screenTimeError = State(initialValue: Self.restartScrollWatch())
         Self.watch(
             places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs, growth: growth
@@ -111,6 +111,8 @@ struct LifeHubApp: App {
         WindowGroup {
             if let mode = ScreenshotMode.mode {
                 ScreenshotHome(mode: mode)
+            } else if let filled = ScreenshotMode.memory {
+                ScreenshotMemory(filled: filled)
             } else {
                 home
             }
