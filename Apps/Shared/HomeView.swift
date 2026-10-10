@@ -325,14 +325,6 @@ private struct Header: View {
                         .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
                         .foregroundStyle(Toy.ink)
                 }
-                if let error {
-                    Circle()
-                        .fill(Toy.alert)
-                        .overlay(Circle().stroke(Toy.ink, lineWidth: 2))
-                        .frame(width: 14, height: 14)
-                        .help(error)
-                        .accessibilityLabel(error)
-                }
                 if let cans, let onShop {
                     Button(action: onShop) {
                         CanChip(count: cans)
