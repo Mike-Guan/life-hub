@@ -1,0 +1,11 @@
+08:35:58 watches: Apple Watch Series 11 (46mm), Apple Watch Series 11 (42mm), Apple Watch Series 10 (46mm), Apple Watch Series 10 (42mm), Apple Watch Ultra 3 (49mm), Apple Watch Ultra 2 (49mm), Apple Watch SE 3 (44mm), Apple Watch SE 3 (40mm), Apple Watch SE (44mm) (2nd generation), Apple Watch SE (40mm) (2nd generation)
+08:36:01 booting watch 42mm
+08:39:21 still build/recordings/42mm-haku-no-mode
+08:39:27 still build/recordings/42mm-kuro-no-mode
+08:39:38 booting watch 46mm
+08:40:47 still build/recordings/46mm-haku-no-mode
+08:40:54 still build/recordings/46mm-kuro-no-mode
+08:41:00 booting watch 49mm
+08:42:12 still build/recordings/49mm-haku-no-mode
+08:42:18 still build/recordings/49mm-kuro-no-mode
+08:42:23 done
