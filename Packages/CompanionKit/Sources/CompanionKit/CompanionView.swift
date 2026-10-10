@@ -348,9 +348,11 @@ public struct CompanionView: View {
         } else {
             VStack(spacing: 10) {
                 Image(systemName: "sparkles")
-                    .font(.system(size: 44, weight: .black))
-                Text("选一个 mode，HAKU 就上线")
-                    .font(Toy.body(15, weight: .bold))
+                    .font(.system(size: style == .watch ? 32 : 44, weight: .black))
+                // The watch can't pick a mode, so it points to the iPhone.
+                Text(style == .watch ? "在 iPhone 上选个模式" : "选一个 mode，HAKU 就上线")
+                    .font(Toy.body(style == .watch ? 13 : 15, weight: .bold))
+                    .multilineTextAlignment(.center)
             }
             .foregroundStyle(Toy.ink)
         }
