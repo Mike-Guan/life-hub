@@ -176,7 +176,11 @@ struct MemoryView: View {
     }
 
     private func section<Rows: View>(_ title: String, @ViewBuilder rows: () -> Rows) -> some View {
-        section(title) { EmptyView() } rows: { rows() }
+        section(title) {
+            EmptyView()
+        } rows: {
+            rows()
+        }
     }
 
     private func section<Trailing: View, Rows: View>(
