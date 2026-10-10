@@ -33,7 +33,9 @@ struct EnergyCheckCard: View {
             if reply == nil {
                 HStack(spacing: 10) {
                     ForEach(EnergyAnswer.allCases, id: \.self) { answer in
-                        Button { onAnswer(answer) } label: {
+                        Button {
+                            onAnswer(answer)
+                        } label: {
                             Text(answer.title)
                                 .font(Toy.body(15, weight: .heavy))
                                 .foregroundStyle(Toy.ink)
