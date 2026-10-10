@@ -37,8 +37,6 @@ struct HomeView: View {
     var notice: String?
     /// When each change moment happened, for HAKU's Sunday line.
     var changes: [Date] = []
-    /// The savings card, once Mike has set a target and a balance.
-    var money: MoneyCard?
     /// Shows a settings button that calls this, when set.
     var onSettings: (() -> Void)?
     /// Cans to spend; with `onShop`, shows the can count that opens the shop.
@@ -204,10 +202,6 @@ struct HomeView: View {
 
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     TodayTimeline(segments: store.segments(on: context.date, now: context.date), persona: persona)
-                }
-
-                if let money {
-                    money
                 }
             }
             .padding(.horizontal, 20)

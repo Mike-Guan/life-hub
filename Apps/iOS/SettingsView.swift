@@ -4,13 +4,12 @@ import HubCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// App settings: the bedtime reminder time, the places that switch mode, money, the Daily Widget link and
+/// App settings: the bedtime reminder time, the places that switch mode, the Daily Widget link and
 /// the Screen Time watch.
 struct SettingsView: View {
     @Binding var bedtime: BedtimeSchedule
     @Binding var rules: ModeRules
     @Binding var places: PlaceSettings
-    @Binding var budget: BudgetSettings
     @Binding var persona: Persona
     let monitor: PlaceMonitor
     let daily: DailyLink
@@ -31,7 +30,6 @@ struct SettingsView: View {
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
     @State private var asksErase = false
-    @FocusState private var editingAmount: String?
 
     var body: some View {
         ScrollView {
@@ -138,8 +136,6 @@ struct SettingsView: View {
 
             placesCard
 
-            moneyCard
-
             dailyCard
 
             memoryCard
@@ -214,20 +210,6 @@ struct SettingsView: View {
         }
     }
 
-    private var moneyCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("钱")
-                .font(Toy.body(16, weight: .heavy))
-            yenField("银行余额", text: yenText(budget.balance) { budget.enterBalance($0, at: .now) })
-            yenField("金库目标", text: yenText(budget.savingsTarget) { budget.savingsTarget = $0 })
-            Text("发薪日填一次银行余额，首页显示离金库目标还差多少。金额只存在这台 iPhone 上。")
-                .font(Toy.body(12))
-                .foregroundStyle(Toy.muted)
-        }
-        .padding(16)
-        .toyCard()
-    }
-
     private var dailyCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Toggle(isOn: dailyBinding) {
@@ -255,41 +237,6 @@ struct SettingsView: View {
             daily.isOn
         } set: { on in
             if on { pickingDaily = true } else { daily.unlink() }
-        }
-    }
-
-    private func yenField(_ title: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(Toy.body(13, weight: .bold))
-                .foregroundStyle(Toy.muted)
-            HStack(spacing: 6) {
-                Text("¥")
-                    .font(Toy.body(22, weight: .heavy))
-                TextField("点这里输入", text: text)
-                    .keyboardType(.numberPad)
-                    .font(Toy.body(22, weight: .heavy))
-                    .focused($editingAmount, equals: title)
-                if editingAmount == title {
-                    Button("完成") { editingAmount = nil }
-                        .font(Toy.body(14, weight: .heavy))
-                        .frame(minWidth: 44, minHeight: 44)
-                }
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .contentShape(Rectangle())
-            .onTapGesture { editingAmount = title }
-            .toyCard(fill: Toy.paper, radius: 12, shadow: 3)
-        }
-    }
-
-    // Digits only; an empty field clears the amount.
-    private func yenText(_ amount: Int?, set: @escaping (Int?) -> Void) -> Binding<String> {
-        Binding {
-            amount?.formatted(.number.grouping(.automatic)) ?? ""
-        } set: { text in
-            set(Int(text.filter(\.isNumber)))
         }
     }
 

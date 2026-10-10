@@ -10,7 +10,6 @@ import WidgetKit
 struct LifeHubApp: App {
     @State private var store: ModeStore
     @State private var energy: EnergyStore
-    @State private var expenses: ExpenseStore
     @State private var growth: GrowthStore
     @State private var widgets: WidgetBridge
     @State private var setupErrors: [String]
@@ -34,7 +33,6 @@ struct LifeHubApp: App {
     /// The mode HAKU switches from as the app opens, replaying a switch made while it was closed.
     @State private var replayFrom: Mode?
     @State private var places: PlaceSettings
-    @State private var budget: BudgetSettings
     @State private var placeMonitor: PlaceMonitor
     @State private var needs: NeedTracker
     @State private var taps: NotificationTaps
@@ -61,7 +59,6 @@ struct LifeHubApp: App {
         // The Focus filter switches mode through this store, so the app keeps one writer for the log.
         AppDependencyManager.shared.add { store }
         _energy = State(initialValue: energy)
-        _expenses = State(initialValue: ExpenseStore.live(in: container, defaults: AppGroup.defaults))
         UnboxLog.start(with: growth.ledger)
         _growth = State(initialValue: growth)
         _bedtime = State(initialValue: bedtime)
@@ -69,7 +66,6 @@ struct LifeHubApp: App {
         _widgets = State(initialValue: widgets)
         _setupErrors = State(initialValue: errors)
         _places = State(initialValue: places)
-        _budget = State(initialValue: BudgetSettings.stored(in: AppGroup.defaults))
         _placeMonitor = State(initialValue: placeMonitor)
         _needs = State(initialValue: needs)
         // Set before the session starts, so a check that launched the app is answered.
@@ -141,7 +137,6 @@ struct LifeHubApp: App {
             dailyDone: daily.done,
             notice: NudgeBackoff.stored(in: AppGroup.defaults).notice(at: .now, persona: persona),
             changes: ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: growth.ledger),
-            money: moneyCard,
             onSettings: { showsSettings = true },
             cans: growth.ledger.only(persona).balance,
             onShop: { showsShop = true },
@@ -226,13 +221,11 @@ struct LifeHubApp: App {
             )
             refreshNeeds()
         }
-        .onChange(of: budget) { budget.store(in: AppGroup.defaults) }
         .sheet(isPresented: $showsSettings, onDismiss: showNextUnboxing) {
             SettingsView(
                 bedtime: $bedtime,
                 rules: $rules,
                 places: $places,
-                budget: $budget,
                 persona: $persona,
                 monitor: placeMonitor,
                 daily: daily,
@@ -285,7 +278,6 @@ struct LifeHubApp: App {
     private func eraseAll() {
         store.eraseAll()
         energy.eraseAll()
-        expenses.eraseAll()
         growth.eraseAll()
         var errors = AppGroup.container.eraseFiles()
         HubDevice.eraseDefaults(AppGroup.defaults)
@@ -307,7 +299,6 @@ struct LifeHubApp: App {
         bedtime = .stored(in: AppGroup.defaults)
         rules = .stored(in: AppGroup.defaults)
         places = .stored(in: AppGroup.defaults)
-        budget = .stored(in: AppGroup.defaults)
         bathDoneAt = nil
         welcomeBack = nil
         unboxing = nil
@@ -317,13 +308,6 @@ struct LifeHubApp: App {
             await scheduleReminder()
             countdownError = await BoxingCountdown.update(for: needs.reading)
         }
-    }
-
-    private var moneyCard: MoneyCard? {
-        guard let target = budget.savingsTarget, let gap = budget.savingsGap(expenses: expenses.log.active) else {
-            return nil
-        }
-        return MoneyCard(gap: gap, target: target, persona: persona)
     }
 
     // The ledger counts each source once, so re-reading the same workouts earns nothing new.
@@ -411,7 +395,7 @@ struct LifeHubApp: App {
 
     private var firstError: String? {
         let errors = [
-            widgets.lastError, expenses.lastError, growth.lastError, reminderError, offWorkError, healthError,
+            widgets.lastError, growth.lastError, reminderError, offWorkError, healthError,
             placeMonitor.lastError, placeMonitor.accessWarning, needs.lastError, countdownError, screenTimeError,
             daily.lastError, DecisionLog.lastError(in: AppGroup.defaults),
         ]
@@ -560,7 +544,7 @@ struct LifeHubApp: App {
 
     // Pulls in taps made on widgets, then gives widgets the app's view of the state.
     private func syncWidgets() {
-        widgets.sync(mode: store, energy: energy, expenses: expenses)
+        widgets.sync(mode: store, energy: energy)
         WidgetCenter.shared.reloadAllTimelines()
         sendToWatch()
     }

@@ -16,7 +16,6 @@ struct ScreenshotSettings: View {
             bedtime: .constant(.stored(in: AppGroup.defaults)),
             rules: .constant(.stored(in: AppGroup.defaults)),
             places: .constant(PlaceSettings()),
-            budget: .constant(BudgetSettings()),
             persona: .constant(ScreenshotMode.persona),
             monitor: monitor,
             daily: daily,

@@ -126,27 +126,6 @@ import Testing
         #expect(try Data(contentsOf: ledgerURL) == Data("not json".utf8))
     }
 
-    @Test func syncAppliesPaymentsOnlyWithAnExpenseStore() throws {
-        let container = tempContainer()
-        let modes = ModeStore(fileURL: container.modeLogURL, deviceID: "iphone")
-        let energy = EnergyStore(fileURL: container.energyLogURL, deviceID: "iphone")
-        let bridge = WidgetBridge(container: container)
-        let payment = Expense(amount: 900, category: .diningOut, day: date(3, 0), deviceID: "pay", now: date(3, 12))
-        try container.inbox.post(.expense(payment))
-        #expect(InboxItem.expense(payment).at == date(3, 12))
-
-        #expect(bridge.sync(mode: modes, energy: energy, now: date(3, 13), calendar: calendar) == 0)
-        let expenses = ExpenseStore(fileURL: container.expenseLogURL, deviceID: "iphone")
-        let applied = bridge.sync(mode: modes, energy: energy, expenses: expenses, now: date(3, 13), calendar: calendar)
-        #expect(applied == 1)
-        #expect(expenses.log.expenses == [payment])
-        #expect(!expenses.record(payment))
-
-        let reloaded = ExpenseStore(fileURL: container.expenseLogURL, deviceID: "iphone")
-        #expect(reloaded.log.expenses == [payment])
-        #expect(reloaded.lastError == nil)
-    }
-
     @Test func snapshotWriteFailureIsReported() throws {
         let container = tempContainer()
         let folder = try #require(container.folder)
