@@ -105,7 +105,8 @@ struct MemoryView: View {
     private var content: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
-                Text("\(persona.title) 记得的")
+                // PRD §21.2: every character shares the life records, so the title names none.
+                Text("记得的事")
                     .font(Toy.display(24))
                 Spacer()
                 Button("好了") { dismiss() }

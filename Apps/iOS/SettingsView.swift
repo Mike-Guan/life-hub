@@ -133,7 +133,7 @@ struct SettingsView: View {
     private var memoryCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                Text("\(persona.title) 记得的")
+                Text("记得的事")
                     .font(Toy.body(16, weight: .heavy))
                 Spacer()
                 Button("看看") { showsMemory = true }
