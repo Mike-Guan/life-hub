@@ -31,6 +31,9 @@ shoot() {
 }
 
 xcrun simctl ui "$udid" appearance light
+# The first launch after install is slow; a throwaway shot keeps it out of the set.
+shoot warmup -screenshot-mode work
+rm -f "$out/warmup.png"
 for persona in haku kuro; do
   for mode in work chill boxing money; do
     for energy in low okay full; do
