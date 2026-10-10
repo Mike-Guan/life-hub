@@ -54,20 +54,36 @@ for persona in haku kuro; do
 done
 xcrun simctl ui "$udid" appearance light
 
-# The card fading in and out (0.2 s), then the same with reduce motion on.
+# A long press on HAKU opens the card (0.2 s fade), a tap on the dim layer closes it; then the same with
+# reduce motion on. Apps/UITests does the touches; the recording starts once the app is up.
+xcodebuild build-for-testing -quiet -project LifeHub.xcodeproj -scheme CheckCard -configuration Debug \
+  -destination "id=$udid" -derivedDataPath build CODE_SIGNING_ALLOWED=NO
+codesign --force --deep --sign - "$app"
+codesign --force --deep --sign - build/Build/Products/Debug-iphonesimulator/LifeHubUITests-Runner.app
 record() {
   local name=$1
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode chill \
-    -screenshot-persona haku -screenshot-energy low -screenshot-check cycle
+  xcrun simctl terminate "$udid" "$bundle" || true
+  xcodebuild test-without-building -quiet -project LifeHub.xcodeproj -scheme CheckCard \
+    -destination "id=$udid" -derivedDataPath build &
+  local test=$!
+  local tries=0
+  until xcrun simctl spawn "$udid" launchctl list | grep -q "UIKitApplication:$bundle"; do
+    tries=$((tries + 1))
+    if ((tries > 240)); then
+      echo "The app never started for $name" >&2
+      exit 1
+    fi
+    sleep 0.5
+  done
   xcrun simctl io "$udid" recordVideo --force "$out/$name.mov" &
   local recorder=$!
-  sleep 5
+  wait "$test"
   kill -INT "$recorder"
   wait "$recorder" || true
 }
 xcrun simctl spawn "$udid" defaults write com.apple.Accessibility ReduceMotionEnabled -bool false
-record cycle
+record hold
 xcrun simctl spawn "$udid" defaults write com.apple.Accessibility ReduceMotionEnabled -bool true
-record cycle-reduce-motion
+record hold-reduce-motion
 xcrun simctl terminate "$udid" "$bundle" || true
 ls -l "$out"

@@ -36,7 +36,8 @@ enum ScreenshotMode {
         }
     }
 
-    /// What the "不对" card shows: `open` for the question, `reply` for the reply after a correction.
+    /// What the "不对" card shows: `open` for the question, `reply` for the reply after a correction,
+    /// `hold` for nothing until a long press.
     static var check: String? {
         value(after: "-screenshot-check")
     }

@@ -243,7 +243,11 @@ struct HomeView: View {
         .background(Toy.paper.ignoresSafeArea())
         .overlayPreferenceValue(SwitcherBounds.self) { anchor in
             GeometryReader { proxy in
-                checkCard(switcher: anchor.map { proxy[$0] }, height: proxy.size.height)
+                checkCard(
+                    switcher: anchor.map { proxy[$0] },
+                    height: proxy.size.height,
+                    bottomInset: proxy.safeAreaInsets.bottom
+                )
             }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: answers)
@@ -257,11 +261,9 @@ struct HomeView: View {
             switch screenshotCheck {
             case "reply":
                 checkReply = EnergyCheck.reply(corrected: true, persona: persona)
-            case "cycle":
-                // For the screen recording: fades in, stays, fades out as a tap on the dim layer would.
-                withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
-                try? await Task.sleep(for: .seconds(1.5))
-                closeCheck()
+            case "hold":
+                // Waits for a real long press, from Apps/UITests.
+                break
             default:
                 checking = reading
             }
@@ -274,41 +276,54 @@ struct HomeView: View {
         }
     }
 
-    /// The "不对" card near the bottom of the screen, over a dimmed layer that closes it on a tap.
-    @ViewBuilder private func checkCard(switcher: CGRect?, height: CGFloat) -> some View {
+    /// The "不对" card over a dimmed layer that closes it on a tap.
+    @ViewBuilder private func checkCard(switcher: CGRect?, height: CGFloat, bottomInset: CGFloat) -> some View {
         if let checking {
+            let place = checkPlace(switcher: switcher, height: height, bottomInset: bottomInset)
             ZStack(alignment: .top) {
                 // Dims the whole home screen, so what the card overlaps reads as behind it.
                 Toy.ink.opacity(0.25)
                     .ignoresSafeArea()
                     .onTapGesture { closeCheck() }
-                EnergyCheckCard(guess: checking, persona: persona, error: checkError) { answer($0, to: checking) }
-                    .onGeometryChange(for: CGFloat.self) {
-                        $0.size.height
-                    } action: {
-                        checkHeight = $0
+                EnergyCheckCard(guess: checking, persona: persona, error: checkError, fill: place.fill) {
+                    answer($0, to: checking)
+                }
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.size.height
+                } action: {
+                    // Only the card's own height; a stretched card would move it back and forth.
+                    if place.fill == 0 { checkHeight = $0 }
+                }
+                .padding(.horizontal, 20)
+                .offset(y: place.top)
+                .gesture(
+                    DragGesture(minimumDistance: 10).onEnded { drag in
+                        if drag.translation.height > 40 { closeCheck() }
                     }
-                    .padding(.horizontal, 20)
-                    .offset(y: checkTop(switcher: switcher, height: height))
-                    .gesture(
-                        DragGesture(minimumDistance: 10).onEnded { drag in
-                            if drag.translation.height > 40 { closeCheck() }
-                        }
-                    )
+                )
             }
             .transition(reduceMotion ? .identity : .opacity)
         }
     }
 
-    // UI 审核 F10: the card's top edge never cuts through a row of mode buttons. It sits at the bottom when
-    // that leaves 12 pt under the buttons, else 12 pt under the first row, covering the second.
-    /// Where the card's top edge goes in a space `height` tall, given the mode buttons' frame.
-    private func checkTop(switcher: CGRect?, height: CGFloat) -> CGFloat {
-        let bottom = height - 24 - checkHeight
-        guard let switcher, switcher.maxY + 12 > bottom else { return bottom }
-        // Two rows of buttons 14 pt apart on iPhone.
-        let firstRow = switcher.height > 120 ? (switcher.height - 14) / 2 : switcher.height
-        return min(bottom, switcher.minY + firstRow + 12)
+    // UI 审核 F10 and round 3: the card's edges fall only in the gaps between blocks. Its top sits 12 pt under
+    // the first row of mode buttons and it reaches past the bottom of the screen, covering what is below.
+    // When those buttons are off screen it sits at the bottom at its own height.
+    /// Where the card's top edge goes in a space `height` tall, and the least height that reaches past its bottom.
+    private func checkPlace(
+        switcher: CGRect?,
+        height: CGFloat,
+        bottomInset: CGFloat
+    ) -> (top: CGFloat, fill: CGFloat) {
+        if let switcher {
+            // Two rows of buttons 14 pt apart on iPhone.
+            let firstRow = switcher.height > 120 ? (switcher.height - 14) / 2 : switcher.height
+            let top = switcher.minY + firstRow + 12
+            if top >= 0, top + checkHeight + 24 <= height {
+                return (top, height + bottomInset + 24 - top)
+            }
+        }
+        return (height - 24 - checkHeight, 0)
     }
 
     // KURO holds things low in front of her, so her bubble sits above her head with its tail pointing down to her.

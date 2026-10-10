@@ -10,6 +10,8 @@ struct EnergyCheckCard: View {
     let persona: Persona
     /// An error from recording the answer, shown in place of the question.
     let error: String?
+    /// The least height, so the card can reach past the bottom of the screen.
+    var fill: CGFloat = 0
     let onAnswer: (EnergyAnswer) -> Void
 
     var body: some View {
@@ -34,7 +36,7 @@ struct EnergyCheckCard: View {
             .frame(maxWidth: .infinity)
         }
         .padding(16)
-        .frame(maxWidth: 560)
+        .frame(maxWidth: 560, minHeight: fill, alignment: .top)
         .toyCard(radius: 18, shadow: 4)
     }
 }
