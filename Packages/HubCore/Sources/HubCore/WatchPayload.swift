@@ -76,6 +76,13 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         return mine == theirs
     }
 
+    // The first scene starts at the iPhone's clock when it sent them, and the watch draws at the start of
+    // the minute, so a fresh payload is often read a few seconds before its first scene.
+    /// The scene the watch plays at `date`: the one started by then, else the first; `nil` with no scenes.
+    public func scene(at date: Date) -> HomeScene? {
+        scenes.scene(at: date) ?? scenes.first?.scene
+    }
+
     /// When the watch widgets redraw: the iPhone widgets' times for this snapshot.
     public func timelineDates(after date: Date, calendar: Calendar = .current) -> [Date] {
         WidgetSnapshot.timelineDates(after: date, bedtime: bedtime, needTimes: snapshot.needTimes, calendar: calendar)

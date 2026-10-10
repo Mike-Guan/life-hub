@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Draws the README images: the iOS and Mac home screen in each mode, into docs/screenshots/.
+# Also the iOS memory page, for UI 审核.
 # Needs Xcode 26 and XcodeGen. Uses the Debug build's -screenshot-mode launch argument.
 set -euo pipefail
 
@@ -31,6 +32,21 @@ for mode in "${modes[@]}"; do
     -screenshot-persona kuro
   sleep 4
   xcrun simctl io "$udid" screenshot "$out/ios-kuro-$mode.png"
+done
+# The memory page with four weeks of made-up records, for each character, and with none.
+for persona in haku kuro; do
+  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory full \
+    -screenshot-persona "$persona"
+  sleep 4
+  xcrun simctl io "$udid" screenshot "$out/ios-memory-$persona.png"
+done
+xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory empty
+sleep 4
+xcrun simctl io "$udid" screenshot "$out/ios-memory-empty.png"
+for ask in habit decisions everything; do
+  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory full -screenshot-ask "$ask"
+  sleep 4
+  xcrun simctl io "$udid" screenshot "$out/ios-memory-ask-$ask.png"
 done
 xcrun simctl terminate "$udid" "$bundle" || true
 

@@ -23,16 +23,20 @@ enum AppGroup {
         HubContainer.appGroup(identifier) ?? .applicationSupport()
     }
 
-    /// The gym and run days now, with the gym days learned from the can ledger.
-    static func activityDays(now: Date = .now) -> ActivityDays {
-        let ledger = CanLedger.read(from: container.canLedgerURL)
-        return ActivityDays.stored(in: defaults).learningGym(from: ledger, now: now)
+    /// The gym and run days now, with the gym days learned from `ledger` (the stored one when `nil`) since
+    /// they were last forgotten.
+    static func activityDays(ledger: CanLedger? = nil, now: Date = .now) -> ActivityDays {
+        let ledger = ledger ?? CanLedger.read(from: container.canLedgerURL)
+        let since = MemoryResets.stored(in: defaults).since(.gymDays)
+        return ActivityDays.stored(in: defaults).learningGym(from: ledger.since(since), now: now)
     }
 
-    /// The need rules for the chosen character, with KURO's tennis day learned from the can ledger.
+    /// The need rules for the chosen character, with KURO's tennis day learned from the can ledger since
+    /// it was last forgotten.
     static func needRules(now: Date = .now) -> NeedRules {
         let ledger = CanLedger.read(from: container.canLedgerURL)
-        return NeedRules.standard(for: Persona.stored(in: defaults), ledger: ledger, now: now)
+        let since = MemoryResets.stored(in: defaults).since(.identityDay)
+        return NeedRules.standard(for: Persona.stored(in: defaults), ledger: ledger.since(since), now: now)
     }
 
     /// User defaults both processes read, so they share one device id.

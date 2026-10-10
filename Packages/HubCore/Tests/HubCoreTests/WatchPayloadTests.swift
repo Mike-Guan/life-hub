@@ -97,4 +97,16 @@ import Testing
         let message = try #require(sent.message)
         #expect(WatchPayload(message: message)?.persona == .kuro)
     }
+
+    @Test func playsTheFirstSceneWhenReadBeforeIt() {
+        let coding = HomeScene(moment: .vibeCoding)
+        let late = HomeScene(moment: .lateCoding)
+        var sent = payload()
+        sent.scenes = [TimedScene(from: date(7, 20), scene: coding), TimedScene(from: date(7, 22), scene: late)]
+        // The watch draws at the start of the minute, seconds before the iPhone's first scene.
+        #expect(sent.scene(at: date(7, 19, 59)) == coding)
+        #expect(sent.scene(at: date(7, 21)) == coding)
+        #expect(sent.scene(at: date(7, 23)) == late)
+        #expect(payload().scene(at: date(7, 21)) == nil)
+    }
 }

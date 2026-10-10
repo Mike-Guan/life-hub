@@ -73,12 +73,14 @@ struct LifeHubApp: App {
         _placeMonitor = State(initialValue: placeMonitor)
         _needs = State(initialValue: needs)
         // Set before the session starts, so a check that launched the app is answered.
-        // Only a changed mode reloads, since background widget reloads have a daily budget.
+        // Only a changed mode reloads, since background widget reloads have a daily budget. The watch gets
+        // the current scenes either way, since it asked because it just opened.
         WatchSync.shared.onWatchCheck {
-            guard let settled = store.settle(presence: .stored(in: AppGroup.defaults)) else { return }
-            Dogfood.note("settle", "手表打开，\(settled.reason)，切到\(settled.mode.title)")
-            widgets.sync(mode: store, energy: energy)
-            WidgetCenter.shared.reloadAllTimelines()
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
+                Dogfood.note("settle", "手表打开，\(settled.reason)，切到\(settled.mode.title)")
+                widgets.sync(mode: store, energy: energy)
+                WidgetCenter.shared.reloadAllTimelines()
+            }
             Self.sendToWatch(store: store, needs: needs, growth: growth)
         }
         WatchSync.shared.activate()
@@ -92,7 +94,7 @@ struct LifeHubApp: App {
         UNUserNotificationCenter.current().delegate = taps
         _taps = State(initialValue: taps)
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
-        guard ScreenshotMode.mode == nil else { return }
+        guard !ScreenshotMode.isOn else { return }
         _screenTimeError = State(initialValue: Self.restartScrollWatch())
         Self.watch(
             places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs, growth: growth
@@ -109,6 +111,8 @@ struct LifeHubApp: App {
         WindowGroup {
             if let mode = ScreenshotMode.mode {
                 ScreenshotHome(mode: mode)
+            } else if let filled = ScreenshotMode.memory {
+                ScreenshotMemory(filled: filled)
             } else {
                 home
             }
@@ -123,7 +127,7 @@ struct LifeHubApp: App {
             need: needs.reading,
             activitySignals: needs.activitySignals,
             workouts: needs.workouts,
-            activityDays: ActivityDays.stored(in: AppGroup.defaults).learningGym(from: growth.ledger, now: .now),
+            activityDays: AppGroup.activityDays(ledger: growth.ledger),
             departure: needs.departure,
             event: needs.event,
             welcomeBack: welcomeBack,
@@ -230,7 +234,10 @@ struct LifeHubApp: App {
                 budget: $budget,
                 persona: $persona,
                 monitor: placeMonitor,
-                daily: daily
+                daily: daily,
+                store: store,
+                energy: energy,
+                ledger: growth.ledger
             )
         }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
@@ -284,7 +291,8 @@ struct LifeHubApp: App {
             growth.record(earned.win, source: earned.source, at: earned.at)
         }
         // Getting up after an invite is noted by whichever process judged it; the can is earned here.
-        for moment in ChangeLog.stored(in: AppGroup.defaults).moments where moment.kind == .gotUp {
+        let moments = ChangeLog.stored(in: AppGroup.defaults).moments
+        for moment in moments where moment.kind == .gotUp && moment.deletedAt == nil {
             growth.record(.gotUp, source: Win.gotUp.source(at: moment.at), at: moment.at)
         }
         let tasks = DailyAgenda.occurrences(daily.tasks, now: .now)
@@ -334,10 +342,11 @@ struct LifeHubApp: App {
             ],
             deviceID: HubDevice.id(defaults: AppGroup.defaults)
         )
-        DecisionLog.update(at: AppGroup.container.decisionLogURL) { log in
+        let error = DecisionLog.update(at: AppGroup.container.decisionLogURL) { log in
             log.append(decision)
             return true
         }
+        DecisionLog.keep(error, in: AppGroup.defaults)
     }
 
     // The 30-day limit counts a box return only once it has actually played.
@@ -363,7 +372,7 @@ struct LifeHubApp: App {
         let errors = [
             widgets.lastError, expenses.lastError, growth.lastError, reminderError, offWorkError, healthError,
             placeMonitor.lastError, placeMonitor.accessWarning, needs.lastError, countdownError, screenTimeError,
-            daily.lastError,
+            daily.lastError, DecisionLog.lastError(in: AppGroup.defaults),
         ]
         return (setupErrors + errors.compactMap { $0 }).first
     }
@@ -534,7 +543,7 @@ struct LifeHubApp: App {
             bedtime: BedtimeSchedule.stored(in: AppGroup.defaults),
             need: needs.reading,
             signals: needs.activitySignals,
-            days: ActivityDays.stored(in: AppGroup.defaults).learningGym(from: growth.ledger, now: .now),
+            days: AppGroup.activityDays(ledger: growth.ledger),
             departure: needs.departure,
             sit: needs.sit,
             bathDoneAt: BathTime.doneAt(in: AppGroup.defaults),

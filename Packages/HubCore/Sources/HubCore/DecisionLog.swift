@@ -241,6 +241,23 @@ public struct DecisionLog: RecordLog, Equatable {
         return file.save(&log)
     }
 
+    // The writers include extensions with no UI, so the message waits in shared defaults for the app.
+    static let errorKey = "decisionLogError"
+
+    /// Keeps `error` in `defaults` for the app to show, or clears the kept one when `error` is `nil`.
+    public static func keep(_ error: String?, in defaults: UserDefaults) {
+        if let error {
+            defaults.set(error, forKey: errorKey)
+        } else {
+            defaults.removeObject(forKey: errorKey)
+        }
+    }
+
+    /// The last error kept in `defaults`, or `nil` when the latest update succeeded.
+    public static func lastError(in defaults: UserDefaults) -> String? {
+        defaults.string(forKey: errorKey)
+    }
+
     /// The log in the file at `url`, or an empty one when there is none or it can't be read.
     public static func read(from url: URL?) -> DecisionLog {
         guard let url, let data = try? Data(contentsOf: url) else { return DecisionLog() }
