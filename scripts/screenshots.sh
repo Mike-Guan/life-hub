@@ -58,7 +58,8 @@ xcrun simctl uninstall "$udid" "$bundle"
 xcrun simctl install "$udid" "$ios_app"
 xcrun simctl privacy "$udid" grant all "$bundle" || true
 xcrun simctl launch "$udid" "$bundle"
-sleep 6
+# A first launch shows the launch screen longer than the others.
+sleep 15
 xcrun simctl io "$udid" screenshot "$out/ios-fresh.png"
 xcrun simctl terminate "$udid" "$bundle" || true
 
