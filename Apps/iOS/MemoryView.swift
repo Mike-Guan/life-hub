@@ -124,16 +124,15 @@ struct MemoryView: View {
                 note("从你的记录里自己记下的，只能看。")
             }
 
+            // The button sits in the title row, so it doesn't make the count row taller (UI 审核).
             section("判断和纠正") {
-                HStack(spacing: 10) {
-                    Text(judgements)
-                        .font(Toy.body(15, weight: .heavy))
-                    Spacer()
-                    if !decisions.kept.isEmpty {
-                        deleteButton("全部删") { asking = .decisions }
-                    }
+                if !decisions.kept.isEmpty {
+                    deleteButton("全部删") { asking = .decisions }
                 }
-                // Full width under the button, so it doesn't wrap to a lone "90 天。" (UI 审核).
+            } rows: {
+                Text(judgements)
+                    .font(Toy.body(15, weight: .heavy))
+                // Full width, so it doesn't wrap to a lone "90 天。" (UI 审核).
                 note("要不要提醒你、你说「不对」的那几次。保留 90 天。")
             }
 
@@ -177,9 +176,25 @@ struct MemoryView: View {
     }
 
     private func section<Rows: View>(_ title: String, @ViewBuilder rows: () -> Rows) -> some View {
+        section(title) {
+            EmptyView()
+        } rows: {
+            rows()
+        }
+    }
+
+    private func section<Trailing: View, Rows: View>(
+        _ title: String,
+        @ViewBuilder trailing: () -> Trailing,
+        @ViewBuilder rows: () -> Rows
+    ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(Toy.body(16, weight: .heavy))
+            HStack(spacing: 10) {
+                Text(title)
+                    .font(Toy.body(16, weight: .heavy))
+                Spacer()
+                trailing()
+            }
             rows()
         }
         .frame(maxWidth: .infinity, alignment: .leading)

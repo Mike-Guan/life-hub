@@ -177,7 +177,7 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
             }
-            Text("记忆、能量罐、商店物品、衣柜和纪念品一起清空，回到刚装好的样子。")
+            Text("记忆、地点、能量罐、商店物品、衣柜和纪念品一起清空，回到刚装好的样子。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
         }
