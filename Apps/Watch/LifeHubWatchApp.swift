@@ -111,6 +111,17 @@ struct WatchHomeView: View {
         }
         .clipped()
         .ignoresSafeArea()
+        .overlay {
+            // HAKU with no mode is drawn on cream, where the white system clock can't be read.
+            if mode == nil, payload.persona == .haku {
+                GeometryReader { geometry in
+                    Toy.ink
+                        .frame(height: geometry.safeAreaInsets.top)
+                        .offset(y: -geometry.safeAreaInsets.top)
+                }
+                .allowsHitTesting(false)
+            }
+        }
         .overlay(alignment: .topLeading) {
             VStack(alignment: .leading, spacing: 4) {
                 if !Self.cleanFrame {
@@ -186,10 +197,8 @@ private struct ModeChip: View {
         .font(Toy.body(12, weight: .heavy))
         .foregroundStyle(Toy.ink)
         .lineLimit(1)
-        .minimumScaleFactor(0.75)
-        // The clock sits top right; a long relative time must shrink, not run under it.
-        .frame(maxWidth: 112, alignment: .leading)
-        .fixedSize(horizontal: false, vertical: true)
+        // The pill hugs the text; it sits below the clock row, so it never runs under the time.
+        .fixedSize()
         .padding(.horizontal, 9)
         .padding(.vertical, 3)
         .background(Capsule().fill(Toy.card))
