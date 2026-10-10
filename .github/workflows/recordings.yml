@@ -47,16 +47,16 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
-      - name: Push clips to out/watch-no-mode-chip
+      - name: Push clips to out/watch-no-mode-shots
         if: always()
         env:
           TOKEN: ${{ github.token }}
         run: |
           [ -d build/recordings ] || exit 0
           cd build/recordings
-          git init -q -b out/watch-no-mode-chip
+          git init -q -b out/watch-no-mode-shots
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -q -m "Animation clips from ${GITHUB_SHA::7}"
-          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" out/watch-no-mode-chip
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" out/watch-no-mode-shots
