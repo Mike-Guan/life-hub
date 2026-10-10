@@ -4,13 +4,11 @@ import Foundation
 public enum InboxItem: Codable, Equatable, Sendable {
     case mode(ModeChange)
     case energy(EnergyEvent)
-    case expense(Expense)
 
     public var id: UUID {
         switch self {
         case .mode(let change): change.id
         case .energy(let event): event.id
-        case .expense(let expense): expense.id
         }
     }
 
@@ -18,7 +16,6 @@ public enum InboxItem: Codable, Equatable, Sendable {
         switch self {
         case .mode(let change): change.at
         case .energy(let event): event.at
-        case .expense(let expense): expense.createdAt
         }
     }
 }

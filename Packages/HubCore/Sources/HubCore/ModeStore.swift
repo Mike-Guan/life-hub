@@ -139,6 +139,13 @@ public final class ModeStore {
 
     static let encoder = HubJSON.encoder()
     static let decoder = HubJSON.decoder()
+
+    /// Deletes every record and the file, as on a fresh install.
+    public func eraseAll() {
+        log = ModeLog()
+        lastError = file.remove()
+        revision += 1
+    }
 }
 
 extension ModeStore {

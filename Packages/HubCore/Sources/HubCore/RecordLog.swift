@@ -86,6 +86,19 @@ struct LogFile<Log: RecordLog> {
         }
     }
 
+    /// Deletes the file.
+    /// - Returns: an error message for the UI, or `nil` when the file is gone.
+    mutating func remove() -> String? {
+        readBlocked = false
+        guard let url, FileManager.default.fileExists(atPath: url.path) else { return nil }
+        do {
+            try FileManager.default.removeItem(at: url)
+            return nil
+        } catch {
+            return "删不掉\(name)：\(error.localizedDescription)"
+        }
+    }
+
     /// Writes `log`, first merging in the file if an earlier read was blocked.
     /// - Returns: an error message for the UI, or `nil` on success.
     mutating func save(_ log: inout Log) -> String? {

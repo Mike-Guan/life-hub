@@ -106,6 +106,10 @@ struct FrameSheets {
                     })
             }
         }
+        rows.append(
+            Row(label: "watch · no mode", start: Self.base) {
+                AnyView(CompanionView(mode: nil, style: .watch))
+            })
         try write("haku-6-watch", rows, size: CGSize(width: 198, height: 242))
     }
 

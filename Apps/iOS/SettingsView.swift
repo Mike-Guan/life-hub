@@ -4,20 +4,24 @@ import HubCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// App settings: the bedtime reminder time, the places that switch mode, money, the Daily Widget link and
+/// App settings: the bedtime reminder time, the places that switch mode, the Daily Widget link and
 /// the Screen Time watch.
 struct SettingsView: View {
     @Binding var bedtime: BedtimeSchedule
     @Binding var rules: ModeRules
     @Binding var places: PlaceSettings
-    @Binding var budget: BudgetSettings
     @Binding var persona: Persona
     let monitor: PlaceMonitor
     let daily: DailyLink
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
+    /// Deletes every record and setting on this iPhone, as on a fresh install.
+    let onEraseAll: () -> Void
+    /// Starts at the bottom of the page, with the 删除全部数据 confirmation open when `true`. For screenshots only.
+    var screenshot: Bool?
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
     @State private var scrollApps = ScrollWatch.selection
@@ -25,17 +29,36 @@ struct SettingsView: View {
     @State private var screenTimeError: String?
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
-    @FocusState private var editingAmount: String?
+    @State private var asksErase = false
 
     var body: some View {
         ScrollView {
             content
         }
+        .defaultScrollAnchor(screenshot == nil ? nil : .bottom)
+        .task { asksErase = screenshot == true }
         .foregroundStyle(Toy.ink)
         .tint(Toy.pink)
         .background(Toy.paper.ignoresSafeArea())
         // The page is drawn on light paper; dark system controls turn grey on it.
         .preferredColorScheme(.light)
+        .overlay {
+            if asksErase {
+                ToyConfirmSheet(
+                    question: "删除全部数据？",
+                    warning: "记忆、能量罐、商店物品、衣柜、纪念品和地点都会清空，App 回到刚装好的样子。删了不能恢复。",
+                    confirm: "全部删除",
+                    onCancel: { asksErase = false },
+                    onConfirm: {
+                        asksErase = false
+                        onEraseAll()
+                        dismiss()
+                    }
+                )
+                .transition(reduceMotion ? .identity : .opacity)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: asksErase)
     }
 
     private var content: some View {
@@ -113,8 +136,6 @@ struct SettingsView: View {
 
             placesCard
 
-            moneyCard
-
             dailyCard
 
             memoryCard
@@ -125,8 +146,39 @@ struct SettingsView: View {
             scrollCard
             dogfoodCard
             #endif
+
+            eraseCard
         }
         .padding(20)
+    }
+
+    // PRD §21.2: the way to take everything back, at the very bottom. The sheet is the second step.
+    private var eraseCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Text("删除全部数据")
+                    .font(Toy.body(16, weight: .heavy))
+                Spacer()
+                Button {
+                    asksErase = true
+                } label: {
+                    Text("删除…")
+                        .font(Toy.body(13, weight: .heavy))
+                        .foregroundStyle(Toy.alert)
+                        .padding(.horizontal, 12)
+                        .frame(minHeight: 36)
+                        .toyCard(radius: 12, shadow: 3)
+                        .padding(.vertical, 4)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            Text("记忆、地点、能量罐、商店物品、衣柜和纪念品一起清空，回到刚装好的样子。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(16)
+        .toyCard()
     }
 
     // Issue #237: what the companion remembers, on its own page.
@@ -158,20 +210,6 @@ struct SettingsView: View {
         }
     }
 
-    private var moneyCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("钱")
-                .font(Toy.body(16, weight: .heavy))
-            yenField("银行余额", text: yenText(budget.balance) { budget.enterBalance($0, at: .now) })
-            yenField("金库目标", text: yenText(budget.savingsTarget) { budget.savingsTarget = $0 })
-            Text("发薪日填一次银行余额，首页显示离金库目标还差多少。金额只存在这台 iPhone 上。")
-                .font(Toy.body(12))
-                .foregroundStyle(Toy.muted)
-        }
-        .padding(16)
-        .toyCard()
-    }
-
     private var dailyCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Toggle(isOn: dailyBinding) {
@@ -199,41 +237,6 @@ struct SettingsView: View {
             daily.isOn
         } set: { on in
             if on { pickingDaily = true } else { daily.unlink() }
-        }
-    }
-
-    private func yenField(_ title: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(Toy.body(13, weight: .bold))
-                .foregroundStyle(Toy.muted)
-            HStack(spacing: 6) {
-                Text("¥")
-                    .font(Toy.body(22, weight: .heavy))
-                TextField("点这里输入", text: text)
-                    .keyboardType(.numberPad)
-                    .font(Toy.body(22, weight: .heavy))
-                    .focused($editingAmount, equals: title)
-                if editingAmount == title {
-                    Button("完成") { editingAmount = nil }
-                        .font(Toy.body(14, weight: .heavy))
-                        .frame(minWidth: 44, minHeight: 44)
-                }
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .contentShape(Rectangle())
-            .onTapGesture { editingAmount = title }
-            .toyCard(fill: Toy.paper, radius: 12, shadow: 3)
-        }
-    }
-
-    // Digits only; an empty field clears the amount.
-    private func yenText(_ amount: Int?, set: @escaping (Int?) -> Void) -> Binding<String> {
-        Binding {
-            amount?.formatted(.number.grouping(.automatic)) ?? ""
-        } set: { text in
-            set(Int(text.filter(\.isNumber)))
         }
     }
 

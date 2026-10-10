@@ -90,6 +90,12 @@ public final class GrowthStore {
         guard let keepsake = item.keepsake, !theirs.owned.contains(item.id) else { return nil }
         return max(keepsake.count - theirs.count(keepsake.win), 0)
     }
+
+    /// Deletes every record and the file, as on a fresh install.
+    public func eraseAll() {
+        ledger = CanLedger()
+        lastError = file.remove()
+    }
 }
 
 extension GrowthStore {

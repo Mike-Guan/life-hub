@@ -37,8 +37,6 @@ struct HomeView: View {
     var notice: String?
     /// When each change moment happened, for HAKU's Sunday line.
     var changes: [Date] = []
-    /// The savings card, once Mike has set a target and a balance.
-    var money: MoneyCard?
     /// Shows a settings button that calls this, when set.
     var onSettings: (() -> Void)?
     /// Cans to spend; with `onShop`, shows the can count that opens the shop.
@@ -232,10 +230,6 @@ struct HomeView: View {
 
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     TodayTimeline(segments: store.segments(on: context.date, now: context.date), persona: persona)
-                }
-
-                if let money {
-                    money
                 }
             }
             .padding(.horizontal, 20)
@@ -465,10 +459,13 @@ private struct Header: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(greeting)
-                    .font(Toy.display(26))
-                    .foregroundStyle(Toy.ink)
+            // The badges and buttons share a row with the date, so the greeting keeps the full width.
+            HStack(alignment: .center) {
+                Text(subtitle)
+                    .font(Toy.body(13, weight: .bold))
+                    .foregroundStyle(Toy.muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                 Spacer()
                 if let badge = AppEnvironment.badge {
                     Text(badge)
@@ -478,14 +475,6 @@ private struct Header: View {
                         .background(Capsule().fill(Toy.pink))
                         .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
                         .foregroundStyle(Toy.ink)
-                }
-                if let error {
-                    Circle()
-                        .fill(Toy.alert)
-                        .overlay(Circle().stroke(Toy.ink, lineWidth: 2))
-                        .frame(width: 14, height: 14)
-                        .help(error)
-                        .accessibilityLabel(error)
                 }
                 if let cans, let onShop {
                     Button(action: onShop) {
@@ -506,9 +495,11 @@ private struct Header: View {
                     .accessibilityLabel("设置")
                 }
             }
-            Text(subtitle)
-                .font(Toy.body(13, weight: .bold))
-                .foregroundStyle(Toy.muted)
+            Text(greeting)
+                .font(Toy.display(26))
+                .foregroundStyle(Toy.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             if let error {
                 ErrorLine(text: error)
             }

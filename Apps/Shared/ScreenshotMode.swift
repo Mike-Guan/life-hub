@@ -6,6 +6,7 @@ import SwiftUI
 /// `-screenshot-persona <persona>` picks the character, HAKU by default.
 /// `-screenshot-wearing <ids>` dresses her in shop items, given as comma-separated ids.
 /// `-screenshot-memory <full|empty>` shows the memory page instead (iOS), `-screenshot-ask <name>` with a confirmation.
+/// `-screenshot-settings <card|erase>` shows the bottom of Settings (iOS).
 enum ScreenshotMode {
     static var mode: Mode? {
         value(after: "-screenshot-mode").flatMap(Mode.init(rawValue:))
@@ -21,8 +22,13 @@ enum ScreenshotMode {
         value(after: "-screenshot-ask")
     }
 
+    /// The bottom of Settings: `card` for the 删除全部数据 card, `erase` with its confirmation open.
+    static var settings: String? {
+        value(after: "-screenshot-settings")
+    }
+
     /// Whether any screenshot is being drawn.
-    static var isOn: Bool { mode != nil || memory != nil }
+    static var isOn: Bool { mode != nil || memory != nil || settings != nil }
 
     static var persona: Persona {
         value(after: "-screenshot-persona").flatMap(Persona.init(rawValue:)) ?? .haku

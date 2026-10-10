@@ -24,7 +24,6 @@ public struct HubContainer: Sendable {
 
     public var modeLogURL: URL? { file("mode-log.json") }
     public var energyLogURL: URL? { file("energy-log.json") }
-    public var expenseLogURL: URL? { file("expense-log.json") }
     public var canLedgerURL: URL? { file("can-ledger.json") }
     public var snapshotURL: URL? { file("widget-snapshot.json") }
     /// What the Apple Watch last got from the iPhone, in the watch's own container.
@@ -63,6 +62,24 @@ public struct HubContainer: Sendable {
         try? snapshot.applying(item).write(to: url)
     }
 
+    // Only the hub's own files: the App Group container also holds the shared user defaults.
+    /// Deletes every hub file and the widget inbox, as on a fresh install.
+    /// - Returns: error messages for the UI, empty when nothing failed.
+    public func eraseFiles() -> [String] {
+        guard let folder else { return [] }
+        let files = FileManager.default
+        let names = (try? files.contentsOfDirectory(atPath: folder.path)) ?? []
+        var errors: [String] = []
+        for name in names.sorted() where name.hasSuffix(".json") || name == "inbox" {
+            do {
+                try files.removeItem(at: folder.appending(path: name))
+            } catch {
+                errors.append("删不掉 \(name)：\(error.localizedDescription)")
+            }
+        }
+        return errors
+    }
+
     private func file(_ name: String) -> URL? {
         folder?.appending(path: name)
     }
@@ -71,6 +88,14 @@ public struct HubContainer: Sendable {
 /// This device's id, stored in user defaults.
 public enum HubDevice {
     static let key = "deviceID"
+
+    // The id stays, so records written after the erase keep this device's name.
+    /// Removes every key in `defaults` but this device's id, as on a fresh install.
+    public static func eraseDefaults(_ defaults: UserDefaults) {
+        for key in defaults.dictionaryRepresentation().keys where key != Self.key {
+            defaults.removeObject(forKey: key)
+        }
+    }
 
     /// The id kept in `defaults`, created on first use.
     public static func id(defaults: UserDefaults) -> String {
