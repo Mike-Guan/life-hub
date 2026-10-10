@@ -74,20 +74,24 @@ import Testing
     @Test func judgeAppliesOnce() {
         let first = decision("couchScroll")
         var log = DecisionLog(decisions: [first])
-        #expect(log.judge(first.id, .no, by: "test", at: start))
-        #expect(!log.judge(first.id, .yes, by: "test", at: start))
+        let judged = log.judge(first.id, .no, by: "test", at: start)
+        let again = log.judge(first.id, .yes, by: "test", at: start)
+        let missing = log.judge(UUID(), .yes, by: "test", at: start)
+        #expect(judged && !again && !missing)
         #expect(log.decisions.first?.outcome == .no)
-        #expect(!log.judge(UUID(), .yes, by: "test", at: start))
     }
 
     @Test func appendIfChangedSkipsTheSamePlan() {
         let at = start.addingTimeInterval(3600)
         var log = DecisionLog()
-        #expect(log.appendIfChanged(decision("couchScroll", target: at)))
-        #expect(!log.appendIfChanged(decision("couchScroll", at: 60, target: at)))
-        // Another subject is judged on its own.
-        #expect(log.appendIfChanged(decision("offWork", for: "offWork", target: at)))
-        #expect(log.appendIfChanged(decision(Decision.noAction, at: 120)))
+        let added = [
+            log.appendIfChanged(decision("couchScroll", target: at)),
+            log.appendIfChanged(decision("couchScroll", at: 60, target: at)),
+            // Another subject is judged on its own.
+            log.appendIfChanged(decision("offWork", for: "offWork", target: at)),
+            log.appendIfChanged(decision(Decision.noAction, at: 120)),
+        ]
+        #expect(added == [true, false, true, true])
         #expect(log.decisions.map(\.action) == ["couchScroll", "offWork", Decision.noAction])
     }
 
