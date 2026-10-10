@@ -287,14 +287,19 @@ struct LifeHubApp: App {
         energy.eraseAll()
         expenses.eraseAll()
         growth.eraseAll()
-        setupErrors = AppGroup.container.eraseFiles()
+        var errors = AppGroup.container.eraseFiles()
         HubDevice.eraseDefaults(AppGroup.defaults)
         let center = UNUserNotificationCenter.current()
         center.removeAllPendingNotificationRequests()
         center.removeAllDeliveredNotifications()
         daily.unlink()
         // An empty selection stops both Screen Time watches.
-        try? ScrollWatch.start(FamilyActivitySelection(), work: rules)
+        do {
+            try ScrollWatch.start(FamilyActivitySelection(), work: rules)
+        } catch {
+            errors.append("Screen Time 监测没停：\(error.localizedDescription)")
+        }
+        setupErrors = errors
         // Settings go back to their defaults; their onChange handlers store them and clear the geofences.
         persona = .stored(in: AppGroup.defaults)
         growth.persona = persona

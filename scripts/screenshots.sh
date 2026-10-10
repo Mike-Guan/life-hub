@@ -53,6 +53,13 @@ for shows in card erase; do
   sleep 4
   xcrun simctl io "$udid" screenshot "$out/ios-settings-$shows.png"
 done
+# What 删除全部数据 leaves: a clean install, launched without screenshot data.
+xcrun simctl uninstall "$udid" "$bundle"
+xcrun simctl install "$udid" "$ios_app"
+xcrun simctl privacy "$udid" grant all "$bundle" || true
+xcrun simctl launch "$udid" "$bundle"
+sleep 6
+xcrun simctl io "$udid" screenshot "$out/ios-fresh.png"
 xcrun simctl terminate "$udid" "$bundle" || true
 
 # Mac: launch each mode and capture just its window. Reduce motion is a system setting on a Mac, so
