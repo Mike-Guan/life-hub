@@ -31,6 +31,8 @@ public struct HubContainer: Sendable {
     public var watchPayloadURL: URL? { file("watch-payload.json") }
     /// The public card, kept apart from every private log.
     public var publicCardURL: URL? { file("public-card.json") }
+    /// The rule decisions, which never leave the iPhone.
+    public var decisionLogURL: URL? { file("decision-log.json") }
     public var inbox: EventInbox { EventInbox(folder: folder?.appending(path: "inbox", directoryHint: .isDirectory)) }
 
     // M0 builds kept the mode log in Application Support. Moving it keeps Mike's history.

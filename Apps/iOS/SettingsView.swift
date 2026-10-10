@@ -233,17 +233,20 @@ struct SettingsView: View {
     // Debug builds only: the automatic decisions noted during the weeks of use (PRD section 19).
     private var dogfoodCard: some View {
         let log = DogfoodLog.stored(in: AppGroup.defaults)
+        // Issue #129: the decision log goes out with the same export.
+        let decisions = DecisionLog.read(from: AppGroup.container.decisionLogURL)
+        let export = log.text() + "\n\n决策记录（\(decisions.decisions.count) 条）\n" + decisions.text()
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
                 Text("调试记录")
                     .font(Toy.body(16, weight: .heavy))
-                Text("\(log.entries.count) 条")
+                Text("\(log.entries.count) 条 · 决策 \(decisions.decisions.count) 条")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
-                ShareLink("导出", item: log.text())
+                ShareLink("导出", item: export)
                     .font(Toy.body(13, weight: .heavy))
-                    .disabled(log.entries.isEmpty)
+                    .disabled(log.entries.isEmpty && decisions.decisions.isEmpty)
             }
             ForEach(Array(log.entries.suffix(5).reversed().enumerated()), id: \.offset) { _, entry in
                 Text("\(entry.at.formatted(date: .omitted, time: .shortened)) \(entry.kind)：\(entry.detail)")

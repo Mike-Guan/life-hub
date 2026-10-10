@@ -24,6 +24,7 @@ enum InviteReminder {
         let backoff = judgeLastInvite(log, signals: signals, now: now)
         let center = UNUserNotificationCenter.current()
         center.removePendingNotificationRequests(withIdentifiers: [requestID])
+        let wasPending = log.pendingNeed != nil
         log.pendingAt = nil
         log.pendingNeed = nil
         let bedtime = BedtimeSchedule.stored(in: defaults)
@@ -37,7 +38,8 @@ enum InviteReminder {
             sleptShort: StateEngine.sleptShort(events: energy.events, now: now),
             rules: rules
         )
-        if let reading, let at, !backoff.isPaused(reading.need, at: at) {
+        let paused = reading.flatMap { reading in at.map { backoff.isPaused(reading.need, at: $0) } } ?? false
+        if let reading, let at, !paused {
             let content = UNMutableNotificationContent()
             content.title = rules.persona.title
             content.body = NeedEngine.inviteText(
@@ -59,6 +61,21 @@ enum InviteReminder {
             log.pendingNeed = reading.need
         }
         log.store(in: defaults)
+        if reading != nil || wasPending {
+            notePlan(reading, at: log.pendingAt, paused: paused, now: now)
+        }
+    }
+
+    // Issue #129: the plan and the plans to send nothing, once per change.
+    /// Adds the invite plan to the decision log.
+    private static func notePlan(_ reading: NeedReading?, at: Date?, paused: Bool, now: Date) {
+        let deviceID = HubDevice.id(defaults: AppGroup.defaults)
+        var signals = [DecisionLog.subjectKey: "invite", "hour": String(Calendar.current.component(.hour, from: now))]
+        signals["need"] = reading?.need.rawValue
+        if paused { signals["paused"] = "yes" }
+        let action = at == nil ? Decision.noAction : reading?.need.rawValue ?? Decision.noAction
+        let decision = Decision(kind: .push, action: action, target: at, signals: signals, at: now, deviceID: deviceID)
+        DecisionLog.update(at: AppGroup.container.decisionLogURL, now: now) { $0.appendIfChanged(decision) }
     }
 
     // Each sent invite is judged once, as soon as the signals can tell.
@@ -72,13 +89,37 @@ enum InviteReminder {
         let departed = GymDeparture.stored(in: defaults)?.at
         let followed = NudgeBackoff.followed(need, sentAt: sent, signals: signals, departedAt: departed, now: now)
         guard let followed else { return backoff }
+        let wasPaused = backoff.isPaused(need, at: now)
         backoff.record(need, followed: followed, sentAt: sent, now: now)
         backoff.store(in: defaults)
         let deviceID = HubDevice.id(defaults: defaults)
+        let pauses = !wasPaused && backoff.isPaused(need, at: now)
+        noteJudged(need, followed: followed, sentAt: sent, pauses: pauses, now: now)
         if let moment = ChangeEngine.gotUp(need, followed: followed, sentAt: sent, deviceID: deviceID) {
             ChangeLog.note(moment, in: defaults)
         }
         return backoff
+    }
+
+    /// Adds the verdict on the invite sent at `sentAt` and the back-off step to the decision log.
+    private static func noteJudged(_ need: CompanionNeed, followed: Bool, sentAt: Date, pauses: Bool, now: Date) {
+        let deviceID = HubDevice.id(defaults: AppGroup.defaults)
+        let signals = [DecisionLog.subjectKey: "backoff", "need": need.rawValue]
+        let step = Decision(
+            kind: .backoff,
+            action: pauses ? "pause" : Decision.noAction,
+            target: pauses ? now : nil,
+            signals: signals,
+            at: now,
+            deviceID: deviceID
+        )
+        DecisionLog.update(at: AppGroup.container.decisionLogURL, now: now) { log in
+            if let sent = log.latest(.push, action: need.rawValue, target: sentAt) {
+                log.judge(sent.id, followed ? .yes : .no, by: deviceID, at: now)
+            }
+            log.append(step)
+            return true
+        }
     }
 
     /// The text of the invite sent for `reading`, or `nil` when none went out for it.
