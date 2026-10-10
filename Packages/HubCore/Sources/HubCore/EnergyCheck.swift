@@ -1,6 +1,6 @@
 import Foundation
 
-// Issue #236 (PM V0.1 details, 2026-10-08). A long press on the character asks whether her read of
+// Issue #236 (PM V0.1 details in 干预策略 §6, 2026-10-08). A long press on the character asks whether her read of
 // today's energy is right. A correction is a self-report, which StateEngine already lets win for the
 // rest of the day; an answer that agrees writes nothing but the record.
 /// The user's answer when the character says what she thinks today's energy is.
@@ -36,9 +36,11 @@ public enum EnergyCheck {
     public static func question(for guess: EnergyLevel, persona: Persona) -> String {
         switch (persona, guess) {
         case (.haku, .low): "我觉得你今天没睡够。"
-        case (.haku, _): "我觉得你今天还行。"
+        case (.haku, .okay): "我觉得你今天还行。"
+        case (.haku, .full): "我觉得你今天电挺满。"
         case (.kuro, .low): "……今天好像没睡够。"
-        case (.kuro, _): "……今天还可以吧。"
+        case (.kuro, .okay): "……今天还可以吧。"
+        case (.kuro, .full): "……今天状态不错。"
         }
     }
 

@@ -2,52 +2,39 @@ import CompanionKit
 import HubCore
 import SwiftUI
 
-// Issue #236: opened by a long press on the character. One question, two answers, one short reply.
-/// The "不对" card under the character: what she thinks today's energy is, and the two answers.
+// Issue #236, UI preview v5 (纠正预览, UI 审核 passed 2026-10-08): the card slides up in 0.2 s and then
+// stays still so the words are easy to read. Tapping outside or dragging it down closes it without a record.
+/// The "不对" card: what the character thinks today's energy is, and the two answers.
 struct EnergyCheckCard: View {
     let guess: EnergyReading
     let persona: Persona
-    /// The reply after an answer, or nil while asking.
-    let reply: String?
+    /// An error from recording the answer, shown in place of the question.
+    let error: String?
     let onAnswer: (EnergyAnswer) -> Void
-    let onClose: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .top) {
-                Text(reply ?? EnergyCheck.question(for: guess.level, persona: persona))
-                    .font(Toy.body(15, weight: .heavy))
-                    .foregroundStyle(Toy.ink)
-                Spacer(minLength: 8)
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(Toy.ink)
-                        .frame(width: 44, height: 44)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("关掉")
-                .padding(.top, -12)
-                .padding(.trailing, -12)
-            }
-            if reply == nil {
-                HStack(spacing: 10) {
-                    ForEach(EnergyAnswer.allCases, id: \.self) { answer in
-                        Button {
-                            onAnswer(answer)
-                        } label: {
-                            Text(answer.title)
-                                .font(Toy.body(15, weight: .heavy))
-                                .foregroundStyle(Toy.ink)
-                                .frame(maxWidth: .infinity, minHeight: 44)
-                                .toyCard(radius: 12, shadow: 3)
-                        }
-                        .buttonStyle(.plain)
+        VStack(alignment: .leading, spacing: 12) {
+            Text(error ?? EnergyCheck.question(for: guess.level, persona: persona))
+                .font(Toy.body(16, weight: .heavy))
+                .foregroundStyle(Toy.ink)
+            HStack(spacing: 12) {
+                ForEach(EnergyAnswer.allCases, id: \.self) { answer in
+                    Button {
+                        onAnswer(answer)
+                    } label: {
+                        Text(answer.title)
+                            .font(Toy.body(16, weight: .heavy))
+                            .foregroundStyle(Toy.ink)
+                            .frame(maxWidth: 160, minHeight: 48)
+                            .toyCard(radius: 12, shadow: 3)
                     }
+                    .buttonStyle(.plain)
                 }
             }
+            .frame(maxWidth: .infinity)
         }
-        .padding(14)
-        .toyCard(radius: 14, shadow: 3)
+        .padding(16)
+        .frame(maxWidth: 560)
+        .toyCard(radius: 18, shadow: 4)
     }
 }

@@ -70,7 +70,11 @@ struct HomeView: View {
     @State private var replaying = false
     /// The guess the "不对" card is asking about, while it is open.
     @State private var checking: EnergyReading?
+    @State private var checkError: String?
+    /// The character's short reply after an answer, shown for 1.6 s.
     @State private var checkReply: String?
+    @State private var answers = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         let reading = energy.reading()
@@ -154,8 +158,19 @@ struct HomeView: View {
                 // Issue #236: releasing a long press asks about today's energy when there is a guess.
                 .onCompanionHold {
                     guard let reading else { return }
-                    checkReply = nil
-                    withAnimation(.easeOut(duration: 0.2)) { checking = reading }
+                    checkError = nil
+                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
+                }
+                .overlay(alignment: .bottom) {
+                    if let checkReply {
+                        Text(checkReply)
+                            .font(Toy.body(16, weight: .heavy))
+                            .foregroundStyle(Toy.ink)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .toyCard(radius: 14, shadow: 3)
+                            .padding(.bottom, 16)
+                    }
                 }
                 .overlay(alignment: .topTrailing) {
                     if let onWardrobe {
@@ -172,17 +187,6 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                         .padding(12)
                     }
-                }
-
-                if let checking {
-                    EnergyCheckCard(
-                        guess: checking,
-                        persona: persona,
-                        reply: checkReply,
-                        onAnswer: { answer($0, to: checking) },
-                        onClose: closeCheck
-                    )
-                    .transition(.opacity)
                 }
 
                 // Side-hustle states are HAKU's; KURO's desk time shows her tagline.
@@ -238,6 +242,8 @@ struct HomeView: View {
             .frame(maxWidth: .infinity)
         }
         .background(Toy.paper.ignoresSafeArea())
+        .overlay(alignment: .bottom) { checkCard }
+        .sensoryFeedback(.impact(weight: .light), trigger: answers)
         .modeSwitchHaptic(trigger: store.current)
         // HAKU starts in the old mode, then switches, so the switch animation plays.
         .task(id: replayFrom) {
@@ -248,21 +254,48 @@ struct HomeView: View {
         }
     }
 
-    /// Records `choice` for `guess`, shows the character's reply, then closes the card.
-    private func answer(_ choice: EnergyAnswer, to guess: EnergyReading) {
-        let result = EnergyCheck.answer(choice, to: guess, energy: energy, decisionLogURL: decisionLogURL)
-        checkReply = result.error ?? EnergyCheck.reply(corrected: result.report != nil, persona: persona)
-        // An error stays until closed by hand.
-        guard result.error == nil else { return }
-        Task {
-            try? await Task.sleep(for: .seconds(1.5))
-            closeCheck()
+    /// The "不对" card over the bottom of the screen, with a layer behind it that closes it on a tap.
+    @ViewBuilder private var checkCard: some View {
+        if let checking {
+            ZStack(alignment: .bottom) {
+                Color.black.opacity(0.001)
+                    .ignoresSafeArea()
+                    .onTapGesture { closeCheck() }
+                EnergyCheckCard(guess: checking, persona: persona, error: checkError) { answer($0, to: checking) }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
+                    .gesture(
+                        DragGesture(minimumDistance: 10).onEnded { drag in
+                            if drag.translation.height > 40 { closeCheck() }
+                        }
+                    )
+            }
+            .transition(reduceMotion ? .identity : .move(edge: .bottom).combined(with: .opacity))
         }
     }
 
+    /// Records `choice` for `guess`, closes the card and shows the character's reply for 1.6 s.
+    private func answer(_ choice: EnergyAnswer, to guess: EnergyReading) {
+        answers += 1
+        let result = EnergyCheck.answer(choice, to: guess, energy: energy, decisionLogURL: decisionLogURL)
+        // An error keeps the card open, with the message where the question was.
+        if let error = result.error {
+            checkError = error
+            return
+        }
+        closeCheck()
+        let reply = EnergyCheck.reply(corrected: result.report != nil, persona: persona)
+        checkReply = reply
+        Task {
+            try? await Task.sleep(for: .seconds(1.6))
+            if checkReply == reply { checkReply = nil }
+        }
+    }
+
+    // Closing without an answer records nothing.
     private func closeCheck() {
-        withAnimation(.easeOut(duration: 0.2)) { checking = nil }
-        checkReply = nil
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = nil }
+        checkError = nil
     }
 
     // The scene rules live in HubCore, so the watch plays the same scene as this card.

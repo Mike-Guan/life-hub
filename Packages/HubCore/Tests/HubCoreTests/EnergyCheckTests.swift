@@ -88,7 +88,9 @@ import Testing
 
     @Test func linesFollowThePersona() {
         #expect(EnergyCheck.question(for: .low, persona: .haku) == "我觉得你今天没睡够。")
-        #expect(EnergyCheck.question(for: .full, persona: .haku) == "我觉得你今天还行。")
+        #expect(EnergyCheck.question(for: .okay, persona: .haku) == "我觉得你今天还行。")
+        #expect(EnergyCheck.question(for: .full, persona: .haku) == "我觉得你今天电挺满。")
+        #expect(EnergyCheck.question(for: .full, persona: .kuro) == "……今天状态不错。")
         #expect(EnergyCheck.question(for: .low, persona: .kuro) == "……今天好像没睡够。")
         #expect(EnergyCheck.question(for: .okay, persona: .kuro) == "……今天还可以吧。")
         #expect(EnergyCheck.reply(corrected: true, persona: .haku) == "哦。")
