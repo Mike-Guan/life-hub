@@ -35,6 +35,10 @@ struct WatchHomeView: View {
                 } second: {
                     TodayPage(payload: payload, mode: mode, date: context.date)
                 }
+            } else if let payload {
+                // After the iPhone's data is deleted there is no mode yet; like the iPhone home, the character
+                // stays in its plain look. Page 2 reads the mode, so there is only this page.
+                companionPage(payload, mode: nil, at: context.date)
             } else {
                 Text(failure ?? "先在 iPhone 上打开一次 Life Hub")
                     .font(.footnote)
@@ -64,13 +68,13 @@ struct WatchHomeView: View {
     }
 
     /// Page 1: the mode's color to every edge, the character from the chest up, and a small mode chip.
-    private func companionPage(_ payload: WatchPayload, mode: Mode, at date: Date) -> some View {
+    private func companionPage(_ payload: WatchPayload, mode: Mode?, at date: Date) -> some View {
         let snapshot = payload.snapshot
         let scene = payload.scene(at: date)
         return Group {
             if payload.persona == .kuro {
                 KuroView(
-                    look: KuroLook(mode: mode),
+                    look: KuroLook(mode: mode ?? .chill),
                     energy: snapshot.energy(at: date)?.value,
                     bedtime: payload.bedtime.state(at: date),
                     need: snapshot.need(at: date),
@@ -163,18 +167,20 @@ private struct WatchPager<First: View, Second: View>: View {
     }
 }
 
-/// The mode and how long it has run, in a small white pill.
+/// The mode and how long it has run, in a small white pill; "还没有模式" without one.
 private struct ModeChip: View {
-    let mode: Mode
+    let mode: Mode?
     let persona: Persona
     let since: Date?
 
     var body: some View {
         Group {
-            if let since {
+            if let mode, let since {
                 Text("\(mode.title(for: persona)) · \(Text(since, style: .relative))")
-            } else {
+            } else if let mode {
                 Text(mode.title(for: persona))
+            } else {
+                Text("还没有模式")
             }
         }
         .font(Toy.body(12, weight: .heavy))
