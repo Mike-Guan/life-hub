@@ -179,10 +179,8 @@ private struct ModeChip: View {
             .font(Toy.body(12, weight: .heavy))
             .foregroundStyle(Toy.ink)
             .lineLimit(1)
-            .minimumScaleFactor(0.75)
-            // The clock sits right of it in the same row.
-            .frame(maxWidth: 80, alignment: .leading)
-            .fixedSize(horizontal: false, vertical: true)
+            // Mode names are short enough to sit left of the clock at full size.
+            .fixedSize()
             .padding(.horizontal, 8)
             .padding(.vertical, 2)
             .background(Capsule().fill(Toy.card))
