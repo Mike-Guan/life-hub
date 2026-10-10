@@ -152,7 +152,8 @@ struct LifeHubApp: App {
                 bathDoneAt = .now
                 WidgetCenter.shared.reloadAllTimelines()
                 sendToWatch()
-            }
+            },
+            decisionLogURL: AppGroup.container.decisionLogURL
         )
         .environment(store)
         .environment(energy)

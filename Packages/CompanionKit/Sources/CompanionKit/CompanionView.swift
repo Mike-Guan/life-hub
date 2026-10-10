@@ -59,6 +59,7 @@ public struct CompanionView: View {
     @Environment(\.frameReduceMotion) private var frameReduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
+    @Environment(\.companionHold) private var hold
     /// True for a moment after the watch screen comes back on, while the figure stays still.
     @State private var settling = false
     /// Set when the watch screen has been dimmed too long to keep listening for shakes.
@@ -590,6 +591,7 @@ public struct CompanionView: View {
             .onEnded { _ in
                 closeUp = false
                 look = 0
+                hold?.action()
             }
     }
 
@@ -598,6 +600,7 @@ public struct CompanionView: View {
         LongPressGesture(minimumDuration: 0.4)
             .onEnded { _ in
                 closeUp = true
+                hold?.action()
                 Task {
                     try? await Task.sleep(for: .seconds(1.5))
                     closeUp = false

@@ -59,11 +59,23 @@ struct HomeView: View {
     var commuteMotion: [MotionSample] = []
     /// Records that Mike tapped HAKU's bath away.
     var onBathDone: (() -> Void)?
+    /// Where the "不对" card records its answers; nil keeps no record.
+    var decisionLogURL: URL?
+    /// Debug screenshots: `open` shows the "不对" card, `reply` the reply after a correction.
+    var screenshotCheck: String?
 
     @Environment(ModeStore.self) private var store
     @Environment(EnergyStore.self) private var energy
     @State private var cheer = 0
     @State private var replaying = false
+    /// The guess the "不对" card is asking about, while it is open.
+    @State private var checking: EnergyReading?
+    @State private var checkError: String?
+    @State private var checkHeight: CGFloat = 0
+    /// The character's short reply after an answer, shown for 1.6 s.
+    @State private var checkReply: String?
+    @State private var answers = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         let reading = energy.reading()
@@ -144,6 +156,21 @@ struct HomeView: View {
                 }
                 .frame(height: 340)
                 .toyCard()
+                // Issue #236: releasing a long press asks about today's energy when there is a guess.
+                // 干预策略 §6: only a guess is corrected; a level Mike picked himself isn't asked about.
+                .onCompanionHold {
+                    guard let reading, reading.source != .selfReport else { return }
+                    checkError = nil
+                    // UI 审核 round 4: inside the gesture's transaction the fade was dropped, so it runs after.
+                    Task { @MainActor in
+                        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
+                    }
+                }
+                .overlay(alignment: persona == .kuro ? .topLeading : .bottom) {
+                    if let checkReply {
+                        replyBubble(checkReply)
+                    }
+                }
                 .overlay(alignment: .topTrailing) {
                     if let onWardrobe {
                         Button(action: onWardrobe) {
@@ -199,6 +226,7 @@ struct HomeView: View {
                 ModeSwitcher(current: store.current, persona: persona) { mode in
                     switchTo(mode)
                 }
+                .anchorPreference(key: SwitcherBounds.self, value: .bounds) { $0 }
 
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     TodayTimeline(segments: store.segments(on: context.date, now: context.date), persona: persona)
@@ -210,14 +238,143 @@ struct HomeView: View {
             .frame(maxWidth: .infinity)
         }
         .background(Toy.paper.ignoresSafeArea())
+        .overlayPreferenceValue(SwitcherBounds.self) { anchor in
+            GeometryReader { proxy in
+                checkCard(
+                    switcher: anchor.map { proxy[$0] },
+                    height: proxy.size.height,
+                    bottomInset: proxy.safeAreaInsets.bottom
+                )
+            }
+        }
+        .sensoryFeedback(.impact(weight: .light), trigger: answers)
         .modeSwitchHaptic(trigger: store.current)
         // HAKU starts in the old mode, then switches, so the switch animation plays.
+        .task {
+            guard let screenshotCheck else { return }
+            // After ScreenshotHome has set today's energy.
+            try? await Task.sleep(for: .seconds(1))
+            guard let reading = energy.reading(), reading.source != .selfReport else { return }
+            switch screenshotCheck {
+            case "reply":
+                checkReply = EnergyCheck.reply(corrected: true, persona: persona)
+            case "hold":
+                // Waits for a real long press, from Apps/UITests.
+                break
+            default:
+                checking = reading
+            }
+        }
         .task(id: replayFrom) {
             replaying = replayFrom != nil
             guard replaying else { return }
             try? await Task.sleep(for: .seconds(1.2))
             replaying = false
         }
+    }
+
+    /// The "不对" card over a dimmed layer that closes it on a tap.
+    @ViewBuilder private func checkCard(switcher: CGRect?, height: CGFloat, bottomInset: CGFloat) -> some View {
+        if let checking {
+            let place = checkPlace(switcher: switcher, height: height, bottomInset: bottomInset)
+            ZStack(alignment: .top) {
+                // Dims the whole home screen, so what the card overlaps reads as behind it.
+                Toy.ink.opacity(0.25)
+                    .ignoresSafeArea()
+                    .onTapGesture { closeCheck() }
+                EnergyCheckCard(guess: checking, persona: persona, error: checkError, fill: place.fill) {
+                    answer($0, to: checking)
+                }
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.size.height
+                } action: {
+                    // Only the card's own height; a stretched card would move it back and forth.
+                    if place.fill == 0 { checkHeight = $0 }
+                }
+                .padding(.horizontal, 20)
+                .offset(y: place.top)
+                .gesture(
+                    DragGesture(minimumDistance: 10).onEnded { drag in
+                        if drag.translation.height > 40 { closeCheck() }
+                    }
+                )
+            }
+            .transition(reduceMotion ? .identity : .opacity)
+        }
+    }
+
+    // UI 审核 F10 and round 3: the card's edges fall only in the gaps between blocks. Its top sits 12 pt under
+    // the first row of mode buttons and it reaches past the bottom of the screen, covering what is below.
+    // When those buttons are off screen it sits at the bottom at its own height.
+    /// Where the card's top edge goes in a space `height` tall, and the least height that reaches past its bottom.
+    private func checkPlace(
+        switcher: CGRect?,
+        height: CGFloat,
+        bottomInset: CGFloat
+    ) -> (top: CGFloat, fill: CGFloat) {
+        if let switcher {
+            // Two rows of buttons 14 pt apart on iPhone.
+            let firstRow = switcher.height > 120 ? (switcher.height - 14) / 2 : switcher.height
+            let top = switcher.minY + firstRow + 12
+            if top >= 0, top + checkHeight + 24 <= height {
+                return (top, height + bottomInset + 24 - top)
+            }
+        }
+        return (height - 24 - checkHeight, 0)
+    }
+
+    // KURO holds things low in front of her, so her bubble sits above her head with its tail pointing down to her.
+    /// The character's one-line reply after an answer.
+    @ViewBuilder private func replyBubble(_ text: String) -> some View {
+        let bubble = Text(text)
+            .font(Toy.body(16, weight: .heavy))
+            .foregroundStyle(Toy.ink)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+        if persona == .kuro {
+            // The tail's fill covers the bubble's bottom edge, so the two read as one outline.
+            bubble
+                .toyCard(radius: 14, shadow: 3)
+                .overlay(alignment: .bottomTrailing) {
+                    ZStack {
+                        BubbleTail(closed: true).fill(Toy.card)
+                        BubbleTail(closed: false)
+                            .stroke(Toy.ink, style: StrokeStyle(lineWidth: Toy.outline, lineJoin: .round))
+                    }
+                    .frame(width: 16, height: 14)
+                    .offset(x: -14, y: 14 - Toy.outline)
+                }
+                .padding(.top, 28)
+                .padding(.leading, 24)
+        } else {
+            bubble
+                .toyCard(radius: 14, shadow: 3)
+                .padding(.bottom, 16)
+        }
+    }
+
+    /// Records `choice` for `guess`, closes the card and shows the character's reply for 1.6 s.
+    private func answer(_ choice: EnergyAnswer, to guess: EnergyReading) {
+        answers += 1
+        let result = EnergyCheck.answer(choice, to: guess, energy: energy, decisionLogURL: decisionLogURL)
+        // An error keeps the card open, with the message where the question was.
+        if let error = result.error {
+            checkError = error
+            return
+        }
+        closeCheck()
+        let reply = EnergyCheck.reply(corrected: result.report != nil, persona: persona)
+        checkReply = reply
+        Task {
+            try? await Task.sleep(for: .seconds(1.6))
+            if checkReply == reply { checkReply = nil }
+        }
+    }
+
+    // Closing without an answer records nothing.
+    private func closeCheck() {
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = nil }
+        checkError = nil
     }
 
     // The scene rules live in HubCore, so the watch plays the same scene as this card.
@@ -368,4 +525,28 @@ private struct Header: View {
     HomeView()
         .environment(ModeStore.preview())
         .environment(EnergyStore(fileURL: nil, deviceID: "preview"))
+}
+
+/// A speech-bubble tail: a right triangle whose point is at the bottom trailing corner.
+private struct BubbleTail: Shape {
+    /// Whether the path includes the top edge, which joins the bubble.
+    var closed: Bool
+
+    func path(in rect: CGRect) -> Path {
+        Path { path in
+            path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+            if closed { path.closeSubpath() }
+        }
+    }
+}
+
+/// The mode buttons' frame, so the "不对" card can line up with their rows.
+private struct SwitcherBounds: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? { nil }
+
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = value ?? nextValue()
+    }
 }
