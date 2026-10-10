@@ -308,10 +308,13 @@ private struct Header: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(greeting)
-                    .font(Toy.display(26))
-                    .foregroundStyle(Toy.ink)
+            // The badges and buttons share a row with the date, so the greeting keeps the full width.
+            HStack(alignment: .center) {
+                Text(subtitle)
+                    .font(Toy.body(13, weight: .bold))
+                    .foregroundStyle(Toy.muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                 Spacer()
                 if let badge = AppEnvironment.badge {
                     Text(badge)
@@ -349,9 +352,11 @@ private struct Header: View {
                     .accessibilityLabel("设置")
                 }
             }
-            Text(subtitle)
-                .font(Toy.body(13, weight: .bold))
-                .foregroundStyle(Toy.muted)
+            Text(greeting)
+                .font(Toy.display(26))
+                .foregroundStyle(Toy.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             if let error {
                 ErrorLine(text: error)
             }
