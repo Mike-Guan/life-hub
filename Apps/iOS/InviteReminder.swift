@@ -75,7 +75,8 @@ enum InviteReminder {
         if paused { signals["paused"] = "yes" }
         let action = at == nil ? Decision.noAction : reading?.need.rawValue ?? Decision.noAction
         let decision = Decision(kind: .push, action: action, target: at, signals: signals, at: now, deviceID: deviceID)
-        DecisionLog.update(at: AppGroup.container.decisionLogURL, now: now) { $0.appendIfChanged(decision) }
+        let error = DecisionLog.update(at: AppGroup.container.decisionLogURL, now: now) { $0.appendIfChanged(decision) }
+        DecisionLog.keep(error, in: AppGroup.defaults)
     }
 
     // Each sent invite is judged once, as soon as the signals can tell.
@@ -113,13 +114,14 @@ enum InviteReminder {
             at: now,
             deviceID: deviceID
         )
-        DecisionLog.update(at: AppGroup.container.decisionLogURL, now: now) { log in
+        let error = DecisionLog.update(at: AppGroup.container.decisionLogURL, now: now) { log in
             if let sent = log.latest(.push, action: need.rawValue, target: sentAt) {
                 log.judge(sent.id, followed ? .yes : .no, by: deviceID, at: now)
             }
             log.append(step)
             return true
         }
+        DecisionLog.keep(error, in: AppGroup.defaults)
     }
 
     /// The text of the invite sent for `reading`, or `nil` when none went out for it.

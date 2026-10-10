@@ -335,10 +335,11 @@ struct LifeHubApp: App {
             ],
             deviceID: HubDevice.id(defaults: AppGroup.defaults)
         )
-        DecisionLog.update(at: AppGroup.container.decisionLogURL) { log in
+        let error = DecisionLog.update(at: AppGroup.container.decisionLogURL) { log in
             log.append(decision)
             return true
         }
+        DecisionLog.keep(error, in: AppGroup.defaults)
     }
 
     // The 30-day limit counts a box return only once it has actually played.
@@ -364,7 +365,7 @@ struct LifeHubApp: App {
         let errors = [
             widgets.lastError, expenses.lastError, growth.lastError, reminderError, offWorkError, healthError,
             placeMonitor.lastError, placeMonitor.accessWarning, needs.lastError, countdownError, screenTimeError,
-            daily.lastError,
+            daily.lastError, DecisionLog.lastError(in: AppGroup.defaults),
         ]
         return (setupErrors + errors.compactMap { $0 }).first
     }

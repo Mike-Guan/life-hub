@@ -125,4 +125,12 @@ import Testing
         #expect(text.contains("for=invite hour=21"))
         #expect(text.contains("结果=no"))
     }
+
+    @Test func keptErrorIsClearedBySuccess() throws {
+        let defaults = try #require(UserDefaults(suiteName: UUID().uuidString))
+        DecisionLog.keep("存不了", in: defaults)
+        #expect(DecisionLog.lastError(in: defaults) == "存不了")
+        DecisionLog.keep(nil, in: defaults)
+        #expect(DecisionLog.lastError(in: defaults) == nil)
+    }
 }
