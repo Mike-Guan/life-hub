@@ -1,0 +1,35 @@
+05:55:10 watches: Apple Watch Series 11 (46mm), Apple Watch Series 11 (42mm), Apple Watch Series 10 (46mm), Apple Watch Series 10 (42mm), Apple Watch Ultra 3 (49mm), Apple Watch Ultra 2 (49mm), Apple Watch SE 3 (44mm), Apple Watch SE 3 (40mm), Apple Watch SE (44mm) (2nd generation), Apple Watch SE (40mm) (2nd generation)
+05:55:12 booting watch 42mm
+05:58:11 still build/recordings/42mm-haku-work
+05:58:19 still build/recordings/42mm-haku-chill
+05:58:25 still build/recordings/42mm-haku-boxing
+05:58:32 still build/recordings/42mm-haku-money
+05:58:38 still build/recordings/42mm-haku-overtime
+05:58:44 still build/recordings/42mm-kuro-work
+05:58:51 still build/recordings/42mm-kuro-chill
+05:58:57 still build/recordings/42mm-kuro-boxing
+05:59:03 still build/recordings/42mm-kuro-money
+05:59:10 still build/recordings/42mm-kuro-overtime
+05:59:15 booting watch 46mm
+06:00:21 still build/recordings/46mm-haku-work
+06:00:30 still build/recordings/46mm-haku-chill
+06:00:36 still build/recordings/46mm-haku-boxing
+06:00:42 still build/recordings/46mm-haku-money
+06:00:49 still build/recordings/46mm-haku-overtime
+06:00:55 still build/recordings/46mm-kuro-work
+06:01:02 still build/recordings/46mm-kuro-chill
+06:01:08 still build/recordings/46mm-kuro-boxing
+06:01:14 still build/recordings/46mm-kuro-money
+06:01:21 still build/recordings/46mm-kuro-overtime
+06:01:30 booting watch 49mm
+06:02:33 still build/recordings/49mm-haku-work
+06:02:39 still build/recordings/49mm-haku-chill
+06:02:45 still build/recordings/49mm-haku-boxing
+06:02:52 still build/recordings/49mm-haku-money
+06:02:58 still build/recordings/49mm-haku-overtime
+06:03:04 still build/recordings/49mm-kuro-work
+06:03:11 still build/recordings/49mm-kuro-chill
+06:03:17 still build/recordings/49mm-kuro-boxing
+06:03:23 still build/recordings/49mm-kuro-money
+06:03:29 still build/recordings/49mm-kuro-overtime
+06:03:34 done
