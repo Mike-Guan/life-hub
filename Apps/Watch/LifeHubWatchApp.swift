@@ -66,7 +66,7 @@ struct WatchHomeView: View {
     /// Page 1: the mode's color to every edge, the character from the chest up, and a small mode chip.
     private func companionPage(_ payload: WatchPayload, mode: Mode, at date: Date) -> some View {
         let snapshot = payload.snapshot
-        let scene = payload.scenes.scene(at: date)
+        let scene = payload.scene(at: date)
         return Group {
             if payload.persona == .kuro {
                 KuroView(

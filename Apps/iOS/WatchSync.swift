@@ -11,7 +11,7 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
     // Besides the session, which WatchConnectivity makes safe to use from any thread, only the last scenes
     // the app worked out, behind a lock, so a send from a session callback still carries them.
     static let shared = WatchSync()
-    private let played = Mutex(WatchPlay())
+    private let played = Mutex<WatchPlay?>(nil)
     private let onCheck = Mutex<(@MainActor @Sendable () -> Void)?>(nil)
 
     /// Sets what runs when the watch app opens and asks for a re-check; it should send the result.
@@ -28,14 +28,17 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
 
     /// Sends the snapshot the widgets read, with the wardrobe, bedtime and what the home card plays, when a
     /// watch app is installed.
-    /// - Parameter play: what the home card plays next; `nil` sends the last one given.
+    /// - Parameter play: what the home card plays next; `nil` sends the last one given, or the last one sent.
     func send(_ play: WatchPlay? = nil) {
         if let play { played.withLock { $0 = play } }
-        let play = played.withLock { $0 }
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
         guard session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return }
         guard let url = AppGroup.container.snapshotURL, let snapshot = WidgetSnapshot.read(from: url) else { return }
+        let sent = WatchPayload(message: session.applicationContext)
+        // A background launch (a place event, the watch asking for a check) sends on activation before the
+        // app works out its scenes; sending none would show the plain mode look until the app runs again.
+        let play = played.withLock { $0 } ?? WatchPlay(scenes: sent?.scenes ?? [], event: sent?.event)
         let persona = Persona.stored(in: AppGroup.defaults)
         let payload = WatchPayload(
             snapshot: snapshot,
@@ -47,7 +50,7 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
         )
         // Complication transfers have a daily budget (about 50), so they go out only when what the watch
         // face draws changed.
-        let changed = WatchPayload(message: session.applicationContext).map { !payload.drawsLike($0) } ?? true
+        let changed = sent.map { !payload.drawsLike($0) } ?? true
         guard let message = payload.message else { return }
         do {
             try session.updateApplicationContext(message)
