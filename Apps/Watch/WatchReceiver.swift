@@ -82,10 +82,16 @@ final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
         store(userInfo)
     }
 
+    // Sent by the iPhone while the watch app is open, so a change shows without waiting for the context.
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        store(message)
+    }
+
     private func store(_ message: [String: Any]) {
         guard let payload = WatchPayload(message: message) else { return }
         // Application context and complication transfers can arrive out of order; an older one is dropped.
-        guard payload.replaces(WatchPayload.read(from: AppGroup.container.watchPayloadURL)) else { return }
+        let stored = WatchPayload.read(from: AppGroup.container.watchPayloadURL)
+        guard payload.replaces(stored) else { return }
         // A write that fails leaves the last payload in place; the next one from the iPhone tries again.
         do {
             guard let url = AppGroup.container.watchPayloadURL else { throw CocoaError(.fileNoSuchFile) }
@@ -94,7 +100,8 @@ final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
             post(Self.didFail, "没存下 iPhone 发来的状态：\(error.localizedDescription)")
             return
         }
-        WidgetCenter.shared.reloadAllTimelines()
+        // Widget reloads have a daily budget, and the iPhone now also sends while the app is open.
+        if stored.map({ !payload.drawsLike($0) }) ?? true { WidgetCenter.shared.reloadAllTimelines() }
         post(Self.didReceive, nil)
     }
 
