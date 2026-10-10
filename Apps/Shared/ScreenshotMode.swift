@@ -5,10 +5,24 @@ import SwiftUI
 /// Launch argument `-screenshot-mode <mode>` shows the home screen with fixed, in-memory data.
 /// `-screenshot-persona <persona>` picks the character, HAKU by default.
 /// `-screenshot-wearing <ids>` dresses her in shop items, given as comma-separated ids.
+/// `-screenshot-memory <full|empty>` shows the memory page instead (iOS), `-screenshot-ask <name>` with a confirmation.
 enum ScreenshotMode {
     static var mode: Mode? {
         value(after: "-screenshot-mode").flatMap(Mode.init(rawValue:))
     }
+
+    /// Whether the memory page has records to show, `nil` when it isn't being drawn.
+    static var memory: Bool? {
+        value(after: "-screenshot-memory").map { $0 == "full" }
+    }
+
+    /// The memory page's confirmation to open: `habit`, `decisions` or `everything`.
+    static var ask: String? {
+        value(after: "-screenshot-ask")
+    }
+
+    /// Whether any screenshot is being drawn.
+    static var isOn: Bool { mode != nil || memory != nil }
 
     static var persona: Persona {
         value(after: "-screenshot-persona").flatMap(Persona.init(rawValue:)) ?? .haku

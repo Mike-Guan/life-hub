@@ -14,6 +14,9 @@ struct SettingsView: View {
     @Binding var persona: Persona
     let monitor: PlaceMonitor
     let daily: DailyLink
+    let store: ModeStore
+    let energy: EnergyStore
+    let ledger: CanLedger
     @Environment(\.dismiss) private var dismiss
     @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
@@ -21,6 +24,7 @@ struct SettingsView: View {
     @State private var pickingApps = false
     @State private var screenTimeError: String?
     @State private var switchingTo: Persona?
+    @State private var showsMemory = false
     @FocusState private var editingAmount: String?
 
     var body: some View {
@@ -113,6 +117,8 @@ struct SettingsView: View {
 
             dailyCard
 
+            memoryCard
+
             // Debug only until Apple approves Family Controls for distribution; STG and PROD have no
             // entitlement, so the button could only fail. Remove with the CI-CD.md Screen Time step.
             #if DEBUG
@@ -121,6 +127,35 @@ struct SettingsView: View {
             #endif
         }
         .padding(20)
+    }
+
+    // Issue #237: what the companion remembers, on its own page.
+    private var memoryCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Text("记得的事")
+                    .font(Toy.body(16, weight: .heavy))
+                Spacer()
+                Button("看看") { showsMemory = true }
+                    .font(Toy.body(13, weight: .heavy))
+                    .frame(minHeight: 44)
+            }
+            Text("学到的习惯、长期记得的事和做过的判断。都只在这台 iPhone 上。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(16)
+        .toyCard()
+        .sheet(isPresented: $showsMemory) {
+            MemoryView(
+                persona: persona,
+                store: store,
+                energy: energy,
+                ledger: ledger,
+                places: places.places,
+                decisionLogURL: AppGroup.container.decisionLogURL
+            )
+        }
     }
 
     private var moneyCard: some View {
@@ -235,18 +270,18 @@ struct SettingsView: View {
         let log = DogfoodLog.stored(in: AppGroup.defaults)
         // Issue #129: the decision log goes out with the same export.
         let decisions = DecisionLog.read(from: AppGroup.container.decisionLogURL)
-        let export = log.text() + "\n\n决策记录（\(decisions.decisions.count) 条）\n" + decisions.text()
+        let export = log.text() + "\n\n决策记录（\(decisions.kept.count) 条）\n" + decisions.text()
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
                 Text("调试记录")
                     .font(Toy.body(16, weight: .heavy))
-                Text("\(log.entries.count) 条 · 决策 \(decisions.decisions.count) 条")
+                Text("\(log.entries.count) 条 · 决策 \(decisions.kept.count) 条")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
                 ShareLink("导出", item: export)
                     .font(Toy.body(13, weight: .heavy))
-                    .disabled(log.entries.isEmpty && decisions.decisions.isEmpty)
+                    .disabled(log.entries.isEmpty && decisions.kept.isEmpty)
             }
             ForEach(Array(log.entries.suffix(5).reversed().enumerated()), id: \.offset) { _, entry in
                 Text("\(entry.at.formatted(date: .omitted, time: .shortened)) \(entry.kind)：\(entry.detail)")

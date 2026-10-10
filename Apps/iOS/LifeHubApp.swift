@@ -94,7 +94,7 @@ struct LifeHubApp: App {
         UNUserNotificationCenter.current().delegate = taps
         _taps = State(initialValue: taps)
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
-        guard ScreenshotMode.mode == nil else { return }
+        guard !ScreenshotMode.isOn else { return }
         _screenTimeError = State(initialValue: Self.restartScrollWatch())
         Self.watch(
             places, with: placeMonitor, store: store, energy: energy, widgets: widgets, needs: needs, growth: growth
@@ -111,6 +111,8 @@ struct LifeHubApp: App {
         WindowGroup {
             if let mode = ScreenshotMode.mode {
                 ScreenshotHome(mode: mode)
+            } else if let filled = ScreenshotMode.memory {
+                ScreenshotMemory(filled: filled)
             } else {
                 home
             }
@@ -125,7 +127,7 @@ struct LifeHubApp: App {
             need: needs.reading,
             activitySignals: needs.activitySignals,
             workouts: needs.workouts,
-            activityDays: ActivityDays.stored(in: AppGroup.defaults).learningGym(from: growth.ledger, now: .now),
+            activityDays: AppGroup.activityDays(ledger: growth.ledger),
             departure: needs.departure,
             event: needs.event,
             welcomeBack: welcomeBack,
@@ -231,7 +233,10 @@ struct LifeHubApp: App {
                 budget: $budget,
                 persona: $persona,
                 monitor: placeMonitor,
-                daily: daily
+                daily: daily,
+                store: store,
+                energy: energy,
+                ledger: growth.ledger
             )
         }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
@@ -285,7 +290,8 @@ struct LifeHubApp: App {
             growth.record(earned.win, source: earned.source, at: earned.at)
         }
         // Getting up after an invite is noted by whichever process judged it; the can is earned here.
-        for moment in ChangeLog.stored(in: AppGroup.defaults).moments where moment.kind == .gotUp {
+        let moments = ChangeLog.stored(in: AppGroup.defaults).moments
+        for moment in moments where moment.kind == .gotUp && moment.deletedAt == nil {
             growth.record(.gotUp, source: Win.gotUp.source(at: moment.at), at: moment.at)
         }
         let tasks = DailyAgenda.occurrences(daily.tasks, now: .now)
@@ -536,7 +542,7 @@ struct LifeHubApp: App {
             bedtime: BedtimeSchedule.stored(in: AppGroup.defaults),
             need: needs.reading,
             signals: needs.activitySignals,
-            days: ActivityDays.stored(in: AppGroup.defaults).learningGym(from: growth.ledger, now: .now),
+            days: AppGroup.activityDays(ledger: growth.ledger),
             departure: needs.departure,
             sit: needs.sit,
             bathDoneAt: BathTime.doneAt(in: AppGroup.defaults),

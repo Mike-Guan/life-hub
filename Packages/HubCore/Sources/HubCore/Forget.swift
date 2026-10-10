@@ -49,20 +49,3 @@ extension RecordLog where Record: SoftDeletable {
         return count
     }
 }
-
-/// The companion's day that contains a date, for deleting one day of records.
-public struct MemoryDay: Equatable, Sendable {
-    public let start: Date
-    public let end: Date
-
-    /// The day containing `date`, which starts at the same hour as the rest of the app's days.
-    public init(containing date: Date, calendar: Calendar = .current) {
-        start = StateEngine.dayStart(for: date, calendar: calendar)
-        end = calendar.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(86_400)
-    }
-
-    /// Whether `date` falls in this day.
-    public func contains(_ date: Date) -> Bool {
-        date >= start && date < end
-    }
-}
