@@ -57,6 +57,9 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
         } catch {
             Dogfood.note("watch", "没发到手表：\(error.localizedDescription)")
         }
+        // The system delivers the context when it chooses, even with the watch app open; a message
+        // arrives now. The context stays as the fallback, so a failed message needs nothing more.
+        if session.isReachable { session.sendMessage(message, replyHandler: nil, errorHandler: nil) }
         if changed, session.isComplicationEnabled, session.remainingComplicationUserInfoTransfers > 0 {
             session.transferCurrentComplicationUserInfo(message)
         }
