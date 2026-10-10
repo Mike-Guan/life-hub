@@ -53,5 +53,21 @@ for persona in haku kuro; do
   done
 done
 xcrun simctl ui "$udid" appearance light
+
+# The card fading in and out (0.2 s), then the same with reduce motion on.
+record() {
+  local name=$1
+  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode chill \
+    -screenshot-persona haku -screenshot-energy low -screenshot-check cycle
+  xcrun simctl io "$udid" recordVideo --force "$out/$name.mov" &
+  local recorder=$!
+  sleep 5
+  kill -INT "$recorder"
+  wait "$recorder" || true
+}
+xcrun simctl spawn "$udid" defaults write com.apple.Accessibility ReduceMotionEnabled -bool false
+record cycle
+xcrun simctl spawn "$udid" defaults write com.apple.Accessibility ReduceMotionEnabled -bool true
+record cycle-reduce-motion
 xcrun simctl terminate "$udid" "$bundle" || true
 ls -l "$out"

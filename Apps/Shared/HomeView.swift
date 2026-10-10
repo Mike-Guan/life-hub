@@ -73,6 +73,7 @@ struct HomeView: View {
     /// The guess the "不对" card is asking about, while it is open.
     @State private var checking: EnergyReading?
     @State private var checkError: String?
+    @State private var checkHeight: CGFloat = 0
     /// The character's short reply after an answer, shown for 1.6 s.
     @State private var checkReply: String?
     @State private var answers = 0
@@ -224,6 +225,7 @@ struct HomeView: View {
                 ModeSwitcher(current: store.current, persona: persona) { mode in
                     switchTo(mode)
                 }
+                .anchorPreference(key: SwitcherBounds.self, value: .bounds) { $0 }
 
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     TodayTimeline(segments: store.segments(on: context.date, now: context.date), persona: persona)
@@ -239,7 +241,11 @@ struct HomeView: View {
             .frame(maxWidth: .infinity)
         }
         .background(Toy.paper.ignoresSafeArea())
-        .overlay(alignment: .bottom) { checkCard }
+        .overlayPreferenceValue(SwitcherBounds.self) { anchor in
+            GeometryReader { proxy in
+                checkCard(switcher: anchor.map { proxy[$0] }, height: proxy.size.height)
+            }
+        }
         .sensoryFeedback(.impact(weight: .light), trigger: answers)
         .modeSwitchHaptic(trigger: store.current)
         // HAKU starts in the old mode, then switches, so the switch animation plays.
@@ -248,9 +254,15 @@ struct HomeView: View {
             // After ScreenshotHome has set today's energy.
             try? await Task.sleep(for: .seconds(1))
             guard let reading = energy.reading(), reading.source != .selfReport else { return }
-            if screenshotCheck == "reply" {
+            switch screenshotCheck {
+            case "reply":
                 checkReply = EnergyCheck.reply(corrected: true, persona: persona)
-            } else {
+            case "cycle":
+                // For the screen recording: fades in, stays, fades out as a tap on the dim layer would.
+                withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
+                try? await Task.sleep(for: .seconds(1.5))
+                closeCheck()
+            default:
                 checking = reading
             }
         }
@@ -262,17 +274,18 @@ struct HomeView: View {
         }
     }
 
-    /// The "不对" card over the bottom of the screen, with a layer behind it that closes it on a tap.
-    @ViewBuilder private var checkCard: some View {
+    /// The "不对" card near the bottom of the screen, over a dimmed layer that closes it on a tap.
+    @ViewBuilder private func checkCard(switcher: CGRect?, height: CGFloat) -> some View {
         if let checking {
-            ZStack(alignment: .bottom) {
+            ZStack(alignment: .top) {
                 // Dims the whole home screen, so what the card overlaps reads as behind it.
                 Toy.ink.opacity(0.25)
                     .ignoresSafeArea()
                     .onTapGesture { closeCheck() }
                 EnergyCheckCard(guess: checking, persona: persona, error: checkError) { answer($0, to: checking) }
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { checkHeight = $0 }
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 24)
+                    .offset(y: checkTop(switcher: switcher, height: height))
                     .gesture(
                         DragGesture(minimumDistance: 10).onEnded { drag in
                             if drag.translation.height > 40 { closeCheck() }
@@ -281,6 +294,17 @@ struct HomeView: View {
             }
             .transition(reduceMotion ? .identity : .opacity)
         }
+    }
+
+    // UI 审核 F10: the card's top edge never cuts through a row of mode buttons. It sits at the bottom when
+    // that leaves 12 pt under the buttons, else 12 pt under the first row, covering the second.
+    /// Where the card's top edge goes in a space `height` tall, given the mode buttons' frame.
+    private func checkTop(switcher: CGRect?, height: CGFloat) -> CGFloat {
+        let bottom = height - 24 - checkHeight
+        guard let switcher, switcher.maxY + 12 > bottom else { return bottom }
+        // Two rows of buttons 14 pt apart on iPhone.
+        let firstRow = switcher.height > 120 ? (switcher.height - 14) / 2 : switcher.height
+        return min(bottom, switcher.minY + firstRow + 12)
     }
 
     // KURO holds things low in front of her, so her bubble sits above her head with its tail pointing down to her.
@@ -502,5 +526,14 @@ private struct BubbleTail: Shape {
             path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
             if closed { path.closeSubpath() }
         }
+    }
+}
+
+/// The mode buttons' frame, so the "不对" card can line up with their rows.
+private struct SwitcherBounds: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? { nil }
+
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = value ?? nextValue()
     }
 }
