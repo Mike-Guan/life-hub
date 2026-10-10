@@ -22,6 +22,16 @@ enum ScreenshotMode {
         return wardrobe
     }
 
+    /// Today's energy for the screenshot, full when not given.
+    static var energy: EnergyLevel {
+        value(after: "-screenshot-energy").flatMap(EnergyLevel.init(rawValue:)) ?? .full
+    }
+
+    /// What the "不对" card shows: `open` for the question, `reply` for the reply after a correction.
+    static var check: String? {
+        value(after: "-screenshot-check")
+    }
+
     private static func value(after flag: String) -> String? {
         #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
@@ -44,14 +54,15 @@ struct ScreenshotHome: View {
         HomeView(
             bedtime: BedtimeSchedule(startMinute: 0, endMinute: 0),
             wardrobe: ScreenshotMode.wardrobe,
-            persona: ScreenshotMode.persona
+            persona: ScreenshotMode.persona,
+            screenshotCheck: ScreenshotMode.check
         )
         .environment(store)
         .environment(energy)
         .onAppear {
             // A fresh manual change, so the schedule's 2h hold keeps this mode on screen.
             store.switchTo(mode)
-            energy.report(.full)
+            energy.report(ScreenshotMode.energy)
         }
     }
 }

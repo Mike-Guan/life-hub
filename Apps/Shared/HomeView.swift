@@ -63,6 +63,8 @@ struct HomeView: View {
     var onBathDone: (() -> Void)?
     /// Where the "不对" card records its answers; nil keeps no record.
     var decisionLogURL: URL?
+    /// Debug screenshots: `open` shows the "不对" card, `reply` the reply after a correction.
+    var screenshotCheck: String?
 
     @Environment(ModeStore.self) private var store
     @Environment(EnergyStore.self) private var energy
@@ -246,6 +248,17 @@ struct HomeView: View {
         .sensoryFeedback(.impact(weight: .light), trigger: answers)
         .modeSwitchHaptic(trigger: store.current)
         // HAKU starts in the old mode, then switches, so the switch animation plays.
+        .task {
+            guard let screenshotCheck else { return }
+            // After ScreenshotHome has set today's energy.
+            try? await Task.sleep(for: .seconds(1))
+            guard let reading = energy.reading() else { return }
+            if screenshotCheck == "reply" {
+                checkReply = EnergyCheck.reply(corrected: true, persona: persona)
+            } else {
+                checking = reading
+            }
+        }
         .task(id: replayFrom) {
             replaying = replayFrom != nil
             guard replaying else { return }
