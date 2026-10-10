@@ -54,12 +54,12 @@ record() {
 
 # Preview: three watch sizes (smallest, largest series, Ultra), stills of every mode and character.
 devices=$(xcrun simctl list devices available -j |
-  jq -r '[.devices | to_entries[] | select(.key | test("watchOS")) | .value[]] | map(select(.name | test("mm")))')
+  jq -r '[.devices | to_entries[] | select(.key | test("watchOS"))] | last | .value | map(select(.name | test("mm")))')
 note "watches: $(echo "$devices" | jq -r '[.[].name] | join(", ")')"
 pick() { echo "$devices" | jq -r "$1"; }
 udids=(
-  "$(pick '[.[] | select(.name | test("Ultra") | not)] | sort_by(.name | capture("(?<m>[0-9]+)mm").m | tonumber) | first | .udid')"
-  "$(pick '[.[] | select(.name | test("Ultra") | not)] | sort_by(.name | capture("(?<m>[0-9]+)mm").m | tonumber) | last | .udid')"
+  "$(pick '[.[] | select(.name | test("Ultra|SE") | not)] | sort_by(.name | capture("(?<m>[0-9]+)mm").m | tonumber) | first | .udid')"
+  "$(pick '[.[] | select(.name | test("Ultra|SE") | not)] | sort_by(.name | capture("(?<m>[0-9]+)mm").m | tonumber) | last | .udid')"
   "$(pick '[.[] | select(.name | test("Ultra"))] | last | .udid')"
 )
 now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
