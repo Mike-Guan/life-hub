@@ -240,8 +240,10 @@ struct MemoryView: View {
 
     /// `date` as e.g. "10月4日 周日".
     static func day(_ date: Date) -> String {
-        let style = Date.FormatStyle(locale: Locale(identifier: "zh_CN"))
-            .month(.defaultDigits).day().weekday(.abbreviated)
-        return date.formatted(style)
+        // FormatStyle drew "9/12周六"; a fixed pattern keeps the 月/日 words and the space.
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.dateFormat = "M月d日 EEE"
+        return formatter.string(from: date)
     }
 }
