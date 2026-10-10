@@ -17,7 +17,12 @@ struct SettingsView: View {
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
+    /// Deletes every record and setting on this iPhone, as on a fresh install.
+    let onEraseAll: () -> Void
+    /// Starts at the bottom of the page, with the 删除全部数据 confirmation open when `true`. For screenshots only.
+    var screenshot: Bool?
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
     @State private var scrollApps = ScrollWatch.selection
@@ -25,17 +30,37 @@ struct SettingsView: View {
     @State private var screenTimeError: String?
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
+    @State private var asksErase = false
     @FocusState private var editingAmount: String?
 
     var body: some View {
         ScrollView {
             content
         }
+        .defaultScrollAnchor(screenshot == nil ? nil : .bottom)
+        .task { asksErase = screenshot == true }
         .foregroundStyle(Toy.ink)
         .tint(Toy.pink)
         .background(Toy.paper.ignoresSafeArea())
         // The page is drawn on light paper; dark system controls turn grey on it.
         .preferredColorScheme(.light)
+        .overlay {
+            if asksErase {
+                ToyConfirmSheet(
+                    question: "删除全部数据？",
+                    warning: "记忆、能量罐、商店物品、衣柜、纪念品和地点都会清空，App 回到刚装好的样子。删了不能恢复。",
+                    confirm: "全部删除",
+                    onCancel: { asksErase = false },
+                    onConfirm: {
+                        asksErase = false
+                        onEraseAll()
+                        dismiss()
+                    }
+                )
+                .transition(reduceMotion ? .identity : .opacity)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: asksErase)
     }
 
     private var content: some View {
@@ -125,8 +150,39 @@ struct SettingsView: View {
             scrollCard
             dogfoodCard
             #endif
+
+            eraseCard
         }
         .padding(20)
+    }
+
+    // PRD §21.2: the way to take everything back, at the very bottom. The sheet is the second step.
+    private var eraseCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Text("删除全部数据")
+                    .font(Toy.body(16, weight: .heavy))
+                Spacer()
+                Button {
+                    asksErase = true
+                } label: {
+                    Text("删除…")
+                        .font(Toy.body(13, weight: .heavy))
+                        .foregroundStyle(Toy.alert)
+                        .padding(.horizontal, 12)
+                        .frame(minHeight: 36)
+                        .toyCard(radius: 12, shadow: 3)
+                        .padding(.vertical, 4)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            Text("记忆、能量罐、商店物品、衣柜和纪念品一起清空，回到刚装好的样子。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(16)
+        .toyCard()
     }
 
     // Issue #237: what the companion remembers, on its own page.

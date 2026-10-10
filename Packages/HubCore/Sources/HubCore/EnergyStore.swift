@@ -77,6 +77,13 @@ public final class EnergyStore {
     public func reading(now: Date = .now, calendar: Calendar = .current) -> EnergyReading? {
         StateEngine.energy(events: log.active, now: now, calendar: calendar)
     }
+
+    /// Deletes every record and the file, as on a fresh install.
+    public func eraseAll() {
+        log = EnergyLog()
+        lastError = file.remove()
+        revision += 1
+    }
 }
 
 extension EnergyStore {

@@ -113,6 +113,8 @@ struct LifeHubApp: App {
                 ScreenshotHome(mode: mode)
             } else if let filled = ScreenshotMode.memory {
                 ScreenshotMemory(filled: filled)
+            } else if let shows = ScreenshotMode.settings {
+                ScreenshotSettings(asksErase: shows == "erase")
             } else {
                 home
             }
@@ -236,7 +238,8 @@ struct LifeHubApp: App {
                 daily: daily,
                 store: store,
                 energy: energy,
-                ledger: growth.ledger
+                ledger: growth.ledger,
+                onEraseAll: eraseAll
             )
         }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
@@ -275,6 +278,40 @@ struct LifeHubApp: App {
         }
         // A sleep import updates its night in place, so this watches every write too.
         .onChange(of: energy.revision) { syncWidgets() }
+    }
+
+    // PRD §21.2 删除全部数据: as on a fresh install. The stores and their wiring stay, so the next write
+    // starts a new file. Health data is read in place, so there is nothing of it to delete.
+    private func eraseAll() {
+        store.eraseAll()
+        energy.eraseAll()
+        expenses.eraseAll()
+        growth.eraseAll()
+        setupErrors = AppGroup.container.eraseFiles()
+        HubDevice.eraseDefaults(AppGroup.defaults)
+        let center = UNUserNotificationCenter.current()
+        center.removeAllPendingNotificationRequests()
+        center.removeAllDeliveredNotifications()
+        daily.unlink()
+        // An empty selection stops both Screen Time watches.
+        try? ScrollWatch.start(FamilyActivitySelection(), work: rules)
+        // Settings go back to their defaults; their onChange handlers store them and clear the geofences.
+        persona = .stored(in: AppGroup.defaults)
+        growth.persona = persona
+        wardrobe = .stored(in: AppGroup.defaults, persona: persona)
+        bedtime = .stored(in: AppGroup.defaults)
+        rules = .stored(in: AppGroup.defaults)
+        places = .stored(in: AppGroup.defaults)
+        budget = .stored(in: AppGroup.defaults)
+        bathDoneAt = nil
+        welcomeBack = nil
+        unboxing = nil
+        replayFrom = nil
+        refreshNeeds()
+        Task {
+            await scheduleReminder()
+            countdownError = await BoxingCountdown.update(for: needs.reading)
+        }
     }
 
     private var moneyCard: MoneyCard? {

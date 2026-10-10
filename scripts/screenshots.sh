@@ -48,6 +48,11 @@ for ask in habit decisions everything; do
   sleep 4
   xcrun simctl io "$udid" screenshot "$out/ios-memory-ask-$ask.png"
 done
+for shows in card erase; do
+  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-settings "$shows"
+  sleep 4
+  xcrun simctl io "$udid" screenshot "$out/ios-settings-$shows.png"
+done
 xcrun simctl terminate "$udid" "$bundle" || true
 
 # Mac: launch each mode and capture just its window. Reduce motion is a system setting on a Mac, so
