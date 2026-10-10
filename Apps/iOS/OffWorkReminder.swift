@@ -52,6 +52,7 @@ enum OffWorkReminder {
             at: now,
             deviceID: HubDevice.id(defaults: AppGroup.defaults)
         )
-        DecisionLog.update(at: AppGroup.container.decisionLogURL, now: now) { $0.appendIfChanged(decision) }
+        let error = DecisionLog.update(at: AppGroup.container.decisionLogURL, now: now) { $0.appendIfChanged(decision) }
+        DecisionLog.keep(error, in: AppGroup.defaults)
     }
 }
