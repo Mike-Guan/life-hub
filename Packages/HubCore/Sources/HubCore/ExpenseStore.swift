@@ -32,6 +32,12 @@ public final class ExpenseStore {
         lastError = file.save(&log)
         return true
     }
+
+    /// Deletes every record and the file, as on a fresh install.
+    public func eraseAll() {
+        log = ExpenseLog()
+        lastError = file.remove()
+    }
 }
 
 extension ExpenseStore {

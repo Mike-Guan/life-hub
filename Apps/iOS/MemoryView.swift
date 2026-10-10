@@ -62,44 +62,19 @@ struct MemoryView: View {
         }
     }
 
-    // Preview v3: a Toy sheet at the bottom over a dim layer, 算了 on the left and the red answer on the right.
     /// The sheet that asks before `item` is forgotten.
     private func confirmSheet(_ item: Forget) -> some View {
-        ZStack(alignment: .bottom) {
-            Toy.ink.opacity(0.25)
-                .ignoresSafeArea()
-                .onTapGesture { asking = nil }
-            VStack(alignment: .leading, spacing: 12) {
-                Text(question(item))
-                    .font(Toy.body(17, weight: .heavy))
-                Text(warning(item))
-                    .font(Toy.body(13))
-                    .foregroundStyle(Toy.muted)
-                HStack(spacing: 12) {
-                    sheetButton("算了", fill: Toy.card, text: Toy.ink) { asking = nil }
-                    sheetButton(confirm(item), fill: Toy.alert, text: Toy.card) {
-                        asking = nil
-                        forget(item)
-                    }
-                }
+        ToyConfirmSheet(
+            question: question(item),
+            warning: warning(item),
+            confirm: confirm(item),
+            onCancel: { asking = nil },
+            onConfirm: {
+                asking = nil
+                forget(item)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(18)
-            .toyCard(radius: 22, shadow: 5)
-            .padding(12)
-        }
+        )
         .transition(reduceMotion ? .identity : .opacity)
-    }
-
-    private func sheetButton(_ title: String, fill: Color, text: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(Toy.body(15, weight: .heavy))
-                .foregroundStyle(text)
-                .frame(maxWidth: .infinity, minHeight: 48)
-                .toyCard(fill: fill, radius: 12, shadow: 3)
-        }
-        .buttonStyle(.plain)
     }
 
     private var content: some View {
@@ -151,18 +126,15 @@ struct MemoryView: View {
 
             section("判断和纠正") {
                 HStack(spacing: 10) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(judgements)
-                            .font(Toy.body(15, weight: .heavy))
-                        Text("要不要提醒你、你说「不对」的那几次。保留 90 天。")
-                            .font(Toy.body(12))
-                            .foregroundStyle(Toy.muted)
-                    }
+                    Text(judgements)
+                        .font(Toy.body(15, weight: .heavy))
                     Spacer()
                     if !decisions.kept.isEmpty {
                         deleteButton("全部删") { asking = .decisions }
                     }
                 }
+                // Full width under the button, so it doesn't wrap to a lone "90 天。" (UI 审核).
+                note("要不要提醒你、你说「不对」的那几次。保留 90 天。")
             }
 
             if let error {
@@ -178,7 +150,7 @@ struct MemoryView: View {
                     .frame(maxWidth: .infinity, minHeight: 48)
             }
             .buttonStyle(ToyButtonStyle(fill: Toy.card))
-            note("能量罐、商店物品、衣柜和纪念品不算记忆，留着。")
+            note("能量罐、商店物品、衣柜和纪念品不算记忆，留着。要一起清，用设置里的「删除全部数据」。")
         }
         .padding(20)
     }
@@ -250,7 +222,7 @@ struct MemoryView: View {
         case .decisions: "包括你说过「不对」的记录。删了不能恢复。"
         case .everything:
             "习惯、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。"
-                + "罐子、东西和纪念品不受影响。删了不能恢复。"
+                + "能量罐、商店物品、衣柜和纪念品不算记忆，留着。删了不能恢复。"
         }
     }
 
