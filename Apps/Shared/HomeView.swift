@@ -163,7 +163,10 @@ struct HomeView: View {
                 .onCompanionHold {
                     guard let reading, reading.source != .selfReport else { return }
                     checkError = nil
-                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
+                    // UI 审核 round 4: inside the gesture's transaction the fade was dropped, so it runs after.
+                    Task { @MainActor in
+                        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
+                    }
                 }
                 .overlay(alignment: persona == .kuro ? .topLeading : .bottom) {
                     if let checkReply {
