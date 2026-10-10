@@ -61,11 +61,16 @@ struct HomeView: View {
     var commuteMotion: [MotionSample] = []
     /// Records that Mike tapped HAKU's bath away.
     var onBathDone: (() -> Void)?
+    /// Where the "不对" card records its answers; nil keeps no record.
+    var decisionLogURL: URL?
 
     @Environment(ModeStore.self) private var store
     @Environment(EnergyStore.self) private var energy
     @State private var cheer = 0
     @State private var replaying = false
+    /// The guess the "不对" card is asking about, while it is open.
+    @State private var checking: EnergyReading?
+    @State private var checkReply: String?
 
     var body: some View {
         let reading = energy.reading()
@@ -146,6 +151,12 @@ struct HomeView: View {
                 }
                 .frame(height: 340)
                 .toyCard()
+                // Issue #236: releasing a long press asks about today's energy when there is a guess.
+                .onCompanionHold {
+                    guard let reading else { return }
+                    checkReply = nil
+                    withAnimation(.easeOut(duration: 0.2)) { checking = reading }
+                }
                 .overlay(alignment: .topTrailing) {
                     if let onWardrobe {
                         Button(action: onWardrobe) {
@@ -161,6 +172,17 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                         .padding(12)
                     }
+                }
+
+                if let checking {
+                    EnergyCheckCard(
+                        guess: checking,
+                        persona: persona,
+                        reply: checkReply,
+                        onAnswer: { answer($0, to: checking) },
+                        onClose: closeCheck
+                    )
+                    .transition(.opacity)
                 }
 
                 // Side-hustle states are HAKU's; KURO's desk time shows her tagline.
@@ -224,6 +246,23 @@ struct HomeView: View {
             try? await Task.sleep(for: .seconds(1.2))
             replaying = false
         }
+    }
+
+    /// Records `choice` for `guess`, shows the character's reply, then closes the card.
+    private func answer(_ choice: EnergyAnswer, to guess: EnergyReading) {
+        let result = EnergyCheck.answer(choice, to: guess, energy: energy, decisionLogURL: decisionLogURL)
+        checkReply = result.error ?? EnergyCheck.reply(corrected: result.report != nil, persona: persona)
+        // An error stays until closed by hand.
+        guard result.error == nil else { return }
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
+            closeCheck()
+        }
+    }
+
+    private func closeCheck() {
+        withAnimation(.easeOut(duration: 0.2)) { checking = nil }
+        checkReply = nil
     }
 
     // The scene rules live in HubCore, so the watch plays the same scene as this card.
