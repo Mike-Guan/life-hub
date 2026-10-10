@@ -57,6 +57,17 @@ public final class EnergyStore {
         return true
     }
 
+    /// Deletes the events `matching` picks (#237). A re-imported night keeps its delete.
+    /// - Returns: how many events were deleted.
+    @discardableResult
+    public func forget(at date: Date = .now, where matching: (EnergyEvent) -> Bool) -> Int {
+        let count = log.forget(at: date, by: deviceID, where: matching)
+        guard count > 0 else { return 0 }
+        lastError = file.save(&log)
+        revision += 1
+        return count
+    }
+
     /// Records Mike's own rating.
     public func report(_ level: EnergyLevel, at date: Date = .now) {
         record(.selfReport(level, at: date, deviceID: deviceID))
