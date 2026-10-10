@@ -17,7 +17,7 @@ import Testing
     }
 
     func change(_ mode: Mode, _ at: Date) -> ModeChange {
-        ModeChange(mode: mode, source: .geofence, at: at, deviceID: "test")
+        ModeChange(mode: mode, source: .location, at: at, deviceID: "test")
     }
 
     @Test func forgettingOneKeepsTheRecordMarked() {
