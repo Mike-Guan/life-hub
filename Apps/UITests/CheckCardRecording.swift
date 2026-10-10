@@ -17,11 +17,12 @@ final class CheckCardRecording: XCTestCase {
         sleep(2)
         // The character fills the upper part of the screen.
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.38)).press(forDuration: 1)
-        XCTAssertTrue(answer.waitForExistence(timeout: 2))
+        // No queries while the card fades in: each one stalls the app, and the recording loses the fade.
         sleep(2)
+        XCTAssertTrue(answer.exists)
         // The header, above the card, is covered by the dim layer.
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)).tap()
-        XCTAssertTrue(answer.waitForNonExistence(timeout: 2))
         sleep(1)
+        XCTAssertFalse(answer.exists)
     }
 }
