@@ -13,7 +13,10 @@ struct MemoryView: View {
     let ledger: CanLedger
     let places: [HubPlace]
     let decisionLogURL: URL?
+    /// Opens a confirmation at once: `habit`, `decisions` or `everything`. For screenshots only.
+    var ask: String?
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var resets = MemoryResets.stored(in: AppGroup.defaults)
     @State private var decisions = DecisionLog()
     @State private var asking: Forget?
@@ -42,18 +45,61 @@ struct MemoryView: View {
         .tint(Toy.pink)
         .background(Toy.paper.ignoresSafeArea())
         .preferredColorScheme(.light)
-        .confirmationDialog(
-            asking.map { question($0) } ?? "",
-            isPresented: Binding(get: { asking != nil }, set: { if !$0 { asking = nil } }),
-            titleVisibility: .visible,
-            presenting: asking
-        ) { item in
-            Button(confirm(item), role: .destructive) { forget(item) }
-            Button("算了", role: .cancel) {}
-        } message: { item in
-            Text(warning(item))
+        .overlay {
+            if let asking {
+                confirmSheet(asking)
+            }
         }
-        .task { decisions = DecisionLog.read(from: decisionLogURL) }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: asking?.id)
+        .task {
+            decisions = DecisionLog.read(from: decisionLogURL)
+            switch ask {
+            case "habit": asking = habits.first(where: \.isLearned).map { .habit($0) }
+            case "decisions": asking = .decisions
+            case "everything": asking = .everything
+            default: break
+            }
+        }
+    }
+
+    // Preview v3: a Toy sheet at the bottom over a dim layer, 算了 on the left and the red answer on the right.
+    /// The sheet that asks before `item` is forgotten.
+    private func confirmSheet(_ item: Forget) -> some View {
+        ZStack(alignment: .bottom) {
+            Toy.ink.opacity(0.25)
+                .ignoresSafeArea()
+                .onTapGesture { asking = nil }
+            VStack(alignment: .leading, spacing: 12) {
+                Text(question(item))
+                    .font(Toy.body(17, weight: .heavy))
+                Text(warning(item))
+                    .font(Toy.body(13))
+                    .foregroundStyle(Toy.muted)
+                HStack(spacing: 12) {
+                    sheetButton("算了", fill: Toy.card, text: Toy.ink) { asking = nil }
+                    sheetButton(confirm(item), fill: Toy.alert, text: Toy.card) {
+                        asking = nil
+                        forget(item)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(18)
+            .toyCard(radius: 22, shadow: 5)
+            .padding(12)
+        }
+        .transition(reduceMotion ? .identity : .opacity)
+    }
+
+    private func sheetButton(_ title: String, fill: Color, text: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(Toy.body(15, weight: .heavy))
+                .foregroundStyle(text)
+                .frame(maxWidth: .infinity, minHeight: 48)
+                .toyCard(fill: fill, radius: 12, shadow: 3)
+        }
+        .buttonStyle(.plain)
     }
 
     private var content: some View {
@@ -107,7 +153,7 @@ struct MemoryView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(judgements)
                             .font(Toy.body(15, weight: .heavy))
-                        Text("要不要提醒你，和你说「不对」的那几次。保留 90 天。")
+                        Text("要不要提醒你、你说「不对」的那几次。保留 90 天。")
                             .font(Toy.body(12))
                             .foregroundStyle(Toy.muted)
                     }
@@ -175,10 +221,18 @@ struct MemoryView: View {
     }
 
     private func deleteButton(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(title, action: action)
-            .font(Toy.body(13, weight: .heavy))
-            .foregroundStyle(Toy.alert)
-            .frame(minHeight: 44)
+        Button(action: action) {
+            Text(title)
+                .font(Toy.body(13, weight: .heavy))
+                .foregroundStyle(Toy.alert)
+                .padding(.horizontal, 12)
+                .frame(minHeight: 36)
+                .toyCard(radius: 12, shadow: 3)
+                // A 44 pt touch target around the smaller drawn button.
+                .padding(.vertical, 4)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private func question(_ item: Forget) -> String {

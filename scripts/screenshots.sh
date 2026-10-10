@@ -43,6 +43,11 @@ done
 xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory empty
 sleep 4
 xcrun simctl io "$udid" screenshot "$out/ios-memory-empty.png"
+for ask in habit decisions everything; do
+  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory full -screenshot-ask "$ask"
+  sleep 4
+  xcrun simctl io "$udid" screenshot "$out/ios-memory-ask-$ask.png"
+done
 xcrun simctl terminate "$udid" "$bundle" || true
 
 # Mac: launch each mode and capture just its window. Reduce motion is a system setting on a Mac, so
