@@ -71,6 +71,8 @@ struct WatchHomeView: View {
     private func companionPage(_ payload: WatchPayload, mode: Mode?, at date: Date) -> some View {
         let snapshot = payload.snapshot
         let scene = payload.scene(at: date)
+        // HAKU with no mode is drawn on cream, where the white system clock can't be read.
+        let clockBand = mode == nil && payload.persona == .haku
         return Group {
             if payload.persona == .kuro {
                 KuroView(
@@ -112,8 +114,7 @@ struct WatchHomeView: View {
         .clipped()
         .ignoresSafeArea()
         .overlay {
-            // HAKU with no mode is drawn on cream, where the white system clock can't be read.
-            if mode == nil, payload.persona == .haku {
+            if clockBand {
                 GeometryReader { geometry in
                     Toy.ink
                         .frame(height: geometry.safeAreaInsets.top)
@@ -132,6 +133,8 @@ struct WatchHomeView: View {
                 }
             }
             .padding(.leading, 4)
+            // Clear of the dark clock band, so the two outlines don't merge.
+            .padding(.top, clockBand ? 4 : 0)
         }
     }
 }
