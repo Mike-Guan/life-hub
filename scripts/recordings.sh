@@ -105,14 +105,15 @@ done < <(xcrun simctl get_app_container "$watch_udid" "$watch_bundle" groups 2>/
 
 now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 later=$(date -u -v+2H +%Y-%m-%dT%H:%M:%SZ)
-# Writes a payload for `persona` in `mode`, with `scenes` JSON, launches the app and records it as `name`.
-# Extra arguments go to the app.
+# Writes a payload for `persona` in `mode` (`none` for no mode), with `scenes` JSON, launches the app and
+# records it as `name`. Extra arguments go to the app.
 watch_clip() {
-  local folder
+  local folder mode="\"$2\""
+  [[ "$2" == none ]] && mode=null
   for folder in "${folders[@]}"; do
     mkdir -p "$folder"
     cat >"$folder/watch-payload.json" <<JSON
-{"schemaVersion":1,"persona":"$1","snapshot":{"schemaVersion":1,"mode":"$2","since":"$now",
+{"schemaVersion":1,"persona":"$1","snapshot":{"schemaVersion":1,"mode":$mode,"since":"$now",
 "energy":"okay","line":"","updatedAt":"$now"},"scenes":$3}
 JSON
   done
@@ -129,6 +130,8 @@ for persona in "${personas[@]}"; do
   watch_clip "$persona" work \
     "[{\"from\":\"$now\",\"scene\":{\"moment\":\"overtime\",\"overtimeUntil\":\"$later\"}}]" \
     "watch-$persona-overtime"
+  # After the iPhone's data is deleted: no mode yet.
+  watch_clip "$persona" none "[]" "watch-$persona-no-mode"
 done
 
 # Promo stills: HAKU with no mode chip. The system clock stays; crop the top strip off by hand.
