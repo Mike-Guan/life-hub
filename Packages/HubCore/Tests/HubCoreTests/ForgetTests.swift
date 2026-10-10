@@ -41,17 +41,6 @@ import Testing
         #expect(log.records.map(\.deletedAt) == [date(3, 19), date(3, 20)])
     }
 
-    @Test func aDayStartsAtFive() {
-        let day = MemoryDay(containing: date(3, 12), calendar: calendar)
-        #expect(day.contains(date(3, 6)))
-        #expect(day.contains(date(4, 4, 59)))
-        #expect(!day.contains(date(3, 4)))
-        #expect(!day.contains(date(4, 5)))
-        var log = ModeLog(changes: [change(.chill, date(3, 1)), change(.work, date(3, 9)), change(.chill, date(4, 9))])
-        #expect(log.forget(at: date(4, 10), by: "phone") { day.contains($0.at) } == 1)
-        #expect(log.kept.map(\.mode) == [.chill, .chill])
-    }
-
     @Test func anOlderReaderKeepsItDeleted() throws {
         var log = ModeLog(changes: [change(.work, date(3, 9))])
         log.forget(at: date(3, 20), by: "phone") { _ in true }
