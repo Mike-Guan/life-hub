@@ -158,20 +158,15 @@ struct HomeView: View {
                 .frame(height: 340)
                 .toyCard()
                 // Issue #236: releasing a long press asks about today's energy when there is a guess.
+                // 干预策略 §6: only a guess is corrected; a level Mike picked himself isn't asked about.
                 .onCompanionHold {
-                    guard let reading else { return }
+                    guard let reading, reading.source != .selfReport else { return }
                     checkError = nil
                     withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
                 }
-                .overlay(alignment: .bottom) {
+                .overlay(alignment: persona == .kuro ? .topLeading : .bottom) {
                     if let checkReply {
-                        Text(checkReply)
-                            .font(Toy.body(16, weight: .heavy))
-                            .foregroundStyle(Toy.ink)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .toyCard(radius: 14, shadow: 3)
-                            .padding(.bottom, 16)
+                        replyBubble(checkReply)
                     }
                 }
                 .overlay(alignment: .topTrailing) {
@@ -252,7 +247,7 @@ struct HomeView: View {
             guard let screenshotCheck else { return }
             // After ScreenshotHome has set today's energy.
             try? await Task.sleep(for: .seconds(1))
-            guard let reading = energy.reading() else { return }
+            guard let reading = energy.reading(), reading.source != .selfReport else { return }
             if screenshotCheck == "reply" {
                 checkReply = EnergyCheck.reply(corrected: true, persona: persona)
             } else {
@@ -271,7 +266,8 @@ struct HomeView: View {
     @ViewBuilder private var checkCard: some View {
         if let checking {
             ZStack(alignment: .bottom) {
-                Color.black.opacity(0.001)
+                // Dims the whole home screen, so what the card overlaps reads as behind it.
+                Toy.ink.opacity(0.25)
                     .ignoresSafeArea()
                     .onTapGesture { closeCheck() }
                 EnergyCheckCard(guess: checking, persona: persona, error: checkError) { answer($0, to: checking) }
@@ -283,7 +279,37 @@ struct HomeView: View {
                         }
                     )
             }
-            .transition(reduceMotion ? .identity : .move(edge: .bottom).combined(with: .opacity))
+            .transition(reduceMotion ? .identity : .opacity)
+        }
+    }
+
+    // KURO holds things low in front of her, so her bubble sits above her head with its tail pointing down to her.
+    /// The character's one-line reply after an answer.
+    @ViewBuilder private func replyBubble(_ text: String) -> some View {
+        let bubble = Text(text)
+            .font(Toy.body(16, weight: .heavy))
+            .foregroundStyle(Toy.ink)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+        if persona == .kuro {
+            // The tail's fill covers the bubble's bottom edge, so the two read as one outline.
+            bubble
+                .toyCard(radius: 14, shadow: 3)
+                .overlay(alignment: .bottomTrailing) {
+                    ZStack {
+                        BubbleTail(closed: true).fill(Toy.card)
+                        BubbleTail(closed: false)
+                            .stroke(Toy.ink, style: StrokeStyle(lineWidth: Toy.outline, lineJoin: .round))
+                    }
+                    .frame(width: 16, height: 14)
+                    .offset(x: -14, y: 14 - Toy.outline)
+                }
+                .padding(.top, 28)
+                .padding(.leading, 24)
+        } else {
+            bubble
+                .toyCard(radius: 14, shadow: 3)
+                .padding(.bottom, 16)
         }
     }
 
@@ -462,4 +488,19 @@ private struct Header: View {
     HomeView()
         .environment(ModeStore.preview())
         .environment(EnergyStore(fileURL: nil, deviceID: "preview"))
+}
+
+/// A speech-bubble tail: a right triangle whose point is at the bottom trailing corner.
+private struct BubbleTail: Shape {
+    /// Whether the path includes the top edge, which joins the bubble.
+    var closed: Bool
+
+    func path(in rect: CGRect) -> Path {
+        Path { path in
+            path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+            if closed { path.closeSubpath() }
+        }
+    }
 }

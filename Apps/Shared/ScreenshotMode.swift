@@ -27,6 +27,15 @@ enum ScreenshotMode {
         value(after: "-screenshot-energy").flatMap(EnergyLevel.init(rawValue:)) ?? .full
     }
 
+    /// Minutes asleep that give `energy` under the standard thresholds.
+    static var sleepMinutes: Int {
+        switch energy {
+        case .low: 5 * 60
+        case .okay: 6 * 60 + 40
+        case .full: 8 * 60
+        }
+    }
+
     /// What the "不对" card shows: `open` for the question, `reply` for the reply after a correction.
     static var check: String? {
         value(after: "-screenshot-check")
@@ -62,7 +71,12 @@ struct ScreenshotHome: View {
         .onAppear {
             // A fresh manual change, so the schedule's 2h hold keeps this mode on screen.
             store.switchTo(mode)
-            energy.report(ScreenshotMode.energy)
+            // The "不对" card only asks about a guess, so its shots get energy from a night's sleep.
+            if ScreenshotMode.check == nil {
+                energy.report(ScreenshotMode.energy)
+            } else {
+                energy.record(.sleep(minutes: ScreenshotMode.sleepMinutes, endedAt: .now, deviceID: "screenshot"))
+            }
         }
     }
 }
