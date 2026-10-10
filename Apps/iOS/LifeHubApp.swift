@@ -314,9 +314,29 @@ struct LifeHubApp: App {
             log: store.log,
             now: .now
         )
+        noteReturn(replay, since: since)
         guard let replay else { return }
         replayFrom = nil
         welcomeBack = .welcomeBack(id: since.ISO8601Format(), replay: replay)
+    }
+
+    // Issue #129: what opening the app after days away played, or that it played nothing.
+    private func noteReturn(_ replay: ReturnReplay?, since: Date) {
+        let tier = replay.map { $0.tier == .box ? "box" : "glance" }
+        let decision = Decision(
+            kind: .animation,
+            action: tier ?? Decision.noAction,
+            signals: [
+                DecisionLog.subjectKey: "return",
+                "awayDays": String(Int(Date.now.timeIntervalSince(since) / 86_400)),
+                "cards": String(replay?.cards.count ?? 0),
+            ],
+            deviceID: HubDevice.id(defaults: AppGroup.defaults)
+        )
+        DecisionLog.update(at: AppGroup.container.decisionLogURL) { log in
+            log.append(decision)
+            return true
+        }
     }
 
     // The 30-day limit counts a box return only once it has actually played.

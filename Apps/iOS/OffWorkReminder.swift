@@ -21,7 +21,9 @@ enum OffWorkReminder {
     static func schedule(_ rules: ModeRules, mode: Mode?, atOffice: Bool, now: Date = .now) async -> String? {
         let center = UNUserNotificationCenter.current()
         center.removePendingNotificationRequests(withIdentifiers: oldIDs + [requestID])
-        guard let time = rules.offWorkNotice(on: now, mode: mode, atOffice: atOffice) else { return nil }
+        let time = rules.offWorkNotice(on: now, mode: mode, atOffice: atOffice)
+        notePlan(time, mode: mode, atOffice: atOffice, now: now)
+        guard let time else { return nil }
         let content = UNMutableNotificationContent()
         content.title = "快下班了"
         content.body = "灵魂可以先走。"
@@ -35,5 +37,21 @@ enum OffWorkReminder {
         } catch {
             return "下班提醒没设上：\(error.localizedDescription)"
         }
+    }
+
+    // Issue #129: the notice and the days without one, once per change.
+    /// Adds today's notice plan to the decision log.
+    private static func notePlan(_ time: Date?, mode: Mode?, atOffice: Bool, now: Date) {
+        var signals = [DecisionLog.subjectKey: "offWork", "atOffice": atOffice ? "yes" : "no"]
+        signals["mode"] = mode?.rawValue
+        let decision = Decision(
+            kind: .push,
+            action: time == nil ? Decision.noAction : "offWork",
+            target: time,
+            signals: signals,
+            at: now,
+            deviceID: HubDevice.id(defaults: AppGroup.defaults)
+        )
+        DecisionLog.update(at: AppGroup.container.decisionLogURL, now: now) { $0.appendIfChanged(decision) }
     }
 }
