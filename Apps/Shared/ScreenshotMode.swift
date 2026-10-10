@@ -62,7 +62,11 @@ struct ScreenshotHome: View {
     var body: some View {
         // An empty bedtime window, so RUNNER is awake whatever time CI runs.
         HomeView(
+            extraError: ScreenshotMode.persona == .kuro ? "小组件连不上共享文件夹" : nil,
             bedtime: BedtimeSchedule(startMinute: 0, endMinute: 0),
+            onSettings: {},
+            cans: 12,
+            onShop: {},
             wardrobe: ScreenshotMode.wardrobe,
             persona: ScreenshotMode.persona
         )
