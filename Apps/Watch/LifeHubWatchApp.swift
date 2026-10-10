@@ -108,15 +108,21 @@ struct WatchHomeView: View {
         .clipped()
         .ignoresSafeArea()
         .overlay(alignment: .topLeading) {
-            VStack(alignment: .leading, spacing: 4) {
+            if let failure {
+                Text(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2).padding(.leading, 4)
+            }
+        }
+        // The chip sits in the clock's row, the top safe area, so no character's hair runs into it.
+        .overlay(alignment: .topLeading) {
+            GeometryReader { proxy in
                 if !Self.cleanFrame {
-                    ModeChip(mode: mode, persona: payload.persona, since: snapshot.since)
-                }
-                if let failure {
-                    Text(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2)
+                    ModeChip(mode: mode, persona: payload.persona)
+                        .frame(height: proxy.safeAreaInsets.top)
+                        .padding(.leading, 14)
+                        .offset(y: -proxy.safeAreaInsets.top)
+                        .allowsHitTesting(false)
                 }
             }
-            .padding(.leading, 4)
         }
     }
 }
@@ -163,31 +169,24 @@ private struct WatchPager<First: View, Second: View>: View {
     }
 }
 
-/// The mode and how long it has run, in a small white pill.
+/// The mode in a small white pill. How long it has run is on the second page.
 private struct ModeChip: View {
     let mode: Mode
     let persona: Persona
-    let since: Date?
 
     var body: some View {
-        Group {
-            if let since {
-                Text("\(mode.title(for: persona)) · \(Text(since, style: .relative))")
-            } else {
-                Text(mode.title(for: persona))
-            }
-        }
-        .font(Toy.body(12, weight: .heavy))
-        .foregroundStyle(Toy.ink)
-        .lineLimit(1)
-        .minimumScaleFactor(0.75)
-        // The clock sits top right; a long relative time must shrink, not run under it.
-        .frame(maxWidth: 112, alignment: .leading)
-        .fixedSize(horizontal: false, vertical: true)
-        .padding(.horizontal, 9)
-        .padding(.vertical, 3)
-        .background(Capsule().fill(Toy.card))
-        .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+        Text(mode.title(for: persona))
+            .font(Toy.body(12, weight: .heavy))
+            .foregroundStyle(Toy.ink)
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+            // The clock sits right of it in the same row.
+            .frame(maxWidth: 80, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(Toy.card))
+            .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
     }
 }
 

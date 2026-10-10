@@ -50,31 +50,7 @@ record() {
   bounded 30 xcrun simctl io "$1" screenshot "$2.png" || true
 }
 
-# iPhone: the Debug build's -screenshot-mode home screen.
-udid=$(xcrun simctl list devices available -j |
-  jq -r '[.devices[][] | select(.name | test("^iPhone [0-9]+ Pro$"))] | last | .udid')
-xcrun simctl boot "$udid" || true
-note "booting iPhone"
-bounded 300 xcrun simctl bootstatus "$udid" -b || true
-xcrun simctl spawn "$udid" defaults write com.apple.Accessibility ReduceMotionEnabled -bool false
-xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100
-note "building iPhone app"
-xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-iOS -configuration Debug \
-  -destination "id=$udid" -derivedDataPath build CODE_SIGNING_ALLOWED=NO
-ios_app=build/Build/Products/Debug-iphonesimulator/LifeHub.app
-codesign --force --deep --sign - "$ios_app"
-xcrun simctl install "$udid" "$ios_app"
-bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$ios_app/Info.plist")
-for persona in "${personas[@]}"; do
-  for mode in "${modes[@]}"; do
-    bounded 60 xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode" \
-      -screenshot-persona "$persona" -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN || continue
-    sleep 3
-    record "$udid" "$out/ios-$persona-$mode"
-  done
-done
-xcrun simctl terminate "$udid" "$bundle" || true
-xcrun simctl shutdown "$udid" || true
+# Preview branch: watch only.
 
 # Watch: the app shows the payload the iPhone would send, so write one per mode and character.
 watch_udid=$(xcrun simctl list devices available -j |
