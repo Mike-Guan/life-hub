@@ -6,7 +6,7 @@ set -euo pipefail
 
 modes=(work chill boxing money)
 personas=(haku kuro)
-seconds=10
+seconds=3
 out=build/recordings
 mkdir -p "$out"
 xcodegen generate
@@ -52,64 +52,63 @@ record() {
 
 # Preview branch: watch only.
 
-# Watch: the app shows the payload the iPhone would send, so write one per mode and character.
-watch_udid=$(xcrun simctl list devices available -j |
-  jq -r '[.devices | to_entries[] | select(.key | test("watchOS")) | .value[]] | last | .udid')
-if [[ -z "$watch_udid" || "$watch_udid" == "null" ]]; then
-  echo "::warning::No watch simulator available, skipping watch clips"
-  note "done"
-ls -l "$out"
-  exit 0
-fi
-xcrun simctl boot "$watch_udid" || true
-note "booting watch"
-bounded 300 xcrun simctl bootstatus "$watch_udid" -b || true
-note "building watch app"
-xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-Watch -configuration Debug \
-  -destination "id=$watch_udid" -derivedDataPath build CODE_SIGNING_ALLOWED=NO
-watch_app=build/Build/Products/Debug-watchsimulator/LifeHubWatch.app
-codesign --force --deep --sign - "$watch_app"
-xcrun simctl install "$watch_udid" "$watch_app"
-watch_bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$watch_app/Info.plist")
-
-# Unsigned builds have no App Group, so the app falls back to Application Support/<bundle id>/.
-data=$(xcrun simctl get_app_container "$watch_udid" "$watch_bundle" data)
-folders=("$data/Library/Application Support/$watch_bundle")
-while IFS= read -r line; do
-  folders+=("${line#*$'\t'}")
-done < <(xcrun simctl get_app_container "$watch_udid" "$watch_bundle" groups 2>/dev/null || true)
-
+# Preview: three watch sizes (smallest, largest series, Ultra), stills of every mode and character.
+devices=$(xcrun simctl list devices available -j |
+  jq -r '[.devices | to_entries[] | select(.key | test("watchOS")) | .value[]] | map(select(.name | test("mm")))')
+note "watches: $(echo "$devices" | jq -r '[.[].name] | join(", ")')"
+pick() { echo "$devices" | jq -r "$1"; }
+udids=(
+  "$(pick '[.[] | select(.name | test("Ultra") | not)] | sort_by(.name | capture("(?<m>[0-9]+)mm").m | tonumber) | first | .udid')"
+  "$(pick '[.[] | select(.name | test("Ultra") | not)] | sort_by(.name | capture("(?<m>[0-9]+)mm").m | tonumber) | last | .udid')"
+  "$(pick '[.[] | select(.name | test("Ultra"))] | last | .udid')"
+)
 now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 later=$(date -u -v+2H +%Y-%m-%dT%H:%M:%SZ)
-# Writes a payload for `persona` in `mode`, with `scenes` JSON, launches the app and records it as `name`.
-# Extra arguments go to the app.
-watch_clip() {
-  local folder
-  for folder in "${folders[@]}"; do
-    mkdir -p "$folder"
-    cat >"$folder/watch-payload.json" <<JSON
+built=""
+for watch_udid in "${udids[@]}"; do
+  [[ -z "$watch_udid" || "$watch_udid" == "null" ]] && continue
+  size=$(echo "$devices" | jq -r ".[] | select(.udid == \"$watch_udid\") | .name" | grep -o '[0-9]*mm' | head -1)
+  xcrun simctl boot "$watch_udid" || true
+  note "booting watch $size"
+  bounded 300 xcrun simctl bootstatus "$watch_udid" -b || true
+  if [[ -z "$built" ]]; then
+    xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-Watch -configuration Debug \
+      -destination "id=$watch_udid" -derivedDataPath build CODE_SIGNING_ALLOWED=NO
+    watch_app=build/Build/Products/Debug-watchsimulator/LifeHubWatch.app
+    codesign --force --deep --sign - "$watch_app"
+    built=1
+  fi
+  xcrun simctl install "$watch_udid" "$watch_app"
+  watch_bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$watch_app/Info.plist")
+  data=$(xcrun simctl get_app_container "$watch_udid" "$watch_bundle" data)
+  folders=("$data/Library/Application Support/$watch_bundle")
+  while IFS= read -r line; do
+    folders+=("${line#*$'\t'}")
+  done < <(xcrun simctl get_app_container "$watch_udid" "$watch_bundle" groups 2>/dev/null || true)
+  watch_clip() {
+    local folder
+    for folder in "${folders[@]}"; do
+      mkdir -p "$folder"
+      cat >"$folder/watch-payload.json" <<JSON
 {"schemaVersion":1,"persona":"$1","snapshot":{"schemaVersion":1,"mode":"$2","since":"$now",
 "energy":"okay","line":"","updatedAt":"$now"},"scenes":$3}
 JSON
+    done
+    bounded 60 xcrun simctl launch --terminate-running-process "$watch_udid" "$watch_bundle" \
+      -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN >/dev/null || return 0
+    sleep 4
+    note "still $4"
+    bounded 30 xcrun simctl io "$watch_udid" screenshot "$4.png" || true
+  }
+  for persona in "${personas[@]}"; do
+    for mode in "${modes[@]}"; do
+      watch_clip "$persona" "$mode" "[]" "$out/$size-$persona-$mode"
+    done
+    watch_clip "$persona" work \
+      "[{\"from\":\"$now\",\"scene\":{\"moment\":\"overtime\",\"overtimeUntil\":\"$later\"}}]" \
+      "$out/$size-$persona-overtime"
   done
-  bounded 60 xcrun simctl launch --terminate-running-process "$watch_udid" "$watch_bundle" \
-    -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN "${@:5}" >/dev/null || return 0
-  sleep 4
-  record "$watch_udid" "$out/$4"
-}
-for persona in "${personas[@]}"; do
-  for mode in "${modes[@]}"; do
-    watch_clip "$persona" "$mode" "[]" "watch-$persona-$mode"
-  done
-    # HAKU shows it as the overtime moment, KURO from overtimeUntil; the iPhone sends both.
-  watch_clip "$persona" work \
-    "[{\"from\":\"$now\",\"scene\":{\"moment\":\"overtime\",\"overtimeUntil\":\"$later\"}}]" \
-    "watch-$persona-overtime"
+  xcrun simctl shutdown "$watch_udid" || true
 done
-
-# Promo stills: HAKU with no mode chip. The system clock stays; crop the top strip off by hand.
-overtime="[{\"from\":\"$now\",\"scene\":{\"moment\":\"overtime\",\"overtimeUntil\":\"$later\"}}]"
-watch_clip haku work "[]" watch-haku-work-clean -clean-frame
-watch_clip haku work "$overtime" watch-haku-overtime-clean -clean-frame
 note "done"
 ls -l "$out"
