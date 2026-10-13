@@ -23,45 +23,21 @@ ios_app=build/Build/Products/Debug-iphonesimulator/LifeHub.app
 codesign --force --deep --sign - "$ios_app"
 xcrun simctl install "$udid" "$ios_app"
 bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$ios_app/Info.plist")
-for mode in "${modes[@]}"; do
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode"
-  sleep 4
-  xcrun simctl io "$udid" screenshot "$out/ios-$mode.png"
-  # The same mode with KURO picked, for checking the second character before an install.
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode" \
-    -screenshot-persona kuro
-  sleep 4
-  xcrun simctl io "$udid" screenshot "$out/ios-kuro-$mode.png"
-done
-# The memory page with four weeks of made-up records, for each character, and with none.
+# Preview only: the energy row in its three cases, and the card it opens.
 for persona in haku kuro; do
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory full \
+  for check in hold open none; do
+    xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode work \
+      -screenshot-persona "$persona" -screenshot-energy low -screenshot-check "$check"
+    sleep 5
+    xcrun simctl io "$udid" screenshot "$out/ios-$persona-check-$check.png"
+  done
+  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode work \
     -screenshot-persona "$persona"
-  sleep 4
-  xcrun simctl io "$udid" screenshot "$out/ios-memory-$persona.png"
+  sleep 5
+  xcrun simctl io "$udid" screenshot "$out/ios-$persona-check-self.png"
 done
-xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory empty
-sleep 4
-xcrun simctl io "$udid" screenshot "$out/ios-memory-empty.png"
-for ask in habit decisions everything; do
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory full -screenshot-ask "$ask"
-  sleep 4
-  xcrun simctl io "$udid" screenshot "$out/ios-memory-ask-$ask.png"
-done
-for shows in card erase; do
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-settings "$shows"
-  sleep 4
-  xcrun simctl io "$udid" screenshot "$out/ios-settings-$shows.png"
-done
-# What 删除全部数据 leaves: a clean install, launched without screenshot data.
-xcrun simctl uninstall "$udid" "$bundle"
-xcrun simctl install "$udid" "$ios_app"
-xcrun simctl privacy "$udid" grant all "$bundle" || true
-xcrun simctl launch "$udid" "$bundle"
-# A first launch shows the launch screen longer than the others.
-sleep 15
-xcrun simctl io "$udid" screenshot "$out/ios-fresh.png"
-xcrun simctl terminate "$udid" "$bundle" || true
+ls -l "$out"
+exit 0
 
 # Mac: launch each mode and capture just its window. Reduce motion is a system setting on a Mac, so
 # it is only turned on in CI, never on your own Mac. The write can be refused; then RUNNER may blink.
