@@ -73,7 +73,8 @@ public struct LongMemory: Equatable, Sendable {
 
 /// What the memory page lists.
 public enum Memory {
-    /// The habits `persona` learns, learned from `ledger` after the resets.
+    // PM, 2026-10-13 (写死作息排查 v0 #21): the memory page only lists what was really learned.
+    /// The habits `persona` learned from `ledger` after the resets. Habits not learned yet are left out.
     public static func habits(
         persona: Persona,
         days: ActivityDays,
@@ -106,7 +107,7 @@ public enum Memory {
                 )
             )
         }
-        return list
+        return list.filter(\.isLearned)
     }
 
     /// Wins that are a sport done for the first time, with what the memory is called.
