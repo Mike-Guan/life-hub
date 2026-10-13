@@ -63,16 +63,30 @@ extension BedtimeSchedule {
     }
 
     static let adoptedKey = "bedtimeAdopted"
+    static let reminderKey = "bedtimeReminder"
+
+    // PM 2026-10-13 (onboarding 文案 v0 §4a): the reminder is off until the user turns it on.
+    /// Whether the bedtime reminder is on in `defaults`.
+    public static func remindsAtBedtime(in defaults: UserDefaults) -> Bool {
+        defaults.bool(forKey: reminderKey)
+    }
+
+    /// Turns the bedtime reminder on or off in `defaults`.
+    public static func setRemindsAtBedtime(_ on: Bool, in defaults: UserDefaults) {
+        defaults.set(on, forKey: reminderKey)
+    }
 
     // Installs from before 2026-10-13 used `.standard` without saving it. Saving it once keeps their bedtime;
     // a new install has no records on its first launch and stays unset.
-    /// Saves `.standard` as the bedtime of an install that had records before bedtimes had to be set, once.
+    /// For an install that had records before bedtimes had to be set, once: saves `.standard` as its bedtime
+    /// when none is saved, and keeps its reminder on.
     /// - Parameter existingInstall: whether this install already has records.
     public static func adoptStandard(in defaults: UserDefaults, existingInstall: Bool) {
         guard !defaults.bool(forKey: adoptedKey) else { return }
         defaults.set(true, forKey: adoptedKey)
-        guard existingInstall, defaults.data(forKey: defaultsKey) == nil else { return }
-        BedtimeSchedule.standard.store(in: defaults)
+        guard existingInstall else { return }
+        setRemindsAtBedtime(true, in: defaults)
+        if defaults.data(forKey: defaultsKey) == nil { BedtimeSchedule.standard.store(in: defaults) }
     }
 
     /// Saves the schedule in `defaults`.

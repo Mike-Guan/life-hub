@@ -14,6 +14,7 @@ struct LifeHubApp: App {
     @State private var widgets: WidgetBridge
     @State private var setupErrors: [String]
     @State private var bedtime: BedtimeSchedule
+    @State private var remindsAtBedtime: Bool
     @State private var rules: ModeRules
     @State private var offWorkError: String?
     @State private var reminderError: String?
@@ -73,6 +74,7 @@ struct LifeHubApp: App {
         UnboxLog.start(with: growth.ledger)
         _growth = State(initialValue: growth)
         _bedtime = State(initialValue: bedtime)
+        _remindsAtBedtime = State(initialValue: BedtimeSchedule.remindsAtBedtime(in: AppGroup.defaults))
         _rules = State(initialValue: ModeRules.stored(in: AppGroup.defaults))
         _widgets = State(initialValue: widgets)
         _setupErrors = State(initialValue: errors)
@@ -215,6 +217,10 @@ struct LifeHubApp: App {
                 countdownError = await BoxingCountdown.update(for: needs.reading)
             }
         }
+        .onChange(of: remindsAtBedtime) {
+            BedtimeSchedule.setRemindsAtBedtime(remindsAtBedtime, in: AppGroup.defaults)
+            Task { await scheduleReminder() }
+        }
         .onChange(of: bedtime) {
             bedtime.store(in: AppGroup.defaults)
             widgets.bedtime = bedtime
@@ -246,6 +252,7 @@ struct LifeHubApp: App {
         .sheet(isPresented: $showsSettings, onDismiss: showNextUnboxing) {
             SettingsView(
                 bedtime: $bedtime,
+                remindsAtBedtime: $remindsAtBedtime,
                 rules: $rules,
                 places: $places,
                 persona: $persona,
@@ -615,7 +622,7 @@ struct LifeHubApp: App {
     }
 
     private func scheduleReminder() async {
-        reminderError = await BedtimeReminder.schedule(bedtime, persona: persona)
+        reminderError = await BedtimeReminder.schedule(bedtime, on: remindsAtBedtime, persona: persona)
         // The bedtime call asks for permission; without it this would fail the same way.
         if reminderError == nil { await scheduleOffWork() }
     }

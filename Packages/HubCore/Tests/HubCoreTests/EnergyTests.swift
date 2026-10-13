@@ -241,6 +241,7 @@ import Testing
         defer { defaults.removePersistentDomain(forName: suite) }
         BedtimeSchedule.adoptStandard(in: defaults, existingInstall: true)
         #expect(BedtimeSchedule.stored(in: defaults) == .standard)
+        #expect(BedtimeSchedule.remindsAtBedtime(in: defaults))
 
         let fresh = try #require(UserDefaults(suiteName: suite + "-fresh"))
         defer { fresh.removePersistentDomain(forName: suite + "-fresh") }
@@ -248,6 +249,10 @@ import Testing
         // Records made after the first launch don't make it an old install.
         BedtimeSchedule.adoptStandard(in: fresh, existingInstall: true)
         #expect(BedtimeSchedule.stored(in: fresh) == .unset)
+        // A new install's reminder is off until the user turns it on.
+        #expect(!BedtimeSchedule.remindsAtBedtime(in: fresh))
+        BedtimeSchedule.setRemindsAtBedtime(true, in: fresh)
+        #expect(BedtimeSchedule.remindsAtBedtime(in: fresh))
 
         let set = try #require(UserDefaults(suiteName: suite + "-set"))
         defer { set.removePersistentDomain(forName: suite + "-set") }
@@ -255,5 +260,6 @@ import Testing
         late.store(in: set)
         BedtimeSchedule.adoptStandard(in: set, existingInstall: true)
         #expect(BedtimeSchedule.stored(in: set) == late)
+        #expect(BedtimeSchedule.remindsAtBedtime(in: set))
     }
 }

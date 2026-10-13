@@ -8,6 +8,7 @@ import UniformTypeIdentifiers
 /// the Screen Time watch.
 struct SettingsView: View {
     @Binding var bedtime: BedtimeSchedule
+    @Binding var remindsAtBedtime: Bool
     @Binding var rules: ModeRules
     @Binding var places: PlaceSettings
     @Binding var persona: Persona
@@ -108,11 +109,13 @@ struct SettingsView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("睡觉提醒")
+                Text("睡觉时间")
                     .font(Toy.body(16, weight: .heavy))
                 timeRow("睡觉", selection: time(shownBedtime.startMinute))
                 timeRow("起床", selection: time(shownBedtime.endMinute))
-                Text("睡觉时间到了发一条通知，\(persona.title) 变困，一直到起床时间。只提醒一次。")
+                Toggle("到点提醒", isOn: $remindsAtBedtime)
+                    .font(Toy.body(15))
+                Text("\(persona.title) 从睡觉时间开始变困，一直到起床时间。打开提醒，到点发一条通知，只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
             }
