@@ -50,6 +50,7 @@ struct LifeHubApp: App {
         let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
         let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
         let widgets = WidgetBridge(container: container, bedtime: bedtime)
+        widgets.work = ModeRules.stored(in: AppGroup.defaults)
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
         let needs = NeedTracker()
@@ -72,7 +73,8 @@ struct LifeHubApp: App {
         // Only a changed mode reloads, since background widget reloads have a daily budget. The watch gets
         // the current scenes either way, since it asked because it just opened.
         WatchSync.shared.onWatchCheck {
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
+            let work = ModeRules.stored(in: AppGroup.defaults)
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults), rules: work) {
                 Dogfood.note("settle", "手表打开，\(settled.reason)，切到\(settled.mode.title)")
                 widgets.sync(mode: store, energy: energy)
                 WidgetCenter.shared.reloadAllTimelines()
@@ -172,7 +174,8 @@ struct LifeHubApp: App {
             // Mike may have changed location access in Settings while away.
             placeMonitor.checkAccess(places)
             // A missed or held leave still ends work when Mike opens the app in the evening.
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
+            let work = ModeRules.stored(in: AppGroup.defaults)
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults), rules: work) {
                 Dogfood.note("settle", "\(settled.reason)，切到\(settled.mode.title)")
             }
             syncWidgets()
@@ -182,6 +185,7 @@ struct LifeHubApp: App {
                 await replayOffWork()
                 await scheduleReminder()
                 await importSleep()
+                await earnHealthWins()
                 await needs.importMotion()
                 await needs.importCommuteMotion()
                 await daily.read()
@@ -207,6 +211,7 @@ struct LifeHubApp: App {
         }
         .onChange(of: rules) {
             rules.store(in: AppGroup.defaults)
+            widgets.work = rules
             Task { await scheduleOffWork() }
             // The work-hours Screen Time watch follows the work hours.
             screenTimeError = Self.restartScrollWatch()
@@ -441,7 +446,7 @@ struct LifeHubApp: App {
                 decision = nil
             }
             // Place comes first: a leave that was held or came early still ends work once it's evening.
-            let made = decision ?? store.settle(presence: presence)
+            let made = decision ?? store.settle(presence: presence, rules: rules)
             let outcome = made.map { "切到\($0.mode.title)" } ?? "不切（\(Self.keptBecause(store: store, rules: rules))）"
             Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
             needs.refresh(
@@ -591,6 +596,20 @@ struct LifeHubApp: App {
         reminderError = await BedtimeReminder.schedule(bedtime, persona: persona)
         // The bedtime call asks for permission; without it this would fail the same way.
         if reminderError == nil { await scheduleOffWork() }
+    }
+
+    // Issue #279: daylight and on-time sleep. Only the wins come back from HealthKit, never the times.
+    private func earnHealthWins() async {
+        do {
+            let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
+            let slept = try await HealthSleep.earlySleep(schedule: schedule)
+            let sunned = try await HealthMotion.daylight()
+            for earned in [slept, sunned].compactMap(\.self) {
+                growth.record(earned.win, source: earned.source, at: earned.at)
+            }
+        } catch {
+            healthError = "读不到健康 App 里的日照或睡眠：\(error.localizedDescription)"
+        }
     }
 
     // Re-reads each time the app becomes active, so sleep the Watch syncs later still counts.
