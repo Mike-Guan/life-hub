@@ -3,6 +3,12 @@ import Testing
 
 @testable import HubCore
 
+// A routine learned from wins, for tests that need gym and run days.
+extension ActivityDays {
+    /// Gym Tuesday to Thursday, run Saturday from 17:00.
+    static let learnedFixture = ActivityDays(gymWeekdays: [3, 4, 5], runWeekday: 7, runStartMinute: 17 * 60)
+}
+
 @Suite struct ActivityTests {
     let calendar: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
@@ -18,9 +24,10 @@ import Testing
     func activity(
         _ signals: ActivitySignals = ActivitySignals(),
         mode: Mode? = .chill,
+        days: ActivityDays = .learnedFixture,
         at now: Date
     ) -> CompanionActivity? {
-        ActivityEngine.activity(signals, mode: mode, now: now, calendar: calendar)
+        ActivityEngine.activity(signals, mode: mode, days: days, now: now, calendar: calendar)
     }
 
     func workout(_ kind: WorkoutSummary.Kind, endingAt end: Date) -> WorkoutSummary {
@@ -95,12 +102,14 @@ import Testing
 
     @Test func widgetsRedrawWhenGymOrRunDayStarts() {
         let work = ModeRules.standard.workEndMinute
-        let tuesday = ActivityEngine.startTimes(on: date(6, 12), calendar: calendar)
+        let days = ActivityDays.learnedFixture
+        let tuesday = ActivityEngine.startTimes(on: date(6, 12), days: days, calendar: calendar)
         #expect(tuesday == [date(6, work / 60, work % 60)])
-        #expect(ActivityEngine.startTimes(on: date(10, 9), calendar: calendar) == [date(10, 17)])
-        #expect(ActivityEngine.startTimes(on: date(9, 12), calendar: calendar).isEmpty)
+        #expect(ActivityEngine.startTimes(on: date(10, 9), days: days, calendar: calendar) == [date(10, 17)])
+        #expect(ActivityEngine.startTimes(on: date(9, 12), days: days, calendar: calendar).isEmpty)
         // Before 05:00 it is still the previous hub day.
-        #expect(ActivityEngine.startTimes(on: date(7, 2), calendar: calendar) == tuesday)
+        #expect(ActivityEngine.startTimes(on: date(7, 2), days: days, calendar: calendar) == tuesday)
+        #expect(ActivityEngine.startTimes(on: date(6, 12), calendar: calendar).isEmpty)
     }
 
     @Test func gymVisitEarnsAfterHalfAnHour() {
@@ -139,6 +148,36 @@ import Testing
         let days = ActivityDays.standard.learningGym(from: ledger, now: date(31, 12), calendar: calendar)
         #expect(days.gymWeekdays == [3])
         #expect(days.runWeekday == ActivityDays.standard.runWeekday)
+    }
+
+    @Test func aNewUserHasNoGymDayOrRunDay() {
+        #expect(activity(days: .standard, at: date(6, 18, 30)) == nil)
+        #expect(activity(days: .standard, at: date(10, 17)) == nil)
+    }
+
+    @Test func twoMondaysAtTheGymMakeTheThirdAGymDay() {
+        // Mondays 5th and 12th; the 19th is the third Monday.
+        let ledger = gymWins([date(5, 20), date(12, 20)])
+        let days = ActivityDays.standard.learning(from: ledger, now: date(19, 12), calendar: calendar)
+        #expect(days.gymWeekdays == [2])
+        #expect(activity(days: days, at: date(19, 18, 30)) == .gymDay)
+        let one = gymWins([date(5, 20)])
+        let oneMonday = ActivityDays.standard.learning(from: one, now: date(12, 12), calendar: calendar)
+        #expect(activity(days: oneMonday, at: date(12, 18, 30)) == nil)
+    }
+
+    @Test func theRunDayIsLearnedFromRunsWithTheWarmUpAnHourBeforeTheyEnd() {
+        // 5 km runs ending Saturday 17th 18:10 and 24th 18:40, one Friday run; now is Saturday the 31st.
+        let runs = [date(17, 18, 10), date(24, 18, 40), date(23, 7)]
+        let ledger = CanLedger(entries: runs.map { CanEntry.earned(.run5k, source: "\($0)", at: $0, deviceID: "t") })
+        let days = ActivityDays.standard.learning(from: ledger, now: date(31, 12), calendar: calendar)
+        #expect(days.runWeekday == 7)
+        #expect(days.runStartMinute == 17 * 60 + 30)
+        #expect(days.gymWeekdays.isEmpty)
+        #expect(activity(days: days, at: date(31, 17, 15)) == nil)
+        #expect(activity(days: days, at: date(31, 17, 30)) == .runDay)
+        let none = ActivityDays.standard.learningRun(from: CanLedger(), now: date(31, 12), calendar: calendar)
+        #expect(none == .standard)
     }
 
     @Test func twoWinsInOneWeekCountOnceAndKeepTheStoredDays() {

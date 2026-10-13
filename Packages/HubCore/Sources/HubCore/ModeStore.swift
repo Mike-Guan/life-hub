@@ -105,13 +105,17 @@ public final class ModeStore {
         return switchTo(decision.mode, source: decision.source, tag: decision.tag, at: now) ? decision : nil
     }
 
-    /// Ends work once Mike has left the office or come home from 17:30, as `ModeEngine.settle` decides.
+    /// Ends work once the user has left the office or come home in the evening, as `ModeEngine.settle` decides.
     /// - Returns: the decision applied, or `nil` when the mode stays.
     @discardableResult
-    public func settle(presence: PlacePresence, now: Date = .now, calendar: Calendar = .current) -> ModeDecision? {
-        guard let decision = ModeEngine.settle(log: log, presence: presence, now: now, calendar: calendar) else {
-            return nil
-        }
+    public func settle(
+        presence: PlacePresence,
+        now: Date = .now,
+        rules: ModeRules = .standard,
+        calendar: Calendar = .current
+    ) -> ModeDecision? {
+        let decided = ModeEngine.settle(log: log, presence: presence, now: now, rules: rules, calendar: calendar)
+        guard let decision = decided else { return nil }
         return switchTo(decision.mode, source: decision.source, tag: decision.tag, at: now) ? decision : nil
     }
 
