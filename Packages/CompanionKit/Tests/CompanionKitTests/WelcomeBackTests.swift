@@ -109,6 +109,16 @@ import Testing
         #expect((last.welcome?.exit ?? 0) > 0.99)
     }
 
+    // UI 审核 2026-10-13: the can of the sofa rest pose fades in over the ending instead of popping in.
+    @Test func theCanFadesInWithTheEnding() {
+        let during = RunnerPose.welcome(.sofa, time: 3, open: nil, face: .mid, skippedAt: 3)
+        #expect(!RunnerFigure.parts(for: .chill, pose: during).contains(.monsterCan))
+        let ending = RunnerPose.welcome(.sofa, time: 3.15, open: nil, face: .mid, skippedAt: 3)
+        #expect(RunnerFigure.parts(for: .chill, pose: ending).contains(.monsterCan))
+        let fade = SceneMove.welcome(.monsterCan, pose: ending)?.opacity ?? 0
+        #expect(fade > 0.1 && fade < 0.9)
+    }
+
     // HAKU-17 (UI 审核 2026-10-08): at the office the short scenes play at the desk, never on the sofa.
     @Test(arguments: [WelcomeScene.glance, .quiet])
     func atWorkTheShortScenesPlayAtTheDesk(_ scene: WelcomeScene) {

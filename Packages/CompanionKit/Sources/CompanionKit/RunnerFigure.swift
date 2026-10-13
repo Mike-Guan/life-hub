@@ -1483,6 +1483,8 @@ struct RunnerFigure: View {
         }
         visible.formUnion(welcome.phoneFlip < 0.5 ? [.phone, .phoneFeed] : [.phoneBack])
         if welcome.phoneFlip < 1 { visible.insert(.phoneHand) }
+        // UI 审核 2026-10-13: the can the sofa rest pose holds fades in with the ending instead of popping in.
+        if !welcome.atDesk, welcome.exit > 0 { visible.insert(.monsterCan) }
         return visible
     }
 
