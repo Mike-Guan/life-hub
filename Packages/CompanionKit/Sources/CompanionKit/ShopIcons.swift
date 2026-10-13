@@ -95,6 +95,10 @@ struct ItemPicture: Equatable {
             let peace = itemID == "celebrate.up"
             parts = peace ? [.peaceHand] : [.sparkle]
             crop = peace ? CGRect(x: 77, y: 48, width: 40, height: 40) : CGRect(x: 3, y: 14, width: 20, height: 20)
+        case .top, .fullSet:
+            // Clothes have no parts until UI draws them; the shop keeps them off the shelf until then.
+            parts = []
+            crop = CGRect(x: 23, y: 60, width: 74, height: 74)
         }
     }
 }
@@ -115,7 +119,7 @@ extension Slot {
         case .headband: .work
         case .mask: .money
         case .room: .chill
-        case .celebration: nil
+        case .celebration, .top, .fullSet: nil
         }
     }
 
@@ -124,7 +128,7 @@ extension Slot {
         switch self {
         case .gloves, .headband: .boxing
         case .mask: .work
-        case .room, .celebration: .chill
+        case .room, .celebration, .top, .fullSet: .chill
         }
     }
 }

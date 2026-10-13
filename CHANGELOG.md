@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
+  hustle); a full set replaces that mode's top. They go on sale once the character art draws them.
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
   card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
   The second character's flower is now called 地上小粉花.

@@ -385,4 +385,46 @@ import Testing
             #expect(keepsakes(items) == keepsakes(haku), "\(persona)")
         }
     }
+
+    @Test func clothesAreWornOnePerModeAndASetReplacesTheTop() throws {
+        var wardrobe = Wardrobe()
+        let collar = try #require(ShopItem.item("haku.top.work.collar"))
+        let rain = try #require(ShopItem.item("haku.set.work.rain"))
+        let plaid = try #require(ShopItem.item("haku.top.chill.plaid"))
+        wardrobe.equip(collar)
+        wardrobe.equip(plaid)
+        #expect(wardrobe.clothes == [.work: collar.id, .chill: plaid.id])
+        #expect(wardrobe.equipped.isEmpty)
+        wardrobe.equip(rain)
+        #expect(wardrobe.clothes == [.work: rain.id, .chill: plaid.id])
+        wardrobe.undress(.work)
+        #expect(wardrobe.clothes == [.chill: plaid.id])
+    }
+
+    @Test func wardrobesKeepTheirClothesAndOldOnesLoad() throws {
+        let worn = Wardrobe(equipped: [.gloves: "gloves.gold"], clothes: [.chill: "haku.top.chill.plaid"])
+        let data = try JSONEncoder().encode(worn)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: data) == worn)
+        let json = try #require(String(data: data, encoding: .utf8))
+        #expect(json.contains(#""chill":"haku.top.chill.plaid""#))
+        let old = Data(#"{"equipped":{"gloves":"gloves.gold"}}"#.utf8)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: old) == Wardrobe(equipped: [.gloves: "gloves.gold"]))
+        let future = Data(#"{"equipped":{},"clothes":{"dance":"x","work":"haku.top.work.knit"}}"#.utf8)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: future).clothes == [.work: "haku.top.work.knit"])
+    }
+
+    // Prices from the shop catalogue (Mike 2026-10-13): tops 40-60, full sets 120-150.
+    @Test func clothesFollowTheApprovedPricesAndStayOffTheShelfUntilDrawn() {
+        for persona in Persona.allCases {
+            let clothes = ShopItem.catalog(for: persona).filter { $0.mode != nil }
+            #expect(Set(clothes.compactMap(\.mode)) == [.work, .chill, .money], "\(persona)")
+            for item in clothes {
+                let range = item.slot == .fullSet ? 120...150 : 40...60
+                #expect(range.contains(item.price ?? 0), "\(item.id)")
+                #expect(item.slot == .top || item.slot == .fullSet)
+                #expect(!item.isDrawn)
+            }
+            #expect(ShopItem.catalog(for: persona, card: .boxing).allSatisfy { $0.mode == nil })
+        }
+    }
 }
