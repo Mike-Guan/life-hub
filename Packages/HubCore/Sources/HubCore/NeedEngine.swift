@@ -40,7 +40,7 @@ public enum CompanionEvent: Codable, Equatable, Sendable {
 
 /// A workout from the Health app, reduced to what the hub uses.
 public struct WorkoutSummary: Codable, Equatable, Sendable {
-    /// The group a workout belongs to. Only boxing, running and strength can earn cans.
+    /// The group a workout belongs to. Every group but walking and other can earn cans (`Win.wins`).
     public enum Kind: String, Codable, Sendable, CaseIterable {
         case walking
         case running
@@ -477,8 +477,8 @@ public enum NeedEngine {
         case .running: (workout.meters ?? 0) >= rules.celebrateRunMeters
         case .boxing: workout.duration >= rules.celebrateBoxing
         case .strength: workout.duration >= rules.celebrateStrength
-        // Issue #205, Mike 2026-10-07: every group gets its own cheer after a real session. Only boxing,
-        // 5 km runs and strength earn cans (`Win.wins`).
+        // Issue #205, Mike 2026-10-07: every group gets its own cheer after a real session. Which sessions
+        // earn cans is `Win.wins`.
         case .walking, .cycling, .swimming, .martialArts, .racket, .ball, .yoga, .dance, .outdoor:
             workout.duration >= rules.celebrateStrength
         case .other: false
