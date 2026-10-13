@@ -833,6 +833,12 @@ public struct CompanionView: View {
         taps.filter { now.timeIntervalSince($0) < pesterWindow }.count >= count
     }
 
+    // PM 2026-10-13: at bedtime the character is sleepy, not annoyed, so no one turns away then.
+    /// Whether `taps` turn the character away: `count` or more within `pesterWindow`, outside bedtime.
+    nonisolated static func turnsAway(_ taps: [Date], now: Date, count: Int, bedtime: Bedtime) -> Bool {
+        bedtime == .off && pestered(taps, now: now, count: count)
+    }
+
     /// The night to say "还不睡。" for when the app opens at `date`, or nil outside 0:00 to 5:00 or when it was
     /// already said that night. A night is named by the day of its evening, as `yyyy-MM-dd`.
     nonisolated static func newLateNight(at date: Date, last: String, calendar: Calendar = .current) -> String? {
@@ -1070,7 +1076,7 @@ public struct CompanionView: View {
         }
         rollStart = nil
         tapTimes = tapTimes.filter { Date.now.timeIntervalSince($0) < Self.pesterWindow } + [.now]
-        if bedtime == .off, Self.pestered(tapTimes, now: .now, count: WatchPoke.tooMany) {
+        if Self.turnsAway(tapTimes, now: .now, count: WatchPoke.tooMany, bedtime: bedtime) {
             tapTimes = []
             pokeKind = nil
             turnAwayStart = .now
@@ -1104,14 +1110,15 @@ public struct CompanionView: View {
         onTap?()
     }
 
-    /// Plays the reaction to a poke on the watch with a light tap on the wrist; 5 pokes in a row turn HAKU away.
+    /// Plays the reaction to a poke on the watch with a light tap on the wrist; 5 pokes in a row turn HAKU away,
+    /// except at bedtime.
     private func reactToPoke() {
         guard let mode else { return }
         let now = Date.now
         pokes += 1
         guard turnAway(at: now.timeIntervalSinceReferenceDate) == nil else { return }
         tapTimes = tapTimes.filter { now.timeIntervalSince($0) < Self.pesterWindow } + [now]
-        if Self.pestered(tapTimes, now: now, count: WatchPoke.tooMany) {
+        if Self.turnsAway(tapTimes, now: now, count: WatchPoke.tooMany, bedtime: bedtime) {
             tapTimes = []
             pokeKind = nil
             turnAwayStart = now

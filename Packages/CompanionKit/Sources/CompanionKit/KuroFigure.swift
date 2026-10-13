@@ -553,18 +553,18 @@ public struct KuroView: View {
         #endif
     }
 
-    /// Plays her reaction to a tap: a body move for her look, and a line except on the watch. Taps during a move
-    /// only change the line; too many in a row turn her away.
+    // PM 2026-10-13: on the watch she says a line from the same pool as on the phone, in the bottom bubble.
+    /// Plays her reaction to a tap: a body move for her look, and a line. Taps during a move only change the
+    /// line; too many in a row turn her away.
     private func react() {
         let now = Date.now
         if style == .watch { pokes += 1 }
         if tapKind == .turnAway, reaction(at: now.timeIntervalSinceReferenceDate) != nil { return }
         tapTimes = tapTimes.filter { now.timeIntervalSince($0) < CompanionView.pesterWindow } + [now]
-        let talks = showsBubble && style != .watch
-        if bedtime == .off, CompanionView.pestered(tapTimes, now: now, count: KuroTap.tooMany) {
+        if CompanionView.turnsAway(tapTimes, now: now, count: KuroTap.tooMany, bedtime: bedtime) {
             tapTimes = []
             play(.turnAway, at: now)
-            if talks { say("……干嘛。") }
+            if showsBubble { say("……干嘛。") }
             onTap?()
             return
         }
@@ -573,7 +573,7 @@ public struct KuroView: View {
             // KURO-02: at the desk with her chin on her hand she stays seated and taps her cheek.
             play(pose.overtime ? .chinTap : KuroTap(look: look, sleepy: sleepy), at: now)
         }
-        if talks { say(Self.line(after: bubble, from: lines)) }
+        if showsBubble { say(Self.line(after: bubble, from: lines)) }
         onTap?()
     }
 

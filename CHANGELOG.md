@@ -8,9 +8,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
   card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
   The second character's flower is now called 地上小粉花.
+- On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
+  At bedtime, tapping five times in a row no longer turns either character away.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
   the weekly 5 cans, and its gold keepsake counts that card only. Any other watch workout of 30 minutes (not a
   walk) earns 3 cans, shared with the gym's daily 3. The shop names the card instead of "周日拳击".
+- Daylight and going to bed on time now earn their can: 15 minutes in daylight (Apple Watch) earns 1 a day,
+  and falling asleep within 30 minutes of the bedtime set in Settings earns 1 a night. Life Hub asks once
+  for time in daylight in Health. Only the win is kept, never the daylight or sleep times.
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
 - With no mode yet, the watch tells you to pick one on the iPhone, in smaller type, instead of the iPhone's line.
