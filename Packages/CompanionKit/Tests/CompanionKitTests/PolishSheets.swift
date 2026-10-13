@@ -220,5 +220,28 @@ extension FrameSheets {
                 .background(mode.color)
         }
     }
+    // UI 审核 R1: only the three rows that changed.
+    @Test func polishRound2() throws {
+        try write(
+            "polish-6-jump-r2",
+            [Row(label: "jump 后（峰值 20）", start: Self.base) { AnyView(JumpFrame(new: true, start: Self.base)) }],
+            frames: 16, step: 0.05)
+        try write(
+            "polish-7-skip-r2",
+            [
+                Row(label: "点一下跳过 · sofa（罐子淡入）", start: Self.base) {
+                    AnyView(SkipFrame(scene: .sofa, mode: .chill, start: Self.base))
+                }
+            ],
+            frames: 10, step: 0.05)
+        try write(
+            "polish-8-notification-r2",
+            [
+                Row(label: "通知 后（摘一次，坐着无 Zzz）", start: Self.base) {
+                    AnyView(NotificationFrame(once: true, start: Self.base))
+                }
+            ],
+            frames: 12, step: 0.4)
+    }
 }
 #endif
