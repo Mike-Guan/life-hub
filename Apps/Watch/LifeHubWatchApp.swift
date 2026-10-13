@@ -132,8 +132,13 @@ struct WatchHomeView: View {
         .overlay(alignment: .topLeading) {
             GeometryReader { proxy in
                 if !Self.cleanFrame {
+                    // Offered only the room left of the clock, a long name shrinks instead of running into it.
                     ModeChip(mode: mode, persona: payload.persona)
-                        .frame(height: proxy.safeAreaInsets.top)
+                        .frame(
+                            width: proxy.size.width * ModeChip.widthShare - 14,
+                            height: proxy.safeAreaInsets.top,
+                            alignment: .leading
+                        )
                         .padding(.leading, 14)
                         .offset(y: -proxy.safeAreaInsets.top)
                         .allowsHitTesting(false)
@@ -187,6 +192,11 @@ private struct WatchPager<First: View, Second: View>: View {
 
 /// The mode in a small white pill, "还没有模式" without one. How long it has run is on the second page.
 private struct ModeChip: View {
+    // On the 40 mm watch "10:09" starts at about 67% of the width; 8 wide letters at full size reach past it.
+    // WatchChipFitTests checks this share and the font against the clock.
+    /// The share of the screen width the chip may take, its leading inset included.
+    static let widthShare: CGFloat = 0.64
+
     let mode: Mode?
     let persona: Persona
 
@@ -195,8 +205,7 @@ private struct ModeChip: View {
             .font(Toy.body(12, weight: .heavy))
             .foregroundStyle(Toy.ink)
             .lineLimit(1)
-            // Mode names are short enough to sit left of the clock at full size.
-            .fixedSize()
+            .minimumScaleFactor(0.7)
             .padding(.horizontal, 8)
             .padding(.vertical, 2)
             .background(Capsule().fill(Toy.card))
