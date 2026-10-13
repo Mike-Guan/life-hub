@@ -1,0 +1,5 @@
+/* Permission prompts. The Chinese base text lives in project.yml. */
+"NSLocationWhenInUseUsageDescription" = "Life Hub は位置情報を使って、職場・自宅・よく行く運動の場所など、設定した場所に着いたかを判断します。着いたら自動でモードを切り替え、自宅では在宅かどうかを見ます。位置情報はこのiPhone上でのみ使われ、アップロードされません。";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "「常に」を選ぶと、アプリを閉じていても、設定した場所に着いたことが分かります。その場所の近くにいるかだけを確認し、移動ルートは記録しません。位置情報はこのiPhoneの外に出ません。";
+"NSHealthShareUsageDescription" = "Life Hub は、昨夜の睡眠時間、ワークアウト、直近の歩数、今日のスタンド時間だけを読み取ります。元気度の推定、在宅の判定、運動後のお祝い、座りすぎのお知らせに使います。データはこのiPhone上でのみ処理され、アップロードされません。計算済みの状態だけが、あなた自身のApple Watchに送られます。";
+"NSMotionUsageDescription" = "Life Hub は、自宅と職場の間の移動中に、歩いているか乗り物に乗っているかだけを確認し、キャラクターの動きに反映します。モーションデータはこのiPhone上でのみ使われ、アップロードされません。";

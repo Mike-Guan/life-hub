@@ -1,0 +1,5 @@
+/* Permission prompts. The Chinese base text lives in project.yml. */
+"NSLocationWhenInUseUsageDescription" = "Life Hub 用位置判断你是不是到了你设的地点，比如公司、家或常去的运动场所：到了就自动切模式，在家用来看你是不是窝着。位置只在这台 iPhone 上用，不会上传。";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "选「始终」后，App 关着时到了你设的地点也能知道。我们只检查你是否在这几个地点附近，不记录路线。位置只在这台 iPhone 上用，不会上传。";
+"NSHealthShareUsageDescription" = "Life Hub 只读取昨晚的睡眠时长、运动记录、最近几小时的步数和今天的站立小时，用来估计电量、判断你是不是窝在家、运动后庆祝、坐太久时陪你伸懒腰。数据只在这台 iPhone 上处理，不会上传；只会把算好的状态发给你自己的 Apple Watch。";
+"NSMotionUsageDescription" = "Life Hub 只在你从家去公司、从公司回家的路上看一眼你是在走路还是在车上，让角色跟着演。运动数据只在这台 iPhone 上用，不会上传。";
