@@ -267,13 +267,19 @@ enum Placement {
     ]
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
-    // the swimming cheer's ear tap over the earring.
+    // the swimming cheer's ear tap over the earring. KURO's rows are UI 三组's: the rub over the blush, the pen on the
+    // books, the ball bouncing on the racket, the sleeve in front of the tablet, the spin only when unboxing.
     /// Things that may share a place on purpose.
     static let allowed: [Place: [Set<String>]] = [
         .eyes: [["眼睛", "deskGlasses"]],
         .neck: [["面罩", "帽兜"]],
         .deskR: [["deskMonitor", "罐子堆"]],
-        .cheek: [["bandage", "bathBlush"]],
+        .cheek: [["bandage", "bathBlush"], ["blush", "tapRub"]],
+        .handR: [
+            ["chillCup", "itemSpin"], ["deskBooks", "deskPen"], ["tapBall", "tennisRacket"],
+            ["itemGoldRacket", "tapBall"],
+        ],
+        .handsFront: [["workTablet", "揉眼袖子"]],
         .earL: [["耳机", "earringNeon"], ["cheerEarTap", "earringNeon"]],
         .torso: [["外套", "金链"], ["外套", "towel"], ["外套", "apron"]],
     ]
@@ -293,16 +299,16 @@ enum Placement {
             [RunnerPart.roomPlant, .roomBag, .heavyBag, .runningShoes].map { (taker, $0) }
         }
 
-    // §9.4: her blanket on the lap never comes with a book or a hot drink in hand.
+    // §9.4: her blanket on the lap never comes with a book or a hot drink in hand. The cup at rest stands in front of
+    // the blanket, so only drinking (tapCup) counts.
     /// Pairs of KURO's parts that never show together.
-    static let kuroForbidden: [(KuroPart, KuroPart)] = [KuroPart.chillCup, .tapCup, .deskBooks].map {
+    static let kuroForbidden: [(KuroPart, KuroPart)] = [KuroPart.tapCup, .deskBooks].map {
         (.itemBlanket, $0)
     }
 
     static let glovesProp = "新（工程二组 2026-10-13）：拳击模式戴着拳套时，手里的道具不让位，一只手两样东西"
     static let headgear = "新（工程二组 2026-10-13）：庆祝或洗澡的头上物件和头带、耳机同在头顶"
     static let tapWithProp = "新（工程二组 2026-10-13）：右手拿着东西时又点手表，一只手两样东西"
-    static let new9 = "新（工程二组 2026-10-13，按 §9 分组）：同一只手或同一位置两样，UI 一组定改还是列进 §9.3"
 
     // Found by this test on main 0275084 with the §9 table; §5 numbers are the placement map's.
     /// HAKU's conflicts that exist today, with where they were reported.
@@ -349,17 +355,8 @@ enum Placement {
         "torso: towel+外套+金链": "新（工程二组 2026-10-13）：副业的金链和健身回来的毛巾同在胸前",
     ]
 
-    // Found under the §9 groups on main c302979; UI 一组 decides whether each is a fix or a §9.3 allowed entry.
     /// KURO's conflicts that exist today, with where they were reported.
-    static let kuroKnown: [String: String] = [
-        "cheek: blush+tapRub": new9,
-        "handR: chillCup+itemSpin": new9,
-        "handR: deskBooks+deskPen": new9,
-        "handR: itemGoldRacket+tapBall": new9,
-        "handR: tapBall+tennisRacket": new9,
-        "handsFront: workTablet+揉眼袖子": new9,
-        "item_blanket+chill_cup": new9,
-    ]
+    static let kuroKnown: [String: String] = [:]
 
     /// The conflicts among `parts`: a place holding two things, as "place: a+b", and a forbidden pair, as "a+b".
     static func conflicts<Part: RawRepresentable & Hashable>(
