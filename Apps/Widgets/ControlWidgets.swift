@@ -55,10 +55,10 @@ private struct ModeButtons: View {
                 cards.title(for: mode, persona: persona),
                 systemImage: cards.pickedIdentity(for: mode, persona: persona)?.symbol ?? mode.symbol(for: persona)
             )
-                .font(Toy.body(14, weight: .heavy))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .font(Toy.body(14, weight: .heavy))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .buttonStyle(ToyButtonStyle(fill: mode.color(for: persona), isSelected: mode == current))
     }
