@@ -111,7 +111,7 @@ enum PlacementPoses {
             pose.revive = revive
             states.append(("revive.\(revive)", pose))
         }
-        var single: [(String, (inout RunnerPose) -> Void)] = [
+        let single: [(String, (inout RunnerPose) -> Void)] = [
             ("bathCall", { $0.bathCall = 0 }),
             ("bathDry", { $0.bathDry = 0 }),
             ("rubEye", { $0.rubEye = 0.5 }),
