@@ -156,16 +156,6 @@ struct HomeView: View {
                 }
                 .frame(height: 340)
                 .toyCard()
-                // Issue #236: releasing a long press asks about today's energy when there is a guess.
-                // 干预策略 §6: only a guess is corrected; a level Mike picked himself isn't asked about.
-                .onCompanionHold {
-                    guard let reading, reading.source != .selfReport else { return }
-                    checkError = nil
-                    // UI 审核 round 4: inside the gesture's transaction the fade was dropped, so it runs after.
-                    Task { @MainActor in
-                        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
-                    }
-                }
                 .overlay(alignment: persona == .kuro ? .topLeading : .bottom) {
                     if let checkReply {
                         replyBubble(checkReply)
@@ -208,7 +198,8 @@ struct HomeView: View {
                 TimelineView(.everyMinute) { context in
                     let state = bedtime.state(at: context.date)
                     let active = activeNeed(at: context.date)
-                    let why = NeedEngine.whyLine(need: active, energy: reading, bedtime: state)
+                    // Energy has its own row below, so it never hides behind another line.
+                    let why = NeedEngine.whyLine(need: active, energy: nil, bedtime: state)
                     let workLine = moment(at: context.date).flatMap(HakuLines.scene(for:)).map {
                         HakuLines.line($0, at: context.date, persona: persona)
                     }
@@ -222,6 +213,8 @@ struct HomeView: View {
                             .foregroundStyle(Toy.muted)
                     }
                 }
+
+                energyRow(reading)
 
                 ModeSwitcher(current: store.current, persona: persona) { mode in
                     switchTo(mode)
@@ -259,7 +252,7 @@ struct HomeView: View {
             case "reply":
                 checkReply = EnergyCheck.reply(corrected: true, persona: persona)
             case "hold":
-                // Waits for a real long press, from Apps/UITests.
+                // Waits for a real tap on 不对？, from Apps/UITests.
                 break
             default:
                 checking = reading
@@ -324,6 +317,31 @@ struct HomeView: View {
     }
 
     // KURO holds things low in front of her, so her bubble sits above her head with its tail pointing down to her.
+    /// Where today's energy comes from. Only a guess from sleep can be corrected, from its 不对？ button.
+    // 干预策略 §6 (2026-10-13): Mike found no card behind the long press, so the entry moved here.
+    @ViewBuilder private func energyRow(_ reading: EnergyReading?) -> some View {
+        HStack(spacing: 8) {
+            Text(reading?.reasons.first ?? "今天没有睡眠数据")
+                .font(Toy.body(13, weight: .bold))
+                .foregroundStyle(Toy.muted)
+            if let reading, reading.source != .selfReport {
+                Button {
+                    checkError = nil
+                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
+                } label: {
+                    Text("不对？")
+                        .font(Toy.body(12, weight: .heavy))
+                        .foregroundStyle(Toy.ink)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(Toy.card))
+                        .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
     /// The character's one-line reply after an answer.
     @ViewBuilder private func replyBubble(_ text: String) -> some View {
         let bubble = Text(text)
