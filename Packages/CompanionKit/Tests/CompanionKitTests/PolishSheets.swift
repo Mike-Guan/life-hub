@@ -138,5 +138,87 @@ extension FrameSheets {
             .padding(0)
         }
     }
+    @Test func polishOffWorkAndNotification() throws {
+        let rows = [
+            Row(label: "下班 前（4s 后戴回耳机）", start: Self.base) { AnyView(OffWorkFrame(held: false, start: Self.base)) },
+            Row(label: "下班 后（停在下班样子）", start: Self.base) { AnyView(OffWorkFrame(held: true, start: Self.base)) },
+            Row(label: "通知 前（每 2.4s 循环）", start: Self.base) {
+                AnyView(NotificationFrame(once: false, start: Self.base))
+            },
+            Row(label: "通知 后（摘一次）", start: Self.base) { AnyView(NotificationFrame(once: true, start: Self.base)) },
+        ]
+        try write("polish-4-offwork-notification", rows, frames: 12, step: 0.4)
+    }
+
+    @Test func polishWelcomeSkip() throws {
+        let cases: [(WelcomeScene, Mode)] = [(.sofa, .chill), (.desk, .work), (.quiet, .chill)]
+        let rows = cases.map { scene, mode in
+            Row(label: "点一下跳过 · \(scene)", start: Self.base) {
+                AnyView(SkipFrame(scene: scene, mode: mode, start: Self.base))
+            }
+        }
+        try write("polish-5-welcome-skip", rows, frames: 10, step: 0.05)
+    }
+
+    // Off-work starts 2.4 s before the first frame; it lasts 4 s.
+    struct OffWorkFrame: View {
+        let held: Bool
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            let since = (clock ?? start).timeIntervalSince(start) + 2.4
+            let progress = since / 4
+            let pose =
+                progress < 1
+                ? RunnerPose.offWork(time: since, progress: progress, face: .mid)
+                : held ? RunnerPose.offWork(time: since, progress: 1, face: .mid) : RunnerPose(face: .mid)
+            let line = since >= 3 && (!held || since < 4) ? "终于。" : ""
+            return VStack(spacing: 2) {
+                RunnerFigure(mode: .work, pose: pose)
+                Text(line).font(.system(size: 13, weight: .bold)).frame(height: 16)
+            }
+            .padding(10)
+            .background(Mode.work.color)
+        }
+    }
+
+    struct NotificationFrame: View {
+        let once: Bool
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            let t = (clock ?? start).timeIntervalSince(start)
+            let pose =
+                once
+                ? CompanionView.notificationBedtime(time: t, start: 0)
+                : RunnerPose.bedtime(time: t, goodnight: t.truncatingRemainder(dividingBy: 2.4) / 2.4, liesDown: false)
+            return RunnerFigure(mode: .chill, pose: pose)
+                .padding(12)
+                .background(Mode.chill.color)
+        }
+    }
+
+    // A tap at 3 s into the scene; the frames start there.
+    struct SkipFrame: View {
+        let scene: WelcomeScene
+        let mode: Mode
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            let length = scene.length(cards: 2, cans: 3)
+            let t = 3 + CGFloat((clock ?? start).timeIntervalSince(start))
+            let open = scene.open(cards: 2, cans: 3)
+            let pose =
+                t < 3.3
+                ? RunnerPose.welcome(scene, time: t, open: open, face: .mid, mode: mode, length: length, skippedAt: 3)
+                : RunnerPose(face: .mid)
+            return RunnerFigure(mode: mode, pose: pose)
+                .padding(12)
+                .background(mode.color)
+        }
+    }
 }
 #endif
