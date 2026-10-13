@@ -21,6 +21,8 @@ struct HubEntry: TimelineEntry {
     var wardrobe = Wardrobe()
     /// Which character the widgets draw.
     var persona = Persona.haku
+    /// The user's cards, for the mode names; `nil` uses the character's default cards.
+    var cards: ModeCards?
     /// What HAKU does alongside Mike at `date`, `nil` while `moment` replaces the gym bag.
     var activity: CompanionActivity?
     /// The state within the mode HAKU acts out at `date`, such as vibe coding or walking to the gym.
@@ -43,6 +45,8 @@ struct HubEntry: TimelineEntry {
     var bath = false
 
     var mode: Mode? { snapshot?.mode }
+    /// The cards the names come from.
+    var names: ModeCards { cards ?? .legacy(for: persona) }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
     var vitals: HakuVitals { snapshot?.vitals ?? HakuVitals() }
     var need: CompanionNeed? { snapshot?.need(at: date) }
@@ -111,6 +115,7 @@ struct HubProvider: TimelineProvider {
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let persona = Persona.stored(in: AppGroup.defaults)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults, persona: persona)
+        let cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
         let backoff = NudgeBackoff.stored(in: AppGroup.defaults)
         let ledger = CanLedger.read(from: AppGroup.container.canLedgerURL)
         let changes = ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: ledger)
@@ -149,6 +154,7 @@ struct HubProvider: TimelineProvider {
                 bedtime: schedule.state(at: date),
                 wardrobe: wardrobe,
                 persona: persona,
+                cards: cards,
                 activity: activity == .gymDay && moment != nil ? nil : activity,
                 moment: moment,
                 traces: snapshot?.traces(at: date) ?? [],
