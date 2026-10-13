@@ -273,8 +273,9 @@ struct HomeView: View {
             try? await Task.sleep(for: .seconds(1.2))
             replayEnded = true
         }
-        .onChange(of: replayFrom) { _, from in
-            if from == nil { replayEnded = false }
+        // Each new replay starts unfinished, also when one follows another without a nil in between.
+        .onChange(of: replayFrom) {
+            replayEnded = false
         }
     }
 
