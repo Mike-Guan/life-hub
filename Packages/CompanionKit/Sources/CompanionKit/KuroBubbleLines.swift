@@ -66,7 +66,7 @@ enum KuroBubbleLines {
         case .snack: ["……没吃。", "什么零食。没看见。"]
         case .drawing: ["没画什么。", "……不许看。"]
         case .practice: ["……没在练。", "活动一下手腕而已。"]
-        case .tidying: ["周日了，收一收。", "……让一让。"]
+        case .tidying: ["……整理一下。", "……让一让。"]
         }
     }
 
