@@ -74,6 +74,6 @@ public struct ToyButtonStyle: ButtonStyle {
             .overlay(shape.stroke(Toy.ink, lineWidth: Toy.outline))
             .offset(x: pressed ? 3 : 0, y: pressed ? 3 : 0)
             .background(shape.fill(Toy.ink).offset(x: 4, y: 4))
-            .animation(.spring(response: 0.18, dampingFraction: 0.6), value: pressed)
+            .animation(.smooth(duration: 0.18), value: pressed)
     }
 }
