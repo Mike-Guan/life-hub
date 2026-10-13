@@ -84,7 +84,7 @@ struct UnboxSheet: View {
 
     private var subtitle: String {
         if let keepsake = item.keepsake {
-            return "\(keepsake.count) 次\(keepsake.win.shopTitle(for: persona))"
+            return "\(keepsake.count) 次\(keepsake.title(for: persona))"
         }
         return "用 \(entry.cans) 个能量罐换的"
     }

@@ -1252,7 +1252,7 @@ struct Squash {
     var y: CGFloat = 1
 }
 
-/// Lays the figure out for the watch's full-screen page: full width, 30 pt from the top, running off the bottom.
+/// Lays the figure out for the watch's full-screen page: three quarters wide, lowered, running off the bottom.
 struct WatchFigureFrame: ViewModifier {
     let isEnabled: Bool
 
@@ -1267,11 +1267,18 @@ struct WatchFigureFrame: ViewModifier {
                 let width = proxy.size.width * 0.75 + 24
                 content
                     .frame(width: width, height: width * 2, alignment: .top)
-                    .offset(x: (proxy.size.width - width) / 2, y: 38)
+                    .offset(x: (proxy.size.width - width) / 2, y: Self.drop(screenWidth: proxy.size.width))
             }
         } else {
             content
         }
+    }
+
+    // Round 2 screenshots: a fixed 38 pt left 45 pt of empty band on 40 mm and cut the chest props, while 46 mm
+    // was down to 10 pt. Scaling with the width keeps about the same gap on every size.
+    /// How far the figure sits below the top of a watch screen `screenWidth` points wide.
+    nonisolated static func drop(screenWidth: CGFloat) -> CGFloat {
+        screenWidth * 0.18
     }
 }
 
