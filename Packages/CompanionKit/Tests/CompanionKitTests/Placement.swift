@@ -244,7 +244,7 @@ enum Placement {
         .deskPen: Spot(.handR, "deskPen"),
         .deskBooks: Spot(.handR, "deskBooks"),
         .tapBall: Spot(.handR, "tapBall"),
-        .itemSpin: Spot(.handR, "itemSpin"),
+        .itemSpin: .fx,
         .workTablet: Spot(.handsFront, "workTablet"),
         .tapTablet: Spot(.handsFront, "tapTablet"),
         .tapCup: Spot(.handsFront, "tapCup"),
@@ -268,7 +268,7 @@ enum Placement {
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
     // the swimming cheer's ear tap over the earring. KURO's rows are UI 三组's: the rub over the blush, the pen on the
-    // books, the ball bouncing on the racket, the sleeve in front of the tablet, the spin only when unboxing.
+    // books, the ball bouncing on the racket, the sleeve in front of the tablet. The spin is a cheer, not held.
     /// Things that may share a place on purpose.
     static let allowed: [Place: [Set<String>]] = [
         .eyes: [["眼睛", "deskGlasses"]],
@@ -276,7 +276,7 @@ enum Placement {
         .deskR: [["deskMonitor", "罐子堆"]],
         .cheek: [["bandage", "bathBlush"], ["blush", "tapRub"]],
         .handR: [
-            ["chillCup", "itemSpin"], ["deskBooks", "deskPen"], ["tapBall", "tennisRacket"],
+            ["deskBooks", "deskPen"], ["tapBall", "tennisRacket"],
             ["itemGoldRacket", "tapBall"],
         ],
         .handsFront: [["workTablet", "揉眼袖子"]],
