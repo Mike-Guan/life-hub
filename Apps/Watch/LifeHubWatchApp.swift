@@ -71,8 +71,9 @@ struct WatchHomeView: View {
     private func companionPage(_ payload: WatchPayload, mode: Mode?, at date: Date) -> some View {
         let snapshot = payload.snapshot
         let scene = payload.scene(at: date)
-        // HAKU with no mode is drawn on cream, where the white system clock can't be read.
-        let clockBand = mode == nil && payload.persona == .haku
+        // UI 审核: the white system clock is hard to read on several mode colors, so the clock row is ink in
+        // every state, dimmed screen included. Promo stills keep only the character.
+        let clockBand = !Self.cleanFrame
         return Group {
             if payload.persona == .kuro {
                 KuroView(
@@ -121,6 +122,20 @@ struct WatchHomeView: View {
                         .offset(y: -geometry.safeAreaInsets.top)
                 }
                 .allowsHitTesting(false)
+            }
+        }
+        // HAKU's no-mode drawing says this itself; KURO keeps her off-work look, so the watch says it.
+        .overlay(alignment: .bottom) {
+            if mode == nil && payload.persona == .kuro {
+                Text("在 iPhone 上选个模式")
+                    .font(Toy.body(13, weight: .bold))
+                    .foregroundStyle(Toy.ink)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Toy.card))
+                    .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+                    .padding(.bottom, 8)
+                    .allowsHitTesting(false)
             }
         }
         .overlay(alignment: .topLeading) {

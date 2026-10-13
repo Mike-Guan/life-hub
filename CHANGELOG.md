@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- The watch's clock row is dark in every mode, so the white time stays readable. With no mode yet, the second
+  preset character keeps her off-work look and a line asks you to pick a mode on the iPhone.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
