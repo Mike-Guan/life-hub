@@ -207,6 +207,8 @@ import Testing
         #expect(RunnerFigure.parts(for: .chill, pose: home).contains(.pillow))
         #expect(notification.lie == 0)
         #expect(!RunnerFigure.parts(for: .chill, pose: notification).contains(.pillow))
+        #expect(home.zzz >= 0)
+        #expect(notification.zzz == -1)
     }
 
     @Test func sleepyLoopYawns() {

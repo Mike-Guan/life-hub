@@ -5,7 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
-- In the good-night notification HAKU takes the headset off once instead of every 2.4 s. After the off-work
+- In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
+  over the hair while sitting up. After the off-work
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
