@@ -57,6 +57,8 @@ struct KuroPose: Sendable {
     var blinking = false
     /// Low energy: flat mouth and no blush.
     var tired = false
+    /// Full energy: bright eyes a size bigger, pink cheeks, ears up and sparkles by her head.
+    var full = false
     /// Waiting out a late end at the desk, chin on hand.
     var overtime = false
     /// The late end shown on a sign above her head, as HH:mm, or nil for no sign.
@@ -90,6 +92,7 @@ struct KuroPose: Sendable {
             tired = true
         case .high:
             eyes = .bright
+            full = true
         case .mid:
             eyes = look == .tennis ? .bright : look == .desk ? .down : .open
         }
@@ -128,7 +131,7 @@ struct KuroFigure: View {
     var body: some View {
         ZStack {
             ForEach(Self.parts(for: look, pose: pose), id: \.self) { part in
-                KuroPartView(part: part, shift: Self.shift(part, pose: pose))
+                KuroPartView(part: part, shift: Self.offset(part, pose: pose))
             }
             if pose.overtime, let sign = pose.sign {
                 RunnerTextView(text: RunnerText(string: sign, x: 60, y: -1, size: 9, color: KuroPalette.ink))
@@ -143,6 +146,14 @@ struct KuroFigure: View {
         visible.formUnion(outfit(look))
         visible.insert(pose.blinking ? .eyesClosed : part(pose.eyes))
         if !pose.tired { visible.insert(.blush) }
+        // Issue #236 (correction preview v6): full reads apart from okay at a glance, even on the watch.
+        if pose.full {
+            visible.formUnion([.cheeksFull, .sparkle])
+            if visible.contains(.eyesBright) {
+                visible.remove(.eyesBright)
+                visible.insert(.eyesFull)
+            }
+        }
         if pose.overtime {
             visible.subtract([.workTablet, .workStylus])
             visible.formUnion([.overtimeDesk, .overtimeHand])
@@ -164,6 +175,13 @@ struct KuroFigure: View {
         if pose.heart { visible.insert(.tapHeart) }
         if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
         return KuroPart.allCases.filter { visible.contains($0) }
+    }
+
+    /// How far `part` moves from where the SVG draws it, in SVG units; full energy raises her ears a little.
+    nonisolated static func offset(_ part: KuroPart, pose: KuroPose) -> CGSize {
+        let moved = shift(part, pose: pose)
+        let lift: CGFloat = pose.full && part == .catEars ? 3 : 0
+        return CGSize(width: moved.width, height: moved.height - lift)
     }
 
     /// The parts only `look` wears.

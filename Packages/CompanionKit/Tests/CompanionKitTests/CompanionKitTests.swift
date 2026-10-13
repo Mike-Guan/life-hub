@@ -56,8 +56,23 @@ import Testing
         let high = Set(RunnerFigure.parts(for: mode, pose: RunnerPose(face: .high)))
         #expect(mid.isDisjoint(with: [.sparkle, .eyeGlint]))
         #expect(high.contains(.sparkle))
+        // The deadpan eyes open a notch and carry their own glint (Issue #236).
+        let deadpan = mid.contains(.eyesWork)
+        #expect(high.contains(.eyesBright) == deadpan)
+        #expect(high.isDisjoint(with: [.eyesWork, .lidsWork]) == deadpan)
         // Chill's eyes are closed in a smile, so there is nothing to glint.
-        #expect(high.contains(.eyeGlint) == (mode != .chill))
+        #expect(high.contains(.eyeGlint) == (mode != .chill && !deadpan))
+    }
+
+    @Test func highEnergyEyesStillBlinkAndSleep() {
+        var pose = RunnerPose(face: .high)
+        pose.eyesShut = true
+        let shut = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(shut.contains(.eyesClosed))
+        #expect(shut.isDisjoint(with: [.eyesBright, .lidsBright]))
+        var bedtime = RunnerPose.bedtimeStill()
+        bedtime.face = .high
+        #expect(Set(RunnerFigure.parts(for: .work, pose: bedtime)).isDisjoint(with: [.eyesBright, .lidsBright]))
     }
 
     @Test(arguments: Mode.allCases)

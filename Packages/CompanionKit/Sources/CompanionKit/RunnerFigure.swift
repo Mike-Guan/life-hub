@@ -1196,6 +1196,11 @@ struct RunnerFigure: View {
             let t = pose.noteSlap * CGFloat(RunnerPose.noteSlapLength)
             if t > 0.25, t < 0.8 { visible.insert(.noteHit) }
         }
+        // Issue #236 (correction preview v6): full energy opens the deadpan eyes a notch, with their own glint.
+        if pose.face == .high, !pose.bedtime, visible.contains(.eyesWork) {
+            visible.subtract([.eyesWork, .lidsWork, .eyeGlint])
+            visible.formUnion([.eyesBright, .lidsBright])
+        }
         if pose.eyesShut {
             visible.subtract(openEyes)
             visible.insert(.eyesClosed)
@@ -1514,6 +1519,7 @@ struct RunnerFigure: View {
     ]
     nonisolated private static let openEyes: Set<RunnerPart> = [
         .eyesWork, .lidsWork, .eyesChill, .cateyeL, .cateyeR, .eyesMoney, .eyeGlint, .eyesSleepy,
+        .eyesBright, .lidsBright,
     ]
     nonisolated private static let couchParts: Set<RunnerPart> = [.eyesSleepy, .phone, .phoneFeed, .phoneHand]
     nonisolated private static let couchHiddenParts: Set<RunnerPart> = [
@@ -1603,7 +1609,7 @@ struct RunnerFigure: View {
     @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat) -> some View {
         Group {
             switch part {
-            case .eyesWork, .lidsWork, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
+            case .eyesWork, .lidsWork, .eyesBright, .lidsBright, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 1, y: pose.blink, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale, y: pose.eyesDy * scale)
@@ -1905,7 +1911,7 @@ struct RunnerFigure: View {
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
-        .dizzyStar,
+        .dizzyStar, .eyesBright, .lidsBright,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.

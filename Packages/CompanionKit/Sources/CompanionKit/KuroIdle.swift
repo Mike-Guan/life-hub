@@ -99,7 +99,7 @@ enum KuroIdle: CaseIterable, Sendable {
 
     /// The parts that are her eyes.
     private static let eyes: Set<KuroPart> = [
-        .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow,
+        .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow, .eyesFull,
     ]
 
     /// 0 → 1 eased in over `rise` from `start`, held, eased back to 0 over `fall` before `end`.
