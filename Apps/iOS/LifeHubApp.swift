@@ -62,6 +62,7 @@ struct LifeHubApp: App {
         let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
         let widgets = WidgetBridge(container: container, bedtime: bedtime)
         widgets.work = ModeRules.stored(in: AppGroup.defaults)
+        widgets.cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
         let needs = NeedTracker()
@@ -201,6 +202,10 @@ struct LifeHubApp: App {
             syncWidgets()
             Task { await scheduleReminder() }
         }
+        .onChange(of: cards) {
+            widgets.cards = cards
+            syncWidgets()
+        }
         .onChange(of: rules) {
             rules.store(in: AppGroup.defaults)
             widgets.work = rules
@@ -230,6 +235,7 @@ struct LifeHubApp: App {
                 store: store,
                 energy: energy,
                 ledger: growth.ledger,
+                cards: cards,
                 onEraseAll: eraseAll
             )
         }
@@ -475,7 +481,9 @@ struct LifeHubApp: App {
                 decision = store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules)
             } else if let trigger = place.trigger(entered: entered) {
                 // After a GPS-drift return the stay continues; this puts back a mode the leave changed.
-                decision = store.autoSwitch(trigger, rules: rules)
+                let persona = Persona.stored(in: AppGroup.defaults)
+                let cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
+                decision = store.autoSwitch(trigger, rules: rules, cards: cards, persona: persona)
             } else {
                 decision = nil
             }

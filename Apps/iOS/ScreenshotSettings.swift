@@ -22,6 +22,7 @@ struct ScreenshotSettings: View {
             store: store,
             energy: energy,
             ledger: CanLedger(),
+            cards: .current(in: AppGroup.defaults, persona: ScreenshotMode.persona),
             onEraseAll: {},
             screenshot: asksErase
         )
