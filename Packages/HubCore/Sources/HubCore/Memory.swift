@@ -73,7 +73,8 @@ public struct LongMemory: Equatable, Sendable {
 
 /// What the memory page lists.
 public enum Memory {
-    /// The habits `persona` learns, learned from `ledger` after the resets.
+    // PM, 2026-10-13 (写死作息排查 v0 #21): the memory page only lists what was really learned.
+    /// The habits `persona` learned from `ledger` after the resets. Habits not learned yet are left out.
     public static func habits(
         persona: Persona,
         days: ActivityDays,
@@ -90,7 +91,7 @@ public enum Memory {
             LearnedHabit(
                 habit: .gymDays,
                 title: "健身日",
-                days: weekdays(learned.gymWeekdays.isEmpty ? days.gymWeekdays : learned.gymWeekdays) ?? notLearned,
+                days: weekdays(learned.gymWeekdays.isEmpty ? days.gymWeekdays : learned.gymWeekdays),
                 isLearned: !learned.gymWeekdays.isEmpty
             )
         ]
@@ -101,12 +102,12 @@ public enum Memory {
                 LearnedHabit(
                     habit: .identityDay,
                     title: Mode.boxing.title(for: persona),
-                    days: weekdays([learned ?? NeedRules.tennisWeekday]) ?? notLearned,
+                    days: weekdays([learned ?? NeedRules.tennisWeekday]),
                     isLearned: learned != nil
                 )
             )
         }
-        return list
+        return list.filter(\.isLearned)
     }
 
     /// Wins that are a sport done for the first time, with what the memory is called.
@@ -164,11 +165,7 @@ public enum Memory {
     }
 
     /// `days` as Chinese weekday names in week order from Monday, e.g. "周二、周四".
-    /// What a habit shows before a day is learned.
-    public static let notLearned = "还没记住"
-
-    static func weekdays(_ days: Set<Int>) -> String? {
-        guard !days.isEmpty else { return nil }
+    static func weekdays(_ days: Set<Int>) -> String {
         let names = [1: "周日", 2: "周一", 3: "周二", 4: "周三", 5: "周四", 6: "周五", 7: "周六"]
         return days.sorted { ($0 + 5) % 7 < ($1 + 5) % 7 }.compactMap { names[$0] }.joined(separator: "、")
     }

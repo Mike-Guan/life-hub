@@ -55,17 +55,16 @@ import Testing
         let learned = habits(ledger)
         #expect(learned == [LearnedHabit(habit: .gymDays, title: "健身日", days: "周二、周四", isLearned: true)])
         let forgotten = habits(ledger, resets: MemoryResets(habits: [.gymDays: date(16)]))
-        #expect(forgotten.first?.days == Memory.notLearned)
-        #expect(forgotten.first?.isLearned == false)
+        #expect(forgotten.isEmpty)
     }
 
     @Test func kuroAlsoLearnsHerIdentityDay() {
         let ledger = CanLedger(entries: wins(.boxing, [3, 10]))
         let list = habits(ledger, persona: .kuro)
-        #expect(list.map(\.habit) == [.gymDays, .identityDay])
+        #expect(list.map(\.habit) == [.identityDay])
         #expect(list.last == LearnedHabit(habit: .identityDay, title: "网球日", days: "周六", isLearned: true))
         let forgotten = habits(ledger, persona: .kuro, resets: MemoryResets(all: date(11)))
-        #expect(forgotten.last?.isLearned == false)
+        #expect(forgotten.isEmpty)
     }
 
     @Test func longTermMemoriesComeFromRecordsAfterTheLastForget() {
@@ -138,7 +137,7 @@ import Testing
 
     @Test func weekdaysStartOnMonday() {
         #expect(Memory.weekdays([1, 3, 5]) == "周二、周四、周日")
-        #expect(Memory.weekdays([]) == nil)
+        #expect(Memory.weekdays([]) == "")
     }
 
     @Test func onlyPlacesThatSwitchAModeCount() {

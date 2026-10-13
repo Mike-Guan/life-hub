@@ -89,23 +89,24 @@ struct MemoryView: View {
                     .frame(minWidth: 44, minHeight: 44)
             }
 
-            section("学到的习惯") {
-                ForEach(habits, id: \.habit) { habit in
-                    HStack(spacing: 10) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("\(habit.title)：\(habit.days)")
-                                .font(Toy.body(15, weight: .heavy))
-                            Text(habit.isLearned ? "从你去的日子学的" : "同一天去过两周就记住")
-                                .font(Toy.body(12))
-                                .foregroundStyle(Toy.muted)
-                        }
-                        Spacer()
-                        if habit.isLearned {
+            // PM 2026-10-13: only what was really learned, so the section waits until something is.
+            if !habits.isEmpty {
+                section("学到的习惯") {
+                    ForEach(habits, id: \.habit) { habit in
+                        HStack(spacing: 10) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("\(habit.title)：\(habit.days)")
+                                    .font(Toy.body(15, weight: .heavy))
+                                Text("从你去的日子学的")
+                                    .font(Toy.body(12))
+                                    .foregroundStyle(Toy.muted)
+                            }
+                            Spacer()
                             deleteButton("忘掉") { asking = .habit(habit) }
                         }
                     }
+                    note("忘掉后从你之后的日子重新学。")
                 }
-                note("忘掉后回到默认，再从你之后的日子重新学。")
             }
 
             section("长期记得的事") {
