@@ -33,21 +33,11 @@ jobs:
         run: swift build --build-tests --package-path Packages/CompanionKit
 
       # Each sheet takes about a minute to render, one at a time on the main actor.
-      - name: Draw frame sheets
-        timeout-minutes: 25
+      - name: Placement probe
         run: |
           mkdir -p frames
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter "FrameSheets.lockScreen"
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets --skip hakuMoments
-          ls -l frames
-
-      # The moments sheet is the largest; kept apart so the other sheets still upload if it runs long.
-      - name: Draw moment sheets
-        timeout-minutes: 12
-        continue-on-error: true
-        run: |
-          FRAME_SHEETS="$PWD/frames" FRAME_SHA="${{ github.sha }}" swift test --skip-build --package-path Packages/CompanionKit --filter FrameSheets.hakuMoments
-          ls -l frames
+          PLACEMENT_DUMP="$PWD/frames/placement.tsv" swift test --skip-build --package-path Packages/CompanionKit --filter PlacementProbe
+          wc -l frames/placement.tsv
 
       - name: Upload frame sheets
         if: always()
