@@ -120,6 +120,9 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
           SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES
 
+      - name: Privacy manifests in every app and extension
+        run: scripts/privacy-check.sh build/Build/Products
+
       - name: Launch the watch app (simulator)
         run: scripts/watch-launch-check.sh build/Build/Products/Debug-watchsimulator/LifeHubWatch.app
 

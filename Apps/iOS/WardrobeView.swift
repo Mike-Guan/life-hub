@@ -102,11 +102,11 @@ struct WardrobeView: View {
         .padding(.top, 8)
     }
 
-    /// "2026-11-02 · 累计 10 次周日拳击": when and how a keepsake was earned.
+    /// "2026-11-02 · 累计 10 次拳击日": when and how a keepsake was earned.
     private func earnedLine(_ item: ShopItem, at date: Date) -> String {
         let day = date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
         guard let keepsake = item.keepsake else { return day }
-        return "\(day) · 累计 \(keepsake.count) 次\(keepsake.win.shopTitle(for: persona))"
+        return "\(day) · 累计 \(keepsake.count) 次\(keepsake.title(for: persona))"
     }
 
     private var header: some View {
@@ -247,14 +247,14 @@ struct WardrobeView: View {
 
     private func lockedTile(_ item: ShopItem) -> some View {
         let keepsake = item.keepsake
-        let count = keepsake.map { min(ledger.count($0.win), $0.count) } ?? 0
+        let count = keepsake.map { min(ledger.count($0.win, card: $0.card), $0.count) } ?? 0
         return VStack(spacing: 6) {
             ShopItemIcon(item: item)
                 .frame(width: 56, height: 56)
                 .opacity(0.25)
             Text(item.title)
                 .font(Toy.body(13, weight: .heavy))
-            Text("\(keepsake?.win.shopTitle(for: persona) ?? "") \(count)/\(keepsake?.count ?? 1)")
+            Text("\(keepsake?.title(for: persona) ?? "") \(count)/\(keepsake?.count ?? 1)")
                 .font(Toy.body(11, weight: .bold))
                 .foregroundStyle(Toy.muted)
         }

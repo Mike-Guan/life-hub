@@ -3,9 +3,10 @@ import Foundation
 
 /// A real-life win that earns cans. Detected automatically, never entered by hand.
 public enum Win: String, Codable, CaseIterable, Sendable {
-    /// A weekday gym visit or a strength workout.
+    // Issue #279: raw names are stored in the ledger, so `gym` and `boxing` keep their first names.
+    /// A visit to the fitness gym or a strength workout.
     case gym
-    /// Sunday boxing class.
+    /// A session of the identity card: its watch workout or a visit to its place, 30 minutes or more.
     case boxing
     /// A run of 5 km or more.
     case run5k
@@ -17,12 +18,14 @@ public enum Win: String, Codable, CaseIterable, Sendable {
     case earlySleep
     /// Finished a task planned ahead in Daily Widget.
     case plannedTask
+    /// Any other watch workout of 30 minutes or more.
+    case exercise
 
     /// Cans this win earns.
     public var cans: Int {
         switch self {
         case .boxing, .run5k: 5
-        case .gym: 3
+        case .gym, .exercise: 3
         case .gotUp: 2
         case .daylight, .earlySleep, .plannedTask: 1
         }
@@ -35,11 +38,14 @@ public struct EarnedWin: Equatable, Sendable {
     /// What the win came from; the ledger counts each source once.
     public var source: String
     public var at: Date
+    /// The identity card a `boxing` win was earned with, `nil` for other wins.
+    public var card: IdentityKind?
 
-    public init(win: Win, source: String, at: Date) {
+    public init(win: Win, source: String, at: Date, card: IdentityKind? = nil) {
         self.win = win
         self.source = source
         self.at = at
+        self.card = card
     }
 }
 
@@ -52,9 +58,16 @@ extension Win {
 
     // Caps from 03 Product/奖励数值表.md (PM, 2026-10-04). Planned tasks earn per task, up to
     // `DailyAgenda.dailyCanLimit` a day.
-    /// Boxing earns once a week, every other win once a day.
+    /// The identity card earns once a week, every other win once a day.
     public var cap: Cap {
         self == .boxing ? .week : .day
+    }
+
+    // 03 Product/朋友测前 产品打磨清单 v0.md §2.5: a gym visit and any other workout earn one 3-can win a
+    // day together. They stay two wins, so gym days are still learned from the gym alone.
+    /// The win whose cap this win shares: `gym` for `exercise`, itself for every other win.
+    public var capGroup: Win {
+        self == .exercise ? .gym : self
     }
 
     /// The ledger source for this win at `date`: one per day or week, so the win earns at most once in it.
@@ -63,55 +76,77 @@ extension Win {
         case .day:
             let parts = calendar.dateComponents([.year, .month, .day], from: date)
             let day = String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
-            return "\(rawValue):\(day)"
+            return "\(capGroup.rawValue):\(day)"
         case .week:
             let parts = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
             let week = String(format: "%04d-W%02d", parts.yearForWeekOfYear ?? 0, parts.weekOfYear ?? 0)
-            return "\(rawValue):\(week)"
+            return "\(capGroup.rawValue):\(week)"
         }
     }
 
-    // Same bar as the workout celebrations, so HAKU cheers exactly what earns cans.
-    /// The wins in `workouts`: long enough boxing workouts, 5 km runs and strength training, each with
-    /// the source for its cap.
+    /// How long a visit or a workout must last to earn a win.
+    public static let visitMinimum: TimeInterval = 30 * 60
+
+    /// Watch workouts that never earn the exercise win: walks and workouts the app can't group.
+    static let notExercise: Set<WorkoutSummary.Kind> = [.walking, .other]
+
+    // Issue #279. A workout of the identity card earns only the card's weekly win, so a card session is not
+    // also counted as exercise. Strength stays the gym win at the celebration bar, so HAKU cheers what earns.
+    /// The wins in `workouts`, each with the source for its cap: the identity card's win for its workouts of
+    /// 30+ minutes, 5 km runs, the gym win for strength workouts and the exercise win for any other workout
+    /// of 30+ minutes except walks.
+    /// - Parameter identity: the picked identity card, `nil` when there is none.
     public static func wins(
         in workouts: [WorkoutSummary],
+        identity: IdentityKind?,
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> [EarnedWin] {
-        workouts.filter { NeedEngine.isWorthCelebrating($0, rules: rules) }.compactMap { workout in
-            let win: Win
-            switch workout.kind {
-            case .boxing: win = .boxing
-            case .running: win = .run5k
-            case .strength: win = .gym
-            default: return nil
+        workouts.flatMap { workout -> [EarnedWin] in
+            func earned(_ win: Win, card: IdentityKind? = nil) -> EarnedWin {
+                let source = win.source(at: workout.start, calendar: calendar)
+                return EarnedWin(win: win, source: source, at: workout.end, card: card)
             }
-            return EarnedWin(win: win, source: win.source(at: workout.start, calendar: calendar), at: workout.end)
+            var wins: [EarnedWin] = []
+            if workout.kind == .running, (workout.meters ?? 0) >= rules.celebrateRunMeters {
+                wins.append(earned(.run5k))
+            }
+            if let identity, identity.workouts.contains(workout.kind) {
+                if workout.duration >= visitMinimum { wins.append(earned(.boxing, card: identity)) }
+            } else if workout.kind == .strength {
+                if workout.duration >= rules.celebrateStrength { wins.append(earned(.gym)) }
+            } else if !notExercise.contains(workout.kind), workout.duration >= visitMinimum {
+                wins.append(earned(.exercise))
+            }
+            return wins
         }
     }
 
-    /// How long a gym or boxing gym visit must last to earn its win.
-    public static let visitMinimum: TimeInterval = 30 * 60
-
-    // Mike boxes without a watch, so the boxing gym counts like the fitness gym. A visit and a workout
+    // Mike boxes without a watch, so the card's place counts like the fitness gym. A visit and a workout
     // in the same day or week share one source, so they earn once together.
     /// The win for a visit to a place with `action` from `arrived` to `left`: the gym win for the fitness
-    /// gym, boxing for the boxing gym; `nil` for other places or when the visit was too short.
+    /// gym, the identity card's win for the card's place; `nil` for other places, without a card, or when
+    /// the visit was too short.
+    /// - Parameter identity: the picked identity card, `nil` when there is none.
     public static func visit(
         _ action: HubPlace.Action,
         from arrived: Date,
         to left: Date,
+        identity: IdentityKind?,
         calendar: Calendar = .current
     ) -> EarnedWin? {
         let win: Win
+        var card: IdentityKind?
         switch action {
         case .fitness: win = .gym
-        case .boxing: win = .boxing
+        case .boxing:
+            guard let identity else { return nil }
+            win = .boxing
+            card = identity
         default: return nil
         }
         guard left.timeIntervalSince(arrived) >= visitMinimum else { return nil }
-        return EarnedWin(win: win, source: win.source(at: arrived, calendar: calendar), at: left)
+        return EarnedWin(win: win, source: win.source(at: arrived, calendar: calendar), at: left, card: card)
     }
 }
 
@@ -138,6 +173,10 @@ public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
     public var itemID: String?
     /// The character whose cans or item this is.
     public var persona: Persona
+    // Kept as the raw name, like `ModeCards.identityName`, so an older build writes an unknown card back.
+    /// The raw `IdentityKind` name of the card a `boxing` win was earned with; `nil` on other entries and
+    /// on entries from before identity cards.
+    public var cardName: String?
     public var createdAt: Date
     public var updatedAt: Date
     public var updatedBy: String
@@ -151,6 +190,7 @@ public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
         win: Win? = nil,
         itemID: String? = nil,
         persona: Persona = .haku,
+        card: IdentityKind? = nil,
         deviceID: String
     ) {
         self.schemaVersion = Self.currentSchemaVersion
@@ -161,6 +201,7 @@ public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
         self.win = win
         self.itemID = itemID
         self.persona = persona
+        self.cardName = card?.rawValue
         self.createdAt = at
         self.updatedAt = at
         self.updatedBy = deviceID
@@ -169,27 +210,40 @@ public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
 
     // The id comes from the win and its source (a workout id, a night, an invite), not the character,
     // so importing the same win again finds the existing entry and one win never pays both characters.
+    // Wins sharing a cap share the id too, so the gym and exercise wins earn once a day together.
     /// Cans earned for `win` by `persona`, identified by `source`.
+    /// - Parameter card: the identity card a `boxing` win was earned with.
     public static func earned(
         _ win: Win,
         source: String,
         at: Date,
         persona: Persona = .haku,
+        card: IdentityKind? = nil,
         deviceID: String
     ) -> CanEntry {
         CanEntry(
-            id: .derived(from: "win:\(win.rawValue):\(source)"),
+            id: .derived(from: "win:\(win.capGroup.rawValue):\(source)"),
             kind: .earned,
             at: at,
             cans: win.cans,
             win: win,
             persona: persona,
+            card: win == .boxing ? card : nil,
             deviceID: deviceID
         )
     }
 
+    // Issue #279. Entries from before identity cards count for the card their character had then.
+    /// The identity card this entry was earned with: its own, else its character's card from before
+    /// identity cards; `nil` when the card is unknown to this build.
+    public var card: IdentityKind? {
+        guard let cardName else { return ModeCards.legacy(for: persona).identity }
+        return IdentityKind(rawValue: cardName)
+    }
+
     private enum CodingKeys: String, CodingKey {
         case schemaVersion, id, kind, at, cans, win, itemID, persona, createdAt, updatedAt, updatedBy, deletedAt
+        case cardName = "card"
     }
 
     // An unknown kind or win throws, so the ledger keeps the raw record instead of guessing.
@@ -209,6 +263,7 @@ public struct CanEntry: Codable, Identifiable, Equatable, Sendable {
         persona =
             try values.decodeIfPresent(Persona.self, forKey: .persona)
             ?? itemID.flatMap(ShopItem.item)?.persona ?? .haku
+        cardName = try values.decodeIfPresent(String.self, forKey: .cardName)
         createdAt = try values.decodeIfPresent(Date.self, forKey: .createdAt) ?? at
         updatedAt = try values.decodeIfPresent(Date.self, forKey: .updatedAt) ?? createdAt
         updatedBy = try values.decodeIfPresent(String.self, forKey: .updatedBy) ?? "unknown"
@@ -303,6 +358,12 @@ public struct CanLedger: RecordLog, Equatable {
     public func count(_ win: Win) -> Int {
         active.filter { $0.kind == .earned && $0.win == win }.count
     }
+
+    /// How many times `win` was earned, only with identity card `card` when it isn't `nil`.
+    public func count(_ win: Win, card: IdentityKind?) -> Int {
+        guard let card else { return count(win) }
+        return active.filter { $0.kind == .earned && $0.win == win && $0.card == card }.count
+    }
 }
 
 /// Where an item is worn or shown.
@@ -320,6 +381,14 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     public struct Keepsake: Equatable, Sendable {
         public var win: Win
         public var count: Int
+        /// The identity card whose wins count, `nil` when any count.
+        public var card: IdentityKind?
+
+        init(win: Win, count: Int, card: IdentityKind? = nil) {
+            self.win = win
+            self.count = count
+            self.card = card
+        }
     }
 
     public var id: String
@@ -341,7 +410,12 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(id: "gloves.pink", slot: .gloves, title: "霓虹粉拳套", price: 30),
         ShopItem(id: "room.plant", slot: .room, title: "房间绿植", price: 10),
         ShopItem(id: "room.bag", slot: .room, title: "房间小沙袋", price: 25),
-        ShopItem(id: "gloves.gold", slot: .gloves, title: "金拳套", keepsake: Keepsake(win: .boxing, count: 10)),
+        ShopItem(
+            id: "gloves.gold",
+            slot: .gloves,
+            title: "金拳套",
+            keepsake: Keepsake(win: .boxing, count: 10, card: .boxing)
+        ),
         ShopItem(
             id: "keepsake.headband.runner",
             slot: .headband,
@@ -372,7 +446,7 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             id: "kuro.racket.gold",
             slot: .gloves,
             title: "金色网球拍",
-            keepsake: Keepsake(win: .boxing, count: 10),
+            keepsake: Keepsake(win: .boxing, count: 10, card: .tennis),
             persona: .kuro
         ),
     ]

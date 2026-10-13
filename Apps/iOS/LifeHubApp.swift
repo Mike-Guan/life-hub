@@ -50,6 +50,7 @@ struct LifeHubApp: App {
         let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
         let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
         let widgets = WidgetBridge(container: container, bedtime: bedtime)
+        widgets.work = ModeRules.stored(in: AppGroup.defaults)
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
         let needs = NeedTracker()
@@ -72,7 +73,8 @@ struct LifeHubApp: App {
         // Only a changed mode reloads, since background widget reloads have a daily budget. The watch gets
         // the current scenes either way, since it asked because it just opened.
         WatchSync.shared.onWatchCheck {
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
+            let work = ModeRules.stored(in: AppGroup.defaults)
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults), rules: work) {
                 Dogfood.note("settle", "手表打开，\(settled.reason)，切到\(settled.mode.title)")
                 widgets.sync(mode: store, energy: energy)
                 WidgetCenter.shared.reloadAllTimelines()
@@ -172,7 +174,8 @@ struct LifeHubApp: App {
             // Mike may have changed location access in Settings while away.
             placeMonitor.checkAccess(places)
             // A missed or held leave still ends work when Mike opens the app in the evening.
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
+            let work = ModeRules.stored(in: AppGroup.defaults)
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults), rules: work) {
                 Dogfood.note("settle", "\(settled.reason)，切到\(settled.mode.title)")
             }
             syncWidgets()
@@ -207,6 +210,7 @@ struct LifeHubApp: App {
         }
         .onChange(of: rules) {
             rules.store(in: AppGroup.defaults)
+            widgets.work = rules
             Task { await scheduleOffWork() }
             // The work-hours Screen Time watch follows the work hours.
             screenTimeError = Self.restartScrollWatch()
@@ -313,8 +317,8 @@ struct LifeHubApp: App {
 
     // The ledger counts each source once, so re-reading the same workouts earns nothing new.
     private func earnWins() {
-        for earned in Win.wins(in: needs.workouts) {
-            growth.record(earned.win, source: earned.source, at: earned.at)
+        for earned in Win.wins(in: needs.workouts, identity: .picked(for: persona)) {
+            growth.record(earned.win, source: earned.source, at: earned.at, card: earned.card)
         }
         // Getting up after an invite is noted by whichever process judged it; the can is earned here.
         let moments = ChangeLog.stored(in: AppGroup.defaults).moments
@@ -425,8 +429,9 @@ struct LifeHubApp: App {
             }
             presence.record(place, entered: entered, at: .now)
             presence.store(in: AppGroup.defaults)
-            if !entered, let arrived, let visit = Win.visit(place.action, from: arrived, to: .now) {
-                growth.record(visit.win, source: visit.source, at: visit.at)
+            let identity = IdentityKind.picked(for: growth.persona)
+            if !entered, let arrived, let visit = Win.visit(place.action, from: arrived, to: .now, identity: identity) {
+                growth.record(visit.win, source: visit.source, at: visit.at, card: visit.card)
             }
             let rules = ModeRules.stored(in: AppGroup.defaults)
             let decision: ModeDecision?
@@ -440,7 +445,7 @@ struct LifeHubApp: App {
                 decision = nil
             }
             // Place comes first: a leave that was held or came early still ends work once it's evening.
-            let made = decision ?? store.settle(presence: presence)
+            let made = decision ?? store.settle(presence: presence, rules: rules)
             let outcome = made.map { "切到\($0.mode.title)" } ?? "不切（\(Self.keptBecause(store: store, rules: rules))）"
             Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
             needs.refresh(
