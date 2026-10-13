@@ -13,7 +13,7 @@ struct ShopView: View {
 
     // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
     // promises a reward the app can't give yet. Add a win here when its source is wired.
-    static let liveWins: [Win] = [.boxing, .run5k, .gym, .daylight, .earlySleep]
+    static let liveWins: [Win] = [.boxing, .run5k, .exercise, .daylight, .earlySleep]
 
     var body: some View {
         ScrollView {
@@ -82,7 +82,9 @@ struct ShopView: View {
     }
 
     private var footer: String {
-        let wins = Self.liveWins.map { "\($0.shopTitle(for: persona)) +\($0.cans)" }.joined(separator: "，")
+        let wins = Self.liveWins.compactMap { win in
+            win.shopTitle(for: persona).map { "\($0) +\(win.cans)" }
+        }.joined(separator: "，")
         return "能量罐只靠真的做到才有：\(wins)。不过期，也不会被扣。"
     }
 
@@ -179,7 +181,7 @@ struct ShopView: View {
     private func keepsakeRow(_ item: ShopItem) -> some View {
         let isOwned = owned.contains(item.id)
         let keepsake = item.keepsake
-        let count = keepsake.map { min(ledger.count($0.win), $0.count) } ?? 0
+        let count = keepsake.map { min(ledger.count($0.win, card: $0.card), $0.count) } ?? 0
         let goal = keepsake?.count ?? 1
         return HStack(spacing: 10) {
             ShopItemIcon(item: item)
@@ -188,7 +190,7 @@ struct ShopView: View {
                 HStack {
                     Text(item.title)
                     Spacer()
-                    Text(isOwned ? "已拥有" : "\(keepsake?.win.shopTitle(for: persona) ?? "") \(count)/\(goal)")
+                    Text(isOwned ? "已拥有" : "\(keepsake?.title(for: persona) ?? "") \(count)/\(goal)")
                         .foregroundStyle(Toy.muted)
                 }
                 .font(Toy.body(14, weight: .heavy))
@@ -220,17 +222,34 @@ struct ShopView: View {
 }
 
 extension Win {
-    /// How `persona`'s shop names the win.
-    func shopTitle(for persona: Persona) -> String {
+    // Issue #279: the identity card's win carries the card's name, so it reads right for every card.
+    /// How `persona`'s shop names the win; `nil` for the identity card's win when no card is picked.
+    func shopTitle(for persona: Persona) -> String? {
         switch self {
-        case .gym: "健身"
-        case .boxing: persona == .kuro ? "网球日" : "周日拳击"
+        case .gym: "去健身房"
+        case .boxing: IdentityKind.picked(for: persona)?.title
         case .run5k: "跑完 5 km"
         case .gotUp: "被叫起来出门"
         case .daylight: "晒太阳"
         case .earlySleep: "按时睡"
         case .plannedTask: "做完定好的事"
+        case .exercise: "运动 30 分钟"
         }
+    }
+}
+
+extension ShopItem.Keepsake {
+    /// What the keepsake counts, as `persona`'s shop names it: the card's name for a card's keepsake.
+    func title(for persona: Persona) -> String {
+        card?.title ?? win.shopTitle(for: persona) ?? ""
+    }
+}
+
+extension IdentityKind {
+    // Until the card editor saves cards (#273), every install keeps its character's card from before.
+    /// The identity card the user picked, `nil` when none.
+    static func picked(for persona: Persona) -> IdentityKind? {
+        (ModeCards.stored(in: AppGroup.defaults) ?? .legacy(for: persona)).identity
     }
 }
 
