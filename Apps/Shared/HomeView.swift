@@ -194,27 +194,31 @@ struct HomeView: View {
                         .foregroundStyle(Toy.ink)
                 }
 
-                // Why RUNNER looks the way it does: leaving work, the activity, bedtime, then the need, then energy.
-                TimelineView(.everyMinute) { context in
-                    let state = bedtime.state(at: context.date)
-                    let active = activeNeed(at: context.date)
-                    // Energy has its own row below, so it never hides behind another line.
-                    let why = NeedEngine.whyLine(need: active, energy: nil, bedtime: state)
-                    let workLine = moment(at: context.date).flatMap(HakuLines.scene(for:)).map {
-                        HakuLines.line($0, at: context.date, persona: persona)
+                // UI 审核 2026-10-13: energy sits close under the tagline, not like a caption for the cards.
+                VStack(alignment: .leading, spacing: 4) {
+                    // Why RUNNER looks this way: leaving work, the activity, bedtime, then the need, then energy.
+                    TimelineView(.everyMinute) { context in
+                        let state = bedtime.state(at: context.date)
+                        let active = activeNeed(at: context.date)
+                        // Energy has its own row below, so it never hides behind another line.
+                        let why = NeedEngine.whyLine(need: active, energy: nil, bedtime: state)
+                        let workLine = moment(at: context.date).flatMap(HakuLines.scene(for:)).map {
+                            HakuLines.line($0, at: context.date, persona: persona)
+                        }
+                        let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
+                        let leftWork = HakuLines.offWorkUntil(store.log, now: context.date)
+                        let offWork = leftWork.map { HakuLines.offWorkLine(for: persona, until: $0, work: rules) }
+                        let activityLine = activity(at: context.date)?.reason(for: persona)
+                        if let line = offWork ?? activityLine ?? workLine ?? notice ?? sunday ?? why {
+                            Text(line)
+                                .font(Toy.body(13, weight: .bold))
+                                .foregroundStyle(Toy.muted)
+                        }
                     }
-                    let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
-                    let leftWork = HakuLines.offWorkUntil(store.log, now: context.date)
-                    let offWork = leftWork.map { HakuLines.offWorkLine(for: persona, until: $0, work: rules) }
-                    let activityLine = activity(at: context.date)?.reason(for: persona)
-                    if let line = offWork ?? activityLine ?? workLine ?? notice ?? sunday ?? why {
-                        Text(line)
-                            .font(Toy.body(13, weight: .bold))
-                            .foregroundStyle(Toy.muted)
-                    }
-                }
 
-                energyRow(reading)
+                    energyRow(reading)
+                }
+                .padding(.top, -12)
 
                 ModeSwitcher(current: store.current, persona: persona) { mode in
                     switchTo(mode)
@@ -319,26 +323,38 @@ struct HomeView: View {
     // KURO holds things low in front of her, so her bubble sits above her head with its tail pointing down to her.
     /// Where today's energy comes from. Only a guess from sleep can be corrected, from its 不对？ button.
     // 干预策略 §6 (2026-10-13): Mike found no card behind the long press, so the entry moved here.
+    // UI 审核 2026-10-13: the whole row is the tap target, and it is 44 pt tall with or without the button,
+    // so the cards below never jump.
     @ViewBuilder private func energyRow(_ reading: EnergyReading?) -> some View {
-        HStack(spacing: 8) {
-            Text(reading?.reasons.first ?? "今天没有睡眠数据")
-                .font(Toy.body(13, weight: .bold))
-                .foregroundStyle(Toy.muted)
-            if let reading, reading.source != .selfReport {
-                Button {
-                    checkError = nil
-                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
-                } label: {
-                    Text("不对？")
-                        .font(Toy.body(12, weight: .heavy))
-                        .foregroundStyle(Toy.ink)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 3)
-                        .background(Capsule().fill(Toy.card))
-                        .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+        let text = Text(reading?.reasons.first ?? "今天没有睡眠数据")
+            .font(Toy.body(13, weight: .bold))
+            .foregroundStyle(Toy.muted)
+        if let reading, reading.source != .selfReport {
+            Button {
+                checkError = nil
+                withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
+            } label: {
+                HStack(spacing: 8) {
+                    text
+                    // The rounded font draws a narrow question mark, so the full-width one uses the system font.
+                    HStack(spacing: 0) {
+                        Text("不对").font(Toy.body(12, weight: .heavy))
+                        Text("？").font(.system(size: 12, weight: .heavy))
+                    }
+                    .foregroundStyle(Toy.ink)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 3)
+                    .background(Capsule().fill(Toy.card))
+                    .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+                    Spacer(minLength: 0)
                 }
-                .buttonStyle(.plain)
+                .frame(minHeight: 44, alignment: .top)
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text("不对？"))
+        } else {
+            text.frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
         }
     }
 
