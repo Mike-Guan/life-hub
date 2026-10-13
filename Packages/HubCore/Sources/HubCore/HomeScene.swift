@@ -163,7 +163,8 @@ public struct HomeSceneInputs {
             home: home(at: date),
             stiff: sit?.isStiff(mode: mode, at: date) ?? false,
             now: date,
-            work: rules
+            work: rules,
+            rules: NeedRules.standard.following(rules)
         )
     }
 
