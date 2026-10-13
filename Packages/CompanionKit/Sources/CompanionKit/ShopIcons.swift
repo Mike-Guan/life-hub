@@ -96,7 +96,7 @@ struct ItemPicture: Equatable {
             parts = peace ? [.peaceHand] : [.sparkle]
             crop = peace ? CGRect(x: 77, y: 48, width: 40, height: 40) : CGRect(x: 3, y: 14, width: 20, height: 20)
         case .top, .fullSet:
-            // Clothes have no parts until UI draws them; the shop keeps them off the shelf until then.
+            // Placeholder: UI 一组 replaces this when drawing the clothes (map §11). Undrawn clothes stay off the shelf.
             parts = []
             crop = CGRect(x: 23, y: 60, width: 74, height: 74)
         }
