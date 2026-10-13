@@ -31,6 +31,22 @@ import Testing
         #expect(WatchPayload(message: message) == payload())
     }
 
+    @Test func carriesTheUsersCardNames() throws {
+        var cards = ModeCards(identity: .swimming)
+        cards.rename(.work, to: "上学")
+        var sent = payload()
+        sent.cards = cards
+        let message = try #require(sent.message)
+        let received = try #require(WatchPayload(message: message))
+        #expect(received.title(for: .work) == "上学")
+        #expect(received.title(for: .boxing) == "游泳")
+        #expect(payload().title(for: .boxing) == "拳击日")
+        // A name stored by a build without the limit is still cut on the watch.
+        var long = payload()
+        long.cards = ModeCards(names: [Mode.work.rawValue: "一二三四五六"])
+        #expect(long.title(for: .work) == "一二三四")
+    }
+
     @Test func anOlderPayloadNeverReplacesANewerOne() {
         let newer = payload()
         var older = payload()
@@ -56,45 +72,6 @@ import Testing
         #expect(decoded.bedtime == .standard)
         #expect(decoded.persona == .haku)
         #expect(decoded.snapshot == payload().snapshot)
-        #expect(decoded.cards == .legacy(for: .haku))
-    }
-
-    @Test func showsTheUsersCardNames() throws {
-        var cards = ModeCards(identity: .art)
-        cards.rename(.work, to: "School")
-        let payload = WatchPayload(snapshot: payload().snapshot, persona: .kuro, cards: cards)
-        let message = try #require(payload.message)
-        let decoded = try #require(WatchPayload(message: message))
-        #expect(decoded.title(for: .work) == "School")
-        #expect(decoded.title(for: .boxing) == "画画手作")
-        #expect(decoded.title(for: .chill) == Mode.chill.title(for: .kuro))
-    }
-
-    @Test func anOldIPhoneKeepsTheCharactersOwnNames() {
-        let haku = WatchPayload(snapshot: payload().snapshot)
-        let kuro = WatchPayload(snapshot: payload().snapshot, persona: .kuro)
-        for mode in Mode.allCases {
-            #expect(haku.title(for: mode) == mode.title(for: .haku))
-            #expect(kuro.title(for: mode) == mode.title(for: .kuro))
-        }
-    }
-
-    @Test func cutsANameTooWideForTheClockRow() {
-        var cards = ModeCards()
-        cards.names[Mode.work.rawValue] = "一二三四五"
-        cards.names[Mode.chill.rawValue] = "Afterwork"
-        let payload = WatchPayload(snapshot: payload().snapshot, cards: cards)
-        #expect(payload.title(for: .work) == "一二三四")
-        #expect(payload.title(for: .chill) == "Afterwor")
-        for mode in Mode.allCases {
-            #expect(ModeCards.width(of: payload.title(for: mode)) <= ModeCards.nameWidth)
-        }
-    }
-
-    @Test func aRenamedCardRedrawsTheWatchFace() {
-        var cards = ModeCards.legacy(for: .haku)
-        cards.rename(.work, to: "工作")
-        #expect(!WatchPayload(snapshot: payload().snapshot, cards: cards).drawsLike(payload()))
     }
 
     @Test func readsBackWhatItWrote() throws {

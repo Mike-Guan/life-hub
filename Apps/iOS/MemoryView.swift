@@ -89,23 +89,24 @@ struct MemoryView: View {
                     .frame(minWidth: 44, minHeight: 44)
             }
 
-            section("学到的习惯") {
-                ForEach(habits, id: \.habit) { habit in
-                    HStack(spacing: 10) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("\(habit.title)：\(habit.days)")
-                                .font(Toy.body(15, weight: .heavy))
-                            Text(habit.isLearned ? "从你去的日子学的" : "默认的，还在学")
-                                .font(Toy.body(12))
-                                .foregroundStyle(Toy.muted)
-                        }
-                        Spacer()
-                        if habit.isLearned {
+            // PM 2026-10-13: only what was really learned, so the section waits until something is.
+            if !habits.isEmpty {
+                section("学到的习惯") {
+                    ForEach(habits, id: \.habit) { habit in
+                        HStack(spacing: 10) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("\(habit.title)：\(habit.days)")
+                                    .font(Toy.body(15, weight: .heavy))
+                                Text("从你去的日子学的")
+                                    .font(Toy.body(12))
+                                    .foregroundStyle(Toy.muted)
+                            }
+                            Spacer()
                             deleteButton("忘掉") { asking = .habit(habit) }
                         }
                     }
+                    note("忘掉后从你之后的日子重新学。")
                 }
-                note("忘掉后回到默认，再从你之后的日子重新学。")
             }
 
             section("长期记得的事") {
@@ -233,7 +234,7 @@ struct MemoryView: View {
 
     private func warning(_ item: Forget) -> String {
         switch item {
-        case .habit: "回到默认，再慢慢重新学。"
+        case .habit: "忘掉后从你之后的日子重新学。"
         case .decisions: "包括你说过「不对」的记录。删了不能恢复。"
         case .everything:
             "习惯、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。"

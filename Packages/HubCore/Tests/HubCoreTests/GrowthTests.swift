@@ -41,27 +41,110 @@ import Testing
             workout("lift-1", .strength, minutes: 45),
             workout("lift-2", .strength, minutes: 25),
             workout("lift-short", .strength, minutes: 5),
-            workout("walk", .other, minutes: 90),
+            workout("unknown", .other, minutes: 90),
         ]
-        let wins = Win.wins(in: workouts, calendar: calendar)
-        #expect(wins.map(\.win) == [.boxing, .run5k, .gym, .gym])
+        let wins = Win.wins(in: workouts, identity: .boxing, calendar: calendar)
+        #expect(wins.map(\.win) == [.boxing, .run5k, .exercise, .gym, .gym])
         let boxingSource = Win.boxing.source(at: at, calendar: calendar)
-        #expect(wins[0] == EarnedWin(win: .boxing, source: boxingSource, at: at + 3600))
+        #expect(wins[0] == EarnedWin(win: .boxing, source: boxingSource, at: at + 3600, card: .boxing))
         // Two lifts on one day share a source, so the ledger counts the gym once.
-        #expect(wins[2].source == wins[3].source)
+        #expect(wins[3].source == wins[4].source)
         let store = GrowthStore(fileURL: nil, deviceID: "t")
-        for win in wins { store.record(win.win, source: win.source, at: win.at) }
-        #expect(store.ledger.count(.gym) == 1)
+        for win in wins { store.record(win.win, source: win.source, at: win.at, card: win.card) }
+        // The 30-minute run came first, so it took the day's shared gym and exercise can.
+        #expect(store.ledger.count(.exercise) == 1)
+        #expect(store.ledger.count(.gym) == 0)
+        #expect(store.ledger.balance == Win.boxing.cans + Win.run5k.cans + Win.exercise.cans)
     }
 
-    @Test func onlyBoxingRunningAndStrengthEarn() {
-        let earning: Set<WorkoutSummary.Kind> = [.boxing, .running, .strength]
-        let workouts = WorkoutSummary.Kind.allCases.map { workout($0.rawValue, $0, minutes: 90, meters: 10_000) }
-        let wins = Win.wins(in: workouts)
-        #expect(wins.count == earning.count)
-        let others = workouts.filter { !earning.contains($0.kind) }
-        #expect(others.count == WorkoutSummary.Kind.allCases.count - earning.count)
-        #expect(Win.wins(in: others).isEmpty)
+    @Test func anyWorkoutOfHalfAnHourEarnsExerciseExceptWalks() {
+        let workouts = WorkoutSummary.Kind.allCases.map { workout($0.rawValue, $0, minutes: 30) }
+        let wins = Win.wins(in: workouts, identity: nil)
+        let exercised = Set(wins.filter { $0.win == .exercise }.map(\.source))
+        #expect(exercised.count == 1)
+        let kinds = Set(WorkoutSummary.Kind.allCases).subtracting([.strength, .walking, .other])
+        #expect(wins.filter { $0.win == .exercise }.count == kinds.count)
+        #expect(wins.filter { $0.win == .gym }.count == 1)
+        #expect(!wins.contains { $0.win == .boxing })
+        #expect(Win.wins(in: [workout("short", .swimming, minutes: 29)], identity: nil).isEmpty)
+    }
+
+    @Test func theIdentityCardsWorkoutsEarnItsWinInsteadOfExercise() {
+        for identity in IdentityKind.allCases {
+            for kind in identity.workouts {
+                let wins = Win.wins(in: [workout("w", kind, minutes: 30)], identity: identity)
+                #expect(wins.map(\.win) == [.boxing])
+                #expect(wins.first?.card == identity)
+                #expect(Win.wins(in: [workout("w", kind, minutes: 29)], identity: identity).isEmpty)
+            }
+        }
+        // Boxing with the tennis card is plain exercise.
+        let boxed = Win.wins(in: [workout("w", .boxing, minutes: 60)], identity: .tennis)
+        #expect(boxed.map(\.win) == [.exercise])
+    }
+
+    @Test func gymAndExerciseShareOneCanADay() {
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        let gym = Win.gym.source(at: at)
+        #expect(Win.exercise.source(at: at) == gym)
+        store.record(.gym, source: gym, at: at)
+        store.record(.exercise, source: Win.exercise.source(at: at), at: at)
+        #expect(store.ledger.balance == Win.gym.cans)
+        #expect(store.ledger.count(.gym) == 1)
+        #expect(store.ledger.count(.exercise) == 0)
+    }
+
+    @Test func cardPlacesEarnTheCardsWinAndNeedACard() {
+        let left = at + Win.visitMinimum
+        let visit = Win.visit(.boxing, from: at, to: left, identity: .swimming)
+        #expect(visit?.win == .boxing)
+        #expect(visit?.card == .swimming)
+        #expect(Win.visit(.boxing, from: at, to: left, identity: nil) == nil)
+        #expect(Win.visit(.fitness, from: at, to: left, identity: nil)?.win == .gym)
+        #expect(Win.visit(.fitness, from: at, to: left, identity: nil)?.card == nil)
+    }
+
+    @Test func goldKeepsakesCountOnlyTheirOwnCard() throws {
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        let gloves = try item("gloves.gold")
+        for week in 0..<9 { store.record(.boxing, source: "box-\(week)", at: at, card: .boxing) }
+        for week in 0..<5 { store.record(.boxing, source: "swim-\(week)", at: at, card: .swimming) }
+        #expect(store.remaining(for: gloves) == 1)
+        #expect(store.ledger.count(.boxing) == 14)
+        #expect(store.ledger.count(.boxing, card: .swimming) == 5)
+        #expect(store.record(.boxing, source: "swim-5", at: at, card: .swimming).isEmpty)
+        #expect(store.record(.boxing, source: "box-9", at: at, card: .boxing) == [gloves])
+        // The second character's racket counts tennis only.
+        store.persona = .kuro
+        let racket = try item("kuro.racket.gold")
+        #expect(store.remaining(for: racket) == 10)
+        store.record(.boxing, source: "tennis-0", at: at, card: .tennis)
+        #expect(store.remaining(for: racket) == 9)
+    }
+
+    @Test func entriesWithoutACardCountForTheCharactersOldCard() throws {
+        let json = """
+            {"id": "6F1D2A4C-3B5E-4C7D-8E9F-0A1B2C3D4E5F", "kind": "earned", "at": 0, "cans": 5,
+             "win": "boxing", "persona": "kuro"}
+            """
+        let entry = try JSONDecoder().decode(CanEntry.self, from: Data(json.utf8))
+        #expect(entry.cardName == nil)
+        #expect(entry.card == .tennis)
+        var haku = entry
+        haku.persona = .haku
+        #expect(haku.card == .boxing)
+        var unknown = entry
+        unknown.cardName = "fencing"
+        #expect(unknown.card == nil)
+        let saved = try JSONDecoder().decode(CanEntry.self, from: JSONEncoder().encode(unknown))
+        #expect(saved.cardName == "fencing")
+    }
+
+    @Test func onlyIdentityWinsKeepTheirCard() {
+        let gym = CanEntry.earned(.gym, source: "g", at: at, card: .boxing, deviceID: "t")
+        #expect(gym.cardName == nil)
+        let box = CanEntry.earned(.boxing, source: "b", at: at, card: .ski, deviceID: "t")
+        #expect(box.cardName == "ski")
     }
 
     @Test func workoutKindsDecodeAndUnknownOnesBecomeOther() throws {
@@ -85,6 +168,7 @@ import Testing
             #expect(win.cap == .day)
             #expect(win.source(at: at, calendar: calendar) != win.source(at: at + day, calendar: calendar))
         }
+        #expect(Win.allCases.filter { $0.capGroup != $0 } == [.exercise])
         #expect(Win.run5k.source(at: at, calendar: calendar) != Win.gym.source(at: at, calendar: calendar))
     }
 
