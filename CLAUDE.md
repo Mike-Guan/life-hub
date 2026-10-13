@@ -219,6 +219,7 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   Before the second user: go private and move CI to a self-hosted runner on Mike's Mac.
 - 2026-10-13: PM (hard-coded schedule review #4, #8): leaving the office ends work from an hour before the
   end of work hours; the evening, overtime, gym invite and drowsy times follow the work hours too.
-- 2026-10-13: Mike approved the pre-friend-test polish list (15:55Z): Mike's own routines (bedtime 23:30,
-  Tue-Thu gym, Saturday run, 副业 ¥ look) stop being defaults. New installs start unset and learn only from
-  their own wins; existing installs keep their data.
+- 2026-10-13: Mike approved the pre-friend-test polish list (15:55Z). Its row 写死 Mike 作息: onboarding asks
+  for bedtime and work days; gym, run and identity-card days are learned from records and trigger nothing
+  until learned. Mike's own routines (bedtime 23:30, Tue-Thu gym, Saturday run) stop being defaults.
+  Existing installs keep their data.
