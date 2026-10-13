@@ -74,9 +74,11 @@ enum HealthMotion {
         case .traditionalStrengthTraining, .functionalStrengthTraining, .coreTraining: .strength
         case .boxing, .kickboxing: .boxing
         case .martialArts, .wrestling, .fencing: .martialArts
-        case .tennis, .badminton, .squash, .racquetball, .tableTennis, .pickleball: .racket
+        // 活动分类 v1: the tennis card is tennis alone; badminton and the other racket sports are 球类.
+        case .tennis: .racket
         case .basketball, .soccer, .volleyball, .baseball, .softball, .americanFootball, .rugby, .hockey,
-            .handball, .lacrosse, .cricket, .australianFootball, .golf:
+            .handball, .lacrosse, .cricket, .australianFootball, .golf, .badminton, .squash, .racquetball,
+            .tableTennis, .pickleball:
             .ball
         case .yoga, .flexibility, .pilates, .mindAndBody, .taiChi, .cooldown, .preparationAndRecovery, .barre:
             .yoga
