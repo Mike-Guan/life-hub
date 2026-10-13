@@ -69,6 +69,26 @@ import Testing
         #expect(SceneMove.welcome(.phone, pose: RunnerPose(face: .mid)) == nil)
     }
 
+    // HAKU-03 (UI 审核 2026-10-13): the end eases back to rest instead of cutting in one frame.
+    @Test(arguments: [WelcomeScene.quiet, .sofa, .glance])
+    func theEndSettlesWithoutACut(_ scene: WelcomeScene) {
+        let length = scene.length(cards: 2, cans: 3)
+        let open = scene.open(cards: 2, cans: 3)
+        let frames = stride(from: length - 1.5, to: length, by: 0.05).map {
+            RunnerPose.welcome(scene, time: $0, open: open, face: .mid, length: length)
+        }
+        for (a, b) in zip(frames, frames.dropFirst()) {
+            // About 2 pt a frame on a 180 pt card.
+            #expect(abs(b.shift - a.shift) <= 1.3 && abs(b.headDy - a.headDy) <= 1.3)
+            #expect(abs(b.bounce - a.bounce) <= 1.3)
+            #expect(abs((b.welcome?.exit ?? 0) - (a.welcome?.exit ?? 0)) <= 0.35)
+        }
+        let last = RunnerPose.welcome(scene, time: length - 0.001, open: open, face: .mid, length: length)
+        #expect(abs(last.shift) < 0.1 && abs(last.headDy) < 0.1 && abs(last.lean) < 0.1)
+        #expect((last.welcome?.exit ?? 0) > 0.99)
+        if let sofa = SceneMove.welcome(.sofaArm, pose: last) { #expect(sofa.opacity < 0.01) }
+    }
+
     // HAKU-17 (UI 审核 2026-10-08): at the office the short scenes play at the desk, never on the sofa.
     @Test(arguments: [WelcomeScene.glance, .quiet])
     func atWorkTheShortScenesPlayAtTheDesk(_ scene: WelcomeScene) {
