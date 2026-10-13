@@ -114,6 +114,31 @@ import Testing
         #expect(decide(.leftOffice, day, at: date(5, 17, 30))?.mode == .chill)
     }
 
+    @Test func leavingTheOfficeEndsWorkFromAnHourBeforeWorkEnds() {
+        var five = ModeRules.standard
+        five.workEndMinute = 17 * 60
+        #expect(ModeRules.standard.offWorkFromMinute == 17 * 60 + 30)
+        #expect(five.offWorkFromMinute == 16 * 60)
+        let day = log((.work, .location, date(5, 9)))
+        let early = ModeEngine.decide(.leftOffice, log: day, now: date(5, 16, 5), rules: five, calendar: calendar)
+        #expect(early?.mode == .chill)
+        #expect(decide(.leftOffice, day, at: date(5, 17)) == nil)
+        let home = away(from: .office, arrived: date(5, 9), left: date(5, 16, 5))
+        let settled = ModeEngine.settle(
+            log: day,
+            presence: home,
+            now: date(5, 16, 30),
+            rules: five,
+            calendar: calendar
+        )
+        #expect(settled?.mode == .chill)
+        #expect(settle(day, home, at: date(5, 16, 30)) == nil)
+        let left = log((.work, .location, date(5, 9)), (.chill, .location, date(5, 16, 5)))
+        let line = HakuLines.offWorkUntil(left, now: date(5, 16, 10), work: five, calendar: calendar)
+        #expect(line == date(5, 16, 35))
+        #expect(HakuLines.offWorkUntil(left, now: date(5, 16, 10), calendar: calendar) == nil)
+    }
+
     func settle(_ log: ModeLog, _ presence: PlacePresence, at now: Date) -> ModeDecision? {
         ModeEngine.settle(log: log, presence: presence, now: now, calendar: calendar)
     }

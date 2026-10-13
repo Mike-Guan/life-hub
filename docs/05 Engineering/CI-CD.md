@@ -20,6 +20,7 @@ tags: [engineering, ci, cd, quality]
 | 覆盖率门槛 | HubCore（数据契约、mode 逻辑）的行覆盖率低于 80% | Mac |
 | App 编译 | iOS 和 Mac 两个 App 都要能编译，警告当错误 | Mac |
 | 手表启动 | 手表 App 在模拟器上开不起来、20 秒后进程没了，或者 10 秒里 CPU 忙到 80% 以上（HAKU 和 KURO 各开一次，截图作为产物上传）。脚本 `scripts/watch-launch-check.sh` | Mac |
+| 隐私清单 | 编出来的 App 或扩展里没有 `PrivacyInfo.xcprivacy`，或清单写了追踪、收集数据（隐私标签是“不收集数据”）。每个 target 的清单在 `Apps/<target>/PrivacyInfo.xcprivacy`，只声明 UserDefaults（理由 CA92.1 本 App、1C8F.1 App Group）。加联网、CloudKit 或 SDK 前先改清单和隐私标签。脚本 `scripts/privacy-check.sh` | Mac |
 | Companion 画法 | `RunnerArt.swift` 和 `runner-v5-layers.svg` 不一致（改了 SVG 没重新生成，或手改了生成文件） | Linux，几秒 |
 | 角色配色 | App 代码里用了不带角色的模式色（`Mode.color`，那是 HAKU 的），会让 KURO 显示 HAKU 的颜色。改用 `Mode.color(for: persona)`；故意只给 HAKU 的行，行尾写 `// HAKU only: 原因`。脚本 `scripts/persona-colors.sh` | Linux，几秒 |
 

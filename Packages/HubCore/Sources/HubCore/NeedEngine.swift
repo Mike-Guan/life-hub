@@ -51,9 +51,9 @@ public struct WorkoutSummary: Codable, Equatable, Sendable {
         case boxing
         /// Other martial arts, wrestling and fencing.
         case martialArts
-        /// Tennis, badminton, squash, table tennis and other racket sports.
+        /// Tennis.
         case racket
-        /// Team and ball sports.
+        /// Team and ball sports, badminton and the racket sports other than tennis.
         case ball
         /// Yoga, stretching, pilates and recovery.
         case yoga
@@ -156,6 +156,21 @@ public struct NeedRules: Codable, Equatable, Sendable {
         celebrateRunMeters: 5000,
         celebrateBoxing: 30 * 60
     )
+
+    // PM, 2026-10-13 (写死作息排查 v0 #8): these follow the user's work hours. With the standard 9:30 to
+    // 18:30 they are the times from Issue #23.
+    /// These rules with the times that follow work hours taken from `work`: the evening and overtime from
+    /// 30 minutes after work ends, the gym invite from 1 to 2 hours after it ends, and drowsy at the latest
+    /// 4.5 hours after work starts.
+    public func following(_ work: ModeRules) -> NeedRules {
+        var rules = self
+        rules.eveningStartMinute = work.workEndMinute + 30
+        rules.overtimeMinute = work.workEndMinute + 30
+        rules.gymInviteStartMinute = work.workEndMinute + 60
+        rules.gymInviteEndMinute = work.workEndMinute + 120
+        rules.drowsyStartMinute = work.workStartMinute + 4 * 60 + 30
+        return rules
+    }
 
     public init(
         eveningStartMinute: Int,

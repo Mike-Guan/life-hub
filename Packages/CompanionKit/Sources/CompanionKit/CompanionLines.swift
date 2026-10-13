@@ -31,9 +31,9 @@ enum CompanionLines {
         if let life { return lines(for: life) }
         return switch mode {
         case .work: ["又上班。", "人类为什么发明周一。", "……在听。"]
-        case .chill: ["回来了？", "饭呢。", "Monster 第二罐不许开。"]
+        case .chill: ["回来了？", "饭呢。", "第二罐不许开。"]
         case .boxing: ["来，左右直拳。", "今天把沙袋打哭。", "头带系紧了吗？"]
-        case .money: ["¥¥ 在路上。", "数罐子中。", "……"]
+        case .money: ["别吵，在弄。", "再一点点。", "……"]
         case nil: ["先选一个 mode 吧。"]
         }
     }
@@ -59,11 +59,11 @@ enum CompanionLines {
         // In flow HAKU stays silent.
         case .flow: ["……"]
         case .lateCoding: ["代码明天还在。"]
-        case .shooting: ["光线不错。", "这张可以。", "¥¥ 在路上。"]
+        case .shooting: ["光线不错。", "这张可以。"]
         case .collapsed: ["你也活着回来了啊。", "……先让我趴五分钟。"]
         case .blanket: ["今天就这样吧。", "毯子分你一半。"]
         case .morning: ["又要上班了。", "耳机……耳机去哪了。"]
-        case .timeToLeave: ["……公司还在等你。", "唉。"]
+        case .timeToLeave: ["……该出门了吧。", "唉。"]
         case .stiff: ["……我腰要断了。", "起来。我先起了。", "ちょっと休憩。"]
         case .packingUp: ["快了。", "别催，在收。"]
         }
@@ -76,7 +76,7 @@ enum CompanionLines {
         case .snack: ["……没吃。", "什么零食，没看见。"]
         case .drawing: ["没画什么。", "不许看。"]
         case .practice: ["没在练。", "就是活动一下手。"]
-        case .tidying: ["周日了，收拾一下。", "让一让，擦到你了。"]
+        case .tidying: ["……收拾一下。", "让一让，擦到你了。"]
         }
     }
 
@@ -146,7 +146,7 @@ enum CompanionLines {
     private static func state(_ moment: CompanionMoment) -> String {
         switch moment {
         case .slacking: "从电脑屏幕后面探头"
-        case .drowsy: "犯困，开了一罐 Monster"
+        case .drowsy: "犯困，开了一罐能量饮料"
         case .overtime: "加班，趴在桌上"
         case .gymInvite: "背着运动包站在门口"
         case .heading: "背着运动包出发了"
