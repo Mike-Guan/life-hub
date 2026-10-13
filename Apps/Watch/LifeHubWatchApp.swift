@@ -147,7 +147,7 @@ struct WatchHomeView: View {
         .overlay(alignment: .topLeading) {
             GeometryReader { proxy in
                 if !Self.cleanFrame {
-                    ModeChip(mode: mode, persona: payload.persona)
+                    ModeChip(mode: mode, payload: payload)
                         .frame(height: proxy.safeAreaInsets.top)
                         .padding(.leading, 14)
                         .offset(y: -proxy.safeAreaInsets.top)
@@ -203,14 +203,14 @@ private struct WatchPager<First: View, Second: View>: View {
 /// The mode in a small white pill, "还没有模式" without one. How long it has run is on the second page.
 private struct ModeChip: View {
     let mode: Mode?
-    let persona: Persona
+    let payload: WatchPayload
 
     var body: some View {
-        Text(mode?.title(for: persona) ?? "还没有模式")
+        Text(mode.map(payload.title(for:)) ?? "还没有模式")
             .font(Toy.body(12, weight: .heavy))
             .foregroundStyle(Toy.ink)
             .lineLimit(1)
-            // Mode names are short enough to sit left of the clock at full size.
+            // `WatchPayload.title(for:)` keeps names short enough to sit left of the clock at full size.
             .fixedSize()
             .padding(.horizontal, 8)
             .padding(.vertical, 2)
@@ -230,9 +230,9 @@ private struct TodayPage: View {
         VStack(alignment: .leading, spacing: 8) {
             row("模式") {
                 if let since = snapshot.since {
-                    Text("\(mode.title(for: payload.persona)) · \(Text(since, style: .relative))")
+                    Text("\(payload.title(for: mode)) · \(Text(since, style: .relative))")
                 } else {
-                    Text(mode.title(for: payload.persona))
+                    Text(payload.title(for: mode))
                 }
             }
             if let energy = snapshot.energy(at: date) {

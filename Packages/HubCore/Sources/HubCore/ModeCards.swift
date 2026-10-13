@@ -43,6 +43,42 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         }
     }
 
+    /// The card's short English code, for the home header.
+    public var code: String {
+        switch self {
+        case .boxing: "BOXING"
+        case .tennis: "TENNIS"
+        case .fitness: "GYM"
+        case .swimming: "SWIM"
+        case .yoga: "YOGA"
+        case .dance: "DANCE"
+        case .ball: "BALL"
+        case .music: "MUSIC"
+        case .art: "ART"
+        case .study: "STUDY"
+        case .outdoor: "OUTDOOR"
+        case .ski: "SKI"
+        }
+    }
+
+    /// The SF Symbol for the card's mode button.
+    public var symbol: String {
+        switch self {
+        case .boxing: "figure.boxing"
+        case .tennis: "figure.tennis"
+        case .fitness: "dumbbell.fill"
+        case .swimming: "figure.pool.swim"
+        case .yoga: "figure.yoga"
+        case .dance: "figure.dance"
+        case .ball: "basketball.fill"
+        case .music: "guitars.fill"
+        case .art: "paintpalette.fill"
+        case .study: "book.fill"
+        case .outdoor: "figure.hiking"
+        case .ski: "figure.skiing.downhill"
+        }
+    }
+
     // Skiing has no group of its own yet: Health's snow sports fall under `.outdoor` with hiking,
     // so a hike would switch to the ski card. It gets its workout kind with the switching rules.
     /// The watch workouts that switch to this card. Empty when only a place or a tap does.
@@ -189,6 +225,31 @@ public struct ModeCards: Codable, Equatable, Sendable {
         return mode.title(for: persona)
     }
 
+    /// The card's short English code: the identity card's own, else the character's default.
+    public func code(for mode: Mode, persona: Persona) -> String {
+        guard let identity = pickedIdentity(for: mode, persona: persona) else { return mode.code(for: persona) }
+        return identity.code
+    }
+
+    // PM writes each card's lines (Issue #273); until then a card the character has no lines for says its name.
+    /// The line under the home card: the character's own for her default cards, else a plain one.
+    public func tagline(for mode: Mode, persona: Persona) -> String {
+        guard let identity = pickedIdentity(for: mode, persona: persona) else { return mode.tagline(for: persona) }
+        return "\(identity.title)中"
+    }
+
+    // 活动分类 v1 §4: without an identity card there is no empty slot.
+    /// The modes the user can switch to: all four, or the three common cards without an identity card.
+    public var modes: [Mode] {
+        identityName == nil ? Mode.allCases.filter { $0 != .boxing } : Mode.allCases
+    }
+
+    /// The identity card in `mode`'s slot when it differs from `persona`'s default one, else `nil`.
+    public func pickedIdentity(for mode: Mode, persona: Persona) -> IdentityKind? {
+        guard mode == .boxing, let identity, identity != Self.legacy(for: persona).identity else { return nil }
+        return identity
+    }
+
     /// Renames the common card in `mode`'s slot, cut to `nameWidth`; an empty name restores the default.
     /// - Returns: `false`, changing nothing, for the identity slot.
     @discardableResult
@@ -240,6 +301,20 @@ public struct ModeCards: Codable, Equatable, Sendable {
     public func card(for kind: WorkoutSummary.Kind) -> IdentityKind? {
         guard let identity, identity.workouts.contains(kind) else { return nil }
         return identity
+    }
+
+    // PM #20: a new install starts with the generic cards and no identity card. Saving them on the first
+    // launch keeps an install that later gains records from turning into the legacy cards.
+    /// Saves the first cards when none are saved: `persona`'s cards from before Issue #273 for an install
+    /// that already has records, else the generic ones.
+    public static func adopt(in defaults: UserDefaults, persona: Persona, existingInstall: Bool) {
+        guard defaults.data(forKey: defaultsKey) == nil else { return }
+        (existingInstall ? legacy(for: persona) : ModeCards()).store(in: defaults)
+    }
+
+    /// The cards saved in `defaults`, or the generic cards when none are saved.
+    public static func current(in defaults: UserDefaults, persona: Persona) -> ModeCards {
+        stored(in: defaults) ?? ModeCards()
     }
 
     /// The cards saved in `defaults`, or `nil` when none are saved or they can't be read.

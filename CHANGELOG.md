@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
+  4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
 - The watch's clock row is dark in every mode, so the white time stays readable. With no mode yet, the second
   preset character keeps her off-work look and a line asks you to pick a mode on the iPhone.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
