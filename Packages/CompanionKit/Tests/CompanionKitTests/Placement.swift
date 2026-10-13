@@ -266,13 +266,15 @@ enum Placement {
         .tapHeart: .fx,
     ]
 
-    // §9.3, plus HAKU's jacket: the gold chain, towel and apron are worn over it.
+    // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
+    // the swimming cheer's ear tap over the earring.
     /// Things that may share a place on purpose.
     static let allowed: [Place: [Set<String>]] = [
         .eyes: [["眼睛", "deskGlasses"]],
         .neck: [["面罩", "帽兜"]],
         .deskR: [["deskMonitor", "罐子堆"]],
-        .earL: [["耳机", "earringNeon"]],
+        .cheek: [["bandage", "bathBlush"]],
+        .earL: [["耳机", "earringNeon"], ["cheerEarTap", "earringNeon"]],
         .torso: [["外套", "金链"], ["外套", "towel"], ["外套", "apron"]],
     ]
 
@@ -307,8 +309,6 @@ enum Placement {
     static let hakuKnown: [String: String] = [
         "bandage+mic": "§5-2 面罩放下、耳机还在时创可贴和麦克风重叠",
         "bath_bubbles+room_pc": "§5-5 洗澡不藏房间显示器",
-        "cheek: bandage+bathBlush": "新（工程二组 2026-10-13）：洗完澡的脸红和创可贴同在脸颊",
-        "earL: cheerEarTap+earringNeon": "新（工程二组 2026-10-13）：游泳庆祝点耳朵，压在耳环上",
         "earL: cheerEarTap+耳机": "新（工程二组 2026-10-13）：游泳庆祝点耳朵，压在左耳罩上",
         "earR: peaceHand+耳机": "§5-4 剪刀手和右耳罩",
         "handL: cheekHand+拳套": glovesProp,
