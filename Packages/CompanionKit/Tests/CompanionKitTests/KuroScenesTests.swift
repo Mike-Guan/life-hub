@@ -35,8 +35,8 @@ import Testing
         #expect(!Self.parts(look, .invite(time: 0.1)).contains(.inviteHand))
         #expect(!Self.parts(look, .invite(time: 3)).contains(.inviteHand))
         // She looks toward the door on the left while pointing, and back at you after.
-        #expect(KuroScene.invite(time: 1).shift(.eyesOpen).width < 0)
-        #expect(KuroScene.invite(time: 3).shift(.eyesOpen).width == 0)
+        #expect(KuroScene.invite(time: 1).eyesDx < 0)
+        #expect(KuroScene.invite(time: 3).eyesDx == 0)
     }
 
     // 位置规划图 v0 §10: her pointing hand must not touch the room items in the left corner.
