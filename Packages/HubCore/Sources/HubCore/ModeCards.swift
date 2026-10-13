@@ -93,8 +93,9 @@ public struct ModeCards: Codable, Equatable, Sendable {
     public static let currentSchemaVersion = 1
     static let defaultsKey = "modeCards"
 
-    /// The longest card name, in characters, that fits the watch's small label.
-    public static let nameLimit = 6
+    // UI, 2026-10-13: the watch shows the name in the clock row at full size.
+    /// The widest card name that fits the watch's clock row: 4 Chinese characters or 8 Latin letters.
+    public static let nameWidth = 8
     /// How many 副业 states the user can pick.
     public static let sideStateLimit = 3
 
@@ -167,14 +168,29 @@ public struct ModeCards: Codable, Equatable, Sendable {
         return mode.title(for: persona)
     }
 
-    /// Renames the common card in `mode`'s slot; an empty name restores the default.
-    /// - Returns: `false`, changing nothing, for the identity slot or a name longer than `nameLimit`.
+    /// Renames the common card in `mode`'s slot, cut to `nameWidth`; an empty name restores the default.
+    /// - Returns: `false`, changing nothing, for the identity slot.
     @discardableResult
     public mutating func rename(_ mode: Mode, to name: String) -> Bool {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard mode != .boxing, trimmed.count <= Self.nameLimit else { return false }
+        guard mode != .boxing else { return false }
+        let trimmed = Self.fitted(name.trimmingCharacters(in: .whitespacesAndNewlines))
         names[mode.rawValue] = trimmed.isEmpty ? nil : trimmed
         return true
+    }
+
+    /// How wide `text` is on the watch: ASCII counts 1, anything else 2.
+    public static func width(of text: String) -> Int {
+        text.reduce(0) { $0 + ($1.isASCII ? 1 : 2) }
+    }
+
+    /// `text` cut to at most `nameWidth`.
+    public static func fitted(_ text: String) -> String {
+        var result = ""
+        for character in text {
+            guard width(of: result + String(character)) <= nameWidth else { break }
+            result.append(character)
+        }
+        return result
     }
 
     /// Sets the 副业 states, keeping the first `sideStateLimit` distinct ones.
