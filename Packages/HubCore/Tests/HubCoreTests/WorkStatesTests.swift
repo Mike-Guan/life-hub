@@ -85,6 +85,32 @@ import Testing
         #expect(office(nil, at: date(5, 14)) == nil)
     }
 
+    @Test func eveningTimesFollowTheWorkHours() {
+        #expect(NeedRules.standard.following(.standard) == .standard)
+        var early = ModeRules.standard
+        early.workStartMinute = 8 * 60
+        early.workEndMinute = 17 * 60
+        let rules = NeedRules.standard.following(early)
+        #expect(rules.eveningStartMinute == 17 * 60 + 30)
+        #expect(rules.overtimeMinute == 17 * 60 + 30)
+        #expect(rules.gymInviteStartMinute == 18 * 60)
+        #expect(rules.gymInviteEndMinute == 19 * 60)
+        #expect(rules.drowsyStartMinute == 12 * 60 + 30)
+        func office(at now: Date) -> CompanionMoment? {
+            MomentEngine.office(
+                mode: .work,
+                since: date(5, 11),
+                now: now,
+                work: early,
+                rules: rules,
+                calendar: calendar
+            )
+        }
+        // Arriving at 11:00, drowsy from 12:30 instead of 14:00; overtime from 17:30.
+        #expect(office(at: date(5, 12, 30)) == .drowsy)
+        #expect(office(at: date(5, 17, 30)) == .overtime)
+    }
+
     @Test func momentsComeInOrder() {
         func moment(_ hustle: SideHustle?, _ need: CompanionNeed?, departing: Bool = false) -> CompanionMoment? {
             MomentEngine.moment(

@@ -133,7 +133,7 @@ struct WatchHomeView: View {
             GeometryReader { proxy in
                 if !Self.cleanFrame {
                     // Offered only the room left of the clock, a long name shrinks instead of running into it.
-                    ModeChip(mode: mode, persona: payload.persona)
+                    ModeChip(mode: mode, payload: payload)
                         .frame(
                             width: proxy.size.width * ModeChip.widthShare - 14,
                             height: proxy.safeAreaInsets.top,
@@ -198,10 +198,10 @@ private struct ModeChip: View {
     static let widthShare: CGFloat = 0.64
 
     let mode: Mode?
-    let persona: Persona
+    let payload: WatchPayload
 
     var body: some View {
-        Text(mode?.title(for: persona) ?? "还没有模式")
+        Text(mode.map(payload.title(for:)) ?? "还没有模式")
             .font(Toy.body(12, weight: .heavy))
             .foregroundStyle(Toy.ink)
             .lineLimit(1)
@@ -224,9 +224,9 @@ private struct TodayPage: View {
         VStack(alignment: .leading, spacing: 8) {
             row("模式") {
                 if let since = snapshot.since {
-                    Text("\(mode.title(for: payload.persona)) · \(Text(since, style: .relative))")
+                    Text("\(payload.title(for: mode)) · \(Text(since, style: .relative))")
                 } else {
-                    Text(mode.title(for: payload.persona))
+                    Text(payload.title(for: mode))
                 }
             }
             if let energy = snapshot.energy(at: date) {
