@@ -15,9 +15,10 @@ import Testing
 
     @Test func kuroRenamesOnlyHerOwnSlots() {
         #expect(Mode.boxing.title(for: .kuro) == "网球日")
-        #expect(Mode.money.title(for: .kuro) == "备课")
+        #expect(Mode.money.title(for: .kuro) == Mode.money.title)
+        #expect(ModeCards.legacy(for: .kuro).title(for: .money, persona: .kuro) == "备课")
         #expect(Mode.boxing.code(for: .kuro) == "TENNIS")
-        #expect(Mode.money.code(for: .kuro) == "DESK")
+        #expect(Mode.money.code(for: .kuro) == Mode.money.code)
         #expect(Mode.work.code(for: .kuro) == Mode.work.code)
         #expect(Mode.work.title(for: .kuro) == Mode.work.title)
         #expect(Mode.chill.title(for: .kuro) == "下班")

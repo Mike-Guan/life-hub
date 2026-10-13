@@ -36,16 +36,14 @@ extension Mode {
         // UI-32 (PM 2026-10-08): KURO's chill is plain 下班; work keeps HAKU's name.
         case (.kuro, .chill): "下班"
         case (.kuro, .boxing): "网球日"
-        case (.kuro, .money): "备课"
         default: title
         }
     }
 
-    /// The mode's short English code for `persona`: KURO's identity and side slots are TENNIS and DESK.
+    /// The mode's short English code for `persona`: KURO's identity slot is TENNIS.
     public func code(for persona: Persona) -> String {
         switch (persona, self) {
         case (.kuro, .boxing): "TENNIS"
-        case (.kuro, .money): "DESK"
         default: code
         }
     }
@@ -54,10 +52,10 @@ extension Mode {
     public func tagline(for persona: Persona) -> String {
         switch (persona, self) {
         case (.haku, _): tagline
-        case (.kuro, .work): "面罩戴好，平板在手"
-        case (.kuro, .chill): "面罩摘下，热饮捧着"
-        case (.kuro, .boxing): "头带扎好，拍子拎上"
-        case (.kuro, .money): "眼镜戴上，红笔就位"
+        case (.kuro, .work): "……开始了"
+        case (.kuro, .chill): "热饮，窝着"
+        case (.kuro, .boxing): "拍线刚调过"
+        case (.kuro, .money): "一件一件来"
         }
     }
 }

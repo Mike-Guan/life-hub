@@ -61,6 +61,46 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         }
     }
 
+    // 卡片标语与代码 v0 §2. Cards still without lines say their name.
+    /// The line under the home card in `persona`'s voice.
+    public func tagline(for persona: Persona) -> String {
+        let lines: (haku: String, kuro: String)?
+        switch self {
+        case .boxing: lines = ("头带系紧", "拳套系好了")
+        case .tennis: lines = ("球拍拿好", "拍线刚调过")
+        case .fitness: lines = ("包背好了", "水瓶装满了")
+        case .study: lines = ("书摊开了", "眼镜戴上")
+        case .art: lines = ("本子翻开了", "笔在手上")
+        case .outdoor: lines = ("鞋带系紧", "慢慢走")
+        case .swimming: lines = ("泳帽塞好了", "毛巾带上")
+        case .yoga: lines = ("垫子卷好了", "呼——吸")
+        case .ball: lines = ("球打满气了", "帮你看着")
+        case .dance, .music, .ski: lines = nil
+        }
+        guard let lines else { return "\(title)中" }
+        return persona == .kuro ? lines.kuro : lines.haku
+    }
+
+    // 卡片标语与代码 v0 §2: the invite on the learned identity day. Cards still without one use a plain line.
+    /// The identity day's invite in `persona`'s voice.
+    public func invite(for persona: Persona) -> String {
+        let lines: (haku: String, kuro: String)?
+        switch self {
+        case .boxing: lines = ("拳套我都戴好了，你随意啊。", "……拳套系好了。去吗。")
+        case .tennis: lines = ("球拍在门口。去不去随你。", "今天网球。……拍子带好了。")
+        case .fitness: lines = ("包我背好了。", "……包在门口。")
+        case .study: lines = ("书我装好了。", "……今天也去看会儿书？")
+        case .art: lines = ("速写本带上了。", "……今天去画吗。")
+        case .outdoor: lines = ("背包我收好了。", "……今天出去走走？")
+        case .swimming: lines = ("泳帽我找到了。", "……毛巾带了吗。")
+        case .yoga: lines = ("垫子卷好了。", "……今天去拉伸吗。")
+        case .ball: lines = ("球我打好气了。", "……今天去打球吗。")
+        case .dance, .music, .ski: lines = nil
+        }
+        guard let lines else { return persona == .kuro ? "……今天去吗。" : "今天\(title)，我准备好了。" }
+        return persona == .kuro ? lines.kuro : lines.haku
+    }
+
     /// The SF Symbol for the card's mode button.
     public var symbol: String {
         switch self {
@@ -169,7 +209,9 @@ public struct ModeCards: Codable, Equatable, Sendable {
     // tennis, every Chill activity and the three 副业 states.
     /// The cards an existing install had with `persona`.
     public static func legacy(for persona: Persona) -> ModeCards {
+        // KURO's 副业 was called 备课 before the cards; it is her name for it now.
         ModeCards(
+            names: persona == .kuro ? [Mode.money.rawValue: "备课"] : [:],
             identity: persona == .kuro ? .tennis : .boxing,
             sideStates: [.vibeCoding, .shooting, .operating]
         )
@@ -231,11 +273,10 @@ public struct ModeCards: Codable, Equatable, Sendable {
         return identity.code
     }
 
-    // PM writes each card's lines (Issue #273); until then a card the character has no lines for says its name.
-    /// The line under the home card: the character's own for her default cards, else a plain one.
+    /// The line under the home card: the identity card's own in the identity slot, else the mode's.
     public func tagline(for mode: Mode, persona: Persona) -> String {
-        guard let identity = pickedIdentity(for: mode, persona: persona) else { return mode.tagline(for: persona) }
-        return "\(identity.title)中"
+        guard mode == .boxing, let identity else { return mode.tagline(for: persona) }
+        return identity.tagline(for: persona)
     }
 
     // 活动分类 v1 §4: without an identity card there is no empty slot.
