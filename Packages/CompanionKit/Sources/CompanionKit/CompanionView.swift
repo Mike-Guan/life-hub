@@ -302,7 +302,9 @@ public struct CompanionView: View {
                     let life = idleLife(mode, at: frameClock ?? context.date)
                     let motion = idleMotion(mode, life: life, time: time)
                     // HAKU-04: a new bit at home starts with a quick squash instead of parts just swapping.
-                    let turn = reduceMotion ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
+                    // HAKU-08/10: on a dimmed watch screen the body comes to rest before the frame freezes.
+                    let still = reduceMotion || dozing
+                    let turn = still ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
                     RunnerFigure(
                         mode: mode,
                         pose: glance(
@@ -311,9 +313,10 @@ public struct CompanionView: View {
                     )
                     .saturation(vitals.saturation)
                     .brightness(vitals.brightness)
-                    .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                    .offset(y: reduceMotion ? 0 : motion.dy)
+                    .rotationEffect(.degrees(still ? 0 : motion.angle), anchor: .bottom)
+                    .offset(y: still ? 0 : motion.dy)
                     .scaleEffect(x: 1 + 0.07 * turn, y: 1 - 0.1 * turn, anchor: .bottom)
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: dozing)
                 }
             } keyframes: { _ in
                 KeyframeTrack {
@@ -1256,13 +1259,15 @@ struct WatchFigureFrame: ViewModifier {
     @ViewBuilder func body(content: Content) -> some View {
         if isEnabled {
             // The approved C layout shows him from the chest up and the screen edge crops the rest. At the full
-            // width he filled the screen and his hair ran into the mode chip, so the card width is scaled to 80%,
-            // centered and lowered (values tried on Mike's watch). The card padding is undone here.
+            // width he filled the screen and his hair ran into the mode chip, so the card width is scaled down,
+            // centered and lowered. The card padding is undone here.
+            // UI 审核 2026-10-13: the clock band (up to 55 pt) cut the hair flat and the screen edge cut the props,
+            // so the card is smaller and lower: the hair clears the band and the chest props stay in view.
             GeometryReader { proxy in
-                let width = proxy.size.width * 0.8 + 24
+                let width = proxy.size.width * 0.75 + 24
                 content
                     .frame(width: width, height: width * 2, alignment: .top)
-                    .offset(x: (proxy.size.width - width) / 2, y: 24)
+                    .offset(x: (proxy.size.width - width) / 2, y: 38)
             }
         } else {
             content
