@@ -43,7 +43,7 @@ import Testing
     }
 
     @Test func eachCardHasItsOwnIdleMove() {
-        #expect(KuroIdle.pool(.box) == [.ears, .strap, .gloves])
+        #expect(KuroIdle.pool(.box) == [.ears, .strap, .gloves, .ponytail])
         #expect(KuroIdle.pool(.fitness).contains(.lap))
         #expect(KuroIdle.pool(.study).contains(.highlight))
         #expect(KuroIdle.pool(.art).contains(.draw))

@@ -58,8 +58,8 @@ enum KuroIdle: CaseIterable, Sendable {
         case .chill: [.ears, .blow, .aside]
         case .tennis: [.ears, .racket, .ponytail]
         case .desk: [.ears, .glasses, .pen]
-        // B cards get their two base-outfit moves with the base-outfit batch; until then the ears stand in.
-        case .box: [.ears, .strap, .gloves]
+        // K1-K3 for boxing (待机动作 补齐规格 v0); the hop under K3 is her boxing look's idle motion.
+        case .box: [.ears, .strap, .gloves, .ponytail]
         case .fitness: [.ears, .ponytail, .lap]
         case .study: [.ears, .aside, .highlight]
         case .art: [.ears, .draw]
