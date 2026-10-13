@@ -198,7 +198,10 @@ public struct CompanionView: View {
                 .animation(.easeInOut(duration: 0.25), value: mode)
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
 
+            // HAKU-05 (UI 审核 2026-10-13): an automatic switch comes with no animation, so the figure cut over at
+            // once. Every mode change now fades in 0.3 s, whoever made it.
             character
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: mode)
                 .padding(.top, 24)
                 .padding(.horizontal, 12)
                 .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
