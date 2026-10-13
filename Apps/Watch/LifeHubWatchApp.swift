@@ -192,9 +192,9 @@ private struct WatchPager<First: View, Second: View>: View {
 
 /// The mode in a small white pill, "还没有模式" without one. How long it has run is on the second page.
 private struct ModeChip: View {
-    // On the 40 mm watch "10:09" starts at about 58% of the width; 8 wide letters at full size reach past it.
+    // On the 40 mm watch "10:09" starts at about 67% of the width; 8 wide letters at full size reach past it.
     /// The share of the screen width the chip may take, its leading inset included.
-    static let widthShare: CGFloat = 0.55
+    static let widthShare: CGFloat = 0.64
 
     let mode: Mode?
     let payload: WatchPayload
