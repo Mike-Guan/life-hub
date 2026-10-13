@@ -77,6 +77,8 @@ struct KuroPose: Sendable {
     var idle: KuroIdle?
     /// How far into `idle` she is, 0..<1.
     var idleProgress = 0.0
+    /// The home scene she is playing, if any: the invite, a walk or the bath.
+    var scene: KuroScene?
 
     /// The resting pose for `look` at `energy` (0-100, or nil when unknown); `bedtime` makes her sleepy.
     init(look: KuroLook, energy: Double?, bedtime: Bedtime = .off) {
@@ -156,6 +158,7 @@ struct KuroFigure: View {
             visible.insert(item.part)
             if let replaced = item.replaces { visible.remove(replaced) }
         }
+        pose.scene?.dress(look, items: pose.items, &visible)
         if let tap = pose.tap {
             apply(tap, progress: pose.tapProgress, to: &visible)
             // The rubbing hand comes up on her arm, in her look's sleeve.
@@ -257,6 +260,9 @@ public struct KuroView: View {
     let activity: CompanionActivity?
     let moment: CompanionMoment?
     let overtimeUntil: Date?
+    let invite: String?
+    let walking: HubPlace.Kind?
+    let bath: Bool
     let style: CompanionStyle
     let wearing: Set<KuroItem>
     let event: CompanionEvent?
@@ -267,6 +273,8 @@ public struct KuroView: View {
     let onTap: (() -> Void)?
     /// Called once she has answered a welcome back event.
     let onWelcomeDone: (() -> Void)?
+    /// Called after she shows the towel round her head on a tap during bath time.
+    let onBathDone: (() -> Void)?
 
     @Environment(\.frameClock) private var frameClock
     @Environment(\.companionHold) private var hold
@@ -293,6 +301,10 @@ public struct KuroView: View {
     @State private var unboxItem: KuroItem?
     /// When the last unboxing ended, so her idle eases back in instead of jumping.
     @State private var unboxEnd: Date?
+    @State private var inviteStart: Date?
+    @State private var bathStart: Date?
+    @State private var dryStart: Date?
+    @State private var lookBackStart: Date?
     /// Her idle time since her pace last changed; nil until it does.
     @State private var idlePace: IdlePace?
     // Id of the last unboxing, shared with HAKU's view so each plays once.
@@ -319,6 +331,9 @@ public struct KuroView: View {
     ///   - moment: the moment of the day, which picks her lines unless an activity does. In the work look,
     ///     `.overtime` sits her at the desk with her chin on her hand.
     ///   - overtimeUntil: the late end of the work day, shown on a sign above her head during `.overtime`.
+    ///   - invite: today's invite, written by the app. While set she points at the door and says it.
+    ///   - walking: the place she just left; while set she walks with small steps.
+    ///   - bath: bath time; she carries her towel and clothes off to the bath, and a tap shows her washed.
     ///   - style: `.watch` gives a tap a light tap on the wrist instead of a line.
     ///   - wearing: ids of her shop items she wears; each shows only in its own look.
     ///   - event: a one-off animation. `.unlock` with one of her items plays the unboxing once per id;
@@ -329,6 +344,7 @@ public struct KuroView: View {
     ///   - cheer: increment to play her cheer.
     ///   - onTap: called after she reacts to a tap.
     ///   - onWelcomeDone: called once she has answered a `.welcomeBack` event, even one already played.
+    ///   - onBathDone: called after she shows the towel round her head on a tap during bath time.
     public init(
         look: KuroLook,
         energy: Double? = nil,
@@ -337,13 +353,17 @@ public struct KuroView: View {
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
         overtimeUntil: Date? = nil,
+        invite: String? = nil,
+        walking: HubPlace.Kind? = nil,
+        bath: Bool = false,
         style: CompanionStyle = .standard,
         wearing: Set<String> = [],
         event: CompanionEvent? = nil,
         showsBubble: Bool = true,
         cheer: Int = 0,
         onTap: (() -> Void)? = nil,
-        onWelcomeDone: (() -> Void)? = nil
+        onWelcomeDone: (() -> Void)? = nil,
+        onBathDone: (() -> Void)? = nil
     ) {
         self.look = look
         self.energy = energy
@@ -352,6 +372,9 @@ public struct KuroView: View {
         self.activity = activity
         self.moment = moment
         self.overtimeUntil = overtimeUntil
+        self.invite = invite
+        self.walking = walking
+        self.bath = bath
         self.style = style
         // The spin is a celebration, not something she wears.
         self.wearing = KuroItem.items(wearing).subtracting([.spin])
@@ -360,6 +383,7 @@ public struct KuroView: View {
         self.cheer = cheer
         self.onTap = onTap
         self.onWelcomeDone = onWelcomeDone
+        self.onBathDone = onBathDone
     }
 
     public var body: some View {
@@ -376,6 +400,7 @@ public struct KuroView: View {
                 let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate
                 let tap = reaction(at: time)
                 let unbox = unbox(at: time)
+                let homeScene = tap == nil && unbox == nil ? scene(at: time) : nil
                 // Her slot's own move plays between taps; with reduced motion she keeps only the slot's face.
                 let slotMove = tap == nil && unbox == nil && !reduceMotion ? slot?.move(in: look, at: time) : nil
                 let reacting = (tap ?? slotMove).map {
@@ -383,7 +408,8 @@ public struct KuroView: View {
                 }
                 // KURO-04 (UI 审核 2026-10-09): with the watch screen dimmed she dozes, eyes shut and body still,
                 // instead of freezing mid-hop or mid-blink.
-                let pose = dozing ? self.pose.showing(.closed) : unbox != nil ? unboxPose : reacting ?? self.pose
+                let pose =
+                    dozing ? self.pose.showing(.closed) : unbox != nil ? unboxPose : reacting ?? scened(homeScene)
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
                 let still = reduceMotion || unbox != nil || dozing
                 // KURO-16: her idle runs on from where it was when her pace changes, and eases back in after
@@ -392,10 +418,12 @@ public struct KuroView: View {
                 let ease = Self.settle(since: unboxEnd, at: time)
                 // Out being active she bounces like on her tennis day.
                 let loop = slot == .active ? KuroLook.tennis : look
-                let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(loop, time: idleTime)
+                let motion =
+                    sleepy ? IdleMotion.sleeping(time: time) : homeScene?.motion ?? Self.motion(loop, time: idleTime)
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 // Her small idle moves play only in the plain idle.
-                let fidget = still || tap != nil || slot != nil || sleepy ? nil : KuroIdle.at(idleTime, look: look)
+                let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
+                let fidget = busy ? nil : KuroIdle.at(idleTime, look: look)
                 ZStack {
                     KuroFigure(look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget))
                         .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
@@ -472,6 +500,20 @@ public struct KuroView: View {
         .onAppear {
             playEventIfNew()
             finishWelcomeIfNeeded()
+            if invite != nil { startInvite() }
+            if let walking { say(KuroScene.walkLine(from: walking), for: 3) }
+            if bath { startBath() }
+        }
+        .onChange(of: invite) { _, new in
+            if new != nil { startInvite() }
+        }
+        .onChange(of: walking) { _, new in
+            if let new, bedtime == .off { say(KuroScene.walkLine(from: new), for: 3) }
+        }
+        .onChange(of: bath) { _, new in
+            // The view lives for days, so each evening's bath time starts unwashed.
+            dryStart = nil
+            if new { startBath() }
         }
         .onChange(of: event) { _, _ in
             playEventIfNew()
@@ -557,6 +599,11 @@ public struct KuroView: View {
     /// only change the line; too many in a row turn her away.
     private func react() {
         let now = Date.now
+        if style != .watch, unboxStart == nil, reaction(at: now.timeIntervalSinceReferenceDate) == nil,
+            reactInScene(at: now)
+        {
+            return
+        }
         if style == .watch { pokes += 1 }
         if tapKind == .turnAway, reaction(at: now.timeIntervalSinceReferenceDate) != nil { return }
         tapTimes = tapTimes.filter { now.timeIntervalSince($0) < CompanionView.pesterWindow } + [now]
@@ -673,10 +720,78 @@ public struct KuroView: View {
         return slot?.dressing(pose) ?? pose
     }
 
-    /// The fallback body language for her need, activity or moment; none at bedtime.
+    /// The fallback body language for her need, activity or moment; none at bedtime or during a home scene.
     private var slot: KuroSlot? {
-        guard bedtime == .off else { return nil }
+        guard bedtime == .off, invite == nil, walking == nil, !bath else { return nil }
         return KuroSlot(need: need, activity: activity, moment: moment, look: look)
+    }
+
+    /// Her resting pose playing `scene`.
+    private func scened(_ scene: KuroScene?) -> KuroPose {
+        var pose = self.pose
+        pose.scene = scene
+        if let eyes = scene?.eyes { pose.eyes = eyes }
+        return pose
+    }
+
+    /// The home scene playing at `time`, or nil when none is; none at bedtime. A tap's towel comes first, then
+    /// the bath, the walk and the invite, like HAKU.
+    private func scene(at time: TimeInterval) -> KuroScene? {
+        guard bedtime == .off else { return nil }
+        if let dry = dryStart?.timeIntervalSinceReferenceDate, (0..<KuroScene.driedLength).contains(time - dry) {
+            return .dried(time: time - dry)
+        }
+        if bath { return .bath(time: time - (bathStart?.timeIntervalSinceReferenceDate ?? time)) }
+        if let walking {
+            let back = lookBackStart.map { (0..<1.2).contains(time - $0.timeIntervalSinceReferenceDate) } ?? false
+            return .walking(from: walking, time: time, lookingBack: back)
+        }
+        guard invite != nil else { return nil }
+        // Without a start she has already pointed and stands.
+        return .invite(time: time - (inviteStart?.timeIntervalSinceReferenceDate ?? time - 10))
+    }
+
+    /// Answers a tap with the scene's own move; false when no scene is playing.
+    private func reactInScene(at now: Date) -> Bool {
+        guard let scene = scene(at: now.timeIntervalSinceReferenceDate) else { return false }
+        switch scene {
+        case .invite:
+            // Points at the door again, without a word.
+            inviteStart = now.addingTimeInterval(-KuroScene.pointing.lowerBound)
+        case .walking:
+            lookBackStart = now
+        case .bath:
+            dryStart = now
+            say(KuroScene.driedLine, for: 3)
+            Task {
+                try? await Task.sleep(for: .seconds(KuroScene.driedLength))
+                onBathDone?()
+            }
+        case .dried:
+            break
+        }
+        pop += 1
+        return true
+    }
+
+    private func startInvite() {
+        guard bedtime == .off, let invite else { return }
+        inviteStart = .now
+        pop += 1
+        say(invite, for: 5)
+    }
+
+    /// Starts the bath call; she says her line once she has stopped at the edge.
+    private func startBath() {
+        guard bedtime == .off else { return }
+        let start = Date.now
+        bathStart = start
+        bubbleTask?.cancel()
+        bubbleTask = Task {
+            try? await Task.sleep(for: .seconds(KuroScene.bathLineAt))
+            guard !Task.isCancelled, bathStart == start, dryStart == nil else { return }
+            say(KuroScene.bathLine, for: 3)
+        }
     }
 
     /// Her pose while unboxing: acting calm in the new item, with low eyes and a flat mouth.
