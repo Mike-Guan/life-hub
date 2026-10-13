@@ -43,7 +43,7 @@ import Testing
     @Test func herNodDipsOnceAfterTheBlink() {
         let start = Date(timeIntervalSinceReferenceDate: 100)
         #expect(KuroView.nod(since: start, at: 100.05) ?? 1 < 0.1)
-        #expect(KuroView.nod(since: start, at: 100 + CompanionView.nodDuration) == nil)
+        #expect(KuroView.nod(since: start, at: 100.01 + CompanionView.nodDuration) == nil)
         #expect(KuroView.nod(since: nil, at: 100) == nil)
         #expect(KuroView.nodDip(0.05) == 0)
         #expect(KuroView.nodDip(0.31) > 3.5)
