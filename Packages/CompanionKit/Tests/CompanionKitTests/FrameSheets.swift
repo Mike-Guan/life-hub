@@ -176,7 +176,8 @@ struct FrameSheets {
                     Cell(
                         label: String(state.label.dropFirst("\(look.rawValue) 50 ".count).dropLast(" items".count)),
                         conflicts: Placement.conflicts(
-                            in: KuroFigure.parts(for: look, pose: state.pose), spots: Placement.kuro),
+                            in: KuroFigure.parts(for: look, pose: state.pose), spots: Placement.kuro,
+                            forbidden: Placement.kuroForbidden),
                         figure: AnyView(KuroFigure(look: look, pose: state.pose))
                     )
                 }
