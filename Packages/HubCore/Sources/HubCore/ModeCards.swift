@@ -110,6 +110,11 @@ public struct ModeCards: Codable, Equatable, Sendable {
     public var chill: Set<ChillActivity>
     /// The 副业 states tapping the character cycles through, in order. Never empty.
     public var sideStates: [SideHustle]
+    // DW-02: an older build keeps the values only a newer one knows and writes them back.
+    var unknownChill: [String] = []
+    var unknownSideStates: [String] = []
+    // True while `sideStates` holds only the fallback for a list this build couldn't read.
+    var sideStatesFilledIn = false
 
     public init(
         names: [String: String] = [:],
@@ -149,9 +154,25 @@ public struct ModeCards: Codable, Equatable, Sendable {
         identityName = try? values.decodeIfPresent(String.self, forKey: .identityName)
         let chillNames = try? values.decodeIfPresent([String].self, forKey: .chill)
         chill = chillNames.map { Set($0.compactMap(ChillActivity.init(rawValue:))) } ?? Set(ChillActivity.allCases)
+        unknownChill = (chillNames ?? []).filter { ChillActivity(rawValue: $0) == nil }
         let sideNames = (try? values.decodeIfPresent([String].self, forKey: .sideStates)) ?? []
         let states = sideNames.compactMap(SideHustle.init(rawValue:))
         sideStates = states.isEmpty ? [.vibeCoding] : states
+        sideStatesFilledIn = states.isEmpty && !sideNames.isEmpty
+        unknownSideStates = sideNames.filter { SideHustle(rawValue: $0) == nil }
+    }
+
+    /// Encodes the cards, with the values this build doesn't know after the known ones.
+    /// - Throws: `EncodingError` when a value can't be encoded.
+    public func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(schemaVersion, forKey: .schemaVersion)
+        try values.encode(names, forKey: .names)
+        try values.encodeIfPresent(identityName, forKey: .identityName)
+        let chillNames = ChillActivity.allCases.filter(chill.contains).map(\.rawValue)
+        try values.encode(chillNames + unknownChill, forKey: .chill)
+        let known = sideStatesFilledIn && sideStates == [.vibeCoding] ? [] : sideStates.map(\.rawValue)
+        try values.encode(known + unknownSideStates, forKey: .sideStates)
     }
 
     /// The identity card, `nil` when the user picked none or this build doesn't know it.
@@ -203,6 +224,9 @@ public struct ModeCards: Codable, Equatable, Sendable {
         }
         guard !picked.isEmpty else { return false }
         sideStates = picked
+        // The user picked from what this build shows.
+        unknownSideStates = []
+        sideStatesFilledIn = false
         return true
     }
 
