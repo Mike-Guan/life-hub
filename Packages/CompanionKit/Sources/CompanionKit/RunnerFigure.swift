@@ -983,7 +983,7 @@ struct RunnerPose {
     /// and comes back. With `still` only the blink plays.
     mutating func nod(progress p: CGFloat, still: Bool) {
         if p < 0.1 { eyesShut = true }
-        if !still { headDy += 3 * bump(p, from: 0.12, to: 0.5) }
+        if !still { headDy += 3 * Self.bump(p, from: 0.12, to: 0.5) }
     }
 
     /// Staying-home pose at `progress` (0...1): a last look at the door, headset and mask off, then back on the
