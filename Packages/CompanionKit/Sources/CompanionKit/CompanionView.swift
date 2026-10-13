@@ -997,7 +997,7 @@ public struct CompanionView: View {
             }
         }
     }
-    private static let notificationGoodnight = 2.4
+    nonisolated private static let notificationGoodnight = 2.4
 
     // HAKU-18 (UI 审核 2026-10-13): the notification used to loop the whole good night, so the headset went back on
     // every 2.4 s. Now it comes off once and only the breathing, blinks and yawns loop.
