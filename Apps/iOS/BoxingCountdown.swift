@@ -25,10 +25,13 @@ enum BoxingCountdown {
         let state = BoxingActivityAttributes.ContentState(start: start)
         let content = ActivityContent(state: state, staleDate: start)
         do {
-            _ = try Activity.request(attributes: BoxingActivityAttributes(), content: content)
+            let persona = Persona.stored(in: AppGroup.defaults)
+            let cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
+            let attributes = BoxingActivityAttributes(title: cards.activity(for: persona))
+            _ = try Activity.request(attributes: attributes, content: content)
             return nil
         } catch {
-            return "拳击倒计时没能显示：\(error.localizedDescription)"
+            return "倒计时没能显示：\(error.localizedDescription)"
         }
     }
 }

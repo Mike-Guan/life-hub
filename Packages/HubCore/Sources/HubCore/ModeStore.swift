@@ -96,12 +96,15 @@ public final class ModeStore {
     public func autoSwitch(
         _ trigger: ModeTrigger,
         rules: ModeRules = .standard,
+        cards: ModeCards = .legacy(for: .haku),
+        persona: Persona = .haku,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> ModeDecision? {
-        guard let decision = ModeEngine.decide(trigger, log: log, now: now, rules: rules, calendar: calendar) else {
-            return nil
-        }
+        let decision = ModeEngine.decide(
+            trigger, log: log, now: now, rules: rules, cards: cards, persona: persona, calendar: calendar
+        )
+        guard let decision else { return nil }
         return switchTo(decision.mode, source: decision.source, tag: decision.tag, at: now) ? decision : nil
     }
 
