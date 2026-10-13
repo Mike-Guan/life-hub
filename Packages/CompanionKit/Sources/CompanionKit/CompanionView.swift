@@ -43,6 +43,8 @@ public struct CompanionView: View {
     let invite: String?
     /// Increment to play the cheer jump.
     let cheer: Int
+    /// Increment to play the nod after an answer: a blink and a small dip of the head.
+    let nods: Int
     /// `.on` turns RUNNER sleepy; each change to `.on` plays the good-night animation once.
     let bedtime: Bedtime
     /// What HAKU wears from the shop and keepsakes.
@@ -73,6 +75,7 @@ public struct CompanionView: View {
     // Seconds since the reference date of the last good-night animation, shared by every CompanionView.
     @AppStorage("companion.lastGoodnight") private var lastGoodnight: Double = 0
     @State private var celebrationStart: Date?
+    @State private var nodStart: Date?
     @State private var celebrationKind: WorkoutSummary.Kind?
     @State private var inviteJumps = 0
     // Id of the last celebrated workout, shared by every CompanionView so each plays once.
@@ -157,6 +160,7 @@ public struct CompanionView: View {
         bath: Bool = false,
         invite: String? = nil,
         cheer: Int = 0,
+        nods: Int = 0,
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
         style: CompanionStyle = .standard,
@@ -181,6 +185,7 @@ public struct CompanionView: View {
         self.bath = bath
         self.invite = invite
         self.cheer = cheer
+        self.nods = nods
         self.bedtime = bedtime
         self.wardrobe = wardrobe
         self.style = style
@@ -273,6 +278,7 @@ public struct CompanionView: View {
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
         }
+        .onChange(of: nods) { _, _ in nodStart = .now }
         .onChange(of: asleep) { _, new in
             guard style == .watch else { return }
             if new {
@@ -519,6 +525,9 @@ public struct CompanionView: View {
         }
         if let daily { pose.cue(daily, time: time, slap: slap(at: time)) }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
+        if let progress = Self.progress(since: nodStart, at: time, duration: Self.nodDuration) {
+            pose.nod(progress: CGFloat(progress), still: reduceMotion)
+        }
         if let progress = taskDone(at: time) {
             if doneFocus {
                 pose.cheerFocus(progress: progress)
@@ -797,6 +806,8 @@ public struct CompanionView: View {
 
     private static let goodnightDuration = 3.2
     private static let celebrationDuration = 1.6
+    // 「哦。」 stays up 1.6 s; the nod plays inside it (Issue #236, 纠正预览 v6).
+    nonisolated static let nodDuration = 1.6
     private static let offWorkDuration = 4.0
     private static let unlockDuration = 2.8
     private static let stayHomeDuration = 3.2

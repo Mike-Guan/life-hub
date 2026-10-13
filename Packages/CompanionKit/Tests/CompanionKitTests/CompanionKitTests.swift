@@ -182,6 +182,20 @@ import Testing
         #expect(RunnerFigure.baseParts.isSubset(of: parts))
     }
 
+    // Issue #236: 「哦。」 comes with one blink, then a small nod; Reduce Motion keeps only the blink.
+    @Test func theNodBlinksThenDipsTheHead() {
+        var blink = RunnerPose()
+        blink.nod(progress: 0.05, still: false)
+        #expect(blink.eyesShut)
+        var dip = RunnerPose()
+        dip.nod(progress: 0.3, still: false)
+        #expect(!dip.eyesShut && dip.headDy > RunnerPose().headDy + 2)
+        var still = RunnerPose()
+        still.nod(progress: 0.3, still: true)
+        #expect(still.headDy == RunnerPose().headDy)
+        #expect(RunnerFigure.parts(for: .work, pose: blink).contains(.eyesClosed))
+    }
+
     @Test func headsetComesOffDuringGoodnight() {
         let start = RunnerPose.bedtime(time: 0, goodnight: 0.1, liesDown: true)
         let end = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: true)

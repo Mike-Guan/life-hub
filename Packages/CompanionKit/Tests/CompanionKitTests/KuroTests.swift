@@ -40,6 +40,16 @@ import Testing
         #expect(chill.contains(.mouthCat))
     }
 
+    @Test func herNodDipsOnceAfterTheBlink() {
+        let start = Date(timeIntervalSinceReferenceDate: 100)
+        #expect(KuroView.nod(since: start, at: 100.05) ?? 1 < 0.1)
+        #expect(KuroView.nod(since: start, at: 100 + CompanionView.nodDuration) == nil)
+        #expect(KuroView.nod(since: nil, at: 100) == nil)
+        #expect(KuroView.nodDip(0.05) == 0)
+        #expect(KuroView.nodDip(0.31) > 3.5)
+        #expect(KuroView.nodDip(0.6) == 0)
+    }
+
     @Test func energyPicksHerFace() {
         #expect(KuroPose(look: .chill, energy: nil).eyes == .open)
         #expect(KuroPose(look: .tennis, energy: 50).eyes == .bright)
