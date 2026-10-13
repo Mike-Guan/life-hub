@@ -19,7 +19,7 @@ extension FrameSheets {
                 Row(label: "kuro \(look) · 长按特写", start: Self.base) {
                     AnyView(
                         KuroView(look: look, energy: 50, style: .watch)
-                            .scaleEffect(1.8, anchor: UnitPoint(x: 0.5, y: 0.22)).clipped())
+                            .scaleEffect(1.8, anchor: CompanionView.closeUpAnchor(.watch)).clipped())
                 })
         }
         for mode in Mode.allCases {
@@ -27,7 +27,7 @@ extension FrameSheets {
                 Row(label: "haku \(mode.rawValue) · 长按特写", start: Self.base) {
                     AnyView(
                         CompanionView(mode: mode, energy: 50, style: .watch)
-                            .scaleEffect(1.8, anchor: UnitPoint(x: 0.5, y: 0.22)).clipped())
+                            .scaleEffect(1.8, anchor: CompanionView.closeUpAnchor(.watch)).clipped())
                 })
         }
         try write("kuro-watch-closeup", rows, size: CGSize(width: 198, height: 242), frames: 3)
