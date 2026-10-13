@@ -43,6 +43,15 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         }
     }
 
+    /// The activity's name without 日, for sentences such as the countdown and place names.
+    public var activity: String {
+        switch self {
+        case .boxing: "拳击"
+        case .tennis: "网球"
+        default: title
+        }
+    }
+
     /// The card's short English code, for the home header.
     public var code: String {
         switch self {
@@ -294,6 +303,11 @@ public struct ModeCards: Codable, Equatable, Sendable {
         if let name = names[mode.rawValue] { return name }
         if mode == .boxing, let identity { return identity.title }
         return mode.title(for: persona)
+    }
+
+    /// The identity slot's activity for sentences, without 日: the picked card's, else the character's default.
+    public func activity(for persona: Persona) -> String {
+        (identity ?? Self.legacy(for: persona).identity ?? .boxing).activity
     }
 
     /// The card's short English code: the identity card's own, else the character's default.

@@ -27,7 +27,7 @@ enum BoxingCountdown {
         do {
             let persona = Persona.stored(in: AppGroup.defaults)
             let cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
-            let attributes = BoxingActivityAttributes(title: cards.title(for: .boxing, persona: persona))
+            let attributes = BoxingActivityAttributes(title: cards.activity(for: persona))
             _ = try Activity.request(attributes: attributes, content: content)
             return nil
         } catch {

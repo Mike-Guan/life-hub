@@ -81,7 +81,7 @@ extension HubPlace.Kind {
         guard self == .gym, cards.pickedIdentity(for: .boxing, persona: persona) != nil else {
             return title(for: persona)
         }
-        return "\(cards.title(for: .boxing, persona: persona))的地方"
+        return "\(cards.activity(for: persona))的地方"
     }
 }
 
