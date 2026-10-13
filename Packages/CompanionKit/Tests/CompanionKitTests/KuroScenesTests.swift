@@ -48,6 +48,12 @@ import Testing
         for item in [KuroPart.itemFlower, .itemLamp, .itemBag] { #expect(!hand.intersects(Self.box(item)), "\(item)") }
     }
 
+    // UI 审核 2026-10-13 (三个场景 第 2 轮): the flower's tray ran into her body; it keeps 2 units clear.
+    @Test func theFlowerStandsClearOfHer() {
+        let flower = Self.box(.itemFlower).insetBy(dx: -2, dy: -2)
+        for part in [KuroPart.jacketChill, .hairBack, .earL] { #expect(!flower.intersects(Self.box(part)), "\(part)") }
+    }
+
     @Test func walkingPutsDownWhatSheHoldsAndCarriesHerThings() {
         let home = Self.parts(.chill, .walking(from: .home, time: 0, lookingBack: false), items: [.flower])
         #expect(home.contains(.walkPack) && home.contains(.walkStraps) && home.contains(.walkDust))
@@ -76,7 +82,7 @@ import Testing
         #expect(KuroScene.bath(time: 5.7).dx > 0)
         #expect(KuroScene.bath(time: KuroScene.bathLineAt + 2.99).dx == KuroScene.bathEdge)
         // She stays in the frame while she says her line.
-        #expect(KuroScene.bath(time: KuroScene.bathLineAt).dx + 95 < 134)
+        #expect(KuroScene.bath(time: KuroScene.bathLineAt).dx + 97 < 130)
         #expect(Self.parts(.chill, .bath(time: 4.8)).contains(.bathBubbles))
         #expect(!Self.parts(.chill, .bath(time: 2)).contains(.bathBubbles))
         #expect(Self.parts(.chill, .bath(time: 2)).contains(.bathBundle))

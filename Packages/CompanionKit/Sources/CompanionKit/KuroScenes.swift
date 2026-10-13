@@ -26,7 +26,7 @@ enum KuroScene: Equatable, Sendable {
     /// How long she shows the towel round her head after a tap.
     static let driedLength: TimeInterval = 4
     /// How far she walks before stopping at the edge, in SVG units.
-    static let bathEdge: CGFloat = 34
+    static let bathEdge: CGFloat = 30
     /// How far she steps right while pointing, in SVG units.
     static let inviteStep: CGFloat = 9
 
