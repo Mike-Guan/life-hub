@@ -25,8 +25,10 @@ enum UnboxLog {
         AppGroup.defaults.set(ids, forKey: key)
     }
 
-    /// The oldest item of `persona` in `ledger` still to unbox.
+    // An item from a newer build isn't in this catalog. Skipping it, rather than marking it seen,
+    // avoids an empty cover now and keeps its unboxing for the build that knows it.
+    /// The oldest item of `persona` in `ledger` still to unbox that this build's catalog has.
     static func next(in ledger: CanLedger, persona: Persona) -> CanEntry? {
-        ledger.unboxings(seen: seen, persona: persona).first
+        ledger.unboxings(seen: seen, persona: persona).first { $0.itemID.flatMap(ShopItem.item) != nil }
     }
 }
