@@ -6,7 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - The welcome back scene no longer ends with a cut: HAKU settles back over the last second and the sofa,
-  blanket, phone and crate drop a little and fade out.
+  blanket, phone and crate drop a little and fade out. A tap that skips it does the same over 0.3 s.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
   the weekly 5 cans, and its gold keepsake counts that card only. Any other watch workout of 30 minutes (not a
   walk) earns 3 cans, shared with the gym's daily 3. The shop names the card instead of "周日拳击".
