@@ -47,6 +47,8 @@ struct HomeView: View {
     var wardrobe = Wardrobe()
     /// Which character the card draws.
     var persona = Persona.haku
+    /// The name the greeting ends with, `nil` for none.
+    var greetingName: String?
     /// Earned cans, for the traces that stay.
     var ledger = CanLedger()
     /// Shows the wardrobe button on the companion card that calls this, when set.
@@ -87,7 +89,8 @@ struct HomeView: View {
                     cans: cans,
                     onShop: onShop,
                     onSettings: onSettings,
-                    persona: persona
+                    persona: persona,
+                    name: greetingName
                 )
 
                 // PRD section 15: the title shows here only, never on the Lock Screen.
@@ -456,6 +459,7 @@ private struct Header: View {
     let onShop: (() -> Void)?
     let onSettings: (() -> Void)?
     let persona: Persona
+    let name: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -507,12 +511,7 @@ private struct Header: View {
     }
 
     private var greeting: String {
-        let hour = Calendar.current.component(.hour, from: .now)
-        switch hour {
-        case 5..<12: return "GOOD MORNING, MIKE"
-        case 12..<18: return "GOOD AFTERNOON, MIKE"
-        default: return "GOOD EVENING, MIKE"
-        }
+        Greeting.text(hour: Calendar.current.component(.hour, from: .now), name: name)
     }
 
     private var subtitle: String {
