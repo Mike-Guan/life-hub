@@ -93,9 +93,11 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         WidgetSnapshot.timelineDates(after: date, bedtime: bedtime, needTimes: snapshot.needTimes, calendar: calendar)
     }
 
-    /// The name of the card in `mode`'s slot, from the iPhone's cards or the character's defaults.
+    // An older iPhone build may send a name that doesn't fit the watch's clock row.
+    /// The name of the card in `mode`'s slot, from the iPhone's cards or the character's defaults, cut to
+    /// `ModeCards.nameWidth`.
     public func title(for mode: Mode) -> String {
-        (cards ?? .legacy(for: persona)).title(for: mode, persona: persona)
+        ModeCards.fitted((cards ?? .legacy(for: persona)).title(for: mode, persona: persona))
     }
 
     /// The payload as a WatchConnectivity dictionary, `nil` when it can't be encoded.
