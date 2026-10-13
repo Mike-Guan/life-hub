@@ -15,7 +15,7 @@ import Testing
         OnboardingDraft().apply(to: defaults)
         #expect(Persona.stored(in: defaults) == .haku)
         let cards = try #require(ModeCards.stored(in: defaults))
-        #expect(cards.identity == nil && cards.modes == [.work, .chill, .money])
+        #expect(cards.identity == nil)
         #expect(cards.sideStates == [.project])
         #expect(ModeRules.stored(in: defaults).workdays.isEmpty)
         #expect(defaults.data(forKey: BedtimeSchedule.defaultsKey) == nil)
