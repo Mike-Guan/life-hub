@@ -1700,7 +1700,7 @@ struct RunnerFigure: View {
                     .scaleEffect(0.8 + 0.7 * pose.burst, anchor: Self.unit(x: 60, y: 40))
                     .opacity(Double(sin(pose.burst * .pi)))
             case .sparkle:
-                // UI 审核 2026-10-13: with the headset on, the sparkles move out and up, 2pt clear of its band on the watch.
+                // UI 审核 2026-10-13: with the headset on, the sparkles sit 2pt clear of its band on the watch.
                 RunnerPartView(part: part)
                     .scaleEffect(x: headband ? 1.16 : 1, y: 1, anchor: Self.unit(x: 60, y: 27))
                     .offset(y: headband ? -14 * scale : 0)
