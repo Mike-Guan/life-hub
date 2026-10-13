@@ -632,6 +632,10 @@ import Testing
         #expect(!CompanionView.pestered(two, now: now))
         #expect(CompanionView.pestered([now.addingTimeInterval(-20)] + two, now: now))
         #expect(!CompanionView.pestered([now.addingTimeInterval(-CompanionView.pesterWindow)] + two, now: now))
+        let five = (0..<5).map { now.addingTimeInterval(Double(-$0)) }
+        #expect(CompanionView.turnsAway(five, now: now, count: WatchPoke.tooMany, bedtime: .off))
+        #expect(!CompanionView.turnsAway(five, now: now, count: WatchPoke.tooMany, bedtime: .on))
+        #expect(!CompanionView.turnsAway(Array(five.prefix(4)), now: now, count: WatchPoke.tooMany, bedtime: .off))
         var turning = RunnerPose()
         turning.turnAway(progress: 0.12)
         #expect(!turning.turnedAway && turning.turnSqueeze == 0.05)
