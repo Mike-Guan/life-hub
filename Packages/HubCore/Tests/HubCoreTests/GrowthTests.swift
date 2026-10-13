@@ -371,4 +371,18 @@ import Testing
         #expect(ShopItem.item("kuro.racket.gold")?.card == .tennis)
         #expect(ShopItem.item("keepsake.headband.runner")?.card == nil)
     }
+
+    // QA S2: every character gets a whole shop, not a few items borrowed from HAKU.
+    @Test func everyCharacterHasAWholeShop() {
+        let haku = ShopItem.catalog(for: .haku)
+        func keepsakes(_ items: [ShopItem]) -> [String] {
+            items.compactMap(\.keepsake).map { "\($0.win.rawValue)×\($0.count)" }.sorted()
+        }
+        for persona in Persona.allCases {
+            let items = ShopItem.catalog(for: persona)
+            #expect(items.count == haku.count, "\(persona)")
+            #expect(Set(items.map(\.slot)) == Set(Slot.allCases), "\(persona)")
+            #expect(keepsakes(items) == keepsakes(haku), "\(persona)")
+        }
+    }
 }
