@@ -15,6 +15,8 @@ final class CheckCardRecording: XCTestCase {
         let answer = app.buttons["其实很累"]
         XCTAssertFalse(answer.exists)
         sleep(2)
+        // UI 审核 2026-10-13: the whole energy row is the tap target, at least 44 pt tall.
+        XCTAssertGreaterThanOrEqual(app.buttons["不对？"].frame.height, 44)
         app.buttons["不对？"].tap()
         // No queries while the card fades in: each one stalls the app, and the recording loses the fade.
         sleep(2)

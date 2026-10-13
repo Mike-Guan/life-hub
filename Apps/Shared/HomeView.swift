@@ -342,7 +342,9 @@ struct HomeView: View {
                         Text("？").font(.system(size: 12, weight: .heavy))
                     }
                     .foregroundStyle(Toy.ink)
-                    .padding(.horizontal, 10)
+                    // The full-width ？ carries half a character of space on its right, so that side pads less.
+                    .padding(.leading, 10)
+                    .padding(.trailing, 4)
                     .padding(.vertical, 3)
                     .background(Capsule().fill(Toy.card))
                     .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
