@@ -134,7 +134,9 @@ public struct ModeCards: Codable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, names, identityName = "identity", chill, sideStates
+        case schemaVersion, names
+        case identityName = "identity"
+        case chill, sideStates
     }
 
     /// Decodes the cards; missing fields and values this build doesn't know fall back to the defaults.

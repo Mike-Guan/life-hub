@@ -18,13 +18,17 @@ import Testing
 
     @Test func renamingChangesOnlyTheCommonCardsName() {
         var cards = ModeCards(identity: .swimming)
-        #expect(cards.rename(.work, to: " 上学 "))
+        let renamed = cards.rename(.work, to: " 上学 ")
+        #expect(renamed)
         #expect(cards.title(for: .work, persona: .haku) == "上学")
-        #expect(!cards.rename(.work, to: "一二三四五六七"))
+        let tooLong = cards.rename(.work, to: "一二三四五六七")
+        #expect(!tooLong)
         #expect(cards.title(for: .work, persona: .haku) == "上学")
-        #expect(!cards.rename(.boxing, to: "水"))
+        let identityRenamed = cards.rename(.boxing, to: "水")
+        #expect(!identityRenamed)
         #expect(cards.title(for: .boxing, persona: .haku) == "游泳")
-        #expect(cards.rename(.work, to: ""))
+        let cleared = cards.rename(.work, to: "")
+        #expect(cleared)
         #expect(cards.title(for: .work, persona: .haku) == "上班")
     }
 
@@ -39,8 +43,10 @@ import Testing
         var cards = ModeCards()
         #expect(cards.sideStates == [.vibeCoding])
         #expect(cards.next(after: .vibeCoding) == .vibeCoding)
-        #expect(!cards.pickSideStates([]))
-        #expect(cards.pickSideStates([.writing, .writing, .studying, .shooting, .operating]))
+        let pickedNone = cards.pickSideStates([])
+        #expect(!pickedNone)
+        let picked = cards.pickSideStates([.writing, .writing, .studying, .shooting, .operating])
+        #expect(picked)
         #expect(cards.sideStates == [.writing, .studying, .shooting])
         #expect(cards.next(after: .writing) == .studying)
         #expect(cards.next(after: .shooting) == .writing)
@@ -65,7 +71,7 @@ import Testing
     }
 
     @Test func onlyReleasedKindsAreListed() {
-        #expect(IdentityKind.released.allSatisfy(\.isReleased))
+        #expect(IdentityKind.released.allSatisfy { $0.isReleased })
         #expect(IdentityKind.boxing.isReleased)
         #expect(!IdentityKind.ski.isReleased)
         #expect(IdentityKind.allCases.count == 12)
