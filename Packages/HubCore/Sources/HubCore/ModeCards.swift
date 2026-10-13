@@ -122,6 +122,14 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         return persona == .kuro ? lines.kuro : lines.haku
     }
 
+    /// Whether the card is a sport.
+    public var isSport: Bool {
+        switch self {
+        case .music, .art, .study: false
+        default: true
+        }
+    }
+
     /// The SF Symbol for the card's mode button.
     public var symbol: String {
         switch self {
@@ -298,6 +306,13 @@ public struct ModeCards: Codable, Equatable, Sendable {
     public func tagline(for mode: Mode, persona: Persona) -> String {
         guard mode == .boxing, let identity else { return mode.tagline(for: persona) }
         return identity.tagline(for: persona)
+    }
+
+    // 台词 泛化修改 v0 §1: lines about a sports bag are only for users who do sport.
+    /// Whether the user picked a sport card or a sporty Chill activity.
+    public var isSporty: Bool {
+        let sporty: Set<ChillActivity> = [.fitness, .running, .yoga, .cycling, .swimming, .ball]
+        return identity?.isSport == true || !chill.isDisjoint(with: sporty)
     }
 
     // 活动分类 v1 §4: without an identity card there is no empty slot.

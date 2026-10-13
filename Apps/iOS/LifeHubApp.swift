@@ -58,6 +58,7 @@ struct LifeHubApp: App {
         let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
         let widgets = WidgetBridge(container: container, bedtime: bedtime)
         widgets.work = ModeRules.stored(in: AppGroup.defaults)
+        widgets.cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
         let needs = NeedTracker()
@@ -216,6 +217,10 @@ struct LifeHubApp: App {
             widgets.bedtime = bedtime
             syncWidgets()
             Task { await scheduleReminder() }
+        }
+        .onChange(of: cards) {
+            widgets.cards = cards
+            syncWidgets()
         }
         .onChange(of: rules) {
             rules.store(in: AppGroup.defaults)
