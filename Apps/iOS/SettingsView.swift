@@ -110,8 +110,8 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("睡觉提醒")
                     .font(Toy.body(16, weight: .heavy))
-                timeRow("睡觉", selection: time($bedtime.startMinute))
-                timeRow("起床", selection: time($bedtime.endMinute))
+                timeRow("睡觉", selection: time(shownBedtime.startMinute))
+                timeRow("起床", selection: time(shownBedtime.endMinute))
                 Text("睡觉时间到了发一条通知，\(persona.title) 变困，一直到起床时间。只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
@@ -411,6 +411,15 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    // PM 2026-10-13: an unset bedtime shows the prefill; picking a time sets the whole schedule.
+    private var shownBedtime: Binding<BedtimeSchedule> {
+        Binding {
+            bedtime.isSet ? bedtime : .standard
+        } set: { schedule in
+            bedtime = schedule
+        }
     }
 
     // The picker edits a Date; only its hour and minute are kept.

@@ -206,7 +206,7 @@ import Testing
         let suite = "lifehub-tests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        #expect(BedtimeSchedule.stored(in: defaults) == .standard)
+        #expect(BedtimeSchedule.stored(in: defaults) == .unset)
 
         let late = BedtimeSchedule(startMinute: 23 * 60 + 45, endMinute: 5 * 60)
         late.store(in: defaults)
@@ -214,6 +214,46 @@ import Testing
         #expect(late.startComponents == DateComponents(hour: 23, minute: 45))
 
         defaults.set(Data("bad".utf8), forKey: "bedtimeSchedule")
+        #expect(BedtimeSchedule.stored(in: defaults) == .unset)
+    }
+
+    @Test func anUnsetBedtimeStartsNothing() {
+        let unset = BedtimeSchedule.unset
+        #expect(!unset.isSet)
+        #expect(BedtimeSchedule.standard.isSet)
+        let calendar = Calendar(identifier: .gregorian)
+        let night = calendar.date(from: DateComponents(year: 2026, month: 10, day: 5, hour: 23, minute: 50)) ?? .now
+        #expect(unset.state(at: night, calendar: calendar) == .off)
+        #expect(!BathTime.isOn(at: night, bedtime: unset, mode: .chill, atHome: true, doneAt: nil, calendar: calendar))
+        #expect(BathTime.times(after: night, bedtime: unset, calendar: calendar).isEmpty)
+        let home = HomeSignals(since: night.addingTimeInterval(-3 * 3600), workedToday: 0, manualAt: nil)
+        let evening = night.addingTimeInterval(-90 * 60)
+        #expect(MomentEngine.home(mode: .chill, signals: home, now: evening, bedtime: .standard) == .blanket)
+        #expect(MomentEngine.home(mode: .chill, signals: home, now: evening, bedtime: unset) == nil)
+        var irregular = ModeRules.standard
+        irregular.workdays = []
+        #expect(irregular.dayEndMinute(bedtime: unset) == 24 * 60)
+    }
+
+    @Test func installsWithRecordsKeepTheStandardBedtimeOnce() throws {
+        let suite = "lifehub-tests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        BedtimeSchedule.adoptStandard(in: defaults, existingInstall: true)
         #expect(BedtimeSchedule.stored(in: defaults) == .standard)
+
+        let fresh = try #require(UserDefaults(suiteName: suite + "-fresh"))
+        defer { fresh.removePersistentDomain(forName: suite + "-fresh") }
+        BedtimeSchedule.adoptStandard(in: fresh, existingInstall: false)
+        // Records made after the first launch don't make it an old install.
+        BedtimeSchedule.adoptStandard(in: fresh, existingInstall: true)
+        #expect(BedtimeSchedule.stored(in: fresh) == .unset)
+
+        let set = try #require(UserDefaults(suiteName: suite + "-set"))
+        defer { set.removePersistentDomain(forName: suite + "-set") }
+        let late = BedtimeSchedule(startMinute: 60, endMinute: 8 * 60)
+        late.store(in: set)
+        BedtimeSchedule.adoptStandard(in: set, existingInstall: true)
+        #expect(BedtimeSchedule.stored(in: set) == late)
     }
 }

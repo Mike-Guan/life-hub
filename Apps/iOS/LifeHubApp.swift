@@ -56,6 +56,7 @@ struct LifeHubApp: App {
         ModeCards.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
         _cards = State(initialValue: ModeCards.current(in: AppGroup.defaults, persona: persona))
         let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
+        BedtimeSchedule.adoptStandard(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty)
         let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
         let widgets = WidgetBridge(container: container, bedtime: bedtime)
         widgets.work = ModeRules.stored(in: AppGroup.defaults)

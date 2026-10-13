@@ -10,7 +10,8 @@ enum BedtimeReminder {
     static let requestID = "bedtime-daily"
 
     /// Asks for permission, then replaces the daily reminder with one at `schedule`'s start time, in `persona`'s name.
-    /// - Returns: an error message for the UI, or `nil` when the reminder is set.
+    /// Without a bedtime set, removes the reminder and asks nothing.
+    /// - Returns: an error message for the UI, or `nil` when the reminder is set or removed.
     static func schedule(_ schedule: BedtimeSchedule, persona: Persona) async -> String? {
         let center = UNUserNotificationCenter.current()
         // This replaces every category, so the invite's is registered here too.
@@ -24,6 +25,10 @@ enum BedtimeReminder {
             UNNotificationCategory(identifier: InviteReminder.workCategory, actions: [], intentIdentifiers: []),
             UNNotificationCategory(identifier: OffWorkReminder.category, actions: [], intentIdentifiers: []),
         ])
+        guard schedule.isSet else {
+            center.removePendingNotificationRequests(withIdentifiers: [requestID])
+            return nil
+        }
         do {
             guard try await center.requestAuthorization(options: [.alert, .sound]) else {
                 return "通知被关掉了，睡觉提醒发不出来。可以在系统设置里打开。"
