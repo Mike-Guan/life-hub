@@ -529,8 +529,8 @@ extension RunnerPose {
 }
 
 extension SceneMove {
-    /// The move of the phone, the hands holding it or the furniture in the welcome back scene, or nil when
-    /// `part` isn't one.
+    /// The move of the phone, the hands holding it, the furniture or the can in the welcome back scene, or nil
+    /// when `part` isn't one.
     static func welcome(_ part: RunnerPart, pose: RunnerPose) -> SceneMove? {
         guard let w = pose.welcome else { return nil }
         var move = SceneMove()
@@ -560,6 +560,9 @@ extension SceneMove {
         case .blanket:
             move.offset.height = 8 * w.exit
             move.opacity = Double(1 - w.exit)
+        case .monsterCan:
+            move.offset.height = 8 * (1 - w.exit)
+            move.opacity = Double(w.exit)
         default:
             return nil
         }
