@@ -6,6 +6,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
+- Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
+  the weekly 5 cans, and its gold keepsake counts that card only. Any other watch workout of 30 minutes (not a
+  walk) earns 3 cans, shared with the gym's daily 3. The shop names the card instead of "周日拳击".
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
 - With no mode yet, the watch tells you to pick one on the iPhone, in smaller type, instead of the iPhone's line.
