@@ -134,6 +134,8 @@ struct WatchHomeView: View {
                     .background(Capsule().fill(Toy.card))
                     .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
                     .padding(.bottom, 4)
+                    // The watch's bottom safe area is about 20pt; inside it the pill would cover her chin.
+                    .ignoresSafeArea(edges: .bottom)
                     .allowsHitTesting(false)
             }
         }
