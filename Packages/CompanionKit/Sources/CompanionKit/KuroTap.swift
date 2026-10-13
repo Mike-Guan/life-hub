@@ -11,6 +11,14 @@ enum KuroTap: Equatable, Sendable {
     case bounce
     /// Desk: one finger pushes her glasses up and the lenses glint.
     case glasses
+    /// Boxing card: a start, one punch out to the side, then a flat "……别闹。" face.
+    case punch
+    /// Fitness card: she hugs the yoga block a little higher with her eyes shut.
+    case hug
+    /// Study card: the highlighter runs across the line.
+    case mark
+    /// Art card: the pen comes up and she tilts her head to look at the drawing.
+    case sketch
     /// Tired or sleepy in any look: she rubs an eye.
     case rub
     /// Tapped too often: she turns her back with a "…" thought bubble.
@@ -29,6 +37,10 @@ enum KuroTap: Equatable, Sendable {
         case .chill: self = .sip
         case .tennis: self = .bounce
         case .desk: self = .glasses
+        case .box: self = .punch
+        case .fitness: self = .hug
+        case .study: self = .mark
+        case .art: self = .sketch
         }
     }
 
@@ -68,6 +80,18 @@ extension KuroPose {
             pose.calm = p >= 0.65
         case .chinTap:
             pose.eyes = p < 0.75 ? .open : .drowsy
+        case .punch:
+            // Startled first (第 1 批身份卡 预览, frame 1), then the punch and a flat face.
+            pose.eyes = p < 0.15 ? .surprised : .open
+            pose.mouthO = p < 0.15
+            pose.calm = p >= 0.15
+        case .hug:
+            pose.eyes = (0.15..<0.8).contains(p) ? .closed : .happy
+        case .mark:
+            pose.eyes = p < 0.7 ? .down : .happy
+        case .sketch:
+            pose.eyes = p < 0.4 ? .down : .open
+            pose.calm = p >= 0.4
         case .turnAway:
             break
         }
@@ -79,7 +103,8 @@ extension KuroFigure {
     // What she keeps when seen from behind: hair, ears, jackets and things that stay put.
     nonisolated private static let backView: Set<KuroPart> = [
         .itemFlower, .itemLamp, .tennisPonytail, .hairBack, .itemScrunchie, .jacketWork, .jacketChill,
-        .itemBlanket, .jacketTennis, .itemBag, .jacketDesk, .earL, .earR, .catEars, .deskBooks,
+        .itemBlanket, .jacketTennis, .itemBag, .jacketDesk, .earL, .earR, .catEars, .deskBooks, .jacketBox,
+        .jacketSmock, .boxSandbag,
     ]
 
     /// Changes `visible` for `tap` at `progress`.
@@ -106,7 +131,9 @@ extension KuroFigure {
             }
         case .rub:
             if p < 0.65 { visible.insert(.tapRub) }
-        case .chinTap:
+        case .mark:
+            if p >= 0.5 { visible.insert(.studyMark) }
+        case .chinTap, .punch, .hug, .sketch:
             break
         case .turnAway:
             visible.formIntersection(backView)
@@ -132,6 +159,18 @@ extension KuroFigure {
             return CGSize(width: 26 * (1 - lift), height: 36 * (1 - lift))
         case (.glasses, .deskGlasses):
             return CGSize(width: 0, height: p >= 0.2 ? -2 : 0)
+        case (.punch, .boxGloveR):
+            // Out to her side, never across her face.
+            let out = CGFloat(p < 0.15 ? 0 : p < 0.3 ? (p - 0.15) / 0.15 : p < 0.55 ? 1 : max(0, 1 - (p - 0.55) / 0.2))
+            return CGSize(width: 14 * out, height: -12 * out)
+        case (.hug, .gymBlock):
+            return CGSize(width: 0, height: -4 * CGFloat(sin(min(p / 0.8, 1) * .pi)))
+        case (.mark, .studyHighlighter):
+            // Back to the start of the line, then across it.
+            let back = p < 0.15 ? p / 0.15 : max(0, 1 - (p - 0.15) / 0.35)
+            return CGSize(width: -12 * CGFloat(back), height: 0)
+        case (.sketch, .craftPen):
+            return CGSize(width: 0, height: -14 * CGFloat(sin(min(p / 0.9, 1) * .pi)))
         case (.chinTap, .overtimeHand):
             // Two taps on the cheek between 0.15 and 0.75.
             guard (0.15..<0.75).contains(p) else { return .zero }

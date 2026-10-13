@@ -7,7 +7,7 @@ import Testing
 @Suite struct KuroTapTests {
     @Test func eachLookHasItsOwnMoveAndSleepyMeansRubbing() {
         let moves = KuroLook.allCases.map { KuroTap(look: $0, sleepy: false) }
-        #expect(moves == [.tablet, .sip, .bounce, .glasses])
+        #expect(moves == [.tablet, .sip, .bounce, .glasses, .punch, .hug, .mark, .sketch])
         #expect(KuroLook.allCases.allSatisfy { KuroTap(look: $0, sleepy: true) == .rub })
     }
 
@@ -63,8 +63,13 @@ import Testing
     func herRubbingHandComesUpOnHerSleeve(_ look: KuroLook) {
         let rubbing = KuroPose(look: look, energy: 10).reacting(.rub, progress: 0.3)
         let parts = Set(KuroFigure.parts(for: look, pose: rubbing))
-        let sleeves: Set<KuroPart> = [.tapRubSleeveWork, .tapRubSleeveChill, .tapRubSleeveTennis, .tapRubSleeveDesk]
+        let sleeves: Set<KuroPart> = [
+            .tapRubSleeveWork, .tapRubSleeveChill, .tapRubSleeveTennis, .tapRubSleeveDesk, .tapRubSleeveBox,
+            .tapRubSleeveSmock,
+        ]
         #expect(parts.contains(.tapRub) && parts.intersection(sleeves).count == 1)
+        // In gloves the rubbing hand is bare: the left glove comes off.
+        #expect(!parts.contains(.boxGloveL))
         let rest = Set(KuroFigure.parts(for: look, pose: KuroPose(look: look, energy: 10)))
         #expect(rest.isDisjoint(with: sleeves))
     }

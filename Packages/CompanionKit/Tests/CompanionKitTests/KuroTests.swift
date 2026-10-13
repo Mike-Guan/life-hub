@@ -177,7 +177,7 @@ import Testing
     }
 
     @Test func eachLookMapsBackToItsMode() {
-        #expect(KuroLook.allCases.allSatisfy { KuroLook(mode: $0.mode) == $0 })
+        #expect(KuroLook.allCases.allSatisfy { KuroLook(mode: $0.mode, card: $0.card) == $0 })
     }
 
     @Test func aTapNeverRepeatsTheShownLine() {

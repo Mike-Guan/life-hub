@@ -12,15 +12,35 @@ public enum KuroLook: String, CaseIterable, Sendable {
     case tennis
     /// Glasses, a red pen and a stack of notebooks.
     case desk
+    // Identity cards, batch 1 (第 1 批身份卡 预览, UI 审核 round 2 passed 2026-10-13).
+    /// Boxing card: a violet top, a red headband, two red gloves and a small bag stand.
+    case box
+    /// Fitness card: her sportswear without the racket, holding a yoga block.
+    case fitness
+    /// Study card: her lilac top with an open notebook and a highlighter.
+    case study
+    /// Art card: a yellow smock, her tablet and a drawing pen.
+    case art
 
     // The only place the mode-to-outfit mapping lives, like `Mode.riveValue`.
-    /// The look for `mode`: boxing is her tennis day and the side-hustle slot is her desk time.
-    public init(mode: Mode) {
+    /// The look for `mode`: the identity card slot dresses her for `card`, or as her tennis day without one or
+    /// for a card she has no look for yet; the side-hustle slot is her desk time.
+    public init(mode: Mode, card: IdentityKind? = nil) {
         switch mode {
         case .work: self = .work
         case .chill: self = .chill
-        case .boxing: self = .tennis
+        case .boxing: self = Self.look(for: card)
         case .money: self = .desk
+        }
+    }
+
+    private static func look(for card: IdentityKind?) -> KuroLook {
+        switch card {
+        case .boxing: .box
+        case .fitness: .fitness
+        case .study: .study
+        case .art: .art
+        default: .tennis
         }
     }
 
@@ -31,6 +51,22 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .chill: Color(hex: 0x7FB7FF)
         case .tennis: Color(hex: 0xFFD1DC)
         case .desk: Color(hex: 0xDCCFFF)
+        // The card colors are placeholders until the shop palette (A4) settles them; each differs from the rest.
+        case .box: Color(hex: 0xFFE14D)
+        case .fitness: Color(hex: 0xFFC2D6)
+        case .study: Color(hex: 0x9FD3FF)
+        case .art: Color(hex: 0xFFC9A8)
+        }
+    }
+
+    /// The identity card that dresses her in this look, or nil for a look of her own.
+    var card: IdentityKind? {
+        switch self {
+        case .work, .chill, .tennis, .desk: nil
+        case .box: .boxing
+        case .fitness: .fitness
+        case .study: .study
+        case .art: .art
         }
     }
 
@@ -39,7 +75,7 @@ public enum KuroLook: String, CaseIterable, Sendable {
         switch self {
         case .work: .work
         case .chill: .chill
-        case .tennis: .boxing
+        case .tennis, .box, .fitness, .study, .art: .boxing
         case .desk: .money
         }
     }
@@ -149,7 +185,8 @@ struct KuroFigure: View {
             if pose.sign != nil { visible.insert(.overtimeSign) }
         }
         if look != .work {
-            let mouth: KuroPart = pose.tired || pose.calm ? .mouthFlat : look == .tennis ? .mouthSmile : .mouthCat
+            let mouth: KuroPart =
+                pose.tired || pose.calm ? .mouthFlat : look == .tennis || look == .fitness ? .mouthSmile : .mouthCat
             visible.insert(pose.mouthO ? .mouthO : mouth)
         }
         for item in pose.items where item.look == look {
@@ -158,8 +195,11 @@ struct KuroFigure: View {
         }
         if let tap = pose.tap {
             apply(tap, progress: pose.tapProgress, to: &visible)
-            // The rubbing hand comes up on her arm, in her look's sleeve.
-            if visible.contains(.tapRub) { visible.insert(rubSleeve(look)) }
+            // The rubbing hand comes up on her arm, in her look's sleeve; in gloves the left one comes off.
+            if visible.contains(.tapRub) {
+                visible.insert(rubSleeve(look))
+                visible.remove(.boxGloveL)
+            }
         }
         if pose.heart { visible.insert(.tapHeart) }
         if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
@@ -173,6 +213,10 @@ struct KuroFigure: View {
         case .chill: [.jacketChill, .chillCup]
         case .tennis: [.tennisPonytail, .jacketTennis, .tennisHeadband, .tennisRacket]
         case .desk: [.jacketDesk, .deskGlasses, .deskBooks, .deskPen]
+        case .box: [.tennisPonytail, .jacketBox, .boxHeadband, .boxGloveL, .boxGloveR, .boxSandbag]
+        case .fitness: [.tennisPonytail, .jacketTennis, .gymBlock]
+        case .study: [.jacketChill, .studyNotebook, .studyHighlighter]
+        case .art: [.jacketSmock, .workTablet, .craftPen]
         }
     }
 
@@ -180,8 +224,11 @@ struct KuroFigure: View {
         switch look {
         case .work: .tapRubSleeveWork
         case .chill: .tapRubSleeveChill
-        case .tennis: .tapRubSleeveTennis
+        case .tennis, .fitness: .tapRubSleeveTennis
         case .desk: .tapRubSleeveDesk
+        case .box: .tapRubSleeveBox
+        case .study: .tapRubSleeveChill
+        case .art: .tapRubSleeveSmock
         }
     }
 
@@ -767,14 +814,16 @@ public struct KuroView: View {
         }
     }
 
-    /// The idle loop for `look`: work breathes and shifts her weight, chill sways, tennis hops and at the desk
-    /// she nods slowly over the page.
+    /// The idle loop for `look`: work breathes and shifts her weight, chill and fitness sway, tennis and boxing
+    /// hop, and at the desk, studying or drawing she nods slowly over the page.
     nonisolated static func motion(_ look: KuroLook, time t: TimeInterval) -> IdleMotion {
         switch look {
         case .work: IdleMotion(dy: CGFloat(sin(t * 2 * .pi / 3.4)) * 1.5, angle: sin(t * 2 * .pi / 6.8))
         case .chill: IdleMotion(mode: .chill, time: t)
-        case .tennis: IdleMotion(mode: .boxing, time: t)
-        case .desk: IdleMotion(dy: 2 * IdleClock.nod(at: t, period: 1.6, seed: KuroIdle.seed), angle: 0)
+        case .tennis, .box: IdleMotion(mode: .boxing, time: t)
+        // Keeping someone company at the gym, she sways calmly instead of bouncing.
+        case .fitness: IdleMotion(mode: .chill, time: t)
+        case .desk, .study, .art: IdleMotion(dy: 2 * IdleClock.nod(at: t, period: 1.6, seed: KuroIdle.seed), angle: 0)
         }
     }
 
@@ -797,6 +846,10 @@ public struct KuroView: View {
         case .chill: "KURO，捧着热饮"
         case .tennis: "KURO，拿着网球拍"
         case .desk: "KURO，戴着眼镜在批改"
+        case .box: "KURO，戴着拳套"
+        case .fitness: "KURO，抱着瑜伽砖"
+        case .study: "KURO，拿着笔记本"
+        case .art: "KURO，在平板上画画"
         }
     }
 }
