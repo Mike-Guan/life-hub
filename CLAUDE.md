@@ -90,8 +90,9 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   are separate types. Never derive one by overloading the other.
 - Manual mode changes always win. Automatic sources (Focus filter, calendar, geofence)
   may suggest, or switch only under rules Mike enabled; no auto-switch for 2h after a manual change.
-  The clock never switches the mode: work starts by arriving at the office, ends by leaving it from 17:30.
-  Place comes first: from 17:30, having left the office or come home ends work even within the 2h window,
+  The clock never switches the mode: work starts by arriving at the office, ends by leaving it from an hour
+  before the end of work hours (17:30 for 18:30). Place comes first: from then, having left the office or
+  come home ends work even within the 2h window,
   unless the mode changed after that move. The app re-checks this at every place event and every open.
 - Every ModeChange is stored with its source.
 - Exception: entering the boxing gym geofence (CLMonitor, ~100 m) switches straight to boxing with no
@@ -203,7 +204,7 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-05: Mike approved the nudge back-off: an invite ignored 3 times in a row pauses for 7 days,
   with one line and no catch-up; uncertain signals are never counted as ignored.
 - 2026-10-05: Gym is an off-work activity inside Chill, not a mode. Gym days are learned from gym wins
-  (a weekday won in 2 of the last 4 weeks), with no setting. The Tue-Thu default ended 2026-10-13.
+  (a weekday won in 2 of the last 4 weeks; Tue-Thu until one qualifies), with no setting.
 - 2026-10-05: Mike: leaving the office ends work only from 17:30; an earlier leave (lunch) keeps 上班.
 - 2026-10-05: Mike (via PM, PRD §16): arriving at the fitness gym in Work or 副业 switches to Chill (location,
   2h manual hold applies). Lifting shows only in Chill; the gym can is mode-independent; leaving keeps the mode.
@@ -216,4 +217,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-08: Mike agreed: the repo stays public during the freeze, and product docs (PRD, 技术架构,
   范围文档, 方向) are no longer synced into `docs/`. The character SVG stays (CI generates code from it).
   Before the second user: go private and move CI to a self-hosted runner on Mike's Mac.
-- 2026-10-13: Mike (polish list approval): 朋友测前拆掉写死作息，新用户没有默认健身日/跑步日，只从自己的成就里学.
+- 2026-10-13: PM (hard-coded schedule review #4, #8): leaving the office ends work from an hour before the
+  end of work hours; the evening, overtime, gym invite and drowsy times follow the work hours too.
