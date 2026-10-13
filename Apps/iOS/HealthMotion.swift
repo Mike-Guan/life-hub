@@ -63,8 +63,8 @@ enum HealthMotion {
         )
     }
 
-    // Issue #205: about ten groups so HAKU and KURO can react to each later. Only boxing, running and
-    // strength earn cans (`Win.wins`), so martial arts and walking stay out of those groups.
+    // Issue #205: about ten groups so HAKU and KURO can react to each later. Walking never earns cans and
+    // strength earns the gym win (`Win.wins`), so martial arts and walking stay out of those groups.
     private static func kind(_ type: HKWorkoutActivityType) -> WorkoutSummary.Kind {
         switch type {
         case .walking, .wheelchairWalkPace: .walking

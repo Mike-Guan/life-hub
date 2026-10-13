@@ -191,7 +191,8 @@ public enum MomentEngine {
     /// The traces that stay once Mike has done enough of something, counted from earned cans and the mode log.
     public static func lastingTraces(log: ModeLog, ledger: CanLedger, now: Date) -> Set<CompanionTrace> {
         var traces: Set<CompanionTrace> = []
-        if ledger.count(.boxing) >= glovesAfter { traces.insert(.wornGloves) }
+        // Worn gloves are boxing's trace; other identity cards get their own traces later (Issue #279).
+        if ledger.count(.boxing, card: .boxing) >= glovesAfter { traces.insert(.wornGloves) }
         if ledger.count(.run5k) >= shoesAfter { traces.insert(.runningShoes) }
         if log.time(from: .distantPast, to: now, where: { $0.sideHustle == .vibeCoding }) >= monitorAfter {
             traces.insert(.deskMonitor)
