@@ -1,0 +1,41 @@
+15:27:47 watches: Apple Watch Series 11 (46mm), Apple Watch Series 11 (42mm), Apple Watch Series 10 (46mm), Apple Watch Series 10 (42mm), Apple Watch Ultra 3 (49mm), Apple Watch Ultra 2 (49mm), Apple Watch SE 3 (44mm), Apple Watch SE 3 (40mm), Apple Watch SE (44mm) (2nd generation), Apple Watch SE (40mm) (2nd generation)
+15:27:51 booting watch 42mm
+15:31:37 still build/recordings/42mm-haku-work
+15:31:45 still build/recordings/42mm-haku-chill
+15:31:52 still build/recordings/42mm-haku-boxing
+15:31:58 still build/recordings/42mm-haku-money
+15:32:05 still build/recordings/42mm-haku-no-mode
+15:32:11 still build/recordings/42mm-haku-overtime
+15:32:17 still build/recordings/42mm-kuro-work
+15:32:24 still build/recordings/42mm-kuro-chill
+15:32:30 still build/recordings/42mm-kuro-boxing
+15:32:37 still build/recordings/42mm-kuro-money
+15:32:43 still build/recordings/42mm-kuro-no-mode
+15:32:51 still build/recordings/42mm-kuro-overtime
+15:32:57 booting watch 46mm
+15:34:28 still build/recordings/46mm-haku-work
+15:34:39 still build/recordings/46mm-haku-chill
+15:34:45 still build/recordings/46mm-haku-boxing
+15:34:51 still build/recordings/46mm-haku-money
+15:34:58 still build/recordings/46mm-haku-no-mode
+15:35:04 still build/recordings/46mm-haku-overtime
+15:35:10 still build/recordings/46mm-kuro-work
+15:35:17 still build/recordings/46mm-kuro-chill
+15:35:23 still build/recordings/46mm-kuro-boxing
+15:35:30 still build/recordings/46mm-kuro-money
+15:35:36 still build/recordings/46mm-kuro-no-mode
+15:35:43 still build/recordings/46mm-kuro-overtime
+15:35:48 booting watch 49mm
+15:37:16 still build/recordings/49mm-haku-work
+15:37:25 still build/recordings/49mm-haku-chill
+15:37:31 still build/recordings/49mm-haku-boxing
+15:37:37 still build/recordings/49mm-haku-money
+15:37:44 still build/recordings/49mm-haku-no-mode
+15:37:50 still build/recordings/49mm-haku-overtime
+15:37:56 still build/recordings/49mm-kuro-work
+15:38:03 still build/recordings/49mm-kuro-chill
+15:38:09 still build/recordings/49mm-kuro-boxing
+15:38:15 still build/recordings/49mm-kuro-money
+15:38:22 still build/recordings/49mm-kuro-no-mode
+15:38:28 still build/recordings/49mm-kuro-overtime
+15:38:34 done
