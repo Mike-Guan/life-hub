@@ -17,7 +17,7 @@ import Testing
     }
 
     func need(_ signals: NeedSignals, at now: Date) -> NeedReading? {
-        NeedEngine.need(signals, now: now, calendar: calendar)
+        NeedEngine.need(signals, now: now, days: .learnedFixture, calendar: calendar)
     }
 
     func home(_ day: Int) -> NeedSignals {
