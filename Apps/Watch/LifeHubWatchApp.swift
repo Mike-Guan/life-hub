@@ -128,13 +128,13 @@ struct WatchHomeView: View {
         .overlay(alignment: .bottom) {
             if mode == nil && payload.persona == .kuro {
                 Text("在 iPhone 上选个模式")
-                    .font(Toy.body(13, weight: .bold))
+                    .font(Toy.body(12, weight: .bold))
                     .foregroundStyle(Toy.ink)
                     .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 3)
                     .background(Capsule().fill(Toy.card))
                     .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
-                    .padding(.bottom, 8)
+                    .padding(.bottom, 4)
                     .allowsHitTesting(false)
             }
         }
