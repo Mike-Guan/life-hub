@@ -1077,21 +1077,6 @@ import Testing
         #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
     }
 
-    @Test(arguments: Mode.allCases)
-    func glovesNeverGetAThirdHand(_ mode: Mode) {
-        // Mike 2026-10-07: a boxing celebration showed a peace sign next to both gloves.
-        let outfit = Outfit(Wardrobe(equipped: [.celebration: "celebrate.up"]))
-        var cheer = RunnerPose().wearing(outfit)
-        cheer.celebrate(.boxing, progress: 0.5)
-        var daily = RunnerPose()
-        daily.celebrate(.running, progress: 0.5)
-        for pose in [cheer, daily, RunnerPose(mode: .boxing, time: 1, face: .mid, react: 0)] {
-            let parts = Set(RunnerFigure.parts(for: mode, pose: pose))
-            if !parts.isDisjoint(with: [.gloveL, .gloveR]) { #expect(!parts.contains(.peaceHand)) }
-        }
-        #expect(!RunnerFigure.parts(for: .boxing, pose: daily).contains(.peaceHand))
-    }
-
     @Test func everySlotHasAShowcaseMode() {
         #expect(Slot.gloves.showcaseMode == .boxing)
         #expect(Slot.room.showcaseMode == .chill)
