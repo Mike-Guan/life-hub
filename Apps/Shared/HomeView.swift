@@ -221,7 +221,7 @@ struct HomeView: View {
                     let active = activeNeed(at: context.date)
                     let why = NeedEngine.whyLine(need: active, energy: reading, bedtime: state)
                     let workLine = moment(at: context.date).flatMap(HakuLines.scene(for:)).map {
-                        HakuLines.line($0, at: context.date, persona: persona)
+                        HakuLines.line($0, at: context.date, persona: persona, cards: shownCards)
                     }
                     let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
                     let leftWork = HakuLines.offWorkUntil(store.log, now: context.date, work: rules)
