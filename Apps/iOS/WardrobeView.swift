@@ -116,12 +116,15 @@ struct WardrobeView: View {
                 .font(Toy.display(26))
             Spacer()
             CanChip(count: ledger.balance)
-            Button("完成") {
+            Button {
                 dismiss()
+            } label: {
+                Text("完成")
+                    .font(Toy.body(17, weight: .black))
+                    .foregroundStyle(Toy.ink)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
-            .font(Toy.body(17, weight: .black))
-            .foregroundStyle(Toy.ink)
-            .frame(minWidth: 44, minHeight: 44)
             .buttonStyle(.plain)
         }
     }
