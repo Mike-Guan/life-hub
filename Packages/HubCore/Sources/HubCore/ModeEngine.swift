@@ -44,6 +44,11 @@ extension ModeRules {
     /// Minutes before the end of work hours that the off-work notice goes out.
     public static let offWorkLead = 15
 
+    // Mike 2026-10-05 set 17:30 for his 18:30 end; PM 2026-10-13 (写死作息排查 v0 #4) made it an hour
+    // before the end of work hours, so it moves with them.
+    /// From this minute after midnight, leaving the office ends work: an hour before work ends.
+    public var offWorkFromMinute: Int { workEndMinute - 60 }
+
     // Mike, 2026-10-05: only when he is really at work, so a day off or working elsewhere gets no notice.
     /// When today's off-work notice goes out, or `nil` when it shouldn't: not a work day, already past,
     /// or Mike is neither in work mode nor at the office.
@@ -166,9 +171,10 @@ public enum ModeEngine {
 
         case .leftOffice:
             guard !isHeld(changes, now: now, rules: rules), current?.mode == .work else { return nil }
-            // Mike, 2026-10-05: stepping out for lunch isn't the end of work; only a leave from 17:30 is.
+            // Mike, 2026-10-05: stepping out for lunch isn't the end of work; only a leave from an hour before
+            // the end of work hours is.
             let parts = calendar.dateComponents([.hour, .minute], from: now)
-            guard (parts.hour ?? 0) * 60 + (parts.minute ?? 0) >= offWorkFromMinute else { return nil }
+            guard (parts.hour ?? 0) * 60 + (parts.minute ?? 0) >= rules.offWorkFromMinute else { return nil }
             return ModeDecision(mode: .chill, source: .location, reason: "离开公司了")
 
         case .enteredFitness:
@@ -198,25 +204,23 @@ public enum ModeEngine {
         }
     }
 
-    /// Leaving the office ends work only from this minute after midnight.
-    public static let offWorkFromMinute = 17 * 60 + 30
-
-    // Mike, 2026-10-07: place comes first. A leave can be held by a manual change, come before 17:30, or be
+    // Mike, 2026-10-07: place comes first. A leave can be held by a manual change, come too early, or be
     // reported before he really left, and then no second event comes. So the app checks again at every place
     // event and every open, not only at the moment of leaving.
-    /// Ends work when, from 17:30 today, Mike left the office or came home and nothing changed the mode since.
+    /// Ends work when, from `rules.offWorkFromMinute` today, the user left the office or came home and nothing
+    /// changed the mode since.
     /// - Returns: the switch to chill, or `nil` to leave the mode alone.
     public static func settle(
         log: ModeLog,
         presence: PlacePresence,
         now: Date,
+        rules: ModeRules = .standard,
         calendar: Calendar = .current
     ) -> ModeDecision? {
+        let from = rules.offWorkFromMinute
         guard let current = log.active.last(where: { $0.at <= now }), current.mode == .work,
             presence.since(.office) == nil,
-            let evening = calendar.date(
-                bySettingHour: offWorkFromMinute / 60, minute: offWorkFromMinute % 60, second: 0, of: now
-            )
+            let evening = calendar.date(bySettingHour: from / 60, minute: from % 60, second: 0, of: now)
         else { return nil }
         let moves = [(presence.left(.office), "离开公司了"), (presence.since(.home), "到家了")]
             .compactMap { at, reason in at.map { (at: $0, reason: reason) } }

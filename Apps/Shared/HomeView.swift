@@ -47,6 +47,8 @@ struct HomeView: View {
     var wardrobe = Wardrobe()
     /// Which character the card draws.
     var persona = Persona.haku
+    /// The user's cards, for the mode names; `nil` uses the character's default cards.
+    var cards: ModeCards?
     /// Earned cans, for the traces that stay.
     var ledger = CanLedger()
     /// Shows the wardrobe button on the companion card that calls this, when set.
@@ -67,7 +69,10 @@ struct HomeView: View {
     @Environment(ModeStore.self) private var store
     @Environment(EnergyStore.self) private var energy
     @State private var cheer = 0
-    @State private var replaying = false
+    // UI-27: the replay ends by itself, so the first frame after the app opens already shows the old mode.
+    @State private var replayEnded = false
+    /// Counts the user's own switches, so only they tap the phone.
+    @State private var manualSwitches = 0
     /// The guess the "不对" card is asking about, while it is open.
     @State private var checking: EnergyReading?
     @State private var checkError: String?
@@ -79,17 +84,20 @@ struct HomeView: View {
     @State private var answers = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    private var shownCards: ModeCards { cards ?? .legacy(for: persona) }
+
     var body: some View {
         let reading = energy.reading()
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 Header(
-                    mode: store.current,
+                    mode: shownMode,
                     error: store.lastError ?? energy.lastError ?? extraError,
                     cans: cans,
                     onShop: onShop,
                     onSettings: onSettings,
-                    persona: persona
+                    persona: persona,
+                    cards: shownCards
                 )
 
                 // PRD section 15: the title shows here only, never on the Lock Screen.
@@ -114,7 +122,7 @@ struct HomeView: View {
                     if persona == .kuro {
                         // Issue #164: her look per mode, energy face and bedtime; a tap shows a line for now.
                         KuroView(
-                            look: KuroLook(mode: (replaying ? replayFrom : store.current) ?? .chill),
+                            look: KuroLook(mode: shownMode ?? .chill),
                             energy: reading?.value,
                             bedtime: bedtime.state(at: context.date),
                             need: activeNeed(at: context.date)?.need,
@@ -131,7 +139,7 @@ struct HomeView: View {
                         )
                     } else {
                         CompanionView(
-                            mode: replaying ? replayFrom : store.current,
+                            mode: shownMode,
                             energy: reading?.value,
                             need: activeNeed(at: context.date)?.need,
                             needSince: activeNeed(at: context.date)?.since,
@@ -197,8 +205,8 @@ struct HomeView: View {
                     Text("\(state.title) 中 · 点 \(persona.title) 换状态")
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
-                } else if let mode = store.current {
-                    Text(mode.tagline(for: persona))
+                } else if let mode = shownMode {
+                    Text(shownCards.tagline(for: mode, persona: persona))
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
                 } else {
@@ -217,7 +225,7 @@ struct HomeView: View {
                         HakuLines.line($0, at: context.date, persona: persona)
                     }
                     let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
-                    let leftWork = HakuLines.offWorkUntil(store.log, now: context.date)
+                    let leftWork = HakuLines.offWorkUntil(store.log, now: context.date, work: rules)
                     let offWork = leftWork.map { HakuLines.offWorkLine(for: persona, until: $0, work: rules) }
                     let activityLine = activity(at: context.date)?.reason(for: persona)
                     if let line = offWork ?? activityLine ?? workLine ?? notice ?? sunday ?? why {
@@ -227,13 +235,17 @@ struct HomeView: View {
                     }
                 }
 
-                ModeSwitcher(current: store.current, persona: persona) { mode in
+                ModeSwitcher(current: shownMode, persona: persona, cards: shownCards) { mode in
                     switchTo(mode)
                 }
                 .anchorPreference(key: SwitcherBounds.self, value: .bounds) { $0 }
 
                 TimelineView(.periodic(from: .now, by: 60)) { context in
-                    TodayTimeline(segments: store.segments(on: context.date, now: context.date), persona: persona)
+                    TodayTimeline(
+                        segments: store.segments(on: context.date, now: context.date),
+                        persona: persona,
+                        cards: shownCards
+                    )
                 }
             }
             .padding(.horizontal, 20)
@@ -252,7 +264,7 @@ struct HomeView: View {
             }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: answers)
-        .modeSwitchHaptic(trigger: store.current)
+        .modeSwitchHaptic(trigger: manualSwitches)
         // HAKU starts in the old mode, then switches, so the switch animation plays.
         .task {
             guard let screenshotCheck else { return }
@@ -270,10 +282,13 @@ struct HomeView: View {
             }
         }
         .task(id: replayFrom) {
-            replaying = replayFrom != nil
-            guard replaying else { return }
+            guard replayFrom != nil else { return }
             try? await Task.sleep(for: .seconds(1.2))
-            replaying = false
+            replayEnded = true
+        }
+        // Each new replay starts unfinished, also when one follows another without a nil in between.
+        .onChange(of: replayFrom) {
+            replayEnded = false
         }
     }
 
@@ -434,18 +449,28 @@ struct HomeView: View {
         }
     }
 
+    // UI-27: the character, header and mode buttons change in the same frame.
+    /// The mode shown: the one before a switch made while the app was closed, until its replay ends.
+    private var shownMode: Mode? {
+        guard let replayFrom, !replayEnded else { return store.current }
+        return replayFrom
+    }
+
     private func switchTo(_ mode: Mode) {
         let changed = withAnimation(.easeInOut(duration: 0.2)) {
             store.switchTo(mode)
         }
+        // A tap during the replay ends it, so the buttons show what was tapped.
+        replayEnded = true
+        if changed { manualSwitches += 1 }
         // Boxing day gets a pep jump on entry.
         if changed, mode == .boxing { cheer += 1 }
     }
 }
 
 extension View {
-    /// A tap on iPhone when the mode changes; nothing on Mac.
-    @ViewBuilder func modeSwitchHaptic(trigger: Mode?) -> some View {
+    /// A tap on iPhone each time `trigger` changes; nothing on Mac.
+    @ViewBuilder func modeSwitchHaptic(trigger: Int) -> some View {
         #if os(iOS)
         sensoryFeedback(.impact(weight: .medium), trigger: trigger)
         #else
@@ -461,6 +486,7 @@ private struct Header: View {
     let onShop: (() -> Void)?
     let onSettings: (() -> Void)?
     let persona: Persona
+    let cards: ModeCards
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -522,7 +548,7 @@ private struct Header: View {
 
     private var subtitle: String {
         let date = Date.now.formatted(.dateTime.month().day().weekday(.wide))
-        return "\(date) · \(mode.map { "\($0.code(for: persona)) MODE" } ?? "NO MODE")"
+        return "\(date) · \(mode.map { "\(cards.code(for: $0, persona: persona)) MODE" } ?? "NO MODE")"
     }
 }
 

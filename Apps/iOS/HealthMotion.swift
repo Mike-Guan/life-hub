@@ -32,6 +32,24 @@ enum HealthMotion {
         return Reading(workouts: recent, stillSince: still, standHours: hours)
     }
 
+    // Privacy rule: only the win leaves this function, never the daylight minutes.
+    /// Asks for read access to time in daylight, then returns the daylight win for today, if earned.
+    /// - Returns: `nil` when HealthKit is unavailable, access was denied or there wasn't enough daylight.
+    /// - Throws: HealthKit errors.
+    static func daylight(now: Date = .now) async throws -> EarnedWin? {
+        guard HKHealthStore.isHealthDataAvailable() else { return nil }
+        let store = HKHealthStore()
+        let type = HKQuantityType(.timeInDaylight)
+        try await store.requestAuthorization(toShare: [], read: [type])
+        let predicate = HKQuery.predicateForSamples(withStart: StateEngine.dayStart(for: now), end: now)
+        let query = HKStatisticsQueryDescriptor(
+            predicate: .quantitySample(type: type, predicate: predicate),
+            options: .cumulativeSum
+        )
+        let minutes = try await query.result(for: store)?.sumQuantity()?.doubleValue(for: .minute()) ?? 0
+        return Win.daylight(minutes * 60, now: now)
+    }
+
     private static func standHours(
         in store: HKHealthStore,
         type: HKCategoryType,
@@ -74,9 +92,11 @@ enum HealthMotion {
         case .traditionalStrengthTraining, .functionalStrengthTraining, .coreTraining: .strength
         case .boxing, .kickboxing: .boxing
         case .martialArts, .wrestling, .fencing: .martialArts
-        case .tennis, .badminton, .squash, .racquetball, .tableTennis, .pickleball: .racket
+        // 活动分类 v1: the tennis card is tennis alone; badminton and the other racket sports are 球类.
+        case .tennis: .racket
         case .basketball, .soccer, .volleyball, .baseball, .softball, .americanFootball, .rugby, .hockey,
-            .handball, .lacrosse, .cricket, .australianFootball, .golf:
+            .handball, .lacrosse, .cricket, .australianFootball, .golf, .badminton, .squash, .racquetball,
+            .tableTennis, .pickleball:
             .ball
         case .yoga, .flexibility, .pilates, .mindAndBody, .taiChi, .cooldown, .preparationAndRecovery, .barre:
             .yoga
