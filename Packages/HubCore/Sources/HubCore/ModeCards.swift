@@ -101,6 +101,27 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         return persona == .kuro ? lines.kuro : lines.haku
     }
 
+    // 第 1 批、第 2 批、顺延身份卡 台词与待机 v0: three tap lines per card and character.
+    /// What the character says in this card's mode, in `persona`'s voice.
+    public func lines(for persona: Persona) -> [String] {
+        let lines: (haku: [String], kuro: [String])
+        switch self {
+        case .boxing: lines = (["……别碰，手带刚缠好。", "打完再说。", "拳套有点味道。不是我的问题。"], ["……别闹。", "等一下，在系。", "……你看什么。"])
+        case .tennis: lines = (["球拍比我想的重。还是重。", "……别抢。", "捡球的不是我。"], ["……拍子别碰。", "等我颠完。", "……嗯。"])
+        case .fitness: lines = (["……我数，你练。", "……这个不重。", "别看我，看镜子。"], ["……我在这儿。", "数到几了？", "……慢点。"])
+        case .study: lines = (["安静。", "……这页我看过了。", "你看你的，我看我的。"], ["……嘘。", "这里有点难。", "……翻一页。"])
+        case .art: lines = (["……袖子挽起来了。", "……还没画完。", "不给看。"], ["……画好了给你看。", "还差一点。", "……别催。"])
+        case .outdoor: lines = (["……走这么远。", "包有点沉。不是抱怨。"], ["……慢慢走。", "这边好安静。", "……我走慢一点。"])
+        case .swimming: lines = (["我不下水。", "泳帽？不戴。", "毛巾在我这儿。"], ["……吹风机我拿来了。", "……我在岸上等。", "……嗯。"])
+        case .yoga: lines = (["这个姿势我做不了。", "……别笑。", "垫子是你的，我坐边上。"], ["……我也试试。", "呼——", "……慢一点。"])
+        case .ball: lines = (["球别往我这边打。", "……我就看看。", "谁赢了？算了，不重要。"], ["……我帮你看着。", "……我在这儿看。", "……嗯。"])
+        case .dance: lines = (["我刚才没跳。", "……节奏不错。", "别录。"], ["……嘿嘿。", "再来一遍？", "……不许看。"])
+        case .music: lines = (["……刚才那个音不算。", "别吵，在数拍。", "我只会这一段。"], ["……嘘，在听。", "这段好难。", "……再一遍。"])
+        case .ski: lines = (["冷。不是抱怨。", "……我坐缆车就行。", "雪镜起雾了。"], ["……好冷。", "手好冰。", "……再滑一次？"])
+        }
+        return persona == .kuro ? lines.kuro : lines.haku
+    }
+
     /// The SF Symbol for the card's mode button.
     public var symbol: String {
         switch self {

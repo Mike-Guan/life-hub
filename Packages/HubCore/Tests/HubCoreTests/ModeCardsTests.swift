@@ -151,6 +151,7 @@ import Testing
         #expect(IdentityKind.ski.invite(for: .haku) == "今天滑雪，我准备好了。")
         for kind in IdentityKind.allCases {
             #expect(!kind.invite(for: .kuro).isEmpty && !kind.tagline(for: .kuro).isEmpty)
+            #expect(!kind.lines(for: .haku).isEmpty && !kind.lines(for: .kuro).isEmpty)
         }
     }
 
