@@ -102,7 +102,7 @@ struct HubProvider: TimelineProvider {
             work: work,
             rules: NeedRules.standard.following(work)
         )
-        let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work)
+        let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work, bedtime: schedule)
         let slots = WidgetSnapshot.slotDates(after: now)
         let daily = DailyPlan.stored(in: AppGroup.defaults)
         let dailyTimes = daily?.times ?? []
@@ -147,7 +147,8 @@ struct HubProvider: TimelineProvider {
                 stiff: sit?.isStiff(mode: snapshot?.mode, at: date) ?? false,
                 now: date,
                 work: work,
-                rules: NeedRules.standard.following(work)
+                rules: NeedRules.standard.following(work),
+                bedtime: schedule
             )
             return HubEntry(
                 date: date,
