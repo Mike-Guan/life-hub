@@ -105,6 +105,23 @@ import Testing
         #expect(cards.title(for: .work, persona: .haku) == "上学")
         let rewritten = try JSONDecoder().decode(ModeCards.self, from: JSONEncoder().encode(cards))
         #expect(rewritten.identityName == "surfing")
+        // An older build writes back what only a newer one knows.
+        let raw = try #require(
+            JSONSerialization.jsonObject(with: JSONEncoder().encode(cards)) as? [String: Any]
+        )
+        #expect(raw["chill"] as? [String] == ["running", "knitting"])
+        #expect(raw["sideStates"] as? [String] == ["future"])
+    }
+
+    @Test func pickingSideStatesDropsTheOnesThisBuildCantShow() throws {
+        let json = #"{"sideStates":["shooting","future"]}"#
+        var cards = try JSONDecoder().decode(ModeCards.self, from: Data(json.utf8))
+        #expect(cards.sideStates == [.shooting])
+        cards.pickSideStates([.operating])
+        let raw = try #require(
+            JSONSerialization.jsonObject(with: JSONEncoder().encode(cards)) as? [String: Any]
+        )
+        #expect(raw["sideStates"] as? [String] == ["operating"])
     }
 
     @Test func storesInUserDefaults() throws {
