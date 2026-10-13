@@ -291,9 +291,10 @@ struct OnboardingView: View {
             fine("进了副业以后，点它就能换成另一件。")
         } foot: {
             primary("下一步", enabled: !states.isEmpty) { next() }
+            // PM 2026-10-13: the 副业 card always stays; 先不选 keeps the default 做项目.
+            textButton("先不选") { skipSide() }
         } onSkip: {
-            draft.sideStates = nil
-            next()
+            skipSide()
         }
         .onAppear {
             if draft.sideStates == nil { draft.sideStates = [.project] }
@@ -788,6 +789,11 @@ struct OnboardingView: View {
             picked.append(state)
         }
         draft.sideStates = picked
+    }
+
+    private func skipSide() {
+        draft.sideStates = nil
+        next()
     }
 
     private func setHere(_ row: PlaceRow) async {
