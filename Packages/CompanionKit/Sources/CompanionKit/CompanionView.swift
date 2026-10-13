@@ -201,7 +201,7 @@ public struct CompanionView: View {
             character
                 .padding(.top, 24)
                 .padding(.horizontal, 12)
-                .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
+                .scaleEffect(closeUp ? 1.8 : 1, anchor: Self.closeUpAnchor(style))
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: closeUp)
 
             if welcomeStart != nil, let replay = welcomeReplay {
@@ -415,7 +415,15 @@ public struct CompanionView: View {
         return since < length ? since / length : nil
     }
 
-    private var paused: Bool { reduceMotion || asleep || settling }
+    private var paused: Bool {
+        Self.paused(reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling)
+    }
+
+    /// Whether the figure's frame clock stops: with Reduce Motion, outside the active scene, with the watch screen
+    /// dimmed, or while settling after it comes back on.
+    nonisolated static func paused(reduceMotion: Bool, scenePhase: ScenePhase, dozing: Bool, settling: Bool) -> Bool {
+        reduceMotion || scenePhase != .active || dozing || settling
+    }
 
     /// The app is in the background or the watch screen is dimmed.
     private var asleep: Bool { scenePhase != .active || dozing }
@@ -833,6 +841,12 @@ public struct CompanionView: View {
         taps.filter { now.timeIntervalSince($0) < pesterWindow }.count >= count
     }
 
+    // PM 2026-10-13: at bedtime the character is sleepy, not annoyed, so no one turns away then.
+    /// Whether `taps` turn the character away: `count` or more within `pesterWindow`, outside bedtime.
+    nonisolated static func turnsAway(_ taps: [Date], now: Date, count: Int, bedtime: Bedtime) -> Bool {
+        bedtime == .off && pestered(taps, now: now, count: count)
+    }
+
     /// The night to say "还不睡。" for when the app opens at `date`, or nil outside 0:00 to 5:00 or when it was
     /// already said that night. A night is named by the day of its evening, as `yyyy-MM-dd`.
     nonisolated static func newLateNight(at date: Date, last: String, calendar: Calendar = .current) -> String? {
@@ -1070,7 +1084,7 @@ public struct CompanionView: View {
         }
         rollStart = nil
         tapTimes = tapTimes.filter { Date.now.timeIntervalSince($0) < Self.pesterWindow } + [.now]
-        if bedtime == .off, Self.pestered(tapTimes, now: .now, count: WatchPoke.tooMany) {
+        if Self.turnsAway(tapTimes, now: .now, count: WatchPoke.tooMany, bedtime: bedtime) {
             tapTimes = []
             pokeKind = nil
             turnAwayStart = .now
@@ -1104,14 +1118,15 @@ public struct CompanionView: View {
         onTap?()
     }
 
-    /// Plays the reaction to a poke on the watch with a light tap on the wrist; 5 pokes in a row turn HAKU away.
+    /// Plays the reaction to a poke on the watch with a light tap on the wrist; 5 pokes in a row turn HAKU away,
+    /// except at bedtime.
     private func reactToPoke() {
         guard let mode else { return }
         let now = Date.now
         pokes += 1
         guard turnAway(at: now.timeIntervalSinceReferenceDate) == nil else { return }
         tapTimes = tapTimes.filter { now.timeIntervalSince($0) < Self.pesterWindow } + [now]
-        if Self.pestered(tapTimes, now: now, count: WatchPoke.tooMany) {
+        if Self.turnsAway(tapTimes, now: now, count: WatchPoke.tooMany, bedtime: bedtime) {
             tapTimes = []
             pokeKind = nil
             turnAwayStart = now
@@ -1250,6 +1265,15 @@ struct Squash {
 }
 
 /// Lays the figure out for the watch's full-screen page: full width, 30 pt from the top, running off the bottom.
+extension CompanionView {
+    // The watch frame shows the figure lower than the phone card, so the zoom centres lower (逐帧 手表近景 10-13:
+    // at 0.22 the watch close-up showed only hair and the top of the eyes).
+    /// Where the long-press close-up zooms in for `style`, as a point of the view.
+    nonisolated static func closeUpAnchor(_ style: CompanionStyle) -> UnitPoint {
+        UnitPoint(x: 0.5, y: style == .watch ? 0.6 : 0.22)
+    }
+}
+
 struct WatchFigureFrame: ViewModifier {
     let isEnabled: Bool
 

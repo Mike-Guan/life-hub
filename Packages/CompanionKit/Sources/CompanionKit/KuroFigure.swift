@@ -372,7 +372,9 @@ public struct KuroView: View {
                 .animation(.easeInOut(duration: 0.25), value: look)
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
 
-            let paused = reduceMotion || asleep || settling
+            let paused = CompanionView.paused(
+                reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling
+            )
             TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                 let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate
                 let tap = reaction(at: time)
@@ -386,7 +388,7 @@ public struct KuroView: View {
                 // instead of freezing mid-hop or mid-blink.
                 let pose = dozing ? self.pose.showing(.closed) : unbox != nil ? unboxPose : reacting ?? self.pose
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
-                let still = reduceMotion || unbox != nil || dozing
+                let still = Self.holdsStill(reduceMotion: reduceMotion, unboxing: unbox != nil, dozing: dozing)
                 // KURO-16: her idle runs on from where it was when her pace changes, and eases back in after
                 // an unboxing.
                 let idleTime = idlePace?.phase(at: time) ?? time * pace
@@ -426,7 +428,7 @@ public struct KuroView: View {
             .padding(.top, 24)
             .padding(.horizontal, 12)
             // 手表 KURO 与 HAKU 对比 10-13 #1: the same close-up of her face as HAKU's.
-            .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
+            .scaleEffect(closeUp ? 1.8 : 1, anchor: CompanionView.closeUpAnchor(style))
             .animation(reduceMotion ? nil : .smooth(duration: 0.35), value: closeUp)
 
             if unboxStart != nil {
@@ -554,18 +556,18 @@ public struct KuroView: View {
         #endif
     }
 
-    /// Plays her reaction to a tap: a body move for her look, and a line except on the watch. Taps during a move
-    /// only change the line; too many in a row turn her away.
+    // PM 2026-10-13: on the watch she says a line from the same pool as on the phone, in the bottom bubble.
+    /// Plays her reaction to a tap: a body move for her look, and a line. Taps during a move only change the
+    /// line; too many in a row turn her away.
     private func react() {
         let now = Date.now
         if style == .watch { pokes += 1 }
         if tapKind == .turnAway, reaction(at: now.timeIntervalSinceReferenceDate) != nil { return }
         tapTimes = tapTimes.filter { now.timeIntervalSince($0) < CompanionView.pesterWindow } + [now]
-        let talks = showsBubble && style != .watch
-        if bedtime == .off, CompanionView.pestered(tapTimes, now: now, count: KuroTap.tooMany) {
+        if CompanionView.turnsAway(tapTimes, now: now, count: KuroTap.tooMany, bedtime: bedtime) {
             tapTimes = []
             play(.turnAway, at: now)
-            if talks { say("……干嘛。") }
+            if showsBubble { say("……干嘛。") }
             onTap?()
             return
         }
@@ -574,7 +576,7 @@ public struct KuroView: View {
             // KURO-02: at the desk with her chin on her hand she stays seated and taps her cheek.
             play(pose.overtime ? .chinTap : KuroTap(look: look, sleepy: sleepy), at: now)
         }
-        if talks { say(Self.line(after: bubble, from: lines)) }
+        if showsBubble { say(Self.line(after: bubble, from: lines)) }
         onTap?()
     }
 
@@ -673,6 +675,12 @@ public struct KuroView: View {
                     closeUp = false
                 }
             }
+    }
+
+    /// Whether she holds still, with no sway, hop, blink or idle move: with Reduce Motion, while unboxing, or with
+    /// the watch screen dimmed.
+    nonisolated static func holdsStill(reduceMotion: Bool, unboxing: Bool, dozing: Bool) -> Bool {
+        reduceMotion || unboxing || dozing
     }
 
     /// How far she hops at the start of a tap reaction, in points; turning away and the chin tap have no hop.

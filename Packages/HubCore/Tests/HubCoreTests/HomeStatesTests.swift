@@ -86,6 +86,30 @@ import Testing
         #expect(home(since: arrived, at: date(5, 0, 30)) == .blanket)
     }
 
+    @Test func theBlanketComesTwoAndAHalfHoursBeforeBedtime() {
+        let signals = HomeSignals(since: date(4, 18), workedToday: 0, manualAt: nil)
+        func home(bedtime startMinute: Int, at now: Date) -> CompanionMoment? {
+            let bedtime = BedtimeSchedule(startMinute: startMinute, endMinute: 5 * 60)
+            return MomentEngine.home(mode: .chill, signals: signals, now: now, bedtime: bedtime, calendar: calendar)
+        }
+        #expect(home(bedtime: 22 * 60, at: date(4, 19, 29)) == nil)
+        #expect(home(bedtime: 22 * 60, at: date(4, 19, 30)) == .blanket)
+        // Bedtime at 01:00 puts the blanket at 22:30 the evening before.
+        #expect(home(bedtime: 60, at: date(4, 22, 29)) == nil)
+        #expect(home(bedtime: 60, at: date(4, 22, 30)) == .blanket)
+        // Bedtime at 06:00 puts the blanket at 03:30, and the day after 05:00 has none.
+        #expect(home(bedtime: 6 * 60, at: date(5, 3, 29)) == nil)
+        #expect(home(bedtime: 6 * 60, at: date(5, 3, 30)) == .blanket)
+        #expect(home(bedtime: 6 * 60, at: date(5, 12)) == nil)
+        let times = MomentEngine.homeTimes(
+            since: date(4, 18),
+            now: date(4, 18),
+            bedtime: BedtimeSchedule(startMinute: 22 * 60, endMinute: 5 * 60),
+            calendar: calendar
+        )
+        #expect(times.contains(date(4, 19, 30)))
+    }
+
     @Test func homeStatesGiveWayToEverythingElse() {
         let signals = HomeSignals(since: date(4, 22), workedToday: 0, manualAt: nil)
         func moment(
