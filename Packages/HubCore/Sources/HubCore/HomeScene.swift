@@ -164,7 +164,8 @@ public struct HomeSceneInputs {
             stiff: sit?.isStiff(mode: mode, at: date) ?? false,
             now: date,
             work: rules,
-            rules: NeedRules.standard.following(rules)
+            rules: NeedRules.standard.following(rules),
+            bedtime: bedtime
         )
     }
 
