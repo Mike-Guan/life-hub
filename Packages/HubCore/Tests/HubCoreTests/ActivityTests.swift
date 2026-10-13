@@ -104,21 +104,22 @@ import Testing
     }
 
     @Test func gymVisitEarnsAfterHalfAnHour() {
-        #expect(Win.visit(.fitness, from: date(6, 19), to: date(6, 19, 29), calendar: calendar) == nil)
-        let visit = Win.visit(.fitness, from: date(6, 19), to: date(6, 19, 30), calendar: calendar)
+        #expect(Win.visit(.fitness, from: date(6, 19), to: date(6, 19, 29), identity: nil, calendar: calendar) == nil)
+        let visit = Win.visit(.fitness, from: date(6, 19), to: date(6, 19, 30), identity: nil, calendar: calendar)
         #expect(visit?.win == .gym)
         #expect(visit?.at == date(6, 19, 30))
         let lifted = WorkoutSummary(id: "w", kind: .strength, start: date(6, 19, 5), end: date(6, 19, 50))
-        #expect(visit?.source == Win.wins(in: [lifted], calendar: calendar).first?.source)
+        #expect(visit?.source == Win.wins(in: [lifted], identity: .boxing, calendar: calendar).first?.source)
     }
 
     @Test func boxingGymVisitEarnsBoxingOncePerWeekWithTheWorkout() {
-        #expect(Win.visit(.boxing, from: date(11, 10), to: date(11, 10, 29), calendar: calendar) == nil)
-        let visit = Win.visit(.boxing, from: date(11, 10), to: date(11, 11), calendar: calendar)
+        let arrived = date(11, 10)
+        #expect(Win.visit(.boxing, from: arrived, to: date(11, 10, 29), identity: .boxing, calendar: calendar) == nil)
+        let visit = Win.visit(.boxing, from: arrived, to: date(11, 11), identity: .boxing, calendar: calendar)
         #expect(visit?.win == .boxing)
         let boxed = WorkoutSummary(id: "b", kind: .boxing, start: date(11, 10, 5), end: date(11, 10, 50))
-        #expect(visit?.source == Win.wins(in: [boxed], calendar: calendar).first?.source)
-        #expect(Win.visit(.work, from: date(6, 9), to: date(6, 18), calendar: calendar) == nil)
+        #expect(visit?.source == Win.wins(in: [boxed], identity: .boxing, calendar: calendar).first?.source)
+        #expect(Win.visit(.work, from: date(6, 9), to: date(6, 18), identity: .boxing, calendar: calendar) == nil)
     }
     func gymWins(_ dates: [Date]) -> CanLedger {
         CanLedger(entries: dates.map { CanEntry.earned(.gym, source: "\($0)", at: $0, deviceID: "t") })
