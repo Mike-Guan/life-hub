@@ -95,7 +95,7 @@ struct MemoryView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("\(habit.title)：\(habit.days)")
                                 .font(Toy.body(15, weight: .heavy))
-                            Text(habit.isLearned ? "从你去的日子学的" : "默认的，还在学")
+                            Text(habit.isLearned ? "从你去的日子学的" : "同一天去过两周就记住")
                                 .font(Toy.body(12))
                                 .foregroundStyle(Toy.muted)
                         }

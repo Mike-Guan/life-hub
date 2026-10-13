@@ -90,7 +90,7 @@ public enum Memory {
             LearnedHabit(
                 habit: .gymDays,
                 title: "健身日",
-                days: weekdays(learned.gymWeekdays.isEmpty ? days.gymWeekdays : learned.gymWeekdays),
+                days: weekdays(learned.gymWeekdays.isEmpty ? days.gymWeekdays : learned.gymWeekdays) ?? notLearned,
                 isLearned: !learned.gymWeekdays.isEmpty
             )
         ]
@@ -101,7 +101,7 @@ public enum Memory {
                 LearnedHabit(
                     habit: .identityDay,
                     title: Mode.boxing.title(for: persona),
-                    days: weekdays([learned ?? NeedRules.tennisWeekday]),
+                    days: weekdays([learned ?? NeedRules.tennisWeekday]) ?? notLearned,
                     isLearned: learned != nil
                 )
             )
@@ -164,7 +164,11 @@ public enum Memory {
     }
 
     /// `days` as Chinese weekday names in week order from Monday, e.g. "周二、周四".
-    static func weekdays(_ days: Set<Int>) -> String {
+    /// What a habit shows before a day is learned.
+    public static let notLearned = "还没记住"
+
+    static func weekdays(_ days: Set<Int>) -> String? {
+        guard !days.isEmpty else { return nil }
         let names = [1: "周日", 2: "周一", 3: "周二", 4: "周三", 5: "周四", 6: "周五", 7: "周六"]
         return days.sorted { ($0 + 5) % 7 < ($1 + 5) % 7 }.compactMap { names[$0] }.joined(separator: "、")
     }

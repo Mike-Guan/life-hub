@@ -55,7 +55,7 @@ import Testing
         let learned = habits(ledger)
         #expect(learned == [LearnedHabit(habit: .gymDays, title: "健身日", days: "周二、周四", isLearned: true)])
         let forgotten = habits(ledger, resets: MemoryResets(habits: [.gymDays: date(16)]))
-        #expect(forgotten.first?.days == "周二、周三、周四")
+        #expect(forgotten.first?.days == Memory.notLearned)
         #expect(forgotten.first?.isLearned == false)
     }
 
@@ -138,7 +138,7 @@ import Testing
 
     @Test func weekdaysStartOnMonday() {
         #expect(Memory.weekdays([1, 3, 5]) == "周二、周四、周日")
-        #expect(Memory.weekdays([]) == "")
+        #expect(Memory.weekdays([]) == nil)
     }
 
     @Test func onlyPlacesThatSwitchAModeCount() {
