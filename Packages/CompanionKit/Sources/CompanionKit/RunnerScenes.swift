@@ -456,10 +456,11 @@ extension RunnerPose {
 
     /// HAKU `time` seconds into `scene`; the crate opens at `open`, or stays shut when nil. In `mode` work the
     /// glance and the quiet scene play at the desk. A scene `length` seconds long eases HAKU back to rest over its
-    /// last 1.2 s and puts the props away over its last 0.3 s.
+    /// last 1.2 s and puts the props away over its last 0.3 s. A scene skipped at `skippedAt` does both over the
+    /// 0.3 s after it.
     static func welcome(
         _ scene: WelcomeScene, time t: CGFloat, open: CGFloat?, face: EnergyFace, mode: Mode = .chill,
-        length: CGFloat = .infinity
+        length: CGFloat = .infinity, skippedAt: CGFloat? = nil
     ) -> RunnerPose {
         var pose = RunnerPose(face: face)
         // HAKU-17 (UI 审核 2026-10-08): opening the app at the office showed the sofa and blanket.
@@ -511,14 +512,16 @@ extension RunnerPose {
         }
         // HAKU-03 (UI 审核 2026-10-13): the scene used to cut to the idle pose in one frame. The body settles
         // slowly enough to move at most about 2 pt a frame; the props drop and fade in the last 0.3 s.
-        if length.isFinite {
-            let settle = ease(ramp(t, from: length - 1.2, to: length))
+        // UI 审核 2026-10-13: a tap that skips the scene gets the same ending, over 0.3 s.
+        let skip = skippedAt.map { ease(ramp(t, from: $0, to: $0 + 0.3)) } ?? 0
+        if length.isFinite || skippedAt != nil {
+            let settle = max(length.isFinite ? ease(ramp(t, from: length - 1.2, to: length)) : 0, skip)
             pose.bounce *= 1 - settle
             pose.lean *= Double(1 - settle)
             pose.shift *= 1 - settle
             pose.headDy *= 1 - settle
             pose.headTilt *= Double(1 - settle)
-            w.exit = ease(ramp(t, from: length - 0.3, to: length))
+            w.exit = max(length.isFinite ? ease(ramp(t, from: length - 0.3, to: length)) : 0, skip)
         }
         pose.welcome = w
         return pose
