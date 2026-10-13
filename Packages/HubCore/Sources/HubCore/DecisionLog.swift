@@ -14,6 +14,8 @@ public struct Decision: Codable, Identifiable, Equatable, Sendable {
         case line
         case animation
         case backoff
+        /// The character's read of the user's state, answered on the "不对" card.
+        case guess
     }
 
     /// What happened after the decision.
@@ -158,6 +160,15 @@ public struct DecisionLog: RecordLog, Equatable {
     /// Adds `decision` at the end.
     public mutating func append(_ decision: Decision) {
         decisions.append(decision)
+    }
+
+    /// Adds `decision` unless one with its id is already stored.
+    /// - Returns: whether it was added.
+    @discardableResult
+    public mutating func appendOnce(_ decision: Decision) -> Bool {
+        guard !decisions.contains(where: { $0.id == decision.id }) else { return false }
+        decisions.append(decision)
+        return true
     }
 
     // Planners run on every refresh; only a changed plan is a new decision.

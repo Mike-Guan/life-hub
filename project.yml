@@ -80,6 +80,19 @@ targets:
         INFOPLIST_KEY_NSHealthShareUsageDescription: "Life Hub 只读取昨晚的睡眠时长、运动记录、最近几小时的步数和今天的站立小时，用来估计电量、判断你是不是窝在家、打完拳庆祝、坐太久时陪你伸懒腰。健康数据不会离开这台 iPhone。"
         INFOPLIST_KEY_NSMotionUsageDescription: "Life Hub 只在你从家去公司、从公司回家的路上看一眼你是在走路还是在车上，让 HAKU 跟着演。运动数据只在这台 iPhone 上用，不会上传。"
     scheme: {}
+  # Drives the "不对" card recording in scripts/check-card-shots.sh; CI doesn't build it.
+  LifeHub-UITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - Apps/UITests
+    dependencies:
+      - target: LifeHub-iOS
+    settings:
+      base:
+        PRODUCT_NAME: LifeHubUITests
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).uitests
+        TARGETED_DEVICE_FAMILY: "1"
   LifeHub-macOS:
     type: application
     platform: macOS
@@ -205,3 +218,13 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Apps/WatchWidgets/LifeHubWatchWidgets.entitlements
         TARGETED_DEVICE_FAMILY: "4"
         SKIP_INSTALL: YES
+schemes:
+  CheckCard:
+    build:
+      targets:
+        LifeHub-iOS: all
+        LifeHub-UITests: [test]
+    test:
+      config: Debug
+      targets:
+        - LifeHub-UITests

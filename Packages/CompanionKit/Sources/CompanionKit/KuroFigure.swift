@@ -269,6 +269,7 @@ public struct KuroView: View {
     let onWelcomeDone: (() -> Void)?
 
     @Environment(\.frameClock) private var frameClock
+    @Environment(\.companionHold) private var hold
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.frameReduceMotion) private var frameReduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -447,14 +448,15 @@ public struct KuroView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { react() }
-        // Until she has her own close-up (新角色清单), a long press plays her tap reaction.
+        // Until she has her own close-up (新角色清单), a long press plays her tap reaction unless the app
+        // handles it.
         .gesture(
-            LongPressGesture(minimumDuration: 0.4).onEnded { _ in react() },
+            LongPressGesture(minimumDuration: 0.4).onEnded { _ in CompanionHold.release(hold) { react() } },
             including: style == .standard ? .all : .none
         )
         // On the watch the press must not take the swipe from the pages.
         .simultaneousGesture(
-            LongPressGesture(minimumDuration: 0.4).onEnded { _ in react() },
+            LongPressGesture(minimumDuration: 0.4).onEnded { _ in CompanionHold.release(hold) { react() } },
             including: style == .watch ? .all : .none
         )
         .task(id: listensForShakes) { await listenForShakes() }

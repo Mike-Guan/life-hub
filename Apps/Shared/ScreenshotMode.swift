@@ -42,6 +42,26 @@ enum ScreenshotMode {
         return wardrobe
     }
 
+    /// Today's energy for the screenshot, full when not given.
+    static var energy: EnergyLevel {
+        value(after: "-screenshot-energy").flatMap(EnergyLevel.init(rawValue:)) ?? .full
+    }
+
+    /// Minutes asleep that give `energy` under the standard thresholds.
+    static var sleepMinutes: Int {
+        switch energy {
+        case .low: 5 * 60
+        case .okay: 6 * 60 + 40
+        case .full: 8 * 60
+        }
+    }
+
+    /// What the "不对" card shows: `open` for the question, `reply` for the reply after a correction,
+    /// `hold` for nothing until a long press.
+    static var check: String? {
+        value(after: "-screenshot-check")
+    }
+
     private static func value(after flag: String) -> String? {
         #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
@@ -64,14 +84,20 @@ struct ScreenshotHome: View {
         HomeView(
             bedtime: BedtimeSchedule(startMinute: 0, endMinute: 0),
             wardrobe: ScreenshotMode.wardrobe,
-            persona: ScreenshotMode.persona
+            persona: ScreenshotMode.persona,
+            screenshotCheck: ScreenshotMode.check
         )
         .environment(store)
         .environment(energy)
         .onAppear {
             // A fresh manual change, so the schedule's 2h hold keeps this mode on screen.
             store.switchTo(mode)
-            energy.report(.full)
+            // The "不对" card only asks about a guess, so its shots get energy from a night's sleep.
+            if ScreenshotMode.check == nil {
+                energy.report(ScreenshotMode.energy)
+            } else {
+                energy.record(.sleep(minutes: ScreenshotMode.sleepMinutes, endedAt: .now, deviceID: "screenshot"))
+            }
         }
     }
 }
