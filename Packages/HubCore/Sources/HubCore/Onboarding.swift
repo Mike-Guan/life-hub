@@ -67,6 +67,8 @@ public struct OnboardingDraft: Codable, Equatable, Sendable {
     public var sideStates: [SideHustle]?
     /// The names the user gave the common cards on the cards screen.
     public var names: [String: String] = [:]
+    /// Whether the user allowed location on the location screen, `nil` before it.
+    public var allowsLocation: Bool?
 
     public init() {}
 
@@ -81,9 +83,11 @@ public struct OnboardingDraft: Codable, Equatable, Sendable {
         return cards
     }
 
-    /// Moves to the next screen, keeping the answers.
+    // PM onboarding round 2 #6: without location, nothing senses workouts by place, so the motion screen is skipped.
+    /// Moves to the next screen, keeping the answers. Skips the motion screen when location was not allowed.
     public mutating func advance() {
         step = step.next
+        if step == .motion, allowsLocation == false { step = step.next }
     }
 
     /// Writes the answers into the settings in `defaults` and marks the setup done.

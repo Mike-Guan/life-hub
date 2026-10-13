@@ -81,4 +81,16 @@ import Testing
     @Test func doingProjectsLooksLikeCoding() {
         #expect(SideHustle.project.title == "做项目" && SideHustle.project.moment == .vibeCoding)
     }
+
+    @Test func withoutLocationTheMotionScreenIsSkipped() {
+        var draft = OnboardingDraft()
+        draft.step = .places
+        draft.allowsLocation = false
+        draft.advance()
+        #expect(draft.step == .sideHustle)
+        draft.step = .places
+        draft.allowsLocation = true
+        draft.advance()
+        #expect(draft.step == .motion)
+    }
 }
