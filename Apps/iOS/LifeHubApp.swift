@@ -182,6 +182,7 @@ struct LifeHubApp: App {
                 await replayOffWork()
                 await scheduleReminder()
                 await importSleep()
+                await earnHealthWins()
                 await needs.importMotion()
                 await needs.importCommuteMotion()
                 await daily.read()
@@ -590,6 +591,20 @@ struct LifeHubApp: App {
         reminderError = await BedtimeReminder.schedule(bedtime, persona: persona)
         // The bedtime call asks for permission; without it this would fail the same way.
         if reminderError == nil { await scheduleOffWork() }
+    }
+
+    // Issue #279: daylight and on-time sleep. Only the wins come back from HealthKit, never the times.
+    private func earnHealthWins() async {
+        do {
+            let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
+            let slept = try await HealthSleep.earlySleep(schedule: schedule)
+            let sunned = try await HealthMotion.daylight()
+            for earned in [slept, sunned].compactMap(\.self) {
+                growth.record(earned.win, source: earned.source, at: earned.at)
+            }
+        } catch {
+            healthError = "读不到健康 App 里的日照或睡眠：\(error.localizedDescription)"
+        }
     }
 
     // Re-reads each time the app becomes active, so sleep the Watch syncs later still counts.

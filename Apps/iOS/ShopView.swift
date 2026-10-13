@@ -13,7 +13,7 @@ struct ShopView: View {
 
     // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
     // promises a reward the app can't give yet. Add a win here when its source is wired.
-    static let liveWins: [Win] = [.boxing, .run5k, .gym]
+    static let liveWins: [Win] = [.boxing, .run5k, .gym, .daylight, .earlySleep]
 
     var body: some View {
         ScrollView {
