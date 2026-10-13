@@ -2163,6 +2163,8 @@ private struct WelcomeProps: View {
                     if welcome.glow > 0 { RunnerPartView(part: .sparkle).opacity(welcome.glow) }
                 }
             }
+            .offset(y: 8 * welcome.exit * scale)
+            .opacity(Double(1 - welcome.exit))
         }
     }
 }
