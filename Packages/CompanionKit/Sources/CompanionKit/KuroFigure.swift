@@ -428,7 +428,7 @@ public struct KuroView: View {
             .padding(.top, 24)
             .padding(.horizontal, 12)
             // 手表 KURO 与 HAKU 对比 10-13 #1: the same close-up of her face as HAKU's.
-            .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
+            .scaleEffect(closeUp ? 1.8 : 1, anchor: CompanionView.closeUpAnchor(style))
             .animation(reduceMotion ? nil : .smooth(duration: 0.35), value: closeUp)
 
             if unboxStart != nil {

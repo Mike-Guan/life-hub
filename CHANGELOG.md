@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - On the watch, a long press on the second preset character shows a close-up of her face for a moment, like HAKU.
+  The watch close-up of both characters now frames the eyes and mouth instead of the hair.
 - The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
   4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.

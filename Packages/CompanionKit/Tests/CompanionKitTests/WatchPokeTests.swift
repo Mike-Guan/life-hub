@@ -84,4 +84,15 @@ import Testing
             #expect(order == order.sorted())
         }
     }
+
+    // 逐帧 手表近景 10-13: the watch close-up showed only hair and the top of the eyes.
+    @Test func theWatchCloseUpKeepsTheEyesAndMouthInView() {
+        // On the watch both faces sit with the eyes about halfway down and the mouth about 0.62 down.
+        let anchor = CompanionView.closeUpAnchor(.watch).y
+        for y in [0.5, 0.62] {
+            let zoomed = anchor + 1.8 * (y - anchor)
+            #expect((0.15...0.85).contains(zoomed), "\(y)")
+        }
+        #expect(CompanionView.closeUpAnchor(.standard).y == 0.22)
+    }
 }
