@@ -82,12 +82,12 @@ public final class ModeStore {
     }
 
     // A state change counts as a manual change, so automatic switches wait 2 hours after it too.
-    /// In 副业 mode, switches by hand to the next state. Earns no cans.
+    /// In 副业 mode, switches by hand to the next of the 副业 states in `cards`. Earns no cans.
     /// - Returns: `false` outside 副业 mode or when nothing was recorded.
     @discardableResult
-    public func cycleSideHustle(at date: Date = .now) -> Bool {
+    public func cycleSideHustle(cards: ModeCards = .legacy(for: .haku), at date: Date = .now) -> Bool {
         guard let state = sideHustle else { return false }
-        return switchTo(.money, tag: state.next.rawValue, at: date)
+        return switchTo(.money, tag: cards.next(after: state).rawValue, at: date)
     }
 
     /// Applies what `ModeEngine` decides for `trigger`.

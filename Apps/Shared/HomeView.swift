@@ -439,7 +439,7 @@ struct HomeView: View {
         guard store.sideHustle != nil else { return nil }
         return {
             withAnimation(.easeInOut(duration: 0.2)) {
-                _ = store.cycleSideHustle()
+                _ = store.cycleSideHustle(cards: shownCards)
             }
         }
     }
@@ -453,7 +453,8 @@ struct HomeView: View {
 
     private func switchTo(_ mode: Mode) {
         let changed = withAnimation(.easeInOut(duration: 0.2)) {
-            store.switchTo(mode)
+            // 副业 starts in the user's first picked state.
+            store.switchTo(mode, tag: mode == .money ? shownCards.sideStates[0].rawValue : nil)
         }
         // A tap during the replay ends it, so the buttons show what was tapped.
         replayEnded = true
