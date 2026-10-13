@@ -15,9 +15,10 @@ import Testing
 
     @Test func kuroRenamesOnlyHerOwnSlots() {
         #expect(Mode.boxing.title(for: .kuro) == "网球日")
-        #expect(Mode.money.title(for: .kuro) == "备课")
+        #expect(Mode.money.title(for: .kuro) == Mode.money.title)
+        #expect(ModeCards.legacy(for: .kuro).title(for: .money, persona: .kuro) == "备课")
         #expect(Mode.boxing.code(for: .kuro) == "TENNIS")
-        #expect(Mode.money.code(for: .kuro) == "DESK")
+        #expect(Mode.money.code(for: .kuro) == Mode.money.code)
         #expect(Mode.work.code(for: .kuro) == Mode.work.code)
         #expect(Mode.work.title(for: .kuro) == Mode.work.title)
         #expect(Mode.chill.title(for: .kuro) == "下班")
@@ -27,6 +28,26 @@ import Testing
             #expect(mode.code(for: .haku) == mode.code)
             #expect(mode.tagline(for: .kuro) != mode.tagline)
         }
+    }
+
+    @Test func placesAreNamedAfterThePickedCard() {
+        let swim = ModeCards(identity: .swimming)
+        #expect(HubPlace.Kind.gym.title(for: .haku, cards: swim) == "游泳的地方")
+        #expect(HubPlace.Action.boxing.title(for: .kuro, cards: swim) == "当游泳的地方")
+        #expect(HubPlace.Kind.gym.title(for: .haku, cards: .legacy(for: .haku)) == "拳馆")
+        let tennis = ModeCards(identity: .tennis)
+        #expect(HubPlace.Kind.gym.title(for: .haku, cards: tennis) == "网球的地方")
+        #expect(tennis.activity(for: .haku) == "网球")
+        #expect(ModeCards.legacy(for: .haku).activity(for: .haku) == "拳击")
+        #expect(HubPlace.Action.boxing.title(for: .kuro, cards: .legacy(for: .kuro)) == "当网球场")
+        var renamed = ModeCards()
+        renamed.rename(.work, to: "上学")
+        #expect(HubPlace.Action.work.title(for: .haku, cards: renamed) == "切到上学")
+        #expect(!HubPlace.Kind.presets(with: renamed).contains(.gym))
+        #expect(!HubPlace.Action.offered(with: renamed).contains(.boxing))
+        #expect(HubPlace.Action.offered(with: swim) == HubPlace.Action.allCases)
+        let reason = ModeEngine.decide(.enteredGym, log: ModeLog(), now: .now, cards: swim)?.reason
+        #expect(reason == "到游泳的地方了")
     }
 
     @Test func kuroCallsTheGymATennisCourt() {

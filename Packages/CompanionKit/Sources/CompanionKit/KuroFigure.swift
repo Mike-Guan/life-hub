@@ -371,7 +371,9 @@ public struct KuroView: View {
                 .animation(.easeInOut(duration: 0.25), value: look)
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
 
-            let paused = reduceMotion || asleep || settling
+            let paused = CompanionView.paused(
+                reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling
+            )
             TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                 let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate
                 let tap = reaction(at: time)
@@ -385,7 +387,7 @@ public struct KuroView: View {
                 // instead of freezing mid-hop or mid-blink.
                 let pose = dozing ? self.pose.showing(.closed) : unbox != nil ? unboxPose : reacting ?? self.pose
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
-                let still = reduceMotion || unbox != nil || dozing
+                let still = Self.holdsStill(reduceMotion: reduceMotion, unboxing: unbox != nil, dozing: dozing)
                 // KURO-16: her idle runs on from where it was when her pace changes, and eases back in after
                 // an unboxing.
                 let idleTime = idlePace?.phase(at: time) ?? time * pace
@@ -659,6 +661,12 @@ public struct KuroView: View {
         guard let kind = tapKind, let start = tapStart?.timeIntervalSinceReferenceDate else { return nil }
         let progress = (time - start) / kind.duration
         return (0..<1).contains(progress) ? (kind, progress) : nil
+    }
+
+    /// Whether she holds still, with no sway, hop, blink or idle move: with Reduce Motion, while unboxing, or with
+    /// the watch screen dimmed.
+    nonisolated static func holdsStill(reduceMotion: Bool, unboxing: Bool, dozing: Bool) -> Bool {
+        reduceMotion || unboxing || dozing
     }
 
     /// How far she hops at the start of a tap reaction, in points; turning away and the chin tap have no hop.

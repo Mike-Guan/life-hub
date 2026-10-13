@@ -133,4 +133,66 @@ import Testing
         cards.store(in: defaults)
         #expect(ModeCards.stored(in: defaults) == cards)
     }
+
+    @Test func aPickedCardBringsItsOwnCodeLineAndSymbol() {
+        let cards = ModeCards(identity: .swimming)
+        #expect(cards.pickedIdentity(for: .boxing, persona: .haku) == .swimming)
+        #expect(cards.pickedIdentity(for: .work, persona: .haku) == nil)
+        #expect(cards.code(for: .boxing, persona: .haku) == "SWIM")
+        #expect(cards.tagline(for: .boxing, persona: .haku) == "泳帽塞好了")
+        #expect(ModeCards(identity: .ski).tagline(for: .boxing, persona: .kuro) == "滑雪中")
+        #expect(cards.code(for: .work, persona: .haku) == "WORK")
+        #expect(IdentityKind.swimming.symbol == "figure.pool.swim")
+    }
+
+    @Test func eachCardInvitesInTheCharactersVoice() {
+        #expect(IdentityKind.tennis.invite(for: .haku) == "球拍在门口。去不去随你。")
+        #expect(IdentityKind.tennis.invite(for: .kuro) == "今天网球。……拍子带好了。")
+        #expect(IdentityKind.ski.invite(for: .haku) == "今天滑雪，我准备好了。")
+        for kind in IdentityKind.allCases {
+            #expect(!kind.invite(for: .kuro).isEmpty && !kind.tagline(for: .kuro).isEmpty)
+            #expect(!kind.lines(for: .haku).isEmpty && !kind.lines(for: .kuro).isEmpty)
+        }
+    }
+
+    @Test func theCharactersOwnCardKeepsHerLines() {
+        let haku = ModeCards.legacy(for: .haku)
+        #expect(haku.pickedIdentity(for: .boxing, persona: .haku) == nil)
+        #expect(haku.code(for: .boxing, persona: .haku) == Mode.boxing.code(for: .haku))
+        #expect(haku.tagline(for: .boxing, persona: .haku) == Mode.boxing.tagline(for: .haku))
+        let kuro = ModeCards.legacy(for: .kuro)
+        #expect(kuro.tagline(for: .boxing, persona: .kuro) == Mode.boxing.tagline(for: .kuro))
+        #expect(ModeCards(identity: .boxing).pickedIdentity(for: .boxing, persona: .kuro) == .boxing)
+    }
+
+    @Test func withoutAnIdentityCardOnlyThreeModesShow() {
+        #expect(ModeCards().modes == [.work, .chill, .money])
+        #expect(ModeCards(identity: .art).modes == Mode.allCases)
+        var unknown = ModeCards()
+        unknown.identityName = "surfing"
+        #expect(unknown.modes == Mode.allCases)
+    }
+
+    @Test func aNewInstallStartsWithTheGenericCards() throws {
+        let suite = "ModeCardsTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        #expect(ModeCards.current(in: defaults, persona: .kuro) == ModeCards())
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: false)
+        #expect(ModeCards.current(in: defaults, persona: .kuro).identity == nil)
+        // Records saved later don't turn a new install into the legacy cards.
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: true)
+        #expect(ModeCards.current(in: defaults, persona: .kuro) == ModeCards())
+    }
+
+    @Test func anInstallWithRecordsKeepsItsCharactersCards() throws {
+        let suite = "ModeCardsTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: true)
+        #expect(ModeCards.current(in: defaults, persona: .kuro) == .legacy(for: .kuro))
+        ModeCards(identity: .study).store(in: defaults)
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: true)
+        #expect(ModeCards.current(in: defaults, persona: .kuro).identity == .study)
+    }
 }
