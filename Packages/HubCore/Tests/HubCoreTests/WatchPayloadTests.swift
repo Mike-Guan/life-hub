@@ -31,6 +31,22 @@ import Testing
         #expect(WatchPayload(message: message) == payload())
     }
 
+    @Test func carriesTheUsersCardNames() throws {
+        var cards = ModeCards(identity: .swimming)
+        cards.rename(.work, to: "上学")
+        var sent = payload()
+        sent.cards = cards
+        let message = try #require(sent.message)
+        let received = try #require(WatchPayload(message: message))
+        #expect(received.title(for: .work) == "上学")
+        #expect(received.title(for: .boxing) == "游泳")
+        #expect(payload().title(for: .boxing) == "拳击日")
+        // A name stored by a build without the limit is still cut on the watch.
+        var long = payload()
+        long.cards = ModeCards(names: [Mode.work.rawValue: "一二三四五六"])
+        #expect(long.title(for: .work) == "一二三四")
+    }
+
     @Test func anOlderPayloadNeverReplacesANewerOne() {
         let newer = payload()
         var older = payload()

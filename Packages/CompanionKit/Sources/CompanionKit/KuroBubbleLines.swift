@@ -23,7 +23,7 @@ enum KuroBubbleLines {
         case .work: ["……开始了。", "お疲れ。……先说了。", "……在听。"]
         case .chill: ["……回来了。", "热饮，分你一口。", "まあね。"]
         case .boxing: ["正手，反手。", "……今天手感不错。", "头带系好了。"]
-        case .money: ["……在批。", "还剩一摞。", "……"]
+        case .money: ["……在弄自己的事。", "一件一件来。", "……"]
         case nil: ["……先选一个吧。"]
         }
     }
@@ -45,7 +45,7 @@ enum KuroBubbleLines {
         case .overtime: ["……还没结束啊。", "托腮，等着。"]
         case .gymInvite: ["……走吗。网球包拎好了。", "门就在那。……问问而已。"]
         case .heading: ["走了。", "包我拎着。"]
-        case .vibeCoding: ["勾、勾、圈。", "……这题不对。", "红笔，再一支。"]
+        case .vibeCoding: ["……嗯，这样可以。", "再一会儿。", "……别吵，快好了。"]
         // In flow she stays silent, like HAKU.
         case .flow: ["……"]
         case .lateCoding: ["……明天还在。"]
@@ -66,7 +66,7 @@ enum KuroBubbleLines {
         case .snack: ["……没吃。", "什么零食。没看见。"]
         case .drawing: ["没画什么。", "……不许看。"]
         case .practice: ["……没在练。", "活动一下手腕而已。"]
-        case .tidying: ["周日了，收一收。", "……让一让。"]
+        case .tidying: ["……整理一下。", "……让一让。"]
         }
     }
 
