@@ -75,10 +75,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   The iPhone home still cheers the next time it opens.
 
 ### Added
-- A first-run setup on a new install: pick the character, then answer a few questions in her words (Chill
-  activities, an identity card, bedtime, work days, places, 副业) and see the cards the answers make. Every screen
-  can be skipped, and 跳过，直接开始 uses the defaults. Location, Motion & Fitness, Health and notifications are
-  each asked on their own screen that says what they are for. Installs that already have records never see it.
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
   feet with sleepy eyes. On a train or bus he stands and sways instead of stepping.
 - Tapping KURO plays a move for her look: the tablet over her face, a sip from her cup, a ball bounced on her
