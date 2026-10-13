@@ -279,9 +279,18 @@ public struct ModeCards: Codable, Equatable, Sendable {
         return identity
     }
 
-    /// The cards saved in `defaults`, or `persona`'s cards from before Issue #273 when none are saved.
+    // PM #20: a new install starts with the generic cards and no identity card. Saving them on the first
+    // launch keeps an install that later gains records from turning into the legacy cards.
+    /// Saves the first cards when none are saved: `persona`'s cards from before Issue #273 for an install
+    /// that already has records, else the generic ones.
+    public static func adopt(in defaults: UserDefaults, persona: Persona, existingInstall: Bool) {
+        guard defaults.data(forKey: defaultsKey) == nil else { return }
+        (existingInstall ? legacy(for: persona) : ModeCards()).store(in: defaults)
+    }
+
+    /// The cards saved in `defaults`, or the generic cards when none are saved.
     public static func current(in defaults: UserDefaults, persona: Persona) -> ModeCards {
-        stored(in: defaults) ?? legacy(for: persona)
+        stored(in: defaults) ?? ModeCards()
     }
 
     /// The cards saved in `defaults`, or `nil` when none are saved or they can't be read.

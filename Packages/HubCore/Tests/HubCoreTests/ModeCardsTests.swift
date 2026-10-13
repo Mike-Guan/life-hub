@@ -145,12 +145,26 @@ import Testing
         #expect(unknown.modes == Mode.allCases)
     }
 
-    @Test func currentFallsBackToTheCharactersCards() throws {
+    @Test func aNewInstallStartsWithTheGenericCards() throws {
         let suite = "ModeCardsTests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
+        #expect(ModeCards.current(in: defaults, persona: .kuro) == ModeCards())
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: false)
+        #expect(ModeCards.current(in: defaults, persona: .kuro).identity == nil)
+        // Records saved later don't turn a new install into the legacy cards.
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: true)
+        #expect(ModeCards.current(in: defaults, persona: .kuro) == ModeCards())
+    }
+
+    @Test func anInstallWithRecordsKeepsItsCharactersCards() throws {
+        let suite = "ModeCardsTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: true)
         #expect(ModeCards.current(in: defaults, persona: .kuro) == .legacy(for: .kuro))
         ModeCards(identity: .study).store(in: defaults)
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: true)
         #expect(ModeCards.current(in: defaults, persona: .kuro).identity == .study)
     }
 }
