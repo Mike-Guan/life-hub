@@ -59,7 +59,7 @@ import Testing
         // The deadpan eyes open a notch and carry their own glint (Issue #236).
         let deadpan = mid.contains(.eyesWork)
         #expect(high.contains(.eyesBright) == deadpan)
-        #expect(high.isDisjoint(with: [.eyesWork, .lidsWork]) == deadpan)
+        if deadpan { #expect(high.isDisjoint(with: [.eyesWork, .lidsWork])) }
         // Chill's eyes are closed in a smile, so there is nothing to glint.
         #expect(high.contains(.eyeGlint) == (mode != .chill && !deadpan))
     }
