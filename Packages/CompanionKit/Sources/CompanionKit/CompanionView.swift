@@ -415,7 +415,15 @@ public struct CompanionView: View {
         return since < length ? since / length : nil
     }
 
-    private var paused: Bool { reduceMotion || asleep || settling }
+    private var paused: Bool {
+        Self.paused(reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling)
+    }
+
+    /// Whether the figure's frame clock stops: with Reduce Motion, outside the active scene, with the watch screen
+    /// dimmed, or while settling after it comes back on.
+    nonisolated static func paused(reduceMotion: Bool, scenePhase: ScenePhase, dozing: Bool, settling: Bool) -> Bool {
+        reduceMotion || scenePhase != .active || dozing || settling
+    }
 
     /// The app is in the background or the watch screen is dimmed.
     private var asleep: Bool { scenePhase != .active || dozing }
