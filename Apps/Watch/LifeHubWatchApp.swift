@@ -124,17 +124,21 @@ struct WatchHomeView: View {
             }
         }
         .overlay(alignment: .topLeading) {
-            VStack(alignment: .leading, spacing: 4) {
+            if let failure {
+                Text(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2).padding(.leading, 4)
+            }
+        }
+        // The chip sits in the clock's row, the top safe area, so no character's hair runs into it.
+        .overlay(alignment: .topLeading) {
+            GeometryReader { proxy in
                 if !Self.cleanFrame {
-                    ModeChip(mode: mode, persona: payload.persona, since: snapshot.since)
-                }
-                if let failure {
-                    Text(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2)
+                    ModeChip(mode: mode, persona: payload.persona)
+                        .frame(height: proxy.safeAreaInsets.top)
+                        .padding(.leading, 14)
+                        .offset(y: -proxy.safeAreaInsets.top)
+                        .allowsHitTesting(false)
                 }
             }
-            .padding(.leading, 4)
-            // Clear of the dark clock band, so the two outlines don't merge.
-            .padding(.top, clockBand ? 4 : 0)
         }
     }
 }
@@ -181,31 +185,22 @@ private struct WatchPager<First: View, Second: View>: View {
     }
 }
 
-/// The mode and how long it has run, in a small white pill; "还没有模式" without one.
+/// The mode in a small white pill, "还没有模式" without one. How long it has run is on the second page.
 private struct ModeChip: View {
     let mode: Mode?
     let persona: Persona
-    let since: Date?
 
     var body: some View {
-        Group {
-            if let mode, let since {
-                Text("\(mode.title(for: persona)) · \(Text(since, style: .relative))")
-            } else if let mode {
-                Text(mode.title(for: persona))
-            } else {
-                Text("还没有模式")
-            }
-        }
-        .font(Toy.body(12, weight: .heavy))
-        .foregroundStyle(Toy.ink)
-        .lineLimit(1)
-        // The pill hugs the text; it sits below the clock row, so it never runs under the time.
-        .fixedSize()
-        .padding(.horizontal, 9)
-        .padding(.vertical, 3)
-        .background(Capsule().fill(Toy.card))
-        .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+        Text(mode?.title(for: persona) ?? "还没有模式")
+            .font(Toy.body(12, weight: .heavy))
+            .foregroundStyle(Toy.ink)
+            .lineLimit(1)
+            // Mode names are short enough to sit left of the clock at full size.
+            .fixedSize()
+            .padding(.horizontal, 8)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(Toy.card))
+            .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
     }
 }
 
