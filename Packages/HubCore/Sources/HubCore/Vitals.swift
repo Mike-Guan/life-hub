@@ -30,7 +30,7 @@ public struct HakuVitals: Codable, Equatable, Sendable {
 /// Works out HAKU's hidden params. Rules only: they rise fast and fall slowly.
 public enum VitalsEngine {
     /// Wins that count as training.
-    static let trainingWins: Set<Win> = [.boxing, .gym, .run5k]
+    static let trainingWins: Set<Win> = [.boxing, .gym, .run5k, .exercise]
 
     /// The params at `now` from the can ledger and the energy log.
     public static func vitals(

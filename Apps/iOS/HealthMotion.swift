@@ -63,8 +63,8 @@ enum HealthMotion {
         )
     }
 
-    // Issue #205: about ten groups so HAKU and KURO can react to each later. Only boxing, running and
-    // strength earn cans (`Win.wins`), so martial arts and walking stay out of those groups.
+    // Issue #205: about ten groups so HAKU and KURO can react to each later. Walking never earns cans and
+    // strength earns the gym win (`Win.wins`), so martial arts and walking stay out of those groups.
     private static func kind(_ type: HKWorkoutActivityType) -> WorkoutSummary.Kind {
         switch type {
         case .walking, .wheelchairWalkPace: .walking
@@ -74,9 +74,11 @@ enum HealthMotion {
         case .traditionalStrengthTraining, .functionalStrengthTraining, .coreTraining: .strength
         case .boxing, .kickboxing: .boxing
         case .martialArts, .wrestling, .fencing: .martialArts
-        case .tennis, .badminton, .squash, .racquetball, .tableTennis, .pickleball: .racket
+        // 活动分类 v1: the tennis card is tennis alone; badminton and the other racket sports are 球类.
+        case .tennis: .racket
         case .basketball, .soccer, .volleyball, .baseball, .softball, .americanFootball, .rugby, .hockey,
-            .handball, .lacrosse, .cricket, .australianFootball, .golf:
+            .handball, .lacrosse, .cricket, .australianFootball, .golf, .badminton, .squash, .racquetball,
+            .tableTennis, .pickleball:
             .ball
         case .yoga, .flexibility, .pilates, .mindAndBody, .taiChi, .cooldown, .preparationAndRecovery, .barre:
             .yoga

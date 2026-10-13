@@ -16,6 +16,8 @@ public final class WidgetBridge {
     public var workouts: [WorkoutSummary] = []
     /// The need rules for the chosen character; the app sets it before syncing.
     public var rules = NeedRules.standard
+    /// The work hours; the app sets it before syncing.
+    public var work = ModeRules.standard
 
     public init(container: HubContainer, bedtime: BedtimeSchedule = .standard) {
         self.container = container
@@ -50,7 +52,7 @@ public final class WidgetBridge {
         guard let url = container.snapshotURL else { return }
         let reading = energy.reading(now: now, calendar: calendar)
         let state = bedtime.state(at: now, calendar: calendar)
-        var snapshot = WidgetSnapshot(log: mode.log, energy: reading?.level, bedtime: state, now: now)
+        var snapshot = WidgetSnapshot(log: mode.log, energy: reading?.level, bedtime: state, now: now, work: work)
         snapshot.need = need?.need
         snapshot.needSince = need?.since
         snapshot.needUntil = need?.until

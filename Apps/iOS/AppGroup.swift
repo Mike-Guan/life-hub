@@ -34,11 +34,12 @@ enum AppGroup {
     }
 
     /// The need rules for the chosen character, with KURO's tennis day learned from the can ledger since
-    /// it was last forgotten.
+    /// it was last forgotten and the evening times following the stored work hours.
     static func needRules(now: Date = .now) -> NeedRules {
         let ledger = CanLedger.read(from: container.canLedgerURL)
         let since = MemoryResets.stored(in: defaults).since(.identityDay)
         return NeedRules.standard(for: Persona.stored(in: defaults), ledger: ledger.since(since), now: now)
+            .following(ModeRules.stored(in: defaults))
     }
 
     /// User defaults both processes read, so they share one device id.
