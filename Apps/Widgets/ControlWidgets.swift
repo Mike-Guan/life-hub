@@ -7,7 +7,7 @@ import WidgetKit
 struct ModeWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "mode", provider: HubProvider()) { entry in
-            ModeButtons(current: entry.mode, persona: entry.persona)
+            ModeButtons(current: entry.mode, persona: entry.persona, cards: entry.names)
                 .containerBackground(Toy.paper, for: .widget)
         }
         .configurationDisplayName("切换模式")
@@ -32,6 +32,7 @@ struct EnergyWidget: Widget {
 private struct ModeButtons: View {
     let current: Mode?
     let persona: Persona
+    let cards: ModeCards
 
     var body: some View {
         Grid(horizontalSpacing: 10, verticalSpacing: 10) {
@@ -39,20 +40,28 @@ private struct ModeButtons: View {
                 button(.work)
                 button(.chill)
             }
+            // Without an identity card, 副业 takes the whole row instead of leaving a gap.
             GridRow {
-                button(.boxing)
-                button(.money)
+                if cards.modes.contains(.boxing) {
+                    button(.boxing)
+                    button(.money)
+                } else {
+                    button(.money).gridCellColumns(2)
+                }
             }
         }
     }
 
     private func button(_ mode: Mode) -> some View {
         Button(intent: SwitchModeIntent(mode: mode)) {
-            Label(mode.title(for: persona), systemImage: mode.symbol(for: persona))
-                .font(Toy.body(14, weight: .heavy))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            Label(
+                cards.title(for: mode, persona: persona),
+                systemImage: cards.pickedIdentity(for: mode, persona: persona)?.symbol ?? mode.symbol(for: persona)
+            )
+            .font(Toy.body(14, weight: .heavy))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .buttonStyle(ToyButtonStyle(fill: mode.color(for: persona), isSelected: mode == current))
     }
