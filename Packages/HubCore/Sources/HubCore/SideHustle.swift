@@ -6,6 +6,8 @@ public enum SideHustle: String, Codable, CaseIterable, Sendable {
     case vibeCoding
     case shooting
     case operating
+    case writing
+    case studying
 
     /// The state of a 副业 change with `tag`. Changes without a known tag are vibe coding.
     public init(tag: String?) {
@@ -17,19 +19,22 @@ public enum SideHustle: String, Codable, CaseIterable, Sendable {
         case .vibeCoding: "vibe coding"
         case .shooting: "拍摄"
         case .operating: "运营"
+        case .writing: "写作"
+        case .studying: "学习"
         }
     }
 
-    /// The state after this one when Mike taps HAKU.
+    /// The state after this one when Mike taps HAKU, among the states from before Issue #273.
     public var next: SideHustle {
-        let all = Self.allCases
-        let index = all.firstIndex(of: self) ?? all.startIndex
-        return all[(index + 1) % all.count]
+        ModeCards.legacy(for: .haku).next(after: self)
     }
 
     /// The look HAKU takes in this state.
     public var moment: CompanionMoment {
-        self == .vibeCoding ? .vibeCoding : .shooting
+        switch self {
+        case .vibeCoding, .writing, .studying: .vibeCoding
+        case .shooting, .operating: .shooting
+        }
     }
 
     /// How long one more can joins the pile next to HAKU while vibe coding.
