@@ -1,7 +1,7 @@
 import HealthKit
 import HubCore
 
-// Privacy rule: raw samples stay in HealthKit. Only each night's total leaves this file.
+// Privacy rule: raw samples stay in HealthKit. Only each night's total and its on-time win leave this file.
 /// Reads sleep from HealthKit.
 enum HealthSleep {
     /// Asks for read access (HealthKit shows the sheet once), then reads the night for `now`.
@@ -10,6 +10,14 @@ enum HealthSleep {
     static func lastNight(now: Date = .now) async throws -> SleepNight? {
         let intervals = try await asleep(in: SleepNight.window(for: now))
         return intervals.flatMap { SleepNight.from($0, now: now) }
+    }
+
+    /// The on-time sleep win for the night ending in `now`'s hub day, judged against `schedule`.
+    /// - Returns: `nil` when HealthKit is unavailable, access was denied or the night doesn't earn it.
+    /// - Throws: HealthKit errors.
+    static func earlySleep(schedule: BedtimeSchedule, now: Date = .now) async throws -> EarnedWin? {
+        let intervals = try await asleep(in: SleepNight.window(for: now))
+        return intervals.flatMap { Win.earlySleep($0, schedule: schedule, now: now) }
     }
 
     /// Reads one night per hub day from `start` to `end`, for the return replay.
