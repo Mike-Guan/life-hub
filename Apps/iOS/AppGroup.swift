@@ -37,7 +37,7 @@ enum AppGroup {
         let ledger = CanLedger.read(from: container.canLedgerURL)
         let since = MemoryResets.stored(in: defaults).since(.identityDay)
         return NeedRules.standard(for: Persona.stored(in: defaults), ledger: ledger.since(since), now: now)
-            .following(ModeRules.stored(in: defaults))
+            .following(ModeRules.stored(in: defaults), bedtime: BedtimeSchedule.stored(in: defaults))
     }
 
     /// User defaults both processes read, so they share one device id.

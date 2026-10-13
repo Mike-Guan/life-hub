@@ -209,7 +209,7 @@ public enum ActivityEngine {
         let today = StateEngine.dayStart(for: now, calendar: calendar)
         let weekday = calendar.component(.weekday, from: today)
         let minute = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
-        if days.gymWeekdays.contains(weekday), minute >= work.workEndMinute {
+        if days.gymWeekdays.contains(weekday), minute >= work.dayEndMinute(bedtime: bedtime) {
             let visited = (signals.presence.left(.fitness) ?? .distantPast) >= today
             if !visited, (signals.trainedDay ?? .distantPast) < today { return .gymDay }
         }
@@ -225,12 +225,13 @@ public enum ActivityEngine {
         on date: Date,
         days: ActivityDays = .standard,
         work: ModeRules = .standard,
+        bedtime: BedtimeSchedule = .standard,
         calendar: Calendar = .current
     ) -> [Date] {
         let today = StateEngine.dayStart(for: date, calendar: calendar)
         let weekday = calendar.component(.weekday, from: today)
         var minutes: [Int] = []
-        if days.gymWeekdays.contains(weekday) { minutes.append(work.workEndMinute) }
+        if days.gymWeekdays.contains(weekday) { minutes.append(work.dayEndMinute(bedtime: bedtime)) }
         if days.runWeekday == weekday { minutes.append(days.runStartMinute) }
         let midnight = calendar.startOfDay(for: today)
         return minutes.compactMap { calendar.date(byAdding: .minute, value: $0, to: midnight) }
