@@ -146,14 +146,18 @@ public enum ModeEngine {
         log: ModeLog,
         now: Date,
         rules: ModeRules = .standard,
+        cards: ModeCards = .legacy(for: .haku),
+        persona: Persona = .haku,
         calendar: Calendar = .current
     ) -> ModeDecision? {
         let changes = log.active.filter { $0.at <= now }
+        // 卡片标语与代码 v0 §3: reasons name the user's cards and the identity card's place.
+        let gym = HubPlace.Kind.gym.title(for: persona, cards: cards)
         let current = changes.last
         switch trigger {
         case .enteredGym:
             guard current?.mode != .boxing else { return nil }
-            return ModeDecision(mode: .boxing, source: .location, reason: "到拳馆了")
+            return ModeDecision(mode: .boxing, source: .location, reason: "到\(gym)了")
 
         case .leftGym:
             // Only undo our own switch: the gym entry must still be the latest change.
@@ -163,7 +167,8 @@ public enum ModeEngine {
             let previous = changes.dropLast().last
             let before = previous.map { $0.source.isManual ? $0.mode : .chill } ?? .chill
             guard before != .boxing else { return nil }
-            return ModeDecision(mode: before, source: .location, reason: "离开拳馆，回到「\(before.title)」")
+            let reason = "离开\(gym)，回到「\(cards.title(for: before, persona: persona))」"
+            return ModeDecision(mode: before, source: .location, reason: reason)
 
         case .enteredOffice:
             guard !isHeld(changes, now: now, rules: rules), current?.mode != .work else { return nil }

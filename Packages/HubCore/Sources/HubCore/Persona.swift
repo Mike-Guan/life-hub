@@ -70,7 +70,38 @@ extension HubPlace.Kind {
     }
 }
 
+extension HubPlace.Kind {
+    /// The presets Settings lists with `cards`: the identity card's place only when a card is picked.
+    public static func presets(with cards: ModeCards) -> [HubPlace.Kind] {
+        cards.identityName == nil ? presets.filter { $0 != .gym } : presets
+    }
+
+    /// The preset's name for `persona` with `cards`: a picked identity card's place is named after the card.
+    public func title(for persona: Persona, cards: ModeCards) -> String {
+        guard self == .gym, cards.pickedIdentity(for: .boxing, persona: persona) != nil else {
+            return title(for: persona)
+        }
+        return "\(cards.title(for: .boxing, persona: persona))的地方"
+    }
+}
+
 extension HubPlace.Action {
+    /// The actions Settings offers with `cards`: the identity card's only when a card is picked.
+    public static func offered(with cards: ModeCards) -> [HubPlace.Action] {
+        cards.identityName == nil ? allCases.filter { $0 != .boxing } : allCases
+    }
+
+    /// What the action is called for `persona` with `cards`, naming the user's cards.
+    public func title(for persona: Persona, cards: ModeCards) -> String {
+        switch self {
+        case .work: "切到\(cards.title(for: .work, persona: persona))"
+        case .chill: "切到\(cards.title(for: .chill, persona: persona))"
+        case .sideHustle: "切到\(cards.title(for: .money, persona: persona))"
+        case .boxing: "当\(HubPlace.Kind.gym.title(for: persona, cards: cards))"
+        case .recordOnly, .fitness: title(for: persona)
+        }
+    }
+
     /// What the action is called for `persona`.
     public func title(for persona: Persona) -> String {
         switch (persona, self) {

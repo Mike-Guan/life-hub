@@ -30,6 +30,22 @@ import Testing
         }
     }
 
+    @Test func placesAreNamedAfterThePickedCard() {
+        let swim = ModeCards(identity: .swimming)
+        #expect(HubPlace.Kind.gym.title(for: .haku, cards: swim) == "游泳的地方")
+        #expect(HubPlace.Action.boxing.title(for: .kuro, cards: swim) == "当游泳的地方")
+        #expect(HubPlace.Kind.gym.title(for: .haku, cards: .legacy(for: .haku)) == "拳馆")
+        #expect(HubPlace.Action.boxing.title(for: .kuro, cards: .legacy(for: .kuro)) == "当网球场")
+        var renamed = ModeCards()
+        renamed.rename(.work, to: "上学")
+        #expect(HubPlace.Action.work.title(for: .haku, cards: renamed) == "切到上学")
+        #expect(!HubPlace.Kind.presets(with: renamed).contains(.gym))
+        #expect(!HubPlace.Action.offered(with: renamed).contains(.boxing))
+        #expect(HubPlace.Action.offered(with: swim) == HubPlace.Action.allCases)
+        let reason = ModeEngine.decide(.enteredGym, log: ModeLog(), now: .now, cards: swim)?.reason
+        #expect(reason == "到游泳的地方了")
+    }
+
     @Test func kuroCallsTheGymATennisCourt() {
         #expect(HubPlace.Kind.gym.title(for: .kuro) == "网球场")
         #expect(HubPlace.Kind.office.title(for: .kuro) == HubPlace.Kind.office.title)
