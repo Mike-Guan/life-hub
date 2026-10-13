@@ -13,7 +13,7 @@ enum IdleLife: CaseIterable, Sendable {
     case drawing
     /// Shadow boxing, stopped when someone looks.
     case practice
-    /// Wiping the room with a cloth, Sunday afternoons.
+    /// Wiping the room with a cloth, one afternoon a week.
     case tidying
 
     // WidgetSnapshot.slotDates in HubCore uses the same 15 minutes for widget entries; change both together.
@@ -22,11 +22,12 @@ enum IdleLife: CaseIterable, Sendable {
 
     /// The bit for `date`, or nil for plain chilling, nudged by `stamina`.
     ///
-    /// Sunday 13:00-17:00 is always tidying. Other times pick from the rest, changing every
-    /// `slotLength`; the same slot always gives the same bit.
+    /// 13:00-17:00 on one day a week (`tidyingWeekday`) is always tidying. Other times pick from the rest,
+    /// changing every `slotLength`; the same slot always gives the same bit.
     static func at(_ date: Date, calendar: Calendar = .current, stamina: VitalBand = .mid) -> IdleLife? {
         let parts = calendar.dateComponents([.weekday, .hour], from: date)
-        if parts.weekday == 1, let hour = parts.hour, (13..<17).contains(hour) { return .tidying }
+        let tidyingDay = parts.weekday == tidyingWeekday(of: date, calendar: calendar)
+        if tidyingDay, let hour = parts.hour, (13..<17).contains(hour) { return .tidying }
         let slot = UInt64(bitPattern: Int64(floor(date.timeIntervalSinceReferenceDate / slotLength)))
         // A multiplicative hash so neighbouring slots don't step through the list in order.
         let mixed = (slot &* 0x9E37_79B9_7F4A_7C15) >> 33
@@ -37,6 +38,15 @@ enum IdleLife: CaseIterable, Sendable {
         case (.low, .practice?): return .nap
         default: return life
         }
+    }
+
+    // PM 2026-10-13 (写死作息 QA #17): not tied to Sunday, so it isn't one person's routine.
+    /// The `Calendar` weekday (1 is Sunday) of the week of `date` when HAKU tidies; the same week always gives
+    /// the same day.
+    static func tidyingWeekday(of date: Date, calendar: Calendar = .current) -> Int {
+        let parts = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+        let week = UInt64((parts.yearForWeekOfYear ?? 0) * 100 + (parts.weekOfYear ?? 0))
+        return Int(((week &* 0x9E37_79B9_7F4A_7C15) >> 33) % 7) + 1
     }
 
     // Plain chilling (nil) comes up as often as any bit, so the Monster sip still shows.

@@ -24,8 +24,9 @@ public enum MomentEngine {
     public static let collapsedLasts: TimeInterval = 30 * 60
     /// How many minutes after work start HAKU waits at the door before giving up for the day.
     public static let leaveWaitMinutes = 90
-    /// From this minute after midnight a quiet evening at home is the blanket.
-    public static let blanketMinute = 21 * 60
+    // PM 2026-10-13 (写死作息排查 v0 #9): 21:00 for a 23:30 bedtime, moving with the bedtime.
+    /// Minutes before bedtime that a quiet evening at home becomes the blanket.
+    public static let blanketLead = 150
     /// Time boxing or vibe coding today that leaves a trace.
     public static let traceAfter: TimeInterval = 30 * 60
     /// Boxing cans earned before the gloves look worn.
@@ -49,6 +50,7 @@ public enum MomentEngine {
     ///   - officeSince: when Mike arrived at the office, `nil` when he isn't there.
     ///   - home: what the states at home depend on, `nil` when Mike isn't home.
     ///   - work: the work days and hours, for the weekday morning.
+    ///   - bedtime: the bedtime, for the blanket.
     /// - Returns: `nil` when HAKU shows the plain mode, activity or need.
     public static func moment(
         mode: Mode?,
@@ -62,6 +64,7 @@ public enum MomentEngine {
         now: Date,
         work: ModeRules = .standard,
         rules: NeedRules = .standard,
+        bedtime: BedtimeSchedule = .standard,
         calendar: Calendar = .current
     ) -> CompanionMoment? {
         if stiff || need == .sitting, need != .slacking { return .stiff }
@@ -72,19 +75,20 @@ public enum MomentEngine {
         if let atOffice { return atOffice }
         // At home the bag, the couch and the other needs come first.
         guard activity == nil, need == nil, let home else { return nil }
-        return self.home(mode: mode, signals: home, now: now, work: work, calendar: calendar)
+        return self.home(mode: mode, signals: home, now: now, work: work, bedtime: bedtime, calendar: calendar)
     }
 
     // Mike, 2026-10-05: the clock never switches to work, so a weekday morning at home is chill with
     // HAKU getting ready, then waiting at the door. A manual change today means a day off: no nudge.
     /// The state at home in chill: collapsed after a long work day, the weekday morning and the wait at the
-    /// door, then the blanket in the evening.
+    /// door, then the blanket from `blanketLead` minutes before bedtime.
     /// - Returns: `nil` in other modes or with nothing going on.
     public static func home(
         mode: Mode?,
         signals: HomeSignals,
         now: Date,
         work: ModeRules = .standard,
+        bedtime: BedtimeSchedule = .standard,
         calendar: Calendar = .current
     ) -> CompanionMoment? {
         guard mode == nil || mode == .chill, signals.since <= now else { return nil }
@@ -98,7 +102,7 @@ public enum MomentEngine {
             return minute < work.workStartMinute ? .morning : .timeToLeave
         }
         let lateNight = calendar.startOfDay(for: now) > StateEngine.dayStart(for: now, calendar: calendar)
-        return lateNight || minute >= blanketMinute ? .blanket : nil
+        return lateNight || minute >= blanketMinute(bedtime) ? .blanket : nil
     }
 
     /// The give-up animation once HAKU stops waiting at the door: Mike was home when the wait ended and
@@ -138,6 +142,12 @@ public enum MomentEngine {
         return work.workdays.contains(calendar.component(.weekday, from: now)) && !lateNight && !dayOff
     }
 
+    // A bedtime after midnight puts the blanket the evening before.
+    /// When the blanket starts, in minutes after midnight.
+    static func blanketMinute(_ bedtime: BedtimeSchedule) -> Int {
+        (bedtime.startMinute - blanketLead + 24 * 60) % (24 * 60)
+    }
+
     private static func minuteOfDay(_ date: Date, calendar: Calendar) -> Int {
         let parts = calendar.dateComponents([.hour, .minute], from: date)
         return (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
@@ -148,12 +158,13 @@ public enum MomentEngine {
         since: Date?,
         now: Date,
         work: ModeRules = .standard,
+        bedtime: BedtimeSchedule = .standard,
         calendar: Calendar = .current
     ) -> [Date] {
         guard let since else { return [] }
         let midnight = calendar.startOfDay(for: now)
         let minute = { (value: Int) in calendar.date(byAdding: .minute, value: value, to: midnight) ?? midnight }
-        let minutes = [work.workStartMinute, work.workStartMinute + leaveWaitMinutes, blanketMinute]
+        let minutes = [work.workStartMinute, work.workStartMinute + leaveWaitMinutes, blanketMinute(bedtime)]
         return [since.addingTimeInterval(collapsedLasts)] + minutes.map(minute)
     }
 
@@ -191,7 +202,8 @@ public enum MomentEngine {
     /// The traces that stay once Mike has done enough of something, counted from earned cans and the mode log.
     public static func lastingTraces(log: ModeLog, ledger: CanLedger, now: Date) -> Set<CompanionTrace> {
         var traces: Set<CompanionTrace> = []
-        if ledger.count(.boxing) >= glovesAfter { traces.insert(.wornGloves) }
+        // Worn gloves are boxing's trace; other identity cards get their own traces later (Issue #279).
+        if ledger.count(.boxing, card: .boxing) >= glovesAfter { traces.insert(.wornGloves) }
         if ledger.count(.run5k) >= shoesAfter { traces.insert(.runningShoes) }
         if log.time(from: .distantPast, to: now, where: { $0.sideHustle == .vibeCoding }) >= monitorAfter {
             traces.insert(.deskMonitor)
