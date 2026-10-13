@@ -3,6 +3,15 @@ import Testing
 
 @testable import HubCore
 
+// An identity day learned on Sunday with class at 10:00, for tests of the warm-up itself.
+extension NeedRules {
+    static let sundayFixture: NeedRules = {
+        var rules = NeedRules.standard
+        rules.boxingWeekday = 1
+        return rules
+    }()
+}
+
 @Suite struct TennisDayTests {
     let calendar: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
@@ -22,16 +31,38 @@ import Testing
         NeedRules.standard(for: persona, ledger: ledger, now: date(31, 12), calendar: calendar)
     }
 
-    @Test func hakuKeepsTheStandardRules() {
-        #expect(rules(sessions([date(17, 10), date(24, 10)]), persona: .haku) == .standard)
+    @Test func noIdentityDayUntilOneIsLearned() {
+        let none = rules(CanLedger())
+        #expect(none.persona == .kuro)
+        #expect(none.boxingWeekday == nil)
+        // One week is not enough.
+        #expect(rules(sessions([date(25, 10)])).boxingWeekday == nil)
+        // A swimmer who never boxed gets no boxing warm-up on Sunday morning.
+        let haku = rules(CanLedger(), persona: .haku)
+        #expect(NeedEngine.need(NeedSignals(), now: date(25, 9), rules: haku, calendar: calendar) == nil)
+        #expect(NeedEngine.nextScheduled(after: date(24, 12), rules: haku, calendar: calendar) == nil)
     }
 
-    @Test func kuroPlaysOnSaturdayUntilADayIsLearned() {
-        let rules = rules(CanLedger())
-        #expect(rules.persona == .kuro)
-        #expect(rules.boxingWeekday == NeedRules.tennisWeekday)
-        // One week is not enough.
-        #expect(self.rules(sessions([date(25, 10)])).boxingWeekday == NeedRules.tennisWeekday)
+    @Test func oldBoxingRecordsLearnSundayAroundTheUsualArrival() {
+        // Sundays 18th and 25th, leaving the gym at 11:40: arrival taken as 10:10, rounded to 10:00.
+        let ledger = sessions([date(18, 11, 40), date(25, 11, 40)])
+        let haku = rules(ledger, persona: .haku)
+        #expect(haku.boxingWeekday == 1)
+        #expect(haku.boxingStartMinute == 10 * 60)
+        #expect(haku.boxingWarmupStartMinute == 9 * 60)
+        #expect(haku.boxingWarmupEndMinute == 12 * 60)
+        #expect(haku.boxingFirstUntilMinute == 10 * 60 + 30)
+        // Arrivals on that weekday win over the estimate; others are ignored.
+        let arrivals = [date(18, 9, 50), date(25, 9, 40), date(24, 18)]
+        let arrived = NeedRules.standard(
+            for: .haku,
+            ledger: ledger,
+            arrivals: arrivals,
+            now: date(31, 12),
+            calendar: calendar
+        )
+        #expect(arrived.boxingStartMinute == 9 * 60 + 45)
+        #expect(arrived.boxingWarmupStartMinute == 8 * 60 + 45)
     }
 
     @Test func kuroLearnsTheDaySheGoes() {
@@ -46,8 +77,8 @@ import Testing
     }
 
     @Test func kuroHasHerOwnTennisLines() {
-        let kuro = rules(CanLedger())
-        // Saturday 31st, 10:00, inside the warm-up window.
+        // Saturdays 17th and 24th, leaving at 11:30: warm-up from 9:00 on Saturday 31st.
+        let kuro = rules(sessions([date(17, 11, 30), date(24, 11, 30)]))
         let reading = NeedEngine.need(NeedSignals(), now: date(31, 10), rules: kuro, calendar: calendar)
         #expect(reading?.need == .boxingWarmup)
         #expect(reading?.reasons == ["今天网球。……拍子带好了。"])
