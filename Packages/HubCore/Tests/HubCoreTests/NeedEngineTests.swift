@@ -17,7 +17,7 @@ import Testing
     }
 
     func need(_ signals: NeedSignals, at now: Date) -> NeedReading? {
-        NeedEngine.need(signals, now: now, calendar: calendar)
+        NeedEngine.need(signals, now: now, rules: .sundayFixture, calendar: calendar)
     }
 
     func workout(_ kind: WorkoutSummary.Kind, _ start: Date, minutes: Double, meters: Double? = nil) -> WorkoutSummary {
@@ -304,7 +304,7 @@ import Testing
         snapshot.needUntil = date(3, 23)
         #expect(snapshot.needSince(at: date(3, 21), calendar: calendar) == date(3, 20))
         #expect(snapshot.needSince(at: date(3, 23), calendar: calendar) == nil)
-        snapshot.nextNeed = NeedEngine.nextScheduled(after: date(3, 22), calendar: calendar)
+        snapshot.nextNeed = NeedEngine.nextScheduled(after: date(3, 22), rules: .sundayFixture, calendar: calendar)
         #expect(snapshot.needSince(at: date(4, 10), calendar: calendar) == date(4, 9))
     }
 
@@ -341,16 +341,17 @@ import Testing
     }
 
     @Test func nextBoxingMorningIsScheduledAhead() throws {
-        let saturday = try #require(NeedEngine.nextScheduled(after: date(3, 22), calendar: calendar))
+        let rules = NeedRules.sundayFixture
+        let saturday = try #require(NeedEngine.nextScheduled(after: date(3, 22), rules: rules, calendar: calendar))
         #expect(saturday.need == .boxingWarmup)
         #expect(saturday.from == date(4, 9))
         #expect(saturday.until == date(4, 12))
-        let sundayLate = try #require(NeedEngine.nextScheduled(after: date(4, 9), calendar: calendar))
+        let sundayLate = try #require(NeedEngine.nextScheduled(after: date(4, 9), rules: rules, calendar: calendar))
         #expect(sundayLate.from == date(11, 9))
     }
 
     @Test func snapshotShowsTheScheduledNeedWithoutTheApp() throws {
-        let next = try #require(NeedEngine.nextScheduled(after: date(3, 22), calendar: calendar))
+        let next = try #require(NeedEngine.nextScheduled(after: date(3, 22), rules: .sundayFixture, calendar: calendar))
         var snapshot = WidgetSnapshot(mode: .chill, since: nil, updatedAt: date(3, 22))
         snapshot.nextNeed = next
         #expect(snapshot.need(at: date(4, 8, 59), calendar: calendar) == nil)

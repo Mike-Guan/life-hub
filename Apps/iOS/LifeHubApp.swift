@@ -23,6 +23,10 @@ struct LifeHubApp: App {
     @State private var unboxing: CanEntry?
     @State private var welcomeBack: CompanionEvent?
     @State private var persona = Persona.stored(in: AppGroup.defaults)
+    @State private var cards = ModeCards.current(
+        in: AppGroup.defaults,
+        persona: Persona.stored(in: AppGroup.defaults)
+    )
     @State private var wardrobe = Wardrobe.stored(
         in: AppGroup.defaults,
         persona: Persona.stored(in: AppGroup.defaults)
@@ -47,10 +51,14 @@ struct LifeHubApp: App {
             errors.append("小组件连不上共享文件夹（App Group），它们会一直是空的")
         }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
+        let persona = Persona.stored(in: AppGroup.defaults)
+        ModeCards.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
+        _cards = State(initialValue: ModeCards.current(in: AppGroup.defaults, persona: persona))
         let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
         let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
         let widgets = WidgetBridge(container: container, bedtime: bedtime)
         widgets.work = ModeRules.stored(in: AppGroup.defaults)
+        widgets.cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
         let needs = NeedTracker()
@@ -144,6 +152,7 @@ struct LifeHubApp: App {
             onShop: { showsShop = true },
             wardrobe: wardrobe,
             persona: persona,
+            cards: cards,
             ledger: growth.ledger.only(persona),
             onWardrobe: { showsWardrobe = true },
             bathDoneAt: bathDoneAt,
@@ -185,6 +194,7 @@ struct LifeHubApp: App {
                 await replayOffWork()
                 await scheduleReminder()
                 await importSleep()
+                await earnHealthWins()
                 await needs.importMotion()
                 await needs.importCommuteMotion()
                 await daily.read()
@@ -207,6 +217,10 @@ struct LifeHubApp: App {
             widgets.bedtime = bedtime
             syncWidgets()
             Task { await scheduleReminder() }
+        }
+        .onChange(of: cards) {
+            widgets.cards = cards
+            syncWidgets()
         }
         .onChange(of: rules) {
             rules.store(in: AppGroup.defaults)
@@ -237,6 +251,7 @@ struct LifeHubApp: App {
                 store: store,
                 energy: energy,
                 ledger: growth.ledger,
+                cards: cards,
                 onEraseAll: eraseAll
             )
         }
@@ -255,6 +270,8 @@ struct LifeHubApp: App {
             growth.persona = persona
             // Each character keeps her own wardrobe; storing it again below is harmless.
             wardrobe = Wardrobe.stored(in: AppGroup.defaults, persona: persona)
+            // Cards follow the user, not the character; only the defaults before Issue #273 depend on her.
+            cards = .current(in: AppGroup.defaults, persona: persona)
             // Settings is a sheet, so the scene stays active: refresh here what an open would refresh.
             // Needs reschedule the invite, and the widgets and the watch get the new lines.
             refreshNeeds()
@@ -301,6 +318,7 @@ struct LifeHubApp: App {
         persona = .stored(in: AppGroup.defaults)
         growth.persona = persona
         wardrobe = .stored(in: AppGroup.defaults, persona: persona)
+        cards = .current(in: AppGroup.defaults, persona: persona)
         bedtime = .stored(in: AppGroup.defaults)
         rules = .stored(in: AppGroup.defaults)
         places = .stored(in: AppGroup.defaults)
@@ -440,7 +458,9 @@ struct LifeHubApp: App {
                 decision = store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules)
             } else if let trigger = place.trigger(entered: entered) {
                 // After a GPS-drift return the stay continues; this puts back a mode the leave changed.
-                decision = store.autoSwitch(trigger, rules: rules)
+                let persona = Persona.stored(in: AppGroup.defaults)
+                let cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
+                decision = store.autoSwitch(trigger, rules: rules, cards: cards, persona: persona)
             } else {
                 decision = nil
             }
@@ -595,6 +615,20 @@ struct LifeHubApp: App {
         reminderError = await BedtimeReminder.schedule(bedtime, persona: persona)
         // The bedtime call asks for permission; without it this would fail the same way.
         if reminderError == nil { await scheduleOffWork() }
+    }
+
+    // Issue #279: daylight and on-time sleep. Only the wins come back from HealthKit, never the times.
+    private func earnHealthWins() async {
+        do {
+            let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
+            let slept = try await HealthSleep.earlySleep(schedule: schedule)
+            let sunned = try await HealthMotion.daylight()
+            for earned in [slept, sunned].compactMap(\.self) {
+                growth.record(earned.win, source: earned.source, at: earned.at)
+            }
+        } catch {
+            healthError = "读不到健康 App 里的日照或睡眠：\(error.localizedDescription)"
+        }
     }
 
     // Re-reads each time the app becomes active, so sleep the Watch syncs later still counts.
