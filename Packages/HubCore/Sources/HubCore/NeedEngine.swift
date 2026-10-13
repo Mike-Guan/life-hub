@@ -51,9 +51,9 @@ public struct WorkoutSummary: Codable, Equatable, Sendable {
         case boxing
         /// Other martial arts, wrestling and fencing.
         case martialArts
-        /// Tennis, badminton, squash, table tennis and other racket sports.
+        /// Tennis.
         case racket
-        /// Team and ball sports.
+        /// Team and ball sports, badminton and the racket sports other than tennis.
         case ball
         /// Yoga, stretching, pilates and recovery.
         case yoga
