@@ -313,8 +313,8 @@ struct LifeHubApp: App {
 
     // The ledger counts each source once, so re-reading the same workouts earns nothing new.
     private func earnWins() {
-        for earned in Win.wins(in: needs.workouts) {
-            growth.record(earned.win, source: earned.source, at: earned.at)
+        for earned in Win.wins(in: needs.workouts, identity: .picked(for: persona)) {
+            growth.record(earned.win, source: earned.source, at: earned.at, card: earned.card)
         }
         // Getting up after an invite is noted by whichever process judged it; the can is earned here.
         let moments = ChangeLog.stored(in: AppGroup.defaults).moments
@@ -425,8 +425,9 @@ struct LifeHubApp: App {
             }
             presence.record(place, entered: entered, at: .now)
             presence.store(in: AppGroup.defaults)
-            if !entered, let arrived, let visit = Win.visit(place.action, from: arrived, to: .now) {
-                growth.record(visit.win, source: visit.source, at: visit.at)
+            let identity = IdentityKind.picked(for: growth.persona)
+            if !entered, let arrived, let visit = Win.visit(place.action, from: arrived, to: .now, identity: identity) {
+                growth.record(visit.win, source: visit.source, at: visit.at, card: visit.card)
             }
             let rules = ModeRules.stored(in: AppGroup.defaults)
             let decision: ModeDecision?
