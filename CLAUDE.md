@@ -90,8 +90,9 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   are separate types. Never derive one by overloading the other.
 - Manual mode changes always win. Automatic sources (Focus filter, calendar, geofence)
   may suggest, or switch only under rules Mike enabled; no auto-switch for 2h after a manual change.
-  The clock never switches the mode: work starts by arriving at the office, ends by leaving it from 17:30.
-  Place comes first: from 17:30, having left the office or come home ends work even within the 2h window,
+  The clock never switches the mode: work starts by arriving at the office, ends by leaving it from an hour
+  before the end of work hours (17:30 for 18:30). Place comes first: from then, having left the office or
+  come home ends work even within the 2h window,
   unless the mode changed after that move. The app re-checks this at every place event and every open.
 - Every ModeChange is stored with its source.
 - Exception: entering the boxing gym geofence (CLMonitor, ~100 m) switches straight to boxing with no
@@ -216,3 +217,5 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-08: Mike agreed: the repo stays public during the freeze, and product docs (PRD, 技术架构,
   范围文档, 方向) are no longer synced into `docs/`. The character SVG stays (CI generates code from it).
   Before the second user: go private and move CI to a self-hosted runner on Mike's Mac.
+- 2026-10-13: PM (hard-coded schedule review #4, #8): leaving the office ends work from an hour before the
+  end of work hours; the evening, overtime, gym invite and drowsy times follow the work hours too.

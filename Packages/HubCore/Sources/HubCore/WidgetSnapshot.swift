@@ -68,11 +68,12 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         energy: EnergyLevel? = nil,
         bedtime: Bedtime? = nil,
         now: Date = .now,
+        work: ModeRules = .standard,
         calendar: Calendar = .current
     ) {
         self.init(mode: log.current?.mode, since: log.current?.at, energy: energy, bedtime: bedtime, updatedAt: now)
         sideHustle = log.current?.sideHustle
-        offWorkUntil = HakuLines.offWorkUntil(log, now: now, calendar: calendar)
+        offWorkUntil = HakuLines.offWorkUntil(log, now: now, work: work, calendar: calendar)
     }
 }
 
