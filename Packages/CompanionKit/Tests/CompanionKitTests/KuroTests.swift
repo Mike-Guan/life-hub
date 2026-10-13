@@ -45,7 +45,7 @@ import Testing
         let full = KuroPose(look: look, energy: 90)
         let parts = Set(KuroFigure.parts(for: look, pose: full))
         #expect(parts.isSuperset(of: [.eyesFull, .cheeksFull, .sparkle]))
-        #expect(!parts.contains(.eyesBright))
+        #expect(!parts.contains(.eyesBright) && !parts.contains(.blush))
         #expect(KuroFigure.offset(.catEars, pose: full).height == -3)
         let okay = KuroPose(look: look, energy: 50)
         #expect(Set(KuroFigure.parts(for: look, pose: okay)).isDisjoint(with: [.eyesFull, .cheeksFull, .sparkle]))

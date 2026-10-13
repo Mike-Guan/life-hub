@@ -64,6 +64,13 @@ import Testing
         #expect(high.contains(.eyeGlint) == (mode != .chill && !deadpan))
     }
 
+    @Test func tiredAtHomeDoesNotSmileLikeFull() {
+        let tired = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .low)))
+        #expect(!tired.contains(.eyesChill))
+        #expect(tired.isSuperset(of: [.eyesWork, .lidsWork, .eyebags]))
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .high))).contains(.eyesChill))
+    }
+
     @Test func highEnergyEyesStillBlinkAndSleep() {
         var pose = RunnerPose(face: .high)
         pose.eyesShut = true
