@@ -40,11 +40,14 @@ private struct ModeButtons: View {
                 button(.work)
                 button(.chill)
             }
+            // Without an identity card, 副业 takes the whole row instead of leaving a gap.
             GridRow {
                 if cards.modes.contains(.boxing) {
                     button(.boxing)
+                    button(.money)
+                } else {
+                    button(.money).gridCellColumns(2)
                 }
-                button(.money)
             }
         }
     }
