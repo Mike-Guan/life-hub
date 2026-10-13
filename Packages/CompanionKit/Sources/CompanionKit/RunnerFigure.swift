@@ -432,7 +432,7 @@ struct RunnerPose {
         blink = open * Self.blink(at: t)
         squeeze = Self.blink(at: t)
         // Sparkles twinkle out of step with the blink, 1.6 s period.
-        sparkle = 0.55 + 0.45 * sin(time * 2 * .pi / 1.6)
+        sparkle = 0.8 + 0.2 * sin(time * 2 * .pi / 1.6)
 
         // Shooting keeps the ¥¥ look of the old money mode, motion included.
         switch self.moment == .shooting ? .money : mode {
@@ -1121,8 +1121,9 @@ struct RunnerFigure: View {
             let scale = geo.size.width / RunnerArt.bounds.width
             ZStack {
                 ZStack {
-                    ForEach(Self.parts(for: mode, pose: pose), id: \.self) { part in
-                        layer(part, scale: scale)
+                    let parts = Self.parts(for: mode, pose: pose)
+                    ForEach(parts, id: \.self) { part in
+                        layer(part, scale: scale, headband: parts.contains(.headset))
                     }
                     if pose.sleepTalk >= 0, pose.life == .nap, !pose.bedtime {
                         RunnerTextView(text: Self.sleepTalkText)
@@ -1358,6 +1359,11 @@ struct RunnerFigure: View {
             visible.remove(.monsterCan)
             visible.formUnion(props)
         }
+        // UI 审核 2026-10-13 (F7): a tired HAKU at home no longer smiles like a full one; he gets the half-shut eyes.
+        if pose.tired, mode == .chill, !pose.bedtime, visible.contains(.eyesChill) {
+            visible.remove(.eyesChill)
+            visible.formUnion([.eyesWork, .lidsWork, .eyebags])
+        }
         if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
             if mode != .chill, pose.need != .couchScroll { visible.insert(.eyeGlint) }
@@ -1571,7 +1577,7 @@ struct RunnerFigure: View {
         }
     }
 
-    @ViewBuilder private func layer(_ part: RunnerPart, scale: CGFloat) -> some View {
+    @ViewBuilder private func layer(_ part: RunnerPart, scale: CGFloat, headband: Bool) -> some View {
         let isHead = Self.headParts.contains(part)
         Group {
             if pose.propRaise > 0, let scene = pose.dailyScene,
@@ -1587,7 +1593,7 @@ struct RunnerFigure: View {
             } else if part == .walkDust, pose.walkFrom != nil {
                 moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
             } else {
-                partView(part, scale: scale)
+                partView(part, scale: scale, headband: headband)
             }
         }
         .offset(y: (isHead ? pose.headDy : 0) * scale)
@@ -1606,7 +1612,7 @@ struct RunnerFigure: View {
             .opacity(move.opacity)
     }
 
-    @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat) -> some View {
+    @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat, headband: Bool) -> some View {
         Group {
             switch part {
             case .eyesWork, .lidsWork, .eyesBright, .lidsBright, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
@@ -1694,7 +1700,10 @@ struct RunnerFigure: View {
                     .scaleEffect(0.8 + 0.7 * pose.burst, anchor: Self.unit(x: 60, y: 40))
                     .opacity(Double(sin(pose.burst * .pi)))
             case .sparkle:
+                // UI 审核 2026-10-13: with the headset on, the sparkles move out and up off its band.
                 RunnerPartView(part: part)
+                    .scaleEffect(x: headband ? 1.085 : 1, y: 1, anchor: Self.unit(x: 60, y: 27))
+                    .offset(y: headband ? -12 * scale : 0)
                     .scaleEffect(0.8 + 0.2 * pose.sparkle, anchor: Self.unit(x: 60, y: 27))
                     .opacity(pose.sparkle)
             case .ledYen:

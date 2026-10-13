@@ -148,6 +148,8 @@ struct KuroFigure: View {
         if !pose.tired { visible.insert(.blush) }
         // Issue #236 (correction preview v6): full reads apart from okay at a glance, even on the watch.
         if pose.full {
+            // UI 审核 2026-10-13: the round cheeks replace the oval blush rather than smudging over it.
+            visible.remove(.blush)
             visible.formUnion([.cheeksFull, .sparkle])
             if visible.contains(.eyesBright) {
                 visible.remove(.eyesBright)
