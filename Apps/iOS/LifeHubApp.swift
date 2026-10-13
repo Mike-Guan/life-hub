@@ -23,6 +23,10 @@ struct LifeHubApp: App {
     @State private var unboxing: CanEntry?
     @State private var welcomeBack: CompanionEvent?
     @State private var persona = Persona.stored(in: AppGroup.defaults)
+    @State private var cards = ModeCards.current(
+        in: AppGroup.defaults,
+        persona: Persona.stored(in: AppGroup.defaults)
+    )
     @State private var wardrobe = Wardrobe.stored(
         in: AppGroup.defaults,
         persona: Persona.stored(in: AppGroup.defaults)
@@ -47,6 +51,9 @@ struct LifeHubApp: App {
             errors.append("小组件连不上共享文件夹（App Group），它们会一直是空的")
         }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
+        let persona = Persona.stored(in: AppGroup.defaults)
+        ModeCards.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
+        _cards = State(initialValue: ModeCards.current(in: AppGroup.defaults, persona: persona))
         let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
         let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
         let widgets = WidgetBridge(container: container, bedtime: bedtime)
@@ -144,6 +151,7 @@ struct LifeHubApp: App {
             onShop: { showsShop = true },
             wardrobe: wardrobe,
             persona: persona,
+            cards: cards,
             ledger: growth.ledger.only(persona),
             onWardrobe: { showsWardrobe = true },
             bathDoneAt: bathDoneAt,
@@ -256,6 +264,8 @@ struct LifeHubApp: App {
             growth.persona = persona
             // Each character keeps her own wardrobe; storing it again below is harmless.
             wardrobe = Wardrobe.stored(in: AppGroup.defaults, persona: persona)
+            // Cards follow the user, not the character; only the defaults before Issue #273 depend on her.
+            cards = .current(in: AppGroup.defaults, persona: persona)
             // Settings is a sheet, so the scene stays active: refresh here what an open would refresh.
             // Needs reschedule the invite, and the widgets and the watch get the new lines.
             refreshNeeds()
@@ -302,6 +312,7 @@ struct LifeHubApp: App {
         persona = .stored(in: AppGroup.defaults)
         growth.persona = persona
         wardrobe = .stored(in: AppGroup.defaults, persona: persona)
+        cards = .current(in: AppGroup.defaults, persona: persona)
         bedtime = .stored(in: AppGroup.defaults)
         rules = .stored(in: AppGroup.defaults)
         places = .stored(in: AppGroup.defaults)

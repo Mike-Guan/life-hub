@@ -46,7 +46,8 @@ final class WatchSync: NSObject, WCSessionDelegate, @unchecked Sendable {
             bedtime: BedtimeSchedule.stored(in: AppGroup.defaults),
             persona: persona,
             scenes: play.scenes,
-            event: play.event
+            event: play.event,
+            cards: ModeCards.current(in: AppGroup.defaults, persona: persona)
         )
         // Complication transfers have a daily budget (about 50), so they go out only when what the watch
         // face draws changed.
