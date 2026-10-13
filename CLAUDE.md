@@ -203,7 +203,7 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-05: Mike approved the nudge back-off: an invite ignored 3 times in a row pauses for 7 days,
   with one line and no catch-up; uncertain signals are never counted as ignored.
 - 2026-10-05: Gym is an off-work activity inside Chill, not a mode. Gym days are learned from gym wins
-  (a weekday won in 2 of the last 4 weeks; Tue-Thu until one qualifies), with no setting.
+  (a weekday won in 2 of the last 4 weeks), with no setting. The Tue-Thu default ended 2026-10-13.
 - 2026-10-05: Mike: leaving the office ends work only from 17:30; an earlier leave (lunch) keeps 上班.
 - 2026-10-05: Mike (via PM, PRD §16): arriving at the fitness gym in Work or 副业 switches to Chill (location,
   2h manual hold applies). Lifting shows only in Chill; the gym can is mode-independent; leaving keeps the mode.
@@ -216,3 +216,4 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-08: Mike agreed: the repo stays public during the freeze, and product docs (PRD, 技术架构,
   范围文档, 方向) are no longer synced into `docs/`. The character SVG stays (CI generates code from it).
   Before the second user: go private and move CI to a self-hosted runner on Mike's Mac.
+- 2026-10-13: Mike (polish list approval): 朋友测前拆掉写死作息，新用户没有默认健身日/跑步日，只从自己的成就里学.

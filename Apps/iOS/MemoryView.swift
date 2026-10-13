@@ -234,7 +234,7 @@ struct MemoryView: View {
 
     private func warning(_ item: Forget) -> String {
         switch item {
-        case .habit: "回到默认，再慢慢重新学。"
+        case .habit: "忘掉后从你之后的日子重新学。"
         case .decisions: "包括你说过「不对」的记录。删了不能恢复。"
         case .everything:
             "习惯、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。"
