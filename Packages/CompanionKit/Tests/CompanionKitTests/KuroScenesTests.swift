@@ -72,9 +72,12 @@ import Testing
         #expect(KuroScene.bath(time: 2).dx == KuroScene.bathEdge)
         #expect(KuroScene.bath(time: 4.5).dx > 140)
         #expect(KuroScene.bath(time: 6).dx == 0)
+        // She leaves and comes back on the right, and stays put until her 3 s line is over.
+        #expect(KuroScene.bath(time: 5.7).dx > 0)
+        #expect(KuroScene.bath(time: KuroScene.bathLineAt + 2.99).dx == KuroScene.bathEdge)
         // She stays in the frame while she says her line.
         #expect(KuroScene.bath(time: KuroScene.bathLineAt).dx + 95 < 134)
-        #expect(Self.parts(.chill, .bath(time: 4.5)).contains(.bathBubbles))
+        #expect(Self.parts(.chill, .bath(time: 4.8)).contains(.bathBubbles))
         #expect(!Self.parts(.chill, .bath(time: 2)).contains(.bathBubbles))
         #expect(Self.parts(.chill, .bath(time: 2)).contains(.bathBundle))
         #expect(!Self.parts(.chill, .bath(time: 2)).contains(.chillCup))

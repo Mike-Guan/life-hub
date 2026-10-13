@@ -20,7 +20,8 @@ enum KuroScene: Equatable, Sendable {
     static let step: TimeInterval = 0.32
     /// How long one bath loop lasts: walking to the edge, the line, walking off, bubbles, coming back.
     static let bathLength: TimeInterval = 6
-    /// When she has stopped at the edge and says her line, in seconds into the bath loop.
+    // UI 审核 2026-10-13: the line ends before she walks off, so it never hangs over an empty frame.
+    /// When she has stopped at the edge and says her line for 3 s, in seconds into the bath loop.
     static let bathLineAt: TimeInterval = 1
     /// How long she shows the towel round her head after a tap.
     static let driedLength: TimeInterval = 4
@@ -97,10 +98,11 @@ enum KuroScene: Equatable, Sendable {
         let t = Self.loop(time, Self.bathLength)
         switch t {
         case ..<1: return Self.bathEdge * ease(t)
-        case ..<3.2: return Self.bathEdge
-        case ..<3.9: return Self.bathEdge + 130 * ease((t - 3.2) / 0.7)
-        case ..<5.3: return 200
-        default: return -160 * (1 - ease((t - 5.3) / 0.7))
+        case ..<4: return Self.bathEdge
+        case ..<4.6: return Self.bathEdge + 130 * ease((t - 4) / 0.6)
+        case ..<5.4: return 200
+        // UI 审核 2026-10-13: she comes back the way she left, from the right.
+        default: return 160 * (1 - ease((t - 5.4) / 0.6))
         }
     }
 
@@ -113,7 +115,7 @@ enum KuroScene: Equatable, Sendable {
             return back ? 0 : 3
         case .bath(let time):
             let t = Self.loop(time, Self.bathLength)
-            return t >= 1.3 && t < 3.2 ? -3 : t >= 5.3 ? -3 : 3
+            return t >= 1.1 && t < 4 ? -3 : t >= 5.4 ? -3 : 3
         case .dried:
             return 0
         }
@@ -130,8 +132,8 @@ enum KuroScene: Equatable, Sendable {
             return Self.stepping(t, angle: 2)
         case .bath(let time):
             let t = Self.loop(time, Self.bathLength)
-            let walking = t < 1 || (3.2..<3.9).contains(t) || t >= 5.3
-            return walking ? Self.stepping(t, angle: t >= 5.3 ? -2 : 2) : nil
+            let walking = t < 1 || (4..<4.6).contains(t) || t >= 5.4
+            return walking ? Self.stepping(t, angle: t >= 5.4 ? -2 : 2) : nil
         case .dried:
             return IdleMotion(dy: 0, angle: 0)
         }
@@ -170,8 +172,8 @@ enum KuroScene: Equatable, Sendable {
     /// How far the bubbles have risen (0...1) at `time` into the bath call, or nil before and after they show.
     static func bubbles(at time: TimeInterval) -> CGFloat? {
         let t = loop(time, bathLength)
-        guard (3.7..<5.6).contains(t) else { return nil }
-        return CGFloat((t - 3.7) / 1.9)
+        guard (4.3..<5.6).contains(t) else { return nil }
+        return CGFloat((t - 4.3) / 1.3)
     }
 
     private func eyeShift(_ part: KuroPart) -> CGSize {
