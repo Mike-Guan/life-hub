@@ -76,7 +76,7 @@ enum CompanionLines {
         case .snack: ["……没吃。", "什么零食，没看见。"]
         case .drawing: ["没画什么。", "不许看。"]
         case .practice: ["没在练。", "就是活动一下手。"]
-        case .tidying: ["周日了，收拾一下。", "让一让，擦到你了。"]
+        case .tidying: ["……收拾一下。", "让一让，擦到你了。"]
         }
     }
 
