@@ -65,9 +65,11 @@ struct ShopView: View {
     private var ledger: CanLedger { growth.ledger.only(persona) }
     private var balance: Int { ledger.balance }
     private var owned: Set<String> { ledger.owned }
+    // Card items show only with their card. Ones bought under another card stay owned and wearable.
+    private var card: IdentityKind? { .picked(for: persona) }
 
     private var forSale: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { $0.price != nil && !owned.contains($0.id) }
+        ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) }
     }
 
     private var ownedFromShop: [ShopItem] {
@@ -77,7 +79,7 @@ struct ShopView: View {
     private var keepsakes: [ShopItem] {
         ShopItem.catalog(for: persona).filter { item in
             guard let keepsake = item.keepsake else { return false }
-            return Self.liveWins.contains(keepsake.win) || owned.contains(item.id)
+            return (Self.liveWins.contains(keepsake.win) && item.suits(card)) || owned.contains(item.id)
         }
     }
 

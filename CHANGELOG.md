@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
+  card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
+  The second character's flower is now called 地上小粉花.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
   the weekly 5 cans, and its gold keepsake counts that card only. Any other watch workout of 30 minutes (not a
   walk) earns 3 cans, shared with the gym's daily 3. The shop names the card instead of "周日拳击".
