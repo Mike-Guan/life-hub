@@ -19,6 +19,8 @@ public struct WatchPayload: Codable, Equatable, Sendable {
     public var scenes: [TimedScene]
     /// The latest one-off from the iPhone (a workout, a Daily task done, coming back); it plays once by id.
     public var event: CompanionEvent?
+    /// The user's cards, for the mode names the watch shows.
+    public var cards: ModeCards
 
     public init(
         snapshot: WidgetSnapshot,
@@ -26,7 +28,8 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         bedtime: BedtimeSchedule = .standard,
         persona: Persona = .haku,
         scenes: [TimedScene] = [],
-        event: CompanionEvent? = nil
+        event: CompanionEvent? = nil,
+        cards: ModeCards? = nil
     ) {
         self.schemaVersion = Self.currentSchemaVersion
         self.snapshot = snapshot
@@ -35,10 +38,11 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         self.persona = persona
         self.scenes = scenes
         self.event = event
+        self.cards = cards ?? .legacy(for: persona)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, snapshot, wardrobe, bedtime, persona, scenes, event
+        case schemaVersion, snapshot, wardrobe, bedtime, persona, scenes, event, cards
     }
 
     /// Decodes the payload; anything missing besides the snapshot falls back to the defaults.
@@ -51,6 +55,15 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         persona = (try? values.decodeIfPresent(Persona.self, forKey: .persona)) ?? .haku
         scenes = (try? values.decodeIfPresent([TimedScene].self, forKey: .scenes)) ?? []
         event = try? values.decodeIfPresent(CompanionEvent.self, forKey: .event)
+        // An iPhone build from before #273 sends no cards; its user still has the character's own.
+        cards = (try? values.decodeIfPresent(ModeCards.self, forKey: .cards)) ?? .legacy(for: persona)
+    }
+
+    // The clock row shows the name at full size, so a name saved before the limit, or by a newer build
+    // with a longer one, is cut here too.
+    /// The name of `mode`'s card, at most `ModeCards.nameWidth` wide.
+    public func title(for mode: Mode) -> String {
+        ModeCards.fitted(cards.title(for: mode, persona: persona))
     }
 
     /// Whether this payload should replace `stored`: it is not older. Transfers can arrive out of order.
