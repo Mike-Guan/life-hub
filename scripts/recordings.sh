@@ -50,35 +50,17 @@ record() {
   bounded 30 xcrun simctl io "$1" screenshot "$2.png" || true
 }
 
-# iPhone: the Debug build's -screenshot-mode home screen.
-udid=$(xcrun simctl list devices available -j |
-  jq -r '[.devices[][] | select(.name | test("^iPhone [0-9]+ Pro$"))] | last | .udid')
-xcrun simctl boot "$udid" || true
-note "booting iPhone"
-bounded 300 xcrun simctl bootstatus "$udid" -b || true
-xcrun simctl spawn "$udid" defaults write com.apple.Accessibility ReduceMotionEnabled -bool false
-xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100
-note "building iPhone app"
-xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-iOS -configuration Debug \
-  -destination "id=$udid" -derivedDataPath build CODE_SIGNING_ALLOWED=NO
-ios_app=build/Build/Products/Debug-iphonesimulator/LifeHub.app
-codesign --force --deep --sign - "$ios_app"
-xcrun simctl install "$udid" "$ios_app"
-bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$ios_app/Info.plist")
-for persona in "${personas[@]}"; do
-  for mode in "${modes[@]}"; do
-    bounded 60 xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode" \
-      -screenshot-persona "$persona" -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN || continue
-    sleep 3
-    record "$udid" "$out/ios-$persona-$mode"
-  done
-done
-xcrun simctl terminate "$udid" "$bundle" || true
-xcrun simctl shutdown "$udid" || true
-
 # Watch: the app shows the payload the iPhone would send, so write one per mode and character.
-watch_udid=$(xcrun simctl list devices available -j |
-  jq -r '[.devices | to_entries[] | select(.key | test("watchOS")) | .value[]] | last | .udid')
+watch_list=$(xcrun simctl list devices available -j |
+  jq -r '[.devices | to_entries[] | select(.key | test("watchOS")) | .value[] | select(.name | test("Series"))]')
+echo "$watch_list" | jq -r '.[].name' | tee -a "$out/progress.txt"
+for size in small large; do
+if [[ $size == small ]]; then
+  watch_udid=$(echo "$watch_list" | jq -r 'sort_by(.name) | first | .udid')
+else
+  watch_udid=$(echo "$watch_list" | jq -r 'sort_by(.name) | last | .udid')
+fi
+note "watch $size: $(echo "$watch_list" | jq -r --arg u "$watch_udid" '.[] | select(.udid == $u) | .name')"
 if [[ -z "$watch_udid" || "$watch_udid" == "null" ]]; then
   echo "::warning::No watch simulator available, skipping watch clips"
   note "done"
@@ -114,13 +96,13 @@ watch_clip() {
     mkdir -p "$folder"
     cat >"$folder/watch-payload.json" <<JSON
 {"schemaVersion":1,"persona":"$1","snapshot":{"schemaVersion":1,"mode":$mode,"since":"$now",
-"energy":"okay","line":"","updatedAt":"$now"},"scenes":$3}
+"energy":"okay","line":"","updatedAt":"$now"},"scenes":$3${cards:-}}
 JSON
   done
   bounded 60 xcrun simctl launch --terminate-running-process "$watch_udid" "$watch_bundle" \
     -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN "${@:5}" >/dev/null || return 0
   sleep 4
-  record "$watch_udid" "$out/$4"
+  record "$watch_udid" "$out/$size-$4"
 }
 for persona in "${personas[@]}"; do
   for mode in "${modes[@]}"; do
@@ -134,9 +116,13 @@ for persona in "${personas[@]}"; do
   watch_clip "$persona" none "[]" "watch-$persona-no-mode"
 done
 
-# Promo stills: HAKU with no mode chip. The system clock stays; crop the top strip off by hand.
-overtime="[{\"from\":\"$now\",\"scene\":{\"moment\":\"overtime\",\"overtimeUntil\":\"$later\"}}]"
-watch_clip haku work "[]" watch-haku-work-clean -clean-frame
-watch_clip haku work "$overtime" watch-haku-overtime-clean -clean-frame
+# The widest names the card limit allows.
+cards=',"cards":{"names":{"work":"一二三四","chill":"Afterwor","money":"WWWWWWWW"},"identity":"art"}'
+for mode in "${modes[@]}"; do
+  watch_clip haku "$mode" "[]" "watch-haku-$mode-long-name"
+done
+cards=
+xcrun simctl shutdown "$watch_udid" || true
+done
 note "done"
 ls -l "$out"

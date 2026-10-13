@@ -71,8 +71,8 @@ struct WatchHomeView: View {
     private func companionPage(_ payload: WatchPayload, mode: Mode?, at date: Date) -> some View {
         let snapshot = payload.snapshot
         let scene = payload.scene(at: date)
-        // HAKU with no mode is drawn on cream, where the white system clock can't be read.
-        let clockBand = mode == nil && payload.persona == .haku
+        // The white system clock is hard to read on several mode backgrounds, so the clock row is ink in all.
+        let clockBand = !Self.cleanFrame
         return Group {
             if payload.persona == .kuro {
                 KuroView(
