@@ -148,6 +148,42 @@ struct FrameSheets {
         try write("kuro-2-watch", rows, size: CGSize(width: 198, height: 242))
     }
 
+    // QA §1b: everything owned and every trace on at once, one still per state, with the placement test's
+    // conflicts in red under each cell. One page per mode and room item for HAKU, per look for KURO.
+    @Test func allItemsOn() throws {
+        let traces = Set(CompanionTrace.allCases)
+        let outfits = PlacementPoses.outfits.filter { $0.1.room != nil && $0.1.stripedMask && $0.1.peaceSign }
+        for mode in Mode.allCases {
+            for (outfitLabel, outfit) in outfits {
+                let cells = PlacementPoses.hakuStates(face: .mid).map { label, pose in
+                    let worn = pose.wearing(outfit).leaving(traces)
+                    let parts = RunnerFigure.parts(for: mode, pose: worn)
+                    return Cell(
+                        label: label,
+                        conflicts: Placement.conflicts(
+                            in: parts, spots: Placement.haku, forbidden: Placement.hakuForbidden),
+                        figure: AnyView(RunnerFigure(mode: mode, pose: worn))
+                    )
+                }
+                try writeStills("items-haku-\(mode.rawValue)-\(outfitLabel)", cells)
+            }
+        }
+        for look in KuroLook.allCases {
+            let cells = PlacementPoses.kuro
+                .filter { $0.look == look && $0.pose.items.count == KuroItem.allCases.count }
+                .filter { $0.label.hasPrefix("\(look.rawValue) 50 ") }
+                .map { state in
+                    Cell(
+                        label: String(state.label.dropFirst("\(look.rawValue) 50 ".count).dropLast(" items".count)),
+                        conflicts: Placement.conflicts(
+                            in: KuroFigure.parts(for: look, pose: state.pose), spots: Placement.kuro),
+                        figure: AnyView(KuroFigure(look: look, pose: state.pose))
+                    )
+                }
+            try writeStills("items-kuro-\(look.rawValue)", cells)
+        }
+    }
+
     @Test func lockScreenHeads() throws {
         let poses: [(String, CompanionPortrait)] = [
             ("lockscreen-half-awake", CompanionPortrait(mode: .chill, energy: 20, moment: .morning, framing: .head)),
@@ -287,6 +323,44 @@ struct FrameSheets {
                             .environment(\.scenePhase, .active)
                             .frame(width: size.width, height: size.height)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        try save(sheet, as: name, scale: 2)
+    }
+
+    /// One still on a stills page: what it shows, the placement conflicts in it, and the drawing.
+    struct Cell {
+        let label: String
+        let conflicts: [String]
+        let figure: AnyView
+    }
+
+    /// Renders `cells` as stills into `<name>.png`, `columns` to a row.
+    func writeStills(_ name: String, _ cells: [Cell], columns: Int = 8) throws {
+        let commit = ProcessInfo.processInfo.environment["FRAME_SHA"].map { String($0.prefix(7)) } ?? "local"
+        let found = cells.filter { !$0.conflicts.isEmpty }.count
+        let sheet = VStack(alignment: .leading, spacing: 10) {
+            Text("\(name) · \(commit) · 物品和痕迹全开 · 红字 = 同一位置两件（\(found) / \(cells.count) 格）")
+                .font(.system(size: 15, weight: .bold, design: .monospaced))
+            ForEach(Array(stride(from: 0, to: cells.count, by: columns)), id: \.self) { start in
+                HStack(alignment: .top, spacing: 6) {
+                    ForEach(start..<min(start + columns, cells.count), id: \.self) { index in
+                        let cell = cells[index]
+                        VStack(spacing: 2) {
+                            Text(cell.label)
+                                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                                .lineLimit(2)
+                            cell.figure
+                                .frame(width: 120, height: 160)
+                            Text(cell.conflicts.sorted().joined(separator: "\n"))
+                                .font(.system(size: 8, weight: .bold, design: .monospaced))
+                                .foregroundStyle(Color.red)
+                        }
+                        .frame(width: 130, alignment: .top)
                     }
                 }
             }
