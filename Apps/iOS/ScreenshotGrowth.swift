@@ -4,6 +4,7 @@ import SwiftUI
 // Used by scripts/screenshots.sh to draw the shop, wardrobe and unboxing for UI 审核. Debug builds only.
 // Everything lives in memory: ten identity-card wins and one 5 km run, then the first item bought.
 /// The shop, the wardrobe or a keepsake's unboxing for `ScreenshotMode.persona`, picked by `screen`.
+/// `unbox-bottom` opens the unboxing scrolled down to its buttons.
 struct ScreenshotGrowth: View {
     let screen: String
     @State private var growth = Self.growth()
@@ -13,11 +14,17 @@ struct ScreenshotGrowth: View {
         switch screen {
         case "wardrobe":
             WardrobeView(growth: growth, wardrobe: $wardrobe, persona: ScreenshotMode.persona, mode: .boxing)
-        case "unbox":
+        case "unbox", "unbox-bottom":
             if let entry = growth.ledger.entries.first(where: { $0.kind == .granted }),
                 let item = entry.itemID.flatMap(ShopItem.item)
             {
-                UnboxSheet(entry: entry, item: item, wardrobe: $wardrobe, persona: ScreenshotMode.persona)
+                UnboxSheet(
+                    entry: entry,
+                    item: item,
+                    wardrobe: $wardrobe,
+                    persona: ScreenshotMode.persona,
+                    startsAtBottom: screen == "unbox-bottom"
+                )
             }
         default:
             ShopView(growth: growth, wardrobe: $wardrobe, persona: ScreenshotMode.persona)

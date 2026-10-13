@@ -58,7 +58,7 @@ done
 growth_shots() {
   local device=$1 prefix=$2
   for persona in haku kuro; do
-    for screen in shop wardrobe unbox; do
+    for screen in shop wardrobe unbox unbox-bottom; do
       xcrun simctl launch --terminate-running-process "$device" "$bundle" -screenshot-growth "$screen" \
         -screenshot-persona "$persona"
       sleep 4

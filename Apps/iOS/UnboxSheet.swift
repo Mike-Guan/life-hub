@@ -8,9 +8,23 @@ struct UnboxSheet: View {
     let item: ShopItem
     @Binding var wardrobe: Wardrobe
     let persona: Persona
+    /// Opens scrolled to the buttons. Only screenshots set it.
+    var startsAtBottom = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
+        // Scrolls so the buttons stay reachable on small phones, where the 380 pt stage leaves no room.
+        ScrollView {
+            content
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .defaultScrollAnchor(startsAtBottom ? .bottom : nil)
+        .foregroundStyle(Toy.paper)
+        .background(Toy.ink.ignoresSafeArea())
+        .onAppear { UnboxLog.markSeen(entry) }
+    }
+
+    private var content: some View {
         VStack(spacing: 18) {
             if item.keepsake != nil {
                 Text("纪念品")
@@ -48,7 +62,6 @@ struct UnboxSheet: View {
             .frame(height: 380)
             .toyCard()
 
-            Spacer(minLength: 0)
             Button {
                 wardrobe = wearing
                 dismiss()
@@ -68,12 +81,9 @@ struct UnboxSheet: View {
             }
             .buttonStyle(UnboxButtonStyle(fill: Toy.ink, shadow: Toy.ink))
         }
-        .foregroundStyle(Toy.paper)
         .padding(.horizontal, 24)
         .padding(.top, 32)
         .padding(.bottom, 16)
-        .background(Toy.ink.ignoresSafeArea())
-        .onAppear { UnboxLog.markSeen(entry) }
     }
 
     private var wearing: Wardrobe {
