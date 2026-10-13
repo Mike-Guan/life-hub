@@ -284,6 +284,7 @@ public struct KuroView: View {
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
     @State private var pop = 0
+    @State private var closeUp = false
     @State private var tapStart: Date?
     @State private var tapKind: KuroTap?
     @State private var tapHeart = false
@@ -424,6 +425,9 @@ public struct KuroView: View {
             .modifier(WatchFigureFrame(isEnabled: style == .watch))
             .padding(.top, 24)
             .padding(.horizontal, 12)
+            // 手表 KURO 与 HAKU 对比 10-13 #1: the same close-up of her face as HAKU's.
+            .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
+            .animation(reduceMotion ? nil : .smooth(duration: 0.35), value: closeUp)
 
             if unboxStart != nil {
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
@@ -448,17 +452,14 @@ public struct KuroView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { react() }
-        // Until she has her own close-up (新角色清单), a long press plays her tap reaction unless the app
-        // handles it.
+        // On the phone, until she has her own close-up (新角色清单), a long press plays her tap reaction unless
+        // the app handles it.
         .gesture(
             LongPressGesture(minimumDuration: 0.4).onEnded { _ in CompanionHold.release(hold) { react() } },
             including: style == .standard ? .all : .none
         )
         // On the watch the press must not take the swipe from the pages.
-        .simultaneousGesture(
-            LongPressGesture(minimumDuration: 0.4).onEnded { _ in CompanionHold.release(hold) { react() } },
-            including: style == .watch ? .all : .none
-        )
+        .simultaneousGesture(watchPress, including: style == .watch ? .all : .none)
         .task(id: listensForShakes) { await listenForShakes() }
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: pace) { old, new in
@@ -659,6 +660,19 @@ public struct KuroView: View {
         guard let kind = tapKind, let start = tapStart?.timeIntervalSinceReferenceDate else { return nil }
         let progress = (time - start) / kind.duration
         return (0..<1).contains(progress) ? (kind, progress) : nil
+    }
+
+    /// A long press on the watch: the close-up of her face for a moment, then back.
+    private var watchPress: some Gesture {
+        LongPressGesture(minimumDuration: 0.4)
+            .onEnded { _ in
+                closeUp = true
+                hold?.action()
+                Task {
+                    try? await Task.sleep(for: .seconds(1.5))
+                    closeUp = false
+                }
+            }
     }
 
     /// How far she hops at the start of a tap reaction, in points; turning away and the chin tap have no hop.
