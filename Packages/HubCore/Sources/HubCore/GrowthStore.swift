@@ -33,16 +33,17 @@ public final class GrowthStore {
     }
 
     /// Records `win` for `persona` once per `source`, then grants any of her keepsakes it completes.
+    /// - Parameter card: the identity card a `boxing` win was earned with.
     /// - Returns: keepsakes granted by this win; empty when it was already recorded.
     @discardableResult
-    public func record(_ win: Win, source: String, at date: Date = .now) -> [ShopItem] {
-        let entry = CanEntry.earned(win, source: source, at: date, persona: persona, deviceID: deviceID)
+    public func record(_ win: Win, source: String, at date: Date = .now, card: IdentityKind? = nil) -> [ShopItem] {
+        let entry = CanEntry.earned(win, source: source, at: date, persona: persona, card: card, deviceID: deviceID)
         guard !ledger.entries.contains(where: { $0.id == entry.id }) else { return [] }
         ledger.entries.append(entry)
         let mine = ledger.only(persona)
         let granted = ShopItem.catalog(for: persona).filter { item in
             guard let keepsake = item.keepsake, keepsake.win == win else { return false }
-            return !mine.owned.contains(item.id) && mine.count(win) >= keepsake.count
+            return !mine.owned.contains(item.id) && mine.count(win, card: keepsake.card) >= keepsake.count
         }
         for item in granted {
             let id = UUID.derived(from: "granted:\(item.id)")
@@ -88,7 +89,7 @@ public final class GrowthStore {
     public func remaining(for item: ShopItem) -> Int? {
         let theirs = ledger.only(item.persona)
         guard let keepsake = item.keepsake, !theirs.owned.contains(item.id) else { return nil }
-        return max(keepsake.count - theirs.count(keepsake.win), 0)
+        return max(keepsake.count - theirs.count(keepsake.win, card: keepsake.card), 0)
     }
 
     /// Deletes every record and the file, as on a fresh install.
