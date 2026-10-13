@@ -123,6 +123,20 @@ struct WatchHomeView: View {
                 .allowsHitTesting(false)
             }
         }
+        // HAKU's no-mode drawing says this itself; KURO keeps her off-work look, so the watch says it.
+        .overlay(alignment: .bottom) {
+            if mode == nil && payload.persona == .kuro {
+                Text("在 iPhone 上选个模式")
+                    .font(Toy.body(13, weight: .bold))
+                    .foregroundStyle(Toy.ink)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Toy.card))
+                    .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+                    .padding(.bottom, 8)
+                    .allowsHitTesting(false)
+            }
+        }
         .overlay(alignment: .topLeading) {
             if let failure {
                 Text(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2).padding(.leading, 4)

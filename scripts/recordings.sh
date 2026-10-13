@@ -51,21 +51,17 @@ record() {
 }
 
 # Watch: the app shows the payload the iPhone would send, so write one per mode and character.
+# The newest watchOS runtime only, so xcodebuild accepts the device; three sizes, smallest first.
 watch_list=$(xcrun simctl list devices available -j |
-  jq -r '[.devices | to_entries[] | select(.key | test("watchOS")) | .value[] | select(.name | test("Series"))]')
+  jq -c '[.devices | to_entries[] | select(.key | test("watchOS"))] | sort_by(.key) | last | .value')
 echo "$watch_list" | jq -r '.[].name' | tee -a "$out/progress.txt"
-for size in small large; do
-if [[ $size == small ]]; then
-  watch_udid=$(echo "$watch_list" | jq -r 'sort_by(.name) | first | .udid')
-else
-  watch_udid=$(echo "$watch_list" | jq -r 'sort_by(.name) | last | .udid')
-fi
+for size in 40mm 42mm 46mm; do
+watch_udid=$(echo "$watch_list" | jq -r --arg s "($size)" \
+  '[.[] | select(.name | contains($s)) | select(.name | test("SE 3|Series 11"))] | last | .udid')
 note "watch $size: $(echo "$watch_list" | jq -r --arg u "$watch_udid" '.[] | select(.udid == $u) | .name')"
 if [[ -z "$watch_udid" || "$watch_udid" == "null" ]]; then
-  echo "::warning::No watch simulator available, skipping watch clips"
-  note "done"
-ls -l "$out"
-  exit 0
+  echo "::warning::No $size watch simulator, skipping it"
+  continue
 fi
 xcrun simctl boot "$watch_udid" || true
 note "booting watch"
