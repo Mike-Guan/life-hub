@@ -102,7 +102,10 @@ public enum MomentEngine {
             return minute < work.workStartMinute ? .morning : .timeToLeave
         }
         let lateNight = calendar.startOfDay(for: now) > StateEngine.dayStart(for: now, calendar: calendar)
-        return lateNight || minute >= blanketMinute(bedtime) ? .blanket : nil
+        let start = blanketMinute(bedtime)
+        // A bedtime after 07:30 starts the blanket after midnight, so it runs only until the day starts.
+        if start < StateEngine.dayStartHour * 60 { return lateNight && minute >= start ? .blanket : nil }
+        return lateNight || minute >= start ? .blanket : nil
     }
 
     /// The give-up animation once HAKU stops waiting at the door: Mike was home when the wait ended and
