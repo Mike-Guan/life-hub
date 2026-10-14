@@ -73,9 +73,12 @@ struct WardrobeView: View {
         WardrobeShelf.shelves(in: previewMode, card: card).contains(shelf) ? shelf : .clothes
     }
 
-    // 商店完整目录 §9.3: an unearned keepsake stays hidden, as in the life collection.
+    // 商店完整目录 §9.3: an unearned keepsake stays hidden, as in the life collection. A keepsake can be earned
+    // before its art exists, so it waits until the character draws it.
     private var ownedShowing: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { owned.contains($0.id) && $0.shows(in: previewMode, card: card) }
+        ShopItem.catalog(for: persona).filter {
+            owned.contains($0.id) && $0.isDrawn && $0.shows(in: previewMode, card: card)
+        }
     }
 
     private var shelfItems: [ShopItem] {
