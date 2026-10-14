@@ -15,10 +15,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   are never shown and never leave the iPhone.
 - HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
-- In boxing, HAKU now and then slips left, slips right and ducks. Tapping him in boxing makes him duck, throw a
-  left hook that stops at his chest and say 「……反射。」 instead of punching at the screen.
-- Test builds (Debug, STG) have a 「日文和英文」 switch in settings. It is off by default, so every build shows
-  Chinese whatever the phone's language until all Japanese and English text is in.
 - Debug builds have a 「日文和英文」 switch in settings. It is off by default, so every build shows Chinese
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
@@ -72,6 +68,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
   the weekly 5 cans, and its gold keepsake counts that card only. Any other watch workout of 30 minutes (not a
   walk) earns 3 cans, shared with the gym's daily 3. The shop names the card instead of "周日拳击".
+- In boxing, HAKU now and then slips left, slips right and ducks. Tapping him in boxing makes him duck, throw a
+  left hook that stops at his chest and say 「……反射。」 instead of punching at the screen.
 - Daylight and going to bed on time now earn their can: 15 minutes in daylight (Apple Watch) earns 1 a day,
   and falling asleep within 30 minutes of the bedtime set in Settings earns 1 a night. Life Hub asks once
   for time in daylight in Health. Only the win is kept, never the daylight or sleep times.
