@@ -5,8 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
-- HAKU's speech bubble no longer touches his hair: at home he sinks a little while a line shows, and on the
-  unboxing page he stands lower so the whole new item still shows.
+- HAKU's speech bubble no longer touches his hair: at home he gets a little smaller and lower while a line
+  shows, gloves whole, and on the unboxing page he stands lower so the whole new item still shows.
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
   card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
   The second character's flower is now called 地上小粉花.

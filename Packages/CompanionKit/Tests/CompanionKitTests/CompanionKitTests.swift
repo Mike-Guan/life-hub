@@ -198,20 +198,18 @@ import Testing
         #expect(!RunnerFigure.parts(for: .chill, pose: notification).contains(.pillow))
     }
 
-    // UI 审核 2026-10-14: a line keeps 2 pt above the hair. Home sinks while it shows; the showcase starts lower.
+    // UI 审核 2026-10-14: a line keeps 2 pt above the hair and the gloves stay whole. Home moves HAKU down while it
+    // shows; the showcase and Reduce Motion start lower.
     @Test func linesKeepClearOfTheHair() {
-        #expect(CompanionView.figureTop(style: .standard, showsBubble: true, showcase: false, still: false) == 24)
-        #expect(CompanionView.talkDip(style: .standard, showsBubble: true, showcase: false, still: false) == 34)
-        #expect(CompanionView.figureTop(style: .standard, showsBubble: true, showcase: true, still: false) == 58)
-        #expect(CompanionView.talkDip(style: .standard, showsBubble: true, showcase: true, still: false) == 0)
-        #expect(CompanionView.figureTop(style: .standard, showsBubble: true, showcase: false, still: true) == 58)
-        #expect(CompanionView.talkDip(style: .standard, showsBubble: true, showcase: false, still: true) == 0)
+        let top = CompanionView.figureTop
+        #expect(top(.standard, true, false, false, false) == 24)
+        #expect(top(.standard, true, true, false, false) == 58)
+        #expect(top(.standard, true, false, true, false) == 58)
+        #expect(top(.standard, true, false, false, true) == 58)
         for style in [CompanionStyle.watch, .notification] {
-            #expect(CompanionView.figureTop(style: style, showsBubble: true, showcase: false, still: false) == 24)
-            #expect(CompanionView.talkDip(style: style, showsBubble: true, showcase: false, still: false) == 0)
+            #expect(top(style, true, true, false, false) == 24)
         }
-        #expect(CompanionView.figureTop(style: .standard, showsBubble: false, showcase: true, still: true) == 24)
-        #expect(CompanionView.talkDip(style: .standard, showsBubble: false, showcase: false, still: false) == 0)
+        #expect(top(.standard, false, true, true, true) == 24)
     }
 
     @Test func sleepyLoopYawns() {
