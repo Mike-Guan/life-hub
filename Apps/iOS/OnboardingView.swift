@@ -201,7 +201,9 @@ struct OnboardingView: View {
 
     private var workScreen: some View {
         page(dot: 4) {
-            hero(irregular ? line(.irregular) : line(.work), sub: irregular ? "" : "默认周一到周五，9:00 到 18:00。")
+            hero(
+                irregular ? line(.irregular) : line(.work),
+                sub: irregular ? "" : "默认周一到周五，\(clock(9 * 60)) 到 \(clock(18 * 60))。")
             if !irregular {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack {
@@ -648,14 +650,18 @@ struct OnboardingView: View {
     private func settingsLine(_ text: String, link: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             ErrorLine(text: text, size: 13)
-            Button(link) {
+            Button {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
                 }
+            } label: {
+                Text(link)
+                    .font(Toy.body(13, weight: .black))
+                    .underline()
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
             }
-            .font(Toy.body(13, weight: .black))
-            .underline()
-            .frame(minHeight: 44)
+            .buttonStyle(.plain)
         }
     }
 
@@ -748,9 +754,13 @@ struct OnboardingView: View {
     }
 
     private func textButton(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(title, action: action)
-            .font(Toy.body(15, weight: .heavy))
-            .frame(maxWidth: .infinity, minHeight: 44)
+        Button(action: action) {
+            Text(title)
+                .font(Toy.body(15, weight: .heavy))
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Actions
@@ -876,6 +886,13 @@ struct OnboardingView: View {
         } set: { text in
             draft.names[mode.rawValue] = ModeCards.fitted(text)
         }
+    }
+
+    // Written the way the time pickers show it, so 9:00 AM in English and 9:00 in Chinese.
+    /// `minute` after midnight as a short clock time in the current locale.
+    private func clock(_ minute: Int) -> String {
+        let date = Calendar.current.date(bySettingHour: minute / 60, minute: minute % 60, second: 0, of: .now) ?? .now
+        return date.formatted(date: .omitted, time: .shortened)
     }
 
     private func minuteBinding(_ minute: Binding<Int>) -> Binding<Date> {
