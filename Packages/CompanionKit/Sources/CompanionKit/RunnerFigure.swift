@@ -327,11 +327,11 @@ struct RunnerPose {
     // A punch or a clink reaches toward the viewer from where the prop sits on the iPhone, so the lift
     // gives way while it plays and the glove or can lands where it always did, clear of the eyes.
     /// Where the left glove is drawn: its pose plus the watch lift.
-    var gloveLShown: CGSize { CGSize(width: gloveL.width - 12 * propLift, height: gloveL.height - 22 * propLift) }
+    var gloveLShown: CGSize { CGSize(width: gloveL.width - 14 * propLift, height: gloveL.height - 22 * propLift) }
     /// Where the right glove is drawn: its pose plus the watch lift.
     var gloveRShown: CGSize {
         let lift = propLift * (1 - pokeOut(.punch))
-        return CGSize(width: gloveR.width + 12 * lift, height: gloveR.height - 22 * lift)
+        return CGSize(width: gloveR.width + 14 * lift, height: gloveR.height - 22 * lift)
     }
     /// Where the can is drawn: its pose plus the watch lift.
     var canShown: CGSize {
