@@ -31,6 +31,21 @@ import Testing
         #expect(parts.contains(.chillCup) == (look == .chill))
     }
 
+    @Test(arguments: KuroLook.allCases)
+    func onTheWatchSheHoldsHerPropHigher(_ look: KuroLook) {
+        let pose = KuroPose(look: look, energy: nil)
+        let phone = Set(KuroFigure.parts(for: look, pose: pose))
+        let watch = Set(KuroFigure.parts(for: look, pose: pose, watch: true))
+        let props: [KuroLook: (KuroPart, KuroPart)] = [
+            .work: (.workTablet, .watchTablet), .chill: (.chillCup, .watchCup),
+            .tennis: (.tennisRacket, .watchRacket), .desk: (.deskBooks, .watchBooks),
+        ]
+        let (low, high) = props[look]!
+        #expect(phone.contains(low) && !phone.contains(high))
+        #expect(watch.contains(high) && !watch.contains(low))
+        #expect(watch.isDisjoint(with: [.deskPen, .workStylus, .workBadge]))
+    }
+
     @Test func theMaskHidesHerMouthAtWork() {
         let work = Set(KuroFigure.parts(for: .work, pose: KuroPose(look: .work, energy: nil)))
         #expect(work.isDisjoint(with: [.mouthCat, .mouthFlat, .mouthSmile, .mouthO]))

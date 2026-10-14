@@ -126,10 +126,12 @@ struct KuroPose: Sendable {
 struct KuroFigure: View {
     let look: KuroLook
     let pose: KuroPose
+    /// Holds her props higher, so the watch's bottom edge doesn't cut them.
+    var watch = false
 
     var body: some View {
         ZStack {
-            ForEach(Self.parts(for: look, pose: pose), id: \.self) { part in
+            ForEach(Self.parts(for: look, pose: pose, watch: watch), id: \.self) { part in
                 KuroPartView(part: part, shift: Self.shift(part, pose: pose))
             }
             if pose.overtime, let sign = pose.sign {
@@ -139,8 +141,8 @@ struct KuroFigure: View {
         .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
     }
 
-    /// Visible parts in back-to-front order.
-    nonisolated static func parts(for look: KuroLook, pose: KuroPose) -> [KuroPart] {
+    /// Visible parts in back-to-front order; `watch` swaps her low props for the raised watch ones.
+    nonisolated static func parts(for look: KuroLook, pose: KuroPose, watch: Bool = false) -> [KuroPart] {
         var visible: Set<KuroPart> = [.hairBack, .earL, .earR, .faceBase, .hairFringe, .catEars]
         visible.formUnion(outfit(look))
         visible.insert(pose.blinking ? .eyesClosed : part(pose.eyes))
@@ -166,7 +168,22 @@ struct KuroFigure: View {
         }
         if pose.heart { visible.insert(.tapHeart) }
         if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
+        if watch { raise(&visible) }
         return KuroPart.allCases.filter { visible.contains($0) }
+    }
+
+    // UI 审核 2026-10-14 (direction 2): the watch crop cuts her low props, so on the watch she holds each one
+    // higher instead of the face getting smaller. The pen, stylus and badge have no room there and stay off.
+    /// Swaps each low prop in `visible` for its raised watch version.
+    nonisolated private static func raise(_ visible: inout Set<KuroPart>) {
+        let raised: [KuroPart: KuroPart] = [
+            .tennisRacket: .watchRacket, .deskBooks: .watchBooks, .chillCup: .watchCup, .workTablet: .watchTablet,
+        ]
+        for (low, high) in raised where visible.contains(low) {
+            visible.remove(low)
+            visible.insert(high)
+        }
+        visible.subtract([.deskPen, .workStylus, .workBadge])
     }
 
     /// The parts only `look` wears.
@@ -427,7 +444,10 @@ public struct KuroView: View {
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
                 let fidget = busy ? nil : KuroIdle.at(idleTime, look: look)
                 ZStack {
-                    KuroFigure(look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget))
+                    KuroFigure(
+                        look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget),
+                        watch: style == .watch
+                    )
                         .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
                     if let unbox {
                         GiftBox(progress: unbox.box, fill: RunnerPalette.cardboard, ribbon: KuroPalette.pink)
