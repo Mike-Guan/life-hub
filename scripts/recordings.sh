@@ -4,7 +4,7 @@
 # the clips show the real animation. Needs Xcode 26 and XcodeGen.
 set -euo pipefail
 
-modes=(chill boxing)
+modes=(chill)
 personas=(haku)
 seconds=10
 out=build/recordings
