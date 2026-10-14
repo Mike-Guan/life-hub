@@ -3,12 +3,18 @@ import SwiftUI
 
 // Preview v3 (Issue #237): a Toy sheet at the bottom over a dim layer, 算了 on the left and the red answer on
 // the right. Used in place of the system confirmation dialog, which can't take the Toy style.
-/// Asks before something is deleted. Tapping the dim layer cancels.
+/// Asks before something is deleted or a step is skipped. Tapping the dim layer cancels.
 struct ToyConfirmSheet: View {
     let question: String
     let warning: String
-    /// The red button's title.
+    /// The left button's title.
+    var cancel = "算了"
+    /// The right button's title.
     let confirm: String
+    // The setup's 用默认 deletes nothing, so it takes the primary pink instead of the red.
+    /// The right button's fill and text color.
+    var confirmFill = Toy.alert
+    var confirmText = Toy.card
     let onCancel: () -> Void
     let onConfirm: () -> Void
 
@@ -24,8 +30,8 @@ struct ToyConfirmSheet: View {
                     .font(Toy.body(13))
                     .foregroundStyle(Toy.muted)
                 HStack(spacing: 12) {
-                    button("算了", fill: Toy.card, text: Toy.ink, action: onCancel)
-                    button(confirm, fill: Toy.alert, text: Toy.card, action: onConfirm)
+                    button(cancel, fill: Toy.card, text: Toy.ink, action: onCancel)
+                    button(confirm, fill: confirmFill, text: confirmText, action: onConfirm)
                 }
             }
             .foregroundStyle(Toy.ink)

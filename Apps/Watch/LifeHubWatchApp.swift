@@ -13,6 +13,9 @@ struct LifeHubWatchApp: App {
     var body: some Scene {
         WindowGroup {
             WatchHomeView()
+                // The switch reaches the watch with the payload once Japanese and English ship; until then
+                // the watch always shows Chinese.
+                .environment(\.locale, Languages.locale)
         }
         .backgroundTask(.watchConnectivity) {
             await WatchReceiver.shared.waitForPendingContent()
