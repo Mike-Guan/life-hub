@@ -47,6 +47,8 @@ struct HomeView: View {
     var wardrobe = Wardrobe()
     /// Which character the card draws.
     var persona = Persona.haku
+    /// The user's cards, for the mode names; `nil` uses the character's default cards.
+    var cards: ModeCards?
     /// Earned cans, for the traces that stay.
     var ledger = CanLedger()
     /// Shows the wardrobe button on the companion card that calls this, when set.
@@ -80,6 +82,8 @@ struct HomeView: View {
     @State private var answers = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    private var shownCards: ModeCards { cards ?? .legacy(for: persona) }
+
     var body: some View {
         let reading = energy.reading()
         ScrollView {
@@ -90,7 +94,8 @@ struct HomeView: View {
                     cans: cans,
                     onShop: onShop,
                     onSettings: onSettings,
-                    persona: persona
+                    persona: persona,
+                    cards: shownCards
                 )
 
                 // PRD section 15: the title shows here only, never on the Lock Screen.
@@ -197,7 +202,7 @@ struct HomeView: View {
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
                 } else if let mode = shownMode {
-                    Text(mode.tagline(for: persona))
+                    Text(shownCards.tagline(for: mode, persona: persona))
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
                 } else {
@@ -213,7 +218,7 @@ struct HomeView: View {
                     let active = activeNeed(at: context.date)
                     let why = NeedEngine.whyLine(need: active, energy: reading, bedtime: state)
                     let workLine = moment(at: context.date).flatMap(HakuLines.scene(for:)).map {
-                        HakuLines.line($0, at: context.date, persona: persona)
+                        HakuLines.line($0, at: context.date, persona: persona, cards: shownCards)
                     }
                     let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
                     let leftWork = HakuLines.offWorkUntil(store.log, now: context.date, work: rules)
@@ -226,13 +231,17 @@ struct HomeView: View {
                     }
                 }
 
-                ModeSwitcher(current: shownMode, persona: persona) { mode in
+                ModeSwitcher(current: shownMode, persona: persona, cards: shownCards) { mode in
                     switchTo(mode)
                 }
                 .anchorPreference(key: SwitcherBounds.self, value: .bounds) { $0 }
 
                 TimelineView(.periodic(from: .now, by: 60)) { context in
-                    TodayTimeline(segments: store.segments(on: context.date, now: context.date), persona: persona)
+                    TodayTimeline(
+                        segments: store.segments(on: context.date, now: context.date),
+                        persona: persona,
+                        cards: shownCards
+                    )
                 }
             }
             .padding(.horizontal, 20)
@@ -472,6 +481,7 @@ private struct Header: View {
     let onShop: (() -> Void)?
     let onSettings: (() -> Void)?
     let persona: Persona
+    let cards: ModeCards
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -533,7 +543,7 @@ private struct Header: View {
 
     private var subtitle: String {
         let date = Date.now.formatted(.dateTime.month().day().weekday(.wide))
-        return "\(date) · \(mode.map { "\($0.code(for: persona)) MODE" } ?? "NO MODE")"
+        return "\(date) · \(mode.map { "\(cards.code(for: $0, persona: persona)) MODE" } ?? "NO MODE")"
     }
 }
 

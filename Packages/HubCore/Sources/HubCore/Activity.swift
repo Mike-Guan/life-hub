@@ -144,7 +144,7 @@ public struct ActivityDays: Codable, Equatable, Sendable {
         guard let weekday = Self.mostWon(won) else { return self }
         let minutes = Self.recentWins(.run5k, in: ledger, now: now, calendar: calendar)
             .filter { calendar.component(.weekday, from: $0.day) == weekday }
-            .map { minutesAfterMidnight($0.at, on: $0.day, calendar: calendar) }
+            .map { Self.minutesAfterMidnight($0.at, on: $0.day, calendar: calendar) }
             .sorted()
         guard !minutes.isEmpty else { return self }
         var learned = self
@@ -189,12 +189,13 @@ public struct ActivityDays: Codable, Equatable, Sendable {
     static func mostWon(_ won: [Int: Int]) -> Int? {
         won.min { ($1.value, $0.key) < ($0.value, $1.key) }?.key
     }
-}
 
-// The hub day starts at 05:00, so a run ending after midnight counts past 24:00.
-private func minutesAfterMidnight(_ date: Date, on day: Date, calendar: Calendar) -> Int {
-    let midnight = calendar.startOfDay(for: day)
-    return Int(date.timeIntervalSince(midnight) / 60)
+    // The hub day starts at 05:00, so a time after midnight counts past 24:00.
+    /// Minutes from the midnight that starts the hub day `day` to `date`.
+    static func minutesAfterMidnight(_ date: Date, on day: Date, calendar: Calendar) -> Int {
+        let midnight = calendar.startOfDay(for: day)
+        return Int(date.timeIntervalSince(midnight) / 60)
+    }
 }
 
 /// What the app knows right now that activities depend on.
