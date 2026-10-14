@@ -358,6 +358,17 @@ enum Placement {
     /// KURO's conflicts that exist today, with where they were reported.
     static let kuroKnown: [String: String] = [:]
 
+    /// Places that hold things in HAKU's hands.
+    static let hands: Set<Place> = [.handR, .handL, .handsFront]
+
+    // QA spec S6: asleep (lying down at bedtime) HAKU holds nothing. Found on main 85b0d0f.
+    /// Things HAKU still holds asleep today, with where they were reported.
+    static let asleepKnown: [String: String] = [
+        "handL: 拳套": "新（工程二组 2026-10-14）：拳击模式睡着还戴着拳套",
+        "handR: 拳套": "新（工程二组 2026-10-14）：拳击模式睡着还戴着拳套",
+        "handR: monsterCan": "新（工程二组 2026-10-14）：睡着了手里还拿着罐子",
+    ]
+
     /// The conflicts among `parts`: a place holding two things, as "place: a+b", and a forbidden pair, as "a+b".
     static func conflicts<Part: RawRepresentable & Hashable>(
         in parts: [Part],
@@ -405,6 +416,18 @@ enum Placement {
         check(found, known: Placement.hakuKnown)
     }
 
+    @Test func hakuHoldsNothingAsleep() {
+        var found: [String: String] = [:]
+        for state in PlacementPoses.haku where state.label.contains("bedtime.lying") {
+            for part in RunnerFigure.parts(for: state.mode, pose: state.pose) {
+                guard let spot = Placement.haku[part], Placement.hands.contains(spot.place) else { continue }
+                found["\(spot.place.rawValue): \(spot.thing)"] =
+                    found["\(spot.place.rawValue): \(spot.thing)"] ?? state.label
+            }
+        }
+        check(found, known: Placement.asleepKnown, problem: "Something in HAKU's hands while asleep")
+    }
+
     @Test func kuroKeepsOneThingPerPlace() {
         var found: [String: String] = [:]
         for state in PlacementPoses.kuro {
@@ -417,10 +440,9 @@ enum Placement {
     }
 
     /// Fails on a conflict not in `known`, and on a known conflict that no longer happens.
-    func check(_ found: [String: String], known: [String: String]) {
+    func check(_ found: [String: String], known: [String: String], problem: String = "Two things in one place") {
         let new = found.filter { known[$0.key] == nil }.map { "\($0.key) (\($0.value))" }.sorted()
-        #expect(
-            new.isEmpty, "Two things in one place. Fix it, or list it in Placement with the map's §5 number: \(new)")
+        #expect(new.isEmpty, "\(problem). Fix it, or list it in Placement with the map's §5 number: \(new)")
         for (conflict, reason) in known.sorted(by: { $0.key < $1.key }) {
             withKnownIssue(Comment(rawValue: "\(conflict): \(reason)")) {
                 #expect(found[conflict] == nil, "\(conflict) in \(found[conflict] ?? "")")
