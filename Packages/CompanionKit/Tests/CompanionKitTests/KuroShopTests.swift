@@ -68,7 +68,7 @@ import Testing
 
     @Test func sheActsCalmAboutItemsAndShyAboutKeepsakes() {
         #expect(KuroBubbleLines.unlock(KuroItem.bag.rawValue) == "……还行吧。")
-        #expect(KuroBubbleLines.unlock(KuroItem.goldRacket.rawValue) == "……给你的。不是特意挑的。")
+        #expect(KuroBubbleLines.unlock(KuroItem.goldRacket.rawValue) == "……给你。收好。")
     }
 
     @Test func iconsAreSquareCropsOfTheItem() {

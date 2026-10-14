@@ -51,6 +51,21 @@ import Testing
         #expect(Win.earlySleep([], schedule: schedule, now: date(14, 9), calendar: calendar) == nil)
     }
 
+    @Test func noBedtimeSetEarnsNothing() {
+        let night = [sleep(date(13, 22), date(14, 6))]
+        #expect(Win.earlySleep(night, schedule: .unset, now: date(14, 9), calendar: calendar) == nil)
+    }
+
+    @Test func aBedtimeWithTheReminderOffStillEarns() throws {
+        let defaults = try #require(UserDefaults(suiteName: "HealthWinsTests.reminderOff"))
+        defaults.removePersistentDomain(forName: "HealthWinsTests.reminderOff")
+        schedule.store(in: defaults)
+        BedtimeSchedule.setRemindsAtBedtime(false, in: defaults)
+        let stored = BedtimeSchedule.stored(in: defaults)
+        let night = [sleep(date(13, 23), date(14, 7))]
+        #expect(Win.earlySleep(night, schedule: stored, now: date(14, 9), calendar: calendar) != nil)
+    }
+
     @Test func anEveningNapDoesNotCountAsGoingToBed() {
         let night = [
             sleep(date(13, 19), date(13, 19, 40)),

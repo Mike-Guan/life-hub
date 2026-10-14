@@ -123,10 +123,11 @@ extension Win {
     }
 
     // Mike boxes without a watch, so the card's place counts like the fitness gym. A visit and a workout
-    // in the same day or week share one source, so they earn once together.
+    // in the same day or week share one source, so they earn once together. With the fitness card the
+    // fitness gym is the card's place, so a gym visit and a strength workout pay one card win, not two.
     /// The win for a visit to a place with `action` from `arrived` to `left`: the gym win for the fitness
-    /// gym, the identity card's win for the card's place; `nil` for other places, without a card, or when
-    /// the visit was too short.
+    /// gym, the identity card's win for the card's place and, with the fitness card, for the fitness gym;
+    /// `nil` for other places, without a card, or when the visit was too short.
     /// - Parameter identity: the picked identity card, `nil` when there is none.
     public static func visit(
         _ action: HubPlace.Action,
@@ -138,6 +139,9 @@ extension Win {
         let win: Win
         var card: IdentityKind?
         switch action {
+        case .fitness where identity == .fitness:
+            win = .boxing
+            card = identity
         case .fitness: win = .gym
         case .boxing:
             guard let identity else { return nil }

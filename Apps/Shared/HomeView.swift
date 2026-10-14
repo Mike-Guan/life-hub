@@ -47,6 +47,8 @@ struct HomeView: View {
     var wardrobe = Wardrobe()
     /// Which character the card draws.
     var persona = Persona.haku
+    /// The name the greeting ends with, `nil` for none.
+    var greetingName: String?
     /// The user's cards, for the mode names; `nil` uses the character's default cards.
     var cards: ModeCards?
     /// Earned cans, for the traces that stay.
@@ -95,6 +97,7 @@ struct HomeView: View {
                     onShop: onShop,
                     onSettings: onSettings,
                     persona: persona,
+                    name: greetingName,
                     cards: shownCards
                 )
 
@@ -435,11 +438,12 @@ struct HomeView: View {
     private func codingCans(at date: Date) -> Int { inputs.codingCans(at: date) }
 
     // In 副业 a tap switches the state. It is manual, so it earns nothing and holds automatic switches.
+    // With only one state picked there is nothing to switch to, so the tap gets the usual reaction.
     private var tapAction: (() -> Void)? {
-        guard store.sideHustle != nil else { return nil }
+        guard let state = store.sideHustle, shownCards.next(after: state) != state else { return nil }
         return {
             withAnimation(.easeInOut(duration: 0.2)) {
-                _ = store.cycleSideHustle()
+                _ = store.cycleSideHustle(cards: shownCards)
             }
         }
     }
@@ -453,7 +457,8 @@ struct HomeView: View {
 
     private func switchTo(_ mode: Mode) {
         let changed = withAnimation(.easeInOut(duration: 0.2)) {
-            store.switchTo(mode)
+            // 副业 starts in the user's first picked state.
+            store.switchTo(mode, tag: mode == .money ? shownCards.sideStates[0].rawValue : nil)
         }
         // A tap during the replay ends it, so the buttons show what was tapped.
         replayEnded = true
@@ -481,6 +486,7 @@ private struct Header: View {
     let onShop: (() -> Void)?
     let onSettings: (() -> Void)?
     let persona: Persona
+    let name: String?
     let cards: ModeCards
 
     var body: some View {
@@ -533,12 +539,7 @@ private struct Header: View {
     }
 
     private var greeting: String {
-        let hour = Calendar.current.component(.hour, from: .now)
-        switch hour {
-        case 5..<12: return "GOOD MORNING, MIKE"
-        case 12..<18: return "GOOD AFTERNOON, MIKE"
-        default: return "GOOD EVENING, MIKE"
-        }
+        Greeting.text(hour: Calendar.current.component(.hour, from: .now), name: name)
     }
 
     private var subtitle: String {
