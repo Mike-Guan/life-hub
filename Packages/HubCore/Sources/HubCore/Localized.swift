@@ -7,11 +7,13 @@ import Foundation
 extension String {
     /// This text in the user's language, from HubCore's `Localizable` table.
     var localized: String {
-        String(localized: LocalizationValue(self), table: "Localizable", bundle: .module)
+        guard Languages.isOn else { return self }
+        return String(localized: LocalizationValue(self), table: "Localizable", bundle: .module)
     }
 
     /// This line in the user's language, from `persona`'s table in HubCore.
     func localized(for persona: Persona) -> String {
-        String(localized: LocalizationValue(self), table: persona == .kuro ? "Kuro" : "Haku", bundle: .module)
+        guard Languages.isOn else { return self }
+        return String(localized: LocalizationValue(self), table: persona == .kuro ? "Kuro" : "Haku", bundle: .module)
     }
 }

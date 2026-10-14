@@ -8,6 +8,7 @@ struct StatusWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "status", provider: HubProvider()) { entry in
             StatusView(entry: entry)
+                .environment(\.locale, Languages.locale)
         }
         .configurationDisplayName("Life Hub")
         .description("现在的模式和今天的电量。")
