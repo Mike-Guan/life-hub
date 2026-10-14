@@ -91,7 +91,7 @@ struct MemoryView: View {
 
             // PM 2026-10-13: only what was really learned, so the section waits until something is.
             if !habits.isEmpty {
-                section("学到的习惯") {
+                section("学到的规律") {
                     ForEach(habits, id: \.habit) { habit in
                         HStack(spacing: 10) {
                             VStack(alignment: .leading, spacing: 2) {
@@ -237,7 +237,7 @@ struct MemoryView: View {
         case .habit: "忘掉后从你之后的日子重新学。"
         case .decisions: "包括你说过「不对」的记录。删了不能恢复。"
         case .everything:
-            "习惯、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。"
+            "规律、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。"
                 + "能量罐、商店物品、衣柜和纪念品不算记忆，留着。删了不能恢复。"
         }
     }
