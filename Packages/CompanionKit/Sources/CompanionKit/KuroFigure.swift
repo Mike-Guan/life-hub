@@ -499,7 +499,7 @@ public struct KuroView: View {
                 }
             }
             .modifier(WatchFigureFrame(isEnabled: style == .watch))
-            .padding(.top, 24)
+            .padding(.top, Self.topInset(style))
             .padding(.horizontal, 12)
 
             if unboxStart != nil {
@@ -755,6 +755,12 @@ public struct KuroView: View {
         guard let kind = tapKind, let start = tapStart?.timeIntervalSinceReferenceDate else { return nil }
         let progress = (time - start) / kind.duration
         return (0..<1).contains(progress) ? (kind, progress) : nil
+    }
+
+    // The tennis, boxing and gym ponytails reach the top of her bounds, where the phone bubble sits (unbox page).
+    /// The space above the figure for `style`, in points.
+    nonisolated static func topInset(_ style: CompanionStyle) -> CGFloat {
+        style == .watch ? 24 : 38
     }
 
     /// Whether she holds still, with no sway, hop, blink or idle move: with Reduce Motion, while unboxing, or with

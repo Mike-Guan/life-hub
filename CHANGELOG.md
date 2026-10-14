@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character can dress for four identity cards: boxing (gloves and a bag stand), fitness
   (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its own tap
   move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
+  ponytail (unbox page and home card). The watch is unchanged.
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
   card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
   The second character's flower is now called 地上小粉花.
