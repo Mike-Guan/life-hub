@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- A tired HAKU now shows it in every mode: off work he keeps smiling with half-open eyes and bags, at work and
+  on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
+  full night stay brighter and clear the headset.
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
   card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
   The second character's flower is now called 地上小粉花.

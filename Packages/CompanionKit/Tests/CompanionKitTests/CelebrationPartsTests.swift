@@ -24,7 +24,7 @@ import Testing
         .other: [],
     ]
     /// What every HAKU celebration may add: the sparkle burst and the glint in the eye.
-    static let hakuSparkles: Set<RunnerPart> = [.sparkle, .eyeGlint]
+    static let hakuSparkles: Set<RunnerPart> = [.sparkle, .sparkleWork, .eyeGlint]
     /// What cheering the day's focus done may add: the pumped fist with the eyes shut.
     static let focusAllows: Set<RunnerPart> = [.backFist, .eyesClosed]
     /// What KURO's celebration, her look's tap move, may add besides her face and the heart.
