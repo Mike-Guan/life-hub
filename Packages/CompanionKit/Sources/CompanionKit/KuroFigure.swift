@@ -948,6 +948,7 @@ public struct KuroView: View {
     }
 
     private func say(_ text: String?, for seconds: Double = 2.4) {
+        let text = text?.localized(for: .kuro)
         bubbleTask?.cancel()
         withAnimation(.smooth(duration: 0.3)) { bubble = text }
         guard text != nil else { return }

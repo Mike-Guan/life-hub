@@ -188,7 +188,7 @@ public enum HakuLines {
         let day = StateEngine.dayStart(for: date, calendar: calendar)
         let origin = Date(timeIntervalSinceReferenceDate: 0)
         let days = calendar.dateComponents([.day], from: origin, to: day).day ?? 0
-        return lines[((days % lines.count) + lines.count) % lines.count]
+        return lines[((days % lines.count) + lines.count) % lines.count].localized(for: persona)
     }
 
     // 台词 泛化修改 v0 §1, §3: the character's own lines stay for her default card (拳击 for HAKU, 网球 for
@@ -227,8 +227,8 @@ public enum HakuLines {
     ///   - persona: whose voice says the line.
     ///   - evening: whether the leave came after the evening extension started.
     public static func offWorkLine(for persona: Persona, evening: Bool = false) -> String {
-        guard persona == .kuro else { return offWorkLine }
-        return evening ? KuroLines.eveningOffWorkLine : KuroLines.offWorkLine
+        guard persona == .kuro else { return offWorkLine.localized(for: persona) }
+        return (evening ? KuroLines.eveningOffWorkLine : KuroLines.offWorkLine).localized(for: persona)
     }
 
     /// The off-work line in `persona`'s voice for a line that stops showing at `until`.
