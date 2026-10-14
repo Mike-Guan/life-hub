@@ -251,8 +251,9 @@ import Testing
         #expect(throws: GrowthStore.BuyError.notEnoughCans) { try store.buy(try item("kuro.room.flower"), at: at) }
         #expect(throws: GrowthStore.BuyError.notForSale) { try store.buy(try item("room.plant"), at: at) }
         store.persona = .haku
-        try store.buy(try item("room.plant"), at: at)
-        #expect(store.ledger.only(.haku).balance == 4 * Win.boxing.cans - 10)
+        let plant = try item("room.plant")
+        try store.buy(plant, at: at)
+        #expect(store.ledger.only(.haku).balance == 4 * Win.boxing.cans - (plant.price ?? 0))
         #expect(store.ledger.only(.kuro).balance == Win.gym.cans)
         #expect(store.ledger.only(.kuro).owned.isEmpty)
     }
