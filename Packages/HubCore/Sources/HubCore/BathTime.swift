@@ -47,6 +47,7 @@ public enum BathTime {
 
     // Bedtime can be after midnight, so look at the bedtimes of yesterday, today and tomorrow.
     private static func windows(near date: Date, bedtime: BedtimeSchedule, calendar: Calendar) -> [DateInterval] {
+        guard bedtime.isSet else { return [] }
         let today = calendar.startOfDay(for: date)
         return [-1, 0, 1].compactMap { offset -> DateInterval? in
             let day = calendar.date(byAdding: .day, value: offset, to: today) ?? today

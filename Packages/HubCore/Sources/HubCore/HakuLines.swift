@@ -175,18 +175,48 @@ public enum HakuLines {
     // repeats within a week. No history to store, and widgets get the
     // same answer as the app.
     /// The line for `scene` on the hub day containing `date`, in `persona`'s voice.
+    /// - Parameter cards: the user's cards, so the identity card's scenes use its own lines.
     public static func line(
         _ scene: LineScene,
         at date: Date,
         calendar: Calendar = .current,
-        persona: Persona = .haku
+        persona: Persona = .haku,
+        cards: ModeCards? = nil
     ) -> String {
-        let lines = (persona == .kuro ? KuroLines.library : library)[scene] ?? []
+        let lines = pool(scene, persona: persona, cards: cards)
         guard !lines.isEmpty else { return "" }
         let day = StateEngine.dayStart(for: date, calendar: calendar)
         let origin = Date(timeIntervalSinceReferenceDate: 0)
         let days = calendar.dateComponents([.day], from: origin, to: day).day ?? 0
         return lines[((days % lines.count) + lines.count) % lines.count]
+    }
+
+    // 台词 泛化修改 v0 §1, §3: the character's own lines stay for her default card (拳击 for HAKU, 网球 for
+    // KURO); another card brings its own, and a user with no sport gets no sports bag.
+    /// The lines for `scene` in `persona`'s voice, fitted to `cards`.
+    static func pool(_ scene: LineScene, persona: Persona, cards: ModeCards?) -> [String] {
+        let base = (persona == .kuro ? KuroLines.library : library)[scene] ?? []
+        guard let cards else { return base }
+        let own = cards.identity == ModeCards.legacy(for: persona).identity
+        switch scene {
+        case .boxing:
+            guard let identity = cards.identity, !own else { return base }
+            return identity.lines(for: persona)
+        case .boxingWarmup:
+            guard let identity = cards.identity, !own else { return base }
+            let haku = ["……准备好了。你呢。", "我先热个身。", "今天那个，去吗。"]
+            let kuro = ["……准备好了。", "手腕转好了。你呢。", "……去吗。"]
+            return [identity.invite(for: persona)] + (persona == .kuro ? kuro : haku)
+        case .couchScroll:
+            let tennisBag = "网球包在门口。"
+            let lines = base.map { $0 == tennisBag && !own ? "……一起躺会儿？" : $0 }
+            guard !cards.isSporty else { return lines }
+            let bags = ["运动包在看你。", "门口那个包，在看你。"]
+            if persona == .kuro { return lines.filter { !bags.contains($0) } }
+            return lines.map { bags.contains($0) ? "……我也躺会儿。" : $0 }
+        default:
+            return base
+        }
     }
 
     /// HAKU's one line when leaving the office ends work.

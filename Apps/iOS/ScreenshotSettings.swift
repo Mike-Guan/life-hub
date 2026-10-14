@@ -14,6 +14,7 @@ struct ScreenshotSettings: View {
     var body: some View {
         SettingsView(
             bedtime: .constant(.stored(in: AppGroup.defaults)),
+            remindsAtBedtime: .constant(BedtimeSchedule.remindsAtBedtime(in: AppGroup.defaults)),
             rules: .constant(.stored(in: AppGroup.defaults)),
             places: .constant(PlaceSettings()),
             persona: .constant(ScreenshotMode.persona),
@@ -22,6 +23,7 @@ struct ScreenshotSettings: View {
             store: store,
             energy: energy,
             ledger: CanLedger(),
+            cards: .current(in: AppGroup.defaults, persona: ScreenshotMode.persona),
             onEraseAll: {},
             screenshot: asksErase
         )

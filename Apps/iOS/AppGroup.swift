@@ -33,13 +33,22 @@ enum AppGroup {
             .learningRun(from: ledger.since(resets.all), now: now)
     }
 
-    /// The need rules for the chosen character, with KURO's tennis day learned from the can ledger since
-    /// it was last forgotten and the evening times following the stored work hours.
+    /// The need rules for the chosen character, with the identity day learned from the can ledger and the
+    /// switches to the identity card since it was last forgotten, and the evening times following the stored
+    /// work hours.
     static func needRules(now: Date = .now) -> NeedRules {
         let ledger = CanLedger.read(from: container.canLedgerURL)
         let since = MemoryResets.stored(in: defaults).since(.identityDay)
-        return NeedRules.standard(for: Persona.stored(in: defaults), ledger: ledger.since(since), now: now)
-            .following(ModeRules.stored(in: defaults))
+        let arrivals = ModeLog.read(from: container.modeLogURL).active
+            .filter { $0.mode == .boxing && $0.at >= (since ?? .distantPast) }
+            .map(\.at)
+        let rules = NeedRules.standard(
+            for: Persona.stored(in: defaults),
+            ledger: ledger.since(since),
+            arrivals: arrivals,
+            now: now
+        )
+        return rules.following(ModeRules.stored(in: defaults), bedtime: BedtimeSchedule.stored(in: defaults))
     }
 
     /// User defaults both processes read, so they share one device id.
