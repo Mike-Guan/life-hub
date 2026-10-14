@@ -174,7 +174,8 @@ struct KuroFigure: View {
 
     // UI 审核 2026-10-14 (direction 2): the watch crop cuts her low props, so on the watch she holds each one
     // higher instead of the face getting smaller. The pen, stylus and badge have no room there and stay off.
-    /// Swaps each low prop in `visible` for its raised watch version.
+    // UI 审核 2026-10-14: the watch draws no floor props, since its bottom edge leaves only a scrap of them.
+    /// Swaps each low prop in `visible` for its raised watch version and hides the floor props.
     nonisolated private static func raise(_ visible: inout Set<KuroPart>) {
         let raised: [KuroPart: KuroPart] = [
             .tennisRacket: .watchRacket, .deskBooks: .watchBooks, .chillCup: .watchCup, .workTablet: .watchTablet,
@@ -183,7 +184,7 @@ struct KuroFigure: View {
             visible.remove(low)
             visible.insert(high)
         }
-        visible.subtract([.deskPen, .workStylus, .workBadge])
+        visible.subtract([.deskPen, .workStylus, .workBadge, .itemFlower, .itemLamp])
     }
 
     /// The parts only `look` wears.
