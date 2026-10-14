@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
+  turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
 - On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
