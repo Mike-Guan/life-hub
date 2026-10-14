@@ -13,6 +13,9 @@ struct LifeHubWatchApp: App {
     var body: some Scene {
         WindowGroup {
             WatchHomeView()
+                // The switch reaches the watch with the payload once Japanese and English ship; until then
+                // the watch always shows Chinese.
+                .environment(\.locale, Languages.locale)
         }
         .backgroundTask(.watchConnectivity) {
             await WatchReceiver.shared.waitForPendingContent()
@@ -71,8 +74,6 @@ struct WatchHomeView: View {
     private func companionPage(_ payload: WatchPayload, mode: Mode?, at date: Date) -> some View {
         let snapshot = payload.snapshot
         let scene = payload.scene(at: date)
-        // HAKU with no mode is drawn on cream, where the white system clock can't be read.
-        let clockBand = mode == nil && payload.persona == .haku
         return Group {
             if payload.persona == .kuro {
                 KuroView(
@@ -113,16 +114,6 @@ struct WatchHomeView: View {
         }
         .clipped()
         .ignoresSafeArea()
-        .overlay {
-            if clockBand {
-                GeometryReader { geometry in
-                    Toy.ink
-                        .frame(height: geometry.safeAreaInsets.top)
-                        .offset(y: -geometry.safeAreaInsets.top)
-                }
-                .allowsHitTesting(false)
-            }
-        }
         .overlay(alignment: .topLeading) {
             if let failure {
                 Text(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2).padding(.leading, 4)

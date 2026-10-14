@@ -57,9 +57,11 @@ extension ModeRules {
     public var isIrregular: Bool { workdays.isEmpty }
 
     /// When the working day is over for the evening states, in minutes after midnight: the end of work
-    /// hours, or 5 hours before bedtime for irregular work.
+    /// hours, or 5 hours before bedtime for irregular work. Irregular work with no bedtime set never ends,
+    /// so there are no evening states.
     public func dayEndMinute(bedtime: BedtimeSchedule) -> Int {
-        isIrregular ? (bedtime.startMinute - 5 * 60 + 24 * 60) % (24 * 60) : workEndMinute
+        guard isIrregular else { return workEndMinute }
+        return bedtime.isSet ? (bedtime.startMinute - 5 * 60 + 24 * 60) % (24 * 60) : 24 * 60
     }
 
     // Mike, 2026-10-05: only when he is really at work, so a day off or working elsewhere gets no notice.

@@ -31,8 +31,9 @@ import Testing
     static let kuroAllows: [KuroLook: Set<KuroPart>] = [
         .work: [.tapTablet],
         .chill: [.tapCup, .tapPuff],
-        .tennis: [.tapBall, .tapSparkle],
+        .tennis: [.swingLines],
         .desk: [.tapFinger, .tapGlint],
+        .box: [], .fitness: [], .study: [.studyMark], .art: [],
     ]
     static let kuroFace: Set<KuroPart> = [
         .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow,

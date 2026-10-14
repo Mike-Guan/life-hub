@@ -32,7 +32,7 @@ enum KuroBubbleLines {
         switch activity {
         case .boxingAtGym: ["正手。……反手。", "……别看我，看球。", "这球，有点欠。"]
         case .gymSession: ["再一组。……你先。", "……比想的重。"]
-        case .running: ["呼……别说话。", "……腿是你的。我陪着。"]
+        case .running: ["呼……先不说话。", "……腿是你的。我陪着。"]
         case .gymDay: ["包在门口。……随你。", "今天也开着。……只是说说。"]
         case .runDay: ["鞋带系好了。你的呢。", "……先热个身。"]
         }
@@ -53,8 +53,8 @@ enum KuroBubbleLines {
         case .collapsed: ["……回来了。", "先让我窝五分钟。"]
         case .blanket: ["今天就这样吧。", "毯子分你一半。"]
         case .morning: ["……早。", "发圈去哪了。"]
-        case .timeToLeave: ["……该走了。", "嗯。"]
-        case .stiff: ["……腰。", "起来。我先起了。", "ちょっと休憩。"]
+        case .timeToLeave: ["……包收好了。", "嗯。"]
+        case .stiff: ["……腰。", "……我站起来伸一下。你呢？", "ちょっと休憩。"]
         case .packingUp: ["快了。", "……在收。"]
         }
     }
@@ -100,6 +100,6 @@ enum KuroBubbleLines {
     /// What KURO says when unboxing the item with `itemID`.
     static func unlock(_ itemID: String) -> String {
         let keepsake = KuroItem(rawValue: itemID)?.isKeepsake ?? (ShopItem.item(itemID)?.keepsake != nil)
-        return keepsake ? "……给你的。不是特意挑的。" : "……还行吧。"
+        return keepsake ? "……给你。收好。" : "……还行吧。"
     }
 }

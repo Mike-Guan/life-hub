@@ -22,6 +22,7 @@ struct BoxingCountdownWidget: Widget {
             .foregroundStyle(Toy.ink)
             .activityBackgroundTint(Mode.boxing.color)  // HAKU only: KURO has no countdown.
             .activitySystemActionForegroundColor(Toy.ink)
+            .environment(\.locale, Languages.locale)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -33,6 +34,7 @@ struct BoxingCountdownWidget: Widget {
                 DynamicIslandExpandedRegion(.bottom) {
                     Text("\(context.attributes.title ?? "拳击") \(context.state.start, style: .time) 开始")
                         .font(Toy.body(13, weight: .bold))
+                        .environment(\.locale, Languages.locale)
                 }
             } compactLeading: {
                 head

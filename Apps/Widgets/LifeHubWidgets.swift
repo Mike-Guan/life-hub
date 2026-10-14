@@ -4,6 +4,10 @@ import WidgetKit
 
 @main
 struct LifeHubWidgets: WidgetBundle {
+    init() {
+        Languages.load(from: AppGroup.defaults)
+    }
+
     var body: some Widget {
         StatusWidget()
         ModeWidget()
@@ -57,7 +61,7 @@ struct HubEntry: TimelineEntry {
     var detail: String {
         if let offWork { return offWork }
         // The second character's picture shows neither of these, so her line skips them.
-        if persona == .haku && bath { return "去洗澡" }
+        if persona == .haku && bath { return "占浴室中" }
         if let activity { return activity.reason(for: persona) }
         if persona == .haku && moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) {

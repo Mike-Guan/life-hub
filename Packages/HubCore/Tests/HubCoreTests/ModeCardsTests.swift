@@ -195,4 +195,12 @@ import Testing
         ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: true)
         #expect(ModeCards.current(in: defaults, persona: .kuro).identity == .study)
     }
+
+    // Issue #350: with no translation in the catalog the Chinese text comes back unchanged.
+    @Test func textWithoutATranslationStaysChinese() {
+        #expect("拳击日".localized == "拳击日")
+        #expect(IdentityKind.dance.tagline(for: .haku) == "跳舞中")
+        #expect(IdentityKind.ski.lines(for: .kuro) == ["……好冷。", "手好冰。", "……再滑一次？"])
+        #expect(ChillActivity.walking.title == "散步晒太阳")
+    }
 }
