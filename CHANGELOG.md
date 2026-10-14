@@ -7,12 +7,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
+- Test builds (Debug, STG) have a 「日文和英文」 switch in settings. It is off by default, so every build shows
+  Chinese whatever the phone's language until all Japanese and English text is in.
 
 ### Changed
 - 27 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
   names two apps and says only this iPhone knows how long you scrolled.
+- The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
+  fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
+  own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- Tennis is her main card: she bounces the ball on a flat racket and spins the racket while idle, and a tap
+  makes her swing. Boxing keeps only the gloves tapping together.
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.

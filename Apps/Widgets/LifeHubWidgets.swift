@@ -4,6 +4,10 @@ import WidgetKit
 
 @main
 struct LifeHubWidgets: WidgetBundle {
+    init() {
+        Languages.load(from: AppGroup.defaults)
+    }
+
     var body: some Widget {
         StatusWidget()
         ModeWidget()
