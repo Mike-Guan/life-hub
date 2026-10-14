@@ -166,7 +166,7 @@ struct KuroFigure: View {
     var body: some View {
         ZStack {
             ForEach(Self.parts(for: look, pose: pose), id: \.self) { part in
-                KuroPartView(part: part, shift: Self.shift(part, pose: pose))
+                KuroPartView(part: part, shift: Self.shift(part, pose: pose), turn: Self.turn(part, pose: pose))
             }
             if pose.overtime, let sign = pose.sign {
                 RunnerTextView(text: RunnerText(string: sign, x: 60, y: -1, size: 9, color: KuroPalette.ink))
@@ -283,16 +283,37 @@ extension EnvironmentValues {
 }
 
 /// Draws one `KuroPart` across the whole figure frame.
+/// A turn or squash of one part about a point, in SVG units.
+struct KuroTurn: Equatable, Sendable {
+    /// The point the part turns about.
+    var pivot: CGPoint
+    /// The turn, in degrees.
+    var angle: Double = 0
+    /// The direction the squash runs along, in degrees from horizontal.
+    var axis: Double = 0
+    /// The width along `axis`; negative shows the back.
+    var scale: CGFloat = 1
+}
+
 struct KuroPartView: View {
     let part: KuroPart
     /// How far the part moves, in SVG units.
     var shift: CGSize = .zero
+    /// How the part turns about a point, if it does.
+    var turn: KuroTurn?
     @Environment(\.kuroLineArt) private var lineArt
 
     var body: some View {
         Canvas { context, size in
             RunnerDrawing.enterFigureSpace(&context, size: size)
             context.translateBy(x: shift.width, y: shift.height)
+            if let turn {
+                context.translateBy(x: turn.pivot.x, y: turn.pivot.y)
+                context.rotate(by: .degrees(turn.angle + turn.axis))
+                context.scaleBy(x: turn.scale, y: 1)
+                context.rotate(by: .degrees(-turn.axis))
+                context.translateBy(x: -turn.pivot.x, y: -turn.pivot.y)
+            }
             let inks = KuroArt.cachedInks(part)
             RunnerDrawing.draw(lineArt ? KuroArt.lineArt(inks) : inks, in: context)
         }

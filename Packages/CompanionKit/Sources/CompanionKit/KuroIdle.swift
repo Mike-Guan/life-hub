@@ -18,13 +18,16 @@ enum KuroIdle: CaseIterable, Sendable {
     case racket
     /// The ponytail swishes and settles.
     case ponytail
+    // Tennis is her main card (Mike 10/14, 第 1 批身份卡 第 3 轮).
+    /// Tennis: the racket goes flat and the ball bounces on it three times, high then lower, and she catches it.
+    case juggle
+    /// Tennis: the racket spins one turn in her hand, then a small toss and catch.
+    case twirl
     /// The glasses nudge up and catch the light.
     case glasses
     /// The red pen taps the notebooks twice.
     case pen
     // Identity cards, batch 1 (第 1 批身份卡 预览).
-    /// Boxing: the left glove's strap flips up, the right glove presses it down, it flips again, pressed again.
-    case strap
     /// Boxing: the gloves tap together twice, her eyes shut on each tap.
     case gloves
     /// Fitness: the yoga block goes down to her lap and she stays there, only blinking and breathing.
@@ -46,7 +49,8 @@ enum KuroIdle: CaseIterable, Sendable {
         case .blow, .draw: 2
         case .gloves: 1.2
         case .highlight: 1.6
-        case .strap: 4
+        case .juggle: 3
+        case .twirl: 2
         case .lap: 6
         }
     }
@@ -56,10 +60,10 @@ enum KuroIdle: CaseIterable, Sendable {
         switch look {
         case .work: [.ears, .stylus, .lookUp]
         case .chill: [.ears, .blow, .aside]
-        case .tennis: [.ears, .racket, .ponytail]
+        case .tennis: [.ears, .racket, .ponytail, .juggle, .twirl]
         case .desk: [.ears, .glasses, .pen]
-        // K1-K3 for boxing (待机动作 补齐规格 v0); the hop under K3 is her boxing look's idle motion.
-        case .box: [.ears, .strap, .gloves, .ponytail]
+        // Boxing is an ordinary card for her (Mike 10/14): only the gloves tapping together.
+        case .box: [.ears, .gloves, .ponytail]
         case .fitness: [.ears, .ponytail, .lap]
         case .study: [.ears, .aside, .highlight]
         case .art: [.ears, .draw]
@@ -89,10 +93,18 @@ enum KuroIdle: CaseIterable, Sendable {
         case .glasses:
             // No hand: a finger with no arm read as floating (UI 审核 2026-10-09).
             if (0.5..<0.8).contains(p) { visible.insert(.tapGlint) }
-        case .strap:
-            // Up at the start and again at 0.45, each time until the right glove presses it down.
-            if p < 0.3 || (0.45..<0.65).contains(p) { visible.insert(.boxStrap) }
-            if (0.3..<0.45).contains(p) || (0.65..<0.95).contains(p) { Self.eyesDown(&visible) }
+        case .juggle:
+            // The flat racket is her own one; with the gold racket from the shop she just holds it.
+            guard visible.contains(.tennisRacket), p < 0.97 else { return }
+            visible.remove(.tennisRacket)
+            visible.formUnion([.juggleRacket, .tapBall])
+            if Self.ballHeight(p) > 30 { Self.swapEyes(&visible, to: .eyesBright) }
+            if p >= 0.88 {
+                Self.swapEyes(&visible, to: .eyesHappy)
+                visible.insert(.tapSparkle)
+            }
+        case .twirl:
+            if (0.8..<0.97).contains(p) { Self.swapEyes(&visible, to: .eyesHappy) }
         case .gloves:
             if Self.tapping(p) { Self.eyesShut(&visible) }
         case .lap:
@@ -126,11 +138,15 @@ enum KuroIdle: CaseIterable, Sendable {
             return CGSize(width: 0, height: -2 * CGFloat(Self.hold(p, from: 0.25)))
         case .ponytail where part == .tennisPonytail:
             return CGSize(width: 3 * CGFloat(sin(p * 4 * .pi) * (1 - p)), height: 0)
-        case .strap where part == .boxGloveR:
-            let press =
-                CGFloat(Self.hold(p, from: 0.2, rise: 0.1, fall: 0.05, end: 0.45))
-                + CGFloat(Self.hold(p, from: 0.55, rise: 0.1, fall: 0.1, end: 0.95))
-            return CGSize(width: -8 * press, height: 2 * press)
+        // The ball sits on the flat racket face at (106, 93); tapBall is drawn at (103, 92).
+        case .juggle where part == .tapBall: return CGSize(width: 3, height: 1 - Self.ballHeight(p))
+        // Her eyes follow the ball up.
+        case .juggle where Self.eyes.contains(part):
+            return CGSize(width: 0, height: -3 * Self.ballHeight(p) / 45)
+        // The toss at the end lifts the racket along its handle.
+        case .twirl where part == .tennisRacket:
+            let toss = Self.hold(p, from: 0.75, rise: 0.1, fall: 0.1, end: 0.98)
+            return CGSize(width: 2 * toss, height: -5.6 * toss)
         case .gloves where part == .boxGloveL: return CGSize(width: 4 * Self.together(p), height: 0)
         case .gloves where part == .boxGloveR: return CGSize(width: -4 * Self.together(p), height: 0)
         case .lap where part == .gymBlock:
@@ -145,8 +161,17 @@ enum KuroIdle: CaseIterable, Sendable {
         }
     }
 
+    /// How high the juggled ball is above the racket at `p`, in SVG units: three bounces, each lower.
+    static func ballHeight(_ p: Double) -> CGFloat {
+        let bounces: [(start: Double, end: Double, peak: Double)] = [
+            (0.05, 0.45, 45), (0.45, 0.7, 22), (0.7, 0.88, 14),
+        ]
+        guard let bounce = bounces.first(where: { ($0.start..<$0.end).contains(p) }) else { return 0 }
+        return CGFloat(bounce.peak * sin((p - bounce.start) / (bounce.end - bounce.start) * .pi))
+    }
+
     /// How close the gloves are (0...1) at `p`: they meet twice over the move.
-    private static func together(_ p: Double) -> CGFloat {
+    static func together(_ p: Double) -> CGFloat {
         CGFloat(max(0, sin(p * 4 * .pi)))
     }
 
@@ -154,8 +179,6 @@ enum KuroIdle: CaseIterable, Sendable {
     private static func tapping(_ p: Double) -> Bool { together(p) > 0.85 }
 
     private static func eyesShut(_ visible: inout Set<KuroPart>) { swapEyes(&visible, to: .eyesClosed) }
-
-    private static func eyesDown(_ visible: inout Set<KuroPart>) { swapEyes(&visible, to: .eyesDown) }
 
     /// Replaces whichever eyes are showing with `eyes`.
     private static func swapEyes(_ visible: inout Set<KuroPart>, to eyes: KuroPart) {

@@ -7,7 +7,7 @@ import Testing
 @Suite struct KuroTapTests {
     @Test func eachLookHasItsOwnMoveAndSleepyMeansRubbing() {
         let moves = KuroLook.allCases.map { KuroTap(look: $0, sleepy: false) }
-        #expect(moves == [.tablet, .sip, .bounce, .glasses, .punch, .hug, .mark, .sketch])
+        #expect(moves == [.tablet, .sip, .swing, .glasses, .bump, .hug, .mark, .sketch])
         #expect(KuroLook.allCases.allSatisfy { KuroTap(look: $0, sleepy: true) == .rub })
     }
 
@@ -35,14 +35,37 @@ import Testing
         #expect(KuroFigure.shift(.tapTablet, pose: pose.reacting(.tablet, progress: 0.9)).height > 0)
     }
 
-    @Test func theBallBouncesTwiceAndLands() {
+    @Test func sheSwingsTheRacketAcrossHerBodyAndBack() {
         let pose = KuroPose(look: .tennis, energy: nil)
-        let heights = [0.2, 0.4, 0.6, 0.9].map {
-            KuroFigure.shift(.tapBall, pose: pose.reacting(.bounce, progress: $0))
+        let angles = [0.05, 0.2, 0.4, 0.6, 0.95].map {
+            KuroFigure.turn(.tennisRacket, pose: pose.reacting(.swing, progress: $0))?.angle ?? 99
         }
-        #expect(heights[0].height < -30 && heights[1].height > -1 && heights[2].height < -30)
-        #expect(heights[3] == .zero)
-        #expect(KuroFigure.parts(for: .tennis, pose: pose.reacting(.bounce, progress: 0.9)).contains(.tapSparkle))
+        #expect(angles[0] == 0 && angles[1] > 0 && angles[2] == -75 && angles[3] > -75 && angles[3] < -50)
+        #expect(abs(angles[4]) < 0.001)
+        #expect(pose.reacting(.swing, progress: 0.05).eyes == .surprised)
+        let swinging = KuroFigure.parts(for: .tennis, pose: pose.reacting(.swing, progress: 0.4))
+        #expect(swinging.contains(.swingLines) && swinging.contains(.eyesClosed))
+        #expect(!KuroFigure.parts(for: .tennis, pose: pose.reacting(.swing, progress: 0.6)).contains(.swingLines))
+        #expect(KuroFigure.turn(.tennisRacket, pose: pose) == nil)
+    }
+
+    @Test func theBallBouncesThreeTimesOnTheFlatRacketAndIsCaught() {
+        let pose = KuroPose(look: .tennis, energy: nil)
+        let juggling = Set(KuroFigure.parts(for: .tennis, pose: pose.idling((.juggle, 0.25))))
+        #expect(juggling.isSuperset(of: [.juggleRacket, .tapBall, .eyesBright]) && !juggling.contains(.tennisRacket))
+        let heights = [0.25, 0.45, 0.575, 0.79].map { KuroIdle.ballHeight($0) }
+        #expect(heights[0] > heights[2] && heights[2] > heights[3] && heights[3] > 0 && heights[1] < 0.001)
+        let caught = Set(KuroFigure.parts(for: .tennis, pose: pose.idling((.juggle, 0.95))))
+        #expect(caught.isSuperset(of: [.tapSparkle, .eyesHappy]) && KuroIdle.ballHeight(0.95) == 0)
+    }
+
+    @Test func theRacketSpinsOneTurnInHerHand() {
+        let pose = KuroPose(look: .tennis, energy: nil)
+        let widths = [0.0, 0.175, 0.35, 0.7].map {
+            KuroFigure.turn(.tennisRacket, pose: pose.idling((.twirl, $0)))?.scale ?? 0
+        }
+        #expect(widths[0] == 1 && abs(widths[1]) == 0.1 && widths[2] < -0.9 && abs(widths[3] - 1) < 0.001)
+        #expect(KuroFigure.parts(for: .tennis, pose: pose.idling((.twirl, 0.9))).contains(.eyesHappy))
     }
 
     @Test func sheSipsThenPutsTheCupDown() {
@@ -79,7 +102,7 @@ import Testing
         let parts = Set(KuroFigure.parts(for: .tennis, pose: pose))
         #expect(parts.isSuperset(of: [.backHead, .tapDots, .tennisPonytail, .catEars]))
         #expect(parts.isDisjoint(with: [.faceBase, .eyesOpen, .eyesBright, .mouthSmile, .tennisRacket, .tapHeart]))
-        #expect(KuroTap.turnAway.duration > KuroTap.bounce.duration)
+        #expect(KuroTap.turnAway.duration > KuroTap.swing.duration)
         #expect(KuroView.hop((.turnAway, 0.1)) == 0 && KuroView.hop((.sip, 0.1)) < 0 && KuroView.hop(nil) == 0)
     }
 

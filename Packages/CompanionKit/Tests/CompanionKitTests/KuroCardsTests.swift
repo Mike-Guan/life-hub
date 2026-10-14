@@ -33,22 +33,22 @@ import Testing
         }
     }
 
-    @Test func thePunchGoesOutToHerSideAndBack() {
+    @Test func aTapOnTheBoxingCardTapsTheGlovesTogether() {
         let pose = KuroPose(look: .box, energy: 50)
-        let out = KuroFigure.shift(.boxGloveR, pose: pose.reacting(.punch, progress: 0.4))
-        #expect(out.width > 0 && out.height < 0)
-        #expect(KuroFigure.shift(.boxGloveR, pose: pose.reacting(.punch, progress: 0.05)) == .zero)
-        #expect(KuroFigure.shift(.boxGloveR, pose: pose.reacting(.punch, progress: 0.95)) == .zero)
-        #expect(pose.reacting(.punch, progress: 0.05).eyes == .surprised)
+        #expect(pose.reacting(.bump, progress: 0.05).eyes == .surprised)
+        #expect(KuroFigure.shift(.boxGloveL, pose: pose.reacting(.bump, progress: 0.05)) == .zero)
+        // The gloves meet at a quarter of the way through what follows the start.
+        let met = pose.reacting(.bump, progress: 0.15 + 0.85 / 8)
+        #expect(KuroFigure.shift(.boxGloveL, pose: met).width > 3 && KuroFigure.shift(.boxGloveR, pose: met).width < -3)
+        #expect(met.eyes == .closed)
     }
 
+    // Mike 10/14 (第 1 批身份卡 第 3 轮): boxing is an ordinary card for her; tennis has the new moves.
     @Test func eachCardHasItsOwnIdleMove() {
-        #expect(KuroIdle.pool(.box) == [.ears, .strap, .gloves, .ponytail])
+        #expect(KuroIdle.pool(.box) == [.ears, .gloves, .ponytail])
         #expect(KuroIdle.pool(.fitness).contains(.lap))
         #expect(KuroIdle.pool(.study).contains(.highlight))
         #expect(KuroIdle.pool(.art).contains(.draw))
-        // The strap flips up only on the boxing look's left glove.
-        let pose = KuroPose(look: .box, energy: 50).idling((.strap, 0.1))
-        #expect(KuroFigure.parts(for: .box, pose: pose).contains(.boxStrap))
+        #expect(KuroIdle.pool(.tennis) == [.ears, .racket, .ponytail, .juggle, .twirl])
     }
 }

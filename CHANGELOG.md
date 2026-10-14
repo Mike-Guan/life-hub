@@ -5,9 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
-- The second preset character can dress for four identity cards: boxing (gloves and a bag stand), fitness
-  (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its own tap
-  move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
+  fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
+  own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- Tennis is her main card: she bounces the ball on a flat racket and spins the racket while idle, and a tap
+  makes her swing. Boxing keeps only the gloves tapping together.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
   turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
