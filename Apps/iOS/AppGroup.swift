@@ -48,7 +48,7 @@ enum AppGroup {
             arrivals: arrivals,
             now: now
         )
-        return rules.following(ModeRules.stored(in: defaults))
+        return rules.following(ModeRules.stored(in: defaults), bedtime: BedtimeSchedule.stored(in: defaults))
     }
 
     /// User defaults both processes read, so they share one device id.

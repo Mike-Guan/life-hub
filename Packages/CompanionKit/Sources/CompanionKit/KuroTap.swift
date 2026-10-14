@@ -145,6 +145,13 @@ extension KuroFigure {
 
     /// How far `part` moves from where the SVG draws it, in SVG units.
     nonisolated static func shift(_ part: KuroPart, pose: KuroPose) -> CGSize {
+        let move = moveShift(part, pose: pose)
+        guard let scene = pose.scene?.shift(part) else { return move }
+        return CGSize(width: move.width + scene.width, height: move.height + scene.height)
+    }
+
+    /// How far `part` moves for her tap reaction or idle move, in SVG units.
+    nonisolated private static func moveShift(_ part: KuroPart, pose: KuroPose) -> CGSize {
         guard let tap = pose.tap else { return pose.idle?.shift(part, progress: pose.idleProgress) ?? .zero }
         let p = pose.tapProgress
         switch (tap, part) {

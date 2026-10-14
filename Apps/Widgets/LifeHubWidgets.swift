@@ -96,7 +96,7 @@ struct HubProvider: TimelineProvider {
         let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
         let work = ModeRules.stored(in: AppGroup.defaults)
         let days = AppGroup.activityDays(now: now)
-        let starts = ActivityEngine.startTimes(on: now, days: days, work: work)
+        let starts = ActivityEngine.startTimes(on: now, days: days, work: work, bedtime: schedule)
         let departure = GymDeparture.stored(in: AppGroup.defaults)
         let walk = [departure?.at, departure?.until].compactMap { $0 }
         let presence = PlacePresence.stored(in: AppGroup.defaults)
@@ -104,7 +104,7 @@ struct HubProvider: TimelineProvider {
             since: presence.since(.office),
             now: now,
             work: work,
-            rules: NeedRules.standard.following(work)
+            rules: NeedRules.standard.following(work, bedtime: schedule)
         )
         let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work, bedtime: schedule)
         let slots = WidgetSnapshot.slotDates(after: now)
@@ -152,7 +152,7 @@ struct HubProvider: TimelineProvider {
                 stiff: sit?.isStiff(mode: snapshot?.mode, at: date) ?? false,
                 now: date,
                 work: work,
-                rules: NeedRules.standard.following(work),
+                rules: NeedRules.standard.following(work, bedtime: schedule),
                 bedtime: schedule
             )
             return HubEntry(
