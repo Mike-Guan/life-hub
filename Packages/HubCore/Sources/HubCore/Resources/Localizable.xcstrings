@@ -158,17 +158,6 @@
         }
       }
     },
-    "下班 Chill" : {
-      "comment" : "下班卡英文名 Chill（PM 10/14）；卡名；中文要改成“下班”（PM 10/14），英语一直是 Off",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chill"
-          }
-        }
-      }
-    },
     "乐器" : {
       "localizations" : {
         "en" : {
