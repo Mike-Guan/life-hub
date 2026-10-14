@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character dresses for the dance, music and ski cards, each with its own idle move: she sways
+  by a small speaker as notes float up, taps along a score she holds, or pats snow off her shoulder in ski goggles
+  and sneezes. The cards stay out of the picker until HAKU's looks are in too.
 - Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
   hand left out) or the iPhone's own count. Days you didn't open the app count too, up to a week back. Steps
   are never shown and never leave the iPhone.
