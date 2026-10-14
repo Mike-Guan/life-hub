@@ -30,7 +30,9 @@ enum RunnerCardLook: CaseIterable, Sendable {
 
     /// Every part of the look, figure included.
     var parts: Set<RunnerPart> {
-        var parts = RunnerFigure.baseParts.union([.maskDown, .earringNeon, .mouthSmile])
+        var parts = RunnerFigure.baseParts.union([.maskDown, .earringNeon])
+        // The approved art look draws no mouth.
+        if self != .art { parts.insert(.mouthSmile) }
         if sporty {
             parts.remove(.stripeNeon)
             parts.insert(.stripeSport)

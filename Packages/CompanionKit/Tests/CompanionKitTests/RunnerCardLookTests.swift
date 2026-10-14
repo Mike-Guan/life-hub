@@ -44,6 +44,7 @@ import Testing
         }
         // The sport base swaps the neon stripe for the orange one.
         #expect(!parts(.boxing, card: .tennis).contains(.stripeNeon))
+        #expect(!parts(.boxing, card: .art).contains(.mouthSmile))
     }
 
     @Test func somethingElseInHandReplacesTheCardProps() {
