@@ -452,7 +452,7 @@ public enum NeedEngine {
         case .boxingWarmup: "拳套戴好了，出发去拳馆？"
         case .gymDay: "包背好了，走？"
         case .slacking: "嘘，我帮你望风。"
-        case .sitting: "起来。我先起了。"
+        case .sitting: "我先起来了。……你呢？"
         }
     }
 
