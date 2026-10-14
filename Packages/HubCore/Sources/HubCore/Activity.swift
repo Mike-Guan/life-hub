@@ -144,7 +144,7 @@ public struct ActivityDays: Codable, Equatable, Sendable {
         guard let weekday = Self.mostWon(won) else { return self }
         let minutes = Self.recentWins(.run5k, in: ledger, now: now, calendar: calendar)
             .filter { calendar.component(.weekday, from: $0.day) == weekday }
-            .map { minutesAfterMidnight($0.at, on: $0.day, calendar: calendar) }
+            .map { Self.minutesAfterMidnight($0.at, on: $0.day, calendar: calendar) }
             .sorted()
         guard !minutes.isEmpty else { return self }
         var learned = self
@@ -189,12 +189,13 @@ public struct ActivityDays: Codable, Equatable, Sendable {
     static func mostWon(_ won: [Int: Int]) -> Int? {
         won.min { ($1.value, $0.key) < ($0.value, $1.key) }?.key
     }
-}
 
-// The hub day starts at 05:00, so a run ending after midnight counts past 24:00.
-private func minutesAfterMidnight(_ date: Date, on day: Date, calendar: Calendar) -> Int {
-    let midnight = calendar.startOfDay(for: day)
-    return Int(date.timeIntervalSince(midnight) / 60)
+    // The hub day starts at 05:00, so a time after midnight counts past 24:00.
+    /// Minutes from the midnight that starts the hub day `day` to `date`.
+    static func minutesAfterMidnight(_ date: Date, on day: Date, calendar: Calendar) -> Int {
+        let midnight = calendar.startOfDay(for: day)
+        return Int(date.timeIntervalSince(midnight) / 60)
+    }
 }
 
 /// What the app knows right now that activities depend on.
@@ -263,7 +264,7 @@ public enum ActivityEngine {
         let today = StateEngine.dayStart(for: now, calendar: calendar)
         let weekday = calendar.component(.weekday, from: today)
         let minute = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
-        if days.gymWeekdays.contains(weekday), minute >= work.workEndMinute {
+        if days.gymWeekdays.contains(weekday), minute >= work.dayEndMinute(bedtime: bedtime) {
             let visited = (signals.presence.left(.fitness) ?? .distantPast) >= today
             if !visited, (signals.trainedDay ?? .distantPast) < today { return .gymDay }
         }
@@ -279,12 +280,13 @@ public enum ActivityEngine {
         on date: Date,
         days: ActivityDays = .standard,
         work: ModeRules = .standard,
+        bedtime: BedtimeSchedule = .standard,
         calendar: Calendar = .current
     ) -> [Date] {
         let today = StateEngine.dayStart(for: date, calendar: calendar)
         let weekday = calendar.component(.weekday, from: today)
         var minutes: [Int] = []
-        if days.gymWeekdays.contains(weekday) { minutes.append(work.workEndMinute) }
+        if days.gymWeekdays.contains(weekday) { minutes.append(work.dayEndMinute(bedtime: bedtime)) }
         if days.runWeekday == weekday { minutes.append(days.runStartMinute) }
         let midnight = calendar.startOfDay(for: today)
         return minutes.compactMap { calendar.date(byAdding: .minute, value: $0, to: midnight) }

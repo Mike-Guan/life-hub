@@ -123,10 +123,11 @@ extension Win {
     }
 
     // Mike boxes without a watch, so the card's place counts like the fitness gym. A visit and a workout
-    // in the same day or week share one source, so they earn once together.
+    // in the same day or week share one source, so they earn once together. With the fitness card the
+    // fitness gym is the card's place, so a gym visit and a strength workout pay one card win, not two.
     /// The win for a visit to a place with `action` from `arrived` to `left`: the gym win for the fitness
-    /// gym, the identity card's win for the card's place; `nil` for other places, without a card, or when
-    /// the visit was too short.
+    /// gym, the identity card's win for the card's place and, with the fitness card, for the fitness gym;
+    /// `nil` for other places, without a card, or when the visit was too short.
     /// - Parameter identity: the picked identity card, `nil` when there is none.
     public static func visit(
         _ action: HubPlace.Action,
@@ -138,6 +139,9 @@ extension Win {
         let win: Win
         var card: IdentityKind?
         switch action {
+        case .fitness where identity == .fitness:
+            win = .boxing
+            card = identity
         case .fitness: win = .gym
         case .boxing:
             guard let identity else { return nil }
@@ -399,6 +403,8 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     public var keepsake: Keepsake?
     /// The character who wears or shows it.
     public var persona: Persona
+    /// The identity card it belongs to, `nil` when it suits every card. A keepsake belongs to its win's card.
+    public var card: IdentityKind?
 
     // The first catalog (PRD v4.2 section 13), then KURO's (奖励数值表 section 7, approved 2026-10-07).
     // Ids are stored in the ledger, so never reuse one. KURO's items reuse HAKU's slots: her hair ties are
@@ -407,9 +413,9 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     public static let catalog: [ShopItem] = [
         ShopItem(id: "headband.cyan", slot: .headband, title: "青色头带", price: 15),
         ShopItem(id: "mask.stripes", slot: .mask, title: "条纹面罩", price: 20),
-        ShopItem(id: "gloves.pink", slot: .gloves, title: "霓虹粉拳套", price: 30),
+        ShopItem(id: "gloves.pink", slot: .gloves, title: "霓虹粉拳套", price: 30, card: .boxing),
         ShopItem(id: "room.plant", slot: .room, title: "房间绿植", price: 10),
-        ShopItem(id: "room.bag", slot: .room, title: "房间小沙袋", price: 25),
+        ShopItem(id: "room.bag", slot: .room, title: "房间小沙袋", price: 25, card: .boxing),
         ShopItem(
             id: "gloves.gold",
             slot: .gloves,
@@ -423,11 +429,18 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             keepsake: Keepsake(win: .run5k, count: 4)
         ),
         ShopItem(id: "celebrate.up", slot: .celebration, title: "起身庆祝", keepsake: Keepsake(win: .gotUp, count: 1)),
-        ShopItem(id: "kuro.room.flower", slot: .room, title: "窗台小粉花", price: 10, persona: .kuro),
+        ShopItem(id: "kuro.room.flower", slot: .room, title: "地上小粉花", price: 10, persona: .kuro),
         ShopItem(id: "kuro.hair.scrunchie", slot: .headband, title: "粉色发圈", price: 15, persona: .kuro),
         ShopItem(id: "kuro.blanket.cats", slot: .mask, title: "粉色猫猫毯", price: 20, persona: .kuro),
         ShopItem(id: "kuro.room.lamp", slot: .room, title: "猫耳台灯", price: 25, persona: .kuro),
-        ShopItem(id: "kuro.bag.tennis", slot: .gloves, title: "粉色网球包", price: 30, persona: .kuro),
+        ShopItem(
+            id: "kuro.bag.tennis",
+            slot: .gloves,
+            title: "粉色网球包",
+            price: 30,
+            persona: .kuro,
+            card: .tennis
+        ),
         ShopItem(
             id: "kuro.celebrate.spin",
             slot: .celebration,
@@ -457,7 +470,8 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         title: String,
         price: Int? = nil,
         keepsake: Keepsake? = nil,
-        persona: Persona = .haku
+        persona: Persona = .haku,
+        card: IdentityKind? = nil
     ) {
         self.id = id
         self.slot = slot
@@ -465,6 +479,12 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         self.price = price
         self.keepsake = keepsake
         self.persona = persona
+        self.card = card ?? keepsake?.card
+    }
+
+    /// Whether the shop offers it to someone who picked `card`.
+    public func suits(_ card: IdentityKind?) -> Bool {
+        self.card == nil || self.card == card
     }
 
     /// The catalog item with `id`.
@@ -475,6 +495,11 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     /// The items `persona` can own, in catalog order.
     public static func catalog(for persona: Persona) -> [ShopItem] {
         catalog.filter { $0.persona == persona }
+    }
+
+    /// The items `persona` can own that suit `card`, in catalog order.
+    public static func catalog(for persona: Persona, card: IdentityKind?) -> [ShopItem] {
+        catalog(for: persona).filter { $0.suits(card) }
     }
 }
 

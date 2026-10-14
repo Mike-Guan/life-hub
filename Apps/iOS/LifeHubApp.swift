@@ -14,6 +14,7 @@ struct LifeHubApp: App {
     @State private var widgets: WidgetBridge
     @State private var setupErrors: [String]
     @State private var bedtime: BedtimeSchedule
+    @State private var remindsAtBedtime: Bool
     @State private var rules: ModeRules
     @State private var offWorkError: String?
     @State private var reminderError: String?
@@ -52,12 +53,15 @@ struct LifeHubApp: App {
         }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
         let persona = Persona.stored(in: AppGroup.defaults)
+        Greeting.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
         ModeCards.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
         _cards = State(initialValue: ModeCards.current(in: AppGroup.defaults, persona: persona))
         let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
+        BedtimeSchedule.adoptStandard(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty)
         let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
         let widgets = WidgetBridge(container: container, bedtime: bedtime)
         widgets.work = ModeRules.stored(in: AppGroup.defaults)
+        widgets.cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
         let needs = NeedTracker()
@@ -70,6 +74,7 @@ struct LifeHubApp: App {
         UnboxLog.start(with: growth.ledger)
         _growth = State(initialValue: growth)
         _bedtime = State(initialValue: bedtime)
+        _remindsAtBedtime = State(initialValue: BedtimeSchedule.remindsAtBedtime(in: AppGroup.defaults))
         _rules = State(initialValue: ModeRules.stored(in: AppGroup.defaults))
         _widgets = State(initialValue: widgets)
         _setupErrors = State(initialValue: errors)
@@ -120,6 +125,8 @@ struct LifeHubApp: App {
                 ScreenshotMemory(filled: filled)
             } else if let shows = ScreenshotMode.settings {
                 ScreenshotSettings(asksErase: shows == "erase")
+            } else if let screen = ScreenshotMode.growth {
+                ScreenshotGrowth(screen: screen)
             } else {
                 home
             }
@@ -151,6 +158,7 @@ struct LifeHubApp: App {
             onShop: { showsShop = true },
             wardrobe: wardrobe,
             persona: persona,
+            greetingName: Greeting.name(in: AppGroup.defaults),
             cards: cards,
             ledger: growth.ledger.only(persona),
             onWardrobe: { showsWardrobe = true },
@@ -211,11 +219,21 @@ struct LifeHubApp: App {
                 countdownError = await BoxingCountdown.update(for: needs.reading)
             }
         }
+        .onChange(of: remindsAtBedtime) {
+            BedtimeSchedule.setRemindsAtBedtime(remindsAtBedtime, in: AppGroup.defaults)
+            // UI 审核 #340: turning the reminder on keeps the prefilled time, which a picker can't set unchanged.
+            if remindsAtBedtime, !bedtime.isSet { bedtime = .standard }
+            Task { await scheduleReminder() }
+        }
         .onChange(of: bedtime) {
             bedtime.store(in: AppGroup.defaults)
             widgets.bedtime = bedtime
             syncWidgets()
             Task { await scheduleReminder() }
+        }
+        .onChange(of: cards) {
+            widgets.cards = cards
+            syncWidgets()
         }
         .onChange(of: rules) {
             rules.store(in: AppGroup.defaults)
@@ -238,6 +256,7 @@ struct LifeHubApp: App {
         .sheet(isPresented: $showsSettings, onDismiss: showNextUnboxing) {
             SettingsView(
                 bedtime: $bedtime,
+                remindsAtBedtime: $remindsAtBedtime,
                 rules: $rules,
                 places: $places,
                 persona: $persona,
@@ -246,6 +265,7 @@ struct LifeHubApp: App {
                 store: store,
                 energy: energy,
                 ledger: growth.ledger,
+                cards: cards,
                 onEraseAll: eraseAll
             )
         }
@@ -253,7 +273,7 @@ struct LifeHubApp: App {
             ShopView(growth: growth, wardrobe: $wardrobe, persona: persona)
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
-            WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
+            WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, cards: cards)
         }
         .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in
             UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
@@ -452,7 +472,9 @@ struct LifeHubApp: App {
                 decision = store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules)
             } else if let trigger = place.trigger(entered: entered) {
                 // After a GPS-drift return the stay continues; this puts back a mode the leave changed.
-                decision = store.autoSwitch(trigger, rules: rules)
+                let persona = Persona.stored(in: AppGroup.defaults)
+                let cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
+                decision = store.autoSwitch(trigger, rules: rules, cards: cards, persona: persona)
             } else {
                 decision = nil
             }
@@ -604,7 +626,7 @@ struct LifeHubApp: App {
     }
 
     private func scheduleReminder() async {
-        reminderError = await BedtimeReminder.schedule(bedtime, persona: persona)
+        reminderError = await BedtimeReminder.schedule(bedtime, on: remindsAtBedtime, persona: persona)
         // The bedtime call asks for permission; without it this would fail the same way.
         if reminderError == nil { await scheduleOffWork() }
     }
