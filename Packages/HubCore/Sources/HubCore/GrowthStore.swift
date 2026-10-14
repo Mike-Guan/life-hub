@@ -110,7 +110,9 @@ public final class GrowthStore {
     public func eraseAll() {
         ledger = CanLedger()
         looks = LookLog()
-        lastError = file.remove() ?? lookFile.remove()
+        let ledgerError = file.remove()
+        let lookError = lookFile.remove()
+        lastError = ledgerError ?? lookError
     }
 
     @ObservationIgnored private var looksChanged = false
