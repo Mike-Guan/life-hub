@@ -150,10 +150,12 @@ struct SettingsView: View {
 
             memoryCard
 
-            // Debug only until Apple approves Family Controls for distribution; STG and PROD have no
-            // entitlement, so the button could only fail. Remove with the CI-CD.md Screen Time step.
-            #if DEBUG
+            // PROD has no Family Controls entitlement yet, so the button could only fail there.
+            // Remove the condition with the CI-CD.md Screen Time step.
+            #if DEBUG || ENV_STG
             scrollCard
+            #endif
+            #if DEBUG
             dogfoodCard
             #endif
 
