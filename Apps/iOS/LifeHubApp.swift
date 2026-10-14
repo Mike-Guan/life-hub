@@ -21,6 +21,7 @@ struct LifeHubApp: App {
     @State private var showsSettings = false
     @State private var showsShop = false
     @State private var showsWardrobe = false
+    @State private var showsOnboarding: Bool
     @State private var unboxing: CanEntry?
     @State private var welcomeBack: CompanionEvent?
     @State private var persona = Persona.stored(in: AppGroup.defaults)
@@ -43,9 +44,11 @@ struct LifeHubApp: App {
     @State private var taps: NotificationTaps
     @State private var daily = DailyLink()
     @State private var bathDoneAt = BathTime.doneAt(in: AppGroup.defaults)
+    @AppStorage(Languages.key, store: AppGroup.defaults) private var languagesOn = false
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        Languages.load(from: AppGroup.defaults)
         let container = AppGroup.container
         var errors = container.adoptLogs(from: .applicationSupport())
         if !AppGroup.isAvailable {
@@ -55,6 +58,9 @@ struct LifeHubApp: App {
         let persona = Persona.stored(in: AppGroup.defaults)
         Greeting.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
         ModeCards.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
+        _showsOnboarding = State(
+            initialValue: OnboardingDraft.isNeeded(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty)
+        )
         _cards = State(initialValue: ModeCards.current(in: AppGroup.defaults, persona: persona))
         let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
         BedtimeSchedule.adoptStandard(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty)
@@ -127,10 +133,14 @@ struct LifeHubApp: App {
                 ScreenshotSettings(asksErase: shows == "erase")
             } else if let screen = ScreenshotMode.growth {
                 ScreenshotGrowth(screen: screen)
+            } else if let step = ScreenshotMode.onboarding {
+                ScreenshotOnboarding(step: step)
             } else {
                 home
             }
         }
+        // Read on every change of the switch, so views and HubCore's lines change language together.
+        .environment(\.locale, languagesOn ? .autoupdatingCurrent : Languages.chinese)
     }
 
     private var home: some View {
@@ -195,29 +205,9 @@ struct LifeHubApp: App {
                 Dogfood.note("settle", "\(settled.reason)，切到\(settled.mode.title)")
             }
             syncWidgets()
-            // One after the other, so the two permission prompts don't overlap.
-            Task {
-                // Before rescheduling, which could replace today's delivered notice.
-                await replayOffWork()
-                await scheduleReminder()
-                await importSleep()
-                await earnHealthWins()
-                await needs.importMotion()
-                await needs.importCommuteMotion()
-                await daily.read()
-                syncWidgets()
-                earnWins()
-                refreshNeeds()
-                // After earnWins, so wins imported on this open count toward the cards and cans.
-                await welcome(away: away)
-                // The awaits above can include a permission sheet; celebrate only if still on screen.
-                if UIApplication.shared.applicationState == .active {
-                    needs.celebrate(bedtime: bedtime.state(at: .now))
-                    // Keepsakes open after the welcome back, which may show the same keepsake as a card.
-                    if welcomeBack == nil { showNextUnboxing() }
-                }
-                countdownError = await BoxingCountdown.update(for: needs.reading)
-            }
+            // The setup asks for each permission on its own screen, so nothing else asks while it shows.
+            guard !showsOnboarding else { return }
+            Task { await refreshOnOpen(away: away) }
         }
         .onChange(of: remindsAtBedtime) {
             BedtimeSchedule.setRemindsAtBedtime(remindsAtBedtime, in: AppGroup.defaults)
@@ -269,6 +259,10 @@ struct LifeHubApp: App {
                 onEraseAll: eraseAll
             )
         }
+        .fullScreenCover(isPresented: $showsOnboarding) {
+            OnboardingView(places: $places, monitor: placeMonitor, onDone: finishOnboarding)
+                .interactiveDismissDisabled()
+        }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
             ShopView(growth: growth, wardrobe: $wardrobe, persona: persona)
         }
@@ -307,6 +301,41 @@ struct LifeHubApp: App {
         }
         // A sleep import updates its night in place, so this watches every write too.
         .onChange(of: energy.revision) { syncWidgets() }
+    }
+
+    // One after the other, so the permission prompts don't overlap.
+    private func refreshOnOpen(away: Date?) async {
+        // Before rescheduling, which could replace today's delivered notice.
+        await replayOffWork()
+        await scheduleReminder()
+        await importSleep()
+        await earnHealthWins()
+        await needs.importMotion()
+        await needs.importCommuteMotion()
+        await daily.read()
+        syncWidgets()
+        earnWins()
+        refreshNeeds()
+        // After earnWins, so wins imported on this open count toward the cards and cans.
+        await welcome(away: away)
+        // The awaits above can include a permission sheet; celebrate only if still on screen.
+        if UIApplication.shared.applicationState == .active {
+            needs.celebrate(bedtime: bedtime.state(at: .now))
+            // Keepsakes open after the welcome back, which may show the same keepsake as a card.
+            if welcomeBack == nil { showNextUnboxing() }
+        }
+        countdownError = await BoxingCountdown.update(for: needs.reading)
+    }
+
+    // The answers replace the settings; the onChange handlers below store them and reschedule.
+    private func finishOnboarding(_ draft: OnboardingDraft) {
+        draft.apply(to: AppGroup.defaults)
+        persona = .stored(in: AppGroup.defaults)
+        cards = .current(in: AppGroup.defaults, persona: persona)
+        bedtime = .stored(in: AppGroup.defaults)
+        rules = .stored(in: AppGroup.defaults)
+        showsOnboarding = false
+        Task { await refreshOnOpen(away: nil) }
     }
 
     // PRD §21.2 删除全部数据: as on a fresh install. The stores and their wiring stay, so the next write

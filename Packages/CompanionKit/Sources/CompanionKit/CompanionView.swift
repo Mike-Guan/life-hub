@@ -1146,7 +1146,7 @@ public struct CompanionView: View {
         pokeKind = kind
         pokeStart = now
         if kind != .rollOver { pop += 1 }
-        say(kind.line)
+        say(kind.line, after: kind.lineDelay)
     }
 
     // QA §5.1: a shake drops the wrist and dims the watch screen, so the watch listens for up to 5 s more after
@@ -1235,11 +1235,16 @@ public struct CompanionView: View {
         say(invite, for: 5)
     }
 
-    private func say(_ text: String?, for seconds: Double = 2.4) {
+    private func say(_ text: String?, for seconds: Double = 2.4, after delay: Double = 0) {
         bubbleTask?.cancel()
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = delay > 0 ? nil : text }
         guard text != nil else { return }
         bubbleTask = Task {
+            if delay > 0 {
+                try? await Task.sleep(for: .seconds(delay))
+                guard !Task.isCancelled else { return }
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
+            }
             try? await Task.sleep(for: .seconds(seconds))
             guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: 0.2)) { bubble = nil }

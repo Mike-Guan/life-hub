@@ -55,6 +55,11 @@ enum WatchPoke: Sendable, Equatable, CaseIterable {
         }
     }
 
+    // UI 审核 2026-10-14: on the watch the bubble sits over the gloves, so the duck-and-hook line waits until the
+    // hook is back. Move first, excuse after.
+    /// Seconds after the poke starts that the watch shows its line.
+    var lineDelay: TimeInterval { self == .duckHook ? 1.2 : 0 }
+
     /// How far the reaction is held out at `progress` (0...1): quick out, held, then back by 0.85.
     static func hold(_ progress: CGFloat) -> CGFloat {
         RunnerPose.ramp(progress, from: 0, to: 0.15) * (1 - RunnerPose.ramp(progress, from: 0.6, to: 0.85))

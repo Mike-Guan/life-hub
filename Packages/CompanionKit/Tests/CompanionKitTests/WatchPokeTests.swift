@@ -93,6 +93,14 @@ import Testing
         #expect(RunnerFigure.parts(for: .boxing, pose: punch).contains(.thumpLines))
     }
 
+    @Test func watchDuckHookSpeaksOnceTheHookIsBack() {
+        #expect(WatchPoke.allCases.filter { $0.lineDelay > 0 } == [.duckHook])
+        let delay = WatchPoke.duckHook.lineDelay
+        var pose = RunnerPose()
+        pose.poke(.duckHook, progress: delay / WatchPoke.duration)
+        #expect(abs(pose.gloveLScale - 1) < 0.001 && delay < WatchPoke.duration)
+    }
+
     @Test(arguments: WatchPoke.allCases)
     func pokedPartsKeepDrawingOrder(_ kind: WatchPoke) {
         var pose = RunnerPose()
