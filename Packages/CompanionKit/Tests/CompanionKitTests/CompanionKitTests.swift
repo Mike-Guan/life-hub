@@ -1030,12 +1030,37 @@ import Testing
         #expect(Outfit(Wardrobe(equipped: [.gloves: "gloves.someday", .room: "room.someday"])) == Outfit())
     }
 
-    // Clothes join these checks once UI draws them (Issue #327).
     @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
     func everyWornItemChangesTheLook(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
         #expect(Outfit(wardrobe) != Outfit())
+    }
+
+    @Test func clothesReplaceTheJacketOnlyInTheirMode() {
+        let pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"])))
+        let chill = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(chill.isSuperset(of: [.setVarsityTop, .setVarsityCap]) && !chill.contains(.jacket))
+        let work = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(work.contains(.jacket) && !work.contains(.setVarsityTop))
+        var away = pose
+        away.turnedAway = true
+        let back = Set(RunnerFigure.parts(for: .chill, pose: away))
+        #expect(back.contains(.jacket) && !back.contains(.setVarsityTop) && !back.contains(.setVarsityCap))
+    }
+
+    @Test func capGivesWayToHeadgear() {
+        let varsity = Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"]))
+        var pose = RunnerPose(need: .boxingWarmup).wearing(varsity)
+        let warmup = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(warmup.contains(.headband) && !warmup.contains(.setVarsityCap))
+        pose.need = nil
+        #expect(RunnerFigure.parts(for: .chill, pose: pose).contains(.setVarsityCap))
+    }
+
+    @Test func clothesCharmsSwingWithTheBreath() {
+        #expect(abs(RunnerPose(mode: .work, time: 0.6, face: .mid, react: 0).charmSway - 1) < 0.001)
+        #expect(abs(RunnerPose(mode: .work, time: 1.8, face: .mid, react: 0).charmSway + 1) < 0.001)
     }
 
     @Test func stripedMaskShowsOnBothMasks() {
@@ -1060,7 +1085,6 @@ import Testing
         #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
     }
 
-    // Clothes join these checks once UI draws them (Issue #327).
     @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
     func everyItemIconDrawsSomething(_ item: ShopItem) {
         var wardrobe = Wardrobe()

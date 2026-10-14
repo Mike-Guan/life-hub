@@ -186,6 +186,8 @@ struct RunnerPose {
     var welcome: Welcome?
     /// What HAKU wears from the wardrobe.
     var outfit = Outfit()
+    /// -1...1 over a 2.4 s breath: the swing of hanging clothes charms.
+    var charmSway: Double = 0
 
     /// The same pose in `outfit`.
     func wearing(_ outfit: Outfit) -> RunnerPose {
@@ -441,6 +443,7 @@ struct RunnerPose {
         let r = CGFloat(react)
         blink = open * Self.blink(at: t)
         squeeze = Self.blink(at: t)
+        charmSway = sin(t * 2 * .pi / 2.4)
         // Sparkles twinkle out of step with the blink, 1.6 s period.
         sparkle = 0.55 + 0.45 * sin(time * 2 * .pi / 1.6)
 
@@ -1281,6 +1284,10 @@ struct RunnerFigure: View {
             let t = pose.noteSlap * CGFloat(RunnerPose.noteSlapLength)
             if t > 0.25, t < 0.8 { visible.insert(.noteHit) }
         }
+        // The cap gives way to any other headgear, and the hair tuft stays under it.
+        if visible.contains(.setVarsityCap) {
+            visible.remove(visible.isDisjoint(with: headgear) ? .hairTuft : .setVarsityCap)
+        }
         if pose.eyesShut {
             visible.subtract(openEyes)
             visible.insert(.eyesClosed)
@@ -1293,13 +1300,22 @@ struct RunnerFigure: View {
         poked(&visible, pose: pose)
         // Gloves fill both hands, so the peace sign never adds a third one (Mike 2026-10-07).
         if !visible.isDisjoint(with: [.gloveL, .gloveR]) { visible.remove(.peaceHand) }
-        if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
+        if pose.turnedAway {
+            // From the back, clothes show as the plain jacket.
+            if !visible.isDisjoint(with: pose.outfit.clothes[mode] ?? []) { visible.insert(.jacket) }
+            visible = visible.intersection(backParts).union([.headBack])
+        }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
 
     /// Wardrobe items over the visible parts: striped masks and, at home, the room item.
     nonisolated private static func wear(_ pose: RunnerPose, mode: Mode, on visible: inout Set<RunnerPart>) {
         let outfit = pose.outfit
+        // A top or full set replaces the jacket, its stripe, collar and strings wherever the jacket shows.
+        if let clothes = outfit.clothes[mode], visible.contains(.jacket) {
+            visible.subtract(jacketParts)
+            visible.formUnion(clothes)
+        }
         if outfit.stripedMask, visible.contains(.maskUp) {
             visible.remove(.panelLines)
             visible.insert(.maskStripes)
@@ -1591,6 +1607,10 @@ struct RunnerFigure: View {
         .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen, .ledCode,
     ]
     nonisolated private static let warmupParts: Set<RunnerPart> = [.headband, .gloveL, .gloveR]
+    nonisolated private static let jacketParts: Set<RunnerPart> = [.jacket, .stripeNeon, .hoodCollar, .hoodieStrings]
+    nonisolated private static let headgear: Set<RunnerPart> = [
+        .headband, .headset, .cheerGoggles, .bathTowel, .cheerHelmet,
+    ]
     /// What still shows from behind: the room, the jacket, the back of the head and the headset or headband.
     nonisolated private static let backParts: Set<RunnerPart> = [
         .door, .sunlight, .roomPc, .deskMonitor, .pillow, .roomPlant, .roomBag, .runningShoes, .heavyBag,
@@ -1723,6 +1743,14 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .offset(y: -24 * pose.headsetOff * scale)
                     .opacity(Double(1 - pose.headsetOff))
+            case .hoodieStringsCyan:
+                // 商店衣服 pop: the string ends swing about 1.5 pt with the breath.
+                RunnerPartView(part: part)
+                    .rotationEffect(.degrees(7 * pose.charmSway), anchor: Self.unit(x: 60, y: 106))
+            case .setDuckCharm:
+                // 商店衣服 pop: the duck swings 8 degrees on its ring.
+                RunnerPartView(part: part)
+                    .rotationEffect(.degrees(8 * pose.charmSway), anchor: Self.unit(x: 61.5, y: 111))
             case .mouthYawn:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 0.7 + 0.3 * pose.yawn, y: pose.yawn, anchor: Self.unit(x: 60, y: 85))
@@ -2000,7 +2028,7 @@ struct RunnerFigure: View {
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
-        .dizzyStar,
+        .dizzyStar, .setVarsityCap,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
