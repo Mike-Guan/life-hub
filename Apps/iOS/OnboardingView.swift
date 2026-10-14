@@ -932,14 +932,14 @@ private struct FlowLayout: Layout {
     var spacing: CGFloat
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let frames = frames(for: subviews, width: proposal.width ?? .infinity)
+        let frames = self.frames(for: subviews, width: proposal.width ?? .infinity)
         let width = frames.map(\.maxX).max() ?? 0
         let height = frames.map(\.maxY).max() ?? 0
         return CGSize(width: width, height: height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let frames = frames(for: subviews, width: bounds.width)
+        let frames = self.frames(for: subviews, width: bounds.width)
         for (subview, frame) in zip(subviews, frames) {
             subview.place(
                 at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY),
