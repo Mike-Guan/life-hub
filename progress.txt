@@ -1,0 +1,29 @@
+Apple Watch Series 11 (46mm)
+Apple Watch Series 11 (42mm)
+Apple Watch Series 10 (46mm)
+Apple Watch Series 10 (42mm)
+Apple Watch Ultra 3 (49mm)
+Apple Watch Ultra 2 (49mm)
+Apple Watch SE 3 (44mm)
+Apple Watch SE 3 (40mm)
+Apple Watch SE (44mm) (2nd generation)
+Apple Watch SE (40mm) (2nd generation)
+13:54:23 watch 40mm: Apple Watch SE 3 (40mm)
+13:54:26 booting watch
+13:55:30 building watch app
+13:58:43 recording build/recordings/40mm-watch-haku-chill
+13:59:04 recording build/recordings/40mm-watch-haku-overtime
+13:59:22 recording build/recordings/40mm-watch-haku-no-mode
+13:59:38 watch 42mm: Apple Watch Series 10 (42mm)
+13:59:40 booting watch
+14:00:43 building watch app
+14:01:37 recording build/recordings/42mm-watch-haku-chill
+14:01:58 recording build/recordings/42mm-watch-haku-overtime
+14:02:16 recording build/recordings/42mm-watch-haku-no-mode
+14:02:32 watch 46mm: Apple Watch Series 10 (46mm)
+14:02:38 booting watch
+14:03:24 building watch app
+14:04:26 recording build/recordings/46mm-watch-haku-chill
+14:04:44 recording build/recordings/46mm-watch-haku-overtime
+14:05:03 recording build/recordings/46mm-watch-haku-no-mode
+14:05:19 done
