@@ -1037,11 +1037,11 @@ public struct CompanionView: View {
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(Self.goodnightDuration * 0.85))
             guard !Task.isCancelled else { return }
-            say("该睡了")
+            say("……困了。")
         }
     }
 
-    static let bathLine = "……去洗澡。我先占浴室了。"
+    static let bathLine = "……我先去洗了。浴室归我。"
     static let reviveLine = "……活过来了？"
 
     private func react() {
@@ -1425,7 +1425,7 @@ struct SpeechBubble: View {
             CompanionView(mode: .chill, need: .couchScroll, needSince: .now.addingTimeInterval(-45 * 60))
                 .frame(height: 180)
                 .toyCard()
-            CompanionView(mode: .chill, need: .couchScroll, invite: "起来，下楼走 10 分钟？").frame(height: 180).toyCard()
+            CompanionView(mode: .chill, need: .couchScroll, invite: "下楼走 10 分钟？我先穿鞋。").frame(height: 180).toyCard()
             CompanionView(mode: .boxing, event: .celebrate(id: "preview", kind: .boxing)).frame(height: 180).toyCard()
             CompanionView(mode: .chill, event: .celebrate(id: "preview-run", kind: .running))
                 .frame(height: 180)

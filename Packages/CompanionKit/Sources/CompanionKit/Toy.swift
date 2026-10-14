@@ -20,6 +20,19 @@ public enum Toy {
     public static func body(_ size: CGFloat = 15, weight: Font.Weight = .semibold) -> Font {
         .system(size: size, weight: weight, design: .rounded)
     }
+
+    /// Extra space between lines of text at `size` points, for `language`.
+    /// - Parameters:
+    ///   - size: The font size in points.
+    ///   - language: The language of the text. Defaults to the current locale's language.
+    /// - Returns: 4 pt for Chinese or Japanese text at 14 pt and up, 3 pt below that, 2 pt for other languages.
+    public static func lineSpacing(_ size: CGFloat, language: Locale.Language = Locale.current.language) -> CGFloat {
+        // Values come from the three-language typesetting spec (UI 二组).
+        switch language.languageCode {
+        case .chinese?, .japanese?: size >= 14 ? 4 : 3
+        default: 2
+        }
+    }
 }
 
 extension Color {

@@ -67,7 +67,7 @@ import Testing
         #expect(gaps.allSatisfy { (8...20).contains($0) })
         let pool = RunnerPose.workBeats
         let kinds = Set(starts.compactMap { IdleClock.beat(at: $0 + 0.01, lengths: pool, seed: RunnerPose.seed)?.kind })
-        #expect(kinds == [0, 1])
+        #expect(kinds == [0, 1, 2])
     }
 
     @Test func nodsEaseAndNowAndThenHoldABeat() {

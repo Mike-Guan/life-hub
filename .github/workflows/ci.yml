@@ -58,6 +58,8 @@ jobs:
         run: scripts/persona-colors.sh
       - name: No bouncy springs
         run: scripts/no-bounce.sh
+      - name: String Catalogs match the source
+        run: scripts/strings.py
 
   lint:
     name: Format and lint
