@@ -157,10 +157,8 @@ struct SettingsView: View {
             #if DEBUG || ENV_STG
             scrollCard
             #endif
-            #if DEBUG || ENV_STG
-            languagesCard
-            #endif
             #if DEBUG
+            languagesCard
             dogfoodCard
             #endif
 
@@ -288,14 +286,15 @@ struct SettingsView: View {
         .onChange(of: scrollApps) { watchScrolling() }
     }
 
-    // Debug and STG only (Issue #350): Japanese and English stay off until every string is in and reviewed.
+    // Debug only (Issue #350): Japanese and English stay off until every string is in and reviewed. Not in STG,
+    // because friends get the same STG build through TestFlight.
     private var languagesCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Toggle(isOn: languagesBinding) {
                 Text("日文和英文")
                     .font(Toy.body(16, weight: .heavy))
             }
-            Text("打开后跟手机的系统语言走；还没翻译的地方仍是中文。关着时一律中文。只在测试版里有。")
+            Text("打开后跟手机的系统语言走；还没翻译的地方仍是中文。关着时一律中文。只在开发版里有。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
         }
