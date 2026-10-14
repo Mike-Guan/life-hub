@@ -1,0 +1,74 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "NSHealthShareUsageDescription" : {
+      "comment" : "权限说明，中文在 project.yml；改中文时请文案同步改译文（安全与法律核过）。",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Life Hub reads only last night's sleep, your workouts, your steps over the last few hours and today, today's stand hours and your time in daylight. It uses them to estimate your energy, tell whether you're staying in, celebrate after a workout, stretch with you when you've been sitting too long, and give you cans for getting some sun, going to bed on time and walking 6,000 steps. Health data is processed only on this iPhone and is never uploaded. Only the finished status is sent, and only to your own Apple Watch."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Life Hubが読み取るのは、昨夜の睡眠、ワークアウトの記録、ここ数時間と今日の歩数、今日のスタンド時間、日光下での時間だけです。エネルギー残量の見積もり、家でくつろいでいるかの判断、運動後のお祝い、座りっぱなしのときに一緒に伸びをすること、日光を浴びた日・時間どおりに寝た日・6000歩歩いた日にエナジー缶を渡すことに使います。ヘルスケアデータはこのiPhoneの中だけで処理し、アップロードしません。あなた自身のApple Watchに送るのは、計算した状態だけです。"
+          }
+        }
+      }
+    },
+    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
+      "comment" : "权限说明，中文在 project.yml；改中文时请文案同步改译文（安全与法律核过）。",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you choose “Always,” the app can tell when you arrive at work, at home or at another place you set, even while it's closed. We only check whether you're near the places you set. We don't record your routes. Your location is only used on this iPhone and is never uploaded."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「常に許可」を選ぶと、Appを閉じているときでも、会社・自宅・あなたが設定したほかの場所に着いたことがわかります。確認するのは設定した場所の近くにいるかどうかだけで、移動ルートは記録しません。位置情報はこのiPhoneの中だけで使い、アップロードしません。"
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "权限说明，中文在 project.yml；改中文时请文案同步改译文（安全与法律核过）。",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Life Hub uses your location to tell when you arrive at work, at home or at another place you set. It switches modes automatically at work and at the places you set, and at home it checks whether you're staying in. Your location is only used on this iPhone and is never uploaded."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Life Hubは、会社・自宅・あなたが設定したほかの場所に着いたかどうかを判断するために位置情報を使います。会社と設定した場所ではモードを自動で切り替え、自宅ではくつろいでいるかを見るのに使います。位置情報はこのiPhoneの中だけで使い、アップロードしません。"
+          }
+        }
+      }
+    },
+    "NSMotionUsageDescription" : {
+      "comment" : "权限说明，中文在 project.yml；改中文时请文案同步改译文（安全与法律核过）。",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Life Hub checks whether you're walking or riding only on your way between home and work, so your character can act it out. If you haven't allowed Health access, it also uses this to count today's steps and gives you a can at 6,000 steps. Motion data is only used on this iPhone and is never uploaded."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Life Hubは、自宅から会社、会社から自宅への移動中にだけ、歩いているか乗り物に乗っているかを確認し、キャラクターの動きに反映します。ヘルスケアへのアクセスを許可していない場合は、今日の歩数を数えるのにも使い、6000歩歩くとエナジー缶を渡します。モーションデータはこのiPhoneの中だけで使い、アップロードしません。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
