@@ -94,9 +94,10 @@ public struct ActivityDays: Codable, Equatable, Sendable {
     /// When the run-day warm-up starts.
     public var runStartMinute: Int
 
-    // Mike's routine, confirmed 2026-10-04: gym Tuesday to Thursday, 5 km on Saturday evening.
-    /// Gym Tuesday to Thursday, run Saturday from 17:00.
-    public static let standard = ActivityDays(gymWeekdays: [3, 4, 5], runWeekday: 7, runStartMinute: 17 * 60)
+    // PM, 2026-10-13 (写死作息排查 v0 #6): no routine is assumed. Gym and run days are only learned
+    // from the user's own wins, so a new user gets no gym invite or run warm-up until then.
+    /// No gym day and no run day.
+    public static let standard = ActivityDays(gymWeekdays: [], runWeekday: nil, runStartMinute: 17 * 60)
 
     public init(gymWeekdays: Set<Int>, runWeekday: Int?, runStartMinute: Int) {
         self.gymWeekdays = gymWeekdays
@@ -123,23 +124,77 @@ public struct ActivityDays: Codable, Equatable, Sendable {
     public static let learnMinWeeks = 2
 
     // Mike 2026-10-05: gym days follow the days he actually goes, with no setting. Until a weekday
-    // qualifies, the stored days stay, so the first visit doesn't stop the gym-day invite.
+    // qualifies, the stored days stay.
     /// These days with the gym days learned from the gym wins in `ledger`: each weekday with a gym win in
     /// at least `learnMinWeeks` of the last `learnWeeks` weeks, or these days when none has.
     public func learningGym(from ledger: CanLedger, now: Date, calendar: Calendar = .current) -> ActivityDays {
-        let today = StateEngine.dayStart(for: now, calendar: calendar)
-        var weeks: [Int: Set<Int>] = [:]
-        for entry in ledger.active where entry.kind == .earned && entry.win == .gym && entry.at <= now {
-            let day = StateEngine.dayStart(for: entry.at, calendar: calendar)
-            let age = calendar.dateComponents([.day], from: day, to: today).day ?? .max
-            guard (0..<Self.learnWeeks * 7).contains(age) else { continue }
-            weeks[calendar.component(.weekday, from: day), default: []].insert(age / 7)
-        }
-        let learnedDays = Set(weeks.filter { $0.value.count >= Self.learnMinWeeks }.keys)
+        let learnedDays = Set(Self.weeksWon(.gym, in: ledger, now: now, calendar: calendar).keys)
         guard !learnedDays.isEmpty else { return self }
         var learned = self
         learned.gymWeekdays = learnedDays
         return learned
+    }
+
+    // Only the end of a run is stored, so the warm-up starts an hour before the usual end.
+    /// These days with the run day learned from the 5 km run wins in `ledger`: the weekday won in the most
+    /// of the last `learnWeeks` weeks, at least `learnMinWeeks`, warming up from an hour before those runs
+    /// usually end, rounded down to 15 minutes. These days when no weekday qualifies.
+    public func learningRun(from ledger: CanLedger, now: Date, calendar: Calendar = .current) -> ActivityDays {
+        let won = Self.weeksWon(.run5k, in: ledger, now: now, calendar: calendar)
+        guard let weekday = Self.mostWon(won) else { return self }
+        let minutes = Self.recentWins(.run5k, in: ledger, now: now, calendar: calendar)
+            .filter { calendar.component(.weekday, from: $0.day) == weekday }
+            .map { Self.minutesAfterMidnight($0.at, on: $0.day, calendar: calendar) }
+            .sorted()
+        guard !minutes.isEmpty else { return self }
+        var learned = self
+        learned.runWeekday = weekday
+        learned.runStartMinute = max(0, (minutes[minutes.count / 2] - 60) / 15 * 15)
+        return learned
+    }
+
+    /// These days with the gym and run days learned from `ledger`.
+    public func learning(from ledger: CanLedger, now: Date, calendar: Calendar = .current) -> ActivityDays {
+        learningGym(from: ledger, now: now, calendar: calendar).learningRun(from: ledger, now: now, calendar: calendar)
+    }
+
+    /// The hub day and time of each `win` in `ledger` from the last `learnWeeks` weeks up to `now`.
+    static func recentWins(
+        _ win: Win,
+        in ledger: CanLedger,
+        now: Date,
+        calendar: Calendar
+    ) -> [(day: Date, age: Int, at: Date)] {
+        let today = StateEngine.dayStart(for: now, calendar: calendar)
+        return ledger.active.compactMap { entry -> (day: Date, age: Int, at: Date)? in
+            guard entry.kind == .earned, entry.win == win, entry.at <= now else { return nil }
+            let day = StateEngine.dayStart(for: entry.at, calendar: calendar)
+            let age = calendar.dateComponents([.day], from: day, to: today).day ?? .max
+            guard (0..<learnWeeks * 7).contains(age) else { return nil }
+            return (day, age, entry.at)
+        }
+    }
+
+    /// The weekdays with a `win` in at least `learnMinWeeks` of the last `learnWeeks` weeks, each with
+    /// how many weeks it was won in.
+    static func weeksWon(_ win: Win, in ledger: CanLedger, now: Date, calendar: Calendar) -> [Int: Int] {
+        var weeks: [Int: Set<Int>] = [:]
+        for won in recentWins(win, in: ledger, now: now, calendar: calendar) {
+            weeks[calendar.component(.weekday, from: won.day), default: []].insert(won.age / 7)
+        }
+        return weeks.mapValues(\.count).filter { $0.value >= learnMinWeeks }
+    }
+
+    /// The weekday won in the most weeks; the earlier weekday wins a tie. `nil` when `won` is empty.
+    static func mostWon(_ won: [Int: Int]) -> Int? {
+        won.min { ($1.value, $0.key) < ($0.value, $1.key) }?.key
+    }
+
+    // The hub day starts at 05:00, so a time after midnight counts past 24:00.
+    /// Minutes from the midnight that starts the hub day `day` to `date`.
+    static func minutesAfterMidnight(_ date: Date, on day: Date, calendar: Calendar) -> Int {
+        let midnight = calendar.startOfDay(for: day)
+        return Int(date.timeIntervalSince(midnight) / 60)
     }
 }
 

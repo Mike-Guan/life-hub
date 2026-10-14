@@ -8,6 +8,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character can dress for four identity cards: boxing (gloves and a bag stand), fitness
   (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its own tap
   move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
+  card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
+  The second character's flower is now called 地上小粉花.
+- The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
+  4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
+- On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
+  At bedtime, tapping five times in a row no longer turns either character away.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
   the weekly 5 cans, and its gold keepsake counts that card only. Any other watch workout of 30 minutes (not a
   walk) earns 3 cans, shared with the gym's daily 3. The shop names the card instead of "周日拳击".

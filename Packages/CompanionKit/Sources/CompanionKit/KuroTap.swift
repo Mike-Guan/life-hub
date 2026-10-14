@@ -86,9 +86,11 @@ extension KuroPose {
             pose.mouthO = p < 0.15
             pose.calm = p >= 0.15
         case .hug:
-            pose.eyes = (0.15..<0.8).contains(p) ? .closed : .happy
+            pose.eyes = p < 0.8 ? .closed : .happy
         case .mark:
+            // Her mouth eases even when she was frowning over the page (TapMovesTests: the focus slot).
             pose.eyes = p < 0.7 ? .down : .happy
+            pose.calm = false
         case .sketch:
             pose.eyes = p < 0.4 ? .down : .open
             pose.calm = p >= 0.4

@@ -9,6 +9,7 @@ import SwiftUI
 struct PlaceEditor: View {
     let monitor: PlaceMonitor
     let persona: Persona
+    let cards: ModeCards
     let onSave: (HubPlace) -> Void
     let onDelete: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
@@ -20,17 +21,20 @@ struct PlaceEditor: View {
     /// - Parameters:
     ///   - place: the place to edit, or a new one with `hasLocation` false.
     ///   - persona: the character whose names the editor uses.
+    ///   - cards: the user's cards, for the action names.
     ///   - onDelete: removes the place; `nil` hides the button.
     init(
         place: HubPlace,
         hasLocation: Bool,
         monitor: PlaceMonitor,
         persona: Persona,
+        cards: ModeCards,
         onSave: @escaping (HubPlace) -> Void,
         onDelete: (() -> Void)?
     ) {
         self.monitor = monitor
         self.persona = persona
+        self.cards = cards
         self.onSave = onSave
         self.onDelete = onDelete
         _place = State(initialValue: place)
@@ -128,14 +132,14 @@ struct PlaceEditor: View {
                 .font(Toy.body(16, weight: .heavy))
             if place.kind == .custom {
                 Picker("到这里时", selection: $place.action) {
-                    ForEach(HubPlace.Action.allCases, id: \.self) { action in
-                        Text(action.title(for: persona)).tag(action)
+                    ForEach(HubPlace.Action.offered(with: cards), id: \.self) { action in
+                        Text(action.title(for: persona, cards: cards)).tag(action)
                     }
                 }
                 .pickerStyle(.inline)
                 .labelsHidden()
             } else {
-                Text(place.kind.summary(for: persona))
+                Text(place.kind.summary(for: persona, cards: cards))
                     .font(Toy.body(15))
             }
         }
@@ -174,13 +178,13 @@ struct PlaceEditor: View {
 
 extension HubPlace.Kind {
     /// What arriving at the preset does, for Settings.
-    func summary(for persona: Persona) -> String {
+    func summary(for persona: Persona, cards: ModeCards) -> String {
         switch self {
-        case .gym: "直接切到\(Mode.boxing.title(for: persona))。"
-        case .office: "切到上班。"
+        case .gym: "直接切到\(cards.title(for: .boxing, persona: persona))。"
+        case .office: "切到\(cards.title(for: .work, persona: persona))。"
         case .home: "不切换，用来看你是不是窝在家。"
         case .fitness: "\(persona.title) 陪你举铁，待满 30 分钟算一次健身，得 \(Win.gym.cans) 个能量罐。"
-        case .custom: action.title(for: persona)
+        case .custom: action.title(for: persona, cards: cards)
         }
     }
 }

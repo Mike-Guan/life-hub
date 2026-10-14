@@ -39,8 +39,9 @@ struct StatusView: View {
         case .accessoryInline:
             if let mode = entry.mode {
                 Label(
-                    "\(mode.title(for: entry.persona)) · \(entry.detail)",
-                    systemImage: mode.symbol(for: entry.persona)
+                    "\(entry.names.title(for: mode, persona: entry.persona)) · \(entry.detail)",
+                    systemImage: entry.names.pickedIdentity(for: mode, persona: entry.persona)?.symbol
+                        ?? mode.symbol(for: entry.persona)
                 )
             } else {
                 Text("打开一次 Life Hub")
@@ -49,7 +50,8 @@ struct StatusView: View {
             HStack(spacing: 6) {
                 head.frame(width: 44)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(entry.mode?.title(for: entry.persona) ?? "还没有模式").font(.headline)
+                    Text(entry.mode.map { entry.names.title(for: $0, persona: entry.persona) } ?? "还没有模式")
+                        .font(.headline)
                     Text(entry.mode == nil ? "打开一次 Life Hub" : entry.detail).font(.caption).lineLimit(2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -111,7 +113,7 @@ struct StatusView: View {
             if let mode = entry.mode {
                 figure(mode, framing: .full)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                Text("\(mode.code(for: entry.persona)) MODE").font(Toy.display(14))
+                Text("\(entry.names.code(for: mode, persona: entry.persona)) MODE").font(Toy.display(14))
                 Text(entry.detail).font(Toy.body(12, weight: .bold))
             } else {
                 Spacer()
