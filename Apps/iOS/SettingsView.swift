@@ -3,6 +3,7 @@ import FamilyControls
 import HubCore
 import SwiftUI
 import UniformTypeIdentifiers
+import WidgetKit
 
 /// App settings: the bedtime reminder time, the places that switch mode, the Daily Widget link and
 /// the Screen Time watch.
@@ -33,6 +34,7 @@ struct SettingsView: View {
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
     @State private var asksErase = false
+    @AppStorage(Languages.key, store: AppGroup.defaults) private var languagesOn = false
 
     var body: some View {
         ScrollView {
@@ -154,6 +156,9 @@ struct SettingsView: View {
             // Remove the condition with the CI-CD.md Screen Time step.
             #if DEBUG || ENV_STG
             scrollCard
+            #endif
+            #if DEBUG || ENV_STG
+            languagesCard
             #endif
             #if DEBUG
             dogfoodCard
@@ -278,6 +283,32 @@ struct SettingsView: View {
         .toyCard()
         .familyActivityPicker(isPresented: $pickingApps, selection: $scrollApps)
         .onChange(of: scrollApps) { watchScrolling() }
+    }
+
+    // Debug and STG only (Issue #350): Japanese and English stay off until every string is in and reviewed.
+    private var languagesCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle(isOn: languagesBinding) {
+                Text("日文和英文")
+                    .font(Toy.body(16, weight: .heavy))
+            }
+            Text("打开后跟手机的系统语言走；还没翻译的地方仍是中文。关着时一律中文。只在测试版里有。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(16)
+        .toyCard()
+    }
+
+    private var languagesBinding: Binding<Bool> {
+        Binding(
+            get: { languagesOn },
+            set: {
+                Languages.isOn = $0
+                languagesOn = $0
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+        )
     }
 
     // Debug builds only: the automatic decisions noted during the weeks of use (PRD section 19).
