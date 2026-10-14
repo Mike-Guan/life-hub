@@ -1739,7 +1739,8 @@ struct RunnerFigure: View {
                 // Two quick reps in a celebration, or the curl at the gym.
                 RunnerPartView(part: part).offset(y: -12 * pose.dumbbellRise * scale)
             case .heavyBag:
-                RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 12, y: -6))
+                // Mike 2026-10-14 (G): the big bag hangs top left behind the hair and swings from its chain.
+                RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 17.5, y: -8))
             case .speedLines:
                 RunnerPartView(part: part)
                     .offset(x: -8 * pose.dash * scale)

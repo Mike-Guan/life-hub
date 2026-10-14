@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
+  chain when he hits it.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
   turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
