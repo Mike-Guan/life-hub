@@ -136,6 +136,9 @@ struct RunnerPose {
     var gloveL: CGSize = .zero
     var gloveR: CGSize = .zero
     var gloveRScale: CGFloat = 1
+    // The watch frame crops HAKU at the chest, so the gloves and the can would sit below the screen edge.
+    /// 1 on the watch: the gloves come up beside the chin and the can up beside the face; 0 elsewhere.
+    var propLift: CGFloat = 0
     /// Position of the shine sweeping over the gold chain, as a fraction of the figure width.
     var glint: CGFloat = -1
     var coinTurn: Double = 0
@@ -312,6 +315,24 @@ struct RunnerPose {
     /// Whether the mask slides between the face and the chin: going off work, staying home or getting up.
     var unmasking: Bool { offWorking || stayingHome || reviving }
     /// How high the dumbbell is: the celebration reps while one plays, else the lift.
+    // A punch or a clink reaches toward the viewer from where the prop sits on the iPhone, so the lift
+    // gives way while it plays and the glove or can lands where it always did, clear of the eyes.
+    /// Where the left glove is drawn: its pose plus the watch lift.
+    var gloveLShown: CGSize { CGSize(width: gloveL.width - 10 * propLift, height: gloveL.height - 22 * propLift) }
+    /// Where the right glove is drawn: its pose plus the watch lift.
+    var gloveRShown: CGSize {
+        let lift = propLift * (1 - pokeOut(.punch))
+        return CGSize(width: gloveR.width + 10 * lift, height: gloveR.height - 22 * lift)
+    }
+    /// Where the can is drawn: its pose plus the watch lift.
+    var canShown: CGSize {
+        CGSize(width: canOffset.width, height: canOffset.height - 22 * propLift * (1 - pokeOut(.clink)))
+    }
+
+    /// How far a watch poke of `kind` is reaching out, 0...1; 0 when another one or none is playing.
+    private func pokeOut(_ kind: WatchPoke) -> CGFloat {
+        pokeKind == kind && pokeProgress >= 0 ? WatchPoke.hold(pokeProgress) : 0
+    }
     var dumbbellRise: CGFloat { burst >= 0 ? abs(sin(burst * 2 * .pi)) : lift }
     /// HAKU's height while unboxing: 0 = inside the box, then a pop past full height that settles at 1.
     var popOut: CGFloat {
@@ -1762,23 +1783,23 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .scaleEffect(pose.canScale, anchor: Self.unit(x: 102, y: 136))
                     .rotationEffect(.degrees(pose.canAngle), anchor: Self.unit(x: 102, y: 136))
-                    .offset(x: pose.canOffset.width * scale, y: pose.canOffset.height * scale)
+                    .offset(x: pose.canShown.width * scale, y: pose.canShown.height * scale)
                     .opacity(pose.canOpacity)
             case .headband:
                 RunnerPartView(part: part, red: pose.outfit.headband)
             case .gloveL:
                 RunnerPartView(part: part, red: pose.outfit.gloves)
-                    .offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)
+                    .offset(x: pose.gloveLShown.width * scale, y: pose.gloveLShown.height * scale)
             case .gloveR:
                 RunnerPartView(part: part, red: pose.outfit.gloves)
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
-                    .offset(x: pose.gloveR.width * scale, y: pose.gloveR.height * scale)
+                    .offset(x: pose.gloveRShown.width * scale, y: pose.gloveRShown.height * scale)
             case .gloveTapeLeft:
-                RunnerPartView(part: part).offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)
+                RunnerPartView(part: part).offset(x: pose.gloveLShown.width * scale, y: pose.gloveLShown.height * scale)
             case .gloveTapeRight:
                 RunnerPartView(part: part)
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
-                    .offset(x: pose.gloveR.width * scale, y: pose.gloveR.height * scale)
+                    .offset(x: pose.gloveRShown.width * scale, y: pose.gloveRShown.height * scale)
             case .laptop where pose.lidClose > 0:
                 // The lid folds down toward the desk.
                 RunnerPartView(part: part)
