@@ -11,6 +11,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
+- 27 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
+  For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
+  「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
+  names two apps and says only this iPhone knows how long you scrolled.
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
   room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
   back puts them on again. The wardrobe screen moves to these groups in a separate change.
