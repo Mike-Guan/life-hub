@@ -127,7 +127,8 @@ enum KuroIdle: CaseIterable, Sendable {
         case .ponytail where part == .tennisPonytail:
             return CGSize(width: 3 * CGFloat(sin(p * 4 * .pi) * (1 - p)), height: 0)
         case .strap where part == .boxGloveR:
-            let press = CGFloat(Self.hold(p, from: 0.2, rise: 0.1, fall: 0.05, end: 0.45))
+            let press =
+                CGFloat(Self.hold(p, from: 0.2, rise: 0.1, fall: 0.05, end: 0.45))
                 + CGFloat(Self.hold(p, from: 0.55, rise: 0.1, fall: 0.1, end: 0.95))
             return CGSize(width: -8 * press, height: 2 * press)
         case .gloves where part == .boxGloveL: return CGSize(width: 4 * Self.together(p), height: 0)
