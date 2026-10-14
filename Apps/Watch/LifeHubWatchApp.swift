@@ -111,24 +111,6 @@ struct WatchHomeView: View {
         }
         .clipped()
         .ignoresSafeArea()
-        // HAKU's no-mode drawing says this itself; KURO keeps her off-work look, so the watch says it.
-        .overlay {
-            if mode == nil && payload.persona == .kuro {
-                // The pill sits in the bottom safe area (about 20pt), where it does not cover her chin.
-                GeometryReader { geometry in
-                    Text("在 iPhone 上选个模式")
-                        .font(Toy.body(12, weight: .bold))
-                        .foregroundStyle(Toy.ink)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 3)
-                        .background(Capsule().fill(Toy.card))
-                        .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                        .offset(y: geometry.safeAreaInsets.bottom - 4)
-                }
-                .allowsHitTesting(false)
-            }
-        }
         .overlay(alignment: .topLeading) {
             if let failure {
                 Text(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2).padding(.leading, 4)
