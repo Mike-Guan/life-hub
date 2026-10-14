@@ -55,9 +55,9 @@ record() {
 watch_list=$(xcrun simctl list devices available -j |
   jq -c '[.devices | to_entries[] | select(.key | test("watchOS"))] | sort_by(.key) | last | .value')
 echo "$watch_list" | jq -r '.[].name' | tee -a "$out/progress.txt"
-for size in 40mm 42mm 46mm; do
+for size in 40mm 41mm 42mm 46mm; do
 watch_udid=$(echo "$watch_list" | jq -r --arg s "($size)" \
-  '[.[] | select(.name | contains($s)) | select(.name | test("SE 3|Series 11"))] | last | .udid')
+  '[.[] | select(.name | contains($s)) | select(.name | test("SE 3|Series 11|Series 9|Series 10"))] | last | .udid')
 note "watch $size: $(echo "$watch_list" | jq -r --arg u "$watch_udid" '.[] | select(.udid == $u) | .name')"
 if [[ -z "$watch_udid" || "$watch_udid" == "null" ]]; then
   echo "::warning::No $size watch simulator, skipping it"
