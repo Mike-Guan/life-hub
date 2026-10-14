@@ -4,6 +4,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ## [Unreleased]
 
+### Added
+- HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
+  pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
+
 ### Changed
 - The off-work card's default name is now 「下班」, so the watch no longer cuts it to 「下班 Chi」. Names you
   already changed stay as they are.
