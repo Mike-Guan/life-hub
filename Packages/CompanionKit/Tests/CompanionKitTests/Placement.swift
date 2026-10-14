@@ -172,7 +172,7 @@ enum Placement {
         .pillowHug: Spot(.handsFront, "抱枕"),
         .roomPlant: Spot(.corner1, "roomPlant"),
         .roomBag: Spot(.corner1, "roomBag"),
-        .heavyBag: Spot(.corner1, "heavyBag"),
+        .heavyBag: Spot(.window, "heavyBag"),
         .toteBag: Spot(.corner1, "toteBag"),
         .gymBag: Spot(.corner1, "gymBag"),
         .runningShoes: Spot(.corner2, "runningShoes"),

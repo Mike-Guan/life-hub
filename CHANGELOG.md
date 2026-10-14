@@ -5,15 +5,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
+  hand left out) or the iPhone's own count. Days you didn't open the app count too, up to a week back. Steps
+  are never shown and never leave the iPhone.
+- HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
+  pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
+- Debug builds have a 「日文和英文」 switch in settings. It is off by default, so every build shows Chinese
+  whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 - HAKU's eight pop clothes are in the shop: two tops for each of work, off work and 副业, plus the varsity
   and raincoat sets. Each is worn only in its mode, in place of the jacket. The hoodie strings and the
   raincoat's duck swing a little with his breath.
-- HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
-  pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
-- Test builds (Debug, STG) have a 「日文和英文」 switch in settings. It is off by default, so every build shows
-  Chinese whatever the phone's language until all Japanese and English text is in.
 
 ### Changed
+- 27 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
+  For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
+  「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
+  names two apps and says only this iPhone knows how long you scrolled.
+- The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
+  room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
+  back puts them on again. The wardrobe screen moves to these groups in a separate change.
 - The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
   hustle); a full set replaces that mode's top. They go on sale once the character art draws them.
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
@@ -109,6 +119,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   bus, and the moment of arriving. Life Hub asks for Motion & Fitness once; motion stays on the iPhone.
 - After a workout the watch cheers for it as soon as the Health app saves it, without opening the iPhone app.
   The iPhone home still cheers the next time it opens.
+- At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
+  chain when he hits it.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
@@ -415,6 +427,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The wardrobe keeps what a newer build put on (new slots or modes) instead of losing the whole wardrobe,
+  and writes it back when saving.
 - Watch: the app opens without the system killing it (a hand-made pager replaces the vertical page view),
   HAKU is a little smaller, waking is smoother, and a shake still counts right after the screen dims. (#231)
 - Watch: the app has its own icon. (#230)
