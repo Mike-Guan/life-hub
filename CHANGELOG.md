@@ -9,6 +9,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 - Test builds (Debug, STG) have a 「日文和英文」 switch in settings. It is off by default, so every build shows
   Chinese whatever the phone's language until all Japanese and English text is in.
+- The second preset character has two small idle moves in each base outfit: in sportswear she reaches up onto her
+  toes or wipes her forehead with a towel, in the smock she tucks her hair behind her ear or makes a viewfinder
+  with her hands, and in the lilac top she straightens her collar or smiles at her phone.
 
 ### Changed
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
