@@ -118,6 +118,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   The iPhone home still cheers the next time it opens.
 - At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
   chain when he hits it.
+- When HAKU puts the pillow behind his shoulder to lean on it, it now lands exactly where it rests, so it no
+  longer jumps from his chest to behind his shoulder.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
