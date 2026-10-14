@@ -217,7 +217,7 @@ struct WardrobeView: View {
     private var withoutSlot: Set<String> {
         var plain = wardrobe
         plain.clear(slot)
-        return Set(plain.equipped.values)
+        return plain.worn(in: previewMode)
     }
 
     private func itemTile(_ item: ShopItem) -> some View {

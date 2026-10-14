@@ -85,7 +85,7 @@ struct WatchHomeView: View {
                     moment: scene?.moment,
                     overtimeUntil: scene?.overtimeUntil,
                     style: .watch,
-                    wearing: Set(payload.wardrobe.equipped.values),
+                    wearing: payload.wardrobe.worn(in: mode ?? .chill),
                     event: payload.event ?? scene?.event
                 )
             } else {

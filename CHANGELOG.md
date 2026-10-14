@@ -14,6 +14,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
+- The second preset character wears the top or set of the mode she is in, on the home screen, the shop,
+  the wardrobe, unboxing, widgets and the watch. Her clothes stay off the shelf until their art is in.
 - 27 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer

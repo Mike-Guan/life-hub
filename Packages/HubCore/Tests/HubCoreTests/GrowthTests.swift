@@ -498,6 +498,15 @@ import Testing
         #expect(!wardrobe.isWearing(aloha))
     }
 
+    @Test func wornHasOnlyThatModesClothes() {
+        let wardrobe = Wardrobe(
+            equipped: [.mask: "mask.stripes"],
+            clothes: [.work: "kuro.top.work.blouse", .chill: "kuro.top.chill.cardigan"]
+        )
+        #expect(wardrobe.worn(in: .work) == ["mask.stripes", "kuro.top.work.blouse"])
+        #expect(wardrobe.worn(in: .money) == ["mask.stripes"])
+    }
+
     @Test func anotherCardsItemsAreHiddenButKept() {
         let wardrobe = Wardrobe(
             equipped: [.gloves: "gloves.pink", .mask: "mask.stripes", .room: "room.bag", .headband: "headband.future"],

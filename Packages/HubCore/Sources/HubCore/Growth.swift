@@ -642,6 +642,11 @@ public struct Wardrobe: Codable, Equatable, Sendable {
         return equipped[item.slot] == item.id
     }
 
+    /// The ids worn in `mode`: every slot plus that mode's top or set.
+    public func worn(in mode: Mode) -> Set<String> {
+        Set(equipped.values).union(clothes[mode].map { [$0] } ?? [])
+    }
+
     // A switched-away card's items stay stored, so switching back puts them on again. Ids this build
     // doesn't know stay, as in the rest of the wardrobe.
     /// What is drawn with `card` picked: the wardrobe without items that belong to another card.
