@@ -54,6 +54,9 @@ enum RunnerCardLook: CaseIterable, Sendable {
         }
     }
 
+    /// What the look puts aside while HAKU does something else: what it holds, the visor and the apron.
+    var props: Set<RunnerPart> { held.union([.tennisVisor, .apron]) }
+
     /// The jacket fill: dark for sport, the green off-work jacket for out and craft.
     var jacket: Color { sporty ? RunnerPalette.jacket : RunnerPalette.jacketChill }
 }
@@ -64,7 +67,16 @@ extension RunnerPose {
         var pose = self
         pose.cardLook = mode == .boxing ? RunnerCardLook(card: card) : nil
         // The gym bag shows with `bagLift`; 0 keeps it on the floor by the door.
-        if pose.cardLook == .fitness, pose.bagLift < 0 { pose.bagLift = 0 }
+        if pose.cardLook == .fitness, pose.holdsCardProps, pose.bagLift < 0 { pose.bagLift = 0 }
         return pose
+    }
+
+    // Placement map: one thing per place. Whatever else HAKU holds, wears on the head or carries replaces the
+    // card's props, the way the can goes away.
+    /// Whether HAKU shows the card look's props: nothing else is in its hands, on its head or in the corner.
+    var holdsCardProps: Bool {
+        need == nil && activity == nil && life == nil && moment == nil && burst < 0 && dailyProp == nil
+            && dailyScene == nil && walkFrom == nil && commuteLeg == nil && bathCall < 0 && bathDry < 0
+            && thump < 0 && fistPump < 0 && !watchTap
     }
 }

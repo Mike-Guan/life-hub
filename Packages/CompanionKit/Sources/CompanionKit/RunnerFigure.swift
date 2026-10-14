@@ -1412,7 +1412,9 @@ struct RunnerFigure: View {
             case .boxing:
                 if let look = pose.cardLook {
                     // Asleep, HAKU holds nothing (QA spec S6).
-                    visible = pose.bedtime ? look.parts.subtracting(look.held) : look.parts
+                    visible = look.parts
+                    if pose.bedtime { visible.subtract(look.held) }
+                    if !pose.holdsCardProps { visible.subtract(look.props) }
                 } else {
                     visible.formUnion(boxingParts)
                 }

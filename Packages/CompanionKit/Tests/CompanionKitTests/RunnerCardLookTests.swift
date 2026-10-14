@@ -45,4 +45,17 @@ import Testing
         // The sport base swaps the neon stripe for the orange one.
         #expect(!parts(.boxing, card: .tennis).contains(.stripeNeon))
     }
+
+    @Test func somethingElseInHandReplacesTheCardProps() {
+        var pose = RunnerPose(face: .mid)
+        pose.dailyProp = .note
+        pose.propRaise = 1
+        for card: IdentityKind in [.tennis, .fitness, .study, .art] {
+            let dressed = pose.dressed(for: card, in: .boxing)
+            let shown = Set(RunnerFigure.parts(for: .boxing, pose: dressed))
+            #expect(shown.isDisjoint(with: RunnerCardLook(card: card)!.props), "\(card)")
+            #expect(shown.contains(.stickyNote), "\(card)")
+            #expect(dressed.bagLift < 0, "\(card)")
+        }
+    }
 }
