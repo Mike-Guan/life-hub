@@ -160,6 +160,14 @@ struct RunnerPose {
     var stretch: CGFloat = 0
     /// 0 = head upright, 1 = resting on the pillow.
     var lie: CGFloat = 0
+    /// The pillow hugged to the chest and how far it has moved toward the shoulder, or nil when not hugged.
+    var hugPillow: CGSize?
+    /// The pillow tucked behind the left shoulder to lean on.
+    var leanPillow = false
+    /// The hand patting the hugged pillow is shown.
+    var patting = false
+    /// Pat lines by the hand as it lands.
+    var patHit = false
     /// Rise of the floating Z z z, 0...1, or -1 when hidden.
     var zzz: CGFloat = -1
     /// Rise of the sleep-talk "…" while napping, 0...1, or -1 when hidden.
@@ -448,7 +456,9 @@ struct RunnerPose {
             // look at the phone, then it's away.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
             if plain, r == 0, let beat = IdleClock.beat(at: t, lengths: Self.workBeats, seed: Self.seed) {
-                if beat.kind == 0 {
+                if beat.kind == 2 {
+                    spinChair(phase: beat.phase)
+                } else if beat.kind == 0 {
                     let phase = beat.phase
                     let nod = IdleClock.dip(CGFloat(phase.truncatingRemainder(dividingBy: 0.5) / 0.5))
                     headDy = phase < 1 ? 2.5 * nod : 0
@@ -469,7 +479,9 @@ struct RunnerPose {
             canOffset = CGSize(width: -6 * sip, height: -6 * sip - 10 * r + (tired ? 4 : 0))
             // Every 8-20 s, one of: the can is empty, a shake by the ear, then a deadpan stare at it; or a
             // scratch of the head, then a tuft of hair that settles slowly.
-            if let pause, pause.kind == 0 {
+            if let pause, pause.kind == 2 {
+                patPillow(phase: pause.phase)
+            } else if let pause, pause.kind == 0 {
                 let phase = pause.phase
                 let shake = max(0, 1 - phase / 1.2)
                 canAngle = Double(-8 + 10 * sin(phase * 2 * .pi / 0.3) * shake)
@@ -489,9 +501,13 @@ struct RunnerPose {
             gloveRScale = 1 + 0.2 * r
             // Every 18-30 s: shake the wrists out, then a glove up to fix the headband.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
-            if plain, r == 0, let beat = IdleClock.beat(at: t, every: 24, spread: 6, lengths: [3.5], seed: Self.seed) {
+            if plain, r == 0, let beat = IdleClock.beat(
+                at: t, every: 24, spread: 6, lengths: Self.boxingBeats, seed: Self.seed)
+            {
                 let phase = beat.phase
-                if phase < 1.5 {
+                if beat.kind == 1 {
+                    bumpGloves(phase: phase)
+                } else if phase < 1.5 {
                     let shake = CGFloat(sin(phase * 2 * .pi / 0.15)) * 3
                     gloveL = CGSize(width: shake, height: 8)
                     gloveR = CGSize(width: -shake, height: 8)
@@ -526,10 +542,60 @@ struct RunnerPose {
 
     /// HAKU's idle stream; KURO has her own, so the two never blink together.
     static let seed: UInt64 = 0x4841
-    /// Work pool beats: big nods then a headset push, a look at the phone.
-    static let workBeats: [TimeInterval] = [3, 1.2]
-    /// Chill pool beats: the empty can, a scratch of the head.
-    static let chillBeats: [TimeInterval] = [emptyCanLength, 7]
+    /// Work pool beats: big nods then a headset push, a look at the phone, a lean back and a spin of the chair.
+    static let workBeats: [TimeInterval] = [3, 1.2, 2.5]
+    /// Chill pool beats: the empty can, a scratch of the head, patting the pillow and leaning on it.
+    static let chillBeats: [TimeInterval] = [emptyCanLength, 7, 3]
+    /// Boxing pool beats: shaking the wrists out then fixing the headband, bumping the gloves.
+    static let boxingBeats: [TimeInterval] = [3.5, 1.2]
+
+    // 03 Product/companion/待机动作 补齐规格 v0 H4, Mike approved 2026-10-14. 动态: a second of slacking off.
+    /// Leaning back at `phase` (0...2.5 s), spinning the chair round to the back and back again, then sitting up.
+    private mutating func spinChair(phase p: TimeInterval) {
+        let x = CGFloat(p)
+        lean = -4 * Double(Self.bump(x, from: 0, to: 1))
+        eyesShut = p < 0.5
+        let q = Self.ramp(x, from: 0.5, to: 2)
+        turnedAway = q >= 0.3 && q < 0.7
+        if q > 0, q < 0.3 {
+            turnSqueeze = 1 - 0.45 * q / 0.3
+            eyesDx = 4
+        } else if q >= 0.7, q < 1 {
+            turnSqueeze = 0.55 + 0.45 * (q - 0.7) / 0.3
+            eyesDx = -4
+        }
+        bounce = 1.5 * Self.bump(x, from: 2, to: 2.5)
+    }
+
+    // 待机动作 补齐规格 v0 H5. 动态 while patting; still once leaning back: comfortable, so nothing moves.
+    /// Patting the pillow twice at `phase` (0...3 s), tucking it behind the left shoulder and leaning back on it.
+    private mutating func patPillow(phase p: TimeInterval) {
+        let x = CGFloat(p)
+        canOpacity = 0
+        if p < 1.6 {
+            let pat = Self.bump(x, from: 0.2, to: 0.55) + Self.bump(x, from: 0.7, to: 1.05)
+            let move = Self.ramp(x, from: 1.2, to: 1.6)
+            hugPillow = CGSize(width: -13 * move, height: -10 * move + pat)
+            patting = p < 1.2
+            patHit = pat > 0.6
+            prop = CGSize(width: -24, height: -2 + 5 * pat)
+            eyesShut = Self.bump(x, from: 0.7, to: 1.05) > 0.5
+        } else {
+            leanPillow = true
+            lean = -2.5 * Double(Self.ramp(x, from: 1.6, to: 2))
+            eyesShut = p < 2.2
+        }
+    }
+
+    // 待机动作 补齐规格 v0 H13. 动态: bumping the gloves is the move.
+    /// Looking down at the gloves and bumping them together twice at `phase` (0...1.2 s), then looking up.
+    private mutating func bumpGloves(phase p: TimeInterval) {
+        let x = CGFloat(p)
+        let bump = Self.bump(x, from: 0.1, to: 0.45) + Self.bump(x, from: 0.5, to: 0.85)
+        gloveL = CGSize(width: 12 * bump, height: -6 * bump)
+        gloveR = CGSize(width: -12 * bump, height: -6 * bump)
+        eyesDy = p < 0.9 ? 3 : -2.5
+    }
 
     /// The state within the mode: peeking, dozing, slumped, at the door, walking, or vibe coding.
     private mutating func play(_ moment: CompanionMoment, time t: TimeInterval) {
@@ -1172,6 +1238,12 @@ struct RunnerFigure: View {
         }
         wear(pose, mode: mode, on: &visible)
         if pose.rubEye >= 0 { visible.insert(.rubHand) }
+        if pose.hugPillow != nil || pose.leanPillow {
+            visible.remove(.monsterCan)
+            visible.insert(pose.leanPillow ? .pillowLean : .pillowHug)
+            if pose.patting { visible.insert(.tapHand) }
+            if pose.patHit { visible.insert(.patLines) }
+        }
         if pose.hum >= 0 || pose.whistle >= 0 { visible.insert(.musicNote) }
         if pose.thump >= 0 || pose.fistPump >= 0 { visible.insert(.backFist) }
         if pose.thumpHit { visible.insert(.thumpLines) }
@@ -1740,6 +1812,12 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part).offset(y: -12 * pose.dumbbellRise * scale)
             case .heavyBag:
                 RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 12, y: -6))
+            case .pillowHug:
+                let move = pose.hugPillow ?? .zero
+                RunnerPartView(part: part).offset(x: move.width * scale, y: move.height * scale)
+            case .patLines:
+                // Drawn for the welcome pat by the door; patting the pillow puts them by the hand on the chest.
+                RunnerPartView(part: part).offset(x: -12 * scale, y: -2 * scale)
             case .speedLines:
                 RunnerPartView(part: part)
                     .offset(x: -8 * pose.dash * scale)

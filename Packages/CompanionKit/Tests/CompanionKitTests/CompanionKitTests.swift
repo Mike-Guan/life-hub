@@ -348,7 +348,7 @@ import Testing
     }
 
     @Test func boxingHakuShakesOutAndFixesTheHeadband() throws {
-        let start = try #require(IdleClockTests.firstStart(lengths: [3.5], every: 24, spread: 6))
+        let start = try #require(IdleClockTests.firstStart(lengths: RunnerPose.boxingBeats, every: 24, spread: 6))
         let shaking = RunnerPose(mode: .boxing, time: start + 0.5, face: .mid, react: 0)
         #expect(shaking.gloveL.height == 8 && shaking.gloveR.height == 8)
         let fixing = RunnerPose(mode: .boxing, time: start + 2.5, face: .mid, react: 0)
@@ -357,6 +357,47 @@ import Testing
         #expect(guarding.gloveR.height > -4)
         let jab = RunnerPose(mode: .boxing, time: start + 2.5, face: .mid, react: 0.5)
         #expect(jab.gloveR.height > -69)
+    }
+
+    @Test func boxingHakuBumpsTheGlovesAndLooksUp() throws {
+        let start = try #require(
+            IdleClockTests.firstStart(kind: 1, lengths: RunnerPose.boxingBeats, every: 24, spread: 6))
+        let bump = RunnerPose(mode: .boxing, time: start + 0.275, face: .mid, react: 0)
+        #expect(bump.gloveL.width > 11 && bump.gloveR.width < -11 && bump.eyesDy == 3)
+        let apart = RunnerPose(mode: .boxing, time: start + 0.475, face: .mid, react: 0)
+        #expect(apart.gloveL.width < 1)
+        let up = RunnerPose(mode: .boxing, time: start + 1.1, face: .mid, react: 0)
+        #expect(up.eyesDy == -2.5 && up.gloveL == .zero)
+    }
+
+    @Test func atWorkHakuLeansBackAndSpinsTheChair() throws {
+        let start = try #require(IdleClockTests.firstStart(kind: 2, lengths: RunnerPose.workBeats))
+        let back = RunnerPose(mode: .work, time: start + 0.4, face: .mid, react: 0)
+        #expect(back.lean < -3.5 && back.eyesShut)
+        let turning = RunnerPose(mode: .work, time: start + 0.9, face: .mid, react: 0)
+        #expect(turning.turnSqueeze < 0.7 && !turning.turnedAway)
+        let away = RunnerPose(mode: .work, time: start + 1.25, face: .mid, react: 0)
+        #expect(away.turnedAway)
+        let parts = Set(RunnerFigure.parts(for: .work, pose: away))
+        #expect(parts.contains(.headBack) && parts.contains(.headset) && !parts.contains(.eyesWork))
+        let seated = RunnerPose(mode: .work, time: start + 2.25, face: .mid, react: 0)
+        #expect(seated.bounce > 1.4 && seated.turnSqueeze == 1 && !seated.turnedAway)
+    }
+
+    @Test func offWorkHakuPatsThePillowAndLeansOnIt() throws {
+        let start = try #require(IdleClockTests.firstStart(kind: 2, lengths: RunnerPose.chillBeats))
+        let pat = RunnerPose(mode: .chill, time: start + 0.375, face: .mid, react: 0)
+        let patting = Set(RunnerFigure.parts(for: .chill, pose: pat))
+        #expect(patting.isSuperset(of: [.pillowHug, .tapHand, .patLines]))
+        #expect(!patting.contains(.monsterCan) && !patting.contains(.pillowLean))
+        let leaning = RunnerPose(mode: .chill, time: start + 2.6, face: .mid, react: 0)
+        let leant = Set(RunnerFigure.parts(for: .chill, pose: leaning))
+        #expect(leant.contains(.pillowLean) && !leant.contains(.pillowHug) && !leant.contains(.monsterCan))
+        // Comfortable: once it leans back, only the blink moves.
+        let later = RunnerPose(mode: .chill, time: start + 2.9, face: .mid, react: 0)
+        #expect(leaning.lean == -2.5 && later.lean == -2.5 && leaning.prop == later.prop)
+        let after = RunnerPose(mode: .chill, time: start + 3.1, face: .mid, react: 0)
+        #expect(RunnerFigure.parts(for: .chill, pose: after).contains(.monsterCan))
     }
 
     @Test func atWorkHakuSneaksALookAtThePhone() throws {
