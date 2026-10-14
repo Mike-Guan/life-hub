@@ -445,7 +445,7 @@ struct RunnerPose {
         blink = open * Self.blink(at: t)
         squeeze = Self.blink(at: t)
         // Sparkles twinkle out of step with the blink, 1.6 s period.
-        sparkle = 0.55 + 0.45 * sin(time * 2 * .pi / 1.6)
+        sparkle = 0.8 + 0.2 * sin(time * 2 * .pi / 1.6)
 
         // Shooting keeps the ¥¥ look of the old money mode, motion included.
         switch self.moment == .shooting ? .money : mode {
@@ -1224,8 +1224,9 @@ struct RunnerFigure: View {
             let scale = geo.size.width / RunnerArt.bounds.width
             ZStack {
                 ZStack {
-                    ForEach(Self.parts(for: mode, pose: pose), id: \.self) { part in
-                        layer(part, scale: scale)
+                    let parts = Self.parts(for: mode, pose: pose)
+                    ForEach(parts, id: \.self) { part in
+                        layer(part, scale: scale, headband: parts.contains(.headset))
                     }
                     if pose.sleepTalk >= 0, pose.life == .nap, !pose.bedtime {
                         RunnerTextView(text: Self.sleepTalkText)
@@ -1304,6 +1305,11 @@ struct RunnerFigure: View {
             visible.insert(.bigNote)
             let t = pose.noteSlap * CGFloat(RunnerPose.noteSlapLength)
             if t > 0.25, t < 0.8 { visible.insert(.noteHit) }
+        }
+        // Issue #236 (correction preview v6): full energy opens the deadpan eyes a notch, with their own glint.
+        if pose.face == .high, !pose.bedtime, visible.contains(.eyesWork) {
+            visible.subtract([.eyesWork, .lidsWork, .eyeGlint])
+            visible.formUnion([.eyesBright, .lidsBright])
         }
         if pose.eyesShut {
             visible.subtract(openEyes)
@@ -1462,6 +1468,11 @@ struct RunnerFigure: View {
             visible.subtract(cheerHides[kind] ?? [])
             visible.remove(.monsterCan)
             visible.formUnion(props)
+        }
+        // UI 审核 2026-10-13 (F7): a tired HAKU at home no longer smiles like a full one; he gets the half-shut eyes.
+        if pose.tired, mode == .chill, !pose.bedtime, visible.contains(.eyesChill) {
+            visible.remove(.eyesChill)
+            visible.formUnion([.eyesWork, .lidsWork, .eyebags])
         }
         if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
@@ -1624,6 +1635,7 @@ struct RunnerFigure: View {
     ]
     nonisolated private static let openEyes: Set<RunnerPart> = [
         .eyesWork, .lidsWork, .eyesChill, .cateyeL, .cateyeR, .eyesMoney, .eyeGlint, .eyesSleepy,
+        .eyesBright, .lidsBright,
     ]
     nonisolated private static let couchParts: Set<RunnerPart> = [.eyesSleepy, .phone, .phoneFeed, .phoneHand]
     nonisolated private static let couchHiddenParts: Set<RunnerPart> = [
@@ -1675,7 +1687,7 @@ struct RunnerFigure: View {
         }
     }
 
-    @ViewBuilder private func layer(_ part: RunnerPart, scale: CGFloat) -> some View {
+    @ViewBuilder private func layer(_ part: RunnerPart, scale: CGFloat, headband: Bool) -> some View {
         let isHead = Self.headParts.contains(part)
         Group {
             if pose.propRaise > 0, let scene = pose.dailyScene,
@@ -1691,7 +1703,7 @@ struct RunnerFigure: View {
             } else if part == .walkDust, pose.walkFrom != nil {
                 moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
             } else {
-                partView(part, scale: scale)
+                partView(part, scale: scale, headband: headband)
             }
         }
         .offset(y: (isHead ? pose.headDy : 0) * scale)
@@ -1710,10 +1722,10 @@ struct RunnerFigure: View {
             .opacity(move.opacity)
     }
 
-    @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat) -> some View {
+    @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat, headband: Bool) -> some View {
         Group {
             switch part {
-            case .eyesWork, .lidsWork, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
+            case .eyesWork, .lidsWork, .eyesBright, .lidsBright, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 1, y: pose.blink, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale, y: pose.eyesDy * scale)
@@ -1798,7 +1810,10 @@ struct RunnerFigure: View {
                     .scaleEffect(0.8 + 0.7 * pose.burst, anchor: Self.unit(x: 60, y: 40))
                     .opacity(Double(sin(pose.burst * .pi)))
             case .sparkle:
+                // UI 审核 2026-10-13: with the headset on, the sparkles sit 2pt clear of its band on the watch.
                 RunnerPartView(part: part)
+                    .scaleEffect(x: headband ? 1.16 : 1, y: 1, anchor: Self.unit(x: 60, y: 27))
+                    .offset(y: headband ? -14 * scale : 0)
                     .scaleEffect(0.8 + 0.2 * pose.sparkle, anchor: Self.unit(x: 60, y: 27))
                     .opacity(pose.sparkle)
             case .ledYen:
@@ -2029,7 +2044,7 @@ struct RunnerFigure: View {
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
-        .dizzyStar,
+        .dizzyStar, .eyesBright, .lidsBright,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
