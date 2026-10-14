@@ -104,6 +104,19 @@ import Testing
         #expect(Win.visit(.fitness, from: at, to: left, identity: nil)?.card == nil)
     }
 
+    @Test func theFitnessCardPaysAGymVisitAndAStrengthWorkoutOnce() {
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        let left = at + Win.visitMinimum
+        let visit = Win.visit(.fitness, from: at, to: left, identity: .fitness)
+        #expect(visit?.win == .boxing)
+        #expect(visit?.card == .fitness)
+        let lifting = WorkoutSummary(id: "lift", kind: .strength, start: at, end: left)
+        let earned = Win.wins(in: [lifting], identity: .fitness) + [visit].compactMap(\.self)
+        for win in earned { store.record(win.win, source: win.source, at: win.at, card: win.card) }
+        #expect(store.ledger.balance == Win.boxing.cans)
+        #expect(Win.visit(.fitness, from: at, to: left, identity: .boxing)?.win == .gym)
+    }
+
     @Test func goldKeepsakesCountOnlyTheirOwnCard() throws {
         let store = GrowthStore(fileURL: nil, deviceID: "t")
         let gloves = try item("gloves.gold")
