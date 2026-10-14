@@ -412,6 +412,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- Unboxing a top or full set shows HAKU in the mode it is worn in, not always off work.
 - Watch: the app opens without the system killing it (a hand-made pager replaces the vertical page view),
   HAKU is a little smaller, waking is smoother, and a shake still counts right after the screen dims. (#231)
 - Watch: the app has its own icon. (#230)
