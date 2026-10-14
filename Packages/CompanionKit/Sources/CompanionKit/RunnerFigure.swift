@@ -324,7 +324,6 @@ struct RunnerPose {
     var reviving: Bool { revive >= 0 }
     /// Whether the mask slides between the face and the chin: going off work, staying home or getting up.
     var unmasking: Bool { offWorking || stayingHome || reviving }
-    /// How high the dumbbell is: the celebration reps while one plays, else the lift.
     // A punch or a clink reaches toward the viewer from where the prop sits on the iPhone, so the lift
     // gives way while it plays and the glove or can lands where it always did, clear of the eyes.
     /// Where the left glove is drawn: its pose plus the watch lift.
@@ -344,6 +343,7 @@ struct RunnerPose {
     private func pokeOut(_ kind: WatchPoke) -> CGFloat {
         pokeKind == kind && pokeProgress >= 0 ? WatchPoke.hold(pokeProgress) : 0
     }
+    /// How high the dumbbell is: the celebration reps while one plays, else the lift.
     var dumbbellRise: CGFloat { burst >= 0 ? abs(sin(burst * 2 * .pi)) : lift }
     /// HAKU's height while unboxing: 0 = inside the box, then a pop past full height that settles at 1.
     var popOut: CGFloat {
@@ -1891,7 +1891,8 @@ struct RunnerFigure: View {
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
                     .offset(x: pose.gloveRShown.width * scale, y: pose.gloveRShown.height * scale)
             case .gloveTapeLeft:
-                RunnerPartView(part: part).offset(x: pose.gloveLShown.width * scale, y: pose.gloveLShown.height * scale)
+                RunnerPartView(part: part)
+                    .offset(x: pose.gloveLShown.width * scale, y: pose.gloveLShown.height * scale)
             case .gloveTapeRight:
                 RunnerPartView(part: part)
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
