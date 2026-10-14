@@ -199,8 +199,12 @@ public struct CompanionView: View {
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
 
             character
-                .padding(.top, 24)
+                .padding(.top, figureTop)
                 .padding(.horizontal, 12)
+                .offset(y: talkDip)
+                // UI 审核 2026-10-14: 动态. Sinking while a line shows keeps HAKU his usual size at home and still
+                // leaves the line clear of his hair; it eases in and out with no bounce.
+                .animation(.easeOut(duration: 0.25), value: bubble != nil)
                 .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: closeUp)
 
@@ -891,6 +895,40 @@ public struct CompanionView: View {
     nonisolated static func newOffWork(_ event: CompanionEvent?, last: String) -> String? {
         guard case .offWork(let day) = event, day != last else { return nil }
         return day
+    }
+
+    // UI 审核 2026-10-14: a line sits above the hair. Where the figure can't sink out of its way (the unlock
+    // showcase, or with Reduce Motion) it starts 34 pt lower instead.
+    /// Space above the figure, in points: 58 in the showcase or with Reduce Motion when lines show, else 24.
+    nonisolated static func figureTop(
+        style: CompanionStyle,
+        showsBubble: Bool,
+        showcase: Bool,
+        still: Bool
+    ) -> CGFloat {
+        style == .standard && showsBubble && (showcase || still) ? 58 : 24
+    }
+
+    /// How far the figure sinks while a line shows, in points: 34 at home, 0 everywhere else.
+    nonisolated static func talkDip(style: CompanionStyle, showsBubble: Bool, showcase: Bool, still: Bool) -> CGFloat {
+        style == .standard && showsBubble && !showcase && !still ? 34 : 0
+    }
+
+    // UI 审核 2026-10-14: in the showcase the whole new item has to show, so the figure never sinks there.
+    /// Whether this view is the unlock showcase.
+    private var showcase: Bool {
+        if case .unlock = event { true } else { false }
+    }
+
+    /// Space above the figure in this view.
+    private var figureTop: CGFloat {
+        Self.figureTop(style: style, showsBubble: showsBubble, showcase: showcase, still: reduceMotion)
+    }
+
+    /// How far the figure sits lower right now: only while a line shows.
+    private var talkDip: CGFloat {
+        guard bubble != nil else { return 0 }
+        return Self.talkDip(style: style, showsBubble: showsBubble, showcase: showcase, still: reduceMotion)
     }
 
     /// The unboxing id to play for `event`, or nil when there is none or it already played.

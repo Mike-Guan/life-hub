@@ -198,6 +198,22 @@ import Testing
         #expect(!RunnerFigure.parts(for: .chill, pose: notification).contains(.pillow))
     }
 
+    // UI 审核 2026-10-14: a line keeps 2 pt above the hair. Home sinks while it shows; the showcase starts lower.
+    @Test func linesKeepClearOfTheHair() {
+        #expect(CompanionView.figureTop(style: .standard, showsBubble: true, showcase: false, still: false) == 24)
+        #expect(CompanionView.talkDip(style: .standard, showsBubble: true, showcase: false, still: false) == 34)
+        #expect(CompanionView.figureTop(style: .standard, showsBubble: true, showcase: true, still: false) == 58)
+        #expect(CompanionView.talkDip(style: .standard, showsBubble: true, showcase: true, still: false) == 0)
+        #expect(CompanionView.figureTop(style: .standard, showsBubble: true, showcase: false, still: true) == 58)
+        #expect(CompanionView.talkDip(style: .standard, showsBubble: true, showcase: false, still: true) == 0)
+        for style in [CompanionStyle.watch, .notification] {
+            #expect(CompanionView.figureTop(style: style, showsBubble: true, showcase: false, still: false) == 24)
+            #expect(CompanionView.talkDip(style: style, showsBubble: true, showcase: false, still: false) == 0)
+        }
+        #expect(CompanionView.figureTop(style: .standard, showsBubble: false, showcase: true, still: true) == 24)
+        #expect(CompanionView.talkDip(style: .standard, showsBubble: false, showcase: false, still: false) == 0)
+    }
+
     @Test func sleepyLoopYawns() {
         let yawns = (0..<120).map { RunnerPose.bedtime(time: Double($0) * 0.05, goodnight: 1, liesDown: true).yawn }
         #expect(yawns.contains { $0 > 0.5 })
