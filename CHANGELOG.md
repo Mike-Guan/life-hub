@@ -7,6 +7,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - On the watch, a long press on the second preset character shows a close-up of her face for a moment, like HAKU.
   The watch close-up of both characters now frames the eyes and mouth instead of the hair.
+- On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
+  ponytail (unbox page and home card). The watch is unchanged.
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
   card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
   The second character's flower is now called 地上小粉花.
