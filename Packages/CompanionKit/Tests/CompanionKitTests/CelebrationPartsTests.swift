@@ -33,7 +33,7 @@ import Testing
         .chill: [.tapCup, .tapPuff],
         .tennis: [.swingLines],
         .desk: [.tapFinger, .tapGlint],
-        .box: [], .fitness: [], .study: [.studyMark], .art: [],
+        .box: [], .fitness: [], .study: [.studyMark], .art: [], .dance: [], .music: [], .ski: [],
     ]
     static let kuroFace: Set<KuroPart> = [
         .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow,

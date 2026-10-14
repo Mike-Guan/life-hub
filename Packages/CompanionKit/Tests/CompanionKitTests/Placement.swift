@@ -274,6 +274,17 @@ enum Placement {
         .gymBlock: Spot(.handsFront, "gymBlock"),
         .studyNotebook: Spot(.handsFront, "studyNotebook"),
         .boxSandbag: Spot(.corner1, "boxSandbag"),
+        // Deferred identity cards (顺延身份卡 预览): the finger on the score is part of holding it.
+        .danceSpeaker: Spot(.corner1, "danceSpeaker"),
+        .speakerNoteA: .fx,
+        .speakerNoteB: .fx,
+        .scoreSheet: Spot(.handsFront, "乐谱"),
+        .scoreFinger: Spot(.handsFront, "乐谱"),
+        .skiGoggles: Spot(.headTop, "skiGoggles"),
+        .mittenArm: Spot(.handL, "手套"),
+        .mittenHand: Spot(.handL, "手套"),
+        .snowBits: .fx,
+        .sneezePuff: .fx,
         .studyMark: .fx,
         .itemFlower: Spot(.corner1, "itemFlower"),
         .itemLamp: Spot(.corner1, "itemLamp"),
@@ -319,7 +330,9 @@ enum Placement {
             ["deskBooks", "deskPen"], ["tapBall", "tennisRacket"],
             ["itemGoldRacket", "tapBall"],
         ],
-        .handsFront: [["workTablet", "揉眼袖子"], ["gymBlock", "揉眼袖子"], ["studyNotebook", "揉眼袖子"]],
+        .handsFront: [
+            ["workTablet", "揉眼袖子"], ["gymBlock", "揉眼袖子"], ["studyNotebook", "揉眼袖子"], ["乐谱", "揉眼袖子"],
+        ],
         .earL: [["耳机", "earringNeon"], ["cheerEarTap", "earringNeon"]],
         .torso: [["外套", "金链"], ["外套", "towel"], ["外套", "apron"], ["外套", "背包"]],
     ]

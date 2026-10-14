@@ -41,6 +41,8 @@ enum KuroTap: Equatable, Sendable {
         case .fitness: self = .hug
         case .study: self = .mark
         case .art: self = .sketch
+        // Until each deferred card has its own tap (新角色清单), she shuts her eyes happily like the fitness hug.
+        case .dance, .music, .ski: self = .hug
         }
     }
 
@@ -107,7 +109,7 @@ extension KuroFigure {
     nonisolated private static let backView: Set<KuroPart> = [
         .itemFlower, .itemLamp, .tennisPonytail, .hairBack, .itemScrunchie, .jacketWork, .jacketChill,
         .itemBlanket, .jacketTennis, .itemBag, .jacketDesk, .earL, .earR, .catEars, .deskBooks, .jacketBox,
-        .jacketSmock, .boxSandbag,
+        .jacketSmock, .boxSandbag, .danceSpeaker,
     ]
 
     /// Changes `visible` for `tap` at `progress`.
