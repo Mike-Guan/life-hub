@@ -394,6 +394,9 @@ import Testing
         let patting = Set(RunnerFigure.parts(for: .chill, pose: pat))
         #expect(patting.isSuperset(of: [.pillowHug, .tapHand, .patLines]))
         #expect(!patting.contains(.monsterCan) && !patting.contains(.pillowLean))
+        // UI 审核 2026-10-14: the hugged pillow ends where the leaning one is drawn, so only its layer changes.
+        let handover = try #require(RunnerPose(mode: .chill, time: start + 1.849, face: .mid, react: 0).hugPillow)
+        #expect(abs(handover.width + 24) < 0.5 && abs(handover.height + 16) < 0.5)
         let leaning = RunnerPose(mode: .chill, time: start + 2.6, face: .mid, react: 0)
         let leant = Set(RunnerFigure.parts(for: .chill, pose: leaning))
         #expect(leant.contains(.pillowLean) && !leant.contains(.pillowHug) && !leant.contains(.monsterCan))

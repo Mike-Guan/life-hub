@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 
 ### Changed
+- When HAKU puts the pillow behind his shoulder to lean on it, it now lands exactly where it rests, so it no
+  longer jumps from his chest to behind his shoulder.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder

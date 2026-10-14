@@ -584,7 +584,9 @@ struct RunnerPose {
             let come = Self.ramp(x, from: 0, to: 0.35)
             let pat = Self.bump(x, from: 0.45, to: 0.8) + Self.bump(x, from: 0.95, to: 1.3)
             let back = 1 - come + Self.ramp(x, from: 1.45, to: 1.85)
-            hugPillow = CGSize(width: -13 * back, height: -10 * back + pat)
+            // UI 审核 2026-10-14: it goes back exactly onto the leaning pillow (24 left, 16 up), so only the layer
+            // changes at 1.85 s, hidden behind the shoulder.
+            hugPillow = CGSize(width: -24 * back, height: -16 * back + pat)
             pillowOpacity = Double(come)
             patting = p >= 0.35 && p < 1.45
             patHit = pat > 0.6
