@@ -6,6 +6,8 @@ import SwiftUI
 /// RUNNER, reacting to the current mode and energy.
 public struct CompanionView: View {
     let mode: Mode?
+    /// The identity card worn in the identity card mode, or nil for the boxing kit.
+    let card: IdentityKind?
     /// Energy 0-100, or nil when unknown. Below 30 RUNNER looks tired; from 70 it looks bright.
     let energy: Double?
     /// What RUNNER acts out on top of the mode, or nil.
@@ -142,6 +144,7 @@ public struct CompanionView: View {
 
     public init(
         mode: Mode?,
+        card: IdentityKind? = nil,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
         needSince: Date? = nil,
@@ -166,6 +169,7 @@ public struct CompanionView: View {
         onWelcomeDone: (() -> Void)? = nil
     ) {
         self.mode = mode
+        self.card = card
         self.energy = energy
         self.need = need
         self.needSince = needSince
@@ -303,12 +307,8 @@ public struct CompanionView: View {
                     let motion = idleMotion(mode, life: life, time: time)
                     // HAKU-04: a new bit at home starts with a quick squash instead of parts just swapping.
                     let turn = reduceMotion ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
-                    RunnerFigure(
-                        mode: mode,
-                        pose: glance(
-                            pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe)).leaving(traces)
-                        )
-                    )
+                    let dressed = pose(mode, life: life, time: time, react: react).dressed(for: card, in: mode)
+                    RunnerFigure(mode: mode, pose: glance(dressed.wearing(Outfit(wardrobe)).leaving(traces)))
                     .saturation(vitals.saturation)
                     .brightness(vitals.brightness)
                     .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
