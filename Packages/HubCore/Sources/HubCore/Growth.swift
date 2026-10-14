@@ -498,7 +498,26 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             title: "金色网球拍",
             keepsake: Keepsake(win: .boxing, count: 10, card: .tennis),
             persona: .kuro
-        ),  // Clothes (商店完整目录 v0 §1.1 and §2.1, prices of 2026-10-14), off the shelf until drawn.
+        ),
+        // The other first-batch cards' lines (商店完整目录 v0 §1.2 and §2.2), off the shelf until drawn: a prop
+        // colour, and a gold prop on the card's 10th win.
+        ShopItem(prop: "haku.racket.tennis.mint", title: "薄荷色球拍", price: 15, card: .tennis),
+        ShopItem(prop: "haku.racket.tennis.gold", title: "金色网球拍", card: .tennis),
+        ShopItem(prop: "haku.dumbbell.gym.orange", title: "橙色哑铃", price: 15, card: .fitness),
+        ShopItem(prop: "haku.dumbbell.gym.gold", title: "金哑铃", card: .fitness),
+        ShopItem(prop: "haku.book.study.navy", title: "藏青书皮", price: 15, card: .study),
+        ShopItem(prop: "haku.bookmark.study.gold", title: "金书签", card: .study),
+        ShopItem(prop: "haku.sketch.art.yellow", title: "黄色速写本", price: 15, card: .art),
+        ShopItem(prop: "haku.pencil.art.gold", title: "金铅笔", card: .art),
+        ShopItem(prop: "kuro.gloves.boxing.pink", title: "粉色拳套", price: 15, card: .boxing, persona: .kuro),
+        ShopItem(prop: "kuro.gloves.boxing.gold", title: "金拳套", card: .boxing, persona: .kuro),
+        ShopItem(prop: "kuro.block.gym.mint", title: "薄荷瑜伽砖", price: 15, card: .fitness, persona: .kuro),
+        ShopItem(prop: "kuro.block.gym.gold", title: "金瑜伽砖", card: .fitness, persona: .kuro),
+        ShopItem(prop: "kuro.glasses.study.red", title: "红框眼镜", price: 15, card: .study, persona: .kuro),
+        ShopItem(prop: "kuro.bookmark.study.gold", title: "金书签", card: .study, persona: .kuro),
+        ShopItem(prop: "kuro.stylus.art.blue", title: "蓝色触控笔", price: 15, card: .art, persona: .kuro),
+        ShopItem(prop: "kuro.brush.art.gold", title: "金画笔", card: .art, persona: .kuro),
+        // Clothes (商店完整目录 v0 §1.1 and §2.1, prices of 2026-10-14), off the shelf until drawn.
         // HAKU's eight are the pop set Mike approved 2026-10-14; the second character's are still placeholders.
         ShopItem(clothes: "haku.top.work.blazer", slot: .top, title: "学院西装", price: 30, mode: .work),
         ShopItem(clothes: "haku.top.work.cardigan", slot: .top, title: "像素开衫", price: 35, mode: .work),
@@ -537,6 +556,13 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         self.persona = persona
         self.card = card ?? keepsake?.card
         self.isDrawn = true
+    }
+
+    // A prop without a price is the card's gold keepsake. The identity card's win carries the card.
+    init(prop id: String, title: String, price: Int? = nil, card: IdentityKind, persona: Persona = .haku) {
+        let keepsake = price == nil ? Keepsake(win: .boxing, count: 10, card: card) : nil
+        self.init(id: id, slot: .gloves, title: title, price: price, keepsake: keepsake, persona: persona, card: card)
+        isDrawn = false
     }
 
     init(clothes id: String, slot: Slot, title: String, price: Int, mode: Mode, persona: Persona = .haku) {

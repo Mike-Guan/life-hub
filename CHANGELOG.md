@@ -11,6 +11,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   Chinese whatever the phone's language until all Japanese and English text is in.
 
 ### Changed
+- The shop catalogue has a prop colour and a gold prop (earned on the card's 10th win) for the other
+  first-batch identity cards of each character. They go on sale once the character art draws them; a gold prop
+  earned before its art is done is granted on the card's next win after that.
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
   room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
   back puts them on again. The wardrobe screen moves to these groups in a separate change.

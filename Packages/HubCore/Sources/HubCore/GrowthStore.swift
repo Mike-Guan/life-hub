@@ -41,8 +41,9 @@ public final class GrowthStore {
         guard !ledger.entries.contains(where: { $0.id == entry.id }) else { return [] }
         ledger.entries.append(entry)
         let mine = ledger.only(persona)
+        // A keepsake whose art isn't done yet waits: the first matching win after it is drawn grants it.
         let granted = ShopItem.catalog(for: persona).filter { item in
-            guard let keepsake = item.keepsake, keepsake.win == win else { return false }
+            guard item.isDrawn, let keepsake = item.keepsake, keepsake.win == win else { return false }
             return !mine.owned.contains(item.id) && mine.count(win, card: keepsake.card) >= keepsake.count
         }
         for item in granted {

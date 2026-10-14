@@ -303,7 +303,7 @@ import Testing
         let kuro = ShopItem.catalog(for: .kuro)
         #expect(haku.count + kuro.count == ShopItem.catalog.count)
         #expect(kuro.compactMap(\.price).sorted() == haku.compactMap(\.price).sorted())
-        #expect(kuro.compactMap(\.keepsake).map(\.win) == [.gotUp, .run5k, .boxing])
+        #expect(kuro.filter(\.isDrawn).compactMap(\.keepsake).map(\.win) == [.gotUp, .run5k, .boxing])
     }
 
     @Test func ledgerPersistsAndKeepsUnreadableEntries() throws {
@@ -499,5 +499,30 @@ import Testing
                 )
         )
         #expect(wardrobe.showing(card: .boxing) == wardrobe)
+    }
+
+    @Test func eachFirstBatchCardHasAPropColourAndAGoldProp() {
+        let cards: [Persona: [IdentityKind]] = [
+            .haku: [.tennis, .fitness, .study, .art], .kuro: [.boxing, .fitness, .study, .art],
+        ]
+        for (persona, kinds) in cards {
+            for card in kinds {
+                let line = ShopItem.catalog(for: persona).filter {
+                    $0.card == card && $0.slot == .gloves && !$0.isDrawn
+                }
+                #expect(line.compactMap(\.price) == [15], "\(persona) \(card)")
+                #expect(line.compactMap(\.keepsake).map(\.count) == [10], "\(persona) \(card)")
+                #expect(line.allSatisfy { $0.suits(card) && !$0.suits(nil) && $0.slot.shelf == .props })
+            }
+        }
+    }
+
+    @Test func aKeepsakeWaitsForItsArt() throws {
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        for day in 0..<10 {
+            #expect(store.record(.boxing, source: "day-\(day)", at: at, card: .fitness).isEmpty)
+        }
+        #expect(!store.ledger.only(.haku).owned.contains("haku.dumbbell.gym.gold"))
+        #expect(try item("haku.dumbbell.gym.gold").keepsake?.card == .fitness)
     }
 }
