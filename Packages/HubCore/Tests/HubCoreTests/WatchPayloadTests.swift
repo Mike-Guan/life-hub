@@ -69,7 +69,7 @@ import Testing
         let json = #"{"snapshot":"# + String(decoding: snapshot, as: UTF8.self) + "}"
         let decoded = try HubJSON.decoder().decode(WatchPayload.self, from: Data(json.utf8))
         #expect(decoded.wardrobe == Wardrobe())
-        #expect(decoded.bedtime == .standard)
+        #expect(decoded.bedtime == .unset)
         #expect(decoded.persona == .haku)
         #expect(decoded.snapshot == payload().snapshot)
     }
@@ -99,13 +99,15 @@ import Testing
 
     @Test func redrawsWhenTheIPhoneWidgetsDo() {
         let now = date(7, 12)
+        var sent = payload()
+        sent.bedtime = .standard
         let expected = WidgetSnapshot.timelineDates(
             after: now,
             bedtime: .standard,
-            needTimes: payload().snapshot.needTimes,
+            needTimes: sent.snapshot.needTimes,
             calendar: calendar
         )
-        #expect(payload().timelineDates(after: now, calendar: calendar) == expected)
+        #expect(sent.timelineDates(after: now, calendar: calendar) == expected)
     }
 
     @Test func carriesThePersona() throws {
