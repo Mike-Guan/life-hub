@@ -418,6 +418,13 @@ import Testing
         let patting = Set(RunnerFigure.parts(for: .chill, pose: pat))
         #expect(patting.isSuperset(of: [.pillowHug, .tapHand, .patLines]))
         #expect(!patting.contains(.monsterCan) && !patting.contains(.pillowLean))
+        // UI 审核 2026-10-14: the hugged pillow ends where the leaning one is drawn, so only its layer changes.
+        // `start` can be up to 0.01 s into the beat, so step back to its first frame.
+        let first = try #require(IdleClock.beat(at: start, lengths: RunnerPose.chillBeats, seed: RunnerPose.seed))
+        let end = start - first.phase + 1.849
+        let handover = try #require(RunnerPose(mode: .chill, time: end, face: .mid, react: 0).hugPillow)
+        #expect(RunnerPose(mode: .chill, time: end - 0.1, face: .mid, react: 0).eyesShut)
+        #expect(abs(handover.width + 24) < 0.5 && abs(handover.height + 16) < 0.5)
         let leaning = RunnerPose(mode: .chill, time: start + 2.6, face: .mid, react: 0)
         let leant = Set(RunnerFigure.parts(for: .chill, pose: leaning))
         #expect(leant.contains(.pillowLean) && !leant.contains(.pillowHug) && !leant.contains(.monsterCan))
