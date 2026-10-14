@@ -7,6 +7,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
+- When the fourth card is not boxing, HAKU wears a base outfit for it: sport cards get a dark jacket with an
+  orange stripe and a wristband, 户外 the green off-work jacket, and 乐器, 画画手作 and 自习 the green jacket
+  with an apron. Apps opt in by passing the card to the companion view.
 
 ### Changed
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the

@@ -136,6 +136,10 @@ struct RunnerPose {
     var gloveL: CGSize = .zero
     var gloveR: CGSize = .zero
     var gloveRScale: CGFloat = 1
+    /// The identity card on the fourth slot, or nil for HAKU's own boxing card.
+    var card: IdentityKind?
+    /// The outfit the fourth slot wears for `card`.
+    var cardLook: CardLook { card.map(CardLook.init) ?? .boxing }
     /// Position of the shine sweeping over the gold chain, as a fraction of the figure width.
     var glint: CGFloat = -1
     var coinTurn: Double = 0
@@ -433,9 +437,11 @@ struct RunnerPose {
         life: IdleLife? = nil,
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
+        card: IdentityKind? = nil,
         react: Double
     ) {
         self.init(face: face, need: need, life: life, activity: activity, moment: moment)
+        self.card = card
         let t = time * face.speed
         let open: CGFloat = tired ? 0.75 : 1
         let r = CGFloat(react)
@@ -495,6 +501,9 @@ struct RunnerPose {
                 if itch < 2 { scratch = CGFloat(itch / 2) }
                 tuft = Self.ramp(CGFloat(itch), from: 0.5, to: 2) * (1 - Self.ramp(CGFloat(itch), from: 2, to: 7))
             }
+        case .boxing where cardLook != .boxing:
+            // Another identity card wears its base outfit; its moves live in RunnerCardMoves.swift (UI 四组).
+            if let card { cardIdle(cardLook, kind: card, time: t, react: r) }
         case .boxing:
             // Guard bounce every 0.6 s, gloves alternate; tap = right jab.
             let bounce = CGFloat(sin(t * 2 * .pi / 0.6)) * 3
@@ -1213,7 +1222,7 @@ struct RunnerFigure: View {
                             .offset(x: 0, y: pose.headDy * scale)
                     }
                     if pose.armsUp > 0 {
-                        StretchArms(raise: pose.armsUp, sleeve: Self.jacketColor(mode))
+                        StretchArms(raise: pose.armsUp, sleeve: Self.jacketColor(mode, look: pose.cardLook))
                     }
                 }
                 .rotationEffect(.degrees(pose.lean), anchor: Self.unit(x: 60, y: 140))
@@ -1228,7 +1237,8 @@ struct RunnerFigure: View {
                     GiftBox(progress: pose.unbox)
                 }
                 if let welcome = pose.welcome {
-                    WelcomeProps(welcome: welcome, shoulder: 82 + pose.shift, sleeve: Self.jacketColor(mode))
+                    let sleeve = Self.jacketColor(mode, look: pose.cardLook)
+                    WelcomeProps(welcome: welcome, shoulder: 82 + pose.shift, sleeve: sleeve)
                 }
             }
         }
@@ -1408,7 +1418,11 @@ struct RunnerFigure: View {
                 if pose.scratch >= 0 { visible.insert(.scratchHand) }
                 if pose.tuft > 0 { visible.insert(.hairTuft) }
             case .boxing:
-                visible.formUnion(boxingParts)
+                visible.formUnion(lookParts(pose.cardLook))
+                if pose.cardLook == .sport { visible.remove(.stripeNeon) }
+                if let card = pose.card, pose.cardLook != .boxing {
+                    cardParts(pose.cardLook, kind: card, pose: pose, into: &visible)
+                }
             case .money:
                 visible.formUnion(moneyParts)
             }
@@ -1583,6 +1597,17 @@ struct RunnerFigure: View {
     nonisolated private static let boxingParts: Set<RunnerPart> = [
         .cateyeL, .cateyeR, .browsBox, .mouthFang, .maskDown, .earringNeon, .headband, .gloveL, .gloveR,
     ]
+    // HAKU 第 1 批 ① 三套底衣, Mike approved 2026-10-14 01:46Z.
+    /// The fourth slot's outfit and face for `look`: boxing gear, or a base outfit with the off-work face.
+    nonisolated private static func lookParts(_ look: CardLook) -> Set<RunnerPart> {
+        let face: Set<RunnerPart> = [.eyesChill, .mouthSmile, .maskDown, .earringNeon]
+        switch look {
+        case .boxing: return boxingParts
+        case .sport: return face.union([.sportStripe, .wristbandRest])
+        case .outing: return face
+        case .making: return face.union([.apron])
+        }
+    }
     nonisolated private static let moneyParts: Set<RunnerPart> = [
         .eyesMoney, .maskUp, .panelLines, .ledYen, .earringNeon, .chainGold, .coin,
     ]
@@ -1786,7 +1811,7 @@ struct RunnerFigure: View {
                     RunnerTextView(text: Self.dots)
                 }
             case .jacket:
-                RunnerPartView(part: part, fillOverride: Self.jacketColor(mode))
+                RunnerPartView(part: part, fillOverride: Self.jacketColor(mode, look: pose.cardLook))
             case .gymBag:
                 // Lifted from the floor by the door onto the left shoulder.
                 RunnerPartView(part: part)
@@ -2006,8 +2031,9 @@ struct RunnerFigure: View {
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
     private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown]
 
-    private static func jacketColor(_ mode: Mode) -> Color {
+    private static func jacketColor(_ mode: Mode, look: CardLook) -> Color {
         switch mode {
+        case .boxing where look == .outing || look == .making: RunnerPalette.jacketChill
         case .work, .boxing: RunnerPalette.jacket
         case .chill: RunnerPalette.jacketChill
         case .money: RunnerPalette.jacketMoney

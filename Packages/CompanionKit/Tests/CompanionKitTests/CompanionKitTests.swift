@@ -370,6 +370,31 @@ import Testing
         #expect(up.eyesDy == -2.5 && up.gloveL == .zero)
     }
 
+    @Test func everyIdentityCardHasALook() {
+        #expect(CardLook(.boxing) == .boxing)
+        let sport: [IdentityKind] = [.tennis, .fitness, .swimming, .yoga, .dance, .ball, .ski]
+        #expect(sport.allSatisfy { CardLook($0) == .sport })
+        #expect(CardLook(.outdoor) == .outing)
+        #expect([IdentityKind.music, .art, .study].allSatisfy { CardLook($0) == .making })
+    }
+
+    @Test func otherCardsWearTheirBaseOutfitInTheFourthSlot() {
+        let wear = { (card: IdentityKind?) -> Set<RunnerPart> in
+            let pose = RunnerPose(mode: .boxing, time: 1000, face: .mid, card: card, react: 0)
+            return Set(RunnerFigure.parts(for: .boxing, pose: pose))
+        }
+        let gear: Set<RunnerPart> = [.gloveL, .gloveR, .headband, .cateyeL, .browsBox]
+        #expect(wear(nil).isSuperset(of: gear) && wear(.boxing).isSuperset(of: gear))
+        let sport = wear(.tennis)
+        #expect(sport.isSuperset(of: [.sportStripe, .wristbandRest, .eyesChill, .jacket]))
+        #expect(sport.isDisjoint(with: gear.union([.stripeNeon, .apron])))
+        let outing = wear(.outdoor)
+        #expect(outing.isSuperset(of: [.stripeNeon, .eyesChill]) && outing.isDisjoint(with: gear.union([.apron])))
+        #expect(wear(.art).isSuperset(of: [.apron, .eyesChill]) && wear(.art).isDisjoint(with: gear))
+        // No guard bounce without the gloves.
+        #expect(RunnerPose(mode: .boxing, time: 1000.15, face: .mid, card: .yoga, react: 0).gloveL == .zero)
+    }
+
     @Test func atWorkHakuLeansBackAndSpinsTheChair() throws {
         let start = try #require(IdleClockTests.firstStart(kind: 2, lengths: RunnerPose.workBeats))
         let back = RunnerPose(mode: .work, time: start + 0.4, face: .mid, react: 0)

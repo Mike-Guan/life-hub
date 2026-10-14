@@ -18,6 +18,8 @@ public struct CompanionView: View {
     let moment: CompanionMoment?
     /// Monster cans piled up next to HAKU while vibe coding.
     let codingCans: Int
+    /// The identity card on the fourth slot, or nil for boxing; other cards wear their base outfit.
+    let identity: IdentityKind?
     /// What today left in HAKU's world, such as a bandage after boxing.
     let traces: Set<CompanionTrace>
     /// HAKU's hidden params; they change only how it moves and looks.
@@ -159,6 +161,7 @@ public struct CompanionView: View {
         cheer: Int = 0,
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
+        identity: IdentityKind? = nil,
         style: CompanionStyle = .standard,
         showsBubble: Bool = true,
         onTap: (() -> Void)? = nil,
@@ -172,6 +175,7 @@ public struct CompanionView: View {
         self.activity = activity
         self.moment = moment
         self.codingCans = codingCans
+        self.identity = identity
         self.traces = traces
         self.vitals = vitals
         self.event = event
@@ -504,6 +508,7 @@ public struct CompanionView: View {
             life: life,
             activity: activity,
             moment: shownMoment,
+            card: identity,
             react: react
         )
         pose.codingCans = codingCans
@@ -574,9 +579,11 @@ public struct CompanionView: View {
         return pose
     }
 
-    /// `pose` with the eyes following a press, and dozing while the screen is dimmed (Always On).
+    /// `pose` in the fourth slot's outfit, with the eyes following a press, and dozing while the screen is dimmed
+    /// (Always On).
     private func glance(_ pose: RunnerPose) -> RunnerPose {
         var pose = pose
+        pose.card = identity
         pose.eyesDx += 4 * look
         pose.headTilt += 4 * Double(look)
         if closeUp { pose.eyesDy -= 1 }
@@ -1218,8 +1225,9 @@ public struct CompanionView: View {
 
     /// Whether HAKU acts out something other than the plain mode, given its idle `life`.
     private func isBusy(_ life: IdleLife?) -> Bool {
+        // A base outfit has no gloves to punch with, so a tap there glares.
         shownNeed != nil || activity != nil || shownMoment != nil || life != nil || daily != nil || walking != nil
-            || bath || invite != nil
+            || bath || invite != nil || (mode == .boxing && (identity.map(CardLook.init) ?? .boxing) != .boxing)
     }
 
     private func startInvite() {
