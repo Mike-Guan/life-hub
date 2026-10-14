@@ -88,8 +88,8 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         case .ball: lines = ("球打满气了", "帮你看着")
         case .dance, .music, .ski: lines = nil
         }
-        guard let lines else { return String(format: "%@中".localized, title) }
-        return (persona == .kuro ? lines.kuro : lines.haku).localized
+        guard let lines else { return String(format: "%@中".localized(for: persona), title) }
+        return (persona == .kuro ? lines.kuro : lines.haku).localized(for: persona)
     }
 
     // 卡片标语与代码 v0 §2: the invite on the learned identity day. Cards still without one use a plain line.
@@ -109,9 +109,10 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         case .dance, .music, .ski: lines = nil
         }
         guard let lines else {
-            return persona == .kuro ? "……今天去吗。".localized : String(format: "今天%@，我准备好了。".localized, title)
+            let line = persona == .kuro ? "……今天去吗。" : "今天%@，我准备好了。"
+            return String(format: line.localized(for: persona), title)
         }
-        return (persona == .kuro ? lines.kuro : lines.haku).localized
+        return (persona == .kuro ? lines.kuro : lines.haku).localized(for: persona)
     }
 
     // 第 1 批、第 2 批、顺延身份卡 台词与待机 v0: three tap lines per card and character.
@@ -132,7 +133,7 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         case .music: lines = (["……刚才那个音不算。", "别吵，在数拍。", "我只会这一段。"], ["……嘘，在听。", "这段好难。", "……再一遍。"])
         case .ski: lines = (["冷。不是抱怨。", "……我坐缆车就行。", "雪镜起雾了。"], ["……好冷。", "手好冰。", "……再滑一次？"])
         }
-        return (persona == .kuro ? lines.kuro : lines.haku).map(\.localized)
+        return (persona == .kuro ? lines.kuro : lines.haku).map { $0.localized(for: persona) }
     }
 
     /// Whether the card is a sport.
