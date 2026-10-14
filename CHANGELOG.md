@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character has her own seven weekly items, in her own rotation. They go on sale once
+  their art is in.
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
   Sunday items take turns now.
