@@ -189,8 +189,9 @@ struct WardrobeView: View {
             wardrobe.clear(slot)
         } label: {
             tile(isWorn: isWorn) {
-                // KURO has no default item, so her tile shows her head without this slot's item.
-                if persona == .haku {
+                // KURO has no default item to wear, so her worn slots show her head without this slot's item.
+                // Room and celebration are not worn, so they show the same picture as HAKU's.
+                if persona == .haku || slot == .room || slot == .celebration {
                     WardrobeItemIcon(slotDefault: slot)
                         .frame(width: 56, height: 56)
                 } else {
