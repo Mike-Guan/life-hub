@@ -13,7 +13,7 @@ struct ShopView: View {
 
     // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
     // promises a reward the app can't give yet. Add a win here when its source is wired.
-    static let liveWins: [Win] = [.boxing, .run5k, .exercise, .daylight, .earlySleep]
+    static let liveWins: [Win] = [.boxing, .run5k, .exercise, .daylight, .earlySleep, .steps]
 
     var body: some View {
         ScrollView {
@@ -65,9 +65,11 @@ struct ShopView: View {
     private var ledger: CanLedger { growth.ledger.only(persona) }
     private var balance: Int { ledger.balance }
     private var owned: Set<String> { ledger.owned }
+    // Card items show only with their card. Ones bought under another card stay owned and wearable.
+    private var card: IdentityKind? { .picked(for: persona) }
 
     private var forSale: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { $0.price != nil && !owned.contains($0.id) }
+        ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) }
     }
 
     private var ownedFromShop: [ShopItem] {
@@ -77,7 +79,7 @@ struct ShopView: View {
     private var keepsakes: [ShopItem] {
         ShopItem.catalog(for: persona).filter { item in
             guard let keepsake = item.keepsake else { return false }
-            return Self.liveWins.contains(keepsake.win) || owned.contains(item.id)
+            return (Self.liveWins.contains(keepsake.win) && item.suits(card)) || owned.contains(item.id)
         }
     }
 
@@ -89,20 +91,22 @@ struct ShopView: View {
     }
 
     private var header: some View {
+        // A full-screen cover closes with "完成" at the top right, not a back arrow.
         HStack(spacing: 8) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(Toy.body(20, weight: .heavy))
-                    .frame(width: 44, height: 44)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("返回")
             Text("商店")
                 .font(Toy.display(26))
             Spacer()
             CanChip(count: balance)
+            Button {
+                dismiss()
+            } label: {
+                Text("完成")
+                    .font(Toy.body(17, weight: .black))
+                    .foregroundStyle(Toy.ink)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -234,6 +238,7 @@ extension Win {
         case .earlySleep: "按时睡"
         case .plannedTask: "做完定好的事"
         case .exercise: "运动 30 分钟"
+        case .steps: "走了不少路"
         }
     }
 }

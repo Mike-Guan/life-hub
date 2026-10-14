@@ -11,7 +11,8 @@ struct BoxingCountdownWidget: Widget {
             HStack(spacing: 12) {
                 head.frame(width: 52, height: 52)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("拳击 \(context.state.start, style: .time) 开始").font(Toy.body(14, weight: .bold))
+                    Text("\(context.attributes.title ?? "拳击") \(context.state.start, style: .time) 开始")
+                        .font(Toy.body(14, weight: .bold))
                     countdown(to: context.state.start, started: context.isStale).font(Toy.display(28))
                 }
                 Spacer()
@@ -21,6 +22,7 @@ struct BoxingCountdownWidget: Widget {
             .foregroundStyle(Toy.ink)
             .activityBackgroundTint(Mode.boxing.color)  // HAKU only: KURO has no countdown.
             .activitySystemActionForegroundColor(Toy.ink)
+            .environment(\.locale, Languages.locale)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -30,7 +32,9 @@ struct BoxingCountdownWidget: Widget {
                     countdown(to: context.state.start, started: context.isStale).font(Toy.display(22))
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("拳套戴好了，\(context.state.start, style: .time) 开始").font(Toy.body(13, weight: .bold))
+                    Text("\(context.attributes.title ?? "拳击") \(context.state.start, style: .time) 开始")
+                        .font(Toy.body(13, weight: .bold))
+                        .environment(\.locale, Languages.locale)
                 }
             } compactLeading: {
                 head

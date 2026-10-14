@@ -12,15 +12,35 @@ public enum KuroLook: String, CaseIterable, Sendable {
     case tennis
     /// Glasses, a red pen and a stack of notebooks.
     case desk
+    // Identity cards, batch 1 (第 1 批身份卡 预览, UI 审核 round 2 passed 2026-10-13).
+    /// Boxing card: a violet top, a red headband, two red gloves and a small bag stand.
+    case box
+    /// Fitness card: her sportswear without the racket, holding a yoga block.
+    case fitness
+    /// Study card: her lilac top with an open notebook and a highlighter.
+    case study
+    /// Art card: a yellow smock, her tablet and a drawing pen.
+    case art
 
     // The only place the mode-to-outfit mapping lives, like `Mode.riveValue`.
-    /// The look for `mode`: boxing is her tennis day and the side-hustle slot is her desk time.
-    public init(mode: Mode) {
+    /// The look for `mode`: the identity card slot dresses her for `card`, or as her tennis day without one or
+    /// for a card she has no look for yet; the side-hustle slot is her desk time.
+    public init(mode: Mode, card: IdentityKind? = nil) {
         switch mode {
         case .work: self = .work
         case .chill: self = .chill
-        case .boxing: self = .tennis
+        case .boxing: self = Self.look(for: card)
         case .money: self = .desk
+        }
+    }
+
+    private static func look(for card: IdentityKind?) -> KuroLook {
+        switch card {
+        case .boxing: .box
+        case .fitness: .fitness
+        case .study: .study
+        case .art: .art
+        default: .tennis
         }
     }
 
@@ -31,6 +51,22 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .chill: Color(hex: 0x7FB7FF)
         case .tennis: Color(hex: 0xFFD1DC)
         case .desk: Color(hex: 0xDCCFFF)
+        // The card colors are placeholders until the shop palette (A4) settles them; each differs from the rest.
+        case .box: Color(hex: 0xFFE14D)
+        case .fitness: Color(hex: 0xFFC2D6)
+        case .study: Color(hex: 0x9FD3FF)
+        case .art: Color(hex: 0xFFC9A8)
+        }
+    }
+
+    /// The identity card that dresses her in this look, or nil for a look of her own.
+    var card: IdentityKind? {
+        switch self {
+        case .work, .chill, .tennis, .desk: nil
+        case .box: .boxing
+        case .fitness: .fitness
+        case .study: .study
+        case .art: .art
         }
     }
 
@@ -39,7 +75,7 @@ public enum KuroLook: String, CaseIterable, Sendable {
         switch self {
         case .work: .work
         case .chill: .chill
-        case .tennis: .boxing
+        case .tennis, .box, .fitness, .study, .art: .boxing
         case .desk: .money
         }
     }
@@ -77,6 +113,8 @@ struct KuroPose: Sendable {
     var idle: KuroIdle?
     /// How far into `idle` she is, 0..<1.
     var idleProgress = 0.0
+    /// The home scene she is playing, if any: the invite, a walk or the bath.
+    var scene: KuroScene?
 
     /// The resting pose for `look` at `energy` (0-100, or nil when unknown); `bedtime` makes her sleepy.
     init(look: KuroLook, energy: Double?, bedtime: Bedtime = .off) {
@@ -128,7 +166,7 @@ struct KuroFigure: View {
     var body: some View {
         ZStack {
             ForEach(Self.parts(for: look, pose: pose), id: \.self) { part in
-                KuroPartView(part: part, shift: Self.shift(part, pose: pose))
+                KuroPartView(part: part, shift: Self.shift(part, pose: pose), turn: Self.turn(part, pose: pose))
             }
             if pose.overtime, let sign = pose.sign {
                 RunnerTextView(text: RunnerText(string: sign, x: 60, y: -1, size: 9, color: KuroPalette.ink))
@@ -144,22 +182,28 @@ struct KuroFigure: View {
         visible.insert(pose.blinking ? .eyesClosed : part(pose.eyes))
         if !pose.tired { visible.insert(.blush) }
         if pose.overtime {
-            visible.subtract([.workTablet, .workStylus])
+            // Her chin rests on her hand, so whatever she held in front of her is put down.
+            visible.subtract([.workTablet, .workStylus, .gymBlock, .studyNotebook])
             visible.formUnion([.overtimeDesk, .overtimeHand])
             if pose.sign != nil { visible.insert(.overtimeSign) }
         }
         if look != .work {
-            let mouth: KuroPart = pose.tired || pose.calm ? .mouthFlat : look == .tennis ? .mouthSmile : .mouthCat
+            let mouth: KuroPart =
+                pose.tired || pose.calm ? .mouthFlat : look == .tennis || look == .fitness ? .mouthSmile : .mouthCat
             visible.insert(pose.mouthO ? .mouthO : mouth)
         }
         for item in pose.items where item.look == look {
             visible.insert(item.part)
             if let replaced = item.replaces { visible.remove(replaced) }
         }
+        pose.scene?.dress(look, items: pose.items, &visible)
         if let tap = pose.tap {
             apply(tap, progress: pose.tapProgress, to: &visible)
-            // The rubbing hand comes up on her arm, in her look's sleeve.
-            if visible.contains(.tapRub) { visible.insert(rubSleeve(look)) }
+            // The rubbing hand comes up on her arm, in her look's sleeve; in gloves the left one comes off.
+            if visible.contains(.tapRub) {
+                visible.insert(rubSleeve(look))
+                visible.remove(.boxGloveL)
+            }
         }
         if pose.heart { visible.insert(.tapHeart) }
         if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
@@ -173,6 +217,10 @@ struct KuroFigure: View {
         case .chill: [.jacketChill, .chillCup]
         case .tennis: [.tennisPonytail, .jacketTennis, .tennisHeadband, .tennisRacket]
         case .desk: [.jacketDesk, .deskGlasses, .deskBooks, .deskPen]
+        case .box: [.tennisPonytail, .jacketBox, .boxHeadband, .boxGloveL, .boxGloveR, .boxSandbag]
+        case .fitness: [.tennisPonytail, .jacketTennis, .gymBlock]
+        case .study: [.jacketChill, .studyNotebook, .studyHighlighter]
+        case .art: [.jacketSmock, .workTablet, .craftPen]
         }
     }
 
@@ -180,8 +228,11 @@ struct KuroFigure: View {
         switch look {
         case .work: .tapRubSleeveWork
         case .chill: .tapRubSleeveChill
-        case .tennis: .tapRubSleeveTennis
+        case .tennis, .fitness: .tapRubSleeveTennis
         case .desk: .tapRubSleeveDesk
+        case .box: .tapRubSleeveBox
+        case .study: .tapRubSleeveChill
+        case .art: .tapRubSleeveSmock
         }
     }
 
@@ -232,16 +283,37 @@ extension EnvironmentValues {
 }
 
 /// Draws one `KuroPart` across the whole figure frame.
+/// A turn or squash of one part about a point, in SVG units.
+struct KuroTurn: Equatable, Sendable {
+    /// The point the part turns about.
+    var pivot: CGPoint
+    /// The turn, in degrees.
+    var angle: Double = 0
+    /// The direction the squash runs along, in degrees from horizontal.
+    var axis: Double = 0
+    /// The width along `axis`; negative shows the back.
+    var scale: CGFloat = 1
+}
+
 struct KuroPartView: View {
     let part: KuroPart
     /// How far the part moves, in SVG units.
     var shift: CGSize = .zero
+    /// How the part turns about a point, if it does.
+    var turn: KuroTurn?
     @Environment(\.kuroLineArt) private var lineArt
 
     var body: some View {
         Canvas { context, size in
             RunnerDrawing.enterFigureSpace(&context, size: size)
             context.translateBy(x: shift.width, y: shift.height)
+            if let turn {
+                context.translateBy(x: turn.pivot.x, y: turn.pivot.y)
+                context.rotate(by: .degrees(turn.angle + turn.axis))
+                context.scaleBy(x: turn.scale, y: 1)
+                context.rotate(by: .degrees(-turn.axis))
+                context.translateBy(x: -turn.pivot.x, y: -turn.pivot.y)
+            }
             let inks = KuroArt.cachedInks(part)
             RunnerDrawing.draw(lineArt ? KuroArt.lineArt(inks) : inks, in: context)
         }
@@ -257,6 +329,9 @@ public struct KuroView: View {
     let activity: CompanionActivity?
     let moment: CompanionMoment?
     let overtimeUntil: Date?
+    let invite: String?
+    let walking: HubPlace.Kind?
+    let bath: Bool
     let style: CompanionStyle
     let wearing: Set<KuroItem>
     let event: CompanionEvent?
@@ -267,6 +342,8 @@ public struct KuroView: View {
     let onTap: (() -> Void)?
     /// Called once she has answered a welcome back event.
     let onWelcomeDone: (() -> Void)?
+    /// Called after she shows the towel round her head on a tap during bath time.
+    let onBathDone: (() -> Void)?
 
     @Environment(\.frameClock) private var frameClock
     @Environment(\.companionHold) private var hold
@@ -293,6 +370,10 @@ public struct KuroView: View {
     @State private var unboxItem: KuroItem?
     /// When the last unboxing ended, so her idle eases back in instead of jumping.
     @State private var unboxEnd: Date?
+    @State private var inviteStart: Date?
+    @State private var bathStart: Date?
+    @State private var dryStart: Date?
+    @State private var lookBackStart: Date?
     /// Her idle time since her pace last changed; nil until it does.
     @State private var idlePace: IdlePace?
     // Id of the last unboxing, shared with HAKU's view so each plays once.
@@ -319,6 +400,9 @@ public struct KuroView: View {
     ///   - moment: the moment of the day, which picks her lines unless an activity does. In the work look,
     ///     `.overtime` sits her at the desk with her chin on her hand.
     ///   - overtimeUntil: the late end of the work day, shown on a sign above her head during `.overtime`.
+    ///   - invite: today's invite, written by the app. While set she points at the door and says it.
+    ///   - walking: the place she just left; while set she walks with small steps.
+    ///   - bath: bath time; she carries her towel and clothes off to the bath, and a tap shows her washed.
     ///   - style: `.watch` gives a tap a light tap on the wrist instead of a line.
     ///   - wearing: ids of her shop items she wears; each shows only in its own look.
     ///   - event: a one-off animation. `.unlock` with one of her items plays the unboxing once per id;
@@ -329,6 +413,7 @@ public struct KuroView: View {
     ///   - cheer: increment to play her cheer.
     ///   - onTap: called after she reacts to a tap.
     ///   - onWelcomeDone: called once she has answered a `.welcomeBack` event, even one already played.
+    ///   - onBathDone: called after she shows the towel round her head on a tap during bath time.
     public init(
         look: KuroLook,
         energy: Double? = nil,
@@ -337,13 +422,17 @@ public struct KuroView: View {
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
         overtimeUntil: Date? = nil,
+        invite: String? = nil,
+        walking: HubPlace.Kind? = nil,
+        bath: Bool = false,
         style: CompanionStyle = .standard,
         wearing: Set<String> = [],
         event: CompanionEvent? = nil,
         showsBubble: Bool = true,
         cheer: Int = 0,
         onTap: (() -> Void)? = nil,
-        onWelcomeDone: (() -> Void)? = nil
+        onWelcomeDone: (() -> Void)? = nil,
+        onBathDone: (() -> Void)? = nil
     ) {
         self.look = look
         self.energy = energy
@@ -352,6 +441,9 @@ public struct KuroView: View {
         self.activity = activity
         self.moment = moment
         self.overtimeUntil = overtimeUntil
+        self.invite = invite
+        self.walking = walking
+        self.bath = bath
         self.style = style
         // The spin is a celebration, not something she wears.
         self.wearing = KuroItem.items(wearing).subtracting([.spin])
@@ -360,6 +452,7 @@ public struct KuroView: View {
         self.cheer = cheer
         self.onTap = onTap
         self.onWelcomeDone = onWelcomeDone
+        self.onBathDone = onBathDone
     }
 
     public var body: some View {
@@ -378,6 +471,7 @@ public struct KuroView: View {
                 let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate
                 let tap = reaction(at: time)
                 let unbox = unbox(at: time)
+                let homeScene = tap == nil && unbox == nil ? scene(at: time) : nil
                 // Her slot's own move plays between taps; with reduced motion she keeps only the slot's face.
                 let slotMove = tap == nil && unbox == nil && !reduceMotion ? slot?.move(in: look, at: time) : nil
                 let reacting = (tap ?? slotMove).map {
@@ -385,7 +479,8 @@ public struct KuroView: View {
                 }
                 // KURO-04 (UI 审核 2026-10-09): with the watch screen dimmed she dozes, eyes shut and body still,
                 // instead of freezing mid-hop or mid-blink.
-                let pose = dozing ? self.pose.showing(.closed) : unbox != nil ? unboxPose : reacting ?? self.pose
+                let pose =
+                    dozing ? self.pose.showing(.closed) : unbox != nil ? unboxPose : reacting ?? scened(homeScene)
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
                 let still = Self.holdsStill(reduceMotion: reduceMotion, unboxing: unbox != nil, dozing: dozing)
                 // KURO-16: her idle runs on from where it was when her pace changes, and eases back in after
@@ -394,10 +489,12 @@ public struct KuroView: View {
                 let ease = Self.settle(since: unboxEnd, at: time)
                 // Out being active she bounces like on her tennis day.
                 let loop = slot == .active ? KuroLook.tennis : look
-                let motion = sleepy ? IdleMotion.sleeping(time: time) : Self.motion(loop, time: idleTime)
+                let motion =
+                    sleepy ? IdleMotion.sleeping(time: time) : homeScene?.motion ?? Self.motion(loop, time: idleTime)
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 // Her small idle moves play only in the plain idle.
-                let fidget = still || tap != nil || slot != nil || sleepy ? nil : KuroIdle.at(idleTime, look: look)
+                let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
+                let fidget = busy ? nil : KuroIdle.at(idleTime, look: look)
                 ZStack {
                     KuroFigure(look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget))
                         .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
@@ -424,7 +521,7 @@ public struct KuroView: View {
                 }
             }
             .modifier(WatchFigureFrame(isEnabled: style == .watch))
-            .padding(.top, 24)
+            .padding(.top, Self.topInset(style))
             .padding(.horizontal, 12)
 
             if unboxStart != nil {
@@ -474,6 +571,20 @@ public struct KuroView: View {
         .onAppear {
             playEventIfNew()
             finishWelcomeIfNeeded()
+            if invite != nil { startInvite() }
+            if let walking { say(KuroScene.walkLine(from: walking), for: 3) }
+            if bath { startBath() }
+        }
+        .onChange(of: invite) { _, new in
+            if new != nil { startInvite() }
+        }
+        .onChange(of: walking) { _, new in
+            if let new, bedtime == .off { say(KuroScene.walkLine(from: new), for: 3) }
+        }
+        .onChange(of: bath) { _, new in
+            // The view lives for days, so each evening's bath time starts unwashed.
+            dryStart = nil
+            if new { startBath() }
         }
         .onChange(of: event) { _, _ in
             playEventIfNew()
@@ -560,6 +671,11 @@ public struct KuroView: View {
     /// line; too many in a row turn her away.
     private func react() {
         let now = Date.now
+        if style != .watch, unboxStart == nil, reaction(at: now.timeIntervalSinceReferenceDate) == nil,
+            reactInScene(at: now)
+        {
+            return
+        }
         if style == .watch { pokes += 1 }
         if tapKind == .turnAway, reaction(at: now.timeIntervalSinceReferenceDate) != nil { return }
         tapTimes = tapTimes.filter { now.timeIntervalSince($0) < CompanionView.pesterWindow } + [now]
@@ -663,6 +779,12 @@ public struct KuroView: View {
         return (0..<1).contains(progress) ? (kind, progress) : nil
     }
 
+    // The tennis, boxing and gym ponytails reach the top of her bounds, where the phone bubble sits (unbox page).
+    /// The space above the figure for `style`, in points.
+    nonisolated static func topInset(_ style: CompanionStyle) -> CGFloat {
+        style == .watch ? 24 : 38
+    }
+
     /// Whether she holds still, with no sway, hop, blink or idle move: with Reduce Motion, while unboxing, or with
     /// the watch screen dimmed.
     nonisolated static func holdsStill(reduceMotion: Bool, unboxing: Bool, dozing: Bool) -> Bool {
@@ -681,10 +803,78 @@ public struct KuroView: View {
         return slot?.dressing(pose) ?? pose
     }
 
-    /// The fallback body language for her need, activity or moment; none at bedtime.
+    /// The fallback body language for her need, activity or moment; none at bedtime or during a home scene.
     private var slot: KuroSlot? {
-        guard bedtime == .off else { return nil }
+        guard bedtime == .off, invite == nil, walking == nil, !bath else { return nil }
         return KuroSlot(need: need, activity: activity, moment: moment, look: look)
+    }
+
+    /// Her resting pose playing `scene`.
+    private func scened(_ scene: KuroScene?) -> KuroPose {
+        var pose = self.pose
+        pose.scene = scene
+        if let eyes = scene?.eyes { pose.eyes = eyes }
+        return pose
+    }
+
+    /// The home scene playing at `time`, or nil when none is; none at bedtime. A tap's towel comes first, then
+    /// the bath, the walk and the invite, like HAKU.
+    private func scene(at time: TimeInterval) -> KuroScene? {
+        guard bedtime == .off else { return nil }
+        if let dry = dryStart?.timeIntervalSinceReferenceDate, (0..<KuroScene.driedLength).contains(time - dry) {
+            return .dried(time: time - dry)
+        }
+        if bath { return .bath(time: time - (bathStart?.timeIntervalSinceReferenceDate ?? time)) }
+        if let walking {
+            let back = lookBackStart.map { (0..<1.2).contains(time - $0.timeIntervalSinceReferenceDate) } ?? false
+            return .walking(from: walking, time: time, lookingBack: back)
+        }
+        guard invite != nil else { return nil }
+        // Without a start she has already pointed and stands.
+        return .invite(time: time - (inviteStart?.timeIntervalSinceReferenceDate ?? time - 10))
+    }
+
+    /// Answers a tap with the scene's own move; false when no scene is playing.
+    private func reactInScene(at now: Date) -> Bool {
+        guard let scene = scene(at: now.timeIntervalSinceReferenceDate) else { return false }
+        switch scene {
+        case .invite:
+            // Points at the door again, without a word.
+            inviteStart = now.addingTimeInterval(-KuroScene.pointing.lowerBound)
+        case .walking:
+            lookBackStart = now
+        case .bath:
+            dryStart = now
+            say(KuroScene.driedLine, for: 3)
+            Task {
+                try? await Task.sleep(for: .seconds(KuroScene.driedLength))
+                onBathDone?()
+            }
+        case .dried:
+            break
+        }
+        pop += 1
+        return true
+    }
+
+    private func startInvite() {
+        guard bedtime == .off, let invite else { return }
+        inviteStart = .now
+        pop += 1
+        say(invite, for: 5)
+    }
+
+    /// Starts the bath call; she says her line once she has stopped at the edge.
+    private func startBath() {
+        guard bedtime == .off else { return }
+        let start = Date.now
+        bathStart = start
+        bubbleTask?.cancel()
+        bubbleTask = Task {
+            try? await Task.sleep(for: .seconds(KuroScene.bathLineAt))
+            guard !Task.isCancelled, bathStart == start, dryStart == nil else { return }
+            say(KuroScene.bathLine, for: 3)
+        }
     }
 
     /// Her pose while unboxing: acting calm in the new item, with low eyes and a flat mouth.
@@ -775,14 +965,16 @@ public struct KuroView: View {
         }
     }
 
-    /// The idle loop for `look`: work breathes and shifts her weight, chill sways, tennis hops and at the desk
-    /// she nods slowly over the page.
+    /// The idle loop for `look`: work breathes and shifts her weight, chill and fitness sway, tennis and boxing
+    /// hop, and at the desk, studying or drawing she nods slowly over the page.
     nonisolated static func motion(_ look: KuroLook, time t: TimeInterval) -> IdleMotion {
         switch look {
         case .work: IdleMotion(dy: CGFloat(sin(t * 2 * .pi / 3.4)) * 1.5, angle: sin(t * 2 * .pi / 6.8))
         case .chill: IdleMotion(mode: .chill, time: t)
-        case .tennis: IdleMotion(mode: .boxing, time: t)
-        case .desk: IdleMotion(dy: 2 * IdleClock.nod(at: t, period: 1.6, seed: KuroIdle.seed), angle: 0)
+        case .tennis, .box: IdleMotion(mode: .boxing, time: t)
+        // Keeping someone company at the gym, she sways calmly instead of bouncing.
+        case .fitness: IdleMotion(mode: .chill, time: t)
+        case .desk, .study, .art: IdleMotion(dy: 2 * IdleClock.nod(at: t, period: 1.6, seed: KuroIdle.seed), angle: 0)
         }
     }
 
@@ -805,6 +997,10 @@ public struct KuroView: View {
         case .chill: "KURO，捧着热饮"
         case .tennis: "KURO，拿着网球拍"
         case .desk: "KURO，戴着眼镜在批改"
+        case .box: "KURO，戴着拳套"
+        case .fitness: "KURO，抱着瑜伽砖"
+        case .study: "KURO，拿着笔记本"
+        case .art: "KURO，在平板上画画"
         }
     }
 }

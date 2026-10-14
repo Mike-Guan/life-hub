@@ -22,11 +22,12 @@ import Testing
         let parts = Set(KuroFigure.parts(for: look, pose: KuroPose(look: look, energy: nil)))
         let jackets: [KuroLook: KuroPart] = [
             .work: .jacketWork, .chill: .jacketChill, .tennis: .jacketTennis, .desk: .jacketDesk,
+            .box: .jacketBox, .fitness: .jacketTennis, .study: .jacketChill, .art: .jacketSmock,
         ]
         #expect(parts.intersection(Set(jackets.values)) == [jackets[look]!])
         #expect(parts.isSuperset(of: [.hairBack, .faceBase, .hairFringe, .catEars, .blush]))
         #expect(parts.contains(.maskWork) == (look == .work))
-        #expect(parts.contains(.tennisPonytail) == (look == .tennis))
+        #expect(parts.contains(.tennisPonytail) == [.tennis, .box, .fitness].contains(look))
         #expect(parts.contains(.deskGlasses) == (look == .desk))
         #expect(parts.contains(.chillCup) == (look == .chill))
     }
@@ -94,7 +95,7 @@ import Testing
     }
 
     @Test func modesPickHerLooks() {
-        #expect(Mode.allCases.map(KuroLook.init(mode:)) == [.work, .chill, .tennis, .desk])
+        #expect(Mode.allCases.map { KuroLook(mode: $0) } == [.work, .chill, .tennis, .desk])
     }
 
     @Test func bedtimeMakesHerSleepy() {
@@ -136,7 +137,7 @@ import Testing
         let kinds: [WorkoutSummary.Kind] = [.boxing, .running, .strength, .other]
         let hers = kinds.map { CompanionLines.celebration($0, persona: .kuro) }
         #expect(Set(hers).count == kinds.count && hers != kinds.map { CompanionLines.celebration($0) })
-        #expect(CompanionLines.unlock("gloves.gold", persona: .kuro) == "……给你的。不是特意挑的。")
+        #expect(CompanionLines.unlock("gloves.gold", persona: .kuro) == "……给你。收好。")
         #expect(CompanionLines.unlock("room.plant", persona: .kuro) == "……还行吧。")
     }
 
@@ -177,7 +178,7 @@ import Testing
     }
 
     @Test func eachLookMapsBackToItsMode() {
-        #expect(KuroLook.allCases.allSatisfy { KuroLook(mode: $0.mode) == $0 })
+        #expect(KuroLook.allCases.allSatisfy { KuroLook(mode: $0.mode, card: $0.card) == $0 })
     }
 
     @Test func aTapNeverRepeatsTheShownLine() {

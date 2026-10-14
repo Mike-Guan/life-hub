@@ -4,9 +4,51 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ## [Unreleased]
 
+### Added
+- Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
+  hand left out) or the iPhone's own count. Days you didn't open the app count too, up to a week back. Steps
+  are never shown and never leave the iPhone.
+- HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
+  pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
+- Debug builds have a 「日文和英文」 switch in settings. It is off by default, so every build shows Chinese
+  whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
+
 ### Changed
 - Today's energy has its own line under the character, saying where it comes from. When it is a guess from
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
+- 27 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
+  For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
+  「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
+  names two apps and says only this iPhone knows how long you scrolled.
+- The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
+  room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
+  back puts them on again. The wardrobe screen moves to these groups in a separate change.
+- The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
+  hustle); a full set replaces that mode's top. They go on sale once the character art draws them.
+- The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
+  fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
+  own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- Tennis is her main card: she bounces the ball on a flat racket and spins the racket while idle, and a tap
+  makes her swing. Boxing keeps only the gloves tapping together.
+- Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
+  the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
+  blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
+  watch and its widgets never turn sleepy.
+- The Screen Time watch (pick apps in settings) now works in TestFlight (STG) builds too, not only in
+  Debug. The App Store build still leaves it out.
+- The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
+  turned off it is still given.
+- The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
+  first character's line.
+- On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
+  ponytail (unbox page and home card). The watch is unchanged.
+- The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
+  card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
+  The second character's flower is now called 地上小粉花.
+- The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
+  4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
+- The watch has no dark band behind the clock any more; every screen keeps its own background.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
@@ -15,6 +57,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Daylight and going to bed on time now earn their can: 15 minutes in daylight (Apple Watch) earns 1 a day,
   and falling asleep within 30 minutes of the bedtime set in Settings earns 1 a night. Life Hub asks once
   for time in daylight in Health. Only the win is kept, never the daylight or sleep times.
+- With the fitness card picked, a visit to the fitness gym earns the card's weekly cans, the same as a
+  strength workout, so one session no longer pays twice.
+- On the smallest watch, a long mode name in the clock row shrinks to fit instead of running into the clock.
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
 - With no mode yet, the watch tells you to pick one on the iPhone, in smaller type, instead of the iPhone's line.
@@ -73,6 +118,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   bus, and the moment of arriving. Life Hub asks for Motion & Fitness once; motion stays on the iPhone.
 - After a workout the watch cheers for it as soon as the Health app saves it, without opening the iPhone app.
   The iPhone home still cheers the next time it opens.
+- At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
+  chain when he hits it.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
@@ -379,6 +426,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The wardrobe keeps what a newer build put on (new slots or modes) instead of losing the whole wardrobe,
+  and writes it back when saving.
 - Watch: the app opens without the system killing it (a hand-made pager replaces the vertical page view),
   HAKU is a little smaller, waking is smoother, and a shake still counts right after the screen dims. (#231)
 - Watch: the app has its own icon. (#230)

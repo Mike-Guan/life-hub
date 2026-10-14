@@ -4,6 +4,10 @@ import WidgetKit
 
 @main
 struct LifeHubWidgets: WidgetBundle {
+    init() {
+        Languages.load(from: AppGroup.defaults)
+    }
+
     var body: some Widget {
         StatusWidget()
         ModeWidget()
@@ -57,7 +61,7 @@ struct HubEntry: TimelineEntry {
     var detail: String {
         if let offWork { return offWork }
         // The second character's picture shows neither of these, so her line skips them.
-        if persona == .haku && bath { return "去洗澡" }
+        if persona == .haku && bath { return "占浴室中" }
         if let activity { return activity.reason(for: persona) }
         if persona == .haku && moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) {
@@ -96,7 +100,7 @@ struct HubProvider: TimelineProvider {
         let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
         let work = ModeRules.stored(in: AppGroup.defaults)
         let days = AppGroup.activityDays(now: now)
-        let starts = ActivityEngine.startTimes(on: now, days: days, work: work)
+        let starts = ActivityEngine.startTimes(on: now, days: days, work: work, bedtime: schedule)
         let departure = GymDeparture.stored(in: AppGroup.defaults)
         let walk = [departure?.at, departure?.until].compactMap { $0 }
         let presence = PlacePresence.stored(in: AppGroup.defaults)
@@ -104,7 +108,7 @@ struct HubProvider: TimelineProvider {
             since: presence.since(.office),
             now: now,
             work: work,
-            rules: NeedRules.standard.following(work)
+            rules: NeedRules.standard.following(work, bedtime: schedule)
         )
         let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work, bedtime: schedule)
         let slots = WidgetSnapshot.slotDates(after: now)
@@ -152,7 +156,7 @@ struct HubProvider: TimelineProvider {
                 stiff: sit?.isStiff(mode: snapshot?.mode, at: date) ?? false,
                 now: date,
                 work: work,
-                rules: NeedRules.standard.following(work),
+                rules: NeedRules.standard.following(work, bedtime: schedule),
                 bedtime: schedule
             )
             return HubEntry(

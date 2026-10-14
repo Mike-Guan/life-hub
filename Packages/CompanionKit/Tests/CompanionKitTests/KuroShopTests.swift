@@ -9,7 +9,7 @@ import Testing
         let ids = KuroItem.allCases.map(\.rawValue)
         #expect(Set(ids).count == ids.count)
         #expect(ids.allSatisfy { $0.hasPrefix("kuro.") })
-        #expect(Set(ids) == Set(ShopItem.catalog(for: .kuro).map(\.id)))
+        #expect(Set(ids) == Set(ShopItem.catalog(for: .kuro).filter(\.isDrawn).map(\.id)))
         #expect(KuroItem.allCases.filter(\.isKeepsake) == [.spin, .sakura, .goldRacket])
         #expect(KuroItem.items(["kuro.room.flower", "gloves.gold", "nope"]) == [.flower])
     }
@@ -68,7 +68,7 @@ import Testing
 
     @Test func sheActsCalmAboutItemsAndShyAboutKeepsakes() {
         #expect(KuroBubbleLines.unlock(KuroItem.bag.rawValue) == "……还行吧。")
-        #expect(KuroBubbleLines.unlock(KuroItem.goldRacket.rawValue) == "……给你的。不是特意挑的。")
+        #expect(KuroBubbleLines.unlock(KuroItem.goldRacket.rawValue) == "……给你。收好。")
     }
 
     @Test func iconsAreSquareCropsOfTheItem() {

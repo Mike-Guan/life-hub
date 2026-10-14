@@ -3,11 +3,13 @@ import FamilyControls
 import HubCore
 import SwiftUI
 import UniformTypeIdentifiers
+import WidgetKit
 
 /// App settings: the bedtime reminder time, the places that switch mode, the Daily Widget link and
 /// the Screen Time watch.
 struct SettingsView: View {
     @Binding var bedtime: BedtimeSchedule
+    @Binding var remindsAtBedtime: Bool
     @Binding var rules: ModeRules
     @Binding var places: PlaceSettings
     @Binding var persona: Persona
@@ -16,6 +18,8 @@ struct SettingsView: View {
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
+    /// The user's cards, for the place names and actions.
+    let cards: ModeCards
     /// Deletes every record and setting on this iPhone, as on a fresh install.
     let onEraseAll: () -> Void
     /// Starts at the bottom of the page, with the 删除全部数据 confirmation open when `true`. For screenshots only.
@@ -30,6 +34,7 @@ struct SettingsView: View {
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
     @State private var asksErase = false
+    @AppStorage(Languages.key, store: AppGroup.defaults) private var languagesOn = false
 
     var body: some View {
         ScrollView {
@@ -106,11 +111,18 @@ struct SettingsView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("睡觉提醒")
+                Text("睡觉时间")
                     .font(Toy.body(16, weight: .heavy))
-                timeRow("睡觉", selection: time($bedtime.startMinute))
-                timeRow("起床", selection: time($bedtime.endMinute))
-                Text("睡觉时间到了发一条通知，\(persona.title) 变困，一直到起床时间。只提醒一次。")
+                timeRow("睡觉", selection: time(shownBedtime.startMinute), muted: !bedtime.isSet)
+                timeRow("起床", selection: time(shownBedtime.endMinute), muted: !bedtime.isSet)
+                if !bedtime.isSet {
+                    Text("还没设。选一个时间就生效。")
+                        .font(Toy.body(12, weight: .bold))
+                        .foregroundStyle(Toy.muted)
+                }
+                Toggle("到点提醒", isOn: $remindsAtBedtime)
+                    .font(Toy.body(15))
+                Text("\(persona.title) 从睡觉时间开始变困，一直到起床时间。打开提醒，到点发一条通知，只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
             }
@@ -140,10 +152,13 @@ struct SettingsView: View {
 
             memoryCard
 
-            // Debug only until Apple approves Family Controls for distribution; STG and PROD have no
-            // entitlement, so the button could only fail. Remove with the CI-CD.md Screen Time step.
-            #if DEBUG
+            // PROD has no Family Controls entitlement yet, so the button could only fail there.
+            // Remove the condition with the CI-CD.md Screen Time step.
+            #if DEBUG || ENV_STG
             scrollCard
+            #endif
+            #if DEBUG
+            languagesCard
             dogfoodCard
             #endif
 
@@ -192,7 +207,7 @@ struct SettingsView: View {
                     .font(Toy.body(13, weight: .heavy))
                     .frame(minHeight: 44)
             }
-            Text("学到的习惯、长期记得的事和做过的判断。都只在这台 iPhone 上。")
+            Text("学到的规律、长期记得的事和做过的判断。都只在这台 iPhone 上。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
         }
@@ -255,7 +270,10 @@ struct SettingsView: View {
                 .font(Toy.body(13, weight: .heavy))
                 .frame(minHeight: 44)
             }
-            Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
+            Text("选你最容易刷停不下来的 App。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+            Text("用了多久只有这台 iPhone 知道，我们看不到。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             if let screenTimeError {
@@ -266,6 +284,33 @@ struct SettingsView: View {
         .toyCard()
         .familyActivityPicker(isPresented: $pickingApps, selection: $scrollApps)
         .onChange(of: scrollApps) { watchScrolling() }
+    }
+
+    // Debug only (Issue #350): Japanese and English stay off until every string is in and reviewed. Not in STG,
+    // because friends get the same STG build through TestFlight.
+    private var languagesCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle(isOn: languagesBinding) {
+                Text("日文和英文")
+                    .font(Toy.body(16, weight: .heavy))
+            }
+            Text("打开后跟手机的系统语言走；还没翻译的地方仍是中文。关着时一律中文。只在开发版里有。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(16)
+        .toyCard()
+    }
+
+    private var languagesBinding: Binding<Bool> {
+        Binding(
+            get: { languagesOn },
+            set: {
+                Languages.isOn = $0
+                languagesOn = $0
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+        )
     }
 
     // Debug builds only: the automatic decisions noted during the weeks of use (PRD section 19).
@@ -326,14 +371,18 @@ struct SettingsView: View {
     }
 
     /// A time setting: the name on the left, the time in an outlined chip on the right.
-    private func timeRow(_ title: String, selection: Binding<Date>) -> some View {
+    // UI 审核 #340: a prefilled time that isn't set yet is drawn muted, so it doesn't look in effect.
+    private func timeRow(_ title: String, selection: Binding<Date>, muted: Bool = false) -> some View {
         HStack {
             Text(title)
                 .font(Toy.body(15, weight: .bold))
+                .foregroundStyle(muted ? Toy.muted : Toy.ink)
             Spacer()
             DatePicker(title, selection: selection, displayedComponents: .hourAndMinute)
                 .labelsHidden()
                 .font(Toy.body(16, weight: .heavy))
+                .foregroundStyle(muted ? Toy.muted : Toy.ink)
+                .opacity(muted ? 0.6 : 1)
                 .padding(3)
                 .toyCard(fill: Toy.card, radius: 10, shadow: 2)
         }
@@ -355,15 +404,15 @@ struct SettingsView: View {
                 .disabled(!places.canAdd)
                 .accessibilityLabel("添加地点")
             }
-            ForEach(HubPlace.Kind.presets, id: \.self) { kind in
+            ForEach(HubPlace.Kind.presets(with: cards), id: \.self) { kind in
                 let place = places[kind]
-                placeRow(title: kind.title(for: persona), detail: place == nil ? "没设" : "已设") {
+                placeRow(title: kind.title(for: persona, cards: cards), detail: place == nil ? "没设" : "已设") {
                     let blank = HubPlace(kind: kind, latitude: 0, longitude: 0)
                     editing = PlaceEdit(place: place ?? blank, isNew: place == nil)
                 }
             }
             ForEach(places.custom) { place in
-                placeRow(title: place.title, detail: place.action.title(for: persona)) {
+                placeRow(title: place.title, detail: place.action.title(for: persona, cards: cards)) {
                     editing = PlaceEdit(place: place, isNew: false)
                 }
             }
@@ -379,6 +428,7 @@ struct SettingsView: View {
                 hasLocation: !edit.isNew,
                 monitor: monitor,
                 persona: persona,
+                cards: cards,
                 onSave: { places.save($0) },
                 onDelete: edit.isNew ? nil : { places.remove(id: edit.place.id) }
             )
@@ -408,6 +458,15 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    // PM 2026-10-13: an unset bedtime shows the prefill; picking a time sets the whole schedule.
+    private var shownBedtime: Binding<BedtimeSchedule> {
+        Binding {
+            bedtime.isSet ? bedtime : .standard
+        } set: { schedule in
+            bedtime = schedule
+        }
     }
 
     // The picker edits a Date; only its hour and minute are kept.

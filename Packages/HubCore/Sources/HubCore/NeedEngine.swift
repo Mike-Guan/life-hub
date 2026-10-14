@@ -96,8 +96,8 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var stillFor: TimeInterval
     /// How long couch scrolling lasts after the last Screen Time report.
     public var scrollQuiet: TimeInterval
-    /// Boxing day as a `Calendar` weekday (1 is Sunday).
-    public var boxingWeekday: Int
+    /// The identity card's day as a `Calendar` weekday (1 is Sunday), `nil` until one is learned.
+    public var boxingWeekday: Int?
     /// When boxing warm-up starts on boxing day.
     public var boxingWarmupStartMinute: Int
     /// When boxing warm-up gives up on boxing day.
@@ -137,14 +137,15 @@ public struct NeedRules: Codable, Equatable, Sendable {
     /// Whose lines the needs and invites use.
     public var persona: Persona
 
-    // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses.
-    /// Couch after 19:00 and 60 still minutes, or until 20 min after the last Screen Time report; boxing Sunday
-    /// 9:00 to 12:00 with class at 10:00; invites after 60 / 30 min.
+    // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses. PM 2026-10-13
+    // (写死作息排查 v0 #7): no identity day until one is learned; the warm-up times move with it.
+    /// Couch after 19:00 and 60 still minutes, or until 20 min after the last Screen Time report; no identity
+    /// day; invites after 60 / 30 min.
     public static let standard = NeedRules(
         eveningStartMinute: 19 * 60,
         stillFor: 60 * 60,
         scrollQuiet: 20 * 60,
-        boxingWeekday: 1,
+        boxingWeekday: nil,
         boxingWarmupStartMinute: 9 * 60,
         boxingWarmupEndMinute: 12 * 60,
         boxingFirstUntilMinute: 10 * 60 + 30,
@@ -160,14 +161,16 @@ public struct NeedRules: Codable, Equatable, Sendable {
     // PM, 2026-10-13 (写死作息排查 v0 #8): these follow the user's work hours. With the standard 9:30 to
     // 18:30 they are the times from Issue #23.
     /// These rules with the times that follow work hours taken from `work`: the evening and overtime from
-    /// 30 minutes after work ends, the gym invite from 1 to 2 hours after it ends, and drowsy at the latest
-    /// 4.5 hours after work starts.
-    public func following(_ work: ModeRules) -> NeedRules {
+    /// 30 minutes after the working day ends (`ModeRules.dayEndMinute`), the gym invite from 1 to 2 hours
+    /// after it ends, and drowsy at the latest 4.5 hours after work starts.
+    /// - Parameter bedtime: the bedtime, for the end of an irregular working day.
+    public func following(_ work: ModeRules, bedtime: BedtimeSchedule = .standard) -> NeedRules {
         var rules = self
-        rules.eveningStartMinute = work.workEndMinute + 30
-        rules.overtimeMinute = work.workEndMinute + 30
-        rules.gymInviteStartMinute = work.workEndMinute + 60
-        rules.gymInviteEndMinute = work.workEndMinute + 120
+        let end = work.dayEndMinute(bedtime: bedtime)
+        rules.eveningStartMinute = end + 30
+        rules.overtimeMinute = end + 30
+        rules.gymInviteStartMinute = end + 60
+        rules.gymInviteEndMinute = end + 120
         rules.drowsyStartMinute = work.workStartMinute + 4 * 60 + 30
         return rules
     }
@@ -176,7 +179,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
         eveningStartMinute: Int,
         stillFor: TimeInterval,
         scrollQuiet: TimeInterval,
-        boxingWeekday: Int,
+        boxingWeekday: Int?,
         boxingWarmupStartMinute: Int,
         boxingWarmupEndMinute: Int,
         boxingFirstUntilMinute: Int,
@@ -449,7 +452,7 @@ public enum NeedEngine {
         case .boxingWarmup: "拳套戴好了，出发去拳馆？"
         case .gymDay: "包背好了，走？"
         case .slacking: "嘘，我帮你望风。"
-        case .sitting: "起来。我先起了。"
+        case .sitting: "我先起来了。……你呢？"
         }
     }
 
