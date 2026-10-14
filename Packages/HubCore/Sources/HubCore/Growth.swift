@@ -522,23 +522,14 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(
             clothes: "kuro.set.chill.picnic", slot: .fullSet, title: "野餐", price: 80, mode: .chill, persona: .kuro),
         ShopItem(clothes: "kuro.set.work.rain", slot: .fullSet, title: "雨天", price: 90, mode: .work, persona: .kuro),
-        // Weekly items (商店完整目录 v0 §1.4 and §2.4), off the shelf until drawn. The star badge (week 4) and the
-        // beanies (week 8) wait for their own wear slots.
+        // HAKU's weekly items (商店完整目录 v0 §1.4), off the shelf until drawn. The star badge (week 4) and the
+        // beanie (week 8) wait for their own wear slots. The second character's (§2.4) wait for approval.
         ShopItem(weekly: "haku.weekly.headband.orange", slot: .headband, title: "橙色头带", price: 15, week: 1),
         ShopItem(weekly: "haku.weekly.mask.dots", slot: .mask, title: "波点面罩", price: 18, week: 2),
         ShopItem(weekly: "haku.weekly.room.cactus", slot: .room, title: "小仙人掌", price: 15, week: 3),
         ShopItem(weekly: "haku.weekly.headband.mint", slot: .headband, title: "薄荷头带", price: 15, week: 5),
         ShopItem(weekly: "haku.weekly.mask.bolt", slot: .mask, title: "闪电贴纸面罩", price: 18, week: 6),
         ShopItem(weekly: "haku.weekly.room.speaker", slot: .room, title: "迷你音箱", price: 20, week: 7),
-        ShopItem(weekly: "kuro.weekly.hair.mint", slot: .headband, title: "薄荷发圈", price: 15, week: 1, persona: .kuro),
-        ShopItem(weekly: "kuro.weekly.blanket.bear", slot: .mask, title: "小熊毯", price: 18, week: 2, persona: .kuro),
-        ShopItem(
-            weekly: "kuro.weekly.room.succulent", slot: .room, title: "多肉盆栽", price: 15, week: 3, persona: .kuro),
-        ShopItem(weekly: "kuro.weekly.hair.cherry", slot: .headband, title: "樱桃发夹", price: 18, week: 4, persona: .kuro),
-        ShopItem(weekly: "kuro.weekly.hair.star", slot: .headband, title: "星星发圈", price: 15, week: 5, persona: .kuro),
-        ShopItem(weekly: "kuro.weekly.room.cloud", slot: .room, title: "云朵靠垫", price: 20, week: 6, persona: .kuro),
-        ShopItem(
-            weekly: "kuro.weekly.room.nightlight", slot: .room, title: "小夜灯", price: 20, week: 7, persona: .kuro),
     ]
 
     init(

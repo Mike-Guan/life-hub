@@ -68,15 +68,16 @@ struct ShopView: View {
     // Card items show only with their card. Ones bought under another card stay owned and wearable.
     private var card: IdentityKind? { .picked(for: persona) }
 
-    // This week's item leads the shelf. One already owned stays in the owned list instead.
+    private var weekly: ShopItem? { ShopItem.weekly(for: persona, ledger: growth.ledger, now: .now) }
+
+    // 商店完整目录 v0 §1.4: this week's item leads the shelf, and stays there marked owned once bought.
     private var forSale: [ShopItem] {
-        let weekly = ShopItem.weekly(for: persona, ledger: growth.ledger, now: .now)
-        return ([weekly].compactMap { $0 } + ShopItem.catalog(for: persona, card: card))
-            .filter { $0.price != nil && !owned.contains($0.id) }
+        [weekly].compactMap { $0 }
+            + ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) }
     }
 
     private var ownedFromShop: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { $0.price != nil && owned.contains($0.id) }
+        ShopItem.catalog(for: persona).filter { $0.price != nil && owned.contains($0.id) && $0.id != weekly?.id }
     }
 
     private var keepsakes: [ShopItem] {
@@ -140,7 +141,12 @@ struct ShopView: View {
                 .toyCard(fill: item.slot.tileColor(for: persona), radius: 12, shadow: 0)
             Text(item.title)
                 .font(Toy.body(14, weight: .heavy))
-            if let price = item.price {
+            if owned.contains(item.id) {
+                Label("已拥有", systemImage: "checkmark")
+                    .font(Toy.body(13, weight: .heavy))
+                    .foregroundStyle(Toy.ink)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            } else if let price = item.price {
                 if price <= balance {
                     Button {
                         buy(item)
@@ -177,7 +183,7 @@ struct ShopView: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(item.week != nil ? "本周 \(item.title)" : item.title)
+        .accessibilityLabel(item.week != nil ? Text("本周 \(item.title)") : Text(verbatim: item.title))
     }
 
     private func ownedRow(_ item: ShopItem) -> some View {

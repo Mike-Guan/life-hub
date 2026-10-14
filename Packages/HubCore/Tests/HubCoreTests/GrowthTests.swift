@@ -485,9 +485,8 @@ import Testing
         #expect(try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-11-08 08:00") == "haku.weekly.headband.mint")
         // Six drawn items, then it starts over.
         #expect(try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-11-29 08:00") == "haku.weekly.headband.orange")
-        #expect(
-            try weeklyItem(firstCan: "2026-10-03 23:59", now: "2026-10-18 00:00", persona: .kuro)
-                == "kuro.weekly.blanket.bear")
+        // The second character's rotation waits for approval.
+        #expect(try weeklyItem(firstCan: "2026-10-03 23:59", now: "2026-10-18 00:00", persona: .kuro) == nil)
     }
 
     @Test func noWeeklyItemWithoutCansOrArt() throws {

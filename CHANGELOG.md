@@ -5,8 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
-- From each character's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed
-  rotation that starts over, so no item is gone for good. Items go on sale once the character art draws them.
+- From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
+  starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. Items go
+  on sale once the character art draws them.
 - Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
   hand left out) or the iPhone's own count. Days you didn't open the app count too, up to a week back. Steps
   are never shown and never leave the iPhone.
