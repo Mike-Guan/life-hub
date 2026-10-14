@@ -23,11 +23,12 @@ import Testing
         let jackets: [KuroLook: KuroPart] = [
             .work: .jacketWork, .chill: .jacketChill, .tennis: .jacketTennis, .desk: .jacketDesk,
             .box: .jacketBox, .fitness: .jacketTennis, .study: .jacketChill, .art: .jacketSmock,
+            .dance: .jacketTennis, .music: .jacketChill, .ski: .jacketTennis,
         ]
         #expect(parts.intersection(Set(jackets.values)) == [jackets[look]!])
         #expect(parts.isSuperset(of: [.hairBack, .faceBase, .hairFringe, .catEars, .blush]))
         #expect(parts.contains(.maskWork) == (look == .work))
-        #expect(parts.contains(.tennisPonytail) == [.tennis, .box, .fitness].contains(look))
+        #expect(parts.contains(.tennisPonytail) == [.tennis, .box, .fitness, .dance, .ski].contains(look))
         #expect(parts.contains(.deskGlasses) == (look == .desk))
         #expect(parts.contains(.chillCup) == (look == .chill))
     }
@@ -39,6 +40,19 @@ import Testing
         #expect(tennis.contains(.mouthSmile))
         let chill = Set(KuroFigure.parts(for: .chill, pose: KuroPose(look: .chill, energy: nil)))
         #expect(chill.contains(.mouthCat))
+    }
+
+    @Test(arguments: KuroLook.allCases)
+    func fullEnergyReadsApartFromOkay(_ look: KuroLook) {
+        let full = KuroPose(look: look, energy: 90)
+        let parts = Set(KuroFigure.parts(for: look, pose: full))
+        #expect(parts.isSuperset(of: [.eyesFull, .cheeksFull, .sparkle]))
+        #expect(!parts.contains(.eyesBright) && !parts.contains(.blush))
+        #expect(KuroFigure.offset(.catEars, pose: full).height == -3)
+        let okay = KuroPose(look: look, energy: 50)
+        #expect(Set(KuroFigure.parts(for: look, pose: okay)).isDisjoint(with: [.eyesFull, .cheeksFull, .sparkle]))
+        #expect(KuroFigure.offset(.catEars, pose: okay) == .zero)
+        #expect(!KuroPose(look: look, energy: 90, bedtime: .on).full)
     }
 
     @Test func energyPicksHerFace() {

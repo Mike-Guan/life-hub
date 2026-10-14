@@ -64,6 +64,8 @@ enum Placement {
         .browsBox: Spot(.eyes, "眼睛"),
         .eyesMoney: Spot(.eyes, "眼睛"),
         .eyeGlint: Spot(.eyes, "眼睛"),
+        .eyesBright: Spot(.eyes, "眼睛"),
+        .lidsBright: Spot(.eyes, "眼睛"),
         .eyesSleepy: Spot(.eyes, "眼睛"),
         .eyesClosed: Spot(.eyes, "眼睛"),
         .eyeSwirlL: Spot(.eyes, "眼睛"),
@@ -232,6 +234,7 @@ enum Placement {
         .eyesHappy: Spot(.eyes, "眼睛"),
         .eyesSurprised: Spot(.eyes, "眼睛"),
         .eyesLow: Spot(.eyes, "眼睛"),
+        .eyesFull: Spot(.eyes, "眼睛"),
         .deskGlasses: Spot(.eyes, "deskGlasses"),
         .maskWork: Spot(.maskFace, "maskWork"),
         .mouthCat: Spot(.mouth, "嘴"),
@@ -239,6 +242,7 @@ enum Placement {
         .mouthSmile: Spot(.mouth, "嘴"),
         .mouthO: Spot(.mouth, "嘴"),
         .blush: Spot(.cheek, "blush"),
+        .cheeksFull: Spot(.cheek, "blush"),
         .tapRub: Spot(.cheek, "tapRub"),
         .jacketWork: Spot(.torso, "外套"),
         .jacketChill: Spot(.torso, "外套"),
@@ -277,6 +281,17 @@ enum Placement {
         .gymBlock: Spot(.handsFront, "gymBlock"),
         .studyNotebook: Spot(.handsFront, "studyNotebook"),
         .boxSandbag: Spot(.corner1, "boxSandbag"),
+        // Deferred identity cards (顺延身份卡 预览): the finger on the score is part of holding it.
+        .danceSpeaker: Spot(.corner1, "danceSpeaker"),
+        .speakerNoteA: .fx,
+        .speakerNoteB: .fx,
+        .scoreSheet: Spot(.handsFront, "乐谱"),
+        .scoreFinger: Spot(.handsFront, "乐谱"),
+        .skiGoggles: Spot(.headTop, "skiGoggles"),
+        .mittenArm: Spot(.handL, "手套"),
+        .mittenHand: Spot(.handL, "手套"),
+        .snowBits: .fx,
+        .sneezePuff: .fx,
         .studyMark: .fx,
         .itemFlower: Spot(.corner1, "itemFlower"),
         .itemLamp: Spot(.corner1, "itemLamp"),
@@ -306,6 +321,7 @@ enum Placement {
         .walkLines: .fx,
         .walkDust: .fx,
         .bathBubbles: .fx,
+        .sparkle: .fx,
     ]
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
@@ -322,7 +338,9 @@ enum Placement {
             ["deskBooks", "deskPen"], ["tapBall", "tennisRacket"],
             ["itemGoldRacket", "tapBall"],
         ],
-        .handsFront: [["workTablet", "揉眼袖子"], ["gymBlock", "揉眼袖子"], ["studyNotebook", "揉眼袖子"]],
+        .handsFront: [
+            ["workTablet", "揉眼袖子"], ["gymBlock", "揉眼袖子"], ["studyNotebook", "揉眼袖子"], ["乐谱", "揉眼袖子"],
+        ],
         .earL: [["耳机", "earringNeon"], ["cheerEarTap", "earringNeon"]],
         .torso: [["外套", "金链"], ["外套", "towel"], ["外套", "apron"], ["外套", "背包"]],
     ]
