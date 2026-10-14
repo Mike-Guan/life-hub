@@ -56,6 +56,8 @@ jobs:
           fi
       - name: Character colors in app code
         run: scripts/persona-colors.sh
+      - name: String Catalogs match the source
+        run: scripts/strings.py --check
 
   lint:
     name: Format and lint

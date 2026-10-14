@@ -1,4 +1,4 @@
-.PHONY: project open test coverage lint format hooks check art art-check screenshots
+.PHONY: project open test coverage lint format hooks check art art-check strings screenshots
 
 project:
 	xcodegen generate
@@ -36,6 +36,10 @@ art:
 art-check: art
 	git diff --exit-code -- Packages/CompanionKit/Sources/CompanionKit/RunnerArt.swift \
 		Packages/CompanionKit/Sources/CompanionKit/KuroArt.swift
+
+# Add the packages' new Chinese keys to their String Catalogs and drop the ones no longer used (Issue #350).
+strings:
+	scripts/strings.py
 
 # Redraw the README images in docs/screenshots/ (iOS simulator + Mac window, one per mode).
 screenshots:
