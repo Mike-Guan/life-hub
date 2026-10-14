@@ -671,11 +671,15 @@ struct OnboardingView: View {
                 if mode == .boxing {
                     Text(cards.title(for: mode, persona: draft.persona)).font(Toy.body(17, weight: .black))
                 } else {
-                    TextField(mode.title(for: draft.persona), text: name(mode))
-                        .font(Toy.body(17, weight: .black))
-                        .focused($naming, equals: mode)
-                        .submitLabel(.done)
-                        .fixedSize()
+                    // The default name shows as the prompt, in ink like a typed name.
+                    TextField(
+                        "", text: name(mode), prompt: Text(mode.title(for: draft.persona)).foregroundStyle(Toy.ink)
+                    )
+                    .font(Toy.body(17, weight: .black))
+                    .foregroundStyle(Toy.ink)
+                    .focused($naming, equals: mode)
+                    .submitLabel(.done)
+                    .fixedSize()
                     Image(systemName: "pencil").font(.system(size: 13, weight: .heavy))
                 }
                 Spacer(minLength: 4)
@@ -910,21 +914,57 @@ private struct FlowRow: View {
     let items: [String]
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 6) { pills }
-            VStack(alignment: .leading, spacing: 6) { pills }
+        FlowLayout(spacing: 6) {
+            ForEach(items, id: \.self) { item in
+                Text(item)
+                    .font(Toy.body(13, weight: .heavy))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 3)
+                    .background(Capsule().fill(Toy.paper))
+                    .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+            }
+        }
+    }
+}
+
+/// Places subviews left to right and starts a new row when one would pass the proposed width.
+private struct FlowLayout: Layout {
+    var spacing: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let frames = frames(for: subviews, width: proposal.width ?? .infinity)
+        let width = frames.map(\.maxX).max() ?? 0
+        let height = frames.map(\.maxY).max() ?? 0
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let frames = frames(for: subviews, width: bounds.width)
+        for (subview, frame) in zip(subviews, frames) {
+            subview.place(
+                at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY),
+                proposal: ProposedViewSize(frame.size)
+            )
         }
     }
 
-    private var pills: some View {
-        ForEach(items, id: \.self) { item in
-            Text(item)
-                .font(Toy.body(13, weight: .heavy))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 3)
-                .background(Capsule().fill(Toy.paper))
-                .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+    private func frames(for subviews: Subviews, width: CGFloat) -> [CGRect] {
+        var frames: [CGRect] = []
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x > 0 && x + size.width > width {
+                x = 0
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            frames.append(CGRect(origin: CGPoint(x: x, y: y), size: size))
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
         }
+        return frames
     }
 }
 
