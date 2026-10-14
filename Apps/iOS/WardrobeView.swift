@@ -151,7 +151,7 @@ struct WardrobeView: View {
     // Only changes the preview, never the real mode.
     private var modePicker: some View {
         HStack(spacing: 8) {
-            ForEach(Mode.allCases, id: \.self) { mode in
+            ForEach(cards.modes, id: \.self) { mode in
                 Button {
                     previewMode = mode
                 } label: {
