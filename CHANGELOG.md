@@ -7,12 +7,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
-- Test builds (Debug, STG) have a 「日文和英文」 switch in settings. It is off by default, so every build shows
-  Chinese whatever the phone's language until all Japanese and English text is in.
+- Debug builds have a 「日文和英文」 switch in settings. It is off by default, so every build shows Chinese
+  whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
 - The off-work card's default name is now 「下班」, so the watch no longer cuts it to 「下班 Chi」. Names you
   already changed stay as they are.
+- The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
+  room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
+  back puts them on again. The wardrobe screen moves to these groups in a separate change.
 - The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
   hustle); a full set replaces that mode's top. They go on sale once the character art draws them.
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
