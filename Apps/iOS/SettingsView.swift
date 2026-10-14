@@ -267,7 +267,10 @@ struct SettingsView: View {
                 .font(Toy.body(13, weight: .heavy))
                 .frame(minHeight: 44)
             }
-            Text("选你最容易刷停不下来的 App。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。用了多久只有这台 iPhone 知道，我们看不到。")
+            Text("选你最容易刷停不下来的 App。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+            Text("用了多久只有这台 iPhone 知道，我们看不到。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             if let screenTimeError {
