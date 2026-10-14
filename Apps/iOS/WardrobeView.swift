@@ -167,9 +167,14 @@ struct WardrobeView: View {
         .accessibilityLabel("看哪个模式的样子")
     }
 
+    // Slots with nothing drawn yet (clothes before their art) get no tab.
+    private var tabs: [Slot] {
+        Slot.allCases.filter { tab in ShopItem.catalog(for: persona).contains { $0.slot == tab && $0.isDrawn } }
+    }
+
     private var slotTabs: some View {
         HStack(spacing: 6) {
-            ForEach(Slot.allCases, id: \.self) { tab in
+            ForEach(tabs, id: \.self) { tab in
                 Button {
                     slot = tab
                 } label: {
@@ -288,6 +293,8 @@ extension Slot {
         case .mask: persona == .kuro ? "毯子" : "面罩"
         case .room: "房间"
         case .celebration: "庆祝"
+        case .top: "上衣"
+        case .fullSet: "整套"
         }
     }
 }
