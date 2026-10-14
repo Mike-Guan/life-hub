@@ -266,6 +266,21 @@ enum Placement {
         .tapGlint: .fx,
         .tapDots: .fx,
         .tapHeart: .fx,
+        // Scenes (invite, walking, bath, map §9.2): drawn only in a scene, which puts her room and held things away.
+        .inviteSleeveWork: Spot(.handL, "指门"),
+        .inviteSleeveChill: Spot(.handL, "指门"),
+        .inviteSleeveTennis: Spot(.handL, "指门"),
+        .inviteSleeveDesk: Spot(.handL, "指门"),
+        .inviteHand: Spot(.handL, "指门"),
+        .walkPack: Spot(.torso, "背包"),
+        .walkStraps: Spot(.torso, "背包"),
+        .walkTabletHands: Spot(.handsFront, "抱平板"),
+        .bathBundle: Spot(.handsFront, "洗澡用品"),
+        .bathTurban: Spot(.headTop, "毛巾"),
+        .bathTurbanHands: Spot(.handsFront, "毛巾"),
+        .walkLines: .fx,
+        .walkDust: .fx,
+        .bathBubbles: .fx,
     ]
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
@@ -283,7 +298,7 @@ enum Placement {
         ],
         .handsFront: [["workTablet", "揉眼袖子"]],
         .earL: [["耳机", "earringNeon"], ["cheerEarTap", "earringNeon"]],
-        .torso: [["外套", "金链"], ["外套", "towel"], ["外套", "apron"]],
+        .torso: [["外套", "金链"], ["外套", "towel"], ["外套", "apron"], ["外套", "背包"]],
     ]
 
     /// Parts that fill the room corner while they show (`RunnerFigure.cornerTakers`).
