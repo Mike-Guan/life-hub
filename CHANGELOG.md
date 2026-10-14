@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
+  hand left out) or the iPhone's own count. Days you didn't open the app count too, up to a week back. Steps
+  are never shown and never leave the iPhone.
 - HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 
