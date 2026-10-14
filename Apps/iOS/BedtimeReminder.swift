@@ -28,7 +28,7 @@ enum BedtimeReminder {
         do {
             // Asked even with the reminder off: the off-work notice and invites rely on it.
             let allowed = try await center.requestAuthorization(options: [.alert, .sound])
-            guard on, schedule.isSet else {
+            guard let time = schedule.reminderTime(on: on) else {
                 center.removePendingNotificationRequests(withIdentifiers: [requestID])
                 return nil
             }
@@ -40,7 +40,7 @@ enum BedtimeReminder {
             content.body = "\(persona.title) 已经在打哈欠了。"
             content.sound = .default
             content.categoryIdentifier = category
-            let trigger = UNCalendarNotificationTrigger(dateMatching: schedule.startComponents, repeats: true)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: time, repeats: true)
             center.removePendingNotificationRequests(withIdentifiers: [requestID])
             try await center.add(UNNotificationRequest(identifier: requestID, content: content, trigger: trigger))
             return nil

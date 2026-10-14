@@ -262,4 +262,18 @@ import Testing
         #expect(BedtimeSchedule.stored(in: set) == late)
         #expect(BedtimeSchedule.remindsAtBedtime(in: set))
     }
+
+    @Test func aSkippedBedtimeSchedulesNoReminder() throws {
+        let suite = "lifehub-tests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        // A new install that skipped the bedtime step in onboarding.
+        BedtimeSchedule.adoptStandard(in: defaults, existingInstall: false)
+        let skipped = BedtimeSchedule.stored(in: defaults)
+        #expect(skipped.reminderTime(on: BedtimeSchedule.remindsAtBedtime(in: defaults)) == nil)
+        // Turning the reminder on still sends nothing until a time is set.
+        #expect(skipped.reminderTime(on: true) == nil)
+        #expect(BedtimeSchedule.standard.reminderTime(on: false) == nil)
+        #expect(BedtimeSchedule.standard.reminderTime(on: true) == DateComponents(hour: 23, minute: 30))
+    }
 }

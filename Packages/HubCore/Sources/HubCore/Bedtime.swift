@@ -98,4 +98,9 @@ extension BedtimeSchedule {
     public var startComponents: DateComponents {
         DateComponents(hour: startMinute / 60, minute: startMinute % 60)
     }
+
+    /// When the daily reminder fires: `startComponents` while `on` and a bedtime is set, else `nil`.
+    public func reminderTime(on: Bool) -> DateComponents? {
+        on && isSet ? startComponents : nil
+    }
 }
