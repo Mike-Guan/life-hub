@@ -63,7 +63,7 @@ struct WardrobeView: View {
     private var lockedKeepsakes: [ShopItem] {
         ShopItem.catalog(for: persona).filter { item in
             guard item.slot == slot, let keepsake = item.keepsake, !owned.contains(item.id) else { return false }
-            return ShopView.liveWins.contains(keepsake.win)
+            return ShopView.liveWins.contains(keepsake.win) && item.suits(.picked(for: persona))
         }
     }
 
