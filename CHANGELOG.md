@@ -11,6 +11,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   Chinese whatever the phone's language until all Japanese and English text is in.
 
 ### Changed
+- The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
+  hustle); a full set replaces that mode's top. They go on sale once the character art draws them.
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
   fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
   own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
