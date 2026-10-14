@@ -17,14 +17,25 @@ extension FrameSheets {
         try write(
             "bubble-2-unbox-290", [Row(label: "开箱 290 · A", start: Self.base) { AnyView(Stage(gift, showcase: true)) }],
             size: CGSize(width: 320, height: 290), frames: 1)
+        // Round 2: one line at 361 pt, and the longest line wrapped to two lines on the narrowest home card.
+        let longest = "还有 15 分钟。我先替你紧张一下。"
         try write(
             "bubble-3-home-340",
             [
-                Row(label: "首页 340 · 没说话", start: Self.base) { AnyView(Stage(nil, showcase: false)) },
-                Row(label: "首页 340 · C 说话中", start: Self.base) { AnyView(Stage(line, showcase: false)) },
-                Row(label: "首页 340 · 减少动态", start: Self.base) { AnyView(Stage(line, showcase: false, still: true)) },
+                Row(label: "首页 361 · 没说话", start: Self.base) { AnyView(Stage(nil, showcase: false)) },
+                Row(label: "首页 361 · 说话中 一行", start: Self.base) { AnyView(Stage(line, showcase: false)) },
+                Row(label: "首页 361 · 减少动态", start: Self.base) {
+                    AnyView(Stage(line, showcase: false, still: true))
+                },
             ],
             size: CGSize(width: 361, height: 340), frames: 1)
+        try write(
+            "bubble-4-home-two-lines",
+            [
+                Row(label: "首页 288 · 没说话", start: Self.base) { AnyView(Stage(nil, showcase: false)) },
+                Row(label: "首页 288 · 说话中 两行", start: Self.base) { AnyView(Stage(longest, showcase: false)) },
+            ],
+            size: CGSize(width: 288, height: 340), frames: 1)
     }
 
     struct Stage: View {
@@ -42,16 +53,20 @@ extension FrameSheets {
             let mode: Mode = .boxing
             var wardrobe = Wardrobe()
             if showcase { wardrobe.equipped[.gloves] = "gloves.gold" }
-            let dip = CompanionView.talkDip(style: .standard, showsBubble: true, showcase: showcase, still: still)
             return ZStack {
                 Rectangle().fill(mode.color)
                 RunnerFigure(mode: mode, pose: RunnerPose(face: .mid).wearing(Outfit(wardrobe)))
                     .padding(
                         .top,
-                        CompanionView.figureTop(style: .standard, showsBubble: true, showcase: showcase, still: still)
+                        CompanionView.figureTop(
+                            style: .standard,
+                            showsBubble: true,
+                            talking: line != nil,
+                            showcase: showcase,
+                            still: still
+                        )
                     )
                     .padding(.horizontal, 12)
-                    .offset(y: line == nil ? 0 : dip)
                 if let line {
                     SpeechBubble(text: line)
                         .padding(12)
