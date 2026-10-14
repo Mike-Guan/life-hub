@@ -155,6 +155,8 @@ enum Placement {
         .sunlight: Spot(.window, "sunlight"),
         .door: Spot(.door, "door"),
         .pillow: Spot(.pillow, "pillow"),
+        .pillowLean: Spot(.pillow, "pillow"),
+        .pillowHug: Spot(.handsFront, "抱枕"),
         .roomPlant: Spot(.corner1, "roomPlant"),
         .roomBag: Spot(.corner1, "roomBag"),
         .heavyBag: Spot(.corner1, "heavyBag"),
@@ -244,6 +246,7 @@ enum Placement {
         .deskPen: Spot(.handR, "deskPen"),
         .deskBooks: Spot(.handR, "deskBooks"),
         .tapBall: Spot(.handR, "tapBall"),
+        .juggleRacket: Spot(.handR, "tennisRacket"),
         .itemSpin: .fx,
         .workTablet: Spot(.handsFront, "workTablet"),
         .tapTablet: Spot(.handsFront, "tapTablet"),
@@ -254,6 +257,20 @@ enum Placement {
         .tapRubSleeveChill: Spot(.handsFront, "揉眼袖子"),
         .tapRubSleeveTennis: Spot(.handsFront, "揉眼袖子"),
         .tapRubSleeveDesk: Spot(.handsFront, "揉眼袖子"),
+        .tapRubSleeveBox: Spot(.handsFront, "揉眼袖子"),
+        .tapRubSleeveSmock: Spot(.handsFront, "揉眼袖子"),
+        // Identity cards, batch 1 (UI 三组 2026-10-14): the strap belongs to the left glove.
+        .boxHeadband: Spot(.headTop, "boxHeadband"),
+        .jacketBox: Spot(.torso, "外套"),
+        .jacketSmock: Spot(.torso, "外套"),
+        .boxGloveL: Spot(.handL, "拳套"),
+        .boxGloveR: Spot(.handR, "拳套"),
+        .studyHighlighter: Spot(.handR, "studyHighlighter"),
+        .craftPen: Spot(.handR, "craftPen"),
+        .gymBlock: Spot(.handsFront, "gymBlock"),
+        .studyNotebook: Spot(.handsFront, "studyNotebook"),
+        .boxSandbag: Spot(.corner1, "boxSandbag"),
+        .studyMark: .fx,
         .itemFlower: Spot(.corner1, "itemFlower"),
         .itemLamp: Spot(.corner1, "itemLamp"),
         .itemBag: Spot(.corner1, "itemBag"),
@@ -261,6 +278,7 @@ enum Placement {
         .overtimeSign: .fx,
         .tapPuff: .fx,
         .tapSparkle: .fx,
+        .swingLines: .fx,
         .tapGlint: .fx,
         .tapDots: .fx,
         .tapHeart: .fx,
@@ -269,6 +287,8 @@ enum Placement {
         .inviteSleeveChill: Spot(.handL, "指门"),
         .inviteSleeveTennis: Spot(.handL, "指门"),
         .inviteSleeveDesk: Spot(.handL, "指门"),
+        .inviteSleeveBox: Spot(.handL, "指门"),
+        .inviteSleeveSmock: Spot(.handL, "指门"),
         .inviteHand: Spot(.handL, "指门"),
         .walkPack: Spot(.torso, "背包"),
         .walkStraps: Spot(.torso, "背包"),
@@ -283,7 +303,8 @@ enum Placement {
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
     // the swimming cheer's ear tap over the earring. KURO's rows are UI 三组's: the rub over the blush, the pen on the
-    // books, the ball bouncing on the racket, the sleeve in front of the tablet. The spin is a cheer, not held.
+    // books, the ball bouncing on the racket, the sleeve in front of the tablet, yoga block or notebook. The spin is a
+    // cheer, not held.
     /// Things that may share a place on purpose.
     static let allowed: [Place: [Set<String>]] = [
         .eyes: [["眼睛", "deskGlasses"]],
@@ -294,7 +315,7 @@ enum Placement {
             ["deskBooks", "deskPen"], ["tapBall", "tennisRacket"],
             ["itemGoldRacket", "tapBall"],
         ],
-        .handsFront: [["workTablet", "揉眼袖子"]],
+        .handsFront: [["workTablet", "揉眼袖子"], ["gymBlock", "揉眼袖子"], ["studyNotebook", "揉眼袖子"]],
         .earL: [["耳机", "earringNeon"], ["cheerEarTap", "earringNeon"]],
         .torso: [["外套", "金链"], ["外套", "towel"], ["外套", "apron"], ["外套", "背包"]],
     ]

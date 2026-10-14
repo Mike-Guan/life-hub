@@ -13,7 +13,13 @@ struct ScreenshotGrowth: View {
     var body: some View {
         switch screen {
         case "wardrobe":
-            WardrobeView(growth: growth, wardrobe: $wardrobe, persona: ScreenshotMode.persona, mode: .boxing)
+            WardrobeView(
+                growth: growth,
+                wardrobe: $wardrobe,
+                persona: ScreenshotMode.persona,
+                mode: .boxing,
+                cards: ScreenshotMode.cards
+            )
         case "unbox", "unbox-bottom":
             if let entry = growth.ledger.entries.first(where: { $0.kind == .granted }),
                 let item = entry.itemID.flatMap(ShopItem.item)

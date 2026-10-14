@@ -251,8 +251,9 @@ import Testing
         #expect(throws: GrowthStore.BuyError.notEnoughCans) { try store.buy(try item("kuro.room.flower"), at: at) }
         #expect(throws: GrowthStore.BuyError.notForSale) { try store.buy(try item("room.plant"), at: at) }
         store.persona = .haku
-        try store.buy(try item("room.plant"), at: at)
-        #expect(store.ledger.only(.haku).balance == 4 * Win.boxing.cans - 10)
+        let plant = try item("room.plant")
+        try store.buy(plant, at: at)
+        #expect(store.ledger.only(.haku).balance == 4 * Win.boxing.cans - (plant.price ?? 0))
         #expect(store.ledger.only(.kuro).balance == Win.gym.cans)
         #expect(store.ledger.only(.kuro).owned.isEmpty)
     }
@@ -396,6 +397,48 @@ import Testing
             #expect(items.count == haku.count, "\(persona)")
             #expect(Set(items.map(\.slot)) == Set(Slot.allCases), "\(persona)")
             #expect(keepsakes(items) == keepsakes(haku), "\(persona)")
+        }
+    }
+
+    @Test func clothesAreWornOnePerModeAndASetReplacesTheTop() throws {
+        var wardrobe = Wardrobe()
+        let blazer = try #require(ShopItem.item("haku.top.work.blazer"))
+        let raincoat = try #require(ShopItem.item("haku.set.work.raincoat"))
+        let aloha = try #require(ShopItem.item("haku.top.chill.aloha"))
+        wardrobe.equip(blazer)
+        wardrobe.equip(aloha)
+        #expect(wardrobe.clothes == [.work: blazer.id, .chill: aloha.id])
+        #expect(wardrobe.equipped.isEmpty)
+        wardrobe.equip(raincoat)
+        #expect(wardrobe.clothes == [.work: raincoat.id, .chill: aloha.id])
+        wardrobe.undress(.work)
+        #expect(wardrobe.clothes == [.chill: aloha.id])
+    }
+
+    @Test func wardrobesKeepTheirClothesAndOldOnesLoad() throws {
+        let worn = Wardrobe(equipped: [.gloves: "gloves.gold"], clothes: [.chill: "haku.top.chill.aloha"])
+        let data = try JSONEncoder().encode(worn)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: data) == worn)
+        let json = try #require(String(data: data, encoding: .utf8))
+        #expect(json.contains(#""chill":"haku.top.chill.aloha""#))
+        let old = Data(#"{"equipped":{"gloves":"gloves.gold"}}"#.utf8)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: old) == Wardrobe(equipped: [.gloves: "gloves.gold"]))
+        let future = Data(#"{"equipped":{},"clothes":{"dance":"x","work":"haku.top.work.cardigan"}}"#.utf8)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: future).clothes == [.work: "haku.top.work.cardigan"])
+    }
+
+    // Prices from the shop catalogue (Mike 2026-10-13): tops 40-60, full sets 120-150.
+    @Test func clothesFollowTheApprovedPricesAndStayOffTheShelfUntilDrawn() {
+        for persona in Persona.allCases {
+            let clothes = ShopItem.catalog(for: persona).filter { $0.mode != nil }
+            #expect(Set(clothes.compactMap(\.mode)) == [.work, .chill, .money], "\(persona)")
+            for item in clothes {
+                let range = item.slot == .fullSet ? 80...90 : 30...40
+                #expect(range.contains(item.price ?? 0), "\(item.id)")
+                #expect(item.slot == .top || item.slot == .fullSet)
+                #expect(!item.isDrawn)
+            }
+            #expect(ShopItem.catalog(for: persona, card: .boxing).allSatisfy { $0.mode == nil })
         }
     }
 }

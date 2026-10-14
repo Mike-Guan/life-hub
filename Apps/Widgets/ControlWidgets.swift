@@ -9,6 +9,7 @@ struct ModeWidget: Widget {
         StaticConfiguration(kind: "mode", provider: HubProvider()) { entry in
             ModeButtons(current: entry.mode, persona: entry.persona, cards: entry.names)
                 .containerBackground(Toy.paper, for: .widget)
+                .environment(\.locale, Languages.locale)
         }
         .configurationDisplayName("切换模式")
         .description("点一下切到别的模式。")
@@ -22,6 +23,7 @@ struct EnergyWidget: Widget {
         StaticConfiguration(kind: "energy", provider: HubProvider()) { entry in
             EnergyButtons(current: entry.energy)
                 .containerBackground(Toy.paper, for: .widget)
+                .environment(\.locale, Languages.locale)
         }
         .configurationDisplayName("今天电量")
         .description("觉得和睡眠算的不一样时，点一下自己选。")

@@ -7,6 +7,7 @@ struct WardrobeView: View {
     let growth: GrowthStore
     @Binding var wardrobe: Wardrobe
     let persona: Persona
+    private let cards: ModeCards
     @Environment(\.dismiss) private var dismiss
     @State private var previewMode: Mode
     @State private var slot: Slot = .gloves
@@ -14,10 +15,12 @@ struct WardrobeView: View {
     /// - Parameters:
     ///   - persona: the character whose wardrobe it is.
     ///   - mode: the mode to preview first, usually the current one.
-    init(growth: GrowthStore, wardrobe: Binding<Wardrobe>, persona: Persona, mode: Mode?) {
+    ///   - cards: the user's mode cards, which name the mode buttons; the character's defaults when `nil`.
+    init(growth: GrowthStore, wardrobe: Binding<Wardrobe>, persona: Persona, mode: Mode?, cards: ModeCards? = nil) {
         self.growth = growth
         _wardrobe = wardrobe
         self.persona = persona
+        self.cards = cards ?? .legacy(for: persona)
         _previewMode = State(initialValue: mode ?? .chill)
     }
 
@@ -129,30 +132,28 @@ struct WardrobeView: View {
         }
     }
 
+    // UI 审核 R1: a label on the card covered the gloves, so it sits under the card.
     private var preview: some View {
-        PersonaPortrait(persona: persona, mode: previewMode, wardrobe: wardrobe)
-            .frame(width: 210, height: 276)
-            .frame(maxWidth: .infinity, alignment: .bottom)
-            .frame(height: 300, alignment: .bottom)
-            .overlay(alignment: .bottomLeading) {
-                Text("锁屏上也是这样")
-                    .font(Toy.body(13, weight: .heavy))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .toyCard(radius: 12, shadow: 0)
-                    .padding(12)
-            }
-            .toyCard(fill: previewMode.color(for: persona))
+        VStack(alignment: .leading, spacing: 8) {
+            PersonaPortrait(persona: persona, mode: previewMode, wardrobe: wardrobe)
+                .frame(width: 210, height: 276)
+                .frame(maxWidth: .infinity, alignment: .bottom)
+                .frame(height: 300, alignment: .bottom)
+                .toyCard(fill: previewMode.color(for: persona))
+            Text("锁屏上也是这样")
+                .font(Toy.body(13, weight: .heavy))
+                .foregroundStyle(Toy.muted)
+        }
     }
 
     // Only changes the preview, never the real mode.
     private var modePicker: some View {
         HStack(spacing: 8) {
-            ForEach(Mode.allCases, id: \.self) { mode in
+            ForEach(cards.modes, id: \.self) { mode in
                 Button {
                     previewMode = mode
                 } label: {
-                    Text(mode.code(for: persona))
+                    Text(cards.title(for: mode, persona: persona))
                         .font(Toy.body(13, weight: .heavy))
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -166,9 +167,14 @@ struct WardrobeView: View {
         .accessibilityLabel("看哪个模式的样子")
     }
 
+    // Slots with nothing drawn yet (clothes before their art) get no tab.
+    private var tabs: [Slot] {
+        Slot.allCases.filter { tab in ShopItem.catalog(for: persona).contains { $0.slot == tab && $0.isDrawn } }
+    }
+
     private var slotTabs: some View {
         HStack(spacing: 6) {
-            ForEach(Slot.allCases, id: \.self) { tab in
+            ForEach(tabs, id: \.self) { tab in
                 Button {
                     slot = tab
                 } label: {
@@ -191,12 +197,13 @@ struct WardrobeView: View {
             wardrobe.clear(slot)
         } label: {
             tile(isWorn: isWorn) {
-                // KURO's default is her plain look, so her tile has no icon.
-                if persona == .haku {
+                // KURO has no default item to wear, so her worn slots show her head without this slot's item.
+                // Room and celebration are not worn, so they show the same picture as HAKU's.
+                if persona == .haku || slot == .room || slot == .celebration {
                     WardrobeItemIcon(slotDefault: slot)
                         .frame(width: 56, height: 56)
                 } else {
-                    Color.clear
+                    KuroPortrait(look: KuroLook(mode: previewMode), wearing: withoutSlot, framing: .head)
                         .frame(width: 56, height: 56)
                 }
                 Text(slot == .room ? "无" : "默认")
@@ -205,6 +212,12 @@ struct WardrobeView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isWorn ? .isSelected : [])
+    }
+
+    private var withoutSlot: Set<String> {
+        var plain = wardrobe
+        plain.clear(slot)
+        return Set(plain.equipped.values)
     }
 
     private func itemTile(_ item: ShopItem) -> some View {
@@ -280,6 +293,8 @@ extension Slot {
         case .mask: persona == .kuro ? "毯子" : "面罩"
         case .room: "房间"
         case .celebration: "庆祝"
+        case .top: "上衣"
+        case .fullSet: "整套"
         }
     }
 }

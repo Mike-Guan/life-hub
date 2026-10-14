@@ -4,7 +4,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ## [Unreleased]
 
+### Added
+- HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
+  pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
+- Test builds (Debug, STG) have a 「日文和英文」 switch in settings. It is off by default, so every build shows
+  Chinese whatever the phone's language until all Japanese and English text is in.
+
 ### Changed
+- The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
+  hustle); a full set replaces that mode's top. They go on sale once the character art draws them.
+- The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
+  fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
+  own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- Tennis is her main card: she bounces the ball on a flat racket and spins the racket while idle, and a tap
+  makes her swing. Boxing keeps only the gloves tapping together.
+- Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
+  the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
+  blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
+  watch and its widgets never turn sleepy.
+- The Screen Time watch (pick apps in settings) now works in TestFlight (STG) builds too, not only in
+  Debug. The App Store build still leaves it out.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
   turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the

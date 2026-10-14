@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Draws the README images: the iOS and Mac home screen in each mode, into docs/screenshots/.
-# Also the iOS memory page, settings, shop, wardrobe and unboxing for UI 审核, the last three on the
-# smallest iPhone too.
+# Also the iOS memory page, settings, shop, wardrobe, unboxing and first-run setup for UI 审核, the last
+# four on the smallest iPhone too.
 # Needs Xcode 26 and XcodeGen. Uses the Debug build's -screenshot-mode launch argument.
 set -euo pipefail
 
@@ -66,7 +66,17 @@ growth_shots() {
     done
   done
 }
+# The first-run setup, one screen per launch, with no answers given.
+onboarding_shots() {
+  local device=$1 prefix=$2
+  for step in persona chill identity bedtime work location places motion sideHustle cards notifications; do
+    xcrun simctl launch --terminate-running-process "$device" "$bundle" -screenshot-onboarding "$step"
+    sleep 4
+    xcrun simctl io "$device" screenshot "$out/$prefix-onboarding-$step.png"
+  done
+}
 growth_shots "$udid" ios
+onboarding_shots "$udid" ios
 # The same on the smallest iPhone, where fixed heights run out of room first. Skipped with a warning
 # when this Xcode has no iPhone SE simulator, so the README images still get drawn.
 if se=$(xcrun simctl create "Screenshot SE" com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation); then
@@ -80,6 +90,22 @@ if se=$(xcrun simctl create "Screenshot SE" com.apple.CoreSimulator.SimDeviceTyp
   xcrun simctl launch "$se" "$bundle" -screenshot-growth shop -screenshot-persona haku
   sleep 10
   growth_shots "$se" ios-se
+  onboarding_shots "$se" ios-se
+  # The wardrobe's mode buttons with the longest identity card name, and with no identity card.
+  for identity in art none; do
+    xcrun simctl launch --terminate-running-process "$se" "$bundle" -screenshot-growth wardrobe \
+      -screenshot-identity "$identity"
+    sleep 4
+    xcrun simctl io "$se" screenshot "$out/ios-se-wardrobe-$identity.png"
+  done
+  # The unboxing at the first accessibility text size, where the stage gives up the most height.
+  xcrun simctl ui "$se" content_size accessibility-medium
+  for persona in haku kuro; do
+    xcrun simctl launch --terminate-running-process "$se" "$bundle" -screenshot-growth unbox \
+      -screenshot-persona "$persona"
+    sleep 4
+    xcrun simctl io "$se" screenshot "$out/ios-se-ax1-unbox-$persona.png"
+  done
   xcrun simctl delete "$se"
 else
   echo "::warning::No iPhone SE simulator in this Xcode; skipped the small-screen shots."
