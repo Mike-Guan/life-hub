@@ -56,7 +56,8 @@ struct UnboxSheet: View {
                     )
                 }
             }
-            // UI 审核 R1: on small phones, at any text size, both buttons stay on the first screen, so the stage gives up height.
+            // UI 审核 R1: on small phones, at any text size, both buttons stay on the first screen,
+            // so the stage gives up height.
             .containerRelativeFrame(.vertical) { [chrome] height, _ in min(380, max(240, height - chrome)) }
             .toyCard()
 
