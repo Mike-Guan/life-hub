@@ -42,7 +42,7 @@ const KURO_PALETTE = {
   '#8B5A3C': 'iris', '#FF3EA5': 'neonPink',
   // Shop items.
   '#2E9E5B': 'leaf', '#FFE14D': 'yellow', '#FFC2D6': 'blanket', '#FFF6C8': 'goldStrings', '#C9F23A': 'tennisBall',
-  '#FFB7C5': 'sakura', '#FFD1DC': 'petal', '#B8860B': 'goldShade',
+  '#FFB7C5': 'sakura', '#FFD1DC': 'petal', '#B8860B': 'goldShade', '#9EE6C8': 'mint',
 };
 const PALETTE = kuro ? KURO_PALETTE : RUNNER_PALETTE;
 
@@ -130,6 +130,7 @@ const stack = [{ id: null, m: I, style: {} }];
 let pendingText = null;
 const gradients = {}; // id → {x1, y1, x2, y2, stops: [[offset, color]]}
 const clips = {}; // id → [cmds]
+const anchors = {}; // wardrobe part id → [part it is drawn next to, 0 before / 1 after]
 let gradient = null, clip = null;
 const STYLE_KEYS = ['fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'opacity', 'fill-opacity', 'clip-path', 'font-size', 'font-weight'];
 function partFor(id) { let p = parts.find(q => q.id === id); if (!p) { p = { id, inks: [] }; parts.push(p); } return p; }
@@ -157,7 +158,12 @@ function walk(src) {
     }
     if (tag === 'stop') { gradient.stops.push([Number(a.offset), a['stop-color']]); continue; }
     if (tag === 'clipPath') { clip = clips[a.id] = []; if (selfClose) clip = null; continue; }
-    if (tag === 'g') { const g = { id: a.id || top.id, m, style }; if (!selfClose) stack.push(g); continue; }
+    if (tag === 'g') {
+      const g = { id: a.id || top.id, m, style };
+      if (a['data-before'] || a['data-after']) anchors[a.id] = a['data-before'] ? [a['data-before'], 0] : [a['data-after'], 1];
+      if (!selfClose) stack.push(g);
+      continue;
+    }
     if (tag === 'text') { const [x, y] = ap(m, Number(a.x || 0), Number(a.y || 0)); partFor(top.id); pendingText = { part: top.id, x, y, size: Number(style['font-size']), fill: style.fill, text: '' }; continue; }
     let cmds;
     if (tag === 'path') cmds = parseD(a.d);
@@ -183,10 +189,13 @@ if (kuro) {
     if (i < 0) throw new Error('missing anchor ' + anchor);
     parts.splice(i + offset, 0, ...clothes.filter(pick));
   };
-  put('jacket_work', 1, p => !/_(hat|rub_sleeve|invite_sleeve)$/.test(p.id));
-  put('cat_ears', 0, p => p.id.endsWith('_hat'));
-  put('tap_rub_sleeve_smock', 1, p => p.id.endsWith('_rub_sleeve'));
-  put('invite_sleeve_smock', 1, p => p.id.endsWith('_invite_sleeve'));
+  // Anything else says where it goes with data-before or data-after on its group.
+  for (const p of clothes.filter(p => anchors[p.id])) put(anchors[p.id][0], anchors[p.id][1], q => q === p);
+  const placed = p => !anchors[p.id];
+  put('jacket_work', 1, p => placed(p) && !/_(hat|rub_sleeve|invite_sleeve)$/.test(p.id));
+  put('cat_ears', 0, p => placed(p) && p.id.endsWith('_hat'));
+  put('tap_rub_sleeve_smock', 1, p => placed(p) && p.id.endsWith('_rub_sleeve'));
+  put('invite_sleeve_smock', 1, p => placed(p) && p.id.endsWith('_invite_sleeve'));
 }
 if (pendingText) throw new Error('unclosed text');
 

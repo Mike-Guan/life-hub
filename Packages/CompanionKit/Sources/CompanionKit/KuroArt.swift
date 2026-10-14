@@ -36,6 +36,7 @@ enum KuroPalette {
     static let sakura = Color(hex: 0xFFB7C5)
     static let petal = Color(hex: 0xFFD1DC)
     static let goldShade = Color(hex: 0xB8860B)
+    static let mint = Color(hex: 0x9EE6C8)
 }
 
 /// One named, separately movable piece of KURO, in back-to-front order.
