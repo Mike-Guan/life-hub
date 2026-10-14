@@ -1264,7 +1264,6 @@ struct Squash {
     var y: CGFloat = 1
 }
 
-/// Lays the figure out for the watch's full-screen page: full width, 30 pt from the top, running off the bottom.
 extension CompanionView {
     // The watch frame shows the figure lower than the phone card, so the zoom centres lower (逐帧 手表近景 10-13:
     // at 0.22 the watch close-up showed only hair and the top of the eyes).
@@ -1274,6 +1273,7 @@ extension CompanionView {
     }
 }
 
+/// Lays the figure out for the watch's full-screen page: full width, 30 pt from the top, running off the bottom.
 struct WatchFigureFrame: ViewModifier {
     let isEnabled: Bool
 

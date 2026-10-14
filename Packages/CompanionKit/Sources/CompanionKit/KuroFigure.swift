@@ -285,6 +285,7 @@ public struct KuroView: View {
     @State private var bubbleTask: Task<Void, Never>?
     @State private var pop = 0
     @State private var closeUp = false
+    @State private var closeUpTask: Task<Void, Never>?
     @State private var tapStart: Date?
     @State private var tapKind: KuroTap?
     @State private var tapHeart = false
@@ -670,8 +671,11 @@ public struct KuroView: View {
             .onEnded { _ in
                 closeUp = true
                 hold?.action()
-                Task {
+                // A second press restarts the 1.5 s instead of ending it early.
+                closeUpTask?.cancel()
+                closeUpTask = Task {
                     try? await Task.sleep(for: .seconds(1.5))
+                    guard !Task.isCancelled else { return }
                     closeUp = false
                 }
             }
