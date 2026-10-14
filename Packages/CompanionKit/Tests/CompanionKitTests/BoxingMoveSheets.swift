@@ -33,7 +33,7 @@ extension FrameSheets {
                     AnyView(DuckHookFrame(start: tap, line: line, watch: name.hasPrefix("watch")))
                 }
             }
-            try write("boxing-B2-bubble-\(name)", rows, size: size, frames: 4, step: 0.2)
+            try write("boxing-B2-bubble-\(name)", rows, size: size, frames: 5, step: 0.2)
         }
     }
 
@@ -59,16 +59,21 @@ private struct DuckHookFrame: View {
 
     var body: some View {
         if let line {
+            // The phone lays out as #339 does while talking (58 pt above the figure); the watch waits for the hook.
+            let now = frameClock ?? start
+            let shows = !watch || now.timeIntervalSince(start) >= WatchPoke.duckHook.lineDelay
             ZStack {
                 Rectangle().fill(Mode.boxing.color)
-                RunnerFigure(mode: .boxing, pose: pose(at: frameClock ?? start))
+                RunnerFigure(mode: .boxing, pose: pose(at: now))
                     .aspectRatio(RunnerArt.bounds.width / RunnerArt.bounds.height, contentMode: .fit)
-                    .padding(.top, 24)
+                    .padding(.top, watch ? 24 : 58)
                     .padding(.horizontal, 12)
                     .modifier(WatchFigureFrame(isEnabled: watch))
-                SpeechBubble(text: line)
-                    .padding(12)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: watch ? .bottom : .topLeading)
+                if shows {
+                    SpeechBubble(text: line)
+                        .padding(12)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: watch ? .bottom : .topLeading)
+                }
             }
         } else {
             RunnerFigure(mode: .boxing, pose: pose(at: frameClock ?? start))
