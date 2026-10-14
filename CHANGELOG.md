@@ -424,6 +424,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The wardrobe keeps what a newer build put on (new slots or modes) instead of losing the whole wardrobe,
+  and writes it back when saving.
 - Watch: the app opens without the system killing it (a hand-made pager replaces the vertical page view),
   HAKU is a little smaller, waking is smoother, and a shake still counts right after the screen dims. (#231)
 - Watch: the app has its own icon. (#230)
