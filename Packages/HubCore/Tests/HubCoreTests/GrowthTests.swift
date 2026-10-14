@@ -428,6 +428,18 @@ import Testing
         #expect(try JSONDecoder().decode(Wardrobe.self, from: future).clothes == [.work: "haku.top.work.cardigan"])
     }
 
+    @Test func slotsAndModesFromANewerBuildAreWrittenBack() throws {
+        let future = Data(#"{"equipped":{"hat":"x.beanie","mask":"mask.stripes"},"clothes":{"dance":"x.top"}}"#.utf8)
+        var wardrobe = try JSONDecoder().decode(Wardrobe.self, from: future)
+        #expect(wardrobe.equipped == [.mask: "mask.stripes"])
+        #expect(wardrobe.clothes.isEmpty)
+        wardrobe.clear(.mask)
+        wardrobe.equip(try item("haku.top.chill.aloha"))
+        let saved = try JSONDecoder().decode([String: [String: String]].self, from: JSONEncoder().encode(wardrobe))
+        #expect(saved["equipped"] == ["hat": "x.beanie"])
+        #expect(saved["clothes"] == ["dance": "x.top", "chill": "haku.top.chill.aloha"])
+    }
+
     // Prices from the shop catalogue (2026-10-14): tops 30-40, full sets 80-90.
     @Test func clothesFollowTheApprovedPricesAndStayOffTheShelfUntilDrawn() {
         for persona in Persona.allCases {
