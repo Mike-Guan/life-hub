@@ -155,6 +155,8 @@ enum Placement {
         .sunlight: Spot(.window, "sunlight"),
         .door: Spot(.door, "door"),
         .pillow: Spot(.pillow, "pillow"),
+        .pillowLean: Spot(.pillow, "pillow"),
+        .pillowHug: Spot(.handsFront, "抱枕"),
         .roomPlant: Spot(.corner1, "roomPlant"),
         .roomBag: Spot(.corner1, "roomBag"),
         .heavyBag: Spot(.corner1, "heavyBag"),
