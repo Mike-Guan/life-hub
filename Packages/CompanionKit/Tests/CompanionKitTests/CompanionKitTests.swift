@@ -394,6 +394,13 @@ import Testing
         let patting = Set(RunnerFigure.parts(for: .chill, pose: pat))
         #expect(patting.isSuperset(of: [.pillowHug, .tapHand, .patLines]))
         #expect(!patting.contains(.monsterCan) && !patting.contains(.pillowLean))
+        // UI 审核 2026-10-14: the hugged pillow ends where the leaning one is drawn, so only its layer changes.
+        // `start` can be up to 0.01 s into the beat, so step back to its first frame.
+        let first = try #require(IdleClock.beat(at: start, lengths: RunnerPose.chillBeats, seed: RunnerPose.seed))
+        let end = start - first.phase + 1.849
+        let handover = try #require(RunnerPose(mode: .chill, time: end, face: .mid, react: 0).hugPillow)
+        #expect(RunnerPose(mode: .chill, time: end - 0.1, face: .mid, react: 0).eyesShut)
+        #expect(abs(handover.width + 24) < 0.5 && abs(handover.height + 16) < 0.5)
         let leaning = RunnerPose(mode: .chill, time: start + 2.6, face: .mid, react: 0)
         let leant = Set(RunnerFigure.parts(for: .chill, pose: leaning))
         #expect(leant.contains(.pillowLean) && !leant.contains(.pillowHug) && !leant.contains(.monsterCan))
@@ -1030,7 +1037,8 @@ import Testing
         #expect(Outfit(Wardrobe(equipped: [.gloves: "gloves.someday", .room: "room.someday"])) == Outfit())
     }
 
-    @Test(arguments: ShopItem.catalog(for: .haku))
+    // Clothes join these checks once UI draws them (Issue #327).
+    @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
     func everyWornItemChangesTheLook(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
@@ -1059,7 +1067,8 @@ import Testing
         #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
     }
 
-    @Test(arguments: ShopItem.catalog(for: .haku))
+    // Clothes join these checks once UI draws them (Issue #327).
+    @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
     func everyItemIconDrawsSomething(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
@@ -1074,9 +1083,11 @@ import Testing
         #expect(ItemPicture(slot: .room, outfit: Outfit(), itemID: nil).parts.isEmpty)
     }
 
+    // Clothes tiles get their colors with the clothes art, so only the slots on the shelf today are checked.
     @Test(arguments: Persona.allCases)
     func slotsHaveTheirOwnTileColors(_ persona: Persona) {
-        #expect(Set(Slot.allCases.map { $0.tileColor(for: persona) }).count == Slot.allCases.count)
+        let shelf = Slot.allCases.filter { $0 != .top && $0 != .fullSet }
+        #expect(Set(shelf.map { $0.tileColor(for: persona) }).count == shelf.count)
     }
 
     // UI-01 (UI 审核 2026-10-08, regression of 10-07): KURO's shop and wardrobe tiles used HAKU's mode colors.
@@ -1261,6 +1272,6 @@ import Testing
         #expect(brushing.contains(.toothbrush))
         let leaving = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(moment: .timeToLeave)))
         #expect(leaving.isSuperset(of: [.headset, .door, .watchWrist, .tapHand]))
-        #expect(CompanionLines.lines(for: .chill, moment: .timeToLeave).contains("……该出门了吧。"))
+        #expect(CompanionLines.lines(for: .chill, moment: .timeToLeave).contains("……我包背好了。"))
     }
 }

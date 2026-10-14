@@ -399,4 +399,117 @@ import Testing
             #expect(keepsakes(items) == keepsakes(haku), "\(persona)")
         }
     }
+
+    @Test func clothesAreWornOnePerModeAndASetReplacesTheTop() throws {
+        var wardrobe = Wardrobe()
+        let blazer = try #require(ShopItem.item("haku.top.work.blazer"))
+        let raincoat = try #require(ShopItem.item("haku.set.work.raincoat"))
+        let aloha = try #require(ShopItem.item("haku.top.chill.aloha"))
+        wardrobe.equip(blazer)
+        wardrobe.equip(aloha)
+        #expect(wardrobe.clothes == [.work: blazer.id, .chill: aloha.id])
+        #expect(wardrobe.equipped.isEmpty)
+        wardrobe.equip(raincoat)
+        #expect(wardrobe.clothes == [.work: raincoat.id, .chill: aloha.id])
+        wardrobe.undress(.work)
+        #expect(wardrobe.clothes == [.chill: aloha.id])
+    }
+
+    @Test func wardrobesKeepTheirClothesAndOldOnesLoad() throws {
+        let worn = Wardrobe(equipped: [.gloves: "gloves.gold"], clothes: [.chill: "haku.top.chill.aloha"])
+        let data = try JSONEncoder().encode(worn)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: data) == worn)
+        let json = try #require(String(data: data, encoding: .utf8))
+        #expect(json.contains(#""chill":"haku.top.chill.aloha""#))
+        let old = Data(#"{"equipped":{"gloves":"gloves.gold"}}"#.utf8)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: old) == Wardrobe(equipped: [.gloves: "gloves.gold"]))
+        let future = Data(#"{"equipped":{},"clothes":{"dance":"x","work":"haku.top.work.cardigan"}}"#.utf8)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: future).clothes == [.work: "haku.top.work.cardigan"])
+    }
+
+    @Test func slotsAndModesFromANewerBuildAreWrittenBack() throws {
+        let future = Data(#"{"equipped":{"hat":"x.beanie","mask":"mask.stripes"},"clothes":{"dance":"x.top"}}"#.utf8)
+        var wardrobe = try JSONDecoder().decode(Wardrobe.self, from: future)
+        #expect(wardrobe.equipped == [.mask: "mask.stripes"])
+        #expect(wardrobe.clothes.isEmpty)
+        wardrobe.clear(.mask)
+        wardrobe.equip(try item("haku.top.chill.aloha"))
+        let saved = try JSONDecoder().decode([String: [String: String]].self, from: JSONEncoder().encode(wardrobe))
+        #expect(saved["equipped"] == ["hat": "x.beanie"])
+        #expect(saved["clothes"] == ["dance": "x.top", "chill": "haku.top.chill.aloha"])
+    }
+
+    // Prices from the shop catalogue (2026-10-14): tops 30-40, full sets 80-90.
+    @Test func clothesFollowTheApprovedPricesAndStayOffTheShelfUntilDrawn() {
+        for persona in Persona.allCases {
+            let clothes = ShopItem.catalog(for: persona).filter { $0.mode != nil }
+            #expect(Set(clothes.compactMap(\.mode)) == [.work, .chill, .money], "\(persona)")
+            for item in clothes {
+                let range = item.slot == .fullSet ? 80...90 : 30...40
+                #expect(range.contains(item.price ?? 0), "\(item.id)")
+                #expect(item.slot == .top || item.slot == .fullSet)
+                #expect(!item.isDrawn)
+            }
+            #expect(ShopItem.catalog(for: persona, card: .boxing).allSatisfy { $0.mode == nil })
+        }
+    }
+
+    @Test func shelvesGroupSlotsByWhereTheyAreWorn() {
+        #expect(Slot.allCases.filter { $0.shelf == .clothes } == [.top, .fullSet])
+        #expect(Slot.allCases.filter { $0.shelf == .accessories } == [.headband, .mask, .celebration])
+        #expect(Slot.allCases.filter { $0.shelf == .props } == [.gloves])
+        #expect(Slot.allCases.filter { $0.shelf == .room } == [.room])
+    }
+
+    @Test func propsShowOnlyInTheIdentityCardsModeWithACard() {
+        #expect(WardrobeShelf.shelves(in: .boxing, card: .art) == [.clothes, .accessories, .props, .room])
+        #expect(WardrobeShelf.shelves(in: .chill, card: .boxing) == [.clothes, .accessories, .room])
+        #expect(WardrobeShelf.shelves(in: .boxing, card: nil) == [.clothes, .accessories, .room])
+    }
+
+    @Test func theWardrobeListsItemsForTheModeAndCard() throws {
+        let pink = try #require(ShopItem.item("gloves.pink"))
+        let mask = try #require(ShopItem.item("mask.stripes"))
+        let bag = try #require(ShopItem.item("room.bag"))
+        let aloha = try #require(ShopItem.item("haku.top.chill.aloha"))
+        #expect(pink.shows(in: .boxing, card: .boxing))
+        #expect(!pink.shows(in: .boxing, card: .art))
+        #expect(!pink.shows(in: .work, card: .boxing))
+        #expect(mask.shows(in: .work, card: .art))
+        #expect(mask.shows(in: .boxing, card: nil))
+        #expect(bag.shows(in: .chill, card: .boxing))
+        #expect(!bag.shows(in: .chill, card: .tennis))
+        #expect(aloha.shows(in: .chill, card: nil))
+        #expect(!aloha.shows(in: .work, card: nil))
+        let racket = try #require(ShopItem.item("kuro.racket.gold"))
+        #expect(racket.shows(in: .boxing, card: .tennis))
+        #expect(!racket.shows(in: .boxing, card: .boxing))
+    }
+
+    @Test func wearingCoversClothesInTheirMode() throws {
+        let aloha = try #require(ShopItem.item("haku.top.chill.aloha"))
+        let mask = try #require(ShopItem.item("mask.stripes"))
+        var wardrobe = Wardrobe()
+        wardrobe.equip(aloha)
+        wardrobe.equip(mask)
+        #expect(wardrobe.isWearing(aloha))
+        #expect(wardrobe.isWearing(mask))
+        wardrobe.undress(.chill)
+        #expect(!wardrobe.isWearing(aloha))
+    }
+
+    @Test func anotherCardsItemsAreHiddenButKept() {
+        let wardrobe = Wardrobe(
+            equipped: [.gloves: "gloves.pink", .mask: "mask.stripes", .room: "room.bag", .headband: "headband.future"],
+            clothes: [.chill: "haku.top.chill.aloha"]
+        )
+        #expect(
+            wardrobe.showing(card: .art)
+                == Wardrobe(
+                    equipped: [.mask: "mask.stripes", .headband: "headband.future"],
+                    clothes: [.chill: "haku.top.chill.aloha"]
+                )
+        )
+        #expect(wardrobe.showing(card: .boxing) == wardrobe)
+    }
 }
