@@ -13,23 +13,35 @@ public final class GrowthStore {
     }
 
     public private(set) var ledger: CanLedger
+    /// How each character looked when an item reached her.
+    public private(set) var looks: LookLog
     /// Last load or save failure, for the UI to show.
     public private(set) var lastError: String?
     public let deviceID: String
     /// The character new cans and items go to.
     public var persona: Persona = .haku
+    /// The look `persona` had at a moment, `nil` when it isn't known. Unset, no look is kept.
+    @ObservationIgnored public var lookAt: (@MainActor (Persona, Date) -> Look?)?
 
     @ObservationIgnored private var file: LogFile<CanLedger>
+    @ObservationIgnored private var lookFile: LogFile<LookLog>
 
-    /// - Parameter fileURL: where the ledger lives; `nil` keeps everything in memory (previews, tests).
-    public init(fileURL: URL?, deviceID: String) {
+    /// - Parameters:
+    ///   - fileURL: where the ledger lives; `nil` keeps everything in memory (previews, tests).
+    ///   - lookURL: where the look snapshots live; `nil` keeps them in memory.
+    public init(fileURL: URL?, lookURL: URL? = nil, deviceID: String) {
         var file = LogFile<CanLedger>(url: fileURL, name: "能量罐记录")
         var ledger = CanLedger()
         let error = file.load(into: &ledger)
+        var lookFile = LogFile<LookLog>(url: lookURL, name: "那天的样子记录")
+        var looks = LookLog()
+        let lookError = lookFile.load(into: &looks)
         self.file = file
+        self.lookFile = lookFile
         self.deviceID = deviceID
         self.ledger = ledger
-        self.lastError = error
+        self.looks = looks
+        self.lastError = error ?? lookError
     }
 
     /// Records `win` for `persona` once per `source`, then grants any of her keepsakes it completes.
@@ -58,8 +70,9 @@ public final class GrowthStore {
                 deviceID: deviceID
             )
             ledger.entries.append(grant)
+            keepLook(for: grant)
         }
-        lastError = file.save(&ledger)
+        lastError = file.save(&ledger) ?? saveLooks()
         return granted
     }
 
@@ -82,7 +95,8 @@ public final class GrowthStore {
             deviceID: deviceID
         )
         ledger.entries.append(entry)
-        lastError = file.save(&ledger)
+        keepLook(for: entry)
+        lastError = file.save(&ledger) ?? saveLooks()
     }
 
     /// Wins its character still needs for `item`'s keepsake; `nil` when it isn't a keepsake or is owned.
@@ -95,7 +109,35 @@ public final class GrowthStore {
     /// Deletes every record and the file, as on a fresh install.
     public func eraseAll() {
         ledger = CanLedger()
-        lastError = file.remove()
+        looks = LookLog()
+        lastError = file.remove() ?? lookFile.remove()
+    }
+
+    @ObservationIgnored private var looksChanged = false
+
+    /// Keeps `persona`'s look for the item `entry` gave her, once per entry, when the look is known.
+    private func keepLook(for entry: CanEntry) {
+        guard let itemID = entry.itemID, !looks.snapshots.contains(where: { $0.id == entry.id }),
+            let look = lookAt?(entry.persona, entry.at)
+        else { return }
+        let snapshot = LookSnapshot(
+            entry: entry.id,
+            persona: entry.persona,
+            itemID: itemID,
+            look: look,
+            at: entry.at,
+            deviceID: deviceID
+        )
+        looks.snapshots.append(snapshot)
+        looksChanged = true
+    }
+
+    /// Writes the looks when `keepLook` added one.
+    /// - Returns: an error message for the UI, or `nil` on success or when nothing changed.
+    private func saveLooks() -> String? {
+        guard looksChanged else { return nil }
+        looksChanged = false
+        return lookFile.save(&looks)
     }
 }
 
@@ -105,6 +147,10 @@ extension GrowthStore {
         in container: HubContainer = .applicationSupport(),
         defaults: UserDefaults = .standard
     ) -> GrowthStore {
-        GrowthStore(fileURL: container.canLedgerURL, deviceID: HubDevice.id(defaults: defaults))
+        GrowthStore(
+            fileURL: container.canLedgerURL,
+            lookURL: container.lookLogURL,
+            deviceID: HubDevice.id(defaults: defaults)
+        )
     }
 }

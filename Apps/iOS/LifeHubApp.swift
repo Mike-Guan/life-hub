@@ -73,6 +73,14 @@ struct LifeHubApp: App {
         let needs = NeedTracker()
         let growth = GrowthStore.live(in: container, defaults: AppGroup.defaults)
         growth.persona = Persona.stored(in: AppGroup.defaults)
+        growth.lookAt = { persona, date in
+            Look.at(
+                date,
+                log: store.log,
+                wardrobe: .stored(in: AppGroup.defaults, persona: persona),
+                card: .picked(for: persona)
+            )
+        }
         _store = State(initialValue: store)
         // The Focus filter switches mode through this store, so the app keeps one writer for the log.
         AppDependencyManager.shared.add { store }

@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
+  and her identity card. Nothing shows it yet; the keepsake page and share cards will. Wins filled in from
+  an earlier day keep no look, because the wardrobe has no history.
 - Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
   hand left out) or the iPhone's own count. Days you didn't open the app count too, up to a week back. Steps
   are never shown and never leave the iPhone.
