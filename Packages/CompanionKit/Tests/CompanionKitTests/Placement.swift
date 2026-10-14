@@ -284,6 +284,8 @@ enum Placement {
         .inviteSleeveChill: Spot(.handL, "指门"),
         .inviteSleeveTennis: Spot(.handL, "指门"),
         .inviteSleeveDesk: Spot(.handL, "指门"),
+        .inviteSleeveBox: Spot(.handL, "指门"),
+        .inviteSleeveSmock: Spot(.handL, "指门"),
         .inviteHand: Spot(.handL, "指门"),
         .walkPack: Spot(.torso, "背包"),
         .walkStraps: Spot(.torso, "背包"),
