@@ -13778,13 +13778,13 @@ enum KuroArt {
         [
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 22, y: 12))
-                    p.addLine(to: .init(x: 24, y: -6))
-                    p.addLine(to: .init(x: 34, y: 4))
+                    p.move(to: .init(x: 22, y: 21))
+                    p.addLine(to: .init(x: 24, y: 3))
+                    p.addLine(to: .init(x: 34, y: 13))
                     p.closeSubpath()
-                    p.move(to: .init(x: 98, y: 12))
-                    p.addLine(to: .init(x: 96, y: -6))
-                    p.addLine(to: .init(x: 86, y: 4))
+                    p.move(to: .init(x: 98, y: 21))
+                    p.addLine(to: .init(x: 96, y: 3))
+                    p.addLine(to: .init(x: 86, y: 13))
                     p.closeSubpath()
                 },
                 fill: KuroPalette.yellow,
@@ -13794,22 +13794,22 @@ enum KuroArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 26, y: 0))
-                    p.addLine(to: .init(x: 27.5, y: -2.5))
-                    p.addLine(to: .init(x: 30, y: 2))
+                    p.move(to: .init(x: 26, y: 9))
+                    p.addLine(to: .init(x: 27.5, y: 6.5))
+                    p.addLine(to: .init(x: 30, y: 11))
                     p.closeSubpath()
-                    p.move(to: .init(x: 94, y: 0))
-                    p.addLine(to: .init(x: 92.5, y: -2.5))
-                    p.addLine(to: .init(x: 90, y: 2))
+                    p.move(to: .init(x: 94, y: 9))
+                    p.addLine(to: .init(x: 92.5, y: 6.5))
+                    p.addLine(to: .init(x: 90, y: 11))
                     p.closeSubpath()
                 },
                 fill: KuroPalette.pink
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 28, y: 14))
-                    p.addQuadCurve(to: .init(x: 60, y: -7), control: .init(x: 30, y: -6))
-                    p.addQuadCurve(to: .init(x: 92, y: 14), control: .init(x: 90, y: -6))
+                    p.move(to: .init(x: 28, y: 23))
+                    p.addQuadCurve(to: .init(x: 60, y: 2), control: .init(x: 30, y: 3))
+                    p.addQuadCurve(to: .init(x: 92, y: 23), control: .init(x: 90, y: 3))
                     p.closeSubpath()
                 },
                 fill: KuroPalette.yellow,
@@ -13819,11 +13819,11 @@ enum KuroArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 16, y: 15))
-                    p.addQuadCurve(to: .init(x: 104, y: 15), control: .init(x: 60, y: 4))
-                    p.addQuadCurve(to: .init(x: 96, y: 22), control: .init(x: 108, y: 22))
-                    p.addQuadCurve(to: .init(x: 24, y: 22), control: .init(x: 60, y: 16))
-                    p.addQuadCurve(to: .init(x: 16, y: 15), control: .init(x: 12, y: 22))
+                    p.move(to: .init(x: 16, y: 24))
+                    p.addQuadCurve(to: .init(x: 104, y: 24), control: .init(x: 60, y: 13))
+                    p.addQuadCurve(to: .init(x: 96, y: 31), control: .init(x: 108, y: 31))
+                    p.addQuadCurve(to: .init(x: 24, y: 31), control: .init(x: 60, y: 25))
+                    p.addQuadCurve(to: .init(x: 16, y: 24), control: .init(x: 12, y: 31))
                     p.closeSubpath()
                 },
                 fill: KuroPalette.yellow,
@@ -13833,8 +13833,8 @@ enum KuroArt {
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 60, y: -7))
-                    p.addLine(to: .init(x: 60, y: 12))
+                    p.move(to: .init(x: 60, y: 2))
+                    p.addLine(to: .init(x: 60, y: 21))
                 },
                 stroke: KuroPalette.ink,
                 lineWidth: 1.4,

@@ -210,16 +210,24 @@ struct KuroFigure: View {
         // One top or set per mode, so the first worn one in catalog order is the only one.
         let worn = KuroItem.allCases.filter { $0.look == look && pose.items.contains($0) }
         if let clothes = worn.lazy.compactMap(\.clothes).first {
-            dress(look, in: clothes, &visible)
+            dress(look, in: clothes, back: pose.tap == .turnAway, &visible)
         }
         return KuroPart.allCases.filter { visible.contains($0) }
     }
 
-    // Her own top stays wherever a scene or tap leaves it, so the clothes go only where it is drawn.
-    /// Swaps her own top, sleeves and, for the rain set, cat ears in `visible` for `clothes`.
-    nonisolated private static func dress(_ look: KuroLook, in clothes: KuroClothes, _ visible: inout Set<KuroPart>) {
-        if visible.remove(jacket(look)) != nil {
-            visible.insert(clothes.top)
+    // Her own top stays wherever a scene or tap leaves it, so the clothes go only where it is drawn. UI 审核
+    // 2026-10-14: from behind, no front pattern shows, so her own plain top stays until the clothes have backs;
+    // the set hats look the same from behind.
+    /// Swaps her own top, sleeves and, for the rain set, cat ears in `visible` for `clothes`; when `back`, only the
+    /// hat changes.
+    nonisolated private static func dress(
+        _ look: KuroLook, in clothes: KuroClothes, back: Bool, _ visible: inout Set<KuroPart>
+    ) {
+        if visible.contains(jacket(look)) {
+            if !back {
+                visible.remove(jacket(look))
+                visible.insert(clothes.top)
+            }
             // A hat goes where her cat ears are; the bath towel takes both off. The rain hat draws its own ears.
             if let hat = clothes.hat, visible.contains(.catEars) {
                 visible.insert(hat)

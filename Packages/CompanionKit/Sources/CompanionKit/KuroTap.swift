@@ -103,12 +103,11 @@ extension KuroPose {
 }
 
 extension KuroFigure {
-    // What she keeps when seen from behind: hair, ears, jackets, hats and things that stay put. UI 审核 2026-10-14:
-    // her set hats look the same from behind.
+    // What she keeps when seen from behind: hair, ears, jackets and things that stay put.
     nonisolated private static let backView: Set<KuroPart> = [
         .itemFlower, .itemLamp, .tennisPonytail, .hairBack, .itemScrunchie, .jacketWork, .jacketChill,
         .itemBlanket, .jacketTennis, .itemBag, .jacketDesk, .earL, .earR, .catEars, .deskBooks, .jacketBox,
-        .jacketSmock, .boxSandbag, .setPicnicHat, .setRainHat,
+        .jacketSmock, .boxSandbag,
     ]
 
     /// Changes `visible` for `tap` at `progress`.
