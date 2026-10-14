@@ -19,6 +19,24 @@ extension Win {
         return EarnedWin(win: .daylight, source: Win.daylight.source(at: day, calendar: calendar), at: now)
     }
 
+    /// Steps in a day that earn the steps win.
+    public static let stepsMinimum: Double = 6000
+
+    // 奖励数值表 §2a: a day is the local calendar day, 0:00 to 24:00, not the hub day.
+    /// The steps win for the calendar day starting at `day`, after `steps` steps that day.
+    /// - Parameters:
+    ///   - steps: the day's step total, without steps typed in by hand.
+    ///   - day: the start of the calendar day.
+    ///   - now: the current time; the win is dated at the end of the day, or now while the day lasts.
+    ///   - calendar: the calendar for days.
+    /// - Returns: `nil` below `stepsMinimum`.
+    public static func steps(_ steps: Double, on day: Date, now: Date, calendar: Calendar = .current) -> EarnedWin? {
+        guard steps >= stepsMinimum else { return nil }
+        let start = calendar.startOfDay(for: day)
+        let end = calendar.date(byAdding: .day, value: 1, to: start) ?? now
+        return EarnedWin(win: .steps, source: Win.steps.source(at: start, calendar: calendar), at: min(end, now))
+    }
+
     /// The on-time sleep win for last night: its longest sleep began no later than `earlySleepGrace` after
     /// the bedtime in `schedule`.
     /// - Parameters:
