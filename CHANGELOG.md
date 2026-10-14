@@ -113,6 +113,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   bus, and the moment of arriving. Life Hub asks for Motion & Fitness once; motion stays on the iPhone.
 - After a workout the watch cheers for it as soon as the Health app saves it, without opening the iPhone app.
   The iPhone home still cheers the next time it opens.
+- At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
+  chain when he hits it.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
