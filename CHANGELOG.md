@@ -18,6 +18,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - The welcome back scene no longer ends with a cut: HAKU settles back over the last second and the sofa,
   blanket, phone and crate drop a little and fade out. A tap that skips it does the same over 0.3 s.
+- Today's energy has its own line under the character, saying where it comes from. When it is a guess from
+  sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
 - The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
   gym, say the app never records your route, and say only the computed state goes to your own Apple Watch.
   They now also come in Japanese and English, following the phone's language. The 「日文和英文」 switch
