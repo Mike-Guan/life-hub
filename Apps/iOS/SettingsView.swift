@@ -111,8 +111,13 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("睡觉时间")
                     .font(Toy.body(16, weight: .heavy))
-                timeRow("睡觉", selection: time(shownBedtime.startMinute))
-                timeRow("起床", selection: time(shownBedtime.endMinute))
+                timeRow("睡觉", selection: time(shownBedtime.startMinute), muted: !bedtime.isSet)
+                timeRow("起床", selection: time(shownBedtime.endMinute), muted: !bedtime.isSet)
+                if !bedtime.isSet {
+                    Text("还没设。选一个时间就生效。")
+                        .font(Toy.body(12, weight: .bold))
+                        .foregroundStyle(Toy.muted)
+                }
                 Toggle("到点提醒", isOn: $remindsAtBedtime)
                     .font(Toy.body(15))
                 Text("\(persona.title) 从睡觉时间开始变困，一直到起床时间。打开提醒，到点发一条通知，只提醒一次。")
@@ -331,14 +336,18 @@ struct SettingsView: View {
     }
 
     /// A time setting: the name on the left, the time in an outlined chip on the right.
-    private func timeRow(_ title: String, selection: Binding<Date>) -> some View {
+    // UI 审核 #340: a prefilled time that isn't set yet is drawn muted, so it doesn't look in effect.
+    private func timeRow(_ title: String, selection: Binding<Date>, muted: Bool = false) -> some View {
         HStack {
             Text(title)
                 .font(Toy.body(15, weight: .bold))
+                .foregroundStyle(muted ? Toy.muted : Toy.ink)
             Spacer()
             DatePicker(title, selection: selection, displayedComponents: .hourAndMinute)
                 .labelsHidden()
                 .font(Toy.body(16, weight: .heavy))
+                .foregroundStyle(muted ? Toy.muted : Toy.ink)
+                .opacity(muted ? 0.6 : 1)
                 .padding(3)
                 .toyCard(fill: Toy.card, radius: 10, shadow: 2)
         }
