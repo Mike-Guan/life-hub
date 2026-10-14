@@ -26,7 +26,9 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
     public var isReleased: Bool { Self.released.contains(self) }
 
     /// The card's name.
-    public var title: String {
+    public var title: String { titleKey.localized }
+
+    private var titleKey: String {
         switch self {
         case .boxing: "拳击日"
         case .tennis: "网球日"
@@ -46,8 +48,8 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
     /// The activity's name without 日, for sentences such as the countdown and place names.
     public var activity: String {
         switch self {
-        case .boxing: "拳击"
-        case .tennis: "网球"
+        case .boxing: "拳击".localized
+        case .tennis: "网球".localized
         default: title
         }
     }
@@ -86,8 +88,8 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         case .ball: lines = ("球打满气了", "帮你看着")
         case .dance, .music, .ski: lines = nil
         }
-        guard let lines else { return "\(title)中" }
-        return persona == .kuro ? lines.kuro : lines.haku
+        guard let lines else { return String(format: "%@中".localized(for: persona), title) }
+        return (persona == .kuro ? lines.kuro : lines.haku).localized(for: persona)
     }
 
     // 卡片标语与代码 v0 §2: the invite on the learned identity day. Cards still without one use a plain line.
@@ -106,8 +108,11 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         case .ball: lines = ("球我打好气了。", "……今天去打球吗。")
         case .dance, .music, .ski: lines = nil
         }
-        guard let lines else { return persona == .kuro ? "……今天去吗。" : "今天\(title)，我准备好了。" }
-        return persona == .kuro ? lines.kuro : lines.haku
+        guard let lines else {
+            let line = persona == .kuro ? "……今天去吗。" : "今天%@，我准备好了。"
+            return String(format: line.localized(for: persona), title)
+        }
+        return (persona == .kuro ? lines.kuro : lines.haku).localized(for: persona)
     }
 
     // 第 1 批、第 2 批、顺延身份卡 台词与待机 v0: three tap lines per card and character.
@@ -128,7 +133,7 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         case .music: lines = (["……刚才那个音不算。", "别吵，在数拍。", "我只会这一段。"], ["……嘘，在听。", "这段好难。", "……再一遍。"])
         case .ski: lines = (["冷。不是抱怨。", "……我坐缆车就行。", "雪镜起雾了。"], ["……好冷。", "手好冰。", "……再滑一次？"])
         }
-        return persona == .kuro ? lines.kuro : lines.haku
+        return (persona == .kuro ? lines.kuro : lines.haku).map { $0.localized(for: persona) }
     }
 
     /// Whether the card is a sport.
@@ -187,7 +192,9 @@ public enum ChillActivity: String, Codable, CaseIterable, Sendable {
     case shopping
 
     /// The name in the picker.
-    public var title: String {
+    public var title: String { titleKey.localized }
+
+    private var titleKey: String {
         switch self {
         case .fitness: "健身"
         case .running: "跑步"
