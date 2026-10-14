@@ -4,8 +4,8 @@
 # the clips show the real animation. Needs Xcode 26 and XcodeGen.
 set -euo pipefail
 
-modes=(work chill boxing money)
-personas=(haku kuro)
+modes=(chill boxing)
+personas=(haku)
 seconds=10
 out=build/recordings
 mkdir -p "$out"
@@ -55,7 +55,7 @@ record() {
 watch_list=$(xcrun simctl list devices available -j |
   jq -c '[.devices | to_entries[] | select(.key | test("watchOS"))] | sort_by(.key) | last | .value')
 echo "$watch_list" | jq -r '.[].name' | tee -a "$out/progress.txt"
-for size in 46mm; do
+for size in 40mm 42mm 46mm; do
 watch_udid=$(echo "$watch_list" | jq -r --arg s "($size)" \
   '[.[] | select(.name | contains($s)) | select(.name | test("SE 3|Series 11|Series 9|Series 10"))] | last | .udid')
 note "watch $size: $(echo "$watch_list" | jq -r --arg u "$watch_udid" '.[] | select(.udid == $u) | .name')"
@@ -112,20 +112,6 @@ for persona in "${personas[@]}"; do
   watch_clip "$persona" none "[]" "watch-$persona-no-mode"
 done
 
-# The widest names the card limit allows.
-cards=',"cards":{"names":{"work":"一二三四","chill":"Afterwor","money":"WWWWWWWW"},"identity":"art"}'
-for mode in "${modes[@]}"; do
-  watch_clip haku "$mode" "[]" "watch-haku-$mode-long-name"
-done
-cards=
-# Items the watch leaves out of the second character's frame.
-cards=',"wardrobe":{"equipped":{"room":"kuro.room.flower"}}'
-watch_clip kuro chill "[]" "watch-kuro-chill-flower"
-cards=',"wardrobe":{"equipped":{"mask":"kuro.blanket.cats"}}'
-watch_clip kuro chill "[]" "watch-kuro-chill-blanket"
-cards=',"wardrobe":{"equipped":{"room":"kuro.room.lamp"}}'
-watch_clip kuro money "[]" "watch-kuro-money-lamp"
-cards=
 xcrun simctl shutdown "$watch_udid" || true
 done
 note "done"
