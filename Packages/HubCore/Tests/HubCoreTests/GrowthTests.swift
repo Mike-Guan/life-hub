@@ -427,7 +427,7 @@ import Testing
         #expect(try JSONDecoder().decode(Wardrobe.self, from: future).clothes == [.work: "haku.top.work.cardigan"])
     }
 
-    // Prices from the shop catalogue (Mike 2026-10-13): tops 40-60, full sets 120-150.
+    // Prices from the shop catalogue (2026-10-14): tops 30-40, full sets 80-90.
     @Test func clothesFollowTheApprovedPricesAndStayOffTheShelfUntilDrawn() {
         for persona in Persona.allCases {
             let clothes = ShopItem.catalog(for: persona).filter { $0.mode != nil }
