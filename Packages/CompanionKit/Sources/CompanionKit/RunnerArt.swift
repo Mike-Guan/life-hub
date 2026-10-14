@@ -45,6 +45,7 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case roomPc = "room_pc"
     case deskMonitor = "desk_monitor"
     case pillow
+    case pillowLean = "pillow_lean"
     case roomPlant = "room_plant"
     case roomBag = "room_bag"
     case runningShoes = "running_shoes"
@@ -118,6 +119,7 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case sofaArm = "sofa_arm"
     case toothbrush
     case watchWrist = "watch_wrist"
+    case pillowHug = "pillow_hug"
     case tapHand = "tap_hand"
     case backFist = "back_fist"
     case thumpLines = "thump_lines"
@@ -212,6 +214,7 @@ enum RunnerArt {
         case .roomPc: roomPc()
         case .deskMonitor: deskMonitor()
         case .pillow: pillow()
+        case .pillowLean: pillowLean()
         case .roomPlant: roomPlant()
         case .roomBag: roomBag()
         case .runningShoes: runningShoes()
@@ -285,6 +288,7 @@ enum RunnerArt {
         case .sofaArm: sofaArm()
         case .toothbrush: toothbrush()
         case .watchWrist: watchWrist()
+        case .pillowHug: pillowHug()
         case .tapHand: tapHand()
         case .backFist: backFist()
         case .thumpLines: thumpLines()
@@ -780,6 +784,44 @@ enum RunnerArt {
                         to: .init(x: 17, y: 72),
                         control1: .init(x: 6, y: 76.92),
                         control2: .init(x: 10.92, y: 72)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.hairShade,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3.5
+            )
+        ]
+    }
+
+    private static func pillowLean() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 30, y: 88))
+                    p.addLine(to: .init(x: 42, y: 88))
+                    p.addCurve(
+                        to: .init(x: 53, y: 99),
+                        control1: .init(x: 48.08, y: 88),
+                        control2: .init(x: 53, y: 92.92)
+                    )
+                    p.addLine(to: .init(x: 53, y: 101))
+                    p.addCurve(
+                        to: .init(x: 42, y: 112),
+                        control1: .init(x: 53, y: 107.08),
+                        control2: .init(x: 48.08, y: 112)
+                    )
+                    p.addLine(to: .init(x: 30, y: 112))
+                    p.addCurve(
+                        to: .init(x: 19, y: 101),
+                        control1: .init(x: 23.92, y: 112),
+                        control2: .init(x: 19, y: 107.08)
+                    )
+                    p.addLine(to: .init(x: 19, y: 99))
+                    p.addCurve(
+                        to: .init(x: 30, y: 88),
+                        control1: .init(x: 19, y: 92.92),
+                        control2: .init(x: 23.92, y: 88)
                     )
                     p.closeSubpath()
                 },
@@ -5049,6 +5091,44 @@ enum RunnerArt {
                 stroke: RunnerPalette.ink,
                 lineWidth: 1.6
             ),
+        ]
+    }
+
+    private static func pillowHug() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 54, y: 104))
+                    p.addLine(to: .init(x: 66, y: 104))
+                    p.addCurve(
+                        to: .init(x: 77, y: 115),
+                        control1: .init(x: 72.08, y: 104),
+                        control2: .init(x: 77, y: 108.92)
+                    )
+                    p.addLine(to: .init(x: 77, y: 117))
+                    p.addCurve(
+                        to: .init(x: 66, y: 128),
+                        control1: .init(x: 77, y: 123.08),
+                        control2: .init(x: 72.08, y: 128)
+                    )
+                    p.addLine(to: .init(x: 54, y: 128))
+                    p.addCurve(
+                        to: .init(x: 43, y: 117),
+                        control1: .init(x: 47.92, y: 128),
+                        control2: .init(x: 43, y: 123.08)
+                    )
+                    p.addLine(to: .init(x: 43, y: 115))
+                    p.addCurve(
+                        to: .init(x: 54, y: 104),
+                        control1: .init(x: 43, y: 108.92),
+                        control2: .init(x: 47.92, y: 104)
+                    )
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.hairShade,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3.5
+            )
         ]
     }
 
