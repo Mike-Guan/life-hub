@@ -14,6 +14,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
+- The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
+  gym, say the app never records your route, and say only the computed state goes to your own Apple Watch.
+  They now also come in Japanese and English, following the phone's language. The 「日文和英文」 switch
+  can't reach these system prompts.
 - 27 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
