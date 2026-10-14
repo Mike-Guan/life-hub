@@ -236,6 +236,7 @@ public struct CompanionView: View {
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: mode) { _, _ in
             pop += 1
+            if offWork(at: Date.now.timeIntervalSinceReferenceDate) == nil { offWorkStart = nil }
             // The welcome back keeps its line through a mode change (issue #184).
             if welcomeStart == nil { say(nil) }
         }
@@ -466,6 +467,11 @@ public struct CompanionView: View {
         if bedtime == .on { return bedtimePose(time: time) }
         if let progress = offWork(at: time) {
             return RunnerPose.offWork(time: time, progress: reduceMotion ? 1 : progress, face: face)
+        }
+        // HAKU-02 (UI 审核 2026-10-13): once it has played, the off-work pose holds until the mode really changes,
+        // instead of putting the headset back on.
+        if mode == .work, let start = offWorkStart?.timeIntervalSinceReferenceDate, time >= start {
+            return RunnerPose.offWork(time: time, progress: 1, face: face)
         }
         if let progress = stayHome(at: time) {
             return RunnerPose.stayHome(time: time, progress: reduceMotion ? 1 : progress, face: face)
@@ -807,8 +813,8 @@ public struct CompanionView: View {
             let goodnight = (time - start) / Self.goodnightDuration
             return RunnerPose.bedtime(time: time, goodnight: goodnight, liesDown: true)
         case .notification:
-            let loop = time.truncatingRemainder(dividingBy: Self.notificationLoop) / Self.notificationLoop
-            return RunnerPose.bedtime(time: time, goodnight: loop, liesDown: false)
+            let start = goodnightStart?.timeIntervalSinceReferenceDate ?? -.infinity
+            return Self.notificationBedtime(time: time, start: start)
         }
     }
 
@@ -955,7 +961,8 @@ public struct CompanionView: View {
             bubbleTask = Task {
                 try? await Task.sleep(for: .seconds(Self.offWorkDuration * 0.75))
                 guard !Task.isCancelled else { return }
-                say("终于。")
+                // Fades as the animation ends, so it never hangs over the held pose.
+                say("终于。", for: Self.offWorkDuration * 0.25)
             }
         }
         if let id = Self.newUnlock(event, last: lastUnlock), case .unlock(_, let item) = event {
@@ -1015,7 +1022,14 @@ public struct CompanionView: View {
             }
         }
     }
-    private static let notificationLoop = 2.4
+    nonisolated private static let notificationGoodnight = 2.4
+
+    // HAKU-18 (UI 审核 2026-10-13): the notification used to loop the whole good night, so the headset went back on
+    // every 2.4 s. Now it comes off once and only the breathing, blinks and yawns loop.
+    /// The good night in the notification at `time`, after it started at `start`: played once, then held.
+    nonisolated static func notificationBedtime(time: TimeInterval, start: TimeInterval) -> RunnerPose {
+        RunnerPose.bedtime(time: time, goodnight: (time - start) / notificationGoodnight, liesDown: false)
+    }
 
     /// Plays the welcome back scene for `replay`, with its line, and calls `onWelcomeDone` as it ends.
     private func startWelcome(_ replay: ReturnReplay) {
