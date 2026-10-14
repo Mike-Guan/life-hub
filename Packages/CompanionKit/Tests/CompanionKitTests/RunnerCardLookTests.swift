@@ -29,6 +29,14 @@ import Testing
         }
     }
 
+    @Test func theWatchLeavesTheGymBagOffTheFloor() {
+        #expect(RunnerPose().dressed(for: .fitness, in: .boxing).bagLift == 0)
+        let watch = RunnerPose().dressed(for: .fitness, in: .boxing, watch: true)
+        #expect(watch.bagLift < 0)
+        #expect(Set(RunnerFigure.parts(for: .boxing, pose: watch)).isDisjoint(with: [.gymBag]))
+        #expect(Set(RunnerFigure.parts(for: .boxing, pose: watch)).contains(.handWeight))
+    }
+
     @Test func eachCardLookDrawsItsOwnThings() {
         let expected: [IdentityKind: Set<RunnerPart>] = [
             .tennis: [.stripeSport, .tennisVisor, .tennisRacket, .racketHand, .tennisBall],

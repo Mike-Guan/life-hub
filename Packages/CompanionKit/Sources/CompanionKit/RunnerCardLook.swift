@@ -64,12 +64,13 @@ enum RunnerCardLook: CaseIterable, Sendable {
 }
 
 extension RunnerPose {
-    /// The same pose dressed for `card`, which only the identity card mode wears.
-    func dressed(for card: IdentityKind?, in mode: Mode) -> RunnerPose {
+    /// The same pose dressed for `card`, which only the identity card mode wears; `watch` leaves the floor bare.
+    func dressed(for card: IdentityKind?, in mode: Mode, watch: Bool = false) -> RunnerPose {
         var pose = self
         pose.cardLook = mode == .boxing ? RunnerCardLook(card: card) : nil
-        // The gym bag shows with `bagLift`; 0 keeps it on the floor by the door.
-        if pose.cardLook == .fitness, pose.holdsCardProps, pose.bagLift < 0 { pose.bagLift = 0 }
+        // The gym bag shows with `bagLift`; 0 keeps it on the floor by the door. UI 审核 10/14 (位置规划图 §12):
+        // the watch draws nothing on the floor, its bottom edge would leave only a scrap of the bag.
+        if pose.cardLook == .fitness, !watch, pose.holdsCardProps, pose.bagLift < 0 { pose.bagLift = 0 }
         return pose
     }
 

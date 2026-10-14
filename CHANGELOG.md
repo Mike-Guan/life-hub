@@ -7,6 +7,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU can dress for four more identity cards: tennis (visor, racket and ball), fitness (gym bag and a small
   dumbbell), study (green jacket and an open book) and art (green jacket, apron, sketchbook and pencil).
+  The watch leaves the gym bag off the floor.
   Boxing and the other cards keep the boxing kit. The home screen doesn't pass the picked card yet.
 - HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
