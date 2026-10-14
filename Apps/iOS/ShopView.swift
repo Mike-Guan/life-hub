@@ -68,8 +68,11 @@ struct ShopView: View {
     // Card items show only with their card. Ones bought under another card stay owned and wearable.
     private var card: IdentityKind? { .picked(for: persona) }
 
+    // This week's item leads the shelf. One already owned stays in the owned list instead.
     private var forSale: [ShopItem] {
-        ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) }
+        let weekly = ShopItem.weekly(for: persona, ledger: growth.ledger, now: .now)
+        return ([weekly].compactMap { $0 } + ShopItem.catalog(for: persona, card: card))
+            .filter { $0.price != nil && !owned.contains($0.id) }
     }
 
     private var ownedFromShop: [ShopItem] {
@@ -161,8 +164,20 @@ struct ShopView: View {
         }
         .padding(10)
         .toyCard(radius: 16, shadow: 4)
+        .overlay(alignment: .topTrailing) {
+            // 商店完整目录 v0 §1.4: only this tag, no countdown and no "limited" wording.
+            if item.week != nil {
+                Text("本周")
+                    .font(Toy.body(12, weight: .heavy))
+                    .padding(.horizontal, 8)
+                    .frame(height: 24)
+                    .background(Capsule().fill(Toy.pink))
+                    .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
+                    .offset(x: 8, y: -10)
+            }
+        }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(item.title)
+        .accessibilityLabel(item.week != nil ? "本周 \(item.title)" : item.title)
     }
 
     private func ownedRow(_ item: ShopItem) -> some View {

@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- From each character's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed
+  rotation that starts over, so no item is gone for good. Items go on sale once the character art draws them.
 - HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 - Test builds (Debug, STG) have a 「日文和英文」 switch in settings. It is off by default, so every build shows
