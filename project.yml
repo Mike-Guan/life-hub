@@ -65,10 +65,12 @@ targets:
       - target: LifeHub-ScreenTime
       - target: LifeHub-Watch
     settings:
-      # Family Controls is only in Debug until Apple approves it for distribution; see CI-CD.md.
+      # Family Controls is in DEV and STG; PROD gets it once Mike turns it on there. See CI-CD.md.
       configs:
         Debug:
-          CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-Debug.entitlements
+          CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-FamilyControls.entitlements
+        Staging:
+          CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-FamilyControls.entitlements
       base:
         CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub.entitlements
         TARGETED_DEVICE_FAMILY: "1"
@@ -170,7 +172,9 @@ targets:
     settings:
       configs:
         Debug:
-          CODE_SIGN_ENTITLEMENTS: Apps/ScreenTime/LifeHubScreenTime-Debug.entitlements
+          CODE_SIGN_ENTITLEMENTS: Apps/ScreenTime/LifeHubScreenTime-FamilyControls.entitlements
+        Staging:
+          CODE_SIGN_ENTITLEMENTS: Apps/ScreenTime/LifeHubScreenTime-FamilyControls.entitlements
       base:
         PRODUCT_NAME: LifeHubScreenTime
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).screentime
