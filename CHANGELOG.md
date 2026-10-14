@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The app ships the Japanese font Zen Maru Gothic (Bold and Black, SIL Open Font License in `Apps/iOS/Fonts`)
+  and registers it in the app, the widgets and the notification. Nothing uses it yet; Japanese text switches
+  to it in a separate change. If the font fails to load, the app says so in its error list.
 - Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
   hand left out) or the iPhone's own count. Days you didn't open the app count too, up to a week back. Steps
   are never shown and never leave the iPhone.
