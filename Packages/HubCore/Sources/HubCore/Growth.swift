@@ -20,6 +20,8 @@ public enum Win: String, Codable, CaseIterable, Sendable {
     case plannedTask
     /// Any other watch workout of 30 minutes or more.
     case exercise
+    /// 6,000 steps or more in a day.
+    case steps
 
     /// Cans this win earns.
     public var cans: Int {
@@ -27,7 +29,7 @@ public enum Win: String, Codable, CaseIterable, Sendable {
         case .boxing, .run5k: 5
         case .gym, .exercise: 3
         case .gotUp: 2
-        case .daylight, .earlySleep, .plannedTask: 1
+        case .daylight, .earlySleep, .plannedTask, .steps: 1
         }
     }
 }

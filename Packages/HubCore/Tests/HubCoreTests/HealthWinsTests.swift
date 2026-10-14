@@ -34,6 +34,31 @@ import Testing
         #expect(Win.daylight(40 * 60, now: date(15, 9), calendar: calendar)?.source != noon?.source)
     }
 
+    @Test func sixThousandStepsEarnOneCanADay() {
+        #expect(Win.steps(5999, on: date(13, 0), now: date(13, 20), calendar: calendar) == nil)
+        let win = Win.steps(6000, on: date(13, 0), now: date(13, 20), calendar: calendar)
+        #expect(win?.win == .steps)
+        #expect(Win.steps.cans == 1)
+        // Dated now while the day lasts, at its end once it is over.
+        #expect(win?.at == date(13, 20))
+        #expect(Win.steps(8000, on: date(13, 0), now: date(15, 9), calendar: calendar)?.at == date(14, 0))
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        for now in [date(13, 20), date(13, 23), date(15, 9)] {
+            if let win = Win.steps(7000, on: date(13, 0), now: now, calendar: calendar) {
+                store.record(win.win, source: win.source, at: win.at)
+            }
+        }
+        #expect(store.ledger.balance == 1)
+    }
+
+    @Test func stepDaysAreCalendarDaysNotHubDays() {
+        // 02:00 belongs to the 14th here, while the hub day still counts it as the 13th.
+        let late = Win.steps(6000, on: date(14, 2), now: date(14, 3), calendar: calendar)
+        let evening = Win.steps(6000, on: date(13, 21), now: date(13, 22), calendar: calendar)
+        #expect(late?.source != evening?.source)
+        #expect(late?.source == Win.steps(6000, on: date(14, 23), now: date(14, 23), calendar: calendar)?.source)
+    }
+
     @Test func fallingAsleepByHalfAnHourAfterBedtimeEarns() {
         let night = [sleep(date(13, 23, 55), date(14, 7))]
         let win = Win.earlySleep(night, schedule: schedule, now: date(14, 9), calendar: calendar)
