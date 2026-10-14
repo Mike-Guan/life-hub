@@ -8,6 +8,7 @@ import SwiftUI
 /// `-screenshot-memory <full|empty>` shows the memory page instead (iOS), `-screenshot-ask <name>` with a confirmation.
 /// `-screenshot-settings <card|erase>` shows the bottom of Settings (iOS).
 /// `-screenshot-growth <shop|wardrobe|unbox|unbox-bottom>` shows that screen with made-up cans and items (iOS).
+/// `-screenshot-onboarding <step>` shows that first-run setup screen, named as in `OnboardingDraft.Step` (iOS).
 enum ScreenshotMode {
     static var mode: Mode? {
         value(after: "-screenshot-mode").flatMap(Mode.init(rawValue:))
@@ -33,8 +34,15 @@ enum ScreenshotMode {
         value(after: "-screenshot-growth")
     }
 
+    /// The first-run setup screen to show.
+    static var onboarding: OnboardingDraft.Step? {
+        value(after: "-screenshot-onboarding").flatMap { name in
+            OnboardingDraft.Step.allCases.first { "\($0)" == name }
+        }
+    }
+
     /// Whether any screenshot is being drawn.
-    static var isOn: Bool { mode != nil || memory != nil || settings != nil || growth != nil }
+    static var isOn: Bool { mode != nil || memory != nil || settings != nil || growth != nil || onboarding != nil }
 
     static var persona: Persona {
         value(after: "-screenshot-persona").flatMap(Persona.init(rawValue:)) ?? .haku

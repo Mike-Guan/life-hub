@@ -128,6 +128,8 @@ struct LifeHubApp: App {
                 ScreenshotSettings(asksErase: shows == "erase")
             } else if let screen = ScreenshotMode.growth {
                 ScreenshotGrowth(screen: screen)
+            } else if let step = ScreenshotMode.onboarding {
+                ScreenshotOnboarding(step: step)
             } else {
                 home
             }
