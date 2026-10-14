@@ -1046,7 +1046,19 @@ import Testing
         var away = pose
         away.turnedAway = true
         let back = Set(RunnerFigure.parts(for: .chill, pose: away))
-        #expect(back.contains(.jacket) && !back.contains(.setVarsityTop) && !back.contains(.setVarsityCap))
+        #expect(back.isSuperset(of: [.jacket, .setVarsityCap]) && !back.contains(.setVarsityTop))
+        #expect(pose.outfit.clothesBack == [.chill: RunnerPalette.varsityRed])
+    }
+
+    @Test func raincoatKeepsItsLoweredHoodFromTheBack() {
+        var pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.work: "haku.set.work.raincoat"])))
+        pose.turnedAway = true
+        let back = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(back.isSuperset(of: [.jacket, .setKawaiiHood]) && back.isDisjoint(with: [.setKawaiiTop, .setDuckCharm]))
+    }
+
+    @Test func everyTopHasABackColour() {
+        #expect(Set(Outfit.clothesBackColors.keys) == Set(Outfit.clothesParts.keys))
     }
 
     @Test func sideHustleClothesDropTheChainAndCoin() {
