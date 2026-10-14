@@ -69,7 +69,7 @@ growth_shots() {
 # The first-run setup, one screen per launch, with no answers given.
 onboarding_shots() {
   local device=$1 prefix=$2
-  for step in persona chill identity work places sideHustle cards; do
+  for step in persona chill identity bedtime work location places motion sideHustle cards notifications; do
     xcrun simctl launch --terminate-running-process "$device" "$bundle" -screenshot-onboarding "$step"
     sleep 4
     xcrun simctl io "$device" screenshot "$out/$prefix-onboarding-$step.png"
