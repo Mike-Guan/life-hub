@@ -309,11 +309,11 @@ public struct CompanionView: View {
                     let turn = reduceMotion ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
                     let dressed = pose(mode, life: life, time: time, react: react).dressed(for: card, in: mode)
                     RunnerFigure(mode: mode, pose: glance(dressed.wearing(Outfit(wardrobe)).leaving(traces)))
-                    .saturation(vitals.saturation)
-                    .brightness(vitals.brightness)
-                    .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                    .offset(y: reduceMotion ? 0 : motion.dy)
-                    .scaleEffect(x: 1 + 0.07 * turn, y: 1 - 0.1 * turn, anchor: .bottom)
+                        .saturation(vitals.saturation)
+                        .brightness(vitals.brightness)
+                        .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
+                        .offset(y: reduceMotion ? 0 : motion.dy)
+                        .scaleEffect(x: 1 + 0.07 * turn, y: 1 - 0.1 * turn, anchor: .bottom)
                 }
             } keyframes: { _ in
                 KeyframeTrack {
