@@ -47,6 +47,8 @@ struct HomeView: View {
     var wardrobe = Wardrobe()
     /// Which character the card draws.
     var persona = Persona.haku
+    /// The name the greeting ends with, `nil` for none.
+    var greetingName: String?
     /// The user's cards, for the mode names; `nil` uses the character's default cards.
     var cards: ModeCards?
     /// Earned cans, for the traces that stay.
@@ -95,6 +97,7 @@ struct HomeView: View {
                     onShop: onShop,
                     onSettings: onSettings,
                     persona: persona,
+                    name: greetingName,
                     cards: shownCards
                 )
 
@@ -482,6 +485,7 @@ private struct Header: View {
     let onShop: (() -> Void)?
     let onSettings: (() -> Void)?
     let persona: Persona
+    let name: String?
     let cards: ModeCards
 
     var body: some View {
@@ -534,12 +538,7 @@ private struct Header: View {
     }
 
     private var greeting: String {
-        let hour = Calendar.current.component(.hour, from: .now)
-        switch hour {
-        case 5..<12: return "GOOD MORNING, MIKE"
-        case 12..<18: return "GOOD AFTERNOON, MIKE"
-        default: return "GOOD EVENING, MIKE"
-        }
+        Greeting.text(hour: Calendar.current.component(.hour, from: .now), name: name)
     }
 
     private var subtitle: String {
