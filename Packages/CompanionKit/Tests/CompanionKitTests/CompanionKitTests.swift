@@ -1049,6 +1049,12 @@ import Testing
         #expect(back.contains(.jacket) && !back.contains(.setVarsityTop) && !back.contains(.setVarsityCap))
     }
 
+    @Test func sideHustleClothesDropTheChainAndCoin() {
+        let pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.money: "haku.top.side.arcade"])))
+        let parts = Set(RunnerFigure.parts(for: .money, pose: pose))
+        #expect(parts.contains(.topSideArcade) && parts.isDisjoint(with: [.chainGold, .coin, .jacket]))
+    }
+
     @Test func capGivesWayToHeadgear() {
         let varsity = Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"]))
         var pose = RunnerPose(need: .boxingWarmup).wearing(varsity)
