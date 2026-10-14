@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Shop clothes art for the second preset character: eight pop tops and sets and five identity-card tops, in
+  their own layer file. Nothing in the app shows them yet.
 - HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 
