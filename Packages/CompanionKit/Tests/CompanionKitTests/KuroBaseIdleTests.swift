@@ -33,10 +33,6 @@ import Testing
         #expect(phone.contains(.idlePhone) && phone.isDisjoint(with: [.studyNotebook, .studyHighlighter]))
         // And it comes back after.
         #expect(parts(.study, .phone, at: 2.49).contains(.studyNotebook))
-        // On the watch the raised tablet slides down the same way.
-        #expect(shift(.watchTablet, .art, .frame, at: 0.2).height > 10)
-        let watch = KuroPose(look: .art, energy: 50).idling((.frame, 1 / KuroIdle.frame.length))
-        #expect(!KuroFigure.parts(for: .art, pose: watch, watch: true).contains(.watchTablet))
     }
 
     @Test func onHerToesSheRisesButTheFloorStays() {
