@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Changed
+- On the watch the second preset character holds her racket, books, cup and tablet higher, so the bottom of the
+  screen no longer cuts them off. The pen, stylus and badge are left off on the watch. The iPhone is unchanged.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
   turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
