@@ -238,9 +238,13 @@ struct WardrobeView: View {
         } label: {
             tile(isWorn: isWorn, fill: slot.tileColor(for: persona)) {
                 // KURO has no default item to wear, so her worn slots show her head without this shelf's items.
-                // Room and celebration are not worn, so they show the same picture as HAKU's.
-                if persona == .haku || slot == .room || slot == .celebration {
+                // HAKU's default clothes have no item picture either, so they show his head the same way.
+                // Room and celebration are not worn, so they show the same picture for both.
+                if slot == .room || slot == .celebration || (persona == .haku && !clothes) {
                     WardrobeItemIcon(slotDefault: slot)
+                        .frame(width: 56, height: 56)
+                } else if persona == .haku {
+                    CompanionPortrait(mode: previewMode, wardrobe: wardrobe.showing(card: card), framing: .head)
                         .frame(width: 56, height: 56)
                 } else {
                     KuroPortrait(look: KuroLook(mode: previewMode), wearing: without(slots), framing: .head)
