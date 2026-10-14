@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The app ships the Japanese font Zen Maru Gothic (Bold and Black, SIL Open Font License in `Apps/iOS/Fonts`)
+  and registers it in the app, the widgets and the notification. Nothing uses it yet; Japanese text switches
+  to it in a separate change. If the font fails to load, the app says so in its error list.
 - The second preset character dresses for the dance, music and ski cards, each with its own idle move: she sways
   by a small speaker as notes float up, taps along a score she holds, or pats snow off her shoulder in ski goggles
   and sneezes. The cards stay out of the picker until HAKU's looks are in too.
