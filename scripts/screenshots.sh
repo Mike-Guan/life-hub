@@ -75,6 +75,9 @@ if se=$(xcrun simctl create "Screenshot SE" com.apple.CoreSimulator.SimDeviceTyp
   xcrun simctl spawn "$se" defaults write com.apple.Accessibility ReduceMotionEnabled -bool true
   xcrun simctl status_bar "$se" override --time 9:41 --batteryState charged --batteryLevel 100
   xcrun simctl install "$se" "$ios_app"
+  # A fresh simulator's first launch is slow; warm it up so no shot catches the launch screen.
+  xcrun simctl launch "$se" "$bundle"
+  sleep 10
   growth_shots "$se" ios-se
   xcrun simctl delete "$se"
 else
