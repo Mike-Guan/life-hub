@@ -18,6 +18,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Daylight and going to bed on time now earn their can: 15 minutes in daylight (Apple Watch) earns 1 a day,
   and falling asleep within 30 minutes of the bedtime set in Settings earns 1 a night. Life Hub asks once
   for time in daylight in Health. Only the win is kept, never the daylight or sleep times.
+- With the fitness card picked, a visit to the fitness gym earns the card's weekly cans, the same as a
+  strength workout, so one session no longer pays twice.
 - On the smallest watch, a long mode name in the clock row shrinks to fit instead of running into the clock.
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
