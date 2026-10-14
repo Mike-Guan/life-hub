@@ -399,6 +399,7 @@ import Testing
         let first = try #require(IdleClock.beat(at: start, lengths: RunnerPose.chillBeats, seed: RunnerPose.seed))
         let end = start - first.phase + 1.849
         let handover = try #require(RunnerPose(mode: .chill, time: end, face: .mid, react: 0).hugPillow)
+        #expect(RunnerPose(mode: .chill, time: end - 0.1, face: .mid, react: 0).eyesShut)
         #expect(abs(handover.width + 24) < 0.5 && abs(handover.height + 16) < 0.5)
         let leaning = RunnerPose(mode: .chill, time: start + 2.6, face: .mid, react: 0)
         let leant = Set(RunnerFigure.parts(for: .chill, pose: leaning))

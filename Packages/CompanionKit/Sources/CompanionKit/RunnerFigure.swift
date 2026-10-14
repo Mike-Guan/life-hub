@@ -591,7 +591,8 @@ struct RunnerPose {
             patting = p >= 0.35 && p < 1.45
             patHit = pat > 0.6
             prop = CGSize(width: -24, height: -2 + 5 * pat)
-            eyesShut = Self.bump(x, from: 0.95, to: 1.3) > 0.5
+            // UI 审核 2026-10-14: the eyes close at 1.7 s, so the face settles before the pillow's layer changes.
+            eyesShut = Self.bump(x, from: 0.95, to: 1.3) > 0.5 || p >= 1.7
         } else if p < 3.3 {
             leanPillow = true
             pillowOpacity = Double(1 - Self.ramp(x, from: 2.95, to: 3.3))
