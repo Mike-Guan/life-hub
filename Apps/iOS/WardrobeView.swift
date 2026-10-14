@@ -7,6 +7,7 @@ struct WardrobeView: View {
     let growth: GrowthStore
     @Binding var wardrobe: Wardrobe
     let persona: Persona
+    private let cards: ModeCards
     @Environment(\.dismiss) private var dismiss
     @State private var previewMode: Mode
     @State private var slot: Slot = .gloves
@@ -14,10 +15,12 @@ struct WardrobeView: View {
     /// - Parameters:
     ///   - persona: the character whose wardrobe it is.
     ///   - mode: the mode to preview first, usually the current one.
-    init(growth: GrowthStore, wardrobe: Binding<Wardrobe>, persona: Persona, mode: Mode?) {
+    ///   - cards: the user's mode cards, which name the mode buttons; the character's defaults when `nil`.
+    init(growth: GrowthStore, wardrobe: Binding<Wardrobe>, persona: Persona, mode: Mode?, cards: ModeCards? = nil) {
         self.growth = growth
         _wardrobe = wardrobe
         self.persona = persona
+        self.cards = cards ?? .legacy(for: persona)
         _previewMode = State(initialValue: mode ?? .chill)
     }
 
@@ -152,7 +155,7 @@ struct WardrobeView: View {
                 Button {
                     previewMode = mode
                 } label: {
-                    Text(mode.code(for: persona))
+                    Text(cards.title(for: mode, persona: persona))
                         .font(Toy.body(13, weight: .heavy))
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)

@@ -259,7 +259,7 @@ struct LifeHubApp: App {
             ShopView(growth: growth, wardrobe: $wardrobe, persona: persona)
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
-            WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
+            WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, cards: cards)
         }
         .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in
             UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
