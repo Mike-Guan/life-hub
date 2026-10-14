@@ -469,26 +469,26 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             title: "金色网球拍",
             keepsake: Keepsake(win: .boxing, count: 10, card: .tennis),
             persona: .kuro
-        ),  // Clothes (商店完整目录 v0 §1.1 and §2.1, prices approved 2026-10-13), off the shelf until drawn.
+        ),  // Clothes (商店完整目录 v0 §1.1 and §2.1, prices of 2026-10-14), off the shelf until drawn.
         // HAKU's eight are the pop set Mike approved 2026-10-14; the second character's are still placeholders.
-        ShopItem(clothes: "haku.top.work.blazer", slot: .top, title: "学院西装", price: 40, mode: .work),
-        ShopItem(clothes: "haku.top.work.cardigan", slot: .top, title: "像素开衫", price: 50, mode: .work),
-        ShopItem(clothes: "haku.top.chill.aloha", slot: .top, title: "浪花夏威夷衫", price: 45, mode: .chill),
-        ShopItem(clothes: "haku.top.chill.flame", slot: .top, title: "火焰连帽卫衣", price: 55, mode: .chill),
-        ShopItem(clothes: "haku.top.side.sukajan", slot: .top, title: "刺绣夹克", price: 50, mode: .money),
-        ShopItem(clothes: "haku.top.side.arcade", slot: .top, title: "街机 T", price: 60, mode: .money),
-        ShopItem(clothes: "haku.set.chill.varsity", slot: .fullSet, title: "校队夹克", price: 120, mode: .chill),
-        ShopItem(clothes: "haku.set.work.raincoat", slot: .fullSet, title: "原宿雨衣", price: 140, mode: .work),
-        ShopItem(clothes: "kuro.top.work.blouse", slot: .top, title: "蝴蝶结衬衫", price: 40, mode: .work, persona: .kuro),
-        ShopItem(clothes: "kuro.top.work.vest", slot: .top, title: "针织马甲", price: 50, mode: .work, persona: .kuro),
+        ShopItem(clothes: "haku.top.work.blazer", slot: .top, title: "学院西装", price: 30, mode: .work),
+        ShopItem(clothes: "haku.top.work.cardigan", slot: .top, title: "像素开衫", price: 35, mode: .work),
+        ShopItem(clothes: "haku.top.chill.aloha", slot: .top, title: "浪花夏威夷衫", price: 30, mode: .chill),
+        ShopItem(clothes: "haku.top.chill.flame", slot: .top, title: "火焰连帽卫衣", price: 40, mode: .chill),
+        ShopItem(clothes: "haku.top.side.sukajan", slot: .top, title: "刺绣夹克", price: 35, mode: .money),
+        ShopItem(clothes: "haku.top.side.arcade", slot: .top, title: "街机 T", price: 40, mode: .money),
+        ShopItem(clothes: "haku.set.chill.varsity", slot: .fullSet, title: "校队夹克", price: 80, mode: .chill),
+        ShopItem(clothes: "haku.set.work.raincoat", slot: .fullSet, title: "原宿雨衣", price: 90, mode: .work),
+        ShopItem(clothes: "kuro.top.work.blouse", slot: .top, title: "蝴蝶结衬衫", price: 30, mode: .work, persona: .kuro),
+        ShopItem(clothes: "kuro.top.work.vest", slot: .top, title: "针织马甲", price: 35, mode: .work, persona: .kuro),
         ShopItem(
-            clothes: "kuro.top.chill.cardigan", slot: .top, title: "毛绒开衫", price: 45, mode: .chill, persona: .kuro),
-        ShopItem(clothes: "kuro.top.chill.hoodie", slot: .top, title: "猫耳卫衣", price: 55, mode: .chill, persona: .kuro),
-        ShopItem(clothes: "kuro.top.side.smock", slot: .top, title: "格子罩衫", price: 50, mode: .money, persona: .kuro),
-        ShopItem(clothes: "kuro.top.side.denim", slot: .top, title: "牛仔外套", price: 60, mode: .money, persona: .kuro),
+            clothes: "kuro.top.chill.cardigan", slot: .top, title: "毛绒开衫", price: 30, mode: .chill, persona: .kuro),
+        ShopItem(clothes: "kuro.top.chill.hoodie", slot: .top, title: "猫耳卫衣", price: 40, mode: .chill, persona: .kuro),
+        ShopItem(clothes: "kuro.top.side.smock", slot: .top, title: "格子罩衫", price: 35, mode: .money, persona: .kuro),
+        ShopItem(clothes: "kuro.top.side.denim", slot: .top, title: "牛仔外套", price: 40, mode: .money, persona: .kuro),
         ShopItem(
-            clothes: "kuro.set.chill.picnic", slot: .fullSet, title: "野餐", price: 120, mode: .chill, persona: .kuro),
-        ShopItem(clothes: "kuro.set.work.rain", slot: .fullSet, title: "雨天", price: 140, mode: .work, persona: .kuro),
+            clothes: "kuro.set.chill.picnic", slot: .fullSet, title: "野餐", price: 80, mode: .chill, persona: .kuro),
+        ShopItem(clothes: "kuro.set.work.rain", slot: .fullSet, title: "雨天", price: 90, mode: .work, persona: .kuro),
     ]
 
     init(

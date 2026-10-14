@@ -432,7 +432,7 @@ import Testing
             let clothes = ShopItem.catalog(for: persona).filter { $0.mode != nil }
             #expect(Set(clothes.compactMap(\.mode)) == [.work, .chill, .money], "\(persona)")
             for item in clothes {
-                let range = item.slot == .fullSet ? 120...150 : 40...60
+                let range = item.slot == .fullSet ? 80...90 : 30...40
                 #expect(range.contains(item.price ?? 0), "\(item.id)")
                 #expect(item.slot == .top || item.slot == .fullSet)
                 #expect(!item.isDrawn)
