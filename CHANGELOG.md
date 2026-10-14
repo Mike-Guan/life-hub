@@ -19,9 +19,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
-- A tired HAKU now shows it in every mode: off work he keeps smiling with half-open eyes and bags, at work and
-  on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
-  full night stay brighter and clear the headset.
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
   over the hair while sitting up. After the off-work
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
@@ -65,6 +62,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   The second character's flower is now called 地上小粉花.
 - The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
   4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
+- A tired HAKU now shows it in every mode: off work he keeps smiling with half-open eyes and bags, at work and
+  on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
+  full night stay brighter and clear the headset.
 - The watch has no dark band behind the clock any more; every screen keeps its own background.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
