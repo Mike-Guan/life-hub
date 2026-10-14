@@ -91,6 +91,21 @@ if se=$(xcrun simctl create "Screenshot SE" com.apple.CoreSimulator.SimDeviceTyp
   sleep 10
   growth_shots "$se" ios-se
   onboarding_shots "$se" ios-se
+  # The wardrobe's mode buttons with the longest identity card name, and with no identity card.
+  for identity in art none; do
+    xcrun simctl launch --terminate-running-process "$se" "$bundle" -screenshot-growth wardrobe \
+      -screenshot-identity "$identity"
+    sleep 4
+    xcrun simctl io "$se" screenshot "$out/ios-se-wardrobe-$identity.png"
+  done
+  # The unboxing at the first accessibility text size, where the stage gives up the most height.
+  xcrun simctl ui "$se" content_size accessibility-medium
+  for persona in haku kuro; do
+    xcrun simctl launch --terminate-running-process "$se" "$bundle" -screenshot-growth unbox \
+      -screenshot-persona "$persona"
+    sleep 4
+    xcrun simctl io "$se" screenshot "$out/ios-se-ax1-unbox-$persona.png"
+  done
   xcrun simctl delete "$se"
 else
   echo "::warning::No iPhone SE simulator in this Xcode; skipped the small-screen shots."
