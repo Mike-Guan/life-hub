@@ -1,0 +1,68 @@
+Apple Watch Series 11 (46mm)
+Apple Watch Series 11 (42mm)
+Apple Watch Series 10 (46mm)
+Apple Watch Series 10 (42mm)
+Apple Watch Ultra 3 (49mm)
+Apple Watch Ultra 2 (49mm)
+Apple Watch SE 3 (44mm)
+Apple Watch SE 3 (40mm)
+Apple Watch SE (44mm) (2nd generation)
+Apple Watch SE (40mm) (2nd generation)
+02:33:18 watch 40mm: Apple Watch SE 3 (40mm)
+02:33:19 booting watch
+02:34:01 building watch app
+02:35:52 recording build/recordings/40mm-watch-haku-work
+02:36:10 recording build/recordings/40mm-watch-haku-chill
+02:36:28 recording build/recordings/40mm-watch-haku-boxing
+02:36:45 recording build/recordings/40mm-watch-haku-money
+02:37:03 recording build/recordings/40mm-watch-haku-overtime
+02:37:20 recording build/recordings/40mm-watch-haku-no-mode
+02:37:38 recording build/recordings/40mm-watch-kuro-work
+02:37:55 recording build/recordings/40mm-watch-kuro-chill
+02:38:13 recording build/recordings/40mm-watch-kuro-boxing
+02:38:31 recording build/recordings/40mm-watch-kuro-money
+02:38:48 recording build/recordings/40mm-watch-kuro-overtime
+02:39:06 recording build/recordings/40mm-watch-kuro-no-mode
+02:39:23 recording build/recordings/40mm-watch-haku-work-long-name
+02:39:41 recording build/recordings/40mm-watch-haku-chill-long-name
+02:39:58 recording build/recordings/40mm-watch-haku-boxing-long-name
+02:40:16 recording build/recordings/40mm-watch-haku-money-long-name
+02:40:31 watch 42mm: Apple Watch Series 11 (42mm)
+02:40:35 booting watch
+02:41:11 building watch app
+02:41:53 recording build/recordings/42mm-watch-haku-work
+02:42:10 recording build/recordings/42mm-watch-haku-chill
+02:42:28 recording build/recordings/42mm-watch-haku-boxing
+02:42:45 recording build/recordings/42mm-watch-haku-money
+02:43:03 recording build/recordings/42mm-watch-haku-overtime
+02:43:21 recording build/recordings/42mm-watch-haku-no-mode
+02:43:38 recording build/recordings/42mm-watch-kuro-work
+02:43:56 recording build/recordings/42mm-watch-kuro-chill
+02:44:13 recording build/recordings/42mm-watch-kuro-boxing
+02:44:31 recording build/recordings/42mm-watch-kuro-money
+02:44:48 recording build/recordings/42mm-watch-kuro-overtime
+02:45:06 recording build/recordings/42mm-watch-kuro-no-mode
+02:45:23 recording build/recordings/42mm-watch-haku-work-long-name
+02:45:41 recording build/recordings/42mm-watch-haku-chill-long-name
+02:45:58 recording build/recordings/42mm-watch-haku-boxing-long-name
+02:46:16 recording build/recordings/42mm-watch-haku-money-long-name
+02:46:31 watch 46mm: Apple Watch Series 11 (46mm)
+02:46:33 booting watch
+02:47:12 building watch app
+02:47:47 recording build/recordings/46mm-watch-haku-work
+02:48:05 recording build/recordings/46mm-watch-haku-chill
+02:48:22 recording build/recordings/46mm-watch-haku-boxing
+02:48:40 recording build/recordings/46mm-watch-haku-money
+02:48:57 recording build/recordings/46mm-watch-haku-overtime
+02:49:15 recording build/recordings/46mm-watch-haku-no-mode
+02:49:32 recording build/recordings/46mm-watch-kuro-work
+02:49:50 recording build/recordings/46mm-watch-kuro-chill
+02:50:07 recording build/recordings/46mm-watch-kuro-boxing
+02:50:25 recording build/recordings/46mm-watch-kuro-money
+02:50:42 recording build/recordings/46mm-watch-kuro-overtime
+02:51:00 recording build/recordings/46mm-watch-kuro-no-mode
+02:51:17 recording build/recordings/46mm-watch-haku-work-long-name
+02:51:35 recording build/recordings/46mm-watch-haku-chill-long-name
+02:51:52 recording build/recordings/46mm-watch-haku-boxing-long-name
+02:52:10 recording build/recordings/46mm-watch-haku-money-long-name
+02:52:25 done
