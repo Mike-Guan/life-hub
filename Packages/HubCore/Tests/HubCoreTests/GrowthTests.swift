@@ -104,6 +104,19 @@ import Testing
         #expect(Win.visit(.fitness, from: at, to: left, identity: nil)?.card == nil)
     }
 
+    @Test func theFitnessCardPaysAGymVisitAndAStrengthWorkoutOnce() {
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        let left = at + Win.visitMinimum
+        let visit = Win.visit(.fitness, from: at, to: left, identity: .fitness)
+        #expect(visit?.win == .boxing)
+        #expect(visit?.card == .fitness)
+        let lifting = WorkoutSummary(id: "lift", kind: .strength, start: at, end: left)
+        let earned = Win.wins(in: [lifting], identity: .fitness) + [visit].compactMap(\.self)
+        for win in earned { store.record(win.win, source: win.source, at: win.at, card: win.card) }
+        #expect(store.ledger.balance == Win.boxing.cans)
+        #expect(Win.visit(.fitness, from: at, to: left, identity: .boxing)?.win == .gym)
+    }
+
     @Test func goldKeepsakesCountOnlyTheirOwnCard() throws {
         let store = GrowthStore(fileURL: nil, deviceID: "t")
         let gloves = try item("gloves.gold")
@@ -349,5 +362,40 @@ import Testing
     @Test func catalogIDsAreUnique() {
         #expect(Set(ShopItem.catalog.map(\.id)).count == ShopItem.catalog.count)
         #expect(ShopItem.catalog.allSatisfy { ($0.price == nil) != ($0.keepsake == nil) })
+    }
+
+    @Test func cardItemsShowOnlyWithTheirCard() {
+        let boxing = ShopItem.catalog(for: .haku, card: .boxing).map(\.id)
+        let tennis = ShopItem.catalog(for: .haku, card: .tennis).map(\.id)
+        let none = ShopItem.catalog(for: .haku, card: nil).map(\.id)
+        for id in ["gloves.pink", "room.bag", "gloves.gold"] {
+            #expect(boxing.contains(id))
+            #expect(!tennis.contains(id))
+            #expect(!none.contains(id))
+        }
+        #expect(tennis.contains("room.plant") && none.contains("room.plant"))
+        let kuro = ShopItem.catalog(for: .kuro, card: .boxing).map(\.id)
+        #expect(!kuro.contains("kuro.bag.tennis") && !kuro.contains("kuro.racket.gold"))
+        #expect(ShopItem.catalog(for: .kuro, card: .tennis).map(\.id).contains("kuro.bag.tennis"))
+    }
+
+    @Test func aKeepsakeBelongsToTheCardItCounts() {
+        #expect(ShopItem.item("gloves.gold")?.card == .boxing)
+        #expect(ShopItem.item("kuro.racket.gold")?.card == .tennis)
+        #expect(ShopItem.item("keepsake.headband.runner")?.card == nil)
+    }
+
+    // QA S2: every character gets a whole shop, not a few items borrowed from HAKU.
+    @Test func everyCharacterHasAWholeShop() {
+        let haku = ShopItem.catalog(for: .haku)
+        func keepsakes(_ items: [ShopItem]) -> [String] {
+            items.compactMap(\.keepsake).map { "\($0.win.rawValue)×\($0.count)" }.sorted()
+        }
+        for persona in Persona.allCases {
+            let items = ShopItem.catalog(for: persona)
+            #expect(items.count == haku.count, "\(persona)")
+            #expect(Set(items.map(\.slot)) == Set(Slot.allCases), "\(persona)")
+            #expect(keepsakes(items) == keepsakes(haku), "\(persona)")
+        }
     }
 }

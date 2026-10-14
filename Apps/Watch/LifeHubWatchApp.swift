@@ -71,8 +71,6 @@ struct WatchHomeView: View {
     private func companionPage(_ payload: WatchPayload, mode: Mode?, at date: Date) -> some View {
         let snapshot = payload.snapshot
         let scene = payload.scene(at: date)
-        // HAKU with no mode is drawn on cream, where the white system clock can't be read.
-        let clockBand = mode == nil && payload.persona == .haku
         return Group {
             if payload.persona == .kuro {
                 KuroView(
@@ -113,16 +111,6 @@ struct WatchHomeView: View {
         }
         .clipped()
         .ignoresSafeArea()
-        .overlay {
-            if clockBand {
-                GeometryReader { geometry in
-                    Toy.ink
-                        .frame(height: geometry.safeAreaInsets.top)
-                        .offset(y: -geometry.safeAreaInsets.top)
-                }
-                .allowsHitTesting(false)
-            }
-        }
         .overlay(alignment: .topLeading) {
             if let failure {
                 Text(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2).padding(.leading, 4)
@@ -132,8 +120,13 @@ struct WatchHomeView: View {
         .overlay(alignment: .topLeading) {
             GeometryReader { proxy in
                 if !Self.cleanFrame {
-                    ModeChip(mode: mode, persona: payload.persona)
-                        .frame(height: proxy.safeAreaInsets.top)
+                    // Offered only the room left of the clock, a long name shrinks instead of running into it.
+                    ModeChip(mode: mode, payload: payload)
+                        .frame(
+                            width: proxy.size.width * ModeChip.widthShare - 14,
+                            height: proxy.safeAreaInsets.top,
+                            alignment: .leading
+                        )
                         .padding(.leading, 14)
                         .offset(y: -proxy.safeAreaInsets.top)
                         .allowsHitTesting(false)
@@ -187,16 +180,20 @@ private struct WatchPager<First: View, Second: View>: View {
 
 /// The mode in a small white pill, "还没有模式" without one. How long it has run is on the second page.
 private struct ModeChip: View {
+    // On the 40 mm watch "10:09" starts at about 67% of the width; 8 wide letters at full size reach past it.
+    // WatchChipFitTests checks this share and the font against the clock.
+    /// The share of the screen width the chip may take, its leading inset included.
+    static let widthShare: CGFloat = 0.64
+
     let mode: Mode?
-    let persona: Persona
+    let payload: WatchPayload
 
     var body: some View {
-        Text(mode?.title(for: persona) ?? "还没有模式")
+        Text(mode.map(payload.title(for:)) ?? "还没有模式")
             .font(Toy.body(12, weight: .heavy))
             .foregroundStyle(Toy.ink)
             .lineLimit(1)
-            // Mode names are short enough to sit left of the clock at full size.
-            .fixedSize()
+            .minimumScaleFactor(0.7)
             .padding(.horizontal, 8)
             .padding(.vertical, 2)
             .background(Capsule().fill(Toy.card))
@@ -215,9 +212,9 @@ private struct TodayPage: View {
         VStack(alignment: .leading, spacing: 8) {
             row("模式") {
                 if let since = snapshot.since {
-                    Text("\(mode.title(for: payload.persona)) · \(Text(since, style: .relative))")
+                    Text("\(payload.title(for: mode)) · \(Text(since, style: .relative))")
                 } else {
-                    Text(mode.title(for: payload.persona))
+                    Text(payload.title(for: mode))
                 }
             }
             if let energy = snapshot.energy(at: date) {
