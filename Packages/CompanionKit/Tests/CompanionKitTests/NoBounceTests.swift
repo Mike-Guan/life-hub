@@ -19,7 +19,7 @@ struct NoBounceTests {
     @Test func jumpLandsWithoutBounce() {
         let values = samples(KeyframeTimeline(initialValue: 0.0) { Squash.jump() })
         let peak = values.indices.max { values[$0] < values[$1] }!
-        #expect(abs(values[peak] - 20) < 0.5)
+        #expect(abs(values[peak] - 18) < 0.5)
         // After the peak it only comes down, and it never dips below the floor.
         #expect(zip(values[peak...], values[(peak + 1)...]).allSatisfy { $1 <= $0 + 0.0001 })
         #expect(values[peak...].allSatisfy { $0 >= -0.0001 })

@@ -1265,12 +1265,12 @@ struct Squash {
         }
     }
 
-    // UI 审核 2026-10-13: at 36 the hair tips were cut flat by the top of the card at the peak.
-    /// The hop on a cheer or an invite, in points up: a 1.5 pt dip, up to 20, back down to 0 with no bounce.
+    // UI 审核 2026-10-13: at 36 the hair tips were cut flat by the top of the card at the peak; at 20 they kept 1 pt.
+    /// The hop on a cheer or an invite, in points up: a 1.5 pt dip, up to 18, back down to 0 with no bounce.
     @KeyframesBuilder<Double> static func jump() -> some Keyframes<Double> {
         KeyframeTrack {
             LinearKeyframe(-1.5, duration: 0.1, timingCurve: .easeOut)
-            LinearKeyframe(20, duration: 0.18, timingCurve: .easeOut)
+            LinearKeyframe(18, duration: 0.18, timingCurve: .easeOut)
             LinearKeyframe(0, duration: 0.32, timingCurve: .easeIn)
         }
     }
