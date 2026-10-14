@@ -67,6 +67,8 @@ enum Placement {
         .browsBox: Spot(.eyes, "眼睛"),
         .eyesMoney: Spot(.eyes, "眼睛"),
         .eyeGlint: Spot(.eyes, "眼睛"),
+        .eyesBright: Spot(.eyes, "眼睛"),
+        .lidsBright: Spot(.eyes, "眼睛"),
         .eyesSleepy: Spot(.eyes, "眼睛"),
         .eyesClosed: Spot(.eyes, "眼睛"),
         .eyeSwirlL: Spot(.eyes, "眼睛"),
@@ -229,6 +231,7 @@ enum Placement {
         .eyesHappy: Spot(.eyes, "眼睛"),
         .eyesSurprised: Spot(.eyes, "眼睛"),
         .eyesLow: Spot(.eyes, "眼睛"),
+        .eyesFull: Spot(.eyes, "眼睛"),
         .deskGlasses: Spot(.eyes, "deskGlasses"),
         .maskWork: Spot(.maskFace, "maskWork"),
         .mouthCat: Spot(.mouth, "嘴"),
@@ -236,6 +239,7 @@ enum Placement {
         .mouthSmile: Spot(.mouth, "嘴"),
         .mouthO: Spot(.mouth, "嘴"),
         .blush: Spot(.cheek, "blush"),
+        .cheeksFull: Spot(.cheek, "blush"),
         .tapRub: Spot(.cheek, "tapRub"),
         .jacketWork: Spot(.torso, "外套"),
         .jacketChill: Spot(.torso, "外套"),
@@ -314,6 +318,7 @@ enum Placement {
         .walkLines: .fx,
         .walkDust: .fx,
         .bathBubbles: .fx,
+        .sparkle: .fx,
     ]
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;

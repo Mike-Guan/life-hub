@@ -60,8 +60,30 @@ import Testing
         // With the headset on, the stars sit higher, clear of its band.
         #expect(high.contains(mode == .work ? .sparkleWork : .sparkle))
         #expect(!high.contains(mode == .work ? .sparkle : .sparkleWork))
+        // The deadpan eyes open a notch and carry their own glint (Issue #236).
+        let deadpan = mid.contains(.eyesWork)
+        #expect(high.contains(.eyesBright) == deadpan)
+        if deadpan { #expect(high.isDisjoint(with: [.eyesWork, .lidsWork])) }
         // Chill's eyes are closed in a smile, so there is nothing to glint.
-        #expect(high.contains(.eyeGlint) == (mode != .chill))
+        #expect(high.contains(.eyeGlint) == (mode != .chill && !deadpan))
+    }
+
+    @Test func tiredAtHomeDoesNotSmileLikeFull() {
+        let tired = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .low)))
+        #expect(!tired.contains(.eyesChill))
+        #expect(tired.isSuperset(of: [.eyesWork, .lidsWork, .eyebags]))
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .high))).contains(.eyesChill))
+    }
+
+    @Test func highEnergyEyesStillBlinkAndSleep() {
+        var pose = RunnerPose(face: .high)
+        pose.eyesShut = true
+        let shut = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(shut.contains(.eyesClosed))
+        #expect(shut.isDisjoint(with: [.eyesBright, .lidsBright]))
+        var bedtime = RunnerPose.bedtimeStill()
+        bedtime.face = .high
+        #expect(Set(RunnerFigure.parts(for: .work, pose: bedtime)).isDisjoint(with: [.eyesBright, .lidsBright]))
     }
 
     @Test(arguments: Mode.allCases)
@@ -405,6 +427,21 @@ import Testing
         #expect(apart.gloveL.width < 1)
         let up = RunnerPose(mode: .boxing, time: start + 1.1, face: .mid, react: 0)
         #expect(up.eyesDy == -2.5 && up.gloveL == .zero)
+    }
+
+    @Test func boxingHakuSlipsLeftRightAndDucks() throws {
+        let start = try #require(
+            IdleClockTests.firstStart(kind: 2, lengths: RunnerPose.boxingBeats, every: 24, spread: 6))
+        let left = RunnerPose(mode: .boxing, time: start + 0.6, face: .mid, react: 0)
+        #expect(left.shift < -4.9 && left.lean < -2.9 && left.bounce < -1.4)
+        let right = RunnerPose(mode: .boxing, time: start + 1.2, face: .mid, react: 0)
+        #expect(right.shift > 4.9 && right.lean > 2.9)
+        let duck = RunnerPose(mode: .boxing, time: start + 1.8, face: .mid, react: 0)
+        #expect(duck.bounce > 5.9 && abs(duck.shift) < 0.1)
+        let puff = RunnerPose(mode: .boxing, time: start + 2.2, face: .mid, react: 0)
+        #expect(puff.puff && puff.bounce == 0 && RunnerFigure.parts(for: .boxing, pose: puff).contains(.talkDots))
+        let after = RunnerPose(mode: .boxing, time: start + 2.5, face: .mid, react: 0)
+        #expect(!after.puff && after.shift == 0 && after.lean == 0)
     }
 
     @Test func atWorkHakuLeansBackAndSpinsTheChair() throws {
