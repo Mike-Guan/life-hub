@@ -11,8 +11,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   Chinese whatever the phone's language until all Japanese and English text is in.
 
 ### Changed
-- At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
-  chain when he hits it.
+- The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
+  room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
+  back puts them on again. The wardrobe screen moves to these groups in a separate change.
 - The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
   hustle); a full set replaces that mode's top. They go on sale once the character art draws them.
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
@@ -108,6 +109,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   bus, and the moment of arriving. Life Hub asks for Motion & Fitness once; motion stays on the iPhone.
 - After a workout the watch cheers for it as soon as the Health app saves it, without opening the iPhone app.
   The iPhone home still cheers the next time it opens.
+- At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
+  chain when he hits it.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
