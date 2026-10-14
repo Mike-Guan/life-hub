@@ -18,6 +18,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - When the mode switches on its own, at a place, the character fades into the new outfit like a manual switch
   instead of cutting over.
+- Today's energy has its own line under the character, saying where it comes from. When it is a guess from
+  sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
 - The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
   gym, say the app never records your route, and say only the computed state goes to your own Apple Watch.
   They now also come in Japanese and English, following the phone's language. The 「日文和英文」 switch

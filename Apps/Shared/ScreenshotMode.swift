@@ -78,7 +78,7 @@ enum ScreenshotMode {
     }
 
     /// What the "不对" card shows: `open` for the question, `reply` for the reply after a correction,
-    /// `hold` for nothing until a long press.
+    /// `hold` for nothing until 不对？ is tapped, `none` for a day with no energy at all.
     static var check: String? {
         value(after: "-screenshot-check")
     }
@@ -116,6 +116,8 @@ struct ScreenshotHome: View {
             // The "不对" card only asks about a guess, so its shots get energy from a night's sleep.
             if ScreenshotMode.check == nil {
                 energy.report(ScreenshotMode.energy)
+            } else if ScreenshotMode.check == "none" {
+                // No sleep and no self-report: the energy row says so.
             } else {
                 energy.record(.sleep(minutes: ScreenshotMode.sleepMinutes, endedAt: .now, deviceID: "screenshot"))
             }
