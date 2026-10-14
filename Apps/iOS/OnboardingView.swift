@@ -67,7 +67,7 @@ struct OnboardingView: View {
         case .bedtime: bedtimeScreen
         case .work: workScreen
         case .location:
-            askScreen(dot: 5, line: line(.location), note: "选“始终允许”，它才能在你没打开 App 时也跟着换。位置只留在这台手机里。") {
+            askScreen(dot: 5, line: line(.location), note: "选「始终允许」，它才能在你没打开 App 时也跟着换。位置只留在这台手机里。") {
                 let allowed = await OnboardingAccess.location()
                 location = CLLocationManager().authorizationStatus
                 draft.allowsLocation = allowed
