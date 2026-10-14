@@ -102,6 +102,7 @@ public enum MomentEngine {
             return minute < work.workStartMinute ? .morning : .timeToLeave
         }
         let lateNight = calendar.startOfDay(for: now) > StateEngine.dayStart(for: now, calendar: calendar)
+        guard bedtime.isSet else { return lateNight ? .blanket : nil }
         let start = blanketMinute(bedtime)
         // A bedtime after 07:30 starts the blanket after midnight, so it runs only until the day starts.
         if start < StateEngine.dayStartHour * 60 { return lateNight && minute >= start ? .blanket : nil }
@@ -167,7 +168,8 @@ public enum MomentEngine {
         guard let since else { return [] }
         let midnight = calendar.startOfDay(for: now)
         let minute = { (value: Int) in calendar.date(byAdding: .minute, value: value, to: midnight) ?? midnight }
-        let minutes = [work.workStartMinute, work.workStartMinute + leaveWaitMinutes, blanketMinute(bedtime)]
+        let blanket = bedtime.isSet ? [blanketMinute(bedtime)] : []
+        let minutes = [work.workStartMinute, work.workStartMinute + leaveWaitMinutes] + blanket
         return [since.addingTimeInterval(collapsedLasts)] + minutes.map(minute)
     }
 

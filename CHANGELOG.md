@@ -7,6 +7,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - HAKU's speech bubble no longer touches his hair: at home he gets a little smaller and lower while a line
   shows, gloves whole, and on the unboxing page he stands lower so the whole new item still shows.
+- The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
+  watch and its widgets never turn sleepy.
+- The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
+  turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
 - On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
@@ -16,6 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   The second character's flower is now called 地上小粉花.
 - The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
   4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
+- The watch has no dark band behind the clock any more; every screen keeps its own background.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
