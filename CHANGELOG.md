@@ -7,8 +7,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
-- Test builds (Debug, STG) have a 「日文和英文」 switch in settings. It is off by default, so every build shows
-  Chinese whatever the phone's language until all Japanese and English text is in.
+- Debug builds have a 「日文和英文」 switch in settings. It is off by default, so every build shows Chinese
+  whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
 - The shop catalogue has clothes for identity cards. Cards without an outfit of their own share one of three
