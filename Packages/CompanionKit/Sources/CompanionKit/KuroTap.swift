@@ -72,8 +72,8 @@ extension KuroPose {
             pose.mouthO = (0.2..<0.55).contains(p)
         case .swing:
             // 第 1 批身份卡 第 3 轮: startled, backswing, eyes shut on the swing, follow through, racket back.
-            pose.eyes = p < 0.12 ? .surprised : p < 0.25 ? .bright : p < 0.5 ? .closed : p < 0.7 ? .open : .down
-            pose.mouthO = p < 0.12
+            pose.eyes = p < 0.15 ? .surprised : p < 0.25 ? .bright : p < 0.5 ? .closed : p < 0.7 ? .open : .down
+            pose.mouthO = p < 0.15
         case .glasses:
             pose.calm = true
         case .rub:
@@ -203,8 +203,8 @@ extension KuroFigure {
     /// The racket's turn about her hand at `p` into the swing, in degrees: back 4°, across her body to -75°,
     /// -50° on the follow through, then down again.
     nonisolated private static func swingAngle(_ p: Double) -> Double {
-        if p < 0.12 { return 0 }
-        if p < 0.25 { return 4 * ease((p - 0.12) / 0.13) }
+        if p < 0.15 { return 0 }
+        if p < 0.25 { return 4 * ease((p - 0.15) / 0.1) }
         if p < 0.35 { return 4 - 79 * ease((p - 0.25) / 0.1) }
         if p < 0.5 { return -75 }
         if p < 0.7 { return -75 + 25 * ease((p - 0.5) / 0.2) }
