@@ -499,10 +499,11 @@ struct RunnerPose {
             gloveL = CGSize(width: 0, height: bounce)
             gloveR = CGSize(width: -14 * r, height: -bounce - 10 * r)
             gloveRScale = 1 + 0.2 * r
-            // Every 18-30 s: shake the wrists out, then a glove up to fix the headband.
+            // Every 18-30 s, one of: shake the wrists out, then a glove up to fix the headband; or bump the gloves.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
-            if plain, r == 0, let beat = IdleClock.beat(
-                at: t, every: 24, spread: 6, lengths: Self.boxingBeats, seed: Self.seed)
+            if plain, r == 0,
+                let beat = IdleClock.beat(
+                    at: t, every: 24, spread: 6, lengths: Self.boxingBeats, seed: Self.seed)
             {
                 let phase = beat.phase
                 if beat.kind == 1 {
