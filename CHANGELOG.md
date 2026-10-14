@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character dresses for the dance, music and ski cards, each with its own idle move: she sways
+  by a small speaker as notes float up, taps along a score she holds, or pats snow off her shoulder in ski goggles
+  and sneezes. The cards stay out of the picker until HAKU's looks are in too.
 - Shop clothes art for the second preset character: eight pop tops and sets, two identity-card tops and six
   base outfits, each with matching sleeves, in their own layer file. Nothing in the app shows them yet.
 - Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
@@ -18,6 +21,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - When the mode switches on its own, at a place, the character fades into the new outfit like a manual switch
   instead of cutting over.
+- In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
+  over the hair while sitting up. After the off-work
+  animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
 - Today's energy has its own line under the character, saying where it comes from. When it is a guess from
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
 - The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
