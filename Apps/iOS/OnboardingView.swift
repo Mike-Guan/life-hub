@@ -584,6 +584,7 @@ struct OnboardingView: View {
                 .background(Circle().fill(isOn ? workColor : Toy.card))
                 .overlay(Circle().stroke(Toy.ink, lineWidth: 2.5))
                 .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
                 .animation(.easeOut(duration: 0.12), value: isOn)
         }
         .buttonStyle(.plain)
@@ -643,6 +644,7 @@ struct OnboardingView: View {
             .frame(minHeight: 44)
             .background(Capsule().fill(symbol == nil ? Toy.paper : Toy.card).padding(.vertical, 8))
             .overlay(Capsule().stroke(Toy.ink, lineWidth: 2).padding(.vertical, 8))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
