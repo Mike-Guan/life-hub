@@ -7,7 +7,8 @@ import SwiftUI
 /// `-screenshot-wearing <ids>` dresses her in shop items, given as comma-separated ids.
 /// `-screenshot-memory <full|empty>` shows the memory page instead (iOS), `-screenshot-ask <name>` with a confirmation.
 /// `-screenshot-settings <card|erase>` shows the bottom of Settings (iOS).
-/// `-screenshot-growth <shop|wardrobe|unbox|unbox-bottom>` shows that screen with made-up cans and items (iOS).
+/// `-screenshot-growth <shop|wardrobe[-accessories|-props|-room]|unbox|unbox-bottom>` shows that screen
+/// with made-up cans and items (iOS).
 /// `-screenshot-onboarding <step>` shows that first-run setup screen, named as in `OnboardingDraft.Step` (iOS).
 /// `-screenshot-identity <card|none>` gives those screens that identity card, or none; the character's own by default.
 enum ScreenshotMode {

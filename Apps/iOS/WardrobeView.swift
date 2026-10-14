@@ -16,12 +16,21 @@ struct WardrobeView: View {
     ///   - persona: the character whose wardrobe it is.
     ///   - mode: the mode to preview first, usually the current one.
     ///   - cards: the user's mode cards, which name the mode buttons; the character's defaults when `nil`.
-    init(growth: GrowthStore, wardrobe: Binding<Wardrobe>, persona: Persona, mode: Mode?, cards: ModeCards? = nil) {
+    ///   - shelf: the tab to show first.
+    init(
+        growth: GrowthStore,
+        wardrobe: Binding<Wardrobe>,
+        persona: Persona,
+        mode: Mode?,
+        cards: ModeCards? = nil,
+        shelf: WardrobeShelf = .clothes
+    ) {
         self.growth = growth
         _wardrobe = wardrobe
         self.persona = persona
         self.cards = cards ?? .legacy(for: persona)
         _previewMode = State(initialValue: mode ?? .chill)
+        _shelf = State(initialValue: shelf)
     }
 
     var body: some View {
