@@ -9,7 +9,7 @@ import Testing
         let ids = KuroItem.allCases.map(\.rawValue)
         #expect(Set(ids).count == ids.count)
         #expect(ids.allSatisfy { $0.hasPrefix("kuro.") })
-        #expect(Set(ids) == Set(ShopItem.catalog(for: .kuro).map(\.id)))
+        #expect(Set(ids) == Set(ShopItem.catalog(for: .kuro).filter(\.isDrawn).map(\.id)))
         #expect(KuroItem.allCases.filter(\.isKeepsake) == [.spin, .sakura, .goldRacket])
         #expect(KuroItem.items(["kuro.room.flower", "gloves.gold", "nope"]) == [.flower])
     }
