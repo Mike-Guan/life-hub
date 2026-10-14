@@ -109,6 +109,8 @@ struct KuroPose: Sendable {
     var blinking = false
     /// Low energy: flat mouth and no blush.
     var tired = false
+    /// Full energy: bright eyes a size bigger, pink cheeks, ears up and sparkles by her head.
+    var full = false
     /// Waiting out a late end at the desk, chin on hand.
     var overtime = false
     /// The late end shown on a sign above her head, as HH:mm, or nil for no sign.
@@ -144,6 +146,7 @@ struct KuroPose: Sendable {
             tired = true
         case .high:
             eyes = .bright
+            full = true
         case .mid:
             eyes = look == .tennis ? .bright : look == .desk ? .down : .open
         }
@@ -184,7 +187,7 @@ struct KuroFigure: View {
     var body: some View {
         ZStack {
             ForEach(Self.parts(for: look, pose: pose, watch: watch), id: \.self) { part in
-                KuroPartView(part: part, shift: Self.shift(part, pose: pose), turn: Self.turn(part, pose: pose))
+                KuroPartView(part: part, shift: Self.offset(part, pose: pose), turn: Self.turn(part, pose: pose))
                     .opacity(Self.opacity(part, pose: pose))
             }
             if pose.overtime, let sign = pose.sign {
@@ -200,6 +203,16 @@ struct KuroFigure: View {
         visible.formUnion(outfit(look))
         visible.insert(pose.blinking ? .eyesClosed : part(pose.eyes))
         if !pose.tired { visible.insert(.blush) }
+        // Issue #236 (correction preview v6): full reads apart from okay at a glance, even on the watch.
+        if pose.full {
+            // UI 审核 2026-10-13: the round cheeks replace the oval blush rather than smudging over it.
+            visible.remove(.blush)
+            visible.formUnion([.cheeksFull, .sparkle])
+            if visible.contains(.eyesBright) {
+                visible.remove(.eyesBright)
+                visible.insert(.eyesFull)
+            }
+        }
         if pose.overtime {
             // Her chin rests on her hand, so whatever she held in front of her is put down.
             visible.subtract([.workTablet, .workStylus, .gymBlock, .studyNotebook, .scoreSheet, .scoreFinger])
@@ -230,6 +243,13 @@ struct KuroFigure: View {
         // UI 审核 2026-10-14 (位置规划图 §12): the watch draws nothing on the floor.
         if watch { visible.remove(.danceSpeaker) }
         return KuroPart.allCases.filter { visible.contains($0) }
+    }
+
+    /// How far `part` moves from where the SVG draws it, in SVG units; full energy raises her ears a little.
+    nonisolated static func offset(_ part: KuroPart, pose: KuroPose) -> CGSize {
+        let moved = shift(part, pose: pose)
+        let lift: CGFloat = pose.full && part == .catEars ? 3 : 0
+        return CGSize(width: moved.width, height: moved.height - lift)
     }
 
     /// The looks in her sportswear, where she smiles.

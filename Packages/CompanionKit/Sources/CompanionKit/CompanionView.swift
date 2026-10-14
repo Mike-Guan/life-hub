@@ -1131,13 +1131,19 @@ public struct CompanionView: View {
             moment: shownMoment
         )
         let candidates = lines.filter { $0 != bubble }
-        say((candidates.isEmpty ? lines : candidates).randomElement())
         // Taps during a one-off animation only get HAKU's reaction.
         let time = Date.now.timeIntervalSinceReferenceDate
-        guard celebration(at: time) == nil, taskDone(at: time) == nil, !stillOneOff(at: time) else { return }
+        let plays = celebration(at: time) == nil && taskDone(at: time) == nil && !stillOneOff(at: time)
         // The same body move as a poke on the watch (Mike 2026-10-07: one action library for phone and watch).
-        if let mode {
-            pokeKind = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on, busy: isBusy(life))
+        var poke: WatchPoke?
+        if plays, let mode {
+            poke = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on, busy: isBusy(life))
+        }
+        // The boxing duck and hook ends on its own line (身份卡第 3 轮 B2).
+        say(poke == .duckHook ? poke?.line : (candidates.isEmpty ? lines : candidates).randomElement())
+        guard plays else { return }
+        if let poke {
+            pokeKind = poke
             pokeStart = .now
         }
         onTap?()
@@ -1165,7 +1171,7 @@ public struct CompanionView: View {
         pokeKind = kind
         pokeStart = now
         if kind != .rollOver { pop += 1 }
-        say(kind.line)
+        say(kind.line, after: kind.lineDelay)
     }
 
     // QA §5.1: a shake drops the wrist and dims the watch screen, so the watch listens for up to 5 s more after
@@ -1254,12 +1260,17 @@ public struct CompanionView: View {
         say(invite, for: 5)
     }
 
-    private func say(_ text: String?, for seconds: Double = 2.4) {
+    private func say(_ text: String?, for seconds: Double = 2.4, after delay: Double = 0) {
         let text = text?.localized(for: .haku)
         bubbleTask?.cancel()
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = delay > 0 ? nil : text }
         guard text != nil else { return }
         bubbleTask = Task {
+            if delay > 0 {
+                try? await Task.sleep(for: .seconds(delay))
+                guard !Task.isCancelled else { return }
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
+            }
             try? await Task.sleep(for: .seconds(seconds))
             guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: 0.2)) { bubble = nil }
