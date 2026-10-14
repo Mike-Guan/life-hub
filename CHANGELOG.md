@@ -19,8 +19,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
-- The welcome back scene no longer ends with a cut: HAKU settles back over the last second and the sofa,
-  blanket, phone and crate drop a little and fade out. A tap that skips it does the same over 0.3 s.
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
   over the hair while sitting up. After the off-work
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
@@ -44,6 +42,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
   fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
   own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- The welcome back scene no longer ends with a cut: HAKU settles back over the last second and the sofa,
+  blanket, phone and crate drop a little and fade out. A tap that skips it does the same over 0.3 s.
 - Tennis is her main card: she bounces the ball on a flat racket and spins the racket while idle, and a tap
   makes her swing. Boxing keeps only the gloves tapping together.
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
