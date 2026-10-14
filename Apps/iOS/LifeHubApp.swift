@@ -666,11 +666,12 @@ struct LifeHubApp: App {
             let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
             let slept = try await HealthSleep.earlySleep(schedule: schedule)
             let sunned = try await HealthMotion.daylight()
-            for earned in [slept, sunned].compactMap(\.self) {
+            let walked = try await HealthSteps.wins()
+            for earned in [slept, sunned].compactMap(\.self) + walked {
                 growth.record(earned.win, source: earned.source, at: earned.at)
             }
         } catch {
-            healthError = "读不到健康 App 里的日照或睡眠：\(error.localizedDescription)"
+            healthError = "读不到健康 App 里的日照、睡眠或步数：\(error.localizedDescription)"
         }
     }
 
