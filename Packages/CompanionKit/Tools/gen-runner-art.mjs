@@ -32,6 +32,9 @@ const RUNNER_PALETTE = {
   '#FFF6E5': 'cream', '#E8D9BC': 'creamShade', '#FF9F43': 'catOrange', '#C96F1E': 'catStripe',
   // Not in the SVG: per-mode jacket colors from the RUNNER v5 sheet.
   '#3A6B58': 'jacketChill', '#121219': 'jacketMoney',
+  // Shop clothes (UI 审核 2026-10-14: named clothes colours).
+  '#FF8FC8': 'bubblegum', '#F07AB6': 'bubblegumDeep', '#C7A6FF': 'lilac', '#8D6BD6': 'lilacDeep',
+  '#7FB2FF': 'sky', '#FF4D5E': 'varsityRed', '#4A5280': 'capSeam',
 };
 const KURO_PALETTE = {
   '#111111': 'ink', '#111': 'ink', '#FFFFFF': 'white', '#fff': 'white',
