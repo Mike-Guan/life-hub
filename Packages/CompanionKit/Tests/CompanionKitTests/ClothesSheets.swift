@@ -43,6 +43,17 @@ extension FrameSheets {
         try write("clothes-3-icons", rows, size: CGSize(width: 120, height: 120), frames: 1)
     }
 
+    @Test func hakuClothesBacks() throws {
+        let rows = Self.clothes.map { item in
+            Row(label: "背面 · \(item.title)", start: Self.base) {
+                var away = RunnerPose().wearing(Outfit(Wardrobe(clothes: [item.mode!: item.id])))
+                away.turnedAway = true
+                return AnyView(StillHaku(mode: item.mode!, pose: away))
+            }
+        }
+        try write("clothes-5-backs", rows, frames: 1)
+    }
+
     @Test func hakuClothesEdges() throws {
         let varsity = Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"]))
         let raincoat = Outfit(Wardrobe(clothes: [.work: "haku.set.work.raincoat"]))
