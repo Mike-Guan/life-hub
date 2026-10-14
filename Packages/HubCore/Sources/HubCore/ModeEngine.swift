@@ -46,8 +46,21 @@ extension ModeRules {
 
     // Mike 2026-10-05 set 17:30 for his 18:30 end; PM 2026-10-13 (写死作息排查 v0 #4) made it an hour
     // before the end of work hours, so it moves with them.
-    /// From this minute after midnight, leaving the office ends work: an hour before work ends.
-    public var offWorkFromMinute: Int { workEndMinute - 60 }
+    /// From this minute after midnight, leaving the office ends work: an hour before work ends, or any time
+    /// for irregular work.
+    public var offWorkFromMinute: Int { isIrregular ? 0 : workEndMinute - 60 }
+
+    // PM 2026-10-13 (写死作息排查 v0 #3): someone without fixed work days picks 不固定. Then nothing follows
+    // work hours: no morning scenes, off-work notice, office states or work-hours Screen Time watch, and the
+    // evening follows the bedtime.
+    /// Whether the user has no fixed work days.
+    public var isIrregular: Bool { workdays.isEmpty }
+
+    /// When the working day is over for the evening states, in minutes after midnight: the end of work
+    /// hours, or 5 hours before bedtime for irregular work.
+    public func dayEndMinute(bedtime: BedtimeSchedule) -> Int {
+        isIrregular ? (bedtime.startMinute - 5 * 60 + 24 * 60) % (24 * 60) : workEndMinute
+    }
 
     // Mike, 2026-10-05: only when he is really at work, so a day off or working elsewhere gets no notice.
     /// When today's off-work notice goes out, or `nil` when it shouldn't: not a work day, already past,

@@ -52,6 +52,7 @@ struct LifeHubApp: App {
         }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
         let persona = Persona.stored(in: AppGroup.defaults)
+        Greeting.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
         ModeCards.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
         _cards = State(initialValue: ModeCards.current(in: AppGroup.defaults, persona: persona))
         let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
@@ -154,6 +155,7 @@ struct LifeHubApp: App {
             onShop: { showsShop = true },
             wardrobe: wardrobe,
             persona: persona,
+            greetingName: Greeting.name(in: AppGroup.defaults),
             cards: cards,
             ledger: growth.ledger.only(persona),
             onWardrobe: { showsWardrobe = true },
