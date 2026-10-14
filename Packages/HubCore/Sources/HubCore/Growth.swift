@@ -412,6 +412,29 @@ extension Slot {
     }
 }
 
+// 商店完整目录 v0 §1.5 and §2.5: cards without an outfit of their own share one of three base outfits.
+/// Clothes several identity cards share.
+public enum BaseOutfit: String, CaseIterable, Sendable {
+    case sport
+    case outing
+    case craft
+}
+
+extension IdentityKind {
+    // HAKU's boxing and the second character's tennis have outfits of their own. Her boxing keeps its own top
+    // and also wears the sport base when that top isn't bought.
+    /// The base outfit `persona` wears with this card, `nil` when the card has an outfit of its own.
+    public func baseOutfit(for persona: Persona) -> BaseOutfit? {
+        switch self {
+        case .boxing: persona == .kuro ? .sport : nil
+        case .tennis: persona == .kuro ? nil : .sport
+        case .fitness, .swimming, .yoga, .ball, .dance, .ski: .sport
+        case .study, .outdoor, .music: .outing
+        case .art: .craft
+        }
+    }
+}
+
 /// Something a character can own: bought in the shop, or granted as a keepsake.
 public struct ShopItem: Identifiable, Equatable, Sendable {
     /// A milestone that grants an item for free.
@@ -440,6 +463,8 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     public var card: IdentityKind?
     /// The mode a top or full set is worn in, `nil` for items shown in every mode.
     public var mode: Mode?
+    /// The base outfit whose cards can wear it, `nil` for clothes that aren't base clothes.
+    public var base: BaseOutfit?
     /// Whether the character art draws it. The shop leaves it off the shelf until then.
     public var isDrawn: Bool
 
@@ -518,6 +543,23 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(
             clothes: "kuro.set.chill.picnic", slot: .fullSet, title: "野餐", price: 80, mode: .chill, persona: .kuro),
         ShopItem(clothes: "kuro.set.work.rain", slot: .fullSet, title: "雨天", price: 90, mode: .work, persona: .kuro),
+        // Identity card clothes (商店完整目录 v0 §1.2, §1.5, §2.2, §2.5), off the shelf until drawn. Base clothes
+        // are bought once and worn with every card on their base outfit.
+        ShopItem(cardTop: "haku.top.boxing.blackgold", title: "黑金拳击外套", price: 40, card: .boxing),
+        ShopItem(cardTop: "haku.top.gym.tank", title: "运动背心", price: 30, base: .sport),
+        ShopItem(cardTop: "haku.top.tennis.white", title: "白色运动服", price: 40, base: .sport),
+        ShopItem(cardTop: "haku.top.study.cardigan", title: "开衫", price: 30, base: .outing),
+        ShopItem(cardTop: "haku.base.outing.windbreaker", title: "防风夹克", price: 40, base: .outing),
+        ShopItem(cardTop: "haku.top.art.apron", title: "帆布围裙", price: 30, base: .craft),
+        ShopItem(cardTop: "haku.base.craft.overalls", title: "工装背带", price: 40, base: .craft),
+        ShopItem(cardTop: "kuro.top.boxing.lilac", title: "淡紫拳击上衣", price: 40, card: .boxing, persona: .kuro),
+        ShopItem(cardTop: "kuro.top.tennis.sakura", title: "樱色网球服", price: 40, card: .tennis, persona: .kuro),
+        ShopItem(cardTop: "kuro.top.gym.track", title: "运动外套", price: 30, base: .sport, persona: .kuro),
+        ShopItem(cardTop: "kuro.base.sport.tank", title: "运动背心", price: 40, base: .sport, persona: .kuro),
+        ShopItem(cardTop: "kuro.top.study.sweater", title: "圆领毛衣", price: 30, base: .outing, persona: .kuro),
+        ShopItem(cardTop: "kuro.base.outing.trench", title: "短风衣", price: 40, base: .outing, persona: .kuro),
+        ShopItem(cardTop: "kuro.top.art.smock", title: "画画罩衫", price: 30, base: .craft, persona: .kuro),
+        ShopItem(cardTop: "kuro.base.craft.pinafore", title: "背带裙", price: 40, base: .craft, persona: .kuro),
     ]
 
     init(
@@ -545,9 +587,21 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         isDrawn = false
     }
 
+    // The identity card lives in the boxing mode slot (ModeCards), so its clothes are worn there.
+    init(
+        cardTop id: String, title: String, price: Int, card: IdentityKind? = nil, base: BaseOutfit? = nil,
+        persona: Persona = .haku
+    ) {
+        self.init(id: id, slot: .top, title: title, price: price, persona: persona, card: card)
+        mode = .boxing
+        self.base = base
+        isDrawn = false
+    }
+
     /// Whether the shop offers it to someone who picked `card`.
     public func suits(_ card: IdentityKind?) -> Bool {
-        self.card == nil || self.card == card
+        if let base { return card?.baseOutfit(for: persona) == base }
+        return self.card == nil || self.card == card
     }
 
     // The identity card lives in the boxing mode slot (ModeCards), so its props show only there.
