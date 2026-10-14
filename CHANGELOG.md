@@ -16,6 +16,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
   The cheer hop is lower, so the hair stays inside the card.
+- The off-work card's default name is now 「下班」, so the watch no longer cuts it to 「下班 Chi」. Names you
+  already changed stay as they are.
 - 27 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
@@ -120,6 +122,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   The iPhone home still cheers the next time it opens.
 - At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
   chain when he hits it.
+- When HAKU puts the pillow behind his shoulder to lean on it, it now lands exactly where it rests, so it no
+  longer jumps from his chest to behind his shoulder.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
