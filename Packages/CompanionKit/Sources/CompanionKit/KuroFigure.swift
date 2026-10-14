@@ -568,14 +568,7 @@ public struct KuroView: View {
             .keyframeAnimator(initialValue: Squash(), trigger: pop) { content, value in
                 content.scaleEffect(x: value.x, y: value.y, anchor: .bottom)
             } keyframes: { _ in
-                KeyframeTrack(\.x) {
-                    CubicKeyframe(1.07, duration: 0.08)
-                    SpringKeyframe(1, duration: 0.35, spring: .bouncy)
-                }
-                KeyframeTrack(\.y) {
-                    CubicKeyframe(0.9, duration: 0.08)
-                    SpringKeyframe(1, duration: 0.35, spring: .bouncy)
-                }
+                Squash.tap()
             }
             .modifier(WatchFigureFrame(isEnabled: style == .watch))
             .padding(.top, Self.topInset(style))
@@ -1014,7 +1007,7 @@ public struct KuroView: View {
     private func say(_ text: String?, for seconds: Double = 2.4) {
         let text = text?.localized(for: .kuro)
         bubbleTask?.cancel()
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
+        withAnimation(.smooth(duration: 0.3)) { bubble = text }
         guard text != nil else { return }
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(seconds))
