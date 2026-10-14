@@ -136,6 +136,9 @@ struct RunnerPose {
     var gloveL: CGSize = .zero
     var gloveR: CGSize = .zero
     var gloveRScale: CGFloat = 1
+    var gloveLScale: CGFloat = 1
+    /// A puff of breath out of the nose: shows the talk dots.
+    var puff = false
     /// Position of the shine sweeping over the gold chain, as a fraction of the figure width.
     var glint: CGFloat = -1
     var coinTurn: Double = 0
@@ -501,7 +504,8 @@ struct RunnerPose {
             gloveL = CGSize(width: 0, height: bounce)
             gloveR = CGSize(width: -14 * r, height: -bounce - 10 * r)
             gloveRScale = 1 + 0.2 * r
-            // Every 18-30 s, one of: shake the wrists out, then a glove up to fix the headband; or bump the gloves.
+            // Every 18-30 s, one of: shake the wrists out, then a glove up to fix the headband; bump the gloves; or
+            // slip left, slip right and duck.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
             if plain, r == 0,
                 let beat = IdleClock.beat(
@@ -510,6 +514,8 @@ struct RunnerPose {
                 let phase = beat.phase
                 if beat.kind == 1 {
                     bumpGloves(phase: phase)
+                } else if beat.kind == 2 {
+                    slip(phase: phase)
                 } else if phase < 1.5 {
                     let shake = CGFloat(sin(phase * 2 * .pi / 0.15)) * 3
                     gloveL = CGSize(width: shake, height: 8)
@@ -549,8 +555,8 @@ struct RunnerPose {
     static let workBeats: [TimeInterval] = [3, 1.2, 2.5]
     /// Chill pool beats: the empty can, a scratch of the head, patting the pillow and leaning on it.
     static let chillBeats: [TimeInterval] = [emptyCanLength, 7, 3.6]
-    /// Boxing pool beats: shaking the wrists out then fixing the headband, bumping the gloves.
-    static let boxingBeats: [TimeInterval] = [3.5, 1.2]
+    /// Boxing pool beats: shaking the wrists out then fixing the headband, bumping the gloves, slipping.
+    static let boxingBeats: [TimeInterval] = [3.5, 1.2, 2.4]
 
     // 03 Product/companion/待机动作 补齐规格 v0 H4, Mike approved 2026-10-14. 动态: a second of slacking off.
     /// Leaning back at `phase` (0...2.5 s), spinning the chair round to the back and back again, then sitting up.
@@ -611,6 +617,20 @@ struct RunnerPose {
         gloveL = CGSize(width: 12 * bump, height: -6 * bump)
         gloveR = CGSize(width: -12 * bump, height: -6 * bump)
         eyesDy = p < 0.9 ? 3 : -2.5
+    }
+
+    // 身份卡第 3 轮 B1, Mike approved 2026-10-14. 动态: practising the slip is the move.
+    /// Slipping left, back, slipping right and ducking at `phase` (0...2.4 s), then a puff of breath in guard.
+    private mutating func slip(phase p: TimeInterval) {
+        let x = CGFloat(p)
+        let left = Self.bump(x, from: 0.3, to: 0.9)
+        let right = Self.bump(x, from: 0.9, to: 1.5)
+        let duck = Self.bump(x, from: 1.5, to: 2.1)
+        shift = 5 * (right - left)
+        bounce = -1.5 * (left + right) + 6 * duck
+        lean = 3 * Double(right - left)
+        eyesDy = duck
+        puff = p >= 2.05 && p < 2.4
     }
 
     /// The state within the mode: peeking, dozing, slumped, at the door, walking, or vibe coding.
@@ -1295,6 +1315,7 @@ struct RunnerFigure: View {
             visible.formUnion([.eyeSwirlL, .eyeSwirlR, .dizzyStar])
         }
         poked(&visible, pose: pose)
+        if pose.puff { visible.insert(.talkDots) }
         // Gloves fill both hands, so the peace sign never adds a third one (Mike 2026-10-07).
         if !visible.isDisjoint(with: [.gloveL, .gloveR]) { visible.remove(.peaceHand) }
         if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
@@ -1868,13 +1889,16 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part, red: pose.outfit.headband)
             case .gloveL:
                 RunnerPartView(part: part, red: pose.outfit.gloves)
+                    .scaleEffect(pose.gloveLScale, anchor: Self.unit(x: 34, y: 118))
                     .offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)
             case .gloveR:
                 RunnerPartView(part: part, red: pose.outfit.gloves)
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
                     .offset(x: pose.gloveR.width * scale, y: pose.gloveR.height * scale)
             case .gloveTapeLeft:
-                RunnerPartView(part: part).offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)
+                RunnerPartView(part: part)
+                    .scaleEffect(pose.gloveLScale, anchor: Self.unit(x: 34, y: 118))
+                    .offset(x: pose.gloveL.width * scale, y: pose.gloveL.height * scale)
             case .gloveTapeRight:
                 RunnerPartView(part: part)
                     .scaleEffect(pose.gloveRScale, anchor: Self.unit(x: 86, y: 118))
