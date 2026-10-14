@@ -118,6 +118,14 @@ for mode in "${modes[@]}"; do
   watch_clip haku "$mode" "[]" "watch-haku-$mode-long-name"
 done
 cards=
+# Items the watch leaves out of the second character's frame.
+cards=',"wardrobe":{"equipped":{"room":"kuro.room.flower"}}'
+watch_clip kuro chill "[]" "watch-kuro-chill-flower"
+cards=',"wardrobe":{"equipped":{"mask":"kuro.blanket.cats"}}'
+watch_clip kuro chill "[]" "watch-kuro-chill-blanket"
+cards=',"wardrobe":{"equipped":{"room":"kuro.room.lamp"}}'
+watch_clip kuro money "[]" "watch-kuro-money-lamp"
+cards=
 xcrun simctl shutdown "$watch_udid" || true
 done
 note "done"
