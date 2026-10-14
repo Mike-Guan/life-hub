@@ -20,6 +20,8 @@ public enum Win: String, Codable, CaseIterable, Sendable {
     case plannedTask
     /// Any other watch workout of 30 minutes or more.
     case exercise
+    /// 6,000 steps or more in a day.
+    case steps
 
     /// Cans this win earns.
     public var cans: Int {
@@ -27,7 +29,7 @@ public enum Win: String, Codable, CaseIterable, Sendable {
         case .boxing, .run5k: 5
         case .gym, .exercise: 3
         case .gotUp: 2
-        case .daylight, .earlySleep, .plannedTask: 1
+        case .daylight, .earlySleep, .plannedTask, .steps: 1
         }
     }
 }
@@ -377,6 +379,39 @@ public enum Slot: String, Codable, CodingKeyRepresentable, CaseIterable, Sendabl
     case mask
     case room
     case celebration
+    /// Clothes for one mode.
+    case top
+    /// A full outfit for one mode. It replaces that mode's top.
+    case fullSet = "set"
+}
+
+// 商店完整目录 v0 §8 and §9.1: the wardrobe groups items by where they are worn, not by slot.
+/// A group of items in the wardrobe.
+public enum WardrobeShelf: String, CaseIterable, Sendable {
+    /// Tops and full sets, worn per mode.
+    case clothes
+    /// Worn in every mode: headbands, masks, celebrations.
+    case accessories
+    /// The picked identity card's own items.
+    case props
+    case room
+
+    /// The shelves the wardrobe shows while previewing `mode`: props only in the identity card's mode, with a card picked.
+    public static func shelves(in mode: Mode, card: IdentityKind?) -> [WardrobeShelf] {
+        allCases.filter { $0 != .props || (card != nil && mode == .boxing) }
+    }
+}
+
+extension Slot {
+    /// The wardrobe shelf the slot's items sit on.
+    public var shelf: WardrobeShelf {
+        switch self {
+        case .top, .fullSet: .clothes
+        case .headband, .mask, .celebration: .accessories
+        case .gloves: .props
+        case .room: .room
+        }
+    }
 }
 
 /// Something a character can own: bought in the shop, or granted as a keepsake.
@@ -405,6 +440,10 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     public var persona: Persona
     /// The identity card it belongs to, `nil` when it suits every card. A keepsake belongs to its win's card.
     public var card: IdentityKind?
+    /// The mode a top or full set is worn in, `nil` for items shown in every mode.
+    public var mode: Mode?
+    /// Whether the character art draws it. The shop leaves it off the shelf until then.
+    public var isDrawn: Bool
 
     // The first catalog (PRD v4.2 section 13), then KURO's (奖励数值表 section 7, approved 2026-10-07).
     // Ids are stored in the ledger, so never reuse one. KURO's items reuse HAKU's slots: her hair ties are
@@ -461,7 +500,26 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             title: "金色网球拍",
             keepsake: Keepsake(win: .boxing, count: 10, card: .tennis),
             persona: .kuro
-        ),
+        ),  // Clothes (商店完整目录 v0 §1.1 and §2.1, prices of 2026-10-14), off the shelf until drawn.
+        // HAKU's eight are the pop set Mike approved 2026-10-14; the second character's are still placeholders.
+        ShopItem(clothes: "haku.top.work.blazer", slot: .top, title: "学院西装", price: 30, mode: .work),
+        ShopItem(clothes: "haku.top.work.cardigan", slot: .top, title: "像素开衫", price: 35, mode: .work),
+        ShopItem(clothes: "haku.top.chill.aloha", slot: .top, title: "浪花夏威夷衫", price: 30, mode: .chill),
+        ShopItem(clothes: "haku.top.chill.flame", slot: .top, title: "火焰连帽卫衣", price: 40, mode: .chill),
+        ShopItem(clothes: "haku.top.side.sukajan", slot: .top, title: "刺绣夹克", price: 35, mode: .money),
+        ShopItem(clothes: "haku.top.side.arcade", slot: .top, title: "街机 T", price: 40, mode: .money),
+        ShopItem(clothes: "haku.set.chill.varsity", slot: .fullSet, title: "校队夹克", price: 80, mode: .chill),
+        ShopItem(clothes: "haku.set.work.raincoat", slot: .fullSet, title: "原宿雨衣", price: 90, mode: .work),
+        ShopItem(clothes: "kuro.top.work.blouse", slot: .top, title: "蝴蝶结衬衫", price: 30, mode: .work, persona: .kuro),
+        ShopItem(clothes: "kuro.top.work.vest", slot: .top, title: "针织马甲", price: 35, mode: .work, persona: .kuro),
+        ShopItem(
+            clothes: "kuro.top.chill.cardigan", slot: .top, title: "毛绒开衫", price: 30, mode: .chill, persona: .kuro),
+        ShopItem(clothes: "kuro.top.chill.hoodie", slot: .top, title: "猫耳卫衣", price: 40, mode: .chill, persona: .kuro),
+        ShopItem(clothes: "kuro.top.side.smock", slot: .top, title: "格子罩衫", price: 35, mode: .money, persona: .kuro),
+        ShopItem(clothes: "kuro.top.side.denim", slot: .top, title: "牛仔外套", price: 40, mode: .money, persona: .kuro),
+        ShopItem(
+            clothes: "kuro.set.chill.picnic", slot: .fullSet, title: "野餐", price: 80, mode: .chill, persona: .kuro),
+        ShopItem(clothes: "kuro.set.work.rain", slot: .fullSet, title: "雨天", price: 90, mode: .work, persona: .kuro),
     ]
 
     init(
@@ -480,11 +538,25 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         self.keepsake = keepsake
         self.persona = persona
         self.card = card ?? keepsake?.card
+        self.isDrawn = true
+    }
+
+    init(clothes id: String, slot: Slot, title: String, price: Int, mode: Mode, persona: Persona = .haku) {
+        self.init(id: id, slot: slot, title: title, price: price, persona: persona)
+        self.mode = mode
+        isDrawn = false
     }
 
     /// Whether the shop offers it to someone who picked `card`.
     public func suits(_ card: IdentityKind?) -> Bool {
         self.card == nil || self.card == card
+    }
+
+    // The identity card lives in the boxing mode slot (ModeCards), so its props show only there.
+    /// Whether the wardrobe lists it while previewing `mode` with `card` picked.
+    public func shows(in mode: Mode, card: IdentityKind?) -> Bool {
+        guard suits(card), WardrobeShelf.shelves(in: mode, card: card).contains(slot.shelf) else { return false }
+        return self.mode == nil || self.mode == mode
     }
 
     /// The catalog item with `id`.
@@ -497,28 +569,85 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         catalog.filter { $0.persona == persona }
     }
 
-    /// The items `persona` can own that suit `card`, in catalog order.
+    /// The items `persona` can buy or earn that suit `card` and are drawn, in catalog order.
     public static func catalog(for persona: Persona, card: IdentityKind?) -> [ShopItem] {
-        catalog(for: persona).filter { $0.suits(card) }
+        catalog(for: persona).filter { $0.isDrawn && $0.suits(card) }
     }
 }
 
 /// Which owned item a character wears in each slot. A setting, so it is replaced in place.
 public struct Wardrobe: Codable, Equatable, Sendable {
     public var equipped: [Slot: String]
+    /// The top or full set worn in each mode.
+    public var clothes: [Mode: String]
 
-    public init(equipped: [Slot: String] = [:]) {
+    public init(equipped: [Slot: String] = [:], clothes: [Mode: String] = [:]) {
         self.equipped = equipped
+        self.clothes = clothes
     }
 
-    /// Wears `item` in its slot, replacing what was there.
+    // DW-02: slots and modes from a newer build are kept as they are and written back, so an older build
+    // never drops what a newer one put on.
+    var otherSlots: [String: String] = [:]
+    var otherModes: [String: String] = [:]
+
+    // Clothes are keyed by the mode's raw value, so the JSON stays an object. Wardrobes saved before clothes load
+    // with none, and older builds skip the field.
+    enum CodingKeys: String, CodingKey {
+        case equipped
+        case clothes
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let slots = try container.decode([String: String].self, forKey: .equipped)
+        equipped = Dictionary(
+            uniqueKeysWithValues: slots.compactMap { key, id in Slot(rawValue: key).map { ($0, id) } })
+        otherSlots = slots.filter { Slot(rawValue: $0.key) == nil }
+        let modes = try container.decodeIfPresent([String: String].self, forKey: .clothes) ?? [:]
+        clothes = Dictionary(uniqueKeysWithValues: modes.compactMap { key, id in Mode(rawValue: key).map { ($0, id) } })
+        otherModes = modes.filter { Mode(rawValue: $0.key) == nil }
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(
+            otherSlots.merging(equipped.map { ($0.key.rawValue, $0.value) }) { $1 }, forKey: .equipped)
+        try container.encode(
+            otherModes.merging(clothes.map { ($0.key.rawValue, $0.value) }) { $1 }, forKey: .clothes)
+    }
+
+    /// Wears `item`: clothes in their mode, replacing that mode's top or set, anything else in its slot.
     public mutating func equip(_ item: ShopItem) {
-        equipped[item.slot] = item.id
+        if let mode = item.mode {
+            clothes[mode] = item.id
+        } else {
+            equipped[item.slot] = item.id
+        }
     }
 
     /// Takes off whatever is in `slot`.
     public mutating func clear(_ slot: Slot) {
         equipped[slot] = nil
+    }
+
+    /// Takes off the top or set worn in `mode`.
+    public mutating func undress(_ mode: Mode) {
+        clothes[mode] = nil
+    }
+
+    /// Whether `item` is worn: clothes in their mode, anything else in its slot.
+    public func isWearing(_ item: ShopItem) -> Bool {
+        if let mode = item.mode { return clothes[mode] == item.id }
+        return equipped[item.slot] == item.id
+    }
+
+    // A switched-away card's items stay stored, so switching back puts them on again. Ids this build
+    // doesn't know stay, as in the rest of the wardrobe.
+    /// What is drawn with `card` picked: the wardrobe without items that belong to another card.
+    public func showing(card: IdentityKind?) -> Wardrobe {
+        func shows(_ id: String) -> Bool { ShopItem.item(id)?.suits(card) ?? true }
+        return Wardrobe(equipped: equipped.filter { shows($0.value) }, clothes: clothes.filter { shows($0.value) })
     }
 
     // HAKU keeps the original key, so wardrobes saved before KURO had one still load.
