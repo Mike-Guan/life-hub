@@ -94,7 +94,7 @@ import Testing
     }
 
     @Test func modesPickHerLooks() {
-        #expect(Mode.allCases.map(KuroLook.init(mode:)) == [.work, .chill, .tennis, .desk])
+        #expect(Mode.allCases.map { KuroLook(mode: $0) } == [.work, .chill, .tennis, .desk])
     }
 
     @Test func bedtimeMakesHerSleepy() {
