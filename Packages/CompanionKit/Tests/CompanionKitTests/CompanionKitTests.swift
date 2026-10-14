@@ -1261,6 +1261,6 @@ import Testing
         #expect(brushing.contains(.toothbrush))
         let leaving = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(moment: .timeToLeave)))
         #expect(leaving.isSuperset(of: [.headset, .door, .watchWrist, .tapHand]))
-        #expect(CompanionLines.lines(for: .chill, moment: .timeToLeave).contains("……该出门了吧。"))
+        #expect(CompanionLines.lines(for: .chill, moment: .timeToLeave).contains("……我包背好了。"))
     }
 }
