@@ -7,6 +7,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
+- In boxing, HAKU now and then slips left, slips right and ducks. Tapping him in boxing makes him duck, throw a
+  left hook that stops at his chest and say 「……反射。」 instead of punching at the screen.
 
 ### Changed
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the

@@ -12,6 +12,8 @@ enum WatchPoke: Sendable, Equatable, CaseIterable {
     case clink
     /// A punch toward the screen.
     case punch
+    /// Ducking under the poke, then a left hook that stops short at the chest.
+    case duckHook
     /// The mask flashes `</>`.
     case codeFlash
     /// Rolling over and sleeping on.
@@ -37,7 +39,7 @@ enum WatchPoke: Sendable, Equatable, CaseIterable {
         switch mode {
         case .work: return .headsetUp
         case .chill: return .clink
-        case .boxing: return .punch
+        case .boxing: return .duckHook
         case .money: return .codeFlash
         }
     }
@@ -48,6 +50,7 @@ enum WatchPoke: Sendable, Equatable, CaseIterable {
         case .glare: "……干嘛。"
         case .headsetUp: "在上班。"
         case .clink: "叮。"
+        case .duckHook: "……反射。"
         case .punch, .codeFlash, .rollOver: nil
         }
     }
@@ -86,11 +89,32 @@ extension RunnerPose {
             gloveR = CGSize(width: -26 * out, height: -28 * out)
             gloveRScale = 1 + 1.3 * out
             lean += 4 * Double(out)
+        case .duckHook:
+            duckHook(p)
         case .codeFlash:
             ledFlare = max(ledFlare, out)
         case .rollOver:
             break
         }
+    }
+}
+
+extension RunnerPose {
+    // 身份卡第 3 轮 B2, Mike approved 2026-10-14. 动态: a tap needs an answer. Done by 1.4 s of the 1.6 s poke.
+    /// The duck and the short left hook at `p` (0...1): eyes wide, down 7, the hook stops at the chest, then guard
+    /// with the eyes looking off.
+    fileprivate mutating func duckHook(_ p: CGFloat) {
+        let s = p * WatchPoke.duration
+        if s < 0.15 { blink = 1 }
+        let duck = Self.ramp(s, from: 0.1, to: 0.3) * (1 - Self.ramp(s, from: 0.35, to: 0.55))
+        bounce += 7 * duck
+        let hook = Self.ramp(s, from: 0.4, to: 0.6)
+        let reach = Self.ramp(s, from: 0.6, to: 0.75)
+        let home = 1 - Self.ramp(s, from: 0.95, to: 1.2)
+        gloveL.width += (12 + 10 * reach) * hook * home
+        gloveL.height += (-8 + 2 * reach) * hook * home
+        gloveLScale = 1 + (0.12 + 0.03 * reach) * hook * home
+        eyesDx -= 4 * Self.ramp(s, from: 0.95, to: 1.1) * (1 - Self.ramp(s, from: 1.4, to: 1.6))
     }
 }
 

@@ -1106,13 +1106,19 @@ public struct CompanionView: View {
             moment: shownMoment
         )
         let candidates = lines.filter { $0 != bubble }
-        say((candidates.isEmpty ? lines : candidates).randomElement())
         // Taps during a one-off animation only get HAKU's reaction.
         let time = Date.now.timeIntervalSinceReferenceDate
-        guard celebration(at: time) == nil, taskDone(at: time) == nil, !stillOneOff(at: time) else { return }
+        let plays = celebration(at: time) == nil && taskDone(at: time) == nil && !stillOneOff(at: time)
         // The same body move as a poke on the watch (Mike 2026-10-07: one action library for phone and watch).
-        if let mode {
-            pokeKind = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on, busy: isBusy(life))
+        var poke: WatchPoke?
+        if plays, let mode {
+            poke = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on, busy: isBusy(life))
+        }
+        // The boxing duck and hook ends on its own line (身份卡第 3 轮 B2).
+        say(poke == .duckHook ? poke?.line : (candidates.isEmpty ? lines : candidates).randomElement())
+        guard plays else { return }
+        if let poke {
+            pokeKind = poke
             pokeStart = .now
         }
         onTap?()
