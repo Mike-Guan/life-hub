@@ -1236,6 +1236,7 @@ public struct CompanionView: View {
     }
 
     private func say(_ text: String?, for seconds: Double = 2.4, after delay: Double = 0) {
+        let text = text?.localized(for: .haku)
         bubbleTask?.cancel()
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = delay > 0 ? nil : text }
         guard text != nil else { return }

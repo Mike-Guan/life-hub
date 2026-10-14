@@ -445,15 +445,17 @@ public enum NeedEngine {
     ///   - taskSoon: whether a Daily task starts within `DailyAgenda.inviteLead`.
     ///   - persona: whose voice the text is in.
     public static func inviteText(for need: CompanionNeed, taskSoon: Bool = false, persona: Persona = .haku) -> String {
-        switch need {
-        case .boxingWarmup where persona == .kuro: "……走吗。网球包拎好了。"
-        case .couchScroll where taskSoon: "等下还有事，先起来收拾？"
-        case .couchScroll: "去健身房，或者下楼走走？"
-        case .boxingWarmup: "拳套戴好了，出发去拳馆？"
-        case .gymDay: "包背好了，走？"
-        case .slacking: "嘘，我帮你望风。"
-        case .sitting: "我先起来了。……你呢？"
-        }
+        let text: String =
+            switch need {
+            case .boxingWarmup where persona == .kuro: "……走吗。网球包拎好了。"
+            case .couchScroll where taskSoon: "等下还有事，先起来收拾？"
+            case .couchScroll: "去健身房，或者下楼走走？"
+            case .boxingWarmup: "拳套戴好了，出发去拳馆？"
+            case .gymDay: "包背好了，走？"
+            case .slacking: "嘘，我帮你望风。"
+            case .sitting: "我先起来了。……你呢？"
+            }
+        return text.localized(for: persona)
     }
 
     /// The newest workout worth celebrating that hasn't been, or `nil`.
