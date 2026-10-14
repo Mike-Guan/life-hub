@@ -1216,10 +1216,11 @@ public struct CompanionView: View {
         say(reaction.line(for: mode))
     }
 
+    // A card look has no gloves for the boxing poke, so it glares until the card gets a poke of its own.
     /// Whether HAKU acts out something other than the plain mode, given its idle `life`.
     private func isBusy(_ life: IdleLife?) -> Bool {
         shownNeed != nil || activity != nil || shownMoment != nil || life != nil || daily != nil || walking != nil
-            || bath || invite != nil
+            || bath || invite != nil || (mode == .boxing && RunnerCardLook(card: card) != nil)
     }
 
     private func startInvite() {
