@@ -96,8 +96,8 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var stillFor: TimeInterval
     /// How long couch scrolling lasts after the last Screen Time report.
     public var scrollQuiet: TimeInterval
-    /// Boxing day as a `Calendar` weekday (1 is Sunday).
-    public var boxingWeekday: Int
+    /// The identity card's day as a `Calendar` weekday (1 is Sunday), `nil` until one is learned.
+    public var boxingWeekday: Int?
     /// When boxing warm-up starts on boxing day.
     public var boxingWarmupStartMinute: Int
     /// When boxing warm-up gives up on boxing day.
@@ -137,14 +137,15 @@ public struct NeedRules: Codable, Equatable, Sendable {
     /// Whose lines the needs and invites use.
     public var persona: Persona
 
-    // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses.
-    /// Couch after 19:00 and 60 still minutes, or until 20 min after the last Screen Time report; boxing Sunday
-    /// 9:00 to 12:00 with class at 10:00; invites after 60 / 30 min.
+    // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses. PM 2026-10-13
+    // (写死作息排查 v0 #7): no identity day until one is learned; the warm-up times move with it.
+    /// Couch after 19:00 and 60 still minutes, or until 20 min after the last Screen Time report; no identity
+    /// day; invites after 60 / 30 min.
     public static let standard = NeedRules(
         eveningStartMinute: 19 * 60,
         stillFor: 60 * 60,
         scrollQuiet: 20 * 60,
-        boxingWeekday: 1,
+        boxingWeekday: nil,
         boxingWarmupStartMinute: 9 * 60,
         boxingWarmupEndMinute: 12 * 60,
         boxingFirstUntilMinute: 10 * 60 + 30,
@@ -178,7 +179,7 @@ public struct NeedRules: Codable, Equatable, Sendable {
         eveningStartMinute: Int,
         stillFor: TimeInterval,
         scrollQuiet: TimeInterval,
-        boxingWeekday: Int,
+        boxingWeekday: Int?,
         boxingWarmupStartMinute: Int,
         boxingWarmupEndMinute: Int,
         boxingFirstUntilMinute: Int,

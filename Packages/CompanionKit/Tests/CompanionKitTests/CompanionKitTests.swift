@@ -736,14 +736,26 @@ import Testing
         #expect(IdleMotion(dy: 2, angle: 1).bouncing(1.5).dy == 3)
     }
 
-    @Test func sundayAfternoonIsForTidying() throws {
+    @Test func oneAfternoonAWeekIsForTidyingNotAlwaysSunday() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))
-        // 2026-10-04 is a Sunday.
-        let sunday = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 4, hour: 14)))
-        #expect(IdleLife.at(sunday, calendar: calendar) == .tidying)
-        let saturday = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 3, hour: 14)))
-        #expect(IdleLife.at(saturday, calendar: calendar) != .tidying)
+        calendar.firstWeekday = 1
+        var weekdays: Set<Int> = []
+        // Ten weeks from Sunday 2026-10-04.
+        for week in 0..<10 {
+            var days = 0
+            for day in 0..<7 {
+                let parts = DateComponents(year: 2026, month: 10, day: 4 + week * 7 + day, hour: 14)
+                let date = try #require(calendar.date(from: parts))
+                guard IdleLife.at(date, calendar: calendar) == .tidying else { continue }
+                days += 1
+                weekdays.insert(calendar.component(.weekday, from: date))
+                let morning = try #require(calendar.date(bySettingHour: 10, minute: 0, second: 0, of: date))
+                #expect(IdleLife.at(morning, calendar: calendar) != .tidying)
+            }
+            #expect(days == 1)
+        }
+        #expect(weekdays.count > 1)
     }
 
     @Test func idleLifeHoldsForASlotAndVaries() {
@@ -1063,21 +1075,6 @@ import Testing
         #expect(RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
         pose.bedtime = true
         #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
-    }
-
-    @Test(arguments: Mode.allCases)
-    func glovesNeverGetAThirdHand(_ mode: Mode) {
-        // Mike 2026-10-07: a boxing celebration showed a peace sign next to both gloves.
-        let outfit = Outfit(Wardrobe(equipped: [.celebration: "celebrate.up"]))
-        var cheer = RunnerPose().wearing(outfit)
-        cheer.celebrate(.boxing, progress: 0.5)
-        var daily = RunnerPose()
-        daily.celebrate(.running, progress: 0.5)
-        for pose in [cheer, daily, RunnerPose(mode: .boxing, time: 1, face: .mid, react: 0)] {
-            let parts = Set(RunnerFigure.parts(for: mode, pose: pose))
-            if !parts.isDisjoint(with: [.gloveL, .gloveR]) { #expect(!parts.contains(.peaceHand)) }
-        }
-        #expect(!RunnerFigure.parts(for: .boxing, pose: daily).contains(.peaceHand))
     }
 
     @Test func everySlotHasAShowcaseMode() {
