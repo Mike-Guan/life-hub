@@ -122,6 +122,8 @@ struct LifeHubApp: App {
                 ScreenshotMemory(filled: filled)
             } else if let shows = ScreenshotMode.settings {
                 ScreenshotSettings(asksErase: shows == "erase")
+            } else if let screen = ScreenshotMode.growth {
+                ScreenshotGrowth(screen: screen)
             } else {
                 home
             }
