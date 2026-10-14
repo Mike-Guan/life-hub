@@ -388,29 +388,29 @@ import Testing
 
     @Test func clothesAreWornOnePerModeAndASetReplacesTheTop() throws {
         var wardrobe = Wardrobe()
-        let collar = try #require(ShopItem.item("haku.top.work.collar"))
-        let rain = try #require(ShopItem.item("haku.set.work.rain"))
-        let plaid = try #require(ShopItem.item("haku.top.chill.plaid"))
-        wardrobe.equip(collar)
-        wardrobe.equip(plaid)
-        #expect(wardrobe.clothes == [.work: collar.id, .chill: plaid.id])
+        let blazer = try #require(ShopItem.item("haku.top.work.blazer"))
+        let raincoat = try #require(ShopItem.item("haku.set.work.raincoat"))
+        let aloha = try #require(ShopItem.item("haku.top.chill.aloha"))
+        wardrobe.equip(blazer)
+        wardrobe.equip(aloha)
+        #expect(wardrobe.clothes == [.work: blazer.id, .chill: aloha.id])
         #expect(wardrobe.equipped.isEmpty)
-        wardrobe.equip(rain)
-        #expect(wardrobe.clothes == [.work: rain.id, .chill: plaid.id])
+        wardrobe.equip(raincoat)
+        #expect(wardrobe.clothes == [.work: raincoat.id, .chill: aloha.id])
         wardrobe.undress(.work)
-        #expect(wardrobe.clothes == [.chill: plaid.id])
+        #expect(wardrobe.clothes == [.chill: aloha.id])
     }
 
     @Test func wardrobesKeepTheirClothesAndOldOnesLoad() throws {
-        let worn = Wardrobe(equipped: [.gloves: "gloves.gold"], clothes: [.chill: "haku.top.chill.plaid"])
+        let worn = Wardrobe(equipped: [.gloves: "gloves.gold"], clothes: [.chill: "haku.top.chill.aloha"])
         let data = try JSONEncoder().encode(worn)
         #expect(try JSONDecoder().decode(Wardrobe.self, from: data) == worn)
         let json = try #require(String(data: data, encoding: .utf8))
-        #expect(json.contains(#""chill":"haku.top.chill.plaid""#))
+        #expect(json.contains(#""chill":"haku.top.chill.aloha""#))
         let old = Data(#"{"equipped":{"gloves":"gloves.gold"}}"#.utf8)
         #expect(try JSONDecoder().decode(Wardrobe.self, from: old) == Wardrobe(equipped: [.gloves: "gloves.gold"]))
-        let future = Data(#"{"equipped":{},"clothes":{"dance":"x","work":"haku.top.work.knit"}}"#.utf8)
-        #expect(try JSONDecoder().decode(Wardrobe.self, from: future).clothes == [.work: "haku.top.work.knit"])
+        let future = Data(#"{"equipped":{},"clothes":{"dance":"x","work":"haku.top.work.cardigan"}}"#.utf8)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: future).clothes == [.work: "haku.top.work.cardigan"])
     }
 
     // Prices from the shop catalogue (Mike 2026-10-13): tops 40-60, full sets 120-150.
