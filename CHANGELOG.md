@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - HAKU can wear six Sunday items: an orange or a mint headband, a dotted or a lightning-bolt mask, and a small
   cactus or a mini speaker in the room. The speaker's light ring glows every 3 seconds. The shop lists them once
   their catalog entries are marked drawn. The watch leaves room items out, since they stand on the floor.
+- Shop clothes art for the second preset character: eight pop tops and sets, two identity-card tops and six
+  base outfits, each with matching sleeves, in their own layer file. Nothing in the app shows them yet.
 - Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
   hand left out) or the iPhone's own count. Days you didn't open the app count too, up to a week back. Steps
   are never shown and never leave the iPhone.
@@ -17,6 +19,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
+- The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
+  gym, say the app never records your route, and say only the computed state goes to your own Apple Watch.
+  They now also come in Japanese and English, following the phone's language. The 「日文和英文」 switch
+  can't reach these system prompts.
 - The off-work card's default name is now 「下班」, so the watch no longer cuts it to 「下班 Chi」. Names you
   already changed stay as they are.
 - 27 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
