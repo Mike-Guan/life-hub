@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - A tired HAKU now shows it in every mode: off work he keeps smiling with half-open eyes and bags, at work and
   on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
   full night stay brighter and clear the headset.
+- On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
+  ponytail (unbox page and home card). The watch is unchanged.
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
   card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
   The second character's flower is now called 地上小粉花.
@@ -21,6 +23,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Daylight and going to bed on time now earn their can: 15 minutes in daylight (Apple Watch) earns 1 a day,
   and falling asleep within 30 minutes of the bedtime set in Settings earns 1 a night. Life Hub asks once
   for time in daylight in Health. Only the win is kept, never the daylight or sleep times.
+- On the smallest watch, a long mode name in the clock row shrinks to fit instead of running into the clock.
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
 - With no mode yet, the watch tells you to pick one on the iPhone, in smaller type, instead of the iPhone's line.

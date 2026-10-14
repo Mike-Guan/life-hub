@@ -110,20 +110,22 @@ struct WardrobeView: View {
     }
 
     private var header: some View {
+        // A full-screen cover closes with "完成" at the top right, not a back arrow.
         HStack(spacing: 8) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(Toy.body(20, weight: .heavy))
-                    .frame(width: 44, height: 44)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("返回")
             Text("衣柜")
                 .font(Toy.display(26))
             Spacer()
             CanChip(count: ledger.balance)
+            Button {
+                dismiss()
+            } label: {
+                Text("完成")
+                    .font(Toy.body(17, weight: .black))
+                    .foregroundStyle(Toy.ink)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         }
     }
 
