@@ -435,8 +435,9 @@ struct HomeView: View {
     private func codingCans(at date: Date) -> Int { inputs.codingCans(at: date) }
 
     // In 副业 a tap switches the state. It is manual, so it earns nothing and holds automatic switches.
+    // With only one state picked there is nothing to switch to, so the tap gets the usual reaction.
     private var tapAction: (() -> Void)? {
-        guard store.sideHustle != nil else { return nil }
+        guard let state = store.sideHustle, shownCards.next(after: state) != state else { return nil }
         return {
             withAnimation(.easeInOut(duration: 0.2)) {
                 _ = store.cycleSideHustle(cards: shownCards)
