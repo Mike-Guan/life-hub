@@ -57,6 +57,16 @@ import Testing
         #expect(store.sideHustle == .writing)
     }
 
+    @Test func oneStateRecordsNothing() {
+        let store = ModeStore(fileURL: nil, deviceID: "t")
+        var cards = ModeCards()
+        cards.pickSideStates([.writing])
+        store.switchTo(.money, tag: cards.sideStates[0].rawValue, at: at)
+        #expect(!store.cycleSideHustle(cards: cards, at: at + hour))
+        #expect(store.sideHustle == .writing)
+        #expect(store.log.active.count == 1)
+    }
+
     @Test func quickTapsCorrectEachOther() {
         let store = ModeStore(fileURL: nil, deviceID: "t")
         store.switchTo(.money, at: at)
