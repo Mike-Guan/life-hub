@@ -16,6 +16,8 @@ struct SettingsView: View {
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
+    /// The user's cards, for the place names and actions.
+    let cards: ModeCards
     /// Deletes every record and setting on this iPhone, as on a fresh install.
     let onEraseAll: () -> Void
     /// Starts at the bottom of the page, with the 删除全部数据 confirmation open when `true`. For screenshots only.
@@ -355,15 +357,15 @@ struct SettingsView: View {
                 .disabled(!places.canAdd)
                 .accessibilityLabel("添加地点")
             }
-            ForEach(HubPlace.Kind.presets, id: \.self) { kind in
+            ForEach(HubPlace.Kind.presets(with: cards), id: \.self) { kind in
                 let place = places[kind]
-                placeRow(title: kind.title(for: persona), detail: place == nil ? "没设" : "已设") {
+                placeRow(title: kind.title(for: persona, cards: cards), detail: place == nil ? "没设" : "已设") {
                     let blank = HubPlace(kind: kind, latitude: 0, longitude: 0)
                     editing = PlaceEdit(place: place ?? blank, isNew: place == nil)
                 }
             }
             ForEach(places.custom) { place in
-                placeRow(title: place.title, detail: place.action.title(for: persona)) {
+                placeRow(title: place.title, detail: place.action.title(for: persona, cards: cards)) {
                     editing = PlaceEdit(place: place, isNew: false)
                 }
             }
@@ -379,6 +381,7 @@ struct SettingsView: View {
                 hasLocation: !edit.isNew,
                 monitor: monitor,
                 persona: persona,
+                cards: cards,
                 onSave: { places.save($0) },
                 onDelete: edit.isNew ? nil : { places.remove(id: edit.place.id) }
             )
