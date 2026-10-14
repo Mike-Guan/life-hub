@@ -78,15 +78,17 @@ struct WatchStatusView: View {
 
     // PM spec (Issue #160): one line, the mode and how long it has run.
     @ViewBuilder private var modeAndTime: some View {
-        if let mode = entry.mode, let since = entry.payload?.snapshot.since {
-            Text("\(mode.title(for: persona)) · \(Text(since, style: .relative))")
+        if let title, let since = entry.payload?.snapshot.since {
+            Text("\(title) · \(Text(since, style: .relative))")
         } else {
             Text(title ?? "打开 iPhone")
         }
     }
 
-    private var persona: Persona { entry.payload?.persona ?? .haku }
-    private var title: String? { entry.mode?.title(for: persona) }
+    private var title: String? {
+        guard let payload = entry.payload, let mode = entry.mode else { return nil }
+        return payload.title(for: mode)
+    }
 
     // A tinted face keeps only each pixel's alpha, so the filled figure would read as one flat blob.
     // There the outlines become the opaque part and light fills fade, like a line drawing in the face's tint.

@@ -46,8 +46,23 @@ extension ModeRules {
 
     // Mike 2026-10-05 set 17:30 for his 18:30 end; PM 2026-10-13 (写死作息排查 v0 #4) made it an hour
     // before the end of work hours, so it moves with them.
-    /// From this minute after midnight, leaving the office ends work: an hour before work ends.
-    public var offWorkFromMinute: Int { workEndMinute - 60 }
+    /// From this minute after midnight, leaving the office ends work: an hour before work ends, or any time
+    /// for irregular work.
+    public var offWorkFromMinute: Int { isIrregular ? 0 : workEndMinute - 60 }
+
+    // PM 2026-10-13 (写死作息排查 v0 #3): someone without fixed work days picks 不固定. Then nothing follows
+    // work hours: no morning scenes, off-work notice, office states or work-hours Screen Time watch, and the
+    // evening follows the bedtime.
+    /// Whether the user has no fixed work days.
+    public var isIrregular: Bool { workdays.isEmpty }
+
+    /// When the working day is over for the evening states, in minutes after midnight: the end of work
+    /// hours, or 5 hours before bedtime for irregular work. Irregular work with no bedtime set never ends,
+    /// so there are no evening states.
+    public func dayEndMinute(bedtime: BedtimeSchedule) -> Int {
+        guard isIrregular else { return workEndMinute }
+        return bedtime.isSet ? (bedtime.startMinute - 5 * 60 + 24 * 60) % (24 * 60) : 24 * 60
+    }
 
     // Mike, 2026-10-05: only when he is really at work, so a day off or working elsewhere gets no notice.
     /// When today's off-work notice goes out, or `nil` when it shouldn't: not a work day, already past,
@@ -146,14 +161,18 @@ public enum ModeEngine {
         log: ModeLog,
         now: Date,
         rules: ModeRules = .standard,
+        cards: ModeCards = .legacy(for: .haku),
+        persona: Persona = .haku,
         calendar: Calendar = .current
     ) -> ModeDecision? {
         let changes = log.active.filter { $0.at <= now }
+        // 卡片标语与代码 v0 §3: reasons name the user's cards and the identity card's place.
+        let gym = HubPlace.Kind.gym.title(for: persona, cards: cards)
         let current = changes.last
         switch trigger {
         case .enteredGym:
             guard current?.mode != .boxing else { return nil }
-            return ModeDecision(mode: .boxing, source: .location, reason: "到拳馆了")
+            return ModeDecision(mode: .boxing, source: .location, reason: "到\(gym)了")
 
         case .leftGym:
             // Only undo our own switch: the gym entry must still be the latest change.
@@ -163,7 +182,8 @@ public enum ModeEngine {
             let previous = changes.dropLast().last
             let before = previous.map { $0.source.isManual ? $0.mode : .chill } ?? .chill
             guard before != .boxing else { return nil }
-            return ModeDecision(mode: before, source: .location, reason: "离开拳馆，回到「\(before.title)」")
+            let reason = "离开\(gym)，回到「\(cards.title(for: before, persona: persona))」"
+            return ModeDecision(mode: before, source: .location, reason: reason)
 
         case .enteredOffice:
             guard !isHeld(changes, now: now, rules: rules), current?.mode != .work else { return nil }
