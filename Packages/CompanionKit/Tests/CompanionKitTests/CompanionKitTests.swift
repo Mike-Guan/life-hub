@@ -189,6 +189,17 @@ import Testing
         #expect(!RunnerFigure.parts(for: .work, pose: end).contains(.headset))
     }
 
+    // HAKU-18 (UI 审核 2026-10-13): over 10 s of the notification the headset shows in one stretch, at the start.
+    @Test func theNotificationTakesTheHeadsetOffOnce() {
+        let shown = stride(from: 0.0, through: 10, by: 0.1).map {
+            RunnerFigure.parts(for: .work, pose: CompanionView.notificationBedtime(time: 100 + $0, start: 100))
+                .contains(.headset)
+        }
+        #expect(shown.first == true)
+        let changes = zip(shown, shown.dropFirst()).filter { $0 != $1 }.count
+        #expect(changes == 1)
+    }
+
     @Test func onlyTheHomeVersionLiesDown() {
         let home = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: true)
         let notification = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: false)
@@ -196,6 +207,8 @@ import Testing
         #expect(RunnerFigure.parts(for: .chill, pose: home).contains(.pillow))
         #expect(notification.lie == 0)
         #expect(!RunnerFigure.parts(for: .chill, pose: notification).contains(.pillow))
+        #expect(home.zzz >= 0)
+        #expect(notification.zzz == -1)
     }
 
     @Test func sleepyLoopYawns() {
