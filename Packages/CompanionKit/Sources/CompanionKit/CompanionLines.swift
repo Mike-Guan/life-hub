@@ -31,7 +31,7 @@ enum CompanionLines {
         if let life { return lines(for: life) }
         return switch mode {
         case .work: ["又上班。", "人类为什么发明周一。", "……在听。"]
-        case .chill: ["回来了？", "饭呢。", "第二罐不许开。"]
+        case .chill: ["回来了？", "饭呢。", "第二罐……我忍住了。"]
         case .boxing: ["来，左右直拳。", "今天把沙袋打哭。", "头带系紧了吗？"]
         case .money: ["别吵，在弄。", "再一点点。", "……"]
         case nil: ["先选一个 mode 吧。"]
@@ -42,7 +42,7 @@ enum CompanionLines {
         switch activity {
         case .boxingAtGym: ["左、左、右。", "……别看我，看沙袋。", "今天的沙袋有点欠揍。"]
         case .gymSession: ["再来一组。……你先。", "哑铃比我想的重。"]
-        case .running: ["呼……别跟我说话。", "腿是你的，我只是陪跑。"]
+        case .running: ["呼……说不了话。", "腿是你的，我只是陪跑。"]
         case .gymDay: ["包我都背好了。你随意啊。", "健身房今天也开着。……我只是说说。"]
         case .runDay: ["鞋带我系好了。你的呢？", "今天是跑步日。……我先热个身。"]
         }
@@ -50,7 +50,7 @@ enum CompanionLines {
 
     private static func lines(for moment: CompanionMoment) -> [String] {
         switch moment {
-        case .slacking: ["老板在看。我也在看。", "嘘。"]
+        case .slacking: ["……我也在摸鱼。", "嘘。"]
         case .drowsy: ["来一罐？", "眼皮有点重……"]
         case .overtime: ["灵魂已经下班了。", "……我只是趴一下。"]
         case .gymInvite: ["去不去？我包都背好了。", "门就在这。……我只是说说。"]
@@ -63,8 +63,8 @@ enum CompanionLines {
         case .collapsed: ["你也活着回来了啊。", "……先让我趴五分钟。"]
         case .blanket: ["今天就这样吧。", "毯子分你一半。"]
         case .morning: ["又要上班了。", "耳机……耳机去哪了。"]
-        case .timeToLeave: ["……该出门了吧。", "唉。"]
-        case .stiff: ["……我腰要断了。", "起来。我先起了。", "ちょっと休憩。"]
+        case .timeToLeave: ["……我包背好了。", "唉。"]
+        case .stiff: ["……我腰要断了。", "我先起来了。……你呢？", "ちょっと休憩。"]
         case .packingUp: ["快了。", "别催，在收。"]
         }
     }
@@ -92,7 +92,7 @@ enum CompanionLines {
         case .swimming: "耳朵进水了。……不过不错。"
         case .martialArts: "……我也想踢两脚。"
         case .racket: "那一拍……还行吧。"
-        case .ball: "球呢？……算了，赢了就行。"
+        case .ball: "球呢？……算了，打完就行。"
         case .yoga: "……骨头咔了一声。舒服。"
         case .dance: "我没跳。……我没跳。"
         case .outdoor: "风好大。……景还行。"

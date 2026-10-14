@@ -20,6 +20,8 @@ public enum Win: String, Codable, CaseIterable, Sendable {
     case plannedTask
     /// Any other watch workout of 30 minutes or more.
     case exercise
+    /// 6,000 steps or more in a day.
+    case steps
 
     /// Cans this win earns.
     public var cans: Int {
@@ -27,7 +29,7 @@ public enum Win: String, Codable, CaseIterable, Sendable {
         case .boxing, .run5k: 5
         case .gym, .exercise: 3
         case .gotUp: 2
-        case .daylight, .earlySleep, .plannedTask: 1
+        case .daylight, .earlySleep, .plannedTask, .steps: 1
         }
     }
 }
@@ -383,6 +385,35 @@ public enum Slot: String, Codable, CodingKeyRepresentable, CaseIterable, Sendabl
     case fullSet = "set"
 }
 
+// 商店完整目录 v0 §8 and §9.1: the wardrobe groups items by where they are worn, not by slot.
+/// A group of items in the wardrobe.
+public enum WardrobeShelf: String, CaseIterable, Sendable {
+    /// Tops and full sets, worn per mode.
+    case clothes
+    /// Worn in every mode: headbands, masks, celebrations.
+    case accessories
+    /// The picked identity card's own items.
+    case props
+    case room
+
+    /// The shelves the wardrobe shows while previewing `mode`: props only in the identity card's mode, with a card picked.
+    public static func shelves(in mode: Mode, card: IdentityKind?) -> [WardrobeShelf] {
+        allCases.filter { $0 != .props || (card != nil && mode == .boxing) }
+    }
+}
+
+extension Slot {
+    /// The wardrobe shelf the slot's items sit on.
+    public var shelf: WardrobeShelf {
+        switch self {
+        case .top, .fullSet: .clothes
+        case .headband, .mask, .celebration: .accessories
+        case .gloves: .props
+        case .room: .room
+        }
+    }
+}
+
 /// Something a character can own: bought in the shop, or granted as a keepsake.
 public struct ShopItem: Identifiable, Equatable, Sendable {
     /// A milestone that grants an item for free.
@@ -521,6 +552,13 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         self.card == nil || self.card == card
     }
 
+    // The identity card lives in the boxing mode slot (ModeCards), so its props show only there.
+    /// Whether the wardrobe lists it while previewing `mode` with `card` picked.
+    public func shows(in mode: Mode, card: IdentityKind?) -> Bool {
+        guard suits(card), WardrobeShelf.shelves(in: mode, card: card).contains(slot.shelf) else { return false }
+        return self.mode == nil || self.mode == mode
+    }
+
     /// The catalog item with `id`.
     public static func item(_ id: String) -> ShopItem? {
         catalog.first { $0.id == id }
@@ -548,6 +586,11 @@ public struct Wardrobe: Codable, Equatable, Sendable {
         self.clothes = clothes
     }
 
+    // DW-02: slots and modes from a newer build are kept as they are and written back, so an older build
+    // never drops what a newer one put on.
+    var otherSlots: [String: String] = [:]
+    var otherModes: [String: String] = [:]
+
     // Clothes are keyed by the mode's raw value, so the JSON stays an object. Wardrobes saved before clothes load
     // with none, and older builds skip the field.
     enum CodingKeys: String, CodingKey {
@@ -557,17 +600,21 @@ public struct Wardrobe: Codable, Equatable, Sendable {
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        equipped = try container.decode([Slot: String].self, forKey: .equipped)
-        let byName = try container.decodeIfPresent([String: String].self, forKey: .clothes) ?? [:]
-        clothes = Dictionary(
-            uniqueKeysWithValues: byName.compactMap { key, id in Mode(rawValue: key).map { ($0, id) } })
+        let slots = try container.decode([String: String].self, forKey: .equipped)
+        equipped = Dictionary(
+            uniqueKeysWithValues: slots.compactMap { key, id in Slot(rawValue: key).map { ($0, id) } })
+        otherSlots = slots.filter { Slot(rawValue: $0.key) == nil }
+        let modes = try container.decodeIfPresent([String: String].self, forKey: .clothes) ?? [:]
+        clothes = Dictionary(uniqueKeysWithValues: modes.compactMap { key, id in Mode(rawValue: key).map { ($0, id) } })
+        otherModes = modes.filter { Mode(rawValue: $0.key) == nil }
     }
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(equipped, forKey: .equipped)
         try container.encode(
-            Dictionary(uniqueKeysWithValues: clothes.map { ($0.key.rawValue, $0.value) }), forKey: .clothes)
+            otherSlots.merging(equipped.map { ($0.key.rawValue, $0.value) }) { $1 }, forKey: .equipped)
+        try container.encode(
+            otherModes.merging(clothes.map { ($0.key.rawValue, $0.value) }) { $1 }, forKey: .clothes)
     }
 
     /// Wears `item`: clothes in their mode, replacing that mode's top or set, anything else in its slot.
@@ -587,6 +634,20 @@ public struct Wardrobe: Codable, Equatable, Sendable {
     /// Takes off the top or set worn in `mode`.
     public mutating func undress(_ mode: Mode) {
         clothes[mode] = nil
+    }
+
+    /// Whether `item` is worn: clothes in their mode, anything else in its slot.
+    public func isWearing(_ item: ShopItem) -> Bool {
+        if let mode = item.mode { return clothes[mode] == item.id }
+        return equipped[item.slot] == item.id
+    }
+
+    // A switched-away card's items stay stored, so switching back puts them on again. Ids this build
+    // doesn't know stay, as in the rest of the wardrobe.
+    /// What is drawn with `card` picked: the wardrobe without items that belong to another card.
+    public func showing(card: IdentityKind?) -> Wardrobe {
+        func shows(_ id: String) -> Bool { ShopItem.item(id)?.suits(card) ?? true }
+        return Wardrobe(equipped: equipped.filter { shows($0.value) }, clothes: clothes.filter { shows($0.value) })
     }
 
     // HAKU keeps the original key, so wardrobes saved before KURO had one still load.
