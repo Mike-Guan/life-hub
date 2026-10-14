@@ -336,7 +336,7 @@ struct RunnerPose {
     /// Where the can is drawn: its pose plus the watch lift.
     var canShown: CGSize {
         let lift = propLift * (1 - pokeOut(.clink))
-        return CGSize(width: canOffset.width + 2 * lift, height: canOffset.height - 22 * lift)
+        return CGSize(width: canOffset.width + 10 * lift, height: canOffset.height - 22 * lift)
     }
 
     /// How far a watch poke of `kind` is reaching out, 0...1; 0 when another one or none is playing.
