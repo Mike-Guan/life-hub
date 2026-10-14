@@ -202,7 +202,7 @@ struct SettingsView: View {
                     .font(Toy.body(13, weight: .heavy))
                     .frame(minHeight: 44)
             }
-            Text("学到的习惯、长期记得的事和做过的判断。都只在这台 iPhone 上。")
+            Text("学到的规律、长期记得的事和做过的判断。都只在这台 iPhone 上。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
         }

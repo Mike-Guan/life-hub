@@ -91,7 +91,7 @@ struct MemoryView: View {
 
             // PM 2026-10-13: only what was really learned, so the section waits until something is.
             if !habits.isEmpty {
-                section("学到的习惯") {
+                section("学到的规律") {
                     ForEach(habits, id: \.habit) { habit in
                         HStack(spacing: 10) {
                             VStack(alignment: .leading, spacing: 2) {

@@ -9,9 +9,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 
 ### Changed
-- 24 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
+- 27 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
-  「到你定的睡觉时间了」.
+  「到你定的睡觉时间了」. The memory page and settings say 「学到的规律」 instead of 「学到的习惯」.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder

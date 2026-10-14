@@ -31,7 +31,7 @@ enum CompanionLines {
         if let life { return lines(for: life) }
         return switch mode {
         case .work: ["又上班。", "人类为什么发明周一。", "……在听。"]
-        case .chill: ["回来了？", "饭呢。", "第二罐不许开。"]
+        case .chill: ["回来了？", "饭呢。", "第二罐……我忍住了。"]
         case .boxing: ["来，左右直拳。", "今天把沙袋打哭。", "头带系紧了吗？"]
         case .money: ["别吵，在弄。", "再一点点。", "……"]
         case nil: ["先选一个 mode 吧。"]
@@ -92,7 +92,7 @@ enum CompanionLines {
         case .swimming: "耳朵进水了。……不过不错。"
         case .martialArts: "……我也想踢两脚。"
         case .racket: "那一拍……还行吧。"
-        case .ball: "球呢？……算了，赢了就行。"
+        case .ball: "球呢？……算了，打完就行。"
         case .yoga: "……骨头咔了一声。舒服。"
         case .dance: "我没跳。……我没跳。"
         case .outdoor: "风好大。……景还行。"
