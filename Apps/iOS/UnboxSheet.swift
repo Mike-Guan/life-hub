@@ -8,6 +8,8 @@ struct UnboxSheet: View {
     let item: ShopItem
     @Binding var wardrobe: Wardrobe
     let persona: Persona
+    /// Opens scrolled to the buttons. Only screenshots set it.
+    var startsAtBottom = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -16,6 +18,7 @@ struct UnboxSheet: View {
             content
         }
         .scrollBounceBehavior(.basedOnSize)
+        .defaultScrollAnchor(startsAtBottom ? .bottom : nil)
         .foregroundStyle(Toy.paper)
         .background(Toy.ink.ignoresSafeArea())
         .onAppear { UnboxLog.markSeen(entry) }
