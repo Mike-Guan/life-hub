@@ -411,11 +411,11 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     // headbands, her blanket is the mask slot, her tennis bag and racket are the gloves slot.
     /// Everything either character can own.
     public static let catalog: [ShopItem] = [
-        ShopItem(id: "headband.cyan", slot: .headband, title: "青色头带", price: 15),
-        ShopItem(id: "mask.stripes", slot: .mask, title: "条纹面罩", price: 20),
-        ShopItem(id: "gloves.pink", slot: .gloves, title: "霓虹粉拳套", price: 30, card: .boxing),
-        ShopItem(id: "room.plant", slot: .room, title: "房间绿植", price: 10),
-        ShopItem(id: "room.bag", slot: .room, title: "房间小沙袋", price: 25, card: .boxing),
+        ShopItem(id: "headband.cyan", slot: .headband, title: "青色头带", price: 10),
+        ShopItem(id: "mask.stripes", slot: .mask, title: "条纹面罩", price: 12),
+        ShopItem(id: "gloves.pink", slot: .gloves, title: "霓虹粉拳套", price: 20, card: .boxing),
+        ShopItem(id: "room.plant", slot: .room, title: "房间绿植", price: 8),
+        ShopItem(id: "room.bag", slot: .room, title: "房间小沙袋", price: 15, card: .boxing),
         ShopItem(
             id: "gloves.gold",
             slot: .gloves,
@@ -429,15 +429,15 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             keepsake: Keepsake(win: .run5k, count: 4)
         ),
         ShopItem(id: "celebrate.up", slot: .celebration, title: "起身庆祝", keepsake: Keepsake(win: .gotUp, count: 1)),
-        ShopItem(id: "kuro.room.flower", slot: .room, title: "地上小粉花", price: 10, persona: .kuro),
-        ShopItem(id: "kuro.hair.scrunchie", slot: .headband, title: "粉色发圈", price: 15, persona: .kuro),
-        ShopItem(id: "kuro.blanket.cats", slot: .mask, title: "粉色猫猫毯", price: 20, persona: .kuro),
-        ShopItem(id: "kuro.room.lamp", slot: .room, title: "猫耳台灯", price: 25, persona: .kuro),
+        ShopItem(id: "kuro.room.flower", slot: .room, title: "地上小粉花", price: 8, persona: .kuro),
+        ShopItem(id: "kuro.hair.scrunchie", slot: .headband, title: "粉色发圈", price: 10, persona: .kuro),
+        ShopItem(id: "kuro.blanket.cats", slot: .mask, title: "粉色猫猫毯", price: 12, persona: .kuro),
+        ShopItem(id: "kuro.room.lamp", slot: .room, title: "猫耳台灯", price: 15, persona: .kuro),
         ShopItem(
             id: "kuro.bag.tennis",
             slot: .gloves,
             title: "粉色网球包",
-            price: 30,
+            price: 20,
             persona: .kuro,
             card: .tennis
         ),
