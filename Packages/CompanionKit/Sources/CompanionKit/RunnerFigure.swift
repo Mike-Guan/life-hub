@@ -996,7 +996,8 @@ struct RunnerPose {
         let loopYawn = g >= 1 && phase < 1.2 ? CGFloat(sin(phase / 1.2 * .pi)) : 0
         pose.yawn = max(bump(g, from: 0.3, to: 0.65), loopYawn)
         pose.lie = liesDown ? ramp(g, from: 0.65, to: 0.9) : 0
-        pose.zzz = g >= 0.9 ? CGFloat(time.truncatingRemainder(dividingBy: 3) / 3) : -1
+        // UI 审核 2026-10-13: sitting up, the rising Z z z ran over the hair tips, so it shows only lying down.
+        pose.zzz = liesDown && g >= 0.9 ? CGFloat(time.truncatingRemainder(dividingBy: 3) / 3) : -1
         // Slow, heavy blinks; eyes squeeze shut in a yawn.
         pose.blink = max(0.15, (1 - 0.7 * pose.yawn) * blink(at: time * 0.5))
         pose.headDy = 1.5 * (1 - pose.lie) + 1.5 * pose.yawn
