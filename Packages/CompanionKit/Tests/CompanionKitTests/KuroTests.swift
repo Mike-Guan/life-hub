@@ -46,6 +46,15 @@ import Testing
         #expect(watch.isDisjoint(with: [.deskPen, .workStylus, .workBadge]))
     }
 
+    @Test func theWatchLeavesOutWhatSitsOnTheFloorOrHerLap() {
+        for (look, item) in [(KuroLook.chill, KuroItem.flower), (.desk, .lamp), (.chill, .blanket)] {
+            var pose = KuroPose(look: look, energy: nil)
+            pose.items = [item]
+            #expect(KuroFigure.parts(for: look, pose: pose).contains(item.part))
+            #expect(!KuroFigure.parts(for: look, pose: pose, watch: true).contains(item.part))
+        }
+    }
+
     @Test func theMaskHidesHerMouthAtWork() {
         let work = Set(KuroFigure.parts(for: .work, pose: KuroPose(look: .work, energy: nil)))
         #expect(work.isDisjoint(with: [.mouthCat, .mouthFlat, .mouthSmile, .mouthO]))
