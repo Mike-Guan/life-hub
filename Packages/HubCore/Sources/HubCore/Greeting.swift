@@ -25,11 +25,12 @@ public enum Greeting {
         defaults.string(forKey: nameKey)
     }
 
+    // Only HAKU's greeting showed the name; the second preset character's install never did.
     /// On the first launch of this build, saves the name the greeting used to show for an install that
-    /// already has records. Later launches change nothing.
-    public static func adopt(in defaults: UserDefaults, existingInstall: Bool) {
+    /// already has records with `persona`. Later launches change nothing.
+    public static func adopt(in defaults: UserDefaults, persona: Persona, existingInstall: Bool) {
         guard !defaults.bool(forKey: adoptedKey) else { return }
         defaults.set(true, forKey: adoptedKey)
-        if existingInstall { defaults.set(legacyName, forKey: nameKey) }
+        if existingInstall, persona == .haku { defaults.set(legacyName, forKey: nameKey) }
     }
 }

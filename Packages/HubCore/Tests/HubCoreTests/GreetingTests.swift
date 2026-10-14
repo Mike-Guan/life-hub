@@ -15,10 +15,10 @@ import Testing
         let suite = "GreetingTests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        Greeting.adopt(in: defaults, existingInstall: false)
+        Greeting.adopt(in: defaults, persona: .haku, existingInstall: false)
         #expect(Greeting.name(in: defaults) == nil)
         // Records saved later don't bring the old name back.
-        Greeting.adopt(in: defaults, existingInstall: true)
+        Greeting.adopt(in: defaults, persona: .haku, existingInstall: true)
         #expect(Greeting.name(in: defaults) == nil)
     }
 
@@ -26,10 +26,28 @@ import Testing
         let suite = "GreetingTests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        Greeting.adopt(in: defaults, existingInstall: true)
+        Greeting.adopt(in: defaults, persona: .haku, existingInstall: true)
         #expect(Greeting.name(in: defaults) == Greeting.legacyName)
         defaults.removeObject(forKey: Greeting.nameKey)
-        Greeting.adopt(in: defaults, existingInstall: true)
+        Greeting.adopt(in: defaults, persona: .haku, existingInstall: true)
         #expect(Greeting.name(in: defaults) == nil)
+    }
+
+    @Test func theSecondCharactersInstallGetsNoName() throws {
+        let suite = "GreetingTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        Greeting.adopt(in: defaults, persona: .kuro, existingInstall: true)
+        #expect(Greeting.name(in: defaults) == nil)
+    }
+
+    @Test func eraseClearsTheName() throws {
+        let suite = "GreetingTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        Greeting.adopt(in: defaults, persona: .haku, existingInstall: true)
+        HubDevice.eraseDefaults(defaults)
+        #expect(Greeting.name(in: defaults) == nil)
+        #expect(!defaults.bool(forKey: Greeting.adoptedKey))
     }
 }

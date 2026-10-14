@@ -51,8 +51,8 @@ struct LifeHubApp: App {
             errors.append("小组件连不上共享文件夹（App Group），它们会一直是空的")
         }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
-        Greeting.adopt(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty)
         let persona = Persona.stored(in: AppGroup.defaults)
+        Greeting.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
         ModeCards.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
         _cards = State(initialValue: ModeCards.current(in: AppGroup.defaults, persona: persona))
         let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
