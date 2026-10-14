@@ -95,15 +95,14 @@ public enum Memory {
                 isLearned: !learned.gymWeekdays.isEmpty
             )
         ]
-        if persona == .kuro {
-            let identity = ledger.since(resets.since(.identityDay))
-            let learned = NeedRules.learnedWeekday(of: .boxing, in: identity, now: now, calendar: calendar)
+        let identity = ledger.since(resets.since(.identityDay))
+        if let learned = NeedRules.learnedWeekday(of: .boxing, in: identity, now: now, calendar: calendar) {
             list.append(
                 LearnedHabit(
                     habit: .identityDay,
                     title: Mode.boxing.title(for: persona),
-                    days: weekdays([learned ?? NeedRules.tennisWeekday]),
-                    isLearned: learned != nil
+                    days: weekdays([learned]),
+                    isLearned: true
                 )
             )
         }

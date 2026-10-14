@@ -8,6 +8,8 @@ struct UnboxSheet: View {
     let item: ShopItem
     @Binding var wardrobe: Wardrobe
     let persona: Persona
+    /// Opens scrolled to the buttons. Only screenshots set it.
+    var startsAtBottom = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -16,6 +18,7 @@ struct UnboxSheet: View {
             content
         }
         .scrollBounceBehavior(.basedOnSize)
+        .defaultScrollAnchor(startsAtBottom ? .bottom : nil)
         .foregroundStyle(Toy.paper)
         .background(Toy.ink.ignoresSafeArea())
         .onAppear { UnboxLog.markSeen(entry) }
@@ -56,7 +59,9 @@ struct UnboxSheet: View {
                     )
                 }
             }
-            .frame(height: 380)
+            // UI 审核 R1: on small phones, at any text size, both buttons stay on the first screen,
+            // so the stage gives up height.
+            .containerRelativeFrame(.vertical) { [chrome] height, _ in min(380, max(240, height - chrome)) }
             .toyCard()
 
             Button {
@@ -82,6 +87,10 @@ struct UnboxSheet: View {
         .padding(.top, 32)
         .padding(.bottom, 16)
     }
+
+    // Grows with the text size, so large type still leaves both buttons on the first screen.
+    /// Height of everything on the sheet but the stage.
+    @ScaledMetric(relativeTo: .body) private var chrome: CGFloat = 360
 
     private var wearing: Wardrobe {
         var copy = wardrobe

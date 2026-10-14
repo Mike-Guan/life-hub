@@ -4,6 +4,26 @@ import Testing
 @testable import HubCore
 
 @Suite struct HakuLinesTests {
+    @Test func linesFollowThePickedCard() {
+        let swim = ModeCards(identity: .swimming)
+        #expect(HakuLines.pool(.boxing, persona: .haku, cards: swim) == IdentityKind.swimming.lines(for: .haku))
+        #expect(HakuLines.pool(.boxingWarmup, persona: .kuro, cards: swim).first == "……毛巾带了吗。")
+        // The character's own card keeps her lines.
+        let own = HakuLines.pool(.boxing, persona: .haku, cards: .legacy(for: .haku))
+        #expect(own == HakuLines.pool(.boxing, persona: .haku, cards: nil))
+        #expect(HakuLines.pool(.couchScroll, persona: .kuro, cards: .legacy(for: .kuro)).contains("网球包在门口。"))
+        #expect(!HakuLines.pool(.couchScroll, persona: .kuro, cards: swim).contains("网球包在门口。"))
+    }
+
+    @Test func noSportsBagForUsersWithoutSport() {
+        let still = ModeCards(identity: .study, chill: [.walking, .shopping])
+        #expect(!still.isSporty && ModeCards().isSporty && ModeCards(identity: .boxing, chill: []).isSporty)
+        let haku = HakuLines.pool(.couchScroll, persona: .haku, cards: still)
+        #expect(!haku.contains("运动包在看你。") && haku.contains("……我也躺会儿。"))
+        let kuro = HakuLines.pool(.couchScroll, persona: .kuro, cards: still)
+        #expect(!kuro.contains("门口那个包，在看你。") && kuro.count >= 7)
+    }
+
     let calendar: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "Asia/Tokyo") ?? .gmt

@@ -7,6 +7,8 @@ import SwiftUI
 /// `-screenshot-wearing <ids>` dresses her in shop items, given as comma-separated ids.
 /// `-screenshot-memory <full|empty>` shows the memory page instead (iOS), `-screenshot-ask <name>` with a confirmation.
 /// `-screenshot-settings <card|erase>` shows the bottom of Settings (iOS).
+/// `-screenshot-growth <shop|wardrobe|unbox|unbox-bottom>` shows that screen with made-up cans and items (iOS).
+/// `-screenshot-identity <card|none>` gives those screens that identity card, or none; the character's own by default.
 enum ScreenshotMode {
     static var mode: Mode? {
         value(after: "-screenshot-mode").flatMap(Mode.init(rawValue:))
@@ -27,8 +29,19 @@ enum ScreenshotMode {
         value(after: "-screenshot-settings")
     }
 
+    /// The shop, wardrobe or keepsake unboxing to show: `shop`, `wardrobe`, `unbox` or `unbox-bottom`.
+    static var growth: String? {
+        value(after: "-screenshot-growth")
+    }
+
+    /// The mode cards for the growth screens: `-screenshot-identity` picks the identity card, `none` for none.
+    static var cards: ModeCards {
+        guard let name = value(after: "-screenshot-identity") else { return .legacy(for: persona) }
+        return ModeCards(identity: IdentityKind(rawValue: name))
+    }
+
     /// Whether any screenshot is being drawn.
-    static var isOn: Bool { mode != nil || memory != nil || settings != nil }
+    static var isOn: Bool { mode != nil || memory != nil || settings != nil || growth != nil }
 
     static var persona: Persona {
         value(after: "-screenshot-persona").flatMap(Persona.init(rawValue:)) ?? .haku
