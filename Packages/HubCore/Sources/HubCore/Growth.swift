@@ -383,6 +383,35 @@ public enum Slot: String, Codable, CodingKeyRepresentable, CaseIterable, Sendabl
     case fullSet = "set"
 }
 
+// 商店完整目录 v0 §8 and §9.1: the wardrobe groups items by where they are worn, not by slot.
+/// A group of items in the wardrobe.
+public enum WardrobeShelf: String, CaseIterable, Sendable {
+    /// Tops and full sets, worn per mode.
+    case clothes
+    /// Worn in every mode: headbands, masks, celebrations.
+    case accessories
+    /// The picked identity card's own items.
+    case props
+    case room
+
+    /// The shelves the wardrobe shows while previewing `mode`: props only in the identity card's mode, with a card picked.
+    public static func shelves(in mode: Mode, card: IdentityKind?) -> [WardrobeShelf] {
+        allCases.filter { $0 != .props || (card != nil && mode == .boxing) }
+    }
+}
+
+extension Slot {
+    /// The wardrobe shelf the slot's items sit on.
+    public var shelf: WardrobeShelf {
+        switch self {
+        case .top, .fullSet: .clothes
+        case .headband, .mask, .celebration: .accessories
+        case .gloves: .props
+        case .room: .room
+        }
+    }
+}
+
 /// Something a character can own: bought in the shop, or granted as a keepsake.
 public struct ShopItem: Identifiable, Equatable, Sendable {
     /// A milestone that grants an item for free.
@@ -546,6 +575,13 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         self.card == nil || self.card == card
     }
 
+    // The identity card lives in the boxing mode slot (ModeCards), so its props show only there.
+    /// Whether the wardrobe lists it while previewing `mode` with `card` picked.
+    public func shows(in mode: Mode, card: IdentityKind?) -> Bool {
+        guard suits(card), WardrobeShelf.shelves(in: mode, card: card).contains(slot.shelf) else { return false }
+        return self.mode == nil || self.mode == mode
+    }
+
     /// The catalog item with `id`.
     public static func item(_ id: String) -> ShopItem? {
         catalog.first { $0.id == id }
@@ -638,6 +674,20 @@ public struct Wardrobe: Codable, Equatable, Sendable {
     /// Takes off the top or set worn in `mode`.
     public mutating func undress(_ mode: Mode) {
         clothes[mode] = nil
+    }
+
+    /// Whether `item` is worn: clothes in their mode, anything else in its slot.
+    public func isWearing(_ item: ShopItem) -> Bool {
+        if let mode = item.mode { return clothes[mode] == item.id }
+        return equipped[item.slot] == item.id
+    }
+
+    // A switched-away card's items stay stored, so switching back puts them on again. Ids this build
+    // doesn't know stay, as in the rest of the wardrobe.
+    /// What is drawn with `card` picked: the wardrobe without items that belong to another card.
+    public func showing(card: IdentityKind?) -> Wardrobe {
+        func shows(_ id: String) -> Bool { ShopItem.item(id)?.suits(card) ?? true }
+        return Wardrobe(equipped: equipped.filter { shows($0.value) }, clothes: clothes.filter { shows($0.value) })
     }
 
     // HAKU keeps the original key, so wardrobes saved before KURO had one still load.
