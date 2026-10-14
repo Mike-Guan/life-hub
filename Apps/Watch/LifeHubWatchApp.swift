@@ -71,8 +71,6 @@ struct WatchHomeView: View {
     private func companionPage(_ payload: WatchPayload, mode: Mode?, at date: Date) -> some View {
         let snapshot = payload.snapshot
         let scene = payload.scene(at: date)
-        // The white system clock is hard to read on several mode backgrounds, so the clock row is ink in all.
-        let clockBand = !Self.cleanFrame
         return Group {
             if payload.persona == .kuro {
                 KuroView(
@@ -113,21 +111,10 @@ struct WatchHomeView: View {
         }
         .clipped()
         .ignoresSafeArea()
-        .overlay {
-            if clockBand {
-                GeometryReader { geometry in
-                    Toy.ink
-                        .frame(height: geometry.safeAreaInsets.top)
-                        .offset(y: -geometry.safeAreaInsets.top)
-                }
-                .allowsHitTesting(false)
-            }
-        }
         // HAKU's no-mode drawing says this itself; KURO keeps her off-work look, so the watch says it.
         .overlay {
             if mode == nil && payload.persona == .kuro {
-                // Like the clock band, the pill moves into the bottom safe area (about 20pt), where it no
-                // longer covers her chin.
+                // The pill sits in the bottom safe area (about 20pt), where it does not cover her chin.
                 GeometryReader { geometry in
                     Text("在 iPhone 上选个模式")
                         .font(Toy.body(12, weight: .bold))
@@ -212,6 +199,7 @@ private struct WatchPager<First: View, Second: View>: View {
 /// The mode in a small white pill, "还没有模式" without one. How long it has run is on the second page.
 private struct ModeChip: View {
     // On the 40 mm watch "10:09" starts at about 67% of the width; 8 wide letters at full size reach past it.
+    // WatchChipFitTests checks this share and the font against the clock.
     /// The share of the screen width the chip may take, its leading inset included.
     static let widthShare: CGFloat = 0.64
 
