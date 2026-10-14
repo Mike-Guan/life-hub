@@ -30,10 +30,10 @@ public enum Mode: String, Codable, CaseIterable, Identifiable, Sendable {
 
     public var tagline: String {
         switch self {
-        case .work: "死人眼上线，耳机戴好"
-        case .chill: "面罩拉下，开一罐 Monster"
-        case .boxing: "头带系紧，今天打谁"
-        case .money: "</> 上线，罐子摆好"
+        case .work: "耳机戴上，开工"
+        case .chill: "开一罐能量饮料"
+        case .boxing: "头带系紧"
+        case .money: "自己的事，开工"
         }
     }
 }

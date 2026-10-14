@@ -33,9 +33,10 @@ enum ScrollWatch {
         ladder(prefix: "lifehub.scroll.", through: lastMinutes)
     }
 
-    /// The reports of the work-hours watch, up to the length of the work day.
+    /// The reports of the work-hours watch, up to the length of the work day; none for irregular work.
     static func workEvents(for work: ModeRules) -> [Int: DeviceActivityEvent.Name] {
-        ladder(prefix: slackPrefix, through: min(work.workEndMinute - work.workStartMinute, lastMinutes))
+        guard !work.isIrregular else { return [:] }
+        return ladder(prefix: slackPrefix, through: min(work.workEndMinute - work.workStartMinute, lastMinutes))
     }
 
     /// True for a report of the work-hours watch.
