@@ -11,8 +11,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
   chain when he hits it.
+- Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
+  the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
+  blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
+- The Screen Time watch (pick apps in settings) now works in TestFlight (STG) builds too, not only in
+  Debug. The App Store build still leaves it out.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
   turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
