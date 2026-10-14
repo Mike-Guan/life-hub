@@ -22,11 +22,12 @@ import Testing
         let parts = Set(KuroFigure.parts(for: look, pose: KuroPose(look: look, energy: nil)))
         let jackets: [KuroLook: KuroPart] = [
             .work: .jacketWork, .chill: .jacketChill, .tennis: .jacketTennis, .desk: .jacketDesk,
+            .box: .jacketBox, .fitness: .jacketTennis, .study: .jacketChill, .art: .jacketSmock,
         ]
         #expect(parts.intersection(Set(jackets.values)) == [jackets[look]!])
         #expect(parts.isSuperset(of: [.hairBack, .faceBase, .hairFringe, .catEars, .blush]))
         #expect(parts.contains(.maskWork) == (look == .work))
-        #expect(parts.contains(.tennisPonytail) == (look == .tennis))
+        #expect(parts.contains(.tennisPonytail) == [.tennis, .box, .fitness].contains(look))
         #expect(parts.contains(.deskGlasses) == (look == .desk))
         #expect(parts.contains(.chillCup) == (look == .chill))
     }

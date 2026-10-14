@@ -182,7 +182,8 @@ struct KuroFigure: View {
         visible.insert(pose.blinking ? .eyesClosed : part(pose.eyes))
         if !pose.tired { visible.insert(.blush) }
         if pose.overtime {
-            visible.subtract([.workTablet, .workStylus])
+            // Her chin rests on her hand, so whatever she held in front of her is put down.
+            visible.subtract([.workTablet, .workStylus, .gymBlock, .studyNotebook])
             visible.formUnion([.overtimeDesk, .overtimeHand])
             if pose.sign != nil { visible.insert(.overtimeSign) }
         }
