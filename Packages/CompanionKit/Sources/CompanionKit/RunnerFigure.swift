@@ -1301,9 +1301,9 @@ struct RunnerFigure: View {
         // Gloves fill both hands, so the peace sign never adds a third one (Mike 2026-10-07).
         if !visible.isDisjoint(with: [.gloveL, .gloveR]) { visible.remove(.peaceHand) }
         if pose.turnedAway {
-            // From the back, clothes show as the plain jacket.
+            // From the back, clothes show as the jacket in their base colour; the cap and a lowered hood stay.
             if !visible.isDisjoint(with: pose.outfit.clothes[mode] ?? []) { visible.insert(.jacket) }
-            visible = visible.intersection(backParts).union([.headBack])
+            visible = visible.intersection(backParts.union([.setVarsityCap, .setKawaiiHood])).union([.headBack])
         }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
@@ -1817,7 +1817,8 @@ struct RunnerFigure: View {
                     RunnerTextView(text: Self.dots)
                 }
             case .jacket:
-                RunnerPartView(part: part, fillOverride: Self.jacketColor(mode))
+                let back = pose.turnedAway ? pose.outfit.clothesBack[mode] : nil
+                RunnerPartView(part: part, fillOverride: back ?? Self.jacketColor(mode))
             case .gymBag:
                 // Lifted from the floor by the door onto the left shoulder.
                 RunnerPartView(part: part)
