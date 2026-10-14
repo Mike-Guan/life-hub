@@ -448,7 +448,7 @@ public struct KuroView: View {
                         look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget),
                         watch: style == .watch
                     )
-                        .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
+                    .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
                     if let unbox {
                         GiftBox(progress: unbox.box, fill: RunnerPalette.cardboard, ribbon: KuroPalette.pink)
                     }
