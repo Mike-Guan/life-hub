@@ -19,8 +19,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
-- Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
-  The cheer hop is lower, so the hair stays inside the card.
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
   over the hair while sitting up. After the off-work
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
@@ -36,6 +34,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
   names two apps and says only this iPhone knows how long you scrolled.
+- Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
+  The cheer hop is lower, so the hair stays inside the card.
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
   room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
   back puts them on again. The wardrobe screen moves to these groups in a separate change.
