@@ -8,6 +8,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
   and her identity card. Nothing shows it yet; the keepsake page and share cards will. Wins filled in from
   an earlier day keep no look, because the wardrobe has no history.
+- The second preset character dresses for the dance, music and ski cards, each with its own idle move: she sways
+  by a small speaker as notes float up, taps along a score she holds, or pats snow off her shoulder in ski goggles
+  and sneezes. The cards stay out of the picker until HAKU's looks are in too.
 - Shop clothes art for the second preset character: eight pop tops and sets, two identity-card tops and six
   base outfits, each with matching sleeves, in their own layer file. Nothing in the app shows them yet.
 - Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
@@ -19,6 +22,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
+- In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
+  over the hair while sitting up. After the off-work
+  animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
 - Today's energy has its own line under the character, saying where it comes from. When it is a guess from
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
 - The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
@@ -34,6 +40,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
   room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
   back puts them on again. The wardrobe screen moves to these groups in a separate change.
+- The wardrobe screen picks a mode first, then shows four tabs: clothes, accessories, props (only in the identity
+  card's mode) and room. Celebrations are the last group of accessories. Keepsakes not yet earned no longer show.
 - The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
   hustle); a full set replaces that mode's top. They go on sale once the character art draws them.
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
