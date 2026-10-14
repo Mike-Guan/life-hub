@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character dresses for the dance, music and ski cards, each with its own idle move: she sways
+  by a small speaker as notes float up, taps along a score she holds, or pats snow off her shoulder in ski goggles
+  and sneezes. The cards stay out of the picker until HAKU's looks are in too.
 - Shop clothes art for the second preset character: eight pop tops and sets, two identity-card tops and six
   base outfits, each with matching sleeves, in their own layer file. Nothing in the app shows them yet.
 - Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by

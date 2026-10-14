@@ -21,6 +21,13 @@ public enum KuroLook: String, CaseIterable, Sendable {
     case study
     /// Art card: a yellow smock, her tablet and a drawing pen.
     case art
+    // Deferred identity cards (顺延身份卡 预览, UI 审核 round 2 passed 2026-10-14).
+    /// Dance card: her sportswear and a small speaker on the floor.
+    case dance
+    /// Music card: her lilac top and a score she holds at her chest.
+    case music
+    /// Ski card: her sportswear and ski goggles up on her forehead.
+    case ski
 
     // The only place the mode-to-outfit mapping lives, like `Mode.riveValue`.
     /// The look for `mode`: the identity card slot dresses her for `card`, or as her tennis day without one or
@@ -40,6 +47,9 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .fitness: .fitness
         case .study: .study
         case .art: .art
+        case .dance: .dance
+        case .music: .music
+        case .ski: .ski
         default: .tennis
         }
     }
@@ -56,6 +66,9 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .fitness: Color(hex: 0xFFC2D6)
         case .study: Color(hex: 0x9FD3FF)
         case .art: Color(hex: 0xFFC9A8)
+        case .dance: Color(hex: 0xC9B8FF)
+        case .music: Color(hex: 0xF2E8FF)
+        case .ski: Color(hex: 0xE6E9EF)
         }
     }
 
@@ -67,6 +80,9 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .fitness: .fitness
         case .study: .study
         case .art: .art
+        case .dance: .dance
+        case .music: .music
+        case .ski: .ski
         }
     }
 
@@ -75,7 +91,7 @@ public enum KuroLook: String, CaseIterable, Sendable {
         switch self {
         case .work: .work
         case .chill: .chill
-        case .tennis, .box, .fitness, .study, .art: .boxing
+        case .tennis, .box, .fitness, .study, .art, .dance, .music, .ski: .boxing
         case .desk: .money
         }
     }
@@ -165,11 +181,14 @@ struct KuroPose: Sendable {
 struct KuroFigure: View {
     let look: KuroLook
     let pose: KuroPose
+    /// Leaves off what stands on the floor, which the watch's bottom edge cuts.
+    var watch = false
 
     var body: some View {
         ZStack {
-            ForEach(Self.parts(for: look, pose: pose), id: \.self) { part in
+            ForEach(Self.parts(for: look, pose: pose, watch: watch), id: \.self) { part in
                 KuroPartView(part: part, shift: Self.offset(part, pose: pose), turn: Self.turn(part, pose: pose))
+                    .opacity(Self.opacity(part, pose: pose))
             }
             if pose.overtime, let sign = pose.sign {
                 RunnerTextView(text: RunnerText(string: sign, x: 60, y: -1, size: 9, color: KuroPalette.ink))
@@ -178,8 +197,8 @@ struct KuroFigure: View {
         .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
     }
 
-    /// Visible parts in back-to-front order.
-    nonisolated static func parts(for look: KuroLook, pose: KuroPose) -> [KuroPart] {
+    /// Visible parts in back-to-front order; `watch` leaves off what stands on the floor.
+    nonisolated static func parts(for look: KuroLook, pose: KuroPose, watch: Bool = false) -> [KuroPart] {
         var visible: Set<KuroPart> = [.hairBack, .earL, .earR, .faceBase, .hairFringe, .catEars]
         visible.formUnion(outfit(look))
         visible.insert(pose.blinking ? .eyesClosed : part(pose.eyes))
@@ -196,13 +215,13 @@ struct KuroFigure: View {
         }
         if pose.overtime {
             // Her chin rests on her hand, so whatever she held in front of her is put down.
-            visible.subtract([.workTablet, .workStylus, .gymBlock, .studyNotebook])
+            visible.subtract([.workTablet, .workStylus, .gymBlock, .studyNotebook, .scoreSheet, .scoreFinger])
             visible.formUnion([.overtimeDesk, .overtimeHand])
             if pose.sign != nil { visible.insert(.overtimeSign) }
         }
         if look != .work {
             let mouth: KuroPart =
-                pose.tired || pose.calm ? .mouthFlat : look == .tennis || look == .fitness ? .mouthSmile : .mouthCat
+                pose.tired || pose.calm ? .mouthFlat : Self.smiling.contains(look) ? .mouthSmile : .mouthCat
             visible.insert(pose.mouthO ? .mouthO : mouth)
         }
         for item in pose.items where item.look == look {
@@ -212,14 +231,17 @@ struct KuroFigure: View {
         pose.scene?.dress(look, items: pose.items, &visible)
         if let tap = pose.tap {
             apply(tap, progress: pose.tapProgress, to: &visible)
-            // The rubbing hand comes up on her arm, in her look's sleeve; in gloves the left one comes off.
+            // The rubbing hand comes up on her arm, in her look's sleeve; in gloves the left one comes off, and the
+            // finger on the score is that hand.
             if visible.contains(.tapRub) {
                 visible.insert(rubSleeve(look))
-                visible.remove(.boxGloveL)
+                visible.subtract([.boxGloveL, .scoreFinger])
             }
         }
         if pose.heart { visible.insert(.tapHeart) }
         if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
+        // UI 审核 2026-10-14 (位置规划图 §12): the watch draws nothing on the floor.
+        if watch { visible.remove(.danceSpeaker) }
         return KuroPart.allCases.filter { visible.contains($0) }
     }
 
@@ -228,6 +250,15 @@ struct KuroFigure: View {
         let moved = shift(part, pose: pose)
         let lift: CGFloat = pose.full && part == .catEars ? 3 : 0
         return CGSize(width: moved.width, height: moved.height - lift)
+    }
+
+    /// The looks in her sportswear, where she smiles.
+    nonisolated private static let smiling: Set<KuroLook> = [.tennis, .fitness, .dance, .ski]
+
+    /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out.
+    nonisolated static func opacity(_ part: KuroPart, pose: KuroPose) -> Double {
+        guard pose.tap == nil, let idle = pose.idle else { return 1 }
+        return idle.opacity(part, progress: pose.idleProgress)
     }
 
     /// The parts only `look` wears.
@@ -241,6 +272,9 @@ struct KuroFigure: View {
         case .fitness: [.tennisPonytail, .jacketTennis, .gymBlock]
         case .study: [.jacketChill, .studyNotebook, .studyHighlighter]
         case .art: [.jacketSmock, .workTablet, .craftPen]
+        case .dance: [.tennisPonytail, .jacketTennis, .danceSpeaker]
+        case .music: [.jacketChill, .scoreSheet, .scoreFinger]
+        case .ski: [.tennisPonytail, .jacketTennis, .skiGoggles]
         }
     }
 
@@ -248,10 +282,10 @@ struct KuroFigure: View {
         switch look {
         case .work: .tapRubSleeveWork
         case .chill: .tapRubSleeveChill
-        case .tennis, .fitness: .tapRubSleeveTennis
+        case .tennis, .fitness, .dance, .ski: .tapRubSleeveTennis
         case .desk: .tapRubSleeveDesk
         case .box: .tapRubSleeveBox
-        case .study: .tapRubSleeveChill
+        case .study, .music: .tapRubSleeveChill
         case .art: .tapRubSleeveSmock
         }
     }
@@ -516,8 +550,11 @@ public struct KuroView: View {
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
                 let fidget = busy ? nil : KuroIdle.at(idleTime, look: look)
                 ZStack {
-                    KuroFigure(look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget))
-                        .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
+                    KuroFigure(
+                        look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget),
+                        watch: style == .watch
+                    )
+                    .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
                     if let unbox {
                         GiftBox(progress: unbox.box, fill: RunnerPalette.cardboard, ribbon: KuroPalette.pink)
                     }
@@ -986,8 +1023,9 @@ public struct KuroView: View {
         }
     }
 
-    /// The idle loop for `look`: work breathes and shifts her weight, chill and fitness sway, tennis and boxing
-    /// hop, and at the desk, studying or drawing she nods slowly over the page.
+    /// The idle loop for `look`: work breathes and shifts her weight, chill, fitness and ski sway, tennis and
+    /// boxing hop, dancing she sways to the beat, and at the desk, studying, drawing or reading a score she nods
+    /// slowly over the page.
     nonisolated static func motion(_ look: KuroLook, time t: TimeInterval) -> IdleMotion {
         switch look {
         case .work: IdleMotion(dy: CGFloat(sin(t * 2 * .pi / 3.4)) * 1.5, angle: sin(t * 2 * .pi / 6.8))
@@ -995,7 +1033,11 @@ public struct KuroView: View {
         case .tennis, .box: IdleMotion(mode: .boxing, time: t)
         // Keeping someone company at the gym, she sways calmly instead of bouncing.
         case .fitness: IdleMotion(mode: .chill, time: t)
-        case .desk, .study, .art: IdleMotion(dy: 2 * IdleClock.nod(at: t, period: 1.6, seed: KuroIdle.seed), angle: 0)
+        case .desk, .study, .art, .music:
+            IdleMotion(dy: 2 * IdleClock.nod(at: t, period: 1.6, seed: KuroIdle.seed), angle: 0)
+        // Dancing, she sways about her feet once a second; on the slopes she sways calmly like at the gym.
+        case .dance: IdleMotion(dy: 0, angle: 2.6 * sin(t * 2 * .pi))
+        case .ski: IdleMotion(mode: .chill, time: t)
         }
     }
 
@@ -1022,6 +1064,9 @@ public struct KuroView: View {
         case .fitness: "KURO，抱着瑜伽砖"
         case .study: "KURO，拿着笔记本"
         case .art: "KURO，在平板上画画"
+        case .dance: "KURO，跟着音乐摆"
+        case .music: "KURO，捧着乐谱"
+        case .ski: "KURO，戴着雪镜"
         }
     }
 }
