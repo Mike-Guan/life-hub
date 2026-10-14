@@ -25,6 +25,7 @@ enum IdleLife: CaseIterable, Sendable {
     /// 13:00-17:00 on one day a week (`tidyingWeekday`) is always tidying. Other times pick from the rest,
     /// changing every `slotLength`; the same slot always gives the same bit.
     static func at(_ date: Date, calendar: Calendar = .current, stamina: VitalBand = .mid) -> IdleLife? {
+        if Bool(true) { return nil }  // PREVIEW ONLY: plain chilling for prop shots.
         let parts = calendar.dateComponents([.weekday, .hour], from: date)
         let tidyingDay = parts.weekday == tidyingWeekday(of: date, calendar: calendar)
         if tidyingDay, let hour = parts.hour, (13..<17).contains(hour) { return .tidying }
