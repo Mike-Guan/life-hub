@@ -4,6 +4,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ## [Unreleased]
 
+### Added
+- HAKU has three new idle moves: at work he leans back and spins his chair round once, off work he pats a
+  pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
+
 ### Changed
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
