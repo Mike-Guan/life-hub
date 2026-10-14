@@ -71,9 +71,6 @@ struct WatchHomeView: View {
     private func companionPage(_ payload: WatchPayload, mode: Mode?, at date: Date) -> some View {
         let snapshot = payload.snapshot
         let scene = payload.scene(at: date)
-        // UI 审核: the white system clock is hard to read on several mode colors, so the clock row is ink in
-        // every state, dimmed screen included. Promo stills keep only the character.
-        let clockBand = !Self.cleanFrame
         return Group {
             if payload.persona == .kuro {
                 KuroView(
@@ -114,21 +111,10 @@ struct WatchHomeView: View {
         }
         .clipped()
         .ignoresSafeArea()
-        .overlay {
-            if clockBand {
-                GeometryReader { geometry in
-                    Toy.ink
-                        .frame(height: geometry.safeAreaInsets.top)
-                        .offset(y: -geometry.safeAreaInsets.top)
-                }
-                .allowsHitTesting(false)
-            }
-        }
         // HAKU's no-mode drawing says this itself; KURO keeps her off-work look, so the watch says it.
         .overlay {
             if mode == nil && payload.persona == .kuro {
-                // Like the clock band, the pill moves into the bottom safe area (about 20pt), where it no
-                // longer covers her chin.
+                // The pill sits in the bottom safe area (about 20pt), where it does not cover her chin.
                 GeometryReader { geometry in
                     Text("在 iPhone 上选个模式")
                         .font(Toy.body(12, weight: .bold))
