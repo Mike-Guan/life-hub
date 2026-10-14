@@ -12,7 +12,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - 27 character lines no longer tell you what to do, mention money, or claim things the app can't sense.
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
-  names two apps.
+  names two apps and says only this iPhone knows how long you scrolled.
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
