@@ -1054,7 +1054,8 @@ import Testing
         var pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.work: "haku.set.work.raincoat"])))
         pose.turnedAway = true
         let back = Set(RunnerFigure.parts(for: .work, pose: pose))
-        #expect(back.isSuperset(of: [.jacket, .setKawaiiHood]) && back.isDisjoint(with: [.setKawaiiTop, .setDuckCharm]))
+        #expect(
+            back.isSuperset(of: [.jacket, .setKawaiiHood]) && back.isDisjoint(with: [.setKawaiiTop, .setDuckCharm]))
     }
 
     @Test func everyTopHasABackColour() {
