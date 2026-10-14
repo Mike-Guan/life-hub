@@ -157,10 +157,8 @@ struct SettingsView: View {
             #if DEBUG || ENV_STG
             scrollCard
             #endif
-            #if DEBUG || ENV_STG
-            languagesCard
-            #endif
             #if DEBUG
+            languagesCard
             dogfoodCard
             #endif
 
@@ -209,7 +207,7 @@ struct SettingsView: View {
                     .font(Toy.body(13, weight: .heavy))
                     .frame(minHeight: 44)
             }
-            Text("学到的习惯、长期记得的事和做过的判断。都只在这台 iPhone 上。")
+            Text("学到的规律、长期记得的事和做过的判断。都只在这台 iPhone 上。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
         }
@@ -272,7 +270,10 @@ struct SettingsView: View {
                 .font(Toy.body(13, weight: .heavy))
                 .frame(minHeight: 44)
             }
-            Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
+            Text("选你最容易刷停不下来的 App。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+            Text("用了多久只有这台 iPhone 知道，我们看不到。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             if let screenTimeError {
@@ -285,14 +286,15 @@ struct SettingsView: View {
         .onChange(of: scrollApps) { watchScrolling() }
     }
 
-    // Debug and STG only (Issue #350): Japanese and English stay off until every string is in and reviewed.
+    // Debug only (Issue #350): Japanese and English stay off until every string is in and reviewed. Not in STG,
+    // because friends get the same STG build through TestFlight.
     private var languagesCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Toggle(isOn: languagesBinding) {
                 Text("日文和英文")
                     .font(Toy.body(16, weight: .heavy))
             }
-            Text("打开后跟手机的系统语言走；还没翻译的地方仍是中文。关着时一律中文。只在测试版里有。")
+            Text("打开后跟手机的系统语言走；还没翻译的地方仍是中文。关着时一律中文。只在开发版里有。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
         }

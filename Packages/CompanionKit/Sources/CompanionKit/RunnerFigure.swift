@@ -1311,7 +1311,7 @@ struct RunnerFigure: View {
     /// Wardrobe items over the visible parts: striped masks and, at home, the room item.
     nonisolated private static func wear(_ pose: RunnerPose, mode: Mode, on visible: inout Set<RunnerPart>) {
         let outfit = pose.outfit
-        // A top or full set replaces the jacket, its stripe, collar and strings wherever the jacket shows.
+        // A top or full set replaces the jacket and what is on it wherever the jacket shows.
         if let clothes = outfit.clothes[mode], visible.contains(.jacket) {
             visible.subtract(jacketParts)
             visible.formUnion(clothes)
@@ -1607,7 +1607,10 @@ struct RunnerFigure: View {
         .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen, .ledCode,
     ]
     nonisolated private static let warmupParts: Set<RunnerPart> = [.headband, .gloveL, .gloveR]
-    nonisolated private static let jacketParts: Set<RunnerPart> = [.jacket, .stripeNeon, .hoodCollar, .hoodieStrings]
+    // 商店衣服 pop: no ¥ or gold chain on any of the clothes, so the 副业 chain and coin go with the jacket.
+    nonisolated private static let jacketParts: Set<RunnerPart> = [
+        .jacket, .stripeNeon, .hoodCollar, .hoodieStrings, .chainGold, .coin,
+    ]
     nonisolated private static let headgear: Set<RunnerPart> = [
         .headband, .headset, .cheerGoggles, .bathTowel, .cheerHelmet,
     ]
@@ -1852,7 +1855,8 @@ struct RunnerFigure: View {
                 // Two quick reps in a celebration, or the curl at the gym.
                 RunnerPartView(part: part).offset(y: -12 * pose.dumbbellRise * scale)
             case .heavyBag:
-                RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 12, y: -6))
+                // Mike 2026-10-14 (G): the big bag hangs top left behind the hair and swings from its chain.
+                RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 17.5, y: -8))
             case .pillowHug:
                 let move = pose.hugPillow ?? .zero
                 RunnerPartView(part: part)

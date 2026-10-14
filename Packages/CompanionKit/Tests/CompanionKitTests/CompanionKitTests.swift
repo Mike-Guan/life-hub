@@ -1049,6 +1049,12 @@ import Testing
         #expect(back.contains(.jacket) && !back.contains(.setVarsityTop) && !back.contains(.setVarsityCap))
     }
 
+    @Test func sideHustleClothesDropTheChainAndCoin() {
+        let pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.money: "haku.top.side.arcade"])))
+        let parts = Set(RunnerFigure.parts(for: .money, pose: pose))
+        #expect(parts.contains(.topSideArcade) && parts.isDisjoint(with: [.chainGold, .coin, .jacket]))
+    }
+
     @Test func capGivesWayToHeadgear() {
         let varsity = Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"]))
         var pose = RunnerPose(need: .boxingWarmup).wearing(varsity)
@@ -1289,6 +1295,6 @@ import Testing
         #expect(brushing.contains(.toothbrush))
         let leaving = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(moment: .timeToLeave)))
         #expect(leaving.isSuperset(of: [.headset, .door, .watchWrist, .tapHand]))
-        #expect(CompanionLines.lines(for: .chill, moment: .timeToLeave).contains("……该出门了吧。"))
+        #expect(CompanionLines.lines(for: .chill, moment: .timeToLeave).contains("……我包背好了。"))
     }
 }
