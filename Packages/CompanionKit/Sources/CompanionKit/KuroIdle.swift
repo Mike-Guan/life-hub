@@ -156,13 +156,15 @@ enum KuroIdle: CaseIterable, Sendable {
         case .tuck:
             if t < 0.6 { visible.insert(.idleStrand) }
             if (0.2..<1.1).contains(t) { visible.insert(.idleTuckHand) }
-            if t > 0.3 { Self.swapEyes(&visible, to: .eyesDown) }
+            if (0.3..<1.1).contains(t) { Self.swapEyes(&visible, to: .eyesDown) }
         case .frame:
             if (0.15..<1.75).contains(t) { visible.insert(.idleFrameHands) }
             if (0.45..<1.45).contains(t) { Self.swapEyes(&visible, to: .eyesWink) }
         case .collar:
-            if (0.1..<1.4).contains(t) { visible.insert(.idleCollarHands) }
-            Self.swapEyes(&visible, to: .eyesDown)
+            if (0.1..<1.4).contains(t) {
+                visible.insert(.idleCollarHands)
+                Self.swapEyes(&visible, to: .eyesDown)
+            }
         case .phone:
             if (0.1..<2.3).contains(t) { visible.insert(.idlePhone) }
             if (0.35..<2).contains(t) { Self.swapEyes(&visible, to: .eyesDown) }
