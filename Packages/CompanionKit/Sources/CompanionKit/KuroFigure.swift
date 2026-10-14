@@ -956,7 +956,7 @@ public struct KuroView: View {
 
     private func say(_ text: String?, for seconds: Double = 2.4) {
         bubbleTask?.cancel()
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text?.localized(for: .kuro) }
         guard text != nil else { return }
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(seconds))
