@@ -32,7 +32,8 @@ import Testing
         #expect(parts.contains(.chillCup) == (look == .chill))
     }
 
-    @Test(arguments: KuroLook.allCases)
+    // The identity-card looks from #320 keep their own props on the watch for now.
+    @Test(arguments: [KuroLook.work, .chill, .tennis, .desk])
     func onTheWatchSheHoldsHerPropHigher(_ look: KuroLook) {
         let pose = KuroPose(look: look, energy: nil)
         let phone = Set(KuroFigure.parts(for: look, pose: pose))
