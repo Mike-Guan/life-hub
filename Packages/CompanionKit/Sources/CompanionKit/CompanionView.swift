@@ -306,7 +306,7 @@ public struct CompanionView: View {
                     RunnerFigure(
                         mode: mode,
                         pose: glance(
-                            pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe)).leaving(traces)
+                            pose(mode, life: life, time: time, react: react).wearing(wardrobeOutfit).leaving(traces)
                         )
                     )
                     .saturation(vitals.saturation)
@@ -430,6 +430,14 @@ public struct CompanionView: View {
 
     /// Seconds between animation frames: fewer on the watch.
     private var frameInterval: Double { style == .watch ? 1 / 15 : 1 / 30 }
+
+    // 位置规划图 §12 (UI 审核 2026-10-14): the watch's bottom edge would leave only a scrap of a floor item.
+    /// What HAKU wears; the watch leaves out the room item, which stands on the floor.
+    private var wardrobeOutfit: Outfit {
+        var outfit = Outfit(wardrobe)
+        if style == .watch { outfit.room = nil }
+        return outfit
+    }
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
         if pokeKind == .rollOver, let progress = poke(at: time) {

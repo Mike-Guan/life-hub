@@ -1022,7 +1022,7 @@ import Testing
         let outfit = Outfit(wardrobe)
         #expect(outfit.gloves == RunnerPalette.gold)
         #expect(outfit.headband == RunnerPalette.white)
-        #expect(outfit.stripedMask)
+        #expect(outfit.mask == .stripes)
         #expect(outfit.room == .roomBag)
     }
 
@@ -1046,6 +1046,42 @@ import Testing
         #expect(work.contains(.maskStripes))
         #expect(!work.contains(.panelLines))
         #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).contains(.maskStripesDown))
+    }
+
+    @Test func sundayItemsChangeTheLook() {
+        let worn: [Slot: String] = [
+            .headband: "haku.weekly.headband.mint", .mask: "haku.weekly.mask.dots", .room: "haku.weekly.room.speaker",
+        ]
+        let outfit = Outfit(Wardrobe(equipped: worn))
+        #expect(outfit.headband == RunnerPalette.mint)
+        #expect(outfit.mask == .dots)
+        #expect(outfit.room == .roomSpeaker)
+        let orange = Outfit(Wardrobe(equipped: [.headband: "haku.weekly.headband.orange"]))
+        #expect(orange.headband == RunnerPalette.catOrange)
+        #expect(Outfit(Wardrobe(equipped: [.mask: "haku.weekly.mask.bolt"])).mask == .bolt)
+        #expect(Outfit(Wardrobe(equipped: [.room: "haku.weekly.room.cactus"])).room == .roomCactus)
+    }
+
+    @Test(arguments: [MaskPrint.dots, .bolt])
+    func printsGoOnTopOfThePanelLines(_ print: MaskPrint) {
+        var outfit = Outfit()
+        outfit.mask = print
+        let pose = RunnerPose().wearing(outfit)
+        let work = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(work.isSuperset(of: [print.up, .panelLines]))
+        let chill = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(chill.contains(print.down) && !chill.contains(print.up))
+    }
+
+    @Test func theSpeakerRingGlowsEveryThreeSeconds() {
+        var outfit = Outfit()
+        outfit.room = .roomSpeaker
+        let pose = RunnerPose().wearing(outfit)
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).isSuperset(of: [.roomSpeaker, .roomSpeakerRing]))
+        let glow = { (t: TimeInterval) in RunnerPose(mode: .chill, time: t, face: .mid, react: 0).speakerGlow }
+        #expect(abs(glow(0) - 0.45) < 0.01)
+        #expect(abs(glow(1.5) - 1) < 0.01)
+        #expect(abs(glow(3) - 0.45) < 0.01)
     }
 
     @Test func roomItemShowsOnlyAtHome() {

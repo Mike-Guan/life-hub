@@ -71,6 +71,8 @@ enum Placement {
         .maskUp: Spot(.maskFace, "面罩"),
         .panelLines: Spot(.maskFace, "面罩"),
         .maskStripes: Spot(.maskFace, "面罩"),
+        .maskDots: Spot(.maskFace, "面罩"),
+        .maskBolt: Spot(.maskFace, "面罩"),
         .ledLine: Spot(.maskFace, "面罩"),
         .ledYen: Spot(.maskFace, "面罩"),
         .ledCode: Spot(.maskFace, "面罩"),
@@ -89,6 +91,8 @@ enum Placement {
         .roomPc: Spot(.earSideL, "roomPc"),
         .maskDown: Spot(.neck, "面罩"),
         .maskStripesDown: Spot(.neck, "面罩"),
+        .maskDotsDown: Spot(.neck, "面罩"),
+        .maskBoltDown: Spot(.neck, "面罩"),
         .hoodCollar: Spot(.neck, "帽兜"),
         .hoodieStrings: Spot(.neck, "帽兜"),
         .jacket: Spot(.torso, "外套"),
@@ -159,6 +163,9 @@ enum Placement {
         .pillowHug: Spot(.handsFront, "抱枕"),
         .roomPlant: Spot(.corner1, "roomPlant"),
         .roomBag: Spot(.corner1, "roomBag"),
+        .roomCactus: Spot(.corner1, "roomCactus"),
+        .roomSpeaker: Spot(.corner1, "roomSpeaker"),
+        .roomSpeakerRing: Spot(.corner1, "roomSpeaker"),
         .heavyBag: Spot(.window, "heavyBag"),
         .toteBag: Spot(.corner1, "toteBag"),
         .gymBag: Spot(.corner1, "gymBag"),
@@ -332,7 +339,7 @@ enum Placement {
             (.bandage, .mic), (.peaceHand, .mic), (.rubHand, .roomPc), (.bathBubbles, .roomPc), (.scratchHand, .roomPc),
         ]
         + cornerTakers.flatMap { taker in
-            [RunnerPart.roomPlant, .roomBag, .heavyBag, .runningShoes].map { (taker, $0) }
+            [RunnerPart.roomPlant, .roomBag, .roomCactus, .roomSpeaker, .heavyBag, .runningShoes].map { (taker, $0) }
         }
 
     // §9.4: her blanket on the lap never comes with a book or a hot drink in hand. The cup at rest stands in front of

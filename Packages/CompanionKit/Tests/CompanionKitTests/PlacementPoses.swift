@@ -26,14 +26,14 @@ enum PlacementPoses {
     /// Every wardrobe look HAKU can wear, with a label.
     static var outfits: [(String, Outfit)] {
         var outfits: [(String, Outfit)] = []
-        for room: RunnerPart? in [nil, .roomPlant, .roomBag] {
-            for striped in [false, true] {
+        for room: RunnerPart? in [nil, .roomPlant, .roomBag, .roomCactus, .roomSpeaker] {
+            for mask: MaskPrint? in [nil, .stripes, .dots, .bolt] {
                 for peace in [false, true] {
                     var outfit = Outfit()
                     outfit.room = room
-                    outfit.stripedMask = striped
+                    outfit.mask = mask
                     outfit.peaceSign = peace
-                    let label = [room?.rawValue, striped ? "stripes" : nil, peace ? "peace" : nil]
+                    let label = [room?.rawValue, mask.map { "\($0)" }, peace ? "peace" : nil]
                         .compactMap(\.self).joined(separator: "+")
                     outfits.append((label.isEmpty ? "plain" : label, outfit))
                 }
