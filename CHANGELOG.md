@@ -19,7 +19,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
-- After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
   over the hair while sitting up. After the off-work
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
@@ -56,6 +55,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
+- After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
 - On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
   ponytail (unbox page and home card). The watch is unchanged.
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
