@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character can wear her eight shop clothes: two tops each for work, off work and side
+  hustle, plus the picnic and rain sets with their hats. Her sleeves match when she rubs her eye or points
+  at the door. The shop starts offering them in a later change.
 - Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
   hand left out) or the iPhone's own count. Days you didn't open the app count too, up to a week back. Steps
   are never shown and never leave the iPhone.
