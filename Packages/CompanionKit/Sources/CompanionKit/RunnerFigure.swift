@@ -164,6 +164,8 @@ struct RunnerPose {
     var hugPillow: CGSize?
     /// The pillow tucked behind the left shoulder to lean on.
     var leanPillow = false
+    /// How much of the hugged or tucked pillow shows, 0...1, while it comes and goes.
+    var pillowOpacity: Double = 1
     /// The hand patting the hugged pillow is shown.
     var patting = false
     /// Pat lines by the hand as it lands.
@@ -546,7 +548,7 @@ struct RunnerPose {
     /// Work pool beats: big nods then a headset push, a look at the phone, a lean back and a spin of the chair.
     static let workBeats: [TimeInterval] = [3, 1.2, 2.5]
     /// Chill pool beats: the empty can, a scratch of the head, patting the pillow and leaning on it.
-    static let chillBeats: [TimeInterval] = [emptyCanLength, 7, 3]
+    static let chillBeats: [TimeInterval] = [emptyCanLength, 7, 3.6]
     /// Boxing pool beats: shaking the wrists out then fixing the headband, bumping the gloves.
     static let boxingBeats: [TimeInterval] = [3.5, 1.2]
 
@@ -569,22 +571,32 @@ struct RunnerPose {
     }
 
     // 待机动作 补齐规格 v0 H5. 动态 while patting; still once leaning back: comfortable, so nothing moves.
-    /// Patting the pillow twice at `phase` (0...3 s), tucking it behind the left shoulder and leaning back on it.
+    // UI 审核 2026-10-14: the can and the pillow swap over 0.35-0.4 s, never in one frame.
+    /// Patting the pillow twice at `phase` (0...3.6 s), tucking it behind the left shoulder and leaning back on it.
     private mutating func patPillow(phase p: TimeInterval) {
         let x = CGFloat(p)
-        canOpacity = 0
-        if p < 1.6 {
-            let pat = Self.bump(x, from: 0.2, to: 0.55) + Self.bump(x, from: 0.7, to: 1.05)
-            let move = Self.ramp(x, from: 1.2, to: 1.6)
-            hugPillow = CGSize(width: -13 * move, height: -10 * move + pat)
-            patting = p < 1.2
+        // The can fades as it goes down to the right, then comes back the same way at the end.
+        let canIn = p < 1 ? 1 - Self.ramp(x, from: 0, to: 0.35) : Self.ramp(x, from: 3.1, to: 3.5)
+        canOpacity = Double(canIn)
+        canOffset = CGSize(width: 8 * (1 - canIn), height: 10 * (1 - canIn))
+        if p < 1.85 {
+            // The pillow comes forward from behind the left shoulder, is patted, then goes back there.
+            let come = Self.ramp(x, from: 0, to: 0.35)
+            let pat = Self.bump(x, from: 0.45, to: 0.8) + Self.bump(x, from: 0.95, to: 1.3)
+            let back = 1 - come + Self.ramp(x, from: 1.45, to: 1.85)
+            hugPillow = CGSize(width: -13 * back, height: -10 * back + pat)
+            pillowOpacity = Double(come)
+            patting = p >= 0.35 && p < 1.45
             patHit = pat > 0.6
             prop = CGSize(width: -24, height: -2 + 5 * pat)
-            eyesShut = Self.bump(x, from: 0.7, to: 1.05) > 0.5
-        } else {
+            eyesShut = Self.bump(x, from: 0.95, to: 1.3) > 0.5
+        } else if p < 3.3 {
             leanPillow = true
-            lean = -2.5 * Double(Self.ramp(x, from: 1.6, to: 2))
-            eyesShut = p < 2.2
+            pillowOpacity = Double(1 - Self.ramp(x, from: 2.95, to: 3.3))
+            lean = -2.5 * Double(Self.ramp(x, from: 1.85, to: 2.25) - Self.ramp(x, from: 2.95, to: 3.35))
+            eyesShut = p < 2.45
+        } else {
+            lean = -2.5 * Double(1 - Self.ramp(x, from: 2.95, to: 3.35))
         }
     }
 
@@ -1240,7 +1252,7 @@ struct RunnerFigure: View {
         wear(pose, mode: mode, on: &visible)
         if pose.rubEye >= 0 { visible.insert(.rubHand) }
         if pose.hugPillow != nil || pose.leanPillow {
-            visible.remove(.monsterCan)
+            if pose.canOpacity <= 0 { visible.remove(.monsterCan) }
             visible.insert(pose.leanPillow ? .pillowLean : .pillowHug)
             if pose.patting { visible.insert(.tapHand) }
             if pose.patHit { visible.insert(.patLines) }
@@ -1815,7 +1827,11 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 12, y: -6))
             case .pillowHug:
                 let move = pose.hugPillow ?? .zero
-                RunnerPartView(part: part).offset(x: move.width * scale, y: move.height * scale)
+                RunnerPartView(part: part)
+                    .offset(x: move.width * scale, y: move.height * scale)
+                    .opacity(pose.pillowOpacity)
+            case .pillowLean:
+                RunnerPartView(part: part).opacity(pose.pillowOpacity)
             case .patLines:
                 // Drawn for the welcome pat by the door; patting the pillow puts them by the hand on the chest.
                 RunnerPartView(part: part).offset(x: -12 * scale, y: -2 * scale)

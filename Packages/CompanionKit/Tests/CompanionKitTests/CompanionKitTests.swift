@@ -386,7 +386,11 @@ import Testing
 
     @Test func offWorkHakuPatsThePillowAndLeansOnIt() throws {
         let start = try #require(IdleClockTests.firstStart(kind: 2, lengths: RunnerPose.chillBeats))
-        let pat = RunnerPose(mode: .chill, time: start + 0.375, face: .mid, react: 0)
+        // UI 审核 2026-10-14: the can fades out down to the right while the pillow comes forward, never in one frame.
+        let swap = RunnerPose(mode: .chill, time: start + 0.2, face: .mid, react: 0)
+        #expect(swap.canOpacity > 0 && swap.canOpacity < 1 && swap.pillowOpacity > 0 && swap.pillowOpacity < 1)
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: swap)).isSuperset(of: [.monsterCan, .pillowHug]))
+        let pat = RunnerPose(mode: .chill, time: start + 0.625, face: .mid, react: 0)
         let patting = Set(RunnerFigure.parts(for: .chill, pose: pat))
         #expect(patting.isSuperset(of: [.pillowHug, .tapHand, .patLines]))
         #expect(!patting.contains(.monsterCan) && !patting.contains(.pillowLean))
@@ -396,8 +400,12 @@ import Testing
         // Comfortable: once it leans back, only the blink moves.
         let later = RunnerPose(mode: .chill, time: start + 2.9, face: .mid, react: 0)
         #expect(leaning.lean == -2.5 && later.lean == -2.5 && leaning.prop == later.prop)
-        let after = RunnerPose(mode: .chill, time: start + 3.1, face: .mid, react: 0)
-        #expect(RunnerFigure.parts(for: .chill, pose: after).contains(.monsterCan))
+        // At the end the pillow fades behind the shoulder while the can comes back.
+        let ending = RunnerPose(mode: .chill, time: start + 3.2, face: .mid, react: 0)
+        #expect(ending.pillowOpacity > 0 && ending.pillowOpacity < 1 && ending.canOpacity > 0 && ending.canOpacity < 1)
+        let after = RunnerPose(mode: .chill, time: start + 3.65, face: .mid, react: 0)
+        let back = Set(RunnerFigure.parts(for: .chill, pose: after))
+        #expect(back.contains(.monsterCan) && !back.contains(.pillowLean) && after.canOpacity == 1)
     }
 
     @Test func atWorkHakuSneaksALookAtThePhone() throws {
