@@ -129,20 +129,18 @@ struct WardrobeView: View {
         }
     }
 
+    // UI 审核 R1: a label on the card covered the gloves, so it sits under the card.
     private var preview: some View {
-        PersonaPortrait(persona: persona, mode: previewMode, wardrobe: wardrobe)
-            .frame(width: 210, height: 276)
-            .frame(maxWidth: .infinity, alignment: .bottom)
-            .frame(height: 300, alignment: .bottom)
-            .overlay(alignment: .bottomLeading) {
-                Text("锁屏上也是这样")
-                    .font(Toy.body(13, weight: .heavy))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .toyCard(radius: 12, shadow: 0)
-                    .padding(12)
-            }
-            .toyCard(fill: previewMode.color(for: persona))
+        VStack(alignment: .leading, spacing: 8) {
+            PersonaPortrait(persona: persona, mode: previewMode, wardrobe: wardrobe)
+                .frame(width: 210, height: 276)
+                .frame(maxWidth: .infinity, alignment: .bottom)
+                .frame(height: 300, alignment: .bottom)
+                .toyCard(fill: previewMode.color(for: persona))
+            Text("锁屏上也是这样")
+                .font(Toy.body(13, weight: .heavy))
+                .foregroundStyle(Toy.muted)
+        }
     }
 
     // Only changes the preview, never the real mode.
@@ -191,12 +189,12 @@ struct WardrobeView: View {
             wardrobe.clear(slot)
         } label: {
             tile(isWorn: isWorn) {
-                // KURO's default is her plain look, so her tile has no icon.
+                // KURO has no default item, so her tile shows her head without this slot's item.
                 if persona == .haku {
                     WardrobeItemIcon(slotDefault: slot)
                         .frame(width: 56, height: 56)
                 } else {
-                    Color.clear
+                    KuroPortrait(look: KuroLook(mode: previewMode), wearing: withoutSlot, framing: .head)
                         .frame(width: 56, height: 56)
                 }
                 Text(slot == .room ? "无" : "默认")
@@ -205,6 +203,12 @@ struct WardrobeView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isWorn ? .isSelected : [])
+    }
+
+    private var withoutSlot: Set<String> {
+        var plain = wardrobe
+        plain.clear(slot)
+        return Set(plain.equipped.values)
     }
 
     private func itemTile(_ item: ShopItem) -> some View {
