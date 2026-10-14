@@ -21,6 +21,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - Full energy is easier to tell apart from okay: HAKU's deadpan eyes open a notch with a glint, and KURO's eyes
   grow a size, her cheeks go pink, her ears stand up a little and sparkles show by her head.
+- In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
+  over the hair while sitting up. After the off-work
+  animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
 - Today's energy has its own line under the character, saying where it comes from. When it is a guess from
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
 - The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
