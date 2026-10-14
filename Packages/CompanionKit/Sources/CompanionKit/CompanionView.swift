@@ -201,7 +201,7 @@ public struct CompanionView: View {
             character
                 .padding(.top, 24)
                 .padding(.horizontal, 12)
-                .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
+                .scaleEffect(closeUp ? 1.8 : 1, anchor: Self.closeUpAnchor(style))
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: closeUp)
 
             if welcomeStart != nil, let replay = welcomeReplay {
@@ -1262,6 +1262,15 @@ private let previewWelcomes: [(String, Mode, ReturnReplay)] = {
 struct Squash {
     var x: CGFloat = 1
     var y: CGFloat = 1
+}
+
+extension CompanionView {
+    // The watch frame shows the figure lower than the phone card, so the zoom centres lower (逐帧 手表近景 10-13:
+    // at 0.22 the watch close-up showed only hair and the top of the eyes).
+    /// Where the long-press close-up zooms in for `style`, as a point of the view.
+    nonisolated static func closeUpAnchor(_ style: CompanionStyle) -> UnitPoint {
+        UnitPoint(x: 0.5, y: style == .watch ? 0.6 : 0.22)
+    }
 }
 
 /// Lays the figure out for the watch's full-screen page: full width, 30 pt from the top, running off the bottom.
