@@ -13,7 +13,7 @@ public enum Mode: String, Codable, CaseIterable, Identifiable, Sendable {
     public var title: String {
         switch self {
         case .work: "上班"
-        case .chill: "下班 Chill"
+        case .chill: "下班"
         case .boxing: "拳击日"
         case .money: "副业"
         }
