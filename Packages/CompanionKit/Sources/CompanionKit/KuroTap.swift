@@ -109,8 +109,13 @@ extension KuroFigure {
     nonisolated private static let backView: Set<KuroPart> = [
         .itemFlower, .itemLamp, .tennisPonytail, .hairBack, .itemScrunchie, .jacketWork, .jacketChill,
         .itemBlanket, .jacketTennis, .itemBag, .jacketDesk, .earL, .earR, .catEars, .deskBooks, .jacketBox,
-        .jacketSmock, .boxSandbag, .danceSpeaker,
+        .jacketSmock, .boxSandbag, .danceSpeaker, .weeklyHairMintPony, .weeklyHairCherryPony, .weeklyHairStarPony,
+        .weeklyBlanketBear, .weeklyRoomCloud, .weeklyRoomSucculent, .weeklyRoomNightlightGlow, .weeklyRoomNightlight,
+        .weeklyHatBeanie, .weeklyHatBeaniePom,
     ]
+
+    /// What lies on her lap; put away when she drinks.
+    nonisolated static let lap: Set<KuroPart> = [.itemBlanket, .weeklyBlanketBear, .weeklyRoomCloud]
 
     /// Changes `visible` for `tap` at `progress`.
     nonisolated static func apply(_ tap: KuroTap, progress p: Double, to visible: inout Set<KuroPart>) {
@@ -121,7 +126,7 @@ extension KuroFigure {
         case .sip:
             guard p < 0.75 else { return }
             visible.remove(.chillCup)
-            visible.remove(.itemBlanket)
+            visible.subtract(lap)
             visible.insert(.tapCup)
             if (0.2..<0.55).contains(p) { visible.insert(.tapPuff) }
         case .swing:
@@ -190,6 +195,8 @@ extension KuroFigure {
 
     /// How `part` turns for her tap reaction or idle move, or nil when it keeps still.
     nonisolated static func turn(_ part: KuroPart, pose: KuroPose) -> KuroTurn? {
+        // About a point inside her head, so the pom swings side to side on top of the beanie.
+        if part == .weeklyHatBeaniePom, pose.pom != 0 { return KuroTurn(pivot: CGPoint(x: 60, y: 30), angle: pose.pom) }
         // The gold racket from the shop is drawn like her own one, so it turns the same way.
         guard part == .tennisRacket || part == .itemGoldRacket else { return nil }
         if pose.tap == .swing {

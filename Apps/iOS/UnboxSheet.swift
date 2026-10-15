@@ -57,7 +57,8 @@ struct UnboxSheet: View {
                         mode: item.mode ?? item.slot.showcaseMode,
                         event: .unlock(id: entry.id.uuidString, item: item.id),
                         wardrobe: wearing,
-                        showsBubble: true
+                        showsBubble: true,
+                        notices: false
                     )
                 }
             }
