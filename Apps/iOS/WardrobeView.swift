@@ -51,9 +51,7 @@ struct WardrobeView: View {
                 Text(shelfNote)
                     .font(Toy.body(13, weight: .bold))
                     .foregroundStyle(Toy.muted)
-                if !collection.isEmpty {
-                    lifeCollection
-                }
+                lifeCollection
             }
             .padding(20)
             .frame(maxWidth: 560)
@@ -117,6 +115,21 @@ struct WardrobeView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("人生收藏")
                 .font(Toy.display(22))
+            // 界面空状态与报错 §4: an empty collection still shows, so a new user knows it is there.
+            if collection.isEmpty {
+                VStack(spacing: 4) {
+                    Text("还没有")
+                        .font(Toy.body(14, weight: .heavy))
+                    Text("做到一件事，会记在这里，带日期。")
+                        .font(Toy.body(12.5, weight: .bold))
+                        .foregroundStyle(Toy.muted)
+                }
+                .multilineTextAlignment(.center)
+                .padding(14)
+                .frame(maxWidth: .infinity)
+                .overlay(dashedBorder)
+                .accessibilityElement(children: .combine)
+            }
             ForEach(collection, id: \.item.id) { entry in
                 HStack(spacing: 12) {
                     ShopItemIcon(item: entry.item)
@@ -178,6 +191,8 @@ struct WardrobeView: View {
             .frame(maxWidth: .infinity, alignment: .bottom)
             .frame(height: 300, alignment: .bottom)
             .toyCard(fill: previewMode.color(for: persona))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(previewDescription)
             Text("锁屏上也是这样")
                 .font(Toy.body(13, weight: .heavy))
                 .foregroundStyle(Toy.muted)
@@ -189,6 +204,13 @@ struct WardrobeView: View {
     private struct PreviewLook: Hashable {
         let mode: Mode
         let worn: Set<String>
+    }
+
+    /// What VoiceOver reads for the preview: the mode's own name and what is worn in it.
+    private var previewDescription: String {
+        let mode = cards.title(for: previewMode, persona: persona)
+        let worn = wardrobe.showing(card: card).worn(in: previewMode).compactMap { ShopItem.item($0)?.title }.sorted()
+        return worn.isEmpty ? "\(mode)的样子，没穿换来的东西" : "\(mode)的样子，穿着\(worn.joined(separator: "、"))"
     }
 
     // Only changes the preview, never the real mode.
@@ -241,6 +263,16 @@ struct WardrobeView: View {
             defaultTile(defaultSlots)
             ForEach(items) { item in
                 itemTile(item)
+            }
+            // 界面空状态与报错 §4: one line next to the default tile, no link to the shop.
+            if items.isEmpty {
+                Text("在商店换到的，会放在这里。")
+                    .font(Toy.body(12.5, weight: .bold))
+                    .foregroundStyle(Toy.muted)
+                    .multilineTextAlignment(.center)
+                    .padding(8)
+                    .frame(maxWidth: .infinity, minHeight: 128)
+                    .overlay(dashedBorder)
             }
         }
     }
@@ -311,6 +343,11 @@ struct WardrobeView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isWorn ? .isSelected : [])
+    }
+
+    private var dashedBorder: some View {
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .strokeBorder(Toy.muted, style: StrokeStyle(lineWidth: Toy.outline, dash: [6, 4]))
     }
 
     private func tile<Content: View>(isWorn: Bool, fill: Color, @ViewBuilder content: () -> Content) -> some View {
