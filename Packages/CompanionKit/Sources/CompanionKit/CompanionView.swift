@@ -254,6 +254,13 @@ public struct CompanionView: View {
             playEventIfNew()
             if invite != nil { startInvite() }
             if bath { say(Self.bathLine, for: 3) }
+            // Preview only: a fixed line for the font screenshots.
+            if let line = UserDefaults.standard.string(forKey: "screenshot-line") {
+                Task {
+                    try? await Task.sleep(for: .seconds(2.5))
+                    say(line, for: 600)
+                }
+            }
         }
         .onChange(of: bath) { _, new in
             guard new else { return }
