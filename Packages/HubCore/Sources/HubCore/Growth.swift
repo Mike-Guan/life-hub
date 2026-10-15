@@ -465,7 +465,10 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
 
     public var id: String
     public var slot: Slot
-    public var title: String
+    // Issue #350: the Chinese name is the String Catalog key.
+    let titleKey: String
+    /// The name shown to the user, in the app's language.
+    public var title: String { titleKey.localized }
     /// Price in cans; `nil` for a keepsake, which can't be bought.
     public var price: Int?
     public var keepsake: Keepsake?
@@ -626,7 +629,7 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     ) {
         self.id = id
         self.slot = slot
-        self.title = title
+        self.titleKey = title
         self.price = price
         self.keepsake = keepsake
         self.persona = persona
