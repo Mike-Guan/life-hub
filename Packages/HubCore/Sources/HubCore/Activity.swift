@@ -58,6 +58,8 @@ public enum CompanionMoment: String, Codable, CaseIterable, Sendable {
     case collapsed
     /// Chill, doing nothing much: wrapped in a blanket on the couch.
     case blanket
+    /// Chill, couch scrolling in the hours before bedtime: dozing off in the blanket, hugging the phone.
+    case dozing
     /// Weekday morning at home after waking up: brushing teeth.
     case morning
     /// Weekday, past 9:30 and still at home: headphones on at the door, tapping the watch.

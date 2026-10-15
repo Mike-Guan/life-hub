@@ -78,6 +78,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   translation exists.
 - Settings shows the Daily Widget link only in DEV builds. Test builds don't offer it.
 - The shop no longer falls back to the character's old identity card when the saved cards can't be read.
+- Couch scrolling in the hours before bedtime (from 2.5 hours before it, and after midnight) no longer has HAKU
+  peek at the gym bag or send the couch invite. HAKU dozes off in the blanket instead, drawn like the blanket
+  until its own pose is approved.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
