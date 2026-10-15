@@ -203,4 +203,33 @@ import Testing
         #expect(IdentityKind.ski.lines(for: .kuro) == ["……好冷。", "手好冰。", "……再滑一次？"])
         #expect(ChillActivity.walking.title == "散步晒太阳")
     }
+
+    // Issue #416: after the default cards, the identity card can be added, changed or cleared in Settings.
+    @Test func identityCardCanBeAddedChangedAndCleared() {
+        var cards = ModeCards()
+        #expect(cards.identity == nil)
+        #expect(!cards.pickIdentity(.swimming))
+        #expect(cards.identity == .swimming)
+        #expect(cards.title(for: .boxing, persona: .haku) == IdentityKind.swimming.title)
+        #expect(!cards.pickIdentity(.study))
+        #expect(cards.identity == .study)
+        #expect(!cards.pickIdentity(nil))
+        #expect(cards.identity == nil)
+        #expect(cards.chill == Set(ChillActivity.allCases))
+    }
+
+    @Test func fitnessCardTakesTheGymOutOfChillAndGivesItBack() {
+        var cards = ModeCards()
+        #expect(cards.pickIdentity(.fitness))
+        #expect(!cards.chill.contains(.fitness))
+        // Picking it again moves nothing.
+        #expect(!cards.pickIdentity(.fitness))
+        #expect(!cards.pickIdentity(.boxing))
+        #expect(cards.chill.contains(.fitness))
+        // Leaving the fitness card puts 健身 in Chill even if it wasn't there before: it was on the card.
+        var noGym = ModeCards(chill: [.walking])
+        #expect(!noGym.pickIdentity(.fitness))
+        noGym.pickIdentity(nil)
+        #expect(noGym.chill == [.walking, .fitness])
+    }
 }

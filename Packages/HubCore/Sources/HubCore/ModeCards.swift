@@ -389,6 +389,18 @@ public struct ModeCards: Codable, Equatable, Sendable {
         return true
     }
 
+    // 活动分类 v1: one activity sits on one card, so the fitness card takes 健身 out of Chill and gives it back
+    // when another card replaces it.
+    /// Picks `kind` as the identity card, or none for `nil`. Records made with the old card are kept.
+    /// - Returns: `true` when 健身 moved out of Chill into the fitness card.
+    @discardableResult
+    public mutating func pickIdentity(_ kind: IdentityKind?) -> Bool {
+        if identity == .fitness, kind != .fitness { chill.insert(.fitness) }
+        identity = kind
+        guard kind == .fitness else { return false }
+        return chill.remove(.fitness) != nil
+    }
+
     /// The 副业 state after `state` when the user taps the character. A state not picked goes to the first.
     public func next(after state: SideHustle) -> SideHustle {
         guard let index = sideStates.firstIndex(of: state) else { return sideStates[0] }
