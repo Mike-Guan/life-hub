@@ -65,6 +65,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.
+- Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
+  before it ever got a snapshot; after that it says 到常去的地方会自己换.
+- With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
+  translation exists.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
@@ -146,6 +150,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
   card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
   The second character's flower is now called 地上小粉花.
+- The confirmation before switching characters is one whole sentence per direction and looks up the String
+  Catalog, so it can be translated.
 - The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
   4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
 - A tired HAKU now shows it in every mode: off work he keeps smiling with half-open eyes and bags, at work and
@@ -535,6 +541,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- With languages on (Debug and STG), VoiceOver reads the second preset character's overtime lines from her
+  string table, so they can show in Japanese and English.
 - After a workout cheer or the off-work move, HAKU can again stretch after a long sit, get up from the sofa,
   wonder if you're staying home and cheer a finished task. Before, these waited until the app was restarted.
 - On a gym day you already trained, went to the gym or set off for it, scrolling on the phone no longer brings
