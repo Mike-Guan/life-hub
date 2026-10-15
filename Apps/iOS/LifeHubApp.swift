@@ -268,7 +268,7 @@ struct LifeHubApp: App {
                 store: store,
                 energy: energy,
                 ledger: growth.ledger,
-                cards: cards,
+                cards: $cards,
                 onEraseAll: eraseAll
             )
         }

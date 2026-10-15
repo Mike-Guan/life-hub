@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Settings has a 上班日 row and a 身份卡 group. Each opens the same screen as the first-run setup, so work days
+  and the identity card can be set, changed or cleared later.
 - The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a
   side clip), a bear blanket and a cloud cushion on her lap, a succulent on the floor and a nightlight on the wall
   whose glow breathes slowly. The watch leaves out what is on her lap or the floor.

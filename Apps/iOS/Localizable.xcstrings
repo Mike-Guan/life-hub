@@ -63,6 +63,17 @@
         }
       }
     },
+    "上班日" : {
+      "comment" : "设置：上班时段组里的行名，点开改上班日",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workdays"
+          }
+        }
+      }
+    },
     "上班时段" : {
       "localizations" : {
         "en" : {
@@ -100,6 +111,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Doesn't switch. Used to tell if you're holed up at home."
+          }
+        }
+      }
+    },
+    "不固定" : {
+      "comment" : "引导上班日的开关；设置里上班日没定时那行的值",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It varies"
           }
         }
       }
@@ -461,6 +483,17 @@
         }
       }
     },
+    "周一到周五" : {
+      "comment" : "设置：上班日那行的值，周一到周五都上班",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon–Fri"
+          }
+        }
+      }
+    },
     "商店" : {
       "localizations" : {
         "en" : {
@@ -802,6 +835,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Motion & Fitness is off, so on the commute HAKU can only walk. You can turn it on in Settings > Privacy & Security."
+          }
+        }
+      }
+    },
+    "没有" : {
+      "comment" : "设置：没选身份卡时那行显示的字",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
           }
         }
       }
@@ -1218,6 +1262,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Running 5K"
+          }
+        }
+      }
+    },
+    "身份卡" : {
+      "comment" : "设置：身份卡分组标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your card"
           }
         }
       }
