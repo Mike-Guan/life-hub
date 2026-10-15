@@ -139,6 +139,9 @@ struct RunnerPose {
     // The watch frame crops HAKU at the chest, so the gloves and the can would sit below the screen edge.
     /// 1 on the watch: the gloves come up beside the chin and the can up beside the face; 0 elsewhere.
     var propLift: CGFloat = 0
+    var gloveLScale: CGFloat = 1
+    /// A puff of breath out of the nose: shows the talk dots.
+    var puff = false
     /// Position of the shine sweeping over the gold chain, as a fraction of the figure width.
     var glint: CGFloat = -1
     var coinTurn: Double = 0
@@ -324,10 +327,13 @@ struct RunnerPose {
     var reviving: Bool { revive >= 0 }
     /// Whether the mask slides between the face and the chin: going off work, staying home or getting up.
     var unmasking: Bool { offWorking || stayingHome || reviving }
-    // A punch or a clink reaches toward the viewer from where the prop sits on the iPhone, so the lift
+    // A punch, a duck and hook or a clink reaches out from where the prop sits on the iPhone, so the lift
     // gives way while it plays and the glove or can lands where it always did, clear of the eyes.
     /// Where the left glove is drawn: its pose plus the watch lift.
-    var gloveLShown: CGSize { CGSize(width: gloveL.width - 14 * propLift, height: gloveL.height - 22 * propLift) }
+    var gloveLShown: CGSize {
+        let lift = propLift * (1 - pokeOut(.duckHook))
+        return CGSize(width: gloveL.width - 14 * lift, height: gloveL.height - 22 * lift)
+    }
     /// Where the right glove is drawn: its pose plus the watch lift.
     var gloveRShown: CGSize {
         let lift = propLift * (1 - pokeOut(.punch))
@@ -464,7 +470,7 @@ struct RunnerPose {
         blink = open * Self.blink(at: t)
         squeeze = Self.blink(at: t)
         // Sparkles twinkle out of step with the blink, 1.6 s period.
-        sparkle = 0.55 + 0.45 * sin(time * 2 * .pi / 1.6)
+        sparkle = 0.8 + 0.2 * sin(time * 2 * .pi / 1.6)
 
         // Shooting keeps the ¥¥ look of the old money mode, motion included.
         switch self.moment == .shooting ? .money : mode {
@@ -523,7 +529,8 @@ struct RunnerPose {
             gloveL = CGSize(width: 0, height: bounce)
             gloveR = CGSize(width: -14 * r, height: -bounce - 10 * r)
             gloveRScale = 1 + 0.2 * r
-            // Every 18-30 s, one of: shake the wrists out, then a glove up to fix the headband; or bump the gloves.
+            // Every 18-30 s, one of: shake the wrists out, then a glove up to fix the headband; bump the gloves; or
+            // slip left, slip right and duck.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
             if plain, r == 0,
                 let beat = IdleClock.beat(
@@ -532,6 +539,8 @@ struct RunnerPose {
                 let phase = beat.phase
                 if beat.kind == 1 {
                     bumpGloves(phase: phase)
+                } else if beat.kind == 2 {
+                    slip(phase: phase)
                 } else if phase < 1.5 {
                     let shake = CGFloat(sin(phase * 2 * .pi / 0.15)) * 3
                     gloveL = CGSize(width: shake, height: 8)
@@ -571,8 +580,8 @@ struct RunnerPose {
     static let workBeats: [TimeInterval] = [3, 1.2, 2.5]
     /// Chill pool beats: the empty can, a scratch of the head, patting the pillow and leaning on it.
     static let chillBeats: [TimeInterval] = [emptyCanLength, 7, 3.6]
-    /// Boxing pool beats: shaking the wrists out then fixing the headband, bumping the gloves.
-    static let boxingBeats: [TimeInterval] = [3.5, 1.2]
+    /// Boxing pool beats: shaking the wrists out then fixing the headband, bumping the gloves, slipping.
+    static let boxingBeats: [TimeInterval] = [3.5, 1.2, 2.4]
 
     // 03 Product/companion/待机动作 补齐规格 v0 H4, Mike approved 2026-10-14. 动态: a second of slacking off.
     /// Leaning back at `phase` (0...2.5 s), spinning the chair round to the back and back again, then sitting up.
@@ -606,12 +615,15 @@ struct RunnerPose {
             let come = Self.ramp(x, from: 0, to: 0.35)
             let pat = Self.bump(x, from: 0.45, to: 0.8) + Self.bump(x, from: 0.95, to: 1.3)
             let back = 1 - come + Self.ramp(x, from: 1.45, to: 1.85)
-            hugPillow = CGSize(width: -13 * back, height: -10 * back + pat)
+            // UI 审核 2026-10-14: it goes back exactly onto the leaning pillow (24 left, 16 up), so only the layer
+            // changes at 1.85 s, hidden behind the shoulder.
+            hugPillow = CGSize(width: -24 * back, height: -16 * back + pat)
             pillowOpacity = Double(come)
             patting = p >= 0.35 && p < 1.45
             patHit = pat > 0.6
             prop = CGSize(width: -24, height: -2 + 5 * pat)
-            eyesShut = Self.bump(x, from: 0.95, to: 1.3) > 0.5
+            // UI 审核 2026-10-14: the eyes close at 1.7 s, so the face settles before the pillow's layer changes.
+            eyesShut = Self.bump(x, from: 0.95, to: 1.3) > 0.5 || p >= 1.7
         } else if p < 3.3 {
             leanPillow = true
             pillowOpacity = Double(1 - Self.ramp(x, from: 2.95, to: 3.3))
@@ -630,6 +642,20 @@ struct RunnerPose {
         gloveL = CGSize(width: 12 * bump, height: -6 * bump)
         gloveR = CGSize(width: -12 * bump, height: -6 * bump)
         eyesDy = p < 0.9 ? 3 : -2.5
+    }
+
+    // 身份卡第 3 轮 B1, Mike approved 2026-10-14. 动态: practising the slip is the move.
+    /// Slipping left, back, slipping right and ducking at `phase` (0...2.4 s), then a puff of breath in guard.
+    private mutating func slip(phase p: TimeInterval) {
+        let x = CGFloat(p)
+        let left = Self.bump(x, from: 0.3, to: 0.9)
+        let right = Self.bump(x, from: 0.9, to: 1.5)
+        let duck = Self.bump(x, from: 1.5, to: 2.1)
+        shift = 5 * (right - left)
+        bounce = -1.5 * (left + right) + 6 * duck
+        lean = 3 * Double(right - left)
+        eyesDy = duck
+        puff = p >= 2.05 && p < 2.4
     }
 
     /// The state within the mode: peeking, dozing, slumped, at the door, walking, or vibe coding.
@@ -995,7 +1021,8 @@ struct RunnerPose {
         let loopYawn = g >= 1 && phase < 1.2 ? CGFloat(sin(phase / 1.2 * .pi)) : 0
         pose.yawn = max(bump(g, from: 0.3, to: 0.65), loopYawn)
         pose.lie = liesDown ? ramp(g, from: 0.65, to: 0.9) : 0
-        pose.zzz = g >= 0.9 ? CGFloat(time.truncatingRemainder(dividingBy: 3) / 3) : -1
+        // UI 审核 2026-10-13: sitting up, the rising Z z z ran over the hair tips, so it shows only lying down.
+        pose.zzz = liesDown && g >= 0.9 ? CGFloat(time.truncatingRemainder(dividingBy: 3) / 3) : -1
         // Slow, heavy blinks; eyes squeeze shut in a yawn.
         pose.blink = max(0.15, (1 - 0.7 * pose.yawn) * blink(at: time * 0.5))
         pose.headDy = 1.5 * (1 - pose.lie) + 1.5 * pose.yawn
@@ -1078,6 +1105,13 @@ struct RunnerPose {
         pose.blink = max(0.15, (1 - 0.7 * pose.yawn) * blink(at: time))
         pose.headDy = 1.5 * pose.yawn
         return pose
+    }
+
+    /// The nod after an answer to the energy check, at `progress` (0..<1): one blink, then the head dips 3 units
+    /// and comes back. With `still` only the blink plays.
+    mutating func nod(progress p: CGFloat, still: Bool) {
+        if p < 0.1 { eyesShut = true }
+        if !still { headDy += 3 * Self.bump(p, from: 0.12, to: 0.5) }
     }
 
     /// Staying-home pose at `progress` (0...1): a last look at the door, headset and mask off, then back on the
@@ -1222,8 +1256,9 @@ struct RunnerFigure: View {
             let scale = geo.size.width / RunnerArt.bounds.width
             ZStack {
                 ZStack {
-                    ForEach(Self.parts(for: mode, pose: pose), id: \.self) { part in
-                        layer(part, scale: scale)
+                    let parts = Self.parts(for: mode, pose: pose)
+                    ForEach(parts, id: \.self) { part in
+                        layer(part, scale: scale, headband: parts.contains(.headset))
                     }
                     if pose.sleepTalk >= 0, pose.life == .nap, !pose.bedtime {
                         RunnerTextView(text: Self.sleepTalkText)
@@ -1303,6 +1338,11 @@ struct RunnerFigure: View {
             let t = pose.noteSlap * CGFloat(RunnerPose.noteSlapLength)
             if t > 0.25, t < 0.8 { visible.insert(.noteHit) }
         }
+        // Issue #236 (correction preview v6): full energy opens the deadpan eyes a notch, with their own glint.
+        if pose.face == .high, !pose.bedtime, visible.contains(.eyesWork) {
+            visible.subtract([.eyesWork, .lidsWork, .eyeGlint])
+            visible.formUnion([.eyesBright, .lidsBright])
+        }
         if pose.eyesShut {
             visible.subtract(openEyes)
             visible.insert(.eyesClosed)
@@ -1313,6 +1353,7 @@ struct RunnerFigure: View {
             visible.formUnion([.eyeSwirlL, .eyeSwirlR, .dizzyStar])
         }
         poked(&visible, pose: pose)
+        if pose.puff { visible.insert(.talkDots) }
         // Gloves fill both hands, so the peace sign never adds a third one (Mike 2026-10-07).
         if !visible.isDisjoint(with: [.gloveL, .gloveR]) { visible.remove(.peaceHand) }
         if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
@@ -1460,6 +1501,11 @@ struct RunnerFigure: View {
             visible.remove(.monsterCan)
             visible.formUnion(props)
         }
+        // UI 审核 2026-10-13 (F7): a tired HAKU at home no longer smiles like a full one; he gets the half-shut eyes.
+        if pose.tired, mode == .chill, !pose.bedtime, visible.contains(.eyesChill) {
+            visible.remove(.eyesChill)
+            visible.formUnion([.eyesWork, .lidsWork, .eyebags])
+        }
         if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
             if mode != .chill, pose.need != .couchScroll { visible.insert(.eyeGlint) }
@@ -1590,6 +1636,8 @@ struct RunnerFigure: View {
         }
         visible.formUnion(welcome.phoneFlip < 0.5 ? [.phone, .phoneFeed] : [.phoneBack])
         if welcome.phoneFlip < 1 { visible.insert(.phoneHand) }
+        // UI 审核 2026-10-13: the can the sofa rest pose holds fades in with the ending instead of popping in.
+        if !welcome.atDesk, welcome.exit > 0 { visible.insert(.monsterCan) }
         return visible
     }
 
@@ -1621,6 +1669,7 @@ struct RunnerFigure: View {
     ]
     nonisolated private static let openEyes: Set<RunnerPart> = [
         .eyesWork, .lidsWork, .eyesChill, .cateyeL, .cateyeR, .eyesMoney, .eyeGlint, .eyesSleepy,
+        .eyesBright, .lidsBright,
     ]
     nonisolated private static let couchParts: Set<RunnerPart> = [.eyesSleepy, .phone, .phoneFeed, .phoneHand]
     nonisolated private static let couchHiddenParts: Set<RunnerPart> = [
@@ -1672,7 +1721,7 @@ struct RunnerFigure: View {
         }
     }
 
-    @ViewBuilder private func layer(_ part: RunnerPart, scale: CGFloat) -> some View {
+    @ViewBuilder private func layer(_ part: RunnerPart, scale: CGFloat, headband: Bool) -> some View {
         let isHead = Self.headParts.contains(part)
         Group {
             if pose.propRaise > 0, let scene = pose.dailyScene,
@@ -1688,7 +1737,7 @@ struct RunnerFigure: View {
             } else if part == .walkDust, pose.walkFrom != nil {
                 moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
             } else {
-                partView(part, scale: scale)
+                partView(part, scale: scale, headband: headband)
             }
         }
         .offset(y: (isHead ? pose.headDy : 0) * scale)
@@ -1707,10 +1756,10 @@ struct RunnerFigure: View {
             .opacity(move.opacity)
     }
 
-    @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat) -> some View {
+    @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat, headband: Bool) -> some View {
         Group {
             switch part {
-            case .eyesWork, .lidsWork, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
+            case .eyesWork, .lidsWork, .eyesBright, .lidsBright, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 1, y: pose.blink, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale, y: pose.eyesDy * scale)
@@ -1795,7 +1844,10 @@ struct RunnerFigure: View {
                     .scaleEffect(0.8 + 0.7 * pose.burst, anchor: Self.unit(x: 60, y: 40))
                     .opacity(Double(sin(pose.burst * .pi)))
             case .sparkle:
+                // UI 审核 2026-10-13: with the headset on, the sparkles sit 2pt clear of its band on the watch.
                 RunnerPartView(part: part)
+                    .scaleEffect(x: headband ? 1.16 : 1, y: 1, anchor: Self.unit(x: 60, y: 27))
+                    .offset(y: headband ? -14 * scale : 0)
                     .scaleEffect(0.8 + 0.2 * pose.sparkle, anchor: Self.unit(x: 60, y: 27))
                     .opacity(pose.sparkle)
             case .ledYen:
@@ -1846,7 +1898,8 @@ struct RunnerFigure: View {
                 // Two quick reps in a celebration, or the curl at the gym.
                 RunnerPartView(part: part).offset(y: -12 * pose.dumbbellRise * scale)
             case .heavyBag:
-                RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 12, y: -6))
+                // Mike 2026-10-14 (G): the big bag hangs top left behind the hair and swings from its chain.
+                RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 17.5, y: -8))
             case .pillowHug:
                 let move = pose.hugPillow ?? .zero
                 RunnerPartView(part: part)
@@ -1885,6 +1938,7 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part, red: pose.outfit.headband)
             case .gloveL:
                 RunnerPartView(part: part, red: pose.outfit.gloves)
+                    .scaleEffect(pose.gloveLScale, anchor: Self.unit(x: 34, y: 118))
                     .offset(x: pose.gloveLShown.width * scale, y: pose.gloveLShown.height * scale)
             case .gloveR:
                 RunnerPartView(part: part, red: pose.outfit.gloves)
@@ -1892,6 +1946,7 @@ struct RunnerFigure: View {
                     .offset(x: pose.gloveRShown.width * scale, y: pose.gloveRShown.height * scale)
             case .gloveTapeLeft:
                 RunnerPartView(part: part)
+                    .scaleEffect(pose.gloveLScale, anchor: Self.unit(x: 34, y: 118))
                     .offset(x: pose.gloveLShown.width * scale, y: pose.gloveLShown.height * scale)
             case .gloveTapeRight:
                 RunnerPartView(part: part)
@@ -2023,7 +2078,7 @@ struct RunnerFigure: View {
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
-        .dizzyStar,
+        .dizzyStar, .eyesBright, .lidsBright,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
@@ -2281,6 +2336,8 @@ private struct WelcomeProps: View {
                     if welcome.glow > 0 { RunnerPartView(part: .sparkle).opacity(welcome.glow) }
                 }
             }
+            .offset(y: 8 * welcome.exit * scale)
+            .opacity(Double(1 - welcome.exit))
         }
     }
 }

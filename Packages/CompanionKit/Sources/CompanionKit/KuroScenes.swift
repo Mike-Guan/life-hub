@@ -43,13 +43,17 @@ enum KuroScene: Equatable, Sendable {
     static let driedLine = "……洗好了。"
 
     /// The room items she leaves behind when she walks off.
-    static let room: Set<KuroPart> = [.itemFlower, .itemLamp, .itemBlanket, .itemBag]
+    static let room: Set<KuroPart> = [.itemFlower, .itemLamp, .itemBlanket, .itemBag, .boxSandbag, .danceSpeaker]
 
     /// Shows and hides the scene's parts in `look`; `items` are the shop items she owns and wears.
     func dress(_ look: KuroLook, items: Set<KuroItem>, _ visible: inout Set<KuroPart>) {
         switch self {
         case .invite(let t):
-            if Self.pointing.contains(t) { visible.formUnion([Self.sleeve(look), .inviteHand]) }
+            if Self.pointing.contains(t) {
+                // Her left hand points, so whatever it holds in the identity-card looks is set down.
+                visible.subtract(Self.leftHanded)
+                visible.formUnion([Self.sleeve(look), .inviteHand])
+            }
         case .walking(let place, _, _):
             visible.subtract(Self.room.union(Self.handheld))
             visible.formUnion(Self.carried(from: place, look: look, items: items).union([.walkLines, .walkDust]))
@@ -63,8 +67,14 @@ enum KuroScene: Equatable, Sendable {
         }
     }
 
+    /// What her left hand holds in the identity-card looks; the score goes down with the finger on it.
+    static let leftHanded: Set<KuroPart> = [.boxGloveL, .gymBlock, .studyNotebook, .scoreSheet, .scoreFinger]
+
     /// What she holds in her looks; put away when her hands are busy.
-    static let handheld: Set<KuroPart> = [.chillCup, .tennisRacket, .itemGoldRacket, .workStylus, .deskPen, .deskBooks]
+    static let handheld: Set<KuroPart> = [
+        .chillCup, .tennisRacket, .itemGoldRacket, .workStylus, .deskPen, .deskBooks,
+        .boxGloveL, .boxGloveR, .gymBlock, .studyNotebook, .studyHighlighter, .craftPen, .scoreSheet, .scoreFinger,
+    ]
 
     // The tennis bag is a shop item, so she carries it only when she owns it; otherwise her backpack.
     /// What she carries walking away from `place` in `look`.
@@ -81,6 +91,12 @@ enum KuroScene: Equatable, Sendable {
         case .chill: .inviteSleeveChill
         case .tennis: .inviteSleeveTennis
         case .desk: .inviteSleeveDesk
+        case .box: .inviteSleeveBox
+        case .fitness: .inviteSleeveTennis
+        case .study: .inviteSleeveChill
+        case .art: .inviteSleeveSmock
+        case .dance, .ski: .inviteSleeveTennis
+        case .music: .inviteSleeveChill
         }
     }
 

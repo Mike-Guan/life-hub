@@ -62,7 +62,7 @@ import Testing
         let visit = log((.chill, .manual, date(5, 18, 40)), (.boxing, .location, date(5, 19)))
         #expect(decide(.leftGym, visit, at: date(5, 19, 29)) == nil)
         let decision = decide(.leftGym, visit, at: date(5, 20, 30))
-        #expect(decision == ModeDecision(mode: .chill, source: .location, reason: "离开拳馆，回到「下班 Chill」"))
+        #expect(decision == ModeDecision(mode: .chill, source: .location, reason: "离开拳馆，回到「下班」"))
     }
 
     @Test func leavingTheGymAfterAnAutomaticModeGoesToChill() {

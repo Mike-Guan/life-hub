@@ -81,6 +81,8 @@ struct HomeView: View {
     @State private var checkHeight: CGFloat = 0
     /// The character's short reply after an answer, shown for 1.6 s.
     @State private var checkReply: String?
+    // Each answer to the energy check plays the character's nod under 「哦。」.
+    @State private var nods = 0
     @State private var answers = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -135,6 +137,7 @@ struct HomeView: View {
                                 ?? sit?.stretched(at: context.date)
                                 ?? stayHome(at: context.date) ?? dailyDone,
                             cheer: cheer,
+                            nods: nods,
                             onWelcomeDone: onWelcomeDone
                         )
                     } else {
@@ -157,6 +160,7 @@ struct HomeView: View {
                             bath: bath(at: context.date),
                             invite: activeNeed(at: context.date) == nil ? nil : invite,
                             cheer: cheer,
+                            nods: nods,
                             bedtime: bedtime.state(at: context.date),
                             wardrobe: wardrobe,
                             onTap: tapAction,
@@ -167,16 +171,6 @@ struct HomeView: View {
                 }
                 .frame(height: 340)
                 .toyCard()
-                // Issue #236: releasing a long press asks about today's energy when there is a guess.
-                // 干预策略 §6: only a guess is corrected; a level Mike picked himself isn't asked about.
-                .onCompanionHold {
-                    guard let reading, reading.source != .selfReport else { return }
-                    checkError = nil
-                    // UI 审核 round 4: inside the gesture's transaction the fade was dropped, so it runs after.
-                    Task { @MainActor in
-                        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
-                    }
-                }
                 .overlay(alignment: persona == .kuro ? .topLeading : .bottom) {
                     if let checkReply {
                         replyBubble(checkReply)
@@ -215,24 +209,31 @@ struct HomeView: View {
                         .foregroundStyle(Toy.ink)
                 }
 
-                // Why RUNNER looks the way it does: leaving work, the activity, bedtime, then the need, then energy.
-                TimelineView(.everyMinute) { context in
-                    let state = bedtime.state(at: context.date)
-                    let active = activeNeed(at: context.date)
-                    let why = NeedEngine.whyLine(need: active, energy: reading, bedtime: state)
-                    let workLine = moment(at: context.date).flatMap(HakuLines.scene(for:)).map {
-                        HakuLines.line($0, at: context.date, persona: persona, cards: shownCards)
+                // UI 审核 2026-10-13: energy sits close under the tagline, not like a caption for the cards.
+                VStack(alignment: .leading, spacing: 4) {
+                    // Why RUNNER looks this way: leaving work, the activity, bedtime, then the need, then energy.
+                    TimelineView(.everyMinute) { context in
+                        let state = bedtime.state(at: context.date)
+                        let active = activeNeed(at: context.date)
+                        // Energy has its own row below, so it never hides behind another line.
+                        let why = NeedEngine.whyLine(need: active, energy: nil, bedtime: state)
+                        let workLine = moment(at: context.date).flatMap(HakuLines.scene(for:)).map {
+                            HakuLines.line($0, at: context.date, persona: persona, cards: shownCards)
+                        }
+                        let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
+                        let leftWork = HakuLines.offWorkUntil(store.log, now: context.date, work: rules)
+                        let offWork = leftWork.map { HakuLines.offWorkLine(for: persona, until: $0, work: rules) }
+                        let activityLine = activity(at: context.date)?.reason(for: persona)
+                        if let line = offWork ?? activityLine ?? workLine ?? notice ?? sunday ?? why {
+                            Text(line)
+                                .font(Toy.body(13, weight: .bold))
+                                .foregroundStyle(Toy.muted)
+                        }
                     }
-                    let sunday = ChangeEngine.sundayLine(times: changes, now: context.date)
-                    let leftWork = HakuLines.offWorkUntil(store.log, now: context.date, work: rules)
-                    let offWork = leftWork.map { HakuLines.offWorkLine(for: persona, until: $0, work: rules) }
-                    let activityLine = activity(at: context.date)?.reason(for: persona)
-                    if let line = offWork ?? activityLine ?? workLine ?? notice ?? sunday ?? why {
-                        Text(line)
-                            .font(Toy.body(13, weight: .bold))
-                            .foregroundStyle(Toy.muted)
-                    }
+
+                    energyRow(reading)
                 }
+                .padding(.top, -12)
 
                 ModeSwitcher(current: shownMode, persona: persona, cards: shownCards) { mode in
                     switchTo(mode)
@@ -274,7 +275,7 @@ struct HomeView: View {
             case "reply":
                 checkReply = EnergyCheck.reply(corrected: true, persona: persona)
             case "hold":
-                // Waits for a real long press, from Apps/UITests.
+                // Waits for a real tap on 不对？, from Apps/UITests.
                 break
             default:
                 checking = reading
@@ -341,6 +342,45 @@ struct HomeView: View {
         return (height - 24 - checkHeight, 0)
     }
 
+    /// Where today's energy comes from. Only a guess from sleep can be corrected, from its 不对？ button.
+    // 干预策略 §6 (2026-10-13): Mike found no card behind the long press, so the entry moved here.
+    // UI 审核 2026-10-13: the whole row is the tap target, and it is 44 pt tall with or without the button,
+    // so the cards below never jump.
+    @ViewBuilder private func energyRow(_ reading: EnergyReading?) -> some View {
+        let text = Text(reading?.reasons.first ?? "今天没有睡眠数据")
+            .font(Toy.body(13, weight: .bold))
+            .foregroundStyle(Toy.muted)
+        if let reading, reading.source != .selfReport {
+            Button {
+                checkError = nil
+                withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { checking = reading }
+            } label: {
+                HStack(spacing: 8) {
+                    text
+                    // The rounded font draws a narrow question mark, so the full-width one uses the system font.
+                    HStack(spacing: 0) {
+                        Text("不对").font(Toy.body(12, weight: .heavy))
+                        Text("？").font(.system(size: 12, weight: .heavy))
+                    }
+                    .foregroundStyle(Toy.ink)
+                    // The full-width ？ carries half a character of space on its right, so that side pads less.
+                    .padding(.leading, 10)
+                    .padding(.trailing, 4)
+                    .padding(.vertical, 3)
+                    .background(Capsule().fill(Toy.card))
+                    .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+                    Spacer(minLength: 0)
+                }
+                .frame(minHeight: 44, alignment: .top)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text("不对？"))
+        } else {
+            text.frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
+        }
+    }
+
     // KURO holds things low in front of her, so her bubble sits above her head with its tail pointing down to her.
     /// The character's one-line reply after an answer.
     @ViewBuilder private func replyBubble(_ text: String) -> some View {
@@ -383,6 +423,7 @@ struct HomeView: View {
         closeCheck()
         let reply = EnergyCheck.reply(corrected: result.report != nil, persona: persona)
         checkReply = reply
+        nods += 1
         Task {
             try? await Task.sleep(for: .seconds(1.6))
             if checkReply == reply { checkReply = nil }
