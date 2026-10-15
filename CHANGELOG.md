@@ -238,6 +238,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   "……够了。" on both.
 - HAKU wears only the blue earring everywhere. The white earbud in chill, at night under the blanket and on
   walks is gone.
+- Red button text uses a darker red that is readable on white and paper (`Toy.alertText`).
 - HAKU and KURO cheer after every kind of workout of 20 minutes or more (tennis, swimming, yoga and the
   rest), not only boxing, runs and the gym. Cans are unchanged.
 - The home card and the watch know the commute: walking from home to the office or back, riding the train or
