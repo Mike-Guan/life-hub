@@ -158,6 +158,7 @@ struct HubProvider: TimelineProvider {
                 officeSince: presence.since(.office),
                 home: snapshot?.home(since: presence.since(.home), at: date),
                 stiff: sit?.isStiff(mode: snapshot?.mode, at: date) ?? false,
+                phone: snapshot?.needPhone ?? true,
                 now: date,
                 work: work,
                 rules: NeedRules.standard.following(work, bedtime: schedule),
