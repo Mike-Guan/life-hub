@@ -78,7 +78,7 @@ struct ShopView: View {
 
     private var keepsakes: [ShopItem] {
         ShopItem.catalog(for: persona).filter { item in
-            guard let keepsake = item.keepsake else { return false }
+            guard let keepsake = item.keepsake, item.isDrawn else { return false }
             return (Self.liveWins.contains(keepsake.win) && item.suits(card)) || owned.contains(item.id)
         }
     }
