@@ -50,8 +50,7 @@ struct UnboxSheet: View {
                 if let kuro = KuroItem(rawValue: item.id) {
                     KuroView(
                         look: kuro.look,
-                        wearing: wearing.worn(
-                            in: item.mode ?? Mode.allCases.first { KuroLook(mode: $0) == kuro.look } ?? .chill),
+                        wearing: wearing.worn(in: item.previewMode(current: nil, card: card)),
                         event: .unlock(id: entry.id.uuidString, item: item.id)
                     )
                 } else {
@@ -100,14 +99,8 @@ struct UnboxSheet: View {
 
     private var card: IdentityKind? { .picked(for: persona) }
 
-    // Friends test (写死作息 #3): HAKU no longer always pops out in the boxing kit. It wears the look of the
-    // mode it is in and of the user's own card; an item that doesn't show there falls back to its own mode.
-    private var shownMode: Mode {
-        if let mode, item.shows(in: mode, card: card) { return mode }
-        let own = item.mode ?? item.slot.showcaseMode
-        // Without a card the identity slot is the old boxing kit, so the item shows in Chill instead.
-        return own == .boxing && card == nil ? .chill : own
-    }
+    // Friends test (写死作息 #3): HAKU no longer always pops out in the boxing kit.
+    private var shownMode: Mode { item.previewMode(current: mode, card: card) }
 
     private var wearing: Wardrobe {
         var copy = wardrobe

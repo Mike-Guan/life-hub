@@ -8,18 +8,14 @@ final class HomeScene: SKScene {
     let model: HomeModel
     let haku = HakuNode()
 
-    private var pieces: [HomePiece: SKSpriteNode] = [:]
-    private var itemNodes: [HomeItem: SKSpriteNode] = [:]
-    private let shell = SKSpriteNode()
+    private var pieces: [HomePiece: HomeLayerNode] = [:]
+    private var itemNodes: [HomeItem: HomeLayerNode] = [:]
+    private let shell = HomeLayerNode()
     private let skyDay = SKSpriteNode()
     private let skyNight = SKSpriteNode()
-    private let windowFrame = SKSpriteNode()
+    private let clothes = SKSpriteNode()
     private let screen = SKSpriteNode()
-    private let sun = SKSpriteNode()
-    private let shade = SKSpriteNode()
-    private var nightLights: [SKSpriteNode] = []
     private var monitorLight = SKSpriteNode()
-    private let daylight = SKSpriteNode()
 
     // Where HAKU is and where he is going.
     private var point = HomeSpot.hub
@@ -42,7 +38,7 @@ final class HomeScene: SKScene {
     private var nextEffect: TimeInterval = 0
 
     // What the drawing shows now, to redraw only what changed.
-    private var shownColors: [HomePaintable: UInt32] = [:]
+    private var shownColors: [HomePaintable: Int]?
     private var shownOutfits: [HomeOutfit] = []
     private var shownNight: Bool?
     private var shownScreen: HomeScreen?
@@ -72,64 +68,56 @@ final class HomeScene: SKScene {
     // MARK: Building
 
     private func build() {
+        addChild(islandShadow())
         shell.zPosition = -10
         addChild(shell)
+        // The sky shows through the window hole in the rendered wall.
         for sprite in [skyDay, skyNight] {
-            sprite.zPosition = -9.5
+            sprite.zPosition = -10.5
             addChild(sprite)
         }
-        let windowRect = HomeGrid.bounds([GridBox(x0: 1.7, y0: 0, x1: 5.5, y1: 0.35, z0: 1.5, z1: 5.4)])
+        let w = HomeArt.window
+        let windowRect = HomeGrid.bounds([GridBox(x0: w.u0, y0: 0, x1: w.u1, y1: 0.1, z0: w.z0, z1: w.z1)])
         place(skyDay, windowRect, HomeTextures.texture(windowRect) { HomeArt.sky(IsoPen(context: $0), night: false) })
         place(skyNight, windowRect, HomeTextures.texture(windowRect) { HomeArt.sky(IsoPen(context: $0), night: true) })
-        place(windowFrame, windowRect, HomeTextures.texture(windowRect) { HomeArt.windowFrame(IsoPen(context: $0)) })
-        windowFrame.zPosition = -9
-        addChild(windowFrame)
-
-        let floorRect = HomeGrid.bounds([GridBox(x0: 0, y0: 0, x1: HomeGrid.size, y1: HomeGrid.size, z1: 0)])
-        place(sun, floorRect, HomeTextures.texture(floorRect) { HomeArt.sunPatch(IsoPen(context: $0)) })
-        sun.zPosition = -0.9
-        addChild(sun)
 
         for piece in HomePiece.allCases {
-            let sprite = SKSpriteNode()
-            sprite.zPosition = CGFloat(piece.depth)
-            pieces[piece] = sprite
-            addChild(sprite)
+            let node = HomeLayerNode()
+            node.zPosition = CGFloat(piece.depth)
+            pieces[piece] = node
+            addChild(node)
         }
-        drawStaticPieces()
+        clothes.zPosition = CGFloat(HomePiece.wardrobe.depth) + 0.01
+        addChild(clothes)
 
-        let screenRect = HomeGrid.bounds([GridBox(x0: 0.3, y0: 1.2, x1: 0.36, y1: 2.8, z0: 1.65, z1: 2.52)], margin: 3)
-        screen.zPosition = 2.65
+        let screenRect = HomeArt.screenRect
+        screen.zPosition = CGFloat(HomePiece.desk.depth) + 0.05
         place(
             screen, screenRect, HomeTextures.texture(screenRect) { HomeArt.screen(IsoPen(context: $0), content: .off) })
         addChild(screen)
-
-        let roomRect = HomeGrid.canvas
-        place(shade, roomRect, HomeTextures.texture(roomRect) { HomeArt.nightShade(IsoPen(context: $0)) })
-        shade.zPosition = 50
-        addChild(shade)
-        let lights: [(GridPoint, UInt32, CGFloat)] = [
-            (GridPoint(x: 0.66, y: 1.0, z: 2.0), 0xFFC66B, 170),
-            (GridPoint(x: 0.5, y: 8.4, z: 2.0), 0xFF5A7A, 190),
-            (GridPoint(x: 9.45, y: 4.05, z: 1.4), 0xFFC66B, 160),
-            (GridPoint(x: 9.5, y: 1.4, z: 2.4), 0x7CFF4F, 120),
-            (GridPoint(x: 3.6, y: 0.4, z: 3.4), 0x9AA8FF, 170),
-        ]
-        for (at, hex, size) in lights {
-            nightLights.append(glow(at, hex, size))
-        }
         monitorLight = glow(GridPoint(x: 0.6, y: 2.0, z: 2.1), 0x3EF0FF, 120)
-        daylight.texture = HomeEffects.glow
-        daylight.size = CGSize(width: 300, height: 300)
-        daylight.position = HomeGrid.scene(HomeGrid.plan(3.6, 1.0, 2.6))
-        daylight.color = UIColorBridge.color(0xFFF1C2)
-        daylight.colorBlendFactor = 1
-        daylight.blendMode = .add
-        daylight.alpha = 0.35
-        daylight.zPosition = 51
-        addChild(daylight)
 
         addChild(haku)
+    }
+
+    /// The hard shadow the floating room casts on the page.
+    private func islandShadow() -> SKSpriteNode {
+        let n = HomeGrid.size
+        let t = HomeGrid.wallThickness
+        let z = -HomeGrid.slab
+        let corners = [(-t, -t), (n, -t), (n, n), (-t, n)].map { x, y in
+            let p = HomeGrid.plan(x, y, z)
+            return CGPoint(x: p.x, y: p.y + 7)
+        }
+        let rect = HomeGrid.canvas
+        let shadow = SKSpriteNode()
+        place(
+            shadow, rect,
+            HomeTextures.texture(rect) {
+                IsoPen(context: $0).polygon(corners, Color(hex: 0x2D2416).opacity(0.16), line: 0)
+            })
+        shadow.zPosition = -11
+        return shadow
     }
 
     private func glow(_ at: GridPoint, _ hex: UInt32, _ size: CGFloat) -> SKSpriteNode {
@@ -154,54 +142,41 @@ final class HomeScene: SKScene {
         sprite.position = HomeGrid.scene(p)
     }
 
-    private func drawStaticPieces() {
-        let fixed: [HomePiece] = [
-            .desk, .chairSeat, .chairBack, .shelf, .posters, .table, .shop, .bed, .nightstand, .floorLamp,
-            .windowPlant, .doormat,
-        ]
-        for piece in fixed {
-            draw(piece) { pen in
-                switch piece {
-                case .desk: HomeArt.desk(pen)
-                case .chairSeat: HomeArt.chairSeat(pen)
-                case .chairBack: HomeArt.chairBack(pen)
-                case .shelf: HomeArt.shelf(pen)
-                case .posters: HomeArt.posters(pen)
-                case .table: HomeArt.table(pen)
-                case .shop: HomeArt.shop(pen)
-                case .bed: HomeArt.bed(pen)
-                case .nightstand: HomeArt.nightstand(pen)
-                case .floorLamp: HomeArt.floorLamp(pen)
-                case .windowPlant: HomeArt.plant(pen, at: 5.7, 0.8, size: 1.0, pot: 0xFF8FC8)
-                case .doormat: HomeArt.doormat(pen)
-                default: break
-                }
-            }
+    /// The render that shows `piece` with the colours picked now.
+    private func layer(_ piece: HomePiece, covering: Bool) -> String {
+        func painted(_ name: String, _ paintable: HomePaintable) -> String {
+            HomeRenders.layer(name, swatch: model.colors[paintable] ?? 0)
         }
-    }
-
-    private func draw(_ piece: HomePiece, _ art: @escaping (IsoPen) -> Void) {
-        guard let sprite = pieces[piece] else { return }
-        let rect = HomeGrid.bounds(piece.boxes, margin: piece == .windowPlant ? 30 : 10)
-        place(sprite, rect, HomeTextures.texture(rect) { art(IsoPen(context: $0)) })
+        switch piece {
+        case .sofaBack, .sofaFarArm, .sofaSeat, .sofaNearArm: return painted(piece.rawValue, .sofa)
+        case .rug: return painted(piece.rawValue, .rug)
+        case .blanket: return painted(covering ? "blanketCover" : "blanket", .bed)
+        default: return piece.rawValue
+        }
     }
 
     // MARK: Syncing with the model
 
     /// Brings the drawing up to date with the model.
     func sync(animated: Bool = true) {
-        let colors = Dictionary(uniqueKeysWithValues: HomePaintable.allCases.map { ($0, model.color($0)) })
+        let colors = model.colors
         if colors != shownColors {
-            redraw(colors)
+            redraw(flashing: shownColors != nil)
             shownColors = colors
         }
         let outfits = HomeOutfit.allCases.filter { model.ownedOutfits.contains($0) }
         if outfits != shownOutfits {
             shownOutfits = outfits
-            draw(.wardrobe) { HomeArt.wardrobe($0, owned: outfits) }
+            let rect = HomeGrid.bounds(HomePiece.wardrobe.boxes)
+            place(clothes, rect, HomeTextures.texture(rect) { HomeArt.clothes(IsoPen(context: $0), owned: outfits) })
         }
-        for item in model.items where itemNodes[item] == nil {
+        let items = model.items
+        for item in items where itemNodes[item] == nil {
             addItem(item)
+        }
+        for (item, node) in itemNodes where !items.contains(item) {
+            node.removeFromParent()
+            itemNodes[item] = nil
         }
         if model.isNight != shownNight {
             setNight(model.isNight, animated: animated && shownNight != nil)
@@ -214,46 +189,28 @@ final class HomeScene: SKScene {
         updateScreen()
     }
 
-    private func redraw(_ colors: [HomePaintable: UInt32]) {
-        let walls = colors[.walls] ?? HomePaintable.walls.swatches[0]
-        let sofa = colors[.sofa] ?? HomePaintable.sofa.swatches[0]
-        let rug = colors[.rug] ?? HomePaintable.rug.swatches[0]
-        if colors[.walls] != shownColors[.walls] {
-            let rect = HomeGrid.canvas
-            place(shell, rect, HomeTextures.texture(rect) { HomeArt.shell(IsoPen(context: $0), walls: walls) })
-            draw(.partition) { HomeArt.partition($0, walls: walls) }
+    private func redraw(flashing: Bool) {
+        let night = model.isNight
+        shell.show(HomeRenders.layer("shell", swatch: model.colors[.walls] ?? 0), night: night)
+        for (piece, node) in pieces {
+            node.show(layer(piece, covering: shownCovering == true), night: night)
         }
-        if colors[.sofa] != shownColors[.sofa] {
-            draw(.sofaBack) { HomeArt.sofaBack($0, sofa) }
-            draw(.sofaFarArm) { HomeArt.sofaArm($0, sofa, near: false) }
-            draw(.sofaSeat) { HomeArt.sofaSeat($0, sofa) }
-            draw(.sofaNearArm) { HomeArt.sofaArm($0, sofa, near: true) }
-        }
-        if colors[.rug] != shownColors[.rug] {
-            draw(.rug) { HomeArt.rug($0, rug) }
-        }
-        if colors[.bed] != shownColors[.bed] { shownCovering = nil }
-        if !shownColors.isEmpty { flash() }
+        if flashing { flash() }
     }
 
     private func drawBlanket(covering: Bool) {
         guard covering != shownCovering else { return }
         shownCovering = covering
-        let color = model.color(.bed)
-        draw(.blanket) { HomeArt.blanket($0, color, covering: covering) }
+        pieces[.blanket]?.show(layer(.blanket, covering: covering), night: model.isNight)
     }
 
     private func addItem(_ item: HomeItem) {
-        let sprite = SKSpriteNode()
         let s = item.spot
-        let box = GridBox(x0: s.x - 0.5, y0: s.y - 0.5, x1: s.x + 0.5, y1: s.y + 0.5, z0: s.z, z1: s.z + 2.8)
-        let rect = HomeGrid.bounds([box], margin: item == .plant ? 30 : 8)
-        place(
-            sprite, rect, HomeTextures.texture(rect) { HomeArt.item(IsoPen(context: $0), item) },
-            pin: HomeGrid.plan(s))
-        sprite.zPosition = CGFloat(item.depth)
-        itemNodes[item] = sprite
-        addChild(sprite)
+        let node = HomeLayerNode(pivot: HomeGrid.scene(HomeGrid.plan(s.x, s.y, s.z)))
+        node.show("item-\(item.rawValue)", night: model.isNight)
+        node.zPosition = CGFloat(item.depth)
+        itemNodes[item] = node
+        addChild(node)
     }
 
     private func setNight(_ night: Bool, animated: Bool) {
@@ -267,10 +224,10 @@ final class HomeScene: SKScene {
         }
         fade(skyNight, night ? 1 : 0)
         fade(skyDay, night ? 0 : 1)
-        fade(shade, night ? 1 : 0)
-        fade(sun, night ? 0 : 1)
-        fade(daylight, night ? 0 : 0.35)
-        for light in nightLights { fade(light, night ? 0.85 : 0) }
+        fade(clothes, night ? 0.6 : 1)
+        for node in [shell] + Array(pieces.values) + Array(itemNodes.values) {
+            node.setNight(night, duration: duration)
+        }
     }
 
     private func updateScreen() {
@@ -282,7 +239,7 @@ final class HomeScene: SKScene {
             }
         guard content != shownScreen else { return }
         shownScreen = content
-        let rect = HomeGrid.bounds([GridBox(x0: 0.3, y0: 1.2, x1: 0.36, y1: 2.8, z0: 1.65, z1: 2.52)], margin: 3)
+        let rect = HomeArt.screenRect
         screen.texture = HomeTextures.texture(rect) { HomeArt.screen(IsoPen(context: $0), content: content) }
         monitorLight.alpha = content == .off ? 0 : (model.isNight ? 0.8 : 0.35)
     }

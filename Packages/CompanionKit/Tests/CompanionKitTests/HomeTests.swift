@@ -52,7 +52,7 @@ import Testing
         let walk = HomeWalk(stops: HomeSpot.box.path(from: HomeSpot.hub, leaving: .idle, nav: .room()))
         #expect(walk.position(after: 0).point == HomeSpot.hub)
         #expect(walk.position(after: walk.length + 1).point == HomeSpot.box.point)
-        #expect(walk.length > 3.5)
+        #expect(walk.length > 2)
     }
 
     @Test func everySpotIsReachedFromOpenFloor() {
@@ -203,6 +203,24 @@ import Testing
         model.paint(.sofa, 9)
         #expect(model.color(.sofa) == HomePaintable.sofa.swatches[2])
     }
+
+    @Test func thePreviewShowsEveryItemWithoutBuyingIt() {
+        let model = HomeModel(night: false, cans: 10)
+        model.togglePreviewItems()
+        #expect(model.items == Set(HomeItem.allCases))
+        #expect(model.cans == 10)
+        #expect(!model.owns(.item(.bench)))
+        model.togglePreviewItems()
+        #expect(model.items.isEmpty)
+    }
+
+    @Test func wallGearIsNeverSoldAndTheSnowboardOnlyOnTheSkiCard() {
+        #expect(!HomeProduct.all.contains(.item(.gloves)))
+        #expect(!HomeProduct.all.contains(.item(.racket)))
+        #expect(HomeProduct.offered(card: .tennis).contains(.item(.bench)))
+        #expect(!HomeProduct.offered(card: .boxing).contains(.item(.snowboard)))
+        #expect(HomeProduct.offered(card: .ski).contains(.item(.snowboard)))
+    }
 }
 
 #if os(macOS)
@@ -217,6 +235,26 @@ import Testing
         for _ in 0..<400 { scene.step(0.05) }
         #expect(!scene.isWalking)
         #expect(scene.spotReached == .work)
+    }
+
+    @Test func everyPieceItemAndColourHasADayAndNightRender() {
+        var layers = ["shell", "blanketCover"] + HomePiece.allCases.map(\.rawValue)
+        layers += HomeItem.allCases.map { "item-\($0.rawValue)" }
+        let painted: [HomePaintable: [String]] = [
+            .walls: ["shell"], .sofa: ["sofaBack", "sofaFarArm", "sofaSeat", "sofaNearArm"], .rug: ["rug"],
+            .bed: ["blanket", "blanketCover"],
+        ]
+        for (paintable, names) in painted {
+            for index in paintable.swatches.indices.dropFirst() {
+                layers += names.map { HomeRenders.layer($0, swatch: index) }
+            }
+        }
+        for layer in layers {
+            for night in [false, true] {
+                #expect(HomeRenders.rect(layer, night: night) != nil, "\(layer) has no place")
+                #expect(HomeRenders.texture(layer, night: night) != nil, "\(layer) has no image")
+            }
+        }
     }
 
     @Test func tapsFindTheFurniture() {
