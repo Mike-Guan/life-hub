@@ -92,12 +92,19 @@ import Testing
         pose.scene = .dried(time: 1)
         let dried = Set(KuroFigure.parts(for: .work, pose: pose))
         #expect(dried.contains(.bathTurban) && !dried.contains(.setRainHat) && dried.contains(.setRainTop))
-        // From behind she keeps the hat but shows her own plain top.
-        pose.scene = nil
+    }
+
+    @Test(arguments: clothes)
+    func fromBehindSheShowsHerClothesPlainBack(_ item: KuroItem) throws {
+        let clothes = try #require(item.clothes)
+        var pose = KuroPose(look: item.look, energy: nil)
+        pose.items = [item]
         pose.tap = .turnAway
         pose.tapProgress = 0.5
-        let back = Set(KuroFigure.parts(for: .work, pose: pose))
-        #expect(back.isSuperset(of: [.setRainHat, .backHead, .jacketWork]) && !back.contains(.setRainTop))
+        let back = Set(KuroFigure.parts(for: item.look, pose: pose))
+        #expect(back.isSuperset(of: [clothes.back, .backHead]))
+        #expect(!back.contains(clothes.top) && !back.contains(KuroFigure.jacket(item.look)))
+        if let hat = clothes.hat { #expect(back.contains(hat)) }
     }
 
     @Test func actingCalmFlattensHerMouthButKeepsTheBlush() {

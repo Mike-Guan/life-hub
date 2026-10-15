@@ -64,14 +64,20 @@ public enum KuroItem: String, CaseIterable, Sendable {
     /// The parts a top or set draws in place of her own top, or nil for anything else.
     var clothes: KuroClothes? {
         switch self {
-        case .workBlouse: KuroClothes(part, .topWorkSailorRubSleeve, .topWorkSailorInviteSleeve)
-        case .workVest: KuroClothes(part, .topWorkArgyleRubSleeve, .topWorkArgyleInviteSleeve)
-        case .chillCardigan: KuroClothes(part, .topChillStrawberryRubSleeve, .topChillStrawberryInviteSleeve)
-        case .chillHoodie: KuroClothes(part, .topChillCathoodieRubSleeve, .topChillCathoodieInviteSleeve)
-        case .sideSmock: KuroClothes(part, .topSideGinghamRubSleeve, .topSideGinghamInviteSleeve)
-        case .sideDenim: KuroClothes(part, .topSideDenimRubSleeve, .topSideDenimInviteSleeve)
-        case .picnic: KuroClothes(part, .setPicnicRubSleeve, .setPicnicInviteSleeve, hat: .setPicnicHat)
-        case .rain: KuroClothes(part, .setRainRubSleeve, .setRainInviteSleeve, hat: .setRainHat)
+        case .workBlouse:
+            KuroClothes(part, .topWorkSailorRubSleeve, .topWorkSailorInviteSleeve, back: .topWorkSailorBack)
+        case .workVest: KuroClothes(part, .topWorkArgyleRubSleeve, .topWorkArgyleInviteSleeve, back: .topWorkArgyleBack)
+        case .chillCardigan:
+            KuroClothes(
+                part, .topChillStrawberryRubSleeve, .topChillStrawberryInviteSleeve, back: .topChillStrawberryBack)
+        case .chillHoodie:
+            KuroClothes(part, .topChillCathoodieRubSleeve, .topChillCathoodieInviteSleeve, back: .topChillCathoodieBack)
+        case .sideSmock:
+            KuroClothes(part, .topSideGinghamRubSleeve, .topSideGinghamInviteSleeve, back: .topSideGinghamBack)
+        case .sideDenim: KuroClothes(part, .topSideDenimRubSleeve, .topSideDenimInviteSleeve, back: .topSideDenimBack)
+        case .picnic:
+            KuroClothes(part, .setPicnicRubSleeve, .setPicnicInviteSleeve, back: .setPicnicBack, hat: .setPicnicHat)
+        case .rain: KuroClothes(part, .setRainRubSleeve, .setRainInviteSleeve, back: .setRainBack, hat: .setRainHat)
         default: nil
         }
     }
@@ -99,13 +105,16 @@ struct KuroClothes: Sendable {
     var rubSleeve: KuroPart
     /// Drawn in place of her own sleeve when she points to invite.
     var inviteSleeve: KuroPart
+    /// Drawn in place of her look's jacket when she turns away: only its outline and colour.
+    var back: KuroPart
     /// A set's hat, under her cat ears.
     var hat: KuroPart?
 
-    init(_ top: KuroPart, _ rubSleeve: KuroPart, _ inviteSleeve: KuroPart, hat: KuroPart? = nil) {
+    init(_ top: KuroPart, _ rubSleeve: KuroPart, _ inviteSleeve: KuroPart, back: KuroPart, hat: KuroPart? = nil) {
         self.top = top
         self.rubSleeve = rubSleeve
         self.inviteSleeve = inviteSleeve
+        self.back = back
         self.hat = hat
     }
 }

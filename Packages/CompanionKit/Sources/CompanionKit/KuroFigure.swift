@@ -251,18 +251,14 @@ struct KuroFigure: View {
     }
 
     // Her own top stays wherever a scene or tap leaves it, so the clothes go only where it is drawn. UI 审核
-    // 2026-10-14: from behind, no front pattern shows, so her own plain top stays until the clothes have backs;
-    // the set hats look the same from behind.
-    /// Swaps her own top, sleeves and, for the rain set, cat ears in `visible` for `clothes`; when `back`, only the
-    /// hat changes.
+    // 2026-10-14: from behind, no front pattern shows, and the set hats look the same from behind.
+    /// Swaps her own top, sleeves and, for the rain set, cat ears in `visible` for `clothes`; when `back`, the top
+    /// is the clothes' plain back.
     nonisolated private static func dress(
         _ look: KuroLook, in clothes: KuroClothes, back: Bool, _ visible: inout Set<KuroPart>
     ) {
-        if visible.contains(jacket(look)) {
-            if !back {
-                visible.remove(jacket(look))
-                visible.insert(clothes.top)
-            }
+        if visible.remove(jacket(look)) != nil {
+            visible.insert(back ? clothes.back : clothes.top)
             // A hat goes where her cat ears are; the bath towel takes both off. The rain hat draws its own ears.
             if let hat = clothes.hat, visible.contains(.catEars) {
                 visible.insert(hat)
