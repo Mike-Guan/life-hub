@@ -258,6 +258,7 @@ enum Placement {
         .eyesHappy: Spot(.eyes, "眼睛"),
         .eyesSurprised: Spot(.eyes, "眼睛"),
         .eyesLow: Spot(.eyes, "眼睛"),
+        .eyesWink: Spot(.eyes, "眼睛"),
         .eyesFull: Spot(.eyes, "眼睛"),
         .deskGlasses: Spot(.eyes, "deskGlasses"),
         .maskWork: Spot(.maskFace, "maskWork"),
@@ -284,6 +285,11 @@ enum Placement {
         .juggleRacket: Spot(.handR, "tennisRacket"),
         .itemSpin: .fx,
         .workTablet: Spot(.handsFront, "workTablet"),
+        // Watch only (UI 审核 10/14, map §9.5): the same props held higher, in the same hands.
+        .watchRacket: Spot(.handR, "tennisRacket"),
+        .watchBooks: Spot(.handR, "deskBooks"),
+        .watchCup: Spot(.handR, "chillCup"),
+        .watchTablet: Spot(.handsFront, "workTablet"),
         .tapTablet: Spot(.handsFront, "tapTablet"),
         .tapCup: Spot(.handsFront, "tapCup"),
         .overtimeHand: Spot(.handsFront, "overtimeHand"),
@@ -317,6 +323,14 @@ enum Placement {
         .snowBits: .fx,
         .sneezePuff: .fx,
         .studyMark: .fx,
+        // Base-outfit idles (K4-K7, K10-K11, UI 四组 2026-10-14): the card props go down out of the frame first.
+        .idleStrand: .figure,
+        .idleReach: Spot(.handsFront, "伸展"),
+        .idleTowelWipe: Spot(.handR, "毛巾"),
+        .idleTuckHand: Spot(.handR, "别头发"),
+        .idleFrameHands: Spot(.handsFront, "取景框"),
+        .idleCollarHands: Spot(.handsFront, "整理领口"),
+        .idlePhone: Spot(.handsFront, "手机"),
         .itemFlower: Spot(.corner1, "itemFlower"),
         .itemLamp: Spot(.corner1, "itemLamp"),
         .itemBag: Spot(.corner1, "itemBag"),
@@ -468,7 +482,7 @@ enum Placement {
     // §9.4: her blanket on the lap never comes with a book or a hot drink in hand. The cup at rest stands in front of
     // the blanket, so only drinking (tapCup) counts.
     /// Pairs of KURO's parts that never show together.
-    static let kuroForbidden: [(KuroPart, KuroPart)] = [KuroPart.tapCup, .deskBooks].map {
+    static let kuroForbidden: [(KuroPart, KuroPart)] = [KuroPart.tapCup, .deskBooks, .watchBooks].map {
         (.itemBlanket, $0)
     }
 
@@ -597,9 +611,12 @@ enum Placement {
     @Test func kuroKeepsOneThingPerPlace() {
         var found: [String: String] = [:]
         for state in PlacementPoses.kuro {
-            let parts = KuroFigure.parts(for: state.look, pose: state.pose)
-            for conflict in Placement.conflicts(in: parts, spots: Placement.kuro, forbidden: Placement.kuroForbidden) {
-                found[conflict] = found[conflict] ?? state.label
+            for watch in [false, true] {
+                let parts = KuroFigure.parts(for: state.look, pose: state.pose, watch: watch)
+                let spots = Placement.kuro
+                for conflict in Placement.conflicts(in: parts, spots: spots, forbidden: Placement.kuroForbidden) {
+                    found[conflict] = found[conflict] ?? state.label + (watch ? " watch" : "")
+                }
             }
         }
         check(found, known: Placement.kuroKnown)

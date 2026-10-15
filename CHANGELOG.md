@@ -5,7 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
-- The second preset character has her own seven weekly items, in her own rotation. They go on sale once
+- Two new wear slots for weekly items: a badge on the clothes, worn in every mode, and a hat, worn only in
+  下班. HAKU's star badge and both characters' beanies use them and go on sale once their art is in.
+- The second preset character has her own eight weekly items, in her own rotation. They go on sale once
   their art is in.
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
@@ -44,6 +46,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 - Debug builds have a 「日文和英文」 switch in settings. It is off by default, so every build shows Chinese
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
+- The second preset character has two small idle moves in each base outfit: in sportswear she reaches up onto her
+  toes or wipes her forehead with a towel, in the smock she tucks her hair behind her ear or makes a viewfinder
+  with her hands, and in the lilac top she straightens her collar or smiles at her phone.
 - HAKU's eight pop clothes are in the shop: two tops for each of work, off work and 副业, plus the varsity
   and raincoat sets. Each is worn only in its mode, in place of the jacket. The hoodie strings and the
   raincoat's duck swing a little with his breath.
@@ -52,6 +57,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Both characters now dress for the picked identity card on the home screen, in widgets, in the notification
   and in onboarding, not only in the shop and wardrobe. On the home screen the second preset character also
   points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
+- On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
+  screen edge no longer cuts them off. The iPhone is unchanged.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
@@ -101,6 +108,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- On the watch the second preset character holds her racket, books, cup and tablet higher, so the bottom of the
+  screen no longer cuts them off. The pen, stylus and badge are left off on the watch. The iPhone is unchanged.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
 - When the mode switches on its own, at a place, the character fades into the new outfit like a manual switch
