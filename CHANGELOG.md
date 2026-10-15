@@ -98,7 +98,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
   names two apps and says only this iPhone knows how long you scrolled.
 - On the iPhone home screen HAKU stands 24 pt lower, so a one-line speech bubble no longer covers the tips of
-  his hair, the headset band or the gift box on his head, also on the smallest iPhone. The watch is unchanged.
+  its hair, the headset band or the gift box on its head, also on the smallest iPhone. The watch is unchanged.
 - Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
   The cheer hop is lower, so the hair stays inside the card.
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
