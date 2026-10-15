@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Preview only (#392): Japanese font shots on Pro Max and SE, plus one Chinese SE home.
+# Preview only (D5): the longest line in each language over HAKU, three bubble variants, SE and Pro Max.
 set -euo pipefail
 out=docs/screenshots
 rm -rf "$out"
@@ -19,7 +19,6 @@ xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-iOS -configur
 app=build/Build/Products/Debug-iphonesimulator/LifeHub.app
 codesign --force --deep --sign - "$app"
 bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$app/Info.plist")
-ja=(-AppleLanguages "(ja)" -AppleLocale ja_JP -languages.on YES)
 shot() {
   local device=$1 name=$2
   shift 2
@@ -27,23 +26,23 @@ shot() {
   sleep 6
   xcrun simctl io "$device" screenshot "$out/$name.png"
 }
-for pair in "$pro:promax" "$se:se"; do
+for pair in "$se:se" "$pro:promax"; do
   d=${pair%%:*}
   p=${pair##*:}
   xcrun simctl install "$d" "$app"
-  xcrun simctl launch "$d" "$bundle" -screenshot-growth shop "${ja[@]}"
+  xcrun simctl launch "$d" "$bundle" -screenshot-mode chill
   sleep 12
-  shot "$d" "$p-ja-home" -screenshot-mode chill "${ja[@]}"
-  shot "$d" "$p-ja-home-line" -screenshot-mode chill -screenshot-line "玄関のバッグがこっち見てる。" "${ja[@]}"
-  shot "$d" "$p-ja-home-line2" -screenshot-mode chill -screenshot-line "ソファのひじ掛けだけが味方。" "${ja[@]}"
-  shot "$d" "$p-ja-shop" -screenshot-growth shop -screenshot-persona haku "${ja[@]}"
-  shot "$d" "$p-ja-settings" -screenshot-settings card "${ja[@]}"
-  shot "$d" "$p-ja-onboarding-persona" -screenshot-onboarding persona "${ja[@]}"
-  shot "$d" "$p-ja-onboarding-intro" -screenshot-onboarding intro "${ja[@]}"
-  shot "$d" "$p-ja-wardrobe-art" -screenshot-growth wardrobe -screenshot-identity art "${ja[@]}"
+  for v in a b c; do
+    for mode in chill work; do
+      shot "$d" "$p-$v-$mode-zh" -screenshot-mode "$mode" -bubble-variant "$v" \
+        -screenshot-line "拳套有点味道。不是我的问题。" -AppleLanguages "(zh-Hans)" -languages.on NO
+      shot "$d" "$p-$v-$mode-ja" -screenshot-mode "$mode" -bubble-variant "$v" \
+        -screenshot-line "時計は進む。俺らは進まない。" -AppleLanguages "(ja)" -AppleLocale ja_JP -languages.on YES
+      shot "$d" "$p-$v-$mode-en" -screenshot-mode "$mode" -bubble-variant "$v" \
+        -screenshot-line "Something's coming up. Get up and get ready?" -AppleLanguages "(en)" -AppleLocale en_US \
+        -languages.on YES
+    done
+  done
 done
-shot "$se" "se-zh-home" -screenshot-mode chill -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN -languages.on NO
-shot "$se" "se-zh-home-line" -screenshot-mode chill -screenshot-line "门口那个包，在看你。" \
-  -AppleLanguages "(zh-Hans)" -AppleLocale zh_CN -languages.on NO
 xcrun simctl delete "$se"
 ls -l "$out"

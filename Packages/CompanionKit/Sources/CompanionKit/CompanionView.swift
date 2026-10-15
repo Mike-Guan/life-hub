@@ -209,7 +209,7 @@ public struct CompanionView: View {
             // once. Every mode change now fades in 0.3 s, whoever made it.
             character
                 .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: mode)
-                .padding(.top, 24)
+                .padding(.top, UserDefaults.standard.string(forKey: "bubble-variant") == "b" ? 36 : 24)
                 .padding(.horizontal, 12)
                 .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
                 .animation(.smooth(duration: 0.35), value: closeUp)
@@ -222,7 +222,8 @@ public struct CompanionView: View {
 
             if showsBubble, let bubble {
                 SpeechBubble(text: bubble)
-                    .padding(12)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, UserDefaults.standard.string(forKey: "bubble-variant") == "c" ? 4 : 12)
                     .frame(
                         maxWidth: .infinity,
                         maxHeight: .infinity,
@@ -1474,10 +1475,10 @@ struct SpeechBubble: View {
 
     var body: some View {
         Text(text)
-            .font(Toy.body(15, weight: .bold))
+            .font(Toy.body(UserDefaults.standard.string(forKey: "bubble-variant") == "c" ? 14 : 15, weight: .bold))
             .foregroundStyle(Toy.ink)
             .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.vertical, UserDefaults.standard.string(forKey: "bubble-variant") == "c" ? 6 : 8)
             .toyCard(fill: Toy.card, radius: 12, shadow: 3)
     }
 }
