@@ -95,6 +95,13 @@ import Testing
         #expect(RunnerFigure.baseParts.isSubset(of: parts))
     }
 
+    @Test func anotherCardWarmsUpWithoutTheBoxingKit() {
+        var pose = RunnerPose(need: .boxingWarmup)
+        pose.otherCard = true
+        let parts = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(parts.isDisjoint(with: [.headband, .gloveL, .gloveR]))
+    }
+
     @Test func warmupLooksAtTheDoorNowAndThen() {
         let glances = (0..<80).map {
             RunnerPose(mode: .chill, time: Double($0) * 0.05, face: .mid, need: .boxingWarmup, react: 0).eyesDx

@@ -515,6 +515,7 @@ public struct CompanionView: View {
         if reduceMotion {
             var pose = RunnerPose(face: face, need: shownNeed, life: life, activity: activity, moment: shownMoment)
             pose.codingCans = codingCans
+            pose.otherCard = RunnerCardLook(card: card) != nil
             if stage == .peeking { pose.bagLift = 0 }
             if stage == .up { pose.bagLift = 1 }
             pose.headDy += vitals.slouch
@@ -540,6 +541,7 @@ public struct CompanionView: View {
             react: react
         )
         pose.codingCans = codingCans
+        pose.otherCard = RunnerCardLook(card: card) != nil
         pose.headDy += vitals.slouch
         if stage == .peeking { pose.peekAtBag(time: time) }
         if stage == .up { pose.bagLift = 1 }
