@@ -329,6 +329,19 @@ import Testing
         #expect(CompanionView.newCelebration(.offWork(id: "2026-10-05"), last: "") == nil)
     }
 
+    @Test func heldOffWorkLetsGoTheNextDay() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        let start = Date(timeIntervalSince1970: 1_760_000_000)
+        let later = start.addingTimeInterval(3600)
+        let nextDay = calendar.date(byAdding: .day, value: 1, to: start)!
+        #expect(CompanionView.holdsOffWork(since: start, mode: .work, at: later, calendar: calendar))
+        #expect(!CompanionView.holdsOffWork(since: start, mode: .work, at: nextDay, calendar: calendar))
+        #expect(!CompanionView.holdsOffWork(since: start, mode: .chill, at: later, calendar: calendar))
+        #expect(!CompanionView.holdsOffWork(since: nil, mode: .work, at: later, calendar: calendar))
+        #expect(!CompanionView.holdsOffWork(since: later, mode: .work, at: start, calendar: calendar))
+    }
+
     @Test(arguments: Mode.allCases)
     func offWorkGoesFromHeadsetToMonster(_ mode: Mode) {
         let start = Set(RunnerFigure.parts(for: mode, pose: RunnerPose.offWork(time: 0, progress: 0, face: .mid)))
@@ -1304,6 +1317,17 @@ import Testing
         #expect(RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
         pose.bedtime = true
         #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
+    }
+
+    @Test @MainActor func aStillPortraitStandsWhateverTheHour() {
+        let slots = (0..<96).map { Date(timeIntervalSince1970: 1_760_000_000 + Double($0) * IdleLife.slotLength) }
+        #expect(slots.contains { CompanionPortrait(mode: .chill, date: $0).pose.life != nil })
+        for date in slots {
+            let still = CompanionPortrait(mode: .chill, date: date, idles: false).pose
+            #expect(still.life == nil)
+            #expect(still.eyesDx == 0)
+            #expect(RunnerFigure.parts(for: .chill, pose: still) == RunnerFigure.parts(for: .chill, pose: RunnerPose()))
+        }
     }
 
     @Test func everySlotHasAShowcaseMode() {
