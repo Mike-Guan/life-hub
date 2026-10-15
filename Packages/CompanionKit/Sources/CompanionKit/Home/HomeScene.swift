@@ -316,7 +316,7 @@ final class HomeScene: SKScene {
             return
         }
         guard reached != spot else { return }
-        let stops = spot.path(from: point, leaving: reached)
+        let stops = spot.path(from: point, leaving: reached, nav: .room(items: model.items))
         walk = HomeWalk(stops: stops)
         walked = 0
         reached = nil

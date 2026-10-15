@@ -183,6 +183,14 @@ enum HomePiece: String, CaseIterable, Sendable {
         }
     }
 
+    /// Whether HAKU walks around the piece.
+    var blocksWalking: Bool {
+        switch self {
+        case .shelf, .posters, .rug, .doormat, .blanket: false
+        default: true
+        }
+    }
+
     /// What tapping the piece points at, or `nil` when it does nothing.
     var hotspot: HomeHotspot? {
         switch self {
@@ -212,6 +220,16 @@ enum HomeItem: String, CaseIterable, Sendable {
         }
     }
 
+    /// The floor the item takes up, or `nil` when it stands on furniture.
+    var footprint: GridBox? {
+        let r = 0.3
+        switch self {
+        case .cactus: return nil
+        case .plant, .bag, .speaker:
+            return GridBox(x0: spot.x - r, y0: spot.y - r, x1: spot.x + r, y1: spot.y + r, z1: 1)
+        }
+    }
+
     var depth: Double {
         switch self {
         case .plant: 10.0
@@ -222,11 +240,11 @@ enum HomeItem: String, CaseIterable, Sendable {
     }
 }
 
-/// A place HAKU goes to, with the way there from the middle of the rug.
+/// A place HAKU goes to, and the floor point he steps on or off it from.
 enum HomeSpot: String, CaseIterable, Sendable {
     case idle, work, side, sofa, rest, box, shadowbox, wardrobe, shop, window
 
-    /// The middle of the rug, where every walk passes through.
+    /// The middle of the rug, where HAKU waits.
     static let hub = GridPoint(x: 5.2, y: 6.6)
 
     /// Where HAKU's feet, seat or hips are.
@@ -235,25 +253,21 @@ enum HomeSpot: String, CaseIterable, Sendable {
         case .idle, .shadowbox: Self.hub
         case .work, .side: GridPoint(x: 2.05, y: 1.85, z: 0.75)
         case .sofa: GridPoint(x: 1.9, y: 6.0, z: 0.6)
-        case .rest: GridPoint(x: 8.1, y: 7.7, z: 0.65)
+        case .rest: GridPoint(x: 8.0, y: 8.1, z: 0.65)
         case .box: GridPoint(x: 4.6, y: 3.0)
         case .wardrobe: GridPoint(x: 7.85, y: 2.0)
-        case .shop: GridPoint(x: 9.5, y: 2.3)
+        case .shop: GridPoint(x: 9.3, y: 2.0)
         case .window: GridPoint(x: 3.6, y: 1.1)
         }
     }
 
-    /// Stops between the hub and the spot, in walking order.
-    var route: [GridPoint] {
+    /// The open floor next to a seat that HAKU walks to before getting on; the point itself elsewhere.
+    var approach: GridPoint {
         switch self {
-        case .idle, .shadowbox: []
-        case .work, .side: [GridPoint(x: 4.8, y: 4.4), GridPoint(x: 3.2, y: 2.4)]
-        case .sofa: [GridPoint(x: 2.6, y: 7.4)]
-        case .rest: [GridPoint(x: 6.0, y: 9.3)]
-        case .box: [GridPoint(x: 4.8, y: 4.4)]
-        case .wardrobe: [GridPoint(x: 6.0, y: 4.0), GridPoint(x: 7.4, y: 3.0)]
-        case .shop: [GridPoint(x: 6.0, y: 4.0), GridPoint(x: 8.4, y: 3.2)]
-        case .window: [GridPoint(x: 4.8, y: 4.4)]
+        case .work, .side: GridPoint(x: 3.1, y: 1.9)
+        case .sofa: GridPoint(x: 2.6, y: 6.9)
+        case .rest: GridPoint(x: 6.1, y: 7.6)
+        default: point
         }
     }
 
@@ -288,13 +302,16 @@ enum HomeSpot: String, CaseIterable, Sendable {
         }
     }
 
-    /// The walk from `start` to this spot: back out of where HAKU was, through the hub, then in.
-    func path(from start: GridPoint, leaving previous: HomeSpot?) -> [GridPoint] {
+    /// The walk from `start` to this spot: off the seat HAKU was on, the shortest way across the floor, then on.
+    func path(from start: GridPoint, leaving previous: HomeSpot?, nav: HomeNav) -> [GridPoint] {
         var points = [start]
-        if let previous, previous != self { points += previous.route.reversed() }
-        if previous != self { points.append(Self.hub) }
-        points += route
-        points.append(point)
+        var from = start
+        if let previous, previous != self, start.distance(to: previous.point) < 0.05 {
+            from = previous.approach
+            points.append(from)
+        }
+        points += nav.path(from: from, to: approach).dropFirst()
+        if approach != point { points.append(point) }
         // Drop stops that repeat the one before.
         return points.enumerated().compactMap { i, p in
             i > 0 && points[i - 1].distance(to: p) < 0.01 ? nil : p
