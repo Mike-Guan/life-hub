@@ -102,7 +102,12 @@ struct SettingsView: View {
                     isPresented: Binding(get: { switchingTo != nil }, set: { if !$0 { switchingTo = nil } }),
                     presenting: switchingTo
                 ) { next in
-                    Button("换") { persona = next }
+                    Button("换") {
+                        #if DEBUG || ENV_STG
+                        ModeCards.switchWhileTrying(to: next, in: AppGroup.defaults)
+                        #endif
+                        persona = next
+                    }
                     Button("先不换", role: .cancel) {}
                 } message: { next in
                     Text(Self.switchMessage(from: persona, to: next))
@@ -110,6 +115,13 @@ struct SettingsView: View {
                 Text("每个角色有自己的能量罐和东西，换过去从零开始，原来的都留着。生活记录和规则都不变。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+                #if DEBUG || ENV_STG
+                Toggle("连同她的默认模式一起试", isOn: tryDefaultsBinding)
+                    .font(Toy.body(15))
+                Text("打开后先用这个角色的默认模式卡，你自己的卡先存起来；关掉就换回来。地点和学到的作息不变。只在测试版里有。")
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.muted)
+                #endif
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -150,6 +162,16 @@ struct SettingsView: View {
                 Text("到公司才切到上班。在上班的日子，下班前 \(ModeRules.offWorkLead) 分钟提醒一次。晚间延长打开后，下班后还在公司就托腮等到延长时间。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+            }
+            .padding(16)
+            .toyCard()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("模式卡名字")
+                    .font(Toy.body(16, weight: .heavy))
+                placeRow(title: commonCardNames, detail: "") {
+                    answering = StepEdit(step: .cards)
+                }
             }
             .padding(16)
             .toyCard()
@@ -198,6 +220,10 @@ struct SettingsView: View {
                 answering = nil
             }
         }
+    }
+
+    private var commonCardNames: String {
+        cards.modes.filter { $0 != .boxing }.map { cards.title(for: $0, persona: persona) }.joined(separator: " · ")
     }
 
     // Issue #416: 周一到周五 as one phrase, else the days in order, Monday first.
@@ -360,6 +386,23 @@ struct SettingsView: View {
         .familyActivityPicker(isPresented: $pickingApps, selection: $scrollApps)
         .onChange(of: scrollApps) { watchScrolling() }
     }
+
+    #if DEBUG || ENV_STG
+    // 角色切换 正式版 v0 §3: test builds try a character with her default cards; off puts the user's own back.
+    private var tryDefaultsBinding: Binding<Bool> {
+        Binding(
+            get: { ModeCards.isTrying(in: AppGroup.defaults) },
+            set: { on in
+                if on {
+                    ModeCards.tryDefaults(of: persona, from: persona, in: AppGroup.defaults)
+                } else {
+                    ModeCards.restoreOwn(in: AppGroup.defaults)
+                }
+                cards = .current(in: AppGroup.defaults, persona: persona)
+            }
+        )
+    }
+    #endif
 
     // Debug only (Issue #350): Japanese and English stay off until every string is in and reviewed. Not in STG,
     // because friends get the same STG build through TestFlight.
