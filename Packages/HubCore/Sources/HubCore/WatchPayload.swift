@@ -93,6 +93,12 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         WidgetSnapshot.timelineDates(after: date, bedtime: bedtime, needTimes: snapshot.needTimes, calendar: calendar)
     }
 
+    /// The identity card picked for `mode`'s slot, from the iPhone's cards or the character's defaults; `nil`
+    /// outside that slot or for the character's default card.
+    public func card(for mode: Mode) -> IdentityKind? {
+        (cards ?? .legacy(for: persona)).pickedIdentity(for: mode, persona: persona)
+    }
+
     // An older iPhone build may send a name that doesn't fit the watch's clock row.
     /// The name of the card in `mode`'s slot, from the iPhone's cards or the character's defaults, cut to
     /// `ModeCards.nameWidth`.

@@ -127,4 +127,16 @@ import Testing
         #expect(sent.scene(at: date(7, 23)) == late)
         #expect(payload().scene(at: date(7, 21)) == nil)
     }
+
+    @Test func carriesThePickedIdentityCard() {
+        var sent = payload()
+        #expect(sent.card(for: .boxing) == nil)
+        sent.cards = ModeCards(identity: .study)
+        #expect(sent.card(for: .boxing) == .study)
+        #expect(sent.card(for: .chill) == nil)
+        // The character's own card draws her default look.
+        sent.persona = .kuro
+        sent.cards = ModeCards(identity: .tennis)
+        #expect(sent.card(for: .boxing) == nil)
+    }
 }
