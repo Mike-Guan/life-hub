@@ -78,14 +78,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   translation exists.
 - Settings shows the Daily Widget link only in DEV builds. Test builds don't offer it.
 - The shop no longer falls back to the character's old identity card when the saved cards can't be read.
+- Couch scrolling in the hours before bedtime (from 2.5 hours before it, and after midnight) no longer has HAKU
+  peek at the gym bag or send the couch invite. HAKU dozes off in the blanket instead, drawn like the blanket
+  until its own pose is approved.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
   places, Daily, saving records and the bedtime notification.
+- Test builds can try a character together with her default mode cards (Settings, under the characters). The
+  user's own cards are put aside and come back when the switch is turned off or the user switches back to
+  their own character; places and learned days stay.
 - Six lines now say only what the characters felt or sensed: the keepsake gift, the late-night line, the second
   preset character's boxing card line and keepsake line, the racket cheer and her focus-done line.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
   screen edge no longer cuts them off. The iPhone is unchanged.
+- Settings can rename the three common mode cards (上班, 下班, 副业), with the same card screen and length limit
+  as the first setup. Before, only the first setup could name them.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
@@ -141,6 +149,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   44 pt tap area. The shop banner grows with longer text instead of cutting it off.
 - Opening a keepsake or going through the first-run setup no longer uses up HAKU's late-night "还不睡。" or its
   slow look up after half a day away. Both now wait for the home screen.
+- The second preset character's identity-card idle moves now show on the home screen and in notifications.
+  Before, those screens didn't pass her card, so only her base moves played.
 - Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
   The cheer hop is lower, so the hair stays inside the card.
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and

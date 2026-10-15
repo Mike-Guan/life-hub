@@ -76,6 +76,20 @@ import Testing
         #expect(rules == .standard)
     }
 
+    @Test func settingsRenamesTheCommonCardsLater() {
+        var cards = ModeCards(identity: .boxing)
+        cards.rename(.chill, to: "躺平")
+        var rules = ModeRules.standard
+        var draft = OnboardingDraft.editing(.cards, persona: .haku, cards: cards, rules: rules)
+        #expect(draft.names == [Mode.chill.rawValue: "躺平"])
+        draft.names[Mode.work.rawValue] = "搬砖"
+        draft.names[Mode.chill.rawValue] = ""
+        draft.applyStep(to: &cards, rules: &rules)
+        #expect(cards.title(for: .work, persona: .haku) == "搬砖")
+        #expect(cards.names[Mode.chill.rawValue] == nil)
+        #expect(cards.identity == .boxing && rules == .standard)
+    }
+
     @Test func leavingHalfwayPicksUpAtTheSameStep() throws {
         let (defaults, suite) = try defaults()
         defer { defaults.removePersistentDomain(forName: suite) }

@@ -412,7 +412,7 @@ public enum NeedEngine {
 
     /// When the invite for `reading` should go out, at `now` or later, or `nil` when it shouldn't:
     /// the need ends first, today's invite went out, it would land at bedtime, or it's a couch invite
-    /// after a short night.
+    /// after a short night or in the hours before bedtime.
     /// - Parameters:
     ///   - lastInviteAt: when the last invite went out, `nil` if never.
     ///   - bedtime: the bedtime window, checked at the time the invite would go out.
@@ -430,6 +430,10 @@ public enum NeedEngine {
         guard let reading else { return nil }
         let at = max(reading.since.addingTimeInterval(inviteWait(reading.need, rules: rules)), now)
         guard reading.isActive(at: at) else { return nil }
+        // PM action table C2: no couch invite in the hours before bedtime, when HAKU dozes off instead.
+        if reading.need == .couchScroll, MomentEngine.isWindingDown(at, bedtime: bedtime, calendar: calendar) {
+            return nil
+        }
         let state = bedtime.state(at: at, calendar: calendar)
         let invite = shouldInvite(
             reading,

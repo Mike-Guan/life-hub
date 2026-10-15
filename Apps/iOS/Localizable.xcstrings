@@ -1286,6 +1286,22 @@
         }
       }
     },
+    "打开后先用这个角色的默认模式卡，你自己的卡先存起来；关掉就换回来。地点和学到的作息不变。只在测试版里有。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "While on, her default mode cards replace yours, which are kept aside; turn it off to get them back. Places and learned routines stay. Test builds only."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オンの間は彼女のデフォルトのモードカードを使い、あなたのカードは取っておきます。オフで元に戻ります。場所と覚えた生活リズムはそのまま。テスト版だけの機能です。"
+          }
+        }
+      }
+    },
     "打开后跟手机的系统语言走；还没翻译的地方仍是中文。关着时一律中文。只在开发版里有。" : {
       "comment" : "开发版设置",
       "localizations" : {
@@ -1437,6 +1453,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This week"
+          }
+        }
+      }
+    },
+    "模式卡名字" : {
+      "comment" : "设置：改三张通用模式卡名字的分组标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode names"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モードの名前"
           }
         }
       }
@@ -2192,6 +2225,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "In Projects, tap the outfit to switch to another one."
+          }
+        }
+      }
+    },
+    "连同她的默认模式一起试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try her default modes too"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "彼女のデフォルトのモードでも試す"
           }
         }
       }
