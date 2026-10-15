@@ -18,8 +18,8 @@ struct SettingsView: View {
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
-    /// The user's cards, for the place names and actions.
-    let cards: ModeCards
+    /// The user's cards, for the place names and actions and the identity card row.
+    @Binding var cards: ModeCards
     /// Deletes every record and setting on this iPhone, as on a fresh install.
     let onEraseAll: () -> Void
     /// Starts at the bottom of the page, with the 删除全部数据 confirmation open when `true`. For screenshots only.
@@ -28,6 +28,7 @@ struct SettingsView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
+    @State private var answering: StepEdit?
     @State private var scrollApps = ScrollWatch.selection
     @State private var pickingApps = false
     @State private var screenTimeError: String?
@@ -132,6 +133,9 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("上班时段")
                     .font(Toy.body(16, weight: .heavy))
+                placeRow(title: "上班日".localized, detail: workdaysLabel) {
+                    answering = StepEdit(step: .work)
+                }
                 timeRow("上班", selection: time($rules.workStartMinute))
                 timeRow("下班", selection: time($rules.workEndMinute))
                 Toggle("晚间延长", isOn: eveningBinding)
@@ -142,6 +146,16 @@ struct SettingsView: View {
                 Text("到公司才切到上班。在上班的日子，下班前 \(ModeRules.offWorkLead) 分钟提醒一次。晚间延长打开后，下班后还在公司就托腮等到延长时间。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+            }
+            .padding(16)
+            .toyCard()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("身份卡")
+                    .font(Toy.body(16, weight: .heavy))
+                placeRow(title: cards.identity?.title ?? "没有".localized, detail: "") {
+                    answering = StepEdit(step: .identity)
+                }
             }
             .padding(16)
             .toyCard()
@@ -165,6 +179,29 @@ struct SettingsView: View {
             eraseCard
         }
         .padding(20)
+        .sheet(item: $answering) { edit in
+            OnboardingView(
+                places: $places,
+                monitor: monitor,
+                editing: .editing(edit.step, persona: persona, cards: cards, rules: rules)
+            ) { draft in
+                draft.applyStep(to: &cards, rules: &rules)
+                cards.store(in: AppGroup.defaults)
+                answering = nil
+            }
+        }
+    }
+
+    // Issue #416: 周一到周五 as one phrase, else the days in order, Monday first.
+    private var workdaysLabel: String {
+        if rules.workdays.isEmpty { return "不固定".localized }
+        if rules.workdays == [2, 3, 4, 5, 6] { return "周一到周五".localized }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Languages.locale
+        let days = [2, 3, 4, 5, 6, 7, 1].filter(rules.workdays.contains).map { calendar.shortWeekdaySymbols[$0 - 1] }
+        let list = ListFormatter()
+        list.locale = Languages.locale
+        return list.string(from: days) ?? days.joined(separator: " ")
     }
 
     // PRD §21.2: the way to take everything back, at the very bottom. The sheet is the second step.
@@ -455,6 +492,8 @@ struct SettingsView: View {
                 Text(detail)
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(Toy.body(13, weight: .heavy))
@@ -501,6 +540,12 @@ struct SettingsView: View {
             minute.wrappedValue = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
         }
     }
+}
+
+/// The setup step Settings opens to change one answer.
+private struct StepEdit: Identifiable {
+    let step: OnboardingDraft.Step
+    var id: Int { step.rawValue }
 }
 
 /// A place open in the editor; `isNew` until it has a location.

@@ -14,14 +14,16 @@ struct OnboardingView: View {
     let monitor: PlaceMonitor
     /// Called with the finished draft after the last screen or after 用默认.
     let onDone: (OnboardingDraft) -> Void
+    // Issue #416: Settings reuses the work-day and identity screens to change those answers later.
+    private let isEditing: Bool
 
-    @State private var draft = OnboardingDraft.stored(in: AppGroup.defaults)
+    @State private var draft: OnboardingDraft
     @State private var picked: Persona?
     @State private var history: [OnboardingDraft.Step] = []
     @State private var asksDefaults = false
     @State private var bedMinute = 0
-    @State private var work = OnboardingDraft.Work.shown
-    @State private var irregular = false
+    @State private var work: OnboardingDraft.Work
+    @State private var irregular: Bool
     @State private var movedFitness = false
     @State private var sideFull = 0
     @State private var location = CLLocationManager().authorizationStatus
@@ -30,6 +32,29 @@ struct OnboardingView: View {
     @State private var error: String?
     @FocusState private var naming: Mode?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dismiss) private var dismiss
+
+    /// - Parameters:
+    ///   - editing: one step's draft from `OnboardingDraft.editing`, shown alone with 取消 in place of 跳过;
+    ///     `onDone` gets it when the user confirms. `nil` for the whole setup.
+    init(
+        places: Binding<PlaceSettings>,
+        monitor: PlaceMonitor,
+        editing: OnboardingDraft? = nil,
+        onDone: @escaping (OnboardingDraft) -> Void
+    ) {
+        _places = places
+        self.monitor = monitor
+        self.onDone = onDone
+        isEditing = editing != nil
+        let draft = editing ?? .stored(in: AppGroup.defaults)
+        _draft = State(initialValue: draft)
+        let irregular = editing?.work?.workdays.isEmpty == true
+        _irregular = State(initialValue: irregular)
+        var work = editing?.work ?? .shown
+        if irregular { work.workdays = OnboardingDraft.Work.shown.workdays }
+        _work = State(initialValue: work)
+    }
 
     var body: some View {
         ZStack {
@@ -41,7 +66,7 @@ struct OnboardingView: View {
             if asksDefaults {
                 ToyConfirmSheet(
                     question: "先用默认的？",
-                    warning: "先给你 上班、下班、副业 三张卡，没有身份卡。睡觉时间、上班日算没设，不出相关提醒。睡觉时间之后能在 设置 里补。",
+                    warning: "先给你 上班、下班、副业 三张卡，没有身份卡。睡觉时间、上班日算没设，不出相关提醒。都能在 设置 里补。",
                     cancel: "回去说说",
                     confirm: "用默认",
                     confirmFill: Toy.pink,
@@ -53,7 +78,9 @@ struct OnboardingView: View {
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
-        .onChange(of: draft) { draft.store(in: AppGroup.defaults) }
+        .onChange(of: draft) {
+            if !isEditing { draft.store(in: AppGroup.defaults) }
+        }
     }
 
     // MARK: - Screens
@@ -232,8 +259,10 @@ struct OnboardingView: View {
                 .padding(16)
                 .toyCard()
         } foot: {
-            primary("下一步") {
-                draft.work = irregular ? .irregular : work
+            primary(isEditing ? "保存" : "下一步") {
+                // 不固定 keeps the hours, so a later change from Settings doesn't reset them.
+                draft.work =
+                    irregular ? .init(workdays: [], startMinute: work.startMinute, endMinute: work.endMinute) : work
                 next()
             }
         } onSkip: {
@@ -382,11 +411,15 @@ struct OnboardingView: View {
                     Color.clear.frame(width: 44, height: 44)
                 }
                 Spacer()
-                if let dot {
+                if let dot, !isEditing {
                     dots(dot)
                 }
                 Spacer()
-                if skips, let onSkip {
+                if isEditing {
+                    Button("取消") { dismiss() }
+                        .font(Toy.body(15, weight: .heavy))
+                        .frame(minWidth: 44, minHeight: 44)
+                } else if skips, let onSkip {
                     Button("跳过", action: onSkip)
                         .font(Toy.body(15, weight: .heavy))
                         .frame(minWidth: 44, minHeight: 44)
@@ -772,6 +805,10 @@ struct OnboardingView: View {
     // MARK: - Actions
 
     private func next() {
+        if isEditing {
+            onDone(draft)
+            return
+        }
         naming = nil
         history.append(draft.step)
         withAnimation(reduceMotion ? .easeOut(duration: 0.2) : .easeOut(duration: 0.32)) {

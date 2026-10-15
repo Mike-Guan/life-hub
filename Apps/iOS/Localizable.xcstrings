@@ -156,6 +156,17 @@
         }
       }
     },
+    "上班日" : {
+      "comment" : "设置：上班时段组里的行名，点开改上班日",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workdays"
+          }
+        }
+      }
+    },
     "上班时段" : {
       "localizations" : {
         "en" : {
@@ -203,6 +214,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Doesn't switch. Used to tell if you're holed up at home."
+          }
+        }
+      }
+    },
+    "不固定" : {
+      "comment" : "引导上班日的开关；设置里上班日没定时那行的值",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It varies"
           }
         }
       }
@@ -417,6 +439,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Use the defaults?"
+          }
+        }
+      }
+    },
+    "先给你 上班、下班、副业 三张卡，没有身份卡。睡觉时间、上班日算没设，不出相关提醒。都能在 设置 里补。" : {
+      "comment" : "引导「先用默认的？」确认框的说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You start with three cards: Work, Chill and Projects. No card for your thing yet. Bedtime and workdays stay unset, so there are no reminders for them. You can set all of it later in Settings."
           }
         }
       }
@@ -777,6 +810,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Name"
+          }
+        }
+      }
+    },
+    "周一到周五" : {
+      "comment" : "设置：上班日那行的值，周一到周五都上班",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon–Fri"
           }
         }
       }
@@ -1339,6 +1383,17 @@
         }
       }
     },
+    "没有" : {
+      "comment" : "设置：没选身份卡时那行显示的字",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        }
+      }
+    },
     "没有位置权限，到了地方不会自动换。" : {
       "localizations" : {
         "en" : {
@@ -1731,7 +1786,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "I'm here"
+            "value" : "Use current location"
           }
         }
       }
@@ -1856,6 +1911,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Running 5K"
+          }
+        }
+      }
+    },
+    "身份卡" : {
+      "comment" : "设置：身份卡分组标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your card"
           }
         }
       }
