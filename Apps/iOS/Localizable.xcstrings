@@ -4069,18 +4069,18 @@
         }
       }
     },
-    "连同她的默认模式一起试" : {
+    "连同角色的默认模式一起试" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Try her default modes too"
+            "value" : "Try the character's default modes too"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "彼女のデフォルトのモードでも試す"
+            "value" : "キャラのデフォルトのモードでも試す"
           }
         }
       }

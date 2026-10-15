@@ -124,7 +124,7 @@ struct SettingsView: View {
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 #if DEBUG || ENV_STG
-                Toggle("连同她的默认模式一起试", isOn: tryDefaultsBinding)
+                Toggle("连同角色的默认模式一起试", isOn: tryDefaultsBinding)
                     .font(Toy.body(15))
                 Text("打开后先用这个角色的默认模式卡，你自己的卡先存起来；关掉就换回来。地点和学到的作息不变。只在测试版里有。")
                     .font(Toy.body(12))
