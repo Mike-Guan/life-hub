@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character can wear her Sunday beanie in 下班, between her cat ears, with its pom swaying a
+  little. A set hat or the bath towel takes it off; it stays on when she turns away and on the watch.
 - The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a
   side clip), a bear blanket and a cloud cushion on her lap, a succulent on the floor and a nightlight on the wall
   whose glow breathes slowly. The watch leaves out what is on her lap or the floor.
