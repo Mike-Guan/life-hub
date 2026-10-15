@@ -18,8 +18,8 @@ struct SettingsView: View {
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
-    /// The user's cards, for the place names and actions.
-    let cards: ModeCards
+    /// The user's cards, for the place names and actions and the identity card row.
+    @Binding var cards: ModeCards
     /// Deletes every record and setting on this iPhone, as on a fresh install.
     let onEraseAll: () -> Void
     /// Starts at the bottom of the page, with the 删除全部数据 confirmation open when `true`. For screenshots only.
@@ -28,11 +28,13 @@ struct SettingsView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
+    @State private var answering: StepEdit?
     @State private var scrollApps = ScrollWatch.selection
     @State private var pickingApps = false
     @State private var screenTimeError: String?
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
+    @State private var showsHome = false
     @State private var asksErase = false
     @AppStorage(Languages.key, store: AppGroup.defaults) private var languagesOn = false
 
@@ -132,6 +134,9 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("上班时段")
                     .font(Toy.body(16, weight: .heavy))
+                placeRow(title: "上班日".localized, detail: workdaysLabel) {
+                    answering = StepEdit(step: .work)
+                }
                 timeRow("上班", selection: time($rules.workStartMinute))
                 timeRow("下班", selection: time($rules.workEndMinute))
                 Toggle("晚间延长", isOn: eveningBinding)
@@ -146,6 +151,16 @@ struct SettingsView: View {
             .padding(16)
             .toyCard()
 
+            VStack(alignment: .leading, spacing: 8) {
+                Text("身份卡")
+                    .font(Toy.body(16, weight: .heavy))
+                placeRow(title: cards.identity?.title ?? "没有".localized, detail: "") {
+                    answering = StepEdit(step: .identity)
+                }
+            }
+            .padding(16)
+            .toyCard()
+
             placesCard
 
             dailyCard
@@ -156,6 +171,7 @@ struct SettingsView: View {
             // Remove the condition with the CI-CD.md Screen Time step.
             #if DEBUG || ENV_STG
             scrollCard
+            homeCard
             #endif
             #if DEBUG
             languagesCard
@@ -165,6 +181,29 @@ struct SettingsView: View {
             eraseCard
         }
         .padding(20)
+        .sheet(item: $answering) { edit in
+            OnboardingView(
+                places: $places,
+                monitor: monitor,
+                editing: .editing(edit.step, persona: persona, cards: cards, rules: rules)
+            ) { draft in
+                draft.applyStep(to: &cards, rules: &rules)
+                cards.store(in: AppGroup.defaults)
+                answering = nil
+            }
+        }
+    }
+
+    // Issue #416: 周一到周五 as one phrase, else the days in order, Monday first.
+    private var workdaysLabel: String {
+        if rules.workdays.isEmpty { return "不固定".localized }
+        if rules.workdays == [2, 3, 4, 5, 6] { return "周一到周五".localized }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Languages.locale
+        let days = [2, 3, 4, 5, 6, 7, 1].filter(rules.workdays.contains).map { calendar.shortWeekdaySymbols[$0 - 1] }
+        let list = ListFormatter()
+        list.locale = Languages.locale
+        return list.string(from: days) ?? days.joined(separator: " ")
     }
 
     // PRD §21.2: the way to take everything back, at the very bottom. The sheet is the second step.
@@ -226,6 +265,31 @@ struct SettingsView: View {
                 places: places.places,
                 decisionLogURL: AppGroup.container.decisionLogURL
             )
+        }
+    }
+
+    // Issue #485: the home prototype runs on mock data, so it stays out of PROD.
+    private var homeCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Text("家（原型）")
+                    .font(Toy.body(16, weight: .heavy))
+                Spacer()
+                Button {
+                    showsHome = true
+                } label: {
+                    Text("进去").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
+            }
+            Text("HAKU 的房间。罐子、衣服和记录都是假数据，不影响真实记录。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(16)
+        .toyCard()
+        .fullScreenCover(isPresented: $showsHome) {
+            HakuHomeView { showsHome = false }
         }
     }
 
@@ -455,6 +519,8 @@ struct SettingsView: View {
                 Text(detail)
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(Toy.body(13, weight: .heavy))
@@ -501,6 +567,12 @@ struct SettingsView: View {
             minute.wrappedValue = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
         }
     }
+}
+
+/// The setup step Settings opens to change one answer.
+private struct StepEdit: Identifiable {
+    let step: OnboardingDraft.Step
+    var id: Int { step.rawValue }
 }
 
 /// A place open in the editor; `isNew` until it has a location.
