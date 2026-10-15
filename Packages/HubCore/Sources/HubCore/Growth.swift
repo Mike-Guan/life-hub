@@ -469,6 +469,8 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     public var base: BaseOutfit?
     /// Whether the character art draws it. The shop leaves it off the shelf until then.
     public var isDrawn: Bool
+    /// Its place in the weekly rotation, `nil` for items always on the shelf.
+    public var week: Int?
 
     // The first catalog (PRD v4.2 section 13), then KURO's (奖励数值表 section 7, approved 2026-10-07).
     // Ids are stored in the ledger, so never reuse one. KURO's items reuse HAKU's slots: her hair ties are
@@ -581,6 +583,14 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(cardTop: "kuro.base.outing.trench", title: "短风衣", price: 40, base: .outing, persona: .kuro),
         ShopItem(cardTop: "kuro.top.art.smock", title: "画画罩衫", price: 30, base: .craft, persona: .kuro),
         ShopItem(cardTop: "kuro.base.craft.pinafore", title: "背带裙", price: 40, base: .craft, persona: .kuro),
+        // HAKU's weekly items (商店完整目录 v0 §1.4), drawn in #383. The star badge (week 4) and the beanie
+        // (week 8) wait for their own wear slots. The second character's (§2.4) come in their own change.
+        ShopItem(weekly: "haku.weekly.headband.orange", slot: .headband, title: "橙色头带", price: 15, week: 1),
+        ShopItem(weekly: "haku.weekly.mask.dots", slot: .mask, title: "波点面罩", price: 18, week: 2),
+        ShopItem(weekly: "haku.weekly.room.cactus", slot: .room, title: "小仙人掌", price: 15, week: 3),
+        ShopItem(weekly: "haku.weekly.headband.mint", slot: .headband, title: "薄荷头带", price: 15, week: 5),
+        ShopItem(weekly: "haku.weekly.mask.bolt", slot: .mask, title: "闪电贴纸面罩", price: 18, week: 6),
+        ShopItem(weekly: "haku.weekly.room.speaker", slot: .room, title: "迷你音箱", price: 20, week: 7),
     ]
 
     init(
@@ -612,6 +622,11 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     init(clothes id: String, slot: Slot, title: String, price: Int, mode: Mode, persona: Persona = .haku) {
         self.init(id: id, slot: slot, title: title, price: price, persona: persona)
         self.mode = mode
+    }
+
+    init(weekly id: String, slot: Slot, title: String, price: Int, week: Int, persona: Persona = .haku) {
+        self.init(id: id, slot: slot, title: title, price: price, persona: persona)
+        self.week = week
     }
 
     // The identity card lives in the boxing mode slot (ModeCards), so its clothes are worn there.
@@ -648,9 +663,35 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         catalog.filter { $0.persona == persona }
     }
 
-    /// The items `persona` can buy or earn that suit `card` and are drawn, in catalog order.
+    /// The items `persona` can buy or earn that suit `card` and are drawn, in catalog order, without weekly items.
     public static func catalog(for persona: Persona, card: IdentityKind?) -> [ShopItem] {
-        catalog(for: persona).filter { $0.isDrawn && $0.suits(card) }
+        catalog(for: persona).filter { $0.isDrawn && $0.week == nil && $0.suits(card) }
+    }
+
+    // 商店完整目录 v0 §1.4: weeks run Sunday to Saturday and count from the week of the character's first can
+    // entry. Weeks 0 and 1 have none, then the drawn weekly items take turns and start over, so none is gone for good.
+    /// `persona`'s weekly item on sale at `now`, or `nil` before her third week or when none is drawn.
+    public static func weekly(
+        for persona: Persona, ledger: CanLedger, now: Date, calendar: Calendar = .current
+    ) -> ShopItem? {
+        weekly(for: persona, from: catalog, ledger: ledger, now: now, calendar: calendar)
+    }
+
+    static func weekly(
+        for persona: Persona, from items: [ShopItem], ledger: CanLedger, now: Date, calendar: Calendar
+    ) -> ShopItem? {
+        let rotation = items.filter { $0.persona == persona && $0.isDrawn && $0.week != nil }
+            .sorted { ($0.week ?? 0) < ($1.week ?? 0) }
+        var sundays = calendar
+        sundays.firstWeekday = 1
+        guard !rotation.isEmpty, let first = ledger.only(persona).active.first?.at,
+            let start = sundays.dateInterval(of: .weekOfYear, for: first)?.start,
+            let current = sundays.dateInterval(of: .weekOfYear, for: now)?.start,
+            let days = sundays.dateComponents([.day], from: start, to: current).day
+        else { return nil }
+        let week = days / 7
+        guard week >= 2 else { return nil }
+        return rotation[(week - 2) % rotation.count]
     }
 }
 
