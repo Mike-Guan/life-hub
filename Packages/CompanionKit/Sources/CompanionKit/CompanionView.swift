@@ -1469,7 +1469,7 @@ struct IdleMotion {
             self.init(mode: .work, time: t)
         case .shooting:
             self.init(mode: .money, time: t)
-        case .collapsed, .blanket:
+        case .collapsed, .blanket, .dozing:
             let breath = IdleMotion.sleeping(time: t)
             self.init(dy: breath.dy, angle: breath.angle)
         case .morning:

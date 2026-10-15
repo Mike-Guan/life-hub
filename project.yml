@@ -57,8 +57,13 @@ targets:
       - path: Apps/iOS
         excludes:
           - Info.plist
+<<<<<<< HEAD
       # Issue #481: the app runs the card control's intent itself.
       - Apps/Widgets/CardToggleIntent.swift
+=======
+      # Issue #481: the app runs widget mode buttons itself.
+      - Apps/Widgets/SwitchModeIntent.swift
+>>>>>>> origin/main
     dependencies:
       - package: HubCore
       - package: CompanionKit

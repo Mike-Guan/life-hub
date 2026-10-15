@@ -114,16 +114,22 @@ public struct OnboardingDraft: Codable, Equatable, Sendable {
         draft.persona = persona
         draft.chill = cards.chill
         draft.identity = cards.identity
+        draft.sideStates = cards.sideStates
+        draft.names = cards.names
         draft.work = Work(workdays: rules.workdays, startMinute: rules.workStartMinute, endMinute: rules.workEndMinute)
         return draft
     }
 
-    /// Writes this draft's answer for its step into `cards` or `rules`: the identity card, or the work days
-    /// and hours. Other steps change nothing.
+    /// Writes this draft's answer for its step into `cards` or `rules`: the identity card, the common card
+    /// names, or the work days and hours. Other steps change nothing.
     public func applyStep(to cards: inout ModeCards, rules: inout ModeRules) {
         switch step {
         case .identity:
             cards.pickIdentity(identity)
+        case .cards:
+            for mode in Mode.allCases where mode != .boxing {
+                cards.rename(mode, to: names[mode.rawValue] ?? "")
+            }
         case .work:
             let work = work ?? .irregular
             rules.workdays = work.workdays
