@@ -16,7 +16,7 @@ struct PlaceEditor: View {
     @State private var place: HubPlace
     @State private var hasLocation: Bool
     @State private var locating = false
-    @State private var error: String?
+    @State private var failure: LocationFailure?
 
     /// - Parameters:
     ///   - place: the place to edit, or a new one with `hasLocation` false.
@@ -56,8 +56,8 @@ struct PlaceEditor: View {
                 }
                 locationCard
                 actionCard
-                if let error {
-                    ErrorLine(text: error)
+                if let failure {
+                    failureLine(failure)
                 }
                 Button {
                     onSave(place)
@@ -168,10 +168,34 @@ struct PlaceEditor: View {
             place.latitude = coordinate.latitude
             place.longitude = coordinate.longitude
             hasLocation = true
-            error = nil
+            failure = nil
             monitor.requestAlways()
         } catch {
-            self.error = "拿不到当前位置：\(error.localizedDescription)"
+            failure = LocationFailure(error)
+        }
+    }
+
+    // Preview 5: each failure line is followed by the one step that can fix it.
+    private func failureLine(_ failure: LocationFailure) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ErrorLine(text: failure.message, size: 13)
+            Button {
+                if failure.opensSettings {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } else {
+                    Task { await setHere() }
+                }
+            } label: {
+                Text(failure.opensSettings ? "去设置打开" : "再点一次")
+                    .font(Toy.body(15, weight: .heavy))
+                    .underline()
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(locating)
         }
     }
 }

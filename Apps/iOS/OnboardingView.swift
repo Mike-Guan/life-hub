@@ -820,7 +820,7 @@ struct OnboardingView: View {
             places.save(row.place(coordinate.latitude, coordinate.longitude))
             error = nil
         } catch {
-            self.error = "拿不到当前位置：\(error.localizedDescription)"
+            self.error = LocationFailure(error).message
         }
     }
 
