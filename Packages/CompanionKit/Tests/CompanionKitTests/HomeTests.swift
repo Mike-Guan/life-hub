@@ -175,6 +175,27 @@ import Testing
         #expect(model.energy > start)
     }
 
+    @Test func aVisitEndsBackAtTheModesSpot() {
+        let model = HomeModel(night: true)
+        model.switchMode(.work)
+        model.tap(.bed)
+        #expect(model.spot == .rest)
+        model.tick(HomeModel.visitLength - 1)
+        #expect(model.spot == .rest)
+        model.tick(2)
+        #expect(model.spot == .work)
+    }
+
+    @Test func droppedOnTheFloorHeWalksBackAfterAMoment() {
+        let model = HomeModel(night: true)
+        model.switchMode(.chill)
+        model.drop(on: nil, at: GridPoint(x: 5, y: 8))
+        #expect(model.dropPoint != nil)
+        model.tick(HomeModel.landingPause + 0.1)
+        #expect(model.dropPoint == nil)
+        #expect(model.spot == .sofa)
+    }
+
     @Test func paintingPicksASwatch() {
         let model = HomeModel(night: false)
         model.paint(.sofa, 2)
