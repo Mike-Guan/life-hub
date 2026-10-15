@@ -1892,6 +1892,16 @@
         }
       }
     },
+    "裹着毯子打瞌睡" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dozing in a blanket"
+          }
+        }
+      }
+    },
     "裹着毯子瘫在沙发上" : {
       "localizations" : {
         "en" : {
