@@ -740,6 +740,12 @@
             "state" : "translated",
             "value" : "Open Settings"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定を開く"
+          }
         }
       }
     },
