@@ -1278,7 +1278,7 @@ import Testing
     }
 
     @Test func keepsakesAndPurchasesGetTheirOwnLine() {
-        #expect(CompanionLines.unlock("gloves.gold") == "……给你的。才不是特意挑的。")
+        #expect(CompanionLines.unlock("gloves.gold") == "……给你的。顺手。")
         #expect(CompanionLines.unlock("room.plant") != CompanionLines.unlock("gloves.gold"))
     }
 

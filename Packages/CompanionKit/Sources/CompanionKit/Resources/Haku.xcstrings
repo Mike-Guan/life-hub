@@ -280,17 +280,6 @@
         }
       }
     },
-    "……给你的。才不是特意挑的。" : {
-      "comment" : "E5",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…For you. Not like I picked it out."
-          }
-        }
-      }
-    },
     "……腿还是你的吗。" : {
       "localizations" : {
         "en" : {
@@ -1263,17 +1252,6 @@
         }
       }
     },
-    "还不睡。" : {
-      "comment" : "深夜还没睡，打开 App",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Still up."
-          }
-        }
-      }
-    },
     "还有 15 分钟。我先替你紧张一下。" : {
       "comment" : "计划的事开始前",
       "localizations" : {
@@ -1311,16 +1289,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Okay, this one's funny."
-          }
-        }
-      }
-    },
-    "那一拍……还行吧。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "That one shot… was okay."
           }
         }
       }

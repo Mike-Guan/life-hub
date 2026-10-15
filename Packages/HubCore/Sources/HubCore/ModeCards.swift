@@ -120,7 +120,7 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
     public func lines(for persona: Persona) -> [String] {
         let lines: (haku: [String], kuro: [String])
         switch self {
-        case .boxing: lines = (["……别碰，手带刚缠好。", "打完再说。", "拳套有点味道。不是我的问题。"], ["……别闹。", "等一下，在系。", "……你看什么。"])
+        case .boxing: lines = (["……别碰，手带刚缠好。", "打完再说。", "拳套有点味道。不是我的问题。"], ["……真是的。", "等一下，在系。", "……你看什么。"])
         case .tennis: lines = (["球拍比我想的重。还是重。", "……别抢。", "捡球的不是我。"], ["……拍子别碰。", "等我颠完。", "……嗯。"])
         case .fitness: lines = (["……我数，你练。", "……这个不重。", "别看我，看镜子。"], ["……我在这儿。", "数到几了？", "……慢点。"])
         case .study: lines = (["安静。", "……这页我看过了。", "你看你的，我看我的。"], ["……嘘。", "这里有点难。", "……翻一页。"])
