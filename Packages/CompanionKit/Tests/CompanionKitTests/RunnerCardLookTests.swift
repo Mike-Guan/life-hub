@@ -184,10 +184,14 @@ import Testing
     }
 
     @Test func drinkingTakesTheCapOffAndShutsTheEyes() {
-        let frames = (0..<25).map { base(.ski, .drink, at: CGFloat($0) / 10) }
-        #expect(frames.allSatisfy { $0.contains(.waterBottle) && !$0.contains(.wristbandHand) })
+        let frames = (0...25).map { base(.ski, .drink, at: CGFloat($0) / 10) }
+        // A hand always shows, and the bottle only in the fist.
+        #expect(frames.allSatisfy { $0.contains(.wristbandHand) != $0.contains(.bottleFist) })
+        #expect(frames.allSatisfy { $0.contains(.waterBottle) == $0.contains(.bottleFist) })
+        #expect(frames.first?.contains(.wristbandHand) == true)
+        #expect(frames.last?.contains(.wristbandHand) == true)
         #expect(frames.contains { $0.contains(.eyesClosed) && !$0.contains(.bottleCap) })
-        #expect(frames.first?.contains(.bottleCap) == true)
+        #expect(frames.contains { $0.isSuperset(of: [.waterBottle, .bottleCap]) })
     }
 
     @Test func outMovesLookAtTheWristAndShrugTheBackpack() {
