@@ -93,7 +93,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…Don't touch. Fresh hand wraps."
+            "value" : "…Don't touch. Fresh wraps."
           }
         }
       }
@@ -2090,7 +2090,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Racket's heavier than I thought. Still."
+            "value" : "Racket's heavy. Still heavy."
           }
         }
       }
