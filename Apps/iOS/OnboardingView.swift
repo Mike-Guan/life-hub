@@ -455,9 +455,9 @@ struct OnboardingView: View {
     @ViewBuilder private func figure(_ mode: Mode, width: CGFloat) -> some View {
         Group {
             if draft.persona == .kuro {
-                KuroView(look: KuroLook(mode: mode), showsBubble: false)
+                KuroView(look: KuroLook(mode: mode, card: draft.identity), showsBubble: false)
             } else {
-                CompanionView(mode: mode, showsBubble: false, notices: false)
+                CompanionView(mode: mode, card: draft.identity, showsBubble: false, notices: false)
             }
         }
         .frame(width: width, height: (width * 1.32).rounded())
