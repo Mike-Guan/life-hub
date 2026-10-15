@@ -188,6 +188,7 @@ struct LifeHubApp: App {
             bathDoneAt: bathDoneAt,
             scrollSeenAt: needs.scrollSeenAt,
             commuteMotion: needs.commuteMotion,
+            stillSince: needs.stillSince,
             onBathDone: {
                 BathTime.markDone(at: .now, in: AppGroup.defaults)
                 bathDoneAt = .now
@@ -657,7 +658,8 @@ struct LifeHubApp: App {
             scrollSeenAt: needs.scrollSeenAt,
             daily: DailyPlan.stored(in: AppGroup.defaults),
             invite: needs.invite,
-            motion: needs.commuteMotion
+            motion: needs.commuteMotion,
+            stillSince: needs.stillSince
         )
         WatchSync.shared.send(WatchPlay(scenes: inputs.timeline(from: .now), event: event ?? needs.event))
     }

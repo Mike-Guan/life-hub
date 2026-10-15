@@ -61,6 +61,8 @@ struct HomeView: View {
     var scrollSeenAt: Date?
     /// How Mike moved since leaving home or the office, from the iOS app.
     var commuteMotion: [MotionSample] = []
+    /// Start of the current stretch without walking, from the iOS app.
+    var stillSince: Date?
     /// Records that Mike tapped HAKU's bath away.
     var onBathDone: (() -> Void)?
     /// Where the "不对" card records its answers; nil keeps no record.
@@ -456,7 +458,8 @@ struct HomeView: View {
             scrollSeenAt: scrollSeenAt,
             daily: daily,
             invite: invite,
-            motion: commuteMotion
+            motion: commuteMotion,
+            stillSince: stillSince
         )
     }
 
