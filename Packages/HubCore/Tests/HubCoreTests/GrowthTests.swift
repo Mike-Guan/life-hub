@@ -503,7 +503,7 @@ import Testing
         #expect(weekly.filter { !$0.isDrawn }.map(\.slot) == [.badge, .hat])
         let hers = ShopItem.catalog(for: .kuro).filter { $0.week != nil }
         #expect(hers.map(\.week) == Array(1...8))
-        #expect(hers.filter { !$0.isDrawn }.map(\.slot) == [.hat])
+        #expect(hers.allSatisfy { $0.isDrawn })
     }
 
     @Test func noWeeklyItemWithoutCansOrArt() throws {
