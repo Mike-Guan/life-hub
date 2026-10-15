@@ -204,6 +204,20 @@ import Testing
         #expect(RunnerFigure.baseParts.isSubset(of: parts))
     }
 
+    // Issue #236: 「哦。」 comes with one blink, then a small nod; Reduce Motion keeps only the blink.
+    @Test func theNodBlinksThenDipsTheHead() {
+        var blink = RunnerPose()
+        blink.nod(progress: 0.05, still: false)
+        #expect(blink.eyesShut)
+        var dip = RunnerPose()
+        dip.nod(progress: 0.3, still: false)
+        #expect(!dip.eyesShut && dip.headDy > RunnerPose().headDy + 2)
+        var still = RunnerPose()
+        still.nod(progress: 0.3, still: true)
+        #expect(still.headDy == RunnerPose().headDy)
+        #expect(RunnerFigure.parts(for: .work, pose: blink).contains(.eyesClosed))
+    }
+
     @Test func headsetComesOffDuringGoodnight() {
         let start = RunnerPose.bedtime(time: 0, goodnight: 0.1, liesDown: true)
         let end = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: true)
@@ -1087,12 +1101,56 @@ import Testing
         #expect(Outfit(Wardrobe(equipped: [.gloves: "gloves.someday", .room: "room.someday"])) == Outfit())
     }
 
-    // Clothes join these checks once UI draws them (Issue #327).
     @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
     func everyWornItemChangesTheLook(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
         #expect(Outfit(wardrobe) != Outfit())
+    }
+
+    @Test func clothesReplaceTheJacketOnlyInTheirMode() {
+        let pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"])))
+        let chill = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(chill.isSuperset(of: [.setVarsityTop, .setVarsityCap]) && !chill.contains(.jacket))
+        let work = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(work.contains(.jacket) && !work.contains(.setVarsityTop))
+        var away = pose
+        away.turnedAway = true
+        let back = Set(RunnerFigure.parts(for: .chill, pose: away))
+        #expect(back.isSuperset(of: [.jacket, .setVarsityCap]) && !back.contains(.setVarsityTop))
+        #expect(pose.outfit.clothesBack == [.chill: RunnerPalette.varsityRed])
+    }
+
+    @Test func raincoatKeepsItsLoweredHoodFromTheBack() {
+        var pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.work: "haku.set.work.raincoat"])))
+        pose.turnedAway = true
+        let back = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(
+            back.isSuperset(of: [.jacket, .setKawaiiHood]) && back.isDisjoint(with: [.setKawaiiTop, .setDuckCharm]))
+    }
+
+    @Test func everyTopHasABackColour() {
+        #expect(Set(Outfit.clothesBackColors.keys) == Set(Outfit.clothesParts.keys))
+    }
+
+    @Test func sideHustleClothesDropTheChainAndCoin() {
+        let pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.money: "haku.top.side.arcade"])))
+        let parts = Set(RunnerFigure.parts(for: .money, pose: pose))
+        #expect(parts.contains(.topSideArcade) && parts.isDisjoint(with: [.chainGold, .coin, .jacket]))
+    }
+
+    @Test func capGivesWayToHeadgear() {
+        let varsity = Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"]))
+        var pose = RunnerPose(need: .boxingWarmup).wearing(varsity)
+        let warmup = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(warmup.contains(.headband) && !warmup.contains(.setVarsityCap))
+        pose.need = nil
+        #expect(RunnerFigure.parts(for: .chill, pose: pose).contains(.setVarsityCap))
+    }
+
+    @Test func clothesCharmsSwingWithTheBreath() {
+        #expect(abs(RunnerPose(mode: .work, time: 0.6, face: .mid, react: 0).charmSway - 1) < 0.001)
+        #expect(abs(RunnerPose(mode: .work, time: 1.8, face: .mid, react: 0).charmSway + 1) < 0.001)
     }
 
     @Test func stripedMaskShowsOnBothMasks() {
@@ -1117,7 +1175,6 @@ import Testing
         #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
     }
 
-    // Clothes join these checks once UI draws them (Issue #327).
     @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
     func everyItemIconDrawsSomething(_ item: ShopItem) {
         var wardrobe = Wardrobe()

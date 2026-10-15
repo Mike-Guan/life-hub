@@ -432,6 +432,8 @@ public struct KuroView: View {
     let showsBubble: Bool
     /// Increment to play her cheer: her look's move with a hop.
     let cheer: Int
+    /// Increment to play the nod after an answer: a blink and a small dip.
+    let nods: Int
     /// Called after KURO reacts to a tap, for example to switch the 副业 state.
     let onTap: (() -> Void)?
     /// Called once she has answered a welcome back event.
@@ -456,6 +458,7 @@ public struct KuroView: View {
     @State private var bubbleTask: Task<Void, Never>?
     @State private var pop = 0
     @State private var tapStart: Date?
+    @State private var nodStart: Date?
     @State private var tapKind: KuroTap?
     @State private var tapHeart = false
     @State private var tapTimes: [Date] = []
@@ -505,6 +508,7 @@ public struct KuroView: View {
     ///     done and a welcome back each play her look's tap move once per id.
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
     ///   - cheer: increment to play her cheer.
+    ///   - nods: increment to play the nod after an answer.
     ///   - onTap: called after she reacts to a tap.
     ///   - onWelcomeDone: called once she has answered a `.welcomeBack` event, even one already played.
     ///   - onBathDone: called after she shows the towel round her head on a tap during bath time.
@@ -524,6 +528,7 @@ public struct KuroView: View {
         event: CompanionEvent? = nil,
         showsBubble: Bool = true,
         cheer: Int = 0,
+        nods: Int = 0,
         onTap: (() -> Void)? = nil,
         onWelcomeDone: (() -> Void)? = nil,
         onBathDone: (() -> Void)? = nil
@@ -544,6 +549,7 @@ public struct KuroView: View {
         self.event = event
         self.showsBubble = showsBubble
         self.cheer = cheer
+        self.nods = nods
         self.onTap = onTap
         self.onWelcomeDone = onWelcomeDone
         self.onBathDone = onBathDone
@@ -573,8 +579,10 @@ public struct KuroView: View {
                 }
                 // KURO-04 (UI 审核 2026-10-09): with the watch screen dimmed she dozes, eyes shut and body still,
                 // instead of freezing mid-hop or mid-blink.
-                let pose =
-                    dozing ? self.pose.showing(.closed) : unbox != nil ? unboxPose : reacting ?? scened(homeScene)
+                let nod = Self.nod(since: nodStart, at: time)
+                let awake = unbox != nil ? unboxPose : reacting ?? scened(homeScene)
+                // 「……嗯。」 (Issue #236): one blink at the start of the nod.
+                let pose = dozing ? self.pose.showing(.closed) : (nod ?? 1) < 0.1 ? awake.showing(.closed) : awake
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
                 let still = Self.holdsStill(reduceMotion: reduceMotion, unboxing: unbox != nil, dozing: dozing)
                 // KURO-16: her idle runs on from where it was when her pace changes, and eases back in after
@@ -601,7 +609,7 @@ public struct KuroView: View {
                 }
                 .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
                 .rotationEffect(.degrees(still ? 0 : motion.angle * ease), anchor: .bottom)
-                .offset(y: (still ? 0 : motion.dy * ease) + hop)
+                .offset(y: (still ? 0 : motion.dy * ease + Self.nodDip(nod)) + hop)
             }
             .id(look)
             .transition(.opacity)
@@ -613,6 +621,8 @@ public struct KuroView: View {
             .modifier(WatchFigureFrame(isEnabled: style == .watch))
             .padding(.top, Self.topInset(style))
             .padding(.horizontal, 12)
+            // Every look change fades in 0.3 s, also when the mode switched on its own (HAKU-05).
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: look)
 
             if unboxStart != nil {
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
@@ -680,6 +690,7 @@ public struct KuroView: View {
             playEventIfNew()
             finishWelcomeIfNeeded()
         }
+        .onChange(of: nods) { _, _ in nodStart = .now }
         .onChange(of: cheer) { _, _ in
             guard bedtime == .off, unboxStart == nil else { return }
             play(KuroTap(look: look, sleepy: false), at: .now)
@@ -867,6 +878,19 @@ public struct KuroView: View {
         guard let kind = tapKind, let start = tapStart?.timeIntervalSinceReferenceDate else { return nil }
         let progress = (time - start) / kind.duration
         return (0..<1).contains(progress) ? (kind, progress) : nil
+    }
+
+    /// Progress of the nod at `time` (0..<1), or nil when none is playing.
+    nonisolated static func nod(since start: Date?, at time: TimeInterval) -> Double? {
+        guard let start = start?.timeIntervalSinceReferenceDate else { return nil }
+        let progress = (time - start) / CompanionView.nodDuration
+        return (0..<1).contains(progress) ? progress : nil
+    }
+
+    /// How far she dips in the nod at `progress`, in points: down 4 and back, after the blink.
+    nonisolated static func nodDip(_ progress: Double?) -> CGFloat {
+        guard let progress, progress > 0.12, progress < 0.5 else { return 0 }
+        return 4 * CGFloat(sin((progress - 0.12) / 0.38 * .pi))
     }
 
     // The tennis, boxing and gym ponytails reach the top of her bounds, where the phone bubble sits (unbox page).

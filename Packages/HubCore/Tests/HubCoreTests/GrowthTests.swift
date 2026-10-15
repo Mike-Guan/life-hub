@@ -440,7 +440,7 @@ import Testing
     }
 
     // Prices from the shop catalogue (2026-10-14): tops 30-40, full sets 80-90.
-    @Test func clothesFollowTheApprovedPricesAndStayOffTheShelfUntilDrawn() {
+    @Test func clothesFollowTheApprovedPricesAndOnlyHakusAreOnTheShelf() {
         for persona in Persona.allCases {
             let clothes = ShopItem.catalog(for: persona).filter { $0.mode != nil }
             #expect(Set(clothes.compactMap(\.mode)) == [.work, .chill, .money], "\(persona)")
@@ -448,11 +448,10 @@ import Testing
                 let range = item.slot == .fullSet ? 80...90 : 30...40
                 #expect(range.contains(item.price ?? 0), "\(item.id)")
                 #expect(item.slot == .top || item.slot == .fullSet)
-                // The second character's clothes are drawn; HAKU's wait for their art.
-                #expect(item.isDrawn == (persona == .kuro), "\(item.id)")
+                #expect(item.isDrawn, "\(item.id)")
             }
             let onShelf = ShopItem.catalog(for: persona, card: .boxing).filter { $0.mode != nil }
-            #expect(onShelf.count == (persona == .kuro ? clothes.count : 0), "\(persona)")
+            #expect(onShelf.count == clothes.count, "\(persona)")
         }
     }
 

@@ -43,6 +43,8 @@ public struct CompanionView: View {
     let invite: String?
     /// Increment to play the cheer jump.
     let cheer: Int
+    /// Increment to play the nod after an answer: a blink and a small dip of the head.
+    let nods: Int
     /// `.on` turns RUNNER sleepy; each change to `.on` plays the good-night animation once.
     let bedtime: Bedtime
     /// What HAKU wears from the shop and keepsakes.
@@ -73,6 +75,7 @@ public struct CompanionView: View {
     // Seconds since the reference date of the last good-night animation, shared by every CompanionView.
     @AppStorage("companion.lastGoodnight") private var lastGoodnight: Double = 0
     @State private var celebrationStart: Date?
+    @State private var nodStart: Date?
     @State private var celebrationKind: WorkoutSummary.Kind?
     @State private var inviteJumps = 0
     // Id of the last celebrated workout, shared by every CompanionView so each plays once.
@@ -131,6 +134,8 @@ public struct CompanionView: View {
     // Id of the last time HAKU got up from the sofa, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastRevived") private var lastRevived = ""
     @State private var welcomeStart: Date?
+    /// Seconds into the welcome back scene when a tap skipped it.
+    @State private var welcomeSkip: CGFloat?
     @State private var welcomeReplay: ReturnReplay?
     @State private var welcomeTask: Task<Void, Never>?
     // Id of the last welcome back, shared by every CompanionView so each plays once.
@@ -157,6 +162,7 @@ public struct CompanionView: View {
         bath: Bool = false,
         invite: String? = nil,
         cheer: Int = 0,
+        nods: Int = 0,
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
         style: CompanionStyle = .standard,
@@ -181,6 +187,7 @@ public struct CompanionView: View {
         self.bath = bath
         self.invite = invite
         self.cheer = cheer
+        self.nods = nods
         self.bedtime = bedtime
         self.wardrobe = wardrobe
         self.style = style
@@ -198,7 +205,10 @@ public struct CompanionView: View {
                 .animation(.easeInOut(duration: 0.25), value: mode)
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
 
+            // HAKU-05 (UI 审核 2026-10-13): an automatic switch comes with no animation, so the figure cut over at
+            // once. Every mode change now fades in 0.3 s, whoever made it.
             character
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: mode)
                 .padding(.top, 24)
                 .padding(.horizontal, 12)
                 .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
@@ -274,6 +284,7 @@ public struct CompanionView: View {
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
         }
+        .onChange(of: nods) { _, _ in nodStart = .now }
         .onChange(of: asleep) { _, new in
             guard style == .watch else { return }
             if new {
@@ -471,8 +482,12 @@ public struct CompanionView: View {
             let scene = WelcomeScene(replay, mode: mode)
             let open = scene.open(cards: replay.cards.count, cans: replay.cans)
             // Reduced motion holds the last frame.
-            let shown = reduceMotion ? scene.length(cards: replay.cards.count, cans: replay.cans) - 0.2 : t
-            return RunnerPose.welcome(scene, time: shown, open: open, face: face, mode: mode)
+            let length = scene.length(cards: replay.cards.count, cans: replay.cans)
+            if reduceMotion {
+                return RunnerPose.welcome(scene, time: length - 1.3, open: open, face: face, mode: mode)
+            }
+            return RunnerPose.welcome(
+                scene, time: t, open: open, face: face, mode: mode, length: length, skippedAt: welcomeSkip)
         }
         let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
         if reduceMotion {
@@ -522,6 +537,9 @@ public struct CompanionView: View {
         }
         if let daily { pose.cue(daily, time: time, slap: slap(at: time)) }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
+        if let progress = Self.progress(since: nodStart, at: time, duration: Self.nodDuration) {
+            pose.nod(progress: CGFloat(progress), still: reduceMotion)
+        }
         if let progress = taskDone(at: time) {
             if doneFocus {
                 pose.cheerFocus(progress: progress)
@@ -716,8 +734,12 @@ public struct CompanionView: View {
         guard let start = welcomeStart?.timeIntervalSinceReferenceDate, let replay = welcomeReplay else { return nil }
         let length = WelcomeScene(replay, mode: mode ?? .chill).length(cards: replay.cards.count, cans: replay.cans)
         let t = CGFloat(time - start)
-        return t >= 0 && t < length ? t : nil
+        let end = min(length, welcomeSkip.map { $0 + Self.welcomeSkipLength } ?? length)
+        return t >= 0 && t < end ? t : nil
     }
+
+    /// How long the welcome back scene takes to put itself away after a tap skips it.
+    nonisolated static let welcomeSkipLength: CGFloat = 0.3
 
     /// The card flipped over at the top, or at the bottom when there is no crate, then the cans chip.
     @ViewBuilder private func welcomeChips(_ replay: ReturnReplay, at time: TimeInterval) -> some View {
@@ -800,6 +822,8 @@ public struct CompanionView: View {
 
     private static let goodnightDuration = 3.2
     private static let celebrationDuration = 1.6
+    // 「哦。」 stays up 1.6 s; the nod plays inside it (Issue #236, 纠正预览 v6).
+    nonisolated static let nodDuration = 1.6
     private static let offWorkDuration = 4.0
     private static let unlockDuration = 2.8
     private static let stayHomeDuration = 3.2
@@ -1014,6 +1038,7 @@ public struct CompanionView: View {
         let scene = WelcomeScene(replay, mode: mode ?? .chill)
         welcomeReplay = replay
         welcomeStart = .now
+        welcomeSkip = nil
         say(nil)
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(scene.line.at))
@@ -1033,6 +1058,7 @@ public struct CompanionView: View {
         guard welcomeStart != nil else { return }
         welcomeTask?.cancel()
         welcomeStart = nil
+        welcomeSkip = nil
         welcomeReplay = nil
         say(nil)
         onWelcomeDone?()
@@ -1063,9 +1089,20 @@ public struct CompanionView: View {
             reactToPoke()
             return
         }
-        if welcome(at: Date.now.timeIntervalSinceReferenceDate) != nil {
-            // A tap skips the welcome back.
-            endWelcome()
+        if let t = welcome(at: Date.now.timeIntervalSinceReferenceDate) {
+            // A tap skips the welcome back: it puts itself away over 0.3 s instead of cutting.
+            guard welcomeSkip == nil else { return }
+            if reduceMotion {
+                endWelcome()
+                return
+            }
+            welcomeSkip = t
+            welcomeTask?.cancel()
+            welcomeTask = Task {
+                try? await Task.sleep(for: .seconds(Double(Self.welcomeSkipLength)))
+                guard !Task.isCancelled else { return }
+                endWelcome()
+            }
             return
         }
         if bath, dryStart == nil {

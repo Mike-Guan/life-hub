@@ -81,6 +81,8 @@ struct HomeView: View {
     @State private var checkHeight: CGFloat = 0
     /// The character's short reply after an answer, shown for 1.6 s.
     @State private var checkReply: String?
+    // Each answer to the energy check plays the character's nod under 「哦。」.
+    @State private var nods = 0
     @State private var answers = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -135,6 +137,7 @@ struct HomeView: View {
                                 ?? sit?.stretched(at: context.date)
                                 ?? stayHome(at: context.date) ?? dailyDone,
                             cheer: cheer,
+                            nods: nods,
                             onWelcomeDone: onWelcomeDone
                         )
                     } else {
@@ -157,6 +160,7 @@ struct HomeView: View {
                             bath: bath(at: context.date),
                             invite: activeNeed(at: context.date) == nil ? nil : invite,
                             cheer: cheer,
+                            nods: nods,
                             bedtime: bedtime.state(at: context.date),
                             wardrobe: wardrobe,
                             onTap: tapAction,
@@ -419,6 +423,7 @@ struct HomeView: View {
         closeCheck()
         let reply = EnergyCheck.reply(corrected: result.report != nil, persona: persona)
         checkReply = reply
+        nods += 1
         Task {
             try? await Task.sleep(for: .seconds(1.6))
             if checkReply == reply { checkReply = nil }

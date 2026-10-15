@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
+  and her identity card. Nothing shows it yet; the keepsake page and share cards will. Wins filled in from
+  an earlier day keep no look, because the wardrobe has no history.
 - Japanese for the first batch of lock-screen lines (both characters) and English for 842 strings
   are in the String Catalogs, behind the Debug-only 「日文和英文」 switch. `scripts/import-strings.py` adds a
   writers' delivery to the right catalogs.
@@ -27,6 +30,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 - Debug builds have a 「日文和英文」 switch in settings. It is off by default, so every build shows Chinese
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
+- HAKU's eight pop clothes are in the shop: two tops for each of work, off work and 副业, plus the varsity
+  and raincoat sets. Each is worn only in its mode, in place of the jacket. The hoodie strings and the
+  raincoat's duck swing a little with his breath.
 
 ### Changed
 - The second preset character's 6 tops and 2 full sets are on sale. She wears the one of the mode she is in,
@@ -60,6 +66,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
   fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
   own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- The welcome back scene no longer ends with a cut: HAKU settles back over the last second and the sofa,
+  blanket, phone and crate drop a little and fade out. A tap that skips it does the same over 0.3 s.
 - Tennis is her main card: she bounces the ball on a flat racket and spins the racket while idle, and a tap
   makes her swing. Boxing keeps only the gloves tapping together.
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
@@ -67,12 +75,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
+- When the mode switches on its own, at a place, the character fades into the new outfit like a manual switch
+  instead of cutting over.
 - The Screen Time watch (pick apps in settings) now works in TestFlight (STG) builds too, not only in
   Debug. The App Store build still leaves it out.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
   turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
+- After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
 - On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
   ponytail (unbox page and home card). The watch is unchanged.
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
