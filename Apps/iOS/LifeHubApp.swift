@@ -105,8 +105,7 @@ struct LifeHubApp: App {
         // Only a changed mode reloads, since background widget reloads have a daily budget. The watch gets
         // the current scenes either way, since it asked because it just opened.
         WatchSync.shared.onWatchCheck {
-            let work = ModeRules.stored(in: AppGroup.defaults)
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults), rules: work) {
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
                 Dogfood.note("settle", "手表打开，\(settled.reason)，切到\(settled.mode.title)")
                 widgets.sync(mode: store, energy: energy)
                 WidgetCenter.shared.reloadAllTimelines()
@@ -237,9 +236,8 @@ struct LifeHubApp: App {
             replayFrom = OpenReplay.switchFrom(log: store.log, lastSeen: away, now: .now)
             // Mike may have changed location access in Settings while away.
             placeMonitor.checkAccess(places)
-            // A missed or held leave still ends work when Mike opens the app in the evening.
-            let work = ModeRules.stored(in: AppGroup.defaults)
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults), rules: work) {
+            // A missed or held leave still ends work when Mike opens the app.
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
                 Dogfood.note("settle", "\(settled.reason)，切到\(settled.mode.title)")
             }
             syncWidgets()
@@ -568,8 +566,8 @@ struct LifeHubApp: App {
             } else {
                 decision = nil
             }
-            // Place comes first: a leave that was held or came early still ends work once it's evening.
-            let made = decision ?? store.settle(presence: presence, rules: rules)
+            // Place comes first: a leave that was held still ends work at the next place event.
+            let made = decision ?? store.settle(presence: presence)
             let outcome = made.map { "切到\($0.mode.title)" } ?? "不切（\(Self.keptBecause(store: store, rules: rules))）"
             Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
             needs.refresh(
