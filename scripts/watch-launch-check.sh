@@ -8,8 +8,12 @@ app=$1
 out=build/watch-launch
 mkdir -p "$out"
 
+# The smallest screen first (40 mm, then 41 mm), where page 2 is tightest; else the newest watch.
 udid=$(xcrun simctl list devices available -j |
-  jq -r '[.devices | to_entries[] | select(.key | test("watchOS")) | .value[]] | last | .udid')
+  jq -r '[.devices | to_entries[] | select(.key | test("watchOS")) | .value[]] as $all
+    | ([$all[] | select(.name | test("40mm"))] + [$all[] | select(.name | test("41mm"))] + [$all | last])
+    | first | .udid')
+echo "::notice::Watch simulator: $(xcrun simctl list devices | grep "$udid" | sed 's/^ *//')"
 if [[ -z "$udid" || "$udid" == "null" ]]; then
   echo "::error::No watch simulator available"
   exit 1
@@ -41,7 +45,7 @@ for persona in haku kuro; do
     mkdir -p "$folder"
     cat >"$folder/watch-payload.json" <<JSON
 {"schemaVersion":1,"persona":"$persona","snapshot":{"schemaVersion":1,"mode":"work","since":"$now",
-"energy":"okay","line":"上班中","updatedAt":"$now"}}
+"energy":"okay","line":"今天会开得有点多，记得起来走两步，晚上早点回家睡觉","updatedAt":"$now"}}
 JSON
   done
   pid=$(xcrun simctl launch --terminate-running-process "$udid" "$bundle" | awk '{print $NF}')
@@ -63,6 +67,10 @@ JSON
     echo "::error::The watch app kept the CPU at ${busy}% with $persona; its first frame may never finish"
     failed=true
   fi
+  # Page 2 for the layout review; Debug builds open on it with -today-page.
+  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -today-page >/dev/null
+  sleep 8
+  xcrun simctl io "$udid" screenshot "$out/watch-$persona-today.png"
 done
 xcrun simctl terminate "$udid" "$bundle" || true
 ! $failed
