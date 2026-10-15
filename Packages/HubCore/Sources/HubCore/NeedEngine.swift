@@ -566,7 +566,7 @@ public enum NeedEngine {
         if let identity = rules.identity, identity != ModeCards.legacy(for: rules.persona).identity {
             return identity.invite(for: rules.persona)
         }
-        switch rules.persona {
+        return switch rules.persona {
         case .haku: "今天打拳，拳套我戴好了"
         case .kuro: "今天网球。……拍子带好了。"
         }
