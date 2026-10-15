@@ -216,6 +216,7 @@ public struct CompanionView: View {
                 .padding(.top, 24)
                 .padding(.horizontal, 12)
                 .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
+                .offset(y: closeUp ? 0 : Self.bubbleRoom(style: style, showsBubble: showsBubble))
                 .animation(.smooth(duration: 0.35), value: closeUp)
 
             if welcomeStart != nil, let replay = welcomeReplay {
@@ -645,6 +646,13 @@ public struct CompanionView: View {
                     closeUp = false
                 }
             }
+    }
+
+    // D5 (UI 审核 10/15): on a small iPhone the longest one-line bubble covered the hair tips, the headset band and
+    // the gift box on the head. The phone figure sits lower instead of the bubble moving onto the body.
+    /// How far the figure sits below its usual place to leave room for the bubble at the top, in points.
+    nonisolated static func bubbleRoom(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
+        style == .standard && showsBubble ? 24 : 0
     }
 
     /// Whether the off-work pose that played from `start` still holds at `date` in `mode`: in work mode, the same day.

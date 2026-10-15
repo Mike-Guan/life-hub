@@ -322,6 +322,13 @@ import Testing
         #expect(!CompanionLines.lines(for: nil).isEmpty)
     }
 
+    @Test func onlyThePhoneFigureMakesRoomForTheBubble() {
+        #expect(CompanionView.bubbleRoom(style: .standard, showsBubble: true) == 24)
+        #expect(CompanionView.bubbleRoom(style: .standard, showsBubble: false) == 0)
+        #expect(CompanionView.bubbleRoom(style: .watch, showsBubble: true) == 0)
+        #expect(CompanionView.bubbleRoom(style: .notification, showsBubble: true) == 0)
+    }
+
     @Test func offWorkPlaysOncePerDay() {
         #expect(CompanionView.newOffWork(.offWork(id: "2026-10-05"), last: "") == "2026-10-05")
         #expect(CompanionView.newOffWork(.offWork(id: "2026-10-05"), last: "2026-10-05") == nil)
