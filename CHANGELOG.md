@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. Items go
   on sale once the character art draws them.
+- The second preset character's eight Sunday items and a plain back view of every top, for when she turns
+  away, in her clothes layer file. Nothing in the app shows them yet.
 - A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
   and her identity card. Nothing shows it yet; the keepsake page and share cards will. Wins filled in from
   an earlier day keep no look, because the wardrobe has no history.
@@ -94,6 +96,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   The second character's flower is now called 地上小粉花.
 - The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
   4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
+- A tired HAKU now shows it in every mode: off work he keeps smiling with half-open eyes and bags, at work and
+  on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
+  full night stay brighter and clear the headset.
 - The watch has no dark band behind the clock any more; every screen keeps its own background.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
