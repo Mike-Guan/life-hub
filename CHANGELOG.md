@@ -29,8 +29,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
 
 ### Changed
-- The second preset character wears the top or set of the mode she is in, on the home screen, the shop,
-  the wardrobe, unboxing, widgets and the watch. Her clothes stay off the shelf until their art is in.
+- The second preset character's 6 tops and 2 full sets are on sale. She wears the one of the mode she is in,
+  on the home screen, the shop, the wardrobe, unboxing, widgets and the watch.
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
   over the hair while sitting up. After the off-work
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.

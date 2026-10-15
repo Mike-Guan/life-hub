@@ -448,9 +448,11 @@ import Testing
                 let range = item.slot == .fullSet ? 80...90 : 30...40
                 #expect(range.contains(item.price ?? 0), "\(item.id)")
                 #expect(item.slot == .top || item.slot == .fullSet)
-                #expect(!item.isDrawn)
+                // The second character's clothes are drawn; HAKU's wait for their art.
+                #expect(item.isDrawn == (persona == .kuro), "\(item.id)")
             }
-            #expect(ShopItem.catalog(for: persona, card: .boxing).allSatisfy { $0.mode == nil })
+            let onShelf = ShopItem.catalog(for: persona, card: .boxing).filter { $0.mode != nil }
+            #expect(onShelf.count == (persona == .kuro ? clothes.count : 0), "\(persona)")
         }
     }
 
