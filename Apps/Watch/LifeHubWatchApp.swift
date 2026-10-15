@@ -78,6 +78,7 @@ struct WatchHomeView: View {
             if payload.persona == .kuro {
                 KuroView(
                     look: KuroLook(mode: mode ?? .chill, card: mode.flatMap(payload.card(for:))),
+                    card: mode.flatMap(payload.card(for:)),
                     energy: snapshot.energy(at: date)?.value,
                     bedtime: payload.bedtime.state(at: date),
                     need: snapshot.need(at: date),

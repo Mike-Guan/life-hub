@@ -67,7 +67,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - On the watch app and the watch face, both characters wear the look of the identity card picked on the iPhone,
-  instead of the default boxing or tennis look.
+  instead of the default boxing or tennis look. On cards without a look of their own, the second preset character
+  also does that card's base idles on the watch.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
