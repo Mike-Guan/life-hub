@@ -3,6 +3,7 @@ import SwiftUI
 
 // Preview v3 (Issue #237): a Toy sheet at the bottom over a dim layer, 算了 on the left and the red answer on
 // the right. Used in place of the system confirmation dialog, which can't take the Toy style.
+// The texts come in as String, which Text shows as is, so each is looked up in the catalog here.
 /// Asks before something is deleted or a step is skipped. Tapping the dim layer cancels.
 struct ToyConfirmSheet: View {
     let question: String
@@ -24,9 +25,9 @@ struct ToyConfirmSheet: View {
                 .ignoresSafeArea()
                 .onTapGesture(perform: onCancel)
             VStack(alignment: .leading, spacing: 12) {
-                Text(question)
+                Text(question.localized)
                     .font(Toy.body(17, weight: .heavy))
-                Text(warning)
+                Text(warning.localized)
                     .font(Toy.body(13))
                     .foregroundStyle(Toy.muted)
                 HStack(spacing: 12) {
@@ -44,7 +45,7 @@ struct ToyConfirmSheet: View {
 
     private func button(_ title: String, fill: Color, text: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
+            Text(title.localized)
                 .font(Toy.body(15, weight: .heavy))
                 .foregroundStyle(text)
                 .frame(maxWidth: .infinity, minHeight: 48)
