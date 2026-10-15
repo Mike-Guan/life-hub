@@ -27,7 +27,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - HAKU can dress for four more identity cards: tennis (visor, racket and ball), fitness (gym bag and a small
   dumbbell), study (green jacket and an open book) and art (green jacket, apron, sketchbook and pencil).
   The watch leaves the gym bag off the floor.
-  Boxing and the other cards keep the boxing kit. The home screen doesn't pass the picked card yet.
+  Boxing and the other cards keep the boxing kit.
 - The second preset character's eight Sunday items and a plain back view of every top, for when she turns
   away, in her clothes layer file. Nothing in the app shows them yet.
 - A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
@@ -241,6 +241,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   chain when he hits it.
 - When HAKU puts the pillow behind his shoulder to lean on it, it now lands exactly where it rests, so it no
   longer jumps from his chest to behind his shoulder.
+- Both characters now dress for the picked identity card on the home screen, in widgets, in the notification
+  and in onboarding, not only in the shop and wardrobe. On the home screen the second preset character also
+  points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
