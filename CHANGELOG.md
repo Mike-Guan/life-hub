@@ -74,6 +74,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- Swiping back to the character's page on the watch no longer replays its opening reaction, invite hop and line.
 - On another identity card's day, HAKU warms up without the boxing headband and gloves.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.
