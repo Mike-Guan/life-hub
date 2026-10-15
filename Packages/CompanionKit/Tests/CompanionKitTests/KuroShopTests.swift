@@ -86,6 +86,40 @@ import Testing
         #expect(KuroItemIcon.parts(.nightlight) == [.weeklyRoomNightlightGlow, .weeklyRoomNightlight])
     }
 
+    @Test func theBeanieSitsBetweenHerCatEarsOnlyOffWork() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.beanie]
+        let beanie: Set<KuroPart> = [.weeklyHatBeanie, .weeklyHatBeaniePom]
+        let chill = KuroFigure.parts(for: .chill, pose: pose)
+        #expect(Set(chill).isSuperset(of: beanie) && chill.contains(.catEars))
+        // The ears are drawn over it.
+        #expect((chill.firstIndex(of: .weeklyHatBeanie) ?? 99) < (chill.firstIndex(of: .catEars) ?? 0))
+        #expect(Set(KuroFigure.parts(for: .chill, pose: pose, watch: true)).isSuperset(of: beanie))
+        #expect(Set(KuroFigure.parts(for: .work, pose: pose)).isDisjoint(with: beanie))
+        // A set hat or the bath towel takes it off; from behind it stays.
+        pose.items = [.beanie, .picnic]
+        #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isDisjoint(with: beanie))
+        pose.items = [.beanie]
+        pose.scene = .dried(time: 1)
+        #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isDisjoint(with: beanie))
+        pose.scene = nil
+        pose.tap = .turnAway
+        #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isSuperset(of: beanie))
+        #expect(KuroItemIcon.parts(.beanie) == [.weeklyHatBeanie, .weeklyHatBeaniePom])
+        // Her "…" bubble moves right of the pom.
+        #expect(KuroFigure.offset(.tapDots, pose: pose, beanie: true) == KuroFigure.beanieDots)
+    }
+
+    @Test func theBeaniePomSwaysFourDegrees() {
+        let leans = stride(from: 0.0, to: 2.4, by: 0.05).map { KuroPose.pom(at: $0) }
+        #expect(leans.allSatisfy { abs($0) <= 4 } && (leans.max() ?? 0) > 3.9 && (leans.min() ?? 0) < -3.9)
+        var pose = KuroPose(look: .chill, energy: nil)
+        #expect(KuroFigure.turn(.weeklyHatBeaniePom, pose: pose) == nil)
+        pose = pose.glowing(KuroPose.restingGlow, pom: 3)
+        #expect(KuroFigure.turn(.weeklyHatBeaniePom, pose: pose)?.angle == 3)
+        #expect(KuroFigure.turn(.weeklyHatBeanie, pose: pose) == nil)
+    }
+
     @Test func herLapIsClearWhileSheDrinks() {
         for item in [KuroItem.blanket, .bearBlanket, .cloud] {
             var pose = KuroPose(look: .chill, energy: nil)

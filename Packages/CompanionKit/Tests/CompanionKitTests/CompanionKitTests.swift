@@ -1319,6 +1319,18 @@ import Testing
         #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
     }
 
+    @Test func aStateSwapShowsOnlyTheSparkles() {
+        var pose = RunnerPose().wearing(Outfit(Wardrobe(equipped: [.celebration: "celebrate.up"])))
+        pose.burst = 0.5
+        pose.swapping = true
+        pose.lift = 0
+        let parts = RunnerFigure.parts(for: .work, pose: pose)
+        #expect(parts.contains(.sparkleWork))
+        #expect(!parts.contains(.peaceHand))
+        #expect(pose.dumbbellRise == 0)
+        #expect(pose.holdsCardProps)
+    }
+
     @Test @MainActor func aStillPortraitStandsWhateverTheHour() {
         let slots = (0..<96).map { Date(timeIntervalSince1970: 1_760_000_000 + Double($0) * IdleLife.slotLength) }
         #expect(slots.contains { CompanionPortrait(mode: .chill, date: $0).pose.life != nil })
