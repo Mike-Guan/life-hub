@@ -91,6 +91,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   and of the user's own identity card, unless the item only shows in another mode.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
+- Tapping an item's price in the shop shows the character wearing it first. Cans are spent only on the confirm
+  button, not on the first tap.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
   translation exists.
 - Settings shows the Daily Widget link only in DEV builds. Test builds don't offer it.
