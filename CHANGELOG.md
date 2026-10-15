@@ -66,8 +66,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- VoiceOver in the shop and wardrobe says what a buy button gets, how far a keepsake has come, and what the
-  preview is wearing in the user's own mode name.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
@@ -153,6 +151,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   Debug. The App Store build still leaves it out.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
   turned off it is still given.
+- VoiceOver in the shop and wardrobe says what a buy button gets, how far a keepsake has come, and what the
+  preview is wearing in the user's own mode name.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
 - After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
