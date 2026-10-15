@@ -530,10 +530,15 @@ public struct CompanionView: View {
         if stage == .peeking { pose.peekAtBag(time: time) }
         if stage == .up { pose.bagLift = 1 }
         if let progress = Self.progress(since: swapStart, at: time, duration: Self.swapDuration) {
-            // Switching state: a quick burst of sparkles over the squash.
+            // Switching state: a quick burst of sparkles over the squash. C17 (动作展示总表): only the sparkles,
+            // so the peace sign, the dumbbell reps and the card's props stay with real celebrations.
             pose.burst = CGFloat(progress)
+            pose.swapping = true
         }
-        if let progress = lifeSwap(mode, life: life, at: time) { pose.burst = CGFloat(progress) }
+        if let progress = lifeSwap(mode, life: life, at: time) {
+            pose.burst = CGFloat(progress)
+            pose.swapping = true
+        }
         if let commute, daily?.scene == nil, activity == nil {
             pose.commute(commute, time: CGFloat(time))
         } else if let walking, daily?.scene == nil, activity == nil {

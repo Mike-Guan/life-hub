@@ -1306,6 +1306,18 @@ import Testing
         #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
     }
 
+    @Test func aStateSwapShowsOnlyTheSparkles() {
+        var pose = RunnerPose().wearing(Outfit(Wardrobe(equipped: [.celebration: "celebrate.up"])))
+        pose.burst = 0.5
+        pose.swapping = true
+        pose.lift = 0
+        let parts = RunnerFigure.parts(for: .work, pose: pose)
+        #expect(parts.contains(.sparkle))
+        #expect(!parts.contains(.peaceHand))
+        #expect(pose.dumbbellRise == 0)
+        #expect(pose.holdsCardProps)
+    }
+
     @Test func everySlotHasAShowcaseMode() {
         #expect(Slot.gloves.showcaseMode == .boxing)
         #expect(Slot.room.showcaseMode == .chill)

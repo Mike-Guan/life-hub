@@ -154,6 +154,8 @@ struct RunnerPose {
     var sparkle: Double = 1
     /// Progress of the celebration sparkle burst, 0..<1, or -1 when none is playing.
     var burst: CGFloat = -1
+    /// Whether `burst` is only the sparkles of a state swap, with no celebration props or moves.
+    var swapping = false
     /// The workout being celebrated, which picks the move and the props, such as gloves up or a helmet.
     var cheerKind: WorkoutSummary.Kind?
     /// Scroll position of the feed on the phone screen while couch scrolling, 0...1.
@@ -356,7 +358,7 @@ struct RunnerPose {
         pokeKind == kind && pokeProgress >= 0 ? WatchPoke.hold(pokeProgress) : 0
     }
     /// How high the dumbbell is: the celebration reps while one plays, else the lift.
-    var dumbbellRise: CGFloat { burst >= 0 ? abs(sin(burst * 2 * .pi)) : lift }
+    var dumbbellRise: CGFloat { burst >= 0 && !swapping ? abs(sin(burst * 2 * .pi)) : lift }
     /// HAKU's height while unboxing: 0 = inside the box, then a pop past full height that settles at 1.
     var popOut: CGFloat {
         guard unbox >= 0 else { return 1 }
@@ -1399,7 +1401,7 @@ struct RunnerFigure: View {
         // stands in the mountains.
         if mode == .chill, let room = outfit.room, visible.isDisjoint(with: awayParts) { visible.insert(room) }
         if visible.contains(.roomSpeaker) { visible.insert(.roomSpeakerRing) }
-        if outfit.peaceSign, pose.burst >= 0, !pose.bedtime { visible.insert(.peaceHand) }
+        if outfit.peaceSign, pose.burst >= 0, !pose.swapping, !pose.bedtime { visible.insert(.peaceHand) }
         // Today's traces: the bandage goes everywhere, the monitor and the sunlight are in the room at home.
         if pose.traces.contains(.bandage) { visible.insert(.bandage) }
         let home = mode == .chill && visible.isDisjoint(with: awayParts.union([.door]))
