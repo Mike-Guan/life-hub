@@ -486,6 +486,8 @@ struct SettingsView: View {
                 Text(detail)
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(Toy.body(13, weight: .heavy))
