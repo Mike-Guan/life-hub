@@ -12,7 +12,7 @@ import Testing
             cans: 12,
             owned: owned,
             wardrobe: wardrobe,
-            energy: .high,
+            energy: .full,
             vitals: HakuVitals(),
             bedtime: .off,
             today: [],
@@ -37,6 +37,6 @@ import Testing
             room: room)
         #expect(home.unplaced == ["room.bag"])
         #expect(home.cans == 12)
-        #expect(home.energy == .high)
+        #expect(home.energy == .full)
     }
 }
