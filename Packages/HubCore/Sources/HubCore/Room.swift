@@ -95,11 +95,13 @@ public struct RoomPiece: Equatable, Codable, Sendable {
     public var rotations: [Int]
     public var interactions: [RoomInteraction]
     public var slots: [RoomSlot]
+    /// The colors the user can pick for the piece; empty when it can't be recolored.
+    public var colors: [String]
     /// Where the piece stands when it comes out of storage with no spot of its own.
     public var defaultSpot: RoomCell?
 
     private enum CodingKeys: String, CodingKey {
-        case id, layer, footprint, height, blocksWalk, rotations, interactions, slots, defaultSpot
+        case id, layer, footprint, height, blocksWalk, rotations, interactions, slots, colors, defaultSpot
     }
 
     /// Decodes the piece; missing fields fall back to a 1×1 floor piece that blocks nothing.
@@ -116,6 +118,7 @@ public struct RoomPiece: Equatable, Codable, Sendable {
         interactions = ((try? values.decodeIfPresent([Lossy<RoomInteraction>].self, forKey: .interactions)) ?? [])
             .compactMap(\.value)
         slots = ((try? values.decodeIfPresent([Lossy<RoomSlot>].self, forKey: .slots)) ?? []).compactMap(\.value)
+        colors = (try? values.decodeIfPresent([String].self, forKey: .colors)) ?? []
         defaultSpot = try? values.decodeIfPresent(RoomCell.self, forKey: .defaultSpot)
     }
 }

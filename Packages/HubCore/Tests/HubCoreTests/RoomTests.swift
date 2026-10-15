@@ -13,7 +13,7 @@ import Testing
           "pieces": [
             {
               "id": "bed.basic", "layer": "floor", "footprint": { "w": 2, "d": 3 }, "height": 0.65,
-              "blocksWalk": true, "rotations": [0, 90],
+              "blocksWalk": true, "rotations": [0, 90], "colors": ["green", "cream"],
               "interactions": [
                 { "id": "lie", "kind": "lie", "anchor": { "x": 0.9, "y": 1.7, "z": 0.65 }, "facing": "se",
                   "approach": { "x": -0.6, "y": 1.5 }, "animation": "lie", "capacity": 1 },
@@ -40,10 +40,12 @@ import Testing
         #expect(bed.interactions.map(\.id) == ["lie"])
         #expect(bed.interactions.first?.approach == RoomPoint(x: -0.6, y: 1.5))
         #expect(bed.slots.first?.id == "top")
+        #expect(bed.colors == ["green", "cream"])
         let plant = try #require(catalog.piece("room.plant"))
         #expect(plant.footprint == RoomPiece.Footprint(w: 1, d: 1))
         #expect(plant.layer == "floor")
         #expect(!plant.blocksWalk)
+        #expect(plant.colors.isEmpty)
         #expect(plant.defaultSpot == RoomCell(x: 1, y: 8))
         #expect(catalog.piece("sofa") == nil)
     }
