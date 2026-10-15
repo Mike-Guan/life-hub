@@ -106,6 +106,52 @@ import Testing
         #expect(KuroView.hop((.turnAway, 0.1)) == 0 && KuroView.hop((.sip, 0.1)) < 0 && KuroView.hop(nil) == 0)
     }
 
+    // 动作展示总表 G2: she squashes edge-on to swap sides as she turns away and back, and the bubble waits.
+    @Test func sheFlipsLikeACardToTurnAway() {
+        let pose = KuroPose(look: .chill, energy: nil)
+        let length = KuroTap.turnAway.duration
+        let at = { (t: Double) in t / length }
+        let edge = { (t: Double) in abs(KuroTap.turnWidth(at(t)) - KuroTap.edgeOn) < 0.001 }
+        #expect(KuroTap.turnWidth(0) == 1 && edge(0.12) && KuroTap.turnWidth(at(0.5)) == 1 && edge(length - 0.12))
+        #expect(KuroView.width((.turnAway, at(0.06))) < 1 && KuroView.width((.sip, 0.05)) == 1)
+        let front = Set(KuroFigure.parts(for: .chill, pose: pose.reacting(.turnAway, progress: at(0.1))))
+        #expect(front.contains(.faceBase) && !front.contains(.backHead))
+        let back = Set(KuroFigure.parts(for: .chill, pose: pose.reacting(.turnAway, progress: at(0.2))))
+        #expect(back.contains(.backHead) && !back.contains(.tapDots))
+        #expect(KuroTap.dotsOpacity(at(0.29)) > 0 && KuroTap.dotsOpacity(at(0.29)) < 1)
+        #expect(KuroTap.dotsOpacity(at(1.5)) == 1 && KuroTap.dotsOpacity(at(length - 0.2)) == 0)
+        let turning = pose.reacting(.turnAway, progress: at(1.5))
+        #expect(KuroFigure.opacity(.tapDots, pose: turning) == 1)
+        let turnedBack = pose.reacting(.turnAway, progress: at(2.95))
+        #expect(KuroFigure.parts(for: .chill, pose: turnedBack).contains(.faceBase))
+    }
+
+    // 动作展示总表 G1: her eyes shut for a moment at the end instead of jumping back to her own.
+    @Test func aTapEndsWithHerEyesShutWhenTheyChange() {
+        let pose = KuroPose(look: .work, energy: nil)
+        #expect(pose.reacting(.tablet, progress: 0.9).eyes == .down)
+        #expect(pose.reacting(.tablet, progress: 0.97).eyes == .closed)
+        let desk = KuroPose(look: .desk, energy: nil)
+        #expect(desk.reacting(.glasses, progress: 0.97).eyes == desk.eyes)
+        #expect(pose.reacting(.turnAway, progress: 0.99).eyes == pose.eyes)
+    }
+
+    // 动作展示总表 G4: her blanket slides down and away as the cup comes up, and back up after it is down.
+    @Test func herLapSlidesAwayForTheSip() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.blanket]
+        let at = { (t: Double) in pose.reacting(.sip, progress: t / KuroTap.sip.duration) }
+        let leaving = KuroFigure.shift(.itemBlanket, pose: at(0.1)).height
+        #expect(KuroFigure.parts(for: .chill, pose: at(0.1)).contains(.itemBlanket))
+        #expect(leaving > 0 && leaving < KuroTap.lapDrop)
+        #expect(!KuroFigure.parts(for: .chill, pose: at(0.5)).contains(.itemBlanket))
+        #expect(!KuroFigure.parts(for: .chill, pose: at(0.82)).contains(.itemBlanket))
+        let coming = KuroFigure.shift(.itemBlanket, pose: at(0.92)).height
+        #expect(KuroFigure.parts(for: .chill, pose: at(0.92)).contains(.itemBlanket))
+        #expect(coming > 0 && coming < KuroTap.lapDrop)
+        #expect(KuroFigure.shift(.itemBlanket, pose: at(1.05)) == .zero)
+    }
+
     @Test func theHeartShowsAboutOneTapInFour() {
         #expect(KuroTap.heart(0) && !KuroTap.heart(1) && !KuroTap.heart(3))
         let pose = KuroPose(look: .desk, energy: nil).reacting(.glasses, progress: 0.6, heart: true)
