@@ -41,7 +41,7 @@ struct OnboardingView: View {
             if asksDefaults {
                 ToyConfirmSheet(
                     question: "先用默认的？",
-                    warning: "先给你 上班、下班、副业 三张卡，没有身份卡。睡觉时间、上班日算没设，不出相关提醒。都能在 设置 > 模式 里补。",
+                    warning: "先给你 上班、下班、副业 三张卡，没有身份卡。睡觉时间、上班日算没设，不出相关提醒。睡觉时间之后能在 设置 里补。",
                     cancel: "回去说说",
                     confirm: "用默认",
                     confirmFill: Toy.pink,
