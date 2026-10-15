@@ -126,6 +126,17 @@ struct FrameSheets {
         try write("haku-7-welcome-end", rows, frames: 16, step: 0.05)
     }
 
+    @Test func hakuPhoneDoze() throws {
+        let rows = [
+            Row(label: "睡前打瞌睡 · 动态 0-4 s", start: Self.base) { AnyView(PhoneDozeFrame(start: Self.base)) },
+            Row(label: "动态 6-10 s（点头）", start: Self.base) {
+                AnyView(PhoneDozeFrame(start: Self.base, offset: 6))
+            },
+            Row(label: "静态一帧", start: Self.base) { AnyView(PhoneDozeFrame(start: Self.base, still: true)) },
+        ]
+        try write("haku-7-phone-doze", rows)
+    }
+
     @Test func kuroLooks() throws {
         var rows: [Row] = []
         for look in KuroLook.allCases {
@@ -305,6 +316,21 @@ struct FrameSheets {
             date += IdleLife.slotLength
         }
         return date
+    }
+
+    /// HAKU dozing with the phone, `offset` seconds plus the frame clock into the doze.
+    struct PhoneDozeFrame: View {
+        let start: Date
+        var offset: CGFloat = 0
+        var still = false
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            let t = CGFloat((clock ?? start).timeIntervalSince(start)) + offset
+            RunnerFigure(mode: .chill, pose: RunnerPose.phoneDoze(time: t, still: still))
+                .padding(12)
+                .background(Mode.chill.color)
+        }
     }
 
     /// HAKU at the end of the welcome back scene: frame 0 is 0.5 s before it ends; after it ends, the idle pose.

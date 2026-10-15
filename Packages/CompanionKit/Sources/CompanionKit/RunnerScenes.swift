@@ -438,6 +438,8 @@ extension RunnerPose {
         var phoneDrop: CGFloat = 0
         /// 0 = phone screen up, 1 = turned face down.
         var phoneFlip: CGFloat = 0
+        /// Holding the phone to the chest, screen in, instead of looking at it.
+        var hugsPhone = false
         /// How far the crate has slid in: 0 = off to the right, 1 = in front, -1 = hidden.
         var crate: CGFloat = -1
         /// 0 = flaps shut, 1 = folded open.
@@ -523,6 +525,26 @@ extension RunnerPose {
             pose.headTilt *= Double(1 - settle)
             w.exit = max(length.isFinite ? ease(ramp(t, from: length - 0.3, to: length)) : 0, skip)
         }
+        pose.welcome = w
+        return pose
+    }
+
+    // 动作展示总表 §8 (Mike 10/15): dozing off at bedtime with the phone still in hand. Never the phone falling on
+    // the face.
+    /// Dozing under the blanket on the sofa, hugging the phone, `time` seconds in: slow breaths and a nod about
+    /// every 9 s. `still` gives the one frame for the Lock Screen, the watch face, Reduce Motion and Always On.
+    static func phoneDoze(time t: CGFloat, still: Bool = false) -> RunnerPose {
+        var pose = RunnerPose(face: .mid)
+        var w = Welcome(scene: .sofa, time: t)
+        w.hugsPhone = true
+        let breath = still ? 0 : sin(t * 2 * .pi / 4.5)
+        let nod = still ? 0 : bump(loop(t, 9), from: 7.6, to: 8.4)
+        pose.bounce = 5 + 1.2 * breath
+        pose.lean = -3
+        pose.headDy = 6 + breath + 4 * nod
+        pose.headTilt = Double(4 + 2 * nod)
+        pose.eyesShut = true
+        w.phoneDrop = 4 + 0.6 * breath
         pose.welcome = w
         return pose
     }
