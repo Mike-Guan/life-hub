@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Share cards: a keepsake or a new top or full set can be shared as a 9:16 or 1:1 picture of the character
+  wearing it, with its name and her line. Rows in 人生收藏 open the keepsake's page, which shows how she looked the
+  day it arrived; its 「分享」 and a quiet 「分享」 link on the unboxing open the choice. Cards carry no date,
+  place or health number, and sharing gives nothing.
 - HAKU dresses for the dance, music and ski cards, each with its own idle now and then: it bobs to a small
   speaker as notes float up and stops when caught, plays air chords by a ukulele while counting silently, or
   pulls its ski goggles down and back and breathes out a white puff. The watch leaves out the speaker and the
