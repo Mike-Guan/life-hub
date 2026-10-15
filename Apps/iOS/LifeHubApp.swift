@@ -57,7 +57,7 @@ struct LifeHubApp: App {
         }
         let missingFonts = AppFonts.register()
         if !missingFonts.isEmpty {
-            errors.append("日文字体没装上，日文会用系统字体：\(missingFonts.joined(separator: "、"))")
+            errors.append(String(format: "日文字体没装上，日文会用系统字体：%@".localized, missingFonts.joined(separator: "、")))
         }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
         let persona = Persona.stored(in: AppGroup.defaults)
@@ -256,7 +256,7 @@ struct LifeHubApp: App {
             )
             refreshNeeds()
         }
-        .sheet(isPresented: $showsSettings, onDismiss: showNextUnboxing) {
+        .sheet(isPresented: $showsSettings, onDismiss: afterSettings) {
             SettingsView(
                 bedtime: $bedtime,
                 remindsAtBedtime: $remindsAtBedtime,
@@ -376,6 +376,7 @@ struct LifeHubApp: App {
         wardrobe = .stored(in: AppGroup.defaults, persona: persona)
         cards = .current(in: AppGroup.defaults, persona: persona)
         bedtime = .stored(in: AppGroup.defaults)
+        remindsAtBedtime = BedtimeSchedule.remindsAtBedtime(in: AppGroup.defaults)
         rules = .stored(in: AppGroup.defaults)
         places = .stored(in: AppGroup.defaults)
         bathDoneAt = nil
@@ -463,6 +464,16 @@ struct LifeHubApp: App {
     private func markBoxIfShown() {
         if case .welcomeBack(_, let replay) = welcomeBack, replay.tier == .box {
             ReturnLog.markBox(at: .now, in: AppGroup.defaults)
+        }
+    }
+
+    // 交付差距 v1 工程 #7: after 删除全部数据 the app is as freshly installed, so the setup shows again.
+    // It opens once Settings has closed, since one view can't present two covers at once.
+    private func afterSettings() {
+        if OnboardingDraft.isNeeded(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty) {
+            showsOnboarding = true
+        } else {
+            showNextUnboxing()
         }
     }
 
@@ -684,7 +695,7 @@ struct LifeHubApp: App {
                 growth.record(earned.win, source: earned.source, at: earned.at)
             }
         } catch {
-            healthError = "读不到健康 App 里的日照、睡眠或步数：\(error.localizedDescription)"
+            healthError = String(format: "读不到健康 App 里的日照、睡眠或步数：%@".localized, error.localizedDescription)
         }
     }
 

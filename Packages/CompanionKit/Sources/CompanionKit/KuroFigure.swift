@@ -507,6 +507,8 @@ struct KuroPartView: View {
 /// KURO with an idle loop for her look; energy picks her face and a tap gets a line.
 public struct KuroView: View {
     let look: KuroLook
+    /// The identity card she wears `look` for, if any; a card without a look of its own still adds its base moves.
+    let card: IdentityKind?
     let energy: Double?
     let bedtime: Bedtime
     let need: CompanionNeed?
@@ -580,6 +582,7 @@ public struct KuroView: View {
 
     /// - Parameters:
     ///   - look: what she wears.
+    ///   - card: the identity card she wears `look` for, if any.
     ///   - energy: energy 0-100, or nil when unknown. Below 30 she looks tired; from 70 she looks bright.
     ///   - bedtime: `.on` makes her sleepy and slows her to a breath.
     ///   - need: what the user needs, which picks her lines.
@@ -604,6 +607,7 @@ public struct KuroView: View {
     ///   - onBathDone: called after she shows the towel round her head on a tap during bath time.
     public init(
         look: KuroLook,
+        card: IdentityKind? = nil,
         energy: Double? = nil,
         bedtime: Bedtime = .off,
         need: CompanionNeed? = nil,
@@ -624,6 +628,7 @@ public struct KuroView: View {
         onBathDone: (() -> Void)? = nil
     ) {
         self.look = look
+        self.card = card
         self.energy = energy
         self.bedtime = bedtime
         self.need = need
@@ -686,7 +691,7 @@ public struct KuroView: View {
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 // Her small idle moves play only in the plain idle.
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
-                let fidget = busy ? nil : KuroIdle.at(idleTime, look: look)
+                let fidget = busy ? nil : KuroIdle.at(idleTime, look: look, card: card)
                 // 动作展示总表 C9: what an idle she was in the middle of moved goes back as the tap starts.
                 let cutShort = tap.flatMap { cut(tap: $0, sleepy: sleepy) }
                 let back = (tap.map { $0.1 * $0.0.duration } ?? 0) / KuroTap.cutBack
@@ -983,7 +988,7 @@ public struct KuroView: View {
         guard tap.1 * tap.0.duration < KuroTap.cutBack, slot == nil, !sleepy,
             let start = tapStart?.timeIntervalSinceReferenceDate, scene(at: start) == nil
         else { return nil }
-        return KuroIdle.at(idlePace?.phase(at: start) ?? start * pace, look: look)
+        return KuroIdle.at(idlePace?.phase(at: start) ?? start * pace, look: look, card: card)
     }
 
     /// Progress of the nod at `time` (0..<1), or nil when none is playing.
