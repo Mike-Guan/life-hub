@@ -198,6 +198,8 @@ struct RunnerPose {
     var outfit = Outfit()
     /// What HAKU wears for an identity card other than boxing, or nil for the boxing kit.
     var cardLook: RunnerCardLook?
+    /// Whether the user's identity card is one other than boxing, in any mode.
+    var otherCard = false
     /// Seconds into the card look's idle, or -1 when none is playing.
     var cardBeat: CGFloat = -1
     /// The base-outfit move `cardBeat` times, or nil for the look's own idle.
@@ -1540,7 +1542,8 @@ struct RunnerFigure: View {
             visible.formUnion(couchParts)
         }
         if pose.need == .boxingWarmup, !pose.bedtime {
-            visible.formUnion(warmupParts)
+            // 写死作息 #5 (PM 10/15): another card's warm-up keeps the boxing kit off; its lines carry it.
+            if !pose.otherCard { visible.formUnion(warmupParts) }
             visible.remove(.monsterCan)
         }
         if pose.bagLift >= 0, !pose.bedtime { visible.insert(.gymBag) }
@@ -2574,7 +2577,8 @@ public struct CompanionPortrait: View {
                 peeking: peeking,
                 activity: activity,
                 moment: activity == nil ? moment : nil,
-                bedtime: bedtime
+                bedtime: bedtime,
+                card: card
             )
         )
     }
