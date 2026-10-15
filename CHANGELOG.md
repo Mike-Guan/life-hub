@@ -110,6 +110,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   grow a size, her cheeks go pink, her ears stand up a little and sparkles show by her head.
 - The shop banner and the wardrobe preview show HAKU standing, so the clothes stay in view. Before, at home they
   could catch HAKU asleep on the sofa or bent over the handheld.
+- With languages on, the default card names (上班, 下班, 副业 and the character's own card) show in the phone's
+  language in the wardrobe, settings and everywhere else they appear. Names you gave a card stay as you wrote them.
 - The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
   gym, say the app never records your route, and say only the computed state goes to your own Apple Watch.
   They now also come in Japanese and English, following the phone's language. The 「日文和英文」 switch

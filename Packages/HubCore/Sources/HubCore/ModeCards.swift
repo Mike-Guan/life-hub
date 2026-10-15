@@ -309,7 +309,7 @@ public struct ModeCards: Codable, Equatable, Sendable {
     public func title(for mode: Mode, persona: Persona) -> String {
         if let name = names[mode.rawValue] { return name }
         if mode == .boxing, let identity { return identity.title }
-        return mode.title(for: persona)
+        return mode.title(for: persona).localized
     }
 
     /// The identity slot's activity for sentences, without 日: the picked card's, else the character's default.
