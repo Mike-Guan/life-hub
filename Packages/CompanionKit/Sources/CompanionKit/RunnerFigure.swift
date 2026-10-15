@@ -1489,6 +1489,8 @@ struct RunnerFigure: View {
                     }
                     // UI 审核 10/14: the watch's bottom edge cuts the speaker and the fist with the wristband.
                     if pose.watchFrame { visible.subtract([.danceSpeaker, .wristbandHand]) }
+                    // One thing per corner: the gym bag by the door takes it from the speaker or the ukulele.
+                    if pose.bagLift >= 0, !pose.bedtime { visible.subtract([.danceSpeaker, .ukulele]) }
                 } else {
                     visible.formUnion(boxingParts)
                 }

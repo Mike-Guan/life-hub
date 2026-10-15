@@ -58,22 +58,22 @@ enum RunnerCardLook: CaseIterable, Sendable {
         return parts
     }
 
-    /// What the look holds in its hands.
+    /// What the look holds in its hands, or the bare fist with the wristband.
     var held: Set<RunnerPart> {
         switch self {
         case .tennis: [.tennisRacket, .racketHand, .tennisBall]
         case .fitness: [.handWeight]
         case .study: [.book, .bookPage]
         case .art: [.sketchbook, .pencil]
-        case .dance, .music, .ski: []
+        case .dance, .ski: [.wristbandHand]
+        case .music: []
         }
     }
 
-    // The fist with the wristband is the right hand, so it goes too when the hand holds something else.
     /// What the look puts aside while HAKU does something else: what it holds, what it wears over the base and
     /// what stands in the corner.
     var props: Set<RunnerPart> {
-        held.union([.tennisVisor, .apron, .wristbandHand, .danceSpeaker, .ukulele, .skiGoggles])
+        held.union([.tennisVisor, .apron, .danceSpeaker, .ukulele, .skiGoggles])
     }
 
     /// The jacket fill: dark for sport, the green off-work jacket for out and craft.
