@@ -225,6 +225,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   preview is wearing in the user's own mode name.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
+- The home page room has walkable cells and a shortest walk from where the character stands, around furniture
+  and never cutting a corner (Issue #489). The scene switches to it in its own change.
 - Japanese for the second and third copy batches: home bubbles, VoiceOver lines, identity cards, first-run setup,
   shop, wardrobe, unboxing, settings, memory, place editor, item names and reasons.
 - After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
