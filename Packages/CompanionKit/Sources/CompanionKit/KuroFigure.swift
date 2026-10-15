@@ -698,6 +698,13 @@ public struct KuroView: View {
             if invite != nil { startInvite() }
             if let walking { say(KuroScene.walkLine(from: walking), for: 3) }
             if bath { startBath() }
+            // Preview only: a fixed line for the bubble screenshots.
+            if let line = UserDefaults.standard.string(forKey: "screenshot-line") {
+                Task {
+                    try? await Task.sleep(for: .seconds(2.5))
+                    say(line, for: 600)
+                }
+            }
         }
         .onChange(of: invite) { _, new in
             if new != nil { startInvite() }

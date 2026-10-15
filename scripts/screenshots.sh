@@ -1,146 +1,41 @@
 #!/usr/bin/env bash
-# Draws the README images: the iOS and Mac home screen in each mode, into docs/screenshots/.
-# Also the iOS memory page, settings, shop, wardrobe, unboxing and first-run setup for UI 审核, the last
-# four on the smallest iPhone too.
-# Needs Xcode 26 and XcodeGen. Uses the Debug build's -screenshot-mode launch argument.
+# Preview only (D5): the second preset character's longest line in each language over her two hats, on the SE.
 set -euo pipefail
-
-modes=(work chill boxing money)
 out=docs/screenshots
+rm -rf "$out"
 mkdir -p "$out"
 xcodegen generate
-
-# iOS: build for the simulator, then launch each mode and screenshot it.
-udid=$(xcrun simctl list devices available -j |
-  jq -r '[.devices[][] | select(.name | test("^iPhone [0-9]+ Pro$"))] | last | .udid')
-xcrun simctl boot "$udid" || true
-xcrun simctl bootstatus "$udid" -b
-# Reduce motion makes RUNNER hold its still pose, so every run draws the same frame.
-xcrun simctl spawn "$udid" defaults write com.apple.Accessibility ReduceMotionEnabled -bool true
-xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100
+se=$(xcrun simctl create "Screenshot SE" com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation)
+xcrun simctl boot "$se" || true
+xcrun simctl bootstatus "$se" -b
+xcrun simctl spawn "$se" defaults write com.apple.Accessibility ReduceMotionEnabled -bool true
+xcrun simctl status_bar "$se" override --time 9:41 --batteryState charged --batteryLevel 100
 xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-iOS -configuration Debug \
-  -destination "id=$udid" -derivedDataPath build CODE_SIGNING_ALLOWED=NO
-ios_app=build/Build/Products/Debug-iphonesimulator/LifeHub.app
-codesign --force --deep --sign - "$ios_app"
-xcrun simctl install "$udid" "$ios_app"
-bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$ios_app/Info.plist")
-for mode in "${modes[@]}"; do
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode"
-  sleep 4
-  xcrun simctl io "$udid" screenshot "$out/ios-$mode.png"
-  # The same mode with KURO picked, for checking the second character before an install.
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode" \
-    -screenshot-persona kuro
-  sleep 4
-  xcrun simctl io "$udid" screenshot "$out/ios-kuro-$mode.png"
-done
-# The memory page with four weeks of made-up records, for each character, and with none.
-for persona in haku kuro; do
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory full \
-    -screenshot-persona "$persona"
-  sleep 4
-  xcrun simctl io "$udid" screenshot "$out/ios-memory-$persona.png"
-done
-xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory empty
-sleep 4
-xcrun simctl io "$udid" screenshot "$out/ios-memory-empty.png"
-for ask in habit decisions everything; do
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-memory full -screenshot-ask "$ask"
-  sleep 4
-  xcrun simctl io "$udid" screenshot "$out/ios-memory-ask-$ask.png"
-done
-for shows in card erase; do
-  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-settings "$shows"
-  sleep 4
-  xcrun simctl io "$udid" screenshot "$out/ios-settings-$shows.png"
-done
-# The shop, wardrobe and a keepsake's unboxing for each character, with made-up cans and items.
-growth_shots() {
-  local device=$1 prefix=$2
-  for persona in haku kuro; do
-    for screen in shop wardrobe wardrobe-accessories wardrobe-props wardrobe-room unbox unbox-bottom; do
-      xcrun simctl launch --terminate-running-process "$device" "$bundle" -screenshot-growth "$screen" \
-        -screenshot-persona "$persona"
-      sleep 4
-      xcrun simctl io "$device" screenshot "$out/$prefix-$screen-$persona.png"
-    done
-  done
+  -destination "id=$se" -derivedDataPath build CODE_SIGNING_ALLOWED=NO
+app=build/Build/Products/Debug-iphonesimulator/LifeHub.app
+codesign --force --deep --sign - "$app"
+bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$app/Info.plist")
+shot() {
+  local name=$1
+  shift
+  xcrun simctl launch --terminate-running-process "$se" "$bundle" -screenshot-persona kuro "$@"
+  sleep 9
+  xcrun simctl io "$se" screenshot "$out/$name.png"
 }
-# The first-run setup, one screen per launch, with no answers given.
-onboarding_shots() {
-  local device=$1 prefix=$2
-  for step in persona chill identity bedtime work location places motion sideHustle cards notifications; do
-    xcrun simctl launch --terminate-running-process "$device" "$bundle" -screenshot-onboarding "$step"
-    sleep 4
-    xcrun simctl io "$device" screenshot "$out/$prefix-onboarding-$step.png"
-  done
-}
-growth_shots "$udid" ios
-onboarding_shots "$udid" ios
-# The same on the smallest iPhone, where fixed heights run out of room first. Skipped with a warning
-# when this Xcode has no iPhone SE simulator, so the README images still get drawn.
-if se=$(xcrun simctl create "Screenshot SE" com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation); then
-  xcrun simctl boot "$se"
-  xcrun simctl bootstatus "$se" -b
-  xcrun simctl spawn "$se" defaults write com.apple.Accessibility ReduceMotionEnabled -bool true
-  xcrun simctl status_bar "$se" override --time 9:41 --batteryState charged --batteryLevel 100
-  xcrun simctl install "$se" "$ios_app"
-  # A fresh simulator's first launch is slow; warm it up so no shot catches the launch screen.
-  # Screenshot arguments keep the normal launch, and its notification prompt, out of it.
-  xcrun simctl launch "$se" "$bundle" -screenshot-growth shop -screenshot-persona haku
-  sleep 10
-  growth_shots "$se" ios-se
-  onboarding_shots "$se" ios-se
-  # The wardrobe's mode buttons with the longest identity card name, and with no identity card.
-  for identity in art none; do
-    xcrun simctl launch --terminate-running-process "$se" "$bundle" -screenshot-growth wardrobe \
-      -screenshot-identity "$identity"
-    sleep 4
-    xcrun simctl io "$se" screenshot "$out/ios-se-wardrobe-$identity.png"
-  done
-  # The unboxing at the first accessibility text size, where the stage gives up the most height.
-  xcrun simctl ui "$se" content_size accessibility-medium
-  for persona in haku kuro; do
-    xcrun simctl launch --terminate-running-process "$se" "$bundle" -screenshot-growth unbox \
-      -screenshot-persona "$persona"
-    sleep 4
-    xcrun simctl io "$se" screenshot "$out/ios-se-ax1-unbox-$persona.png"
-  done
-  xcrun simctl delete "$se"
-else
-  echo "::warning::No iPhone SE simulator in this Xcode; skipped the small-screen shots."
-fi
-# What 删除全部数据 leaves: a clean install, launched without screenshot data.
-xcrun simctl uninstall "$udid" "$bundle"
-xcrun simctl install "$udid" "$ios_app"
-xcrun simctl privacy "$udid" grant all "$bundle" || true
-xcrun simctl launch "$udid" "$bundle"
-# A first launch shows the launch screen longer than the others.
-sleep 15
-xcrun simctl io "$udid" screenshot "$out/ios-fresh.png"
-xcrun simctl terminate "$udid" "$bundle" || true
-
-# Mac: launch each mode and capture just its window. Reduce motion is a system setting on a Mac, so
-# it is only turned on in CI, never on your own Mac. The write can be refused; then RUNNER may blink.
-if [[ -n "${CI:-}" ]]; then
-  defaults write com.apple.universalaccess reduceMotion -bool true || echo "Could not turn on reduce motion" >&2
-fi
-xcodebuild build -quiet -project LifeHub.xcodeproj -scheme LifeHub-macOS -configuration Debug \
-  -destination 'platform=macOS' -derivedDataPath build CODE_SIGNING_ALLOWED=NO
-mac_app=build/Build/Products/Debug/LifeHub.app
-codesign --force --deep --sign - "$mac_app"
-for mode in "${modes[@]}"; do
-  "$mac_app/Contents/MacOS/LifeHub" -screenshot-mode "$mode" &
-  pid=$!
-  sleep 5
-  window=$(swift scripts/window-id.swift "$pid")
-  if [[ -z "$window" ]]; then
-    echo "No window found for the Mac app in $mode mode" >&2
-    kill "$pid"
-    exit 1
-  fi
-  screencapture -x -o -l"$window" "$out/mac-$mode.png"
-  kill "$pid"
-  wait "$pid" || true
+xcrun simctl install "$se" "$app"
+xcrun simctl launch "$se" "$bundle" -screenshot-mode chill -screenshot-persona kuro
+sleep 20
+for pair in "rain:work:kuro.set.work.rain" "picnic:chill:kuro.set.chill.picnic" "ears:chill:"; do
+  IFS=: read -r hat mode wearing <<<"$pair"
+  wear=()
+  [ -n "$wearing" ] && wear=(-screenshot-wearing "$wearing")
+  shot "se-$hat-zh" -screenshot-mode "$mode" ${wear[@]+"${wear[@]}"} \
+    -screenshot-line "……我们今天，真的不动了吗。" -AppleLanguages "(zh-Hans)" -languages.on NO
+  shot "se-$hat-ja" -screenshot-mode "$mode" ${wear[@]+"${wear[@]}"} \
+    -screenshot-line "玄関のバッグ、こっち見てる。" -AppleLanguages "(ja)" -AppleLocale ja_JP -languages.on YES
+  shot "se-$hat-en" -screenshot-mode "$mode" ${wear[@]+"${wear[@]}"} \
+    -screenshot-line "door's right there. …just asking." -AppleLanguages "(en)" -AppleLocale en_US \
+    -languages.on YES
 done
+xcrun simctl delete "$se"
 ls -l "$out"
