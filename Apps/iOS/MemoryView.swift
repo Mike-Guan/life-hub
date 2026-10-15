@@ -146,13 +146,21 @@ struct MemoryView: View {
             } label: {
                 Text("删掉所有记忆")
                     .font(Toy.body(15, weight: .heavy))
-                    .foregroundStyle(Toy.alert)
+                    .foregroundStyle(hasMemories ? Toy.alert : Toy.muted)
                     .frame(maxWidth: .infinity, minHeight: 48)
             }
             .buttonStyle(ToyButtonStyle(fill: Toy.card))
+            .disabled(!hasMemories)
             note("能量罐、商店物品、衣柜和纪念品不算记忆，留着。要一起清，用设置里的「删除全部数据」。")
         }
         .padding(20)
+    }
+
+    // 交付差距 v1 工程 #15: with nothing left to forget, the button would only ask about nothing.
+    private var hasMemories: Bool {
+        !habits.isEmpty || !longTerm.isEmpty || !decisions.kept.isEmpty
+            || store.log.changes.contains { $0.deletedAt == nil }
+            || energy.log.events.contains { $0.deletedAt == nil }
     }
 
     private var habits: [LearnedHabit] {

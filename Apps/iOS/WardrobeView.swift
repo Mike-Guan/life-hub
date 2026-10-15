@@ -218,9 +218,13 @@ struct WardrobeView: View {
                 Button {
                     shelf = tab
                 } label: {
+                    // Four tabs share the row; a long name shrinks instead of breaking inside a word.
                     Text(tab.title)
                         .font(Toy.body(14, weight: .heavy))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                         .foregroundStyle(shownShelf == tab ? Toy.paper : Toy.ink)
+                        .padding(.horizontal, 6)
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .background(Capsule().fill(shownShelf == tab ? Toy.ink : Toy.card))
                         .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
@@ -297,9 +301,11 @@ struct WardrobeView: View {
             tile(isWorn: isWorn, fill: item.slot.tileColor(for: persona)) {
                 ShopItemIcon(item: item)
                     .frame(width: 56, height: 56)
+                // English and Japanese names run longer than the Chinese; two lines fit in the 128 pt tile.
                 Text(item.title)
                     .font(Toy.body(13, weight: .heavy))
-                    .lineLimit(1)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
                     .minimumScaleFactor(0.8)
             }
         }
