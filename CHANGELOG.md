@@ -725,6 +725,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   TestFlight release workflow for STG and PROD.
 - With the rain or picnic set's hat on, the second preset character's full-energy stars sit above the brim
   instead of on it.
+- The second preset character has the art for her new pose, dozing off hugging her tablet. It stays hidden
+  until it is wired to dozing.
 - When the second preset character is tapped in the middle of an idle move, what she put down slides back over
   0.2 s and notes or snow fade, instead of jumping back in one frame. A cup already at her lips stays there.
 - The second preset character's taps end more smoothly: her eyes shut for a moment instead of jumping back,
