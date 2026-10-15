@@ -59,6 +59,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The work-day buttons in first-time setup start the week where the phone's calendar does, and with languages
+  on they show the weekday letters of the phone's language.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
   places, Daily, saving records and the bedtime notification.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the

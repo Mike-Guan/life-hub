@@ -29,4 +29,20 @@ public enum Languages {
     public static var locale: Locale {
         isOn ? .autoupdatingCurrent : chinese
     }
+
+    /// A Gregorian calendar whose weekday names are in `locale` and whose week starts on `firstWeekday`.
+    /// - Parameter firstWeekday: The first day of the week, as a `Calendar` weekday (1 is Sunday).
+    public static func weekCalendar(firstWeekday: Int = Calendar.current.firstWeekday) -> Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = locale
+        calendar.firstWeekday = firstWeekday
+        return calendar
+    }
+}
+
+extension Calendar {
+    /// The seven weekdays in display order, starting on `firstWeekday` (1 is Sunday).
+    public var weekdaysInOrder: [Int] {
+        (0..<7).map { (firstWeekday - 1 + $0) % 7 + 1 }
+    }
 }

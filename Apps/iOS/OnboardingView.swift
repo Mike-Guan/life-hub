@@ -207,8 +207,9 @@ struct OnboardingView: View {
             if !irregular {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack {
-                        ForEach(Self.weekdays, id: \.self) { day in
-                            dayButton(day)
+                        let week = Languages.weekCalendar()
+                        ForEach(week.weekdaysInOrder, id: \.self) { day in
+                            dayButton(day, in: week)
                         }
                     }
                     HStack {
@@ -573,12 +574,12 @@ struct OnboardingView: View {
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 
-    private func dayButton(_ day: Int) -> some View {
+    private func dayButton(_ day: Int, in week: Calendar) -> some View {
         let isOn = work.workdays.contains(day)
         return Button {
             work.workdays = work.workdays.symmetricDifference([day])
         } label: {
-            Text(Self.dayNames[day] ?? "")
+            Text(week.veryShortWeekdaySymbols[day - 1])
                 .font(Toy.body(15, weight: .black))
                 .frame(width: 40, height: 40)
                 .background(Circle().fill(isOn ? workColor : Toy.card))
@@ -588,7 +589,7 @@ struct OnboardingView: View {
                 .animation(.easeOut(duration: 0.12), value: isOn)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("周\(Self.dayNames[day] ?? "")")
+        .accessibilityLabel(week.standaloneWeekdaySymbols[day - 1])
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 
@@ -913,9 +914,6 @@ struct OnboardingView: View {
     }
 
     private static let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
-    /// Monday first, as `Calendar` weekdays.
-    private static let weekdays = [2, 3, 4, 5, 6, 7, 1]
-    private static let dayNames = [2: "一", 3: "二", 4: "三", 5: "四", 6: "五", 7: "六", 1: "日"]
     private static let sideStates: [SideHustle] = [.project, .vibeCoding, .shooting, .writing, .operating, .studying]
     private static let sidePlaceID = "onboardingSide"
 }
