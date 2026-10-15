@@ -645,6 +645,17 @@
         }
       }
     },
+    "忘掉%@？" : {
+      "comment" : "记忆页：忘掉一条规律前的确认，%@ 是规律名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forget %@?"
+          }
+        }
+      }
+    },
     "忘掉后从你之后的日子重新学。" : {
       "localizations" : {
         "en" : {
@@ -1076,6 +1087,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "When it decided whether to nudge you, and the times you said “Not right.” Kept for 90 days."
+          }
+        }
+      }
+    },
+    "规律、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。能量罐、商店物品、衣柜和纪念品不算记忆，留着。删了不能恢复。" : {
+      "comment" : "记忆页：删掉所有记忆前的确认说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Routines, long-term memories, daily records and decisions are all deleted. Every character will meet you like it's the first time. Cans, shop items, wardrobe and keepsakes aren't memories, so they stay. This can't be undone."
           }
         }
       }

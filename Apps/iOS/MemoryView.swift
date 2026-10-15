@@ -226,7 +226,7 @@ struct MemoryView: View {
 
     private func question(_ item: Forget) -> String {
         switch item {
-        case .habit(let habit): "忘掉\(habit.title)？"
+        case .habit(let habit): String(format: "忘掉%@？".localized, habit.title)
         case .decisions: "删掉所有判断和纠正？"
         case .everything: "删掉所有记忆？"
         }
