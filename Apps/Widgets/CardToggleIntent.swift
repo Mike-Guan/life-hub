@@ -41,6 +41,7 @@ struct CardToggleIntent: SetValueIntent, LiveActivityIntent {
         let mode = value ? card.mode : (log.latest(other: card.mode) ?? .chill)
         let change = ModeChange(mode: mode, source: .manual, deviceID: HubDevice.id(defaults: AppGroup.defaults))
         try AppGroup.container.post(.mode(change))
+        WidgetTaps.apply?()
         ControlCenter.shared.reloadAllControls()
         return .result()
     }
