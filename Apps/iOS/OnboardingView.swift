@@ -206,7 +206,7 @@ struct OnboardingView: View {
                 sub: irregular ? "" : "默认周一到周五，\(clock(9 * 60)) 到 \(clock(18 * 60))。")
             if !irregular {
                 VStack(alignment: .leading, spacing: 14) {
-                    HStack {
+                    HStack(spacing: 4) {
                         let week = Languages.weekCalendar()
                         ForEach(week.weekdaysInOrder, id: \.self) { day in
                             dayButton(day, in: week)
@@ -581,7 +581,10 @@ struct OnboardingView: View {
         } label: {
             Text(week.veryShortWeekdaySymbols[day - 1])
                 .font(Toy.body(15, weight: .black))
-                .frame(width: 40, height: 40)
+                // Seven columns share the card's width; the circle is 40 pt or the column, whichever is less.
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .aspectRatio(1, contentMode: .fit)
+                .frame(maxWidth: 40)
                 .background(Circle().fill(isOn ? workColor : Toy.card))
                 .overlay(Circle().stroke(Toy.ink, lineWidth: 2.5))
                 .frame(maxWidth: .infinity, minHeight: 44)

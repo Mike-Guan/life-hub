@@ -31,11 +31,13 @@ public enum Languages {
     }
 
     /// A Gregorian calendar whose weekday names are in `locale` and whose week starts on `firstWeekday`.
-    /// - Parameter firstWeekday: The first day of the week, as a `Calendar` weekday (1 is Sunday).
-    public static func weekCalendar(firstWeekday: Int = Calendar.current.firstWeekday) -> Calendar {
+    /// - Parameter firstWeekday: The first day of the week, as a `Calendar` weekday (1 is Sunday). Defaults to
+    ///   the phone's when languages are on, and Monday when they are off.
+    public static func weekCalendar(firstWeekday: Int? = nil) -> Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.locale = locale
-        calendar.firstWeekday = firstWeekday
+        // Chinese weeks start on Monday, whatever region the phone is set to.
+        calendar.firstWeekday = firstWeekday ?? (isOn ? Calendar.current.firstWeekday : 2)
         return calendar
     }
 }

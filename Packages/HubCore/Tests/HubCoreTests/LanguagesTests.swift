@@ -34,5 +34,6 @@ import Testing
         // Index 1 is Monday.
         #expect(chinese.veryShortWeekdaySymbols[1] == "一")
         #expect(chinese.standaloneWeekdaySymbols[1] == "星期一")
+        #expect(Languages.weekCalendar().weekdaysInOrder.first == 2)
     }
 }
