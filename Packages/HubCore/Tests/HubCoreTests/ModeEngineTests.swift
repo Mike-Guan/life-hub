@@ -107,32 +107,20 @@ import Testing
         #expect(decide(.leftOffice, log((.money, .manual, date(5, 9))), at: date(5, 18, 40)) == nil)
     }
 
-    @Test func leavingTheOfficeBefore1730KeepsWork() {
+    @Test func leavingTheOfficeAtAnyTimeEndsWork() {
+        // Mike 2026-10-15: a lunch break ends work too, and coming back starts it again.
         let day = log((.work, .location, date(5, 9)))
-        #expect(decide(.leftOffice, day, at: date(5, 12, 30)) == nil)
-        #expect(decide(.leftOffice, day, at: date(5, 17, 29)) == nil)
-        #expect(decide(.leftOffice, day, at: date(5, 17, 30))?.mode == .chill)
+        #expect(decide(.leftOffice, day, at: date(5, 12, 30))?.mode == .chill)
+        #expect(decide(.leftOffice, day, at: date(5, 17, 29))?.mode == .chill)
+        let lunch = log((.work, .location, date(5, 9)), (.chill, .location, date(5, 12, 30)))
+        #expect(decide(.enteredOffice, lunch, at: date(5, 13, 30))?.mode == .work)
     }
 
-    @Test func leavingTheOfficeEndsWorkFromAnHourBeforeWorkEnds() {
+    @Test func theOffWorkLineStartsAnHourBeforeWorkEnds() {
         var five = ModeRules.standard
         five.workEndMinute = 17 * 60
         #expect(ModeRules.standard.offWorkFromMinute == 17 * 60 + 30)
         #expect(five.offWorkFromMinute == 16 * 60)
-        let day = log((.work, .location, date(5, 9)))
-        let early = ModeEngine.decide(.leftOffice, log: day, now: date(5, 16, 5), rules: five, calendar: calendar)
-        #expect(early?.mode == .chill)
-        #expect(decide(.leftOffice, day, at: date(5, 17)) == nil)
-        let home = away(from: .office, arrived: date(5, 9), left: date(5, 16, 5))
-        let settled = ModeEngine.settle(
-            log: day,
-            presence: home,
-            now: date(5, 16, 30),
-            rules: five,
-            calendar: calendar
-        )
-        #expect(settled?.mode == .chill)
-        #expect(settle(day, home, at: date(5, 16, 30)) == nil)
         let left = log((.work, .location, date(5, 9)), (.chill, .location, date(5, 16, 5)))
         let line = HakuLines.offWorkUntil(left, now: date(5, 16, 10), work: five, calendar: calendar)
         #expect(line == date(5, 16, 35))
@@ -159,14 +147,13 @@ import Testing
         #expect(decision == ModeDecision(mode: .chill, source: .location, reason: "离开公司了"))
     }
 
-    @Test func settlingKeepsWorkAtTheOfficeBeforeEveningAndAfterALaterChange() {
+    @Test func settlingKeepsWorkAtTheOfficeAndAfterALaterChange() {
         let day = log((.work, .location, date(5, 9)))
         var inside = PlacePresence()
         inside.record(.office, entered: true, at: date(5, 9))
         #expect(settle(day, inside, at: date(5, 19)) == nil)
         let lunch = away(from: .office, arrived: date(5, 9), left: date(5, 12))
-        #expect(settle(day, lunch, at: date(5, 13)) == nil)
-        #expect(settle(day, lunch, at: date(5, 18)) == nil)
+        #expect(settle(day, lunch, at: date(5, 13))?.mode == .chill)
         let evening = away(from: .office, arrived: date(5, 9), left: date(5, 18))
         let picked = log((.work, .location, date(5, 9)), (.work, .manual, date(5, 18, 30)))
         #expect(settle(picked, evening, at: date(5, 19)) == nil)
@@ -174,10 +161,10 @@ import Testing
         #expect(settle(day, evening, at: date(6, 1)) == nil)
     }
 
-    @Test func comingHomeInTheEveningEndsWork() {
+    @Test func comingHomeEndsWork() {
         let day = log((.work, .location, date(5, 9)))
         var presence = away(from: .office, arrived: date(5, 9), left: date(5, 17, 20))
-        #expect(settle(day, presence, at: date(5, 17, 25)) == nil)
+        #expect(settle(day, presence, at: date(5, 17, 25))?.reason == "离开公司了")
         presence.record(.home, entered: true, at: date(5, 18))
         let decision = settle(day, presence, at: date(5, 18, 1))
         #expect(decision == ModeDecision(mode: .chill, source: .location, reason: "到家了"))
