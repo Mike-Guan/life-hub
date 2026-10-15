@@ -75,5 +75,21 @@ JSON
   sleep 8
   xcrun simctl io "$udid" screenshot "$out/watch-$persona-today.png"
 done
+# Page 2 in Japanese and English with the longest lines so far, for the layout review (UI 审核, #439).
+# Two hours in work mode makes the relative time long too.
+since=$(date -u -v-125M +%Y-%m-%dT%H:%M:%SZ)
+for sample in "ja|ja_JP|時計は進む。俺らは進まない。" "en|en_US|You got up 12 times this week. …Not that I'm counting."; do
+  IFS='|' read -r lang locale line <<<"$sample"
+  for folder in "${folders[@]}"; do
+    cat >"$folder/watch-payload.json" <<JSON
+{"schemaVersion":1,"persona":"haku","snapshot":{"schemaVersion":1,"mode":"work","since":"$since",
+"energy":"okay","line":"$line","updatedAt":"$now"}}
+JSON
+  done
+  xcrun simctl launch --terminate-running-process "$udid" "$bundle" -today-page \
+    -AppleLanguages "($lang)" -AppleLocale "$locale" >/dev/null
+  sleep 8
+  xcrun simctl io "$udid" screenshot "$out/watch-haku-today-$lang.png"
+done
 xcrun simctl terminate "$udid" "$bundle" || true
 ! $failed
