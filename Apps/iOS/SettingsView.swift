@@ -3,6 +3,7 @@ import FamilyControls
 import HubCore
 import SwiftUI
 import UniformTypeIdentifiers
+import UserNotifications
 import WidgetKit
 
 /// App settings: the bedtime reminder time, the places that switch mode, the Daily Widget link and
@@ -26,6 +27,9 @@ struct SettingsView: View {
     var screenshot: Bool?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+    // Read again on every return to the app, so turning notifications on in Settings clears the line.
+    @State private var notificationsOff = false
     @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
     @State private var answering: StepEdit?
@@ -44,6 +48,10 @@ struct SettingsView: View {
         }
         .defaultScrollAnchor(screenshot == nil ? nil : .bottom)
         .task { asksErase = screenshot == true }
+        .task(id: scenePhase) {
+            let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+            notificationsOff = status == .denied
+        }
         .foregroundStyle(Toy.ink)
         .tint(Toy.pink)
         .background(Toy.paper.ignoresSafeArea())
@@ -139,6 +147,9 @@ struct SettingsView: View {
                 Toggle("到点提醒", isOn: reminderToggle)
                     .font(Toy.body(15))
                     .disabled(!bedtime.isSet && !remindsAtBedtime)
+                if remindsAtBedtime, notificationsOff {
+                    notificationsLine
+                }
                 Text("\(persona.title) 从睡觉时间开始变困，一直到起床时间。打开提醒，到点发一条通知，只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
@@ -158,6 +169,9 @@ struct SettingsView: View {
                     .font(Toy.body(15))
                 if rules.eveningUntilMinute != nil {
                     timeRow("延长到", selection: time(eveningMinute))
+                }
+                if !rules.workdays.isEmpty, notificationsOff {
+                    notificationsLine
                 }
                 Text("到公司才切到上班。在上班的日子，下班前 \(ModeRules.offWorkLead) 分钟提醒一次。晚间延长打开后，下班后还在公司就托腮等到延长时间。")
                     .font(Toy.body(12))
@@ -236,6 +250,25 @@ struct SettingsView: View {
         let list = ListFormatter()
         list.locale = Languages.locale
         return list.string(from: days) ?? days.joined(separator: " ")
+    }
+
+    // UI 二组 preview 5: with notifications denied, the reminders that are on can't go out.
+    private var notificationsLine: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ErrorLine(text: "通知被关掉了，睡觉提醒和下班提醒发不出去。".localized, size: 13)
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text("去设置打开")
+                    .font(Toy.body(15, weight: .heavy))
+                    .underline()
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // PRD §21.2: the way to take everything back, at the very bottom. The sheet is the second step.

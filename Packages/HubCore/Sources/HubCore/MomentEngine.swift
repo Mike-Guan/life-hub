@@ -47,6 +47,7 @@ public enum MomentEngine {
     ///   - stiff: whether Mike has sat too long, from `SitState.isStiff(mode:at:)`.
     ///   - activity: what HAKU does alongside Mike; only the gym bag gives way to a gym-day state.
     ///   - need: the current need.
+    ///   - phone: whether the need comes from Screen Time; couch scrolling without it shows the blanket.
     ///   - departing: whether Mike said he is going to the gym.
     ///   - officeSince: when Mike arrived at the office, `nil` when he isn't there.
     ///   - home: what the states at home depend on, `nil` when Mike isn't home.
@@ -62,6 +63,7 @@ public enum MomentEngine {
         officeSince: Date?,
         home: HomeSignals? = nil,
         stiff: Bool = false,
+        phone: Bool = true,
         now: Date,
         work: ModeRules = .standard,
         rules: NeedRules = .standard,
@@ -74,6 +76,11 @@ public enum MomentEngine {
         if need == .slacking { return .slacking }
         let atOffice = office(mode: mode, since: officeSince, now: now, work: work, rules: rules, calendar: calendar)
         if let atOffice { return atOffice }
+        // PM action table U6 (2026-10-15): couch scrolling guessed from stillness, without Screen Time, has no
+        // phone to hold, so HAKU only slumps under the blanket.
+        if need == .couchScroll, !phone, activity == nil, home != nil, mode == nil || mode == .chill {
+            return .blanket
+        }
         // PM action table C2 (2026-10-15): scrolling on the couch in the hours before bedtime, HAKU dozes off
         // with the phone instead of peeking at the gym bag.
         if need == .couchScroll, activity == nil, let home, mode == nil || mode == .chill, home.since <= now,
