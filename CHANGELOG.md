@@ -49,6 +49,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
+  instead of staying on an old scene, such as still setting off.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
