@@ -72,28 +72,31 @@ public struct ShareCardView: View {
     }
 
     // Name top left, the item tilted top right, then the character, the title, the count and the line.
+    // UI 审核 10/15 round 1: the item hangs off the character's top right, so a two-line title lifts both
+    // together and the item never covers her hair.
     private var keepsakeStory: some View {
-        ZStack(alignment: .topLeading) {
-            if let item = card.item {
-                ShopItemIcon(item: item)
-                    .frame(width: 167, height: 167)
-                    .rotationEffect(.degrees(14))
-                    .position(x: 360 - 17 - 167 / 2, y: 67 + 167 / 2)
-            }
-            VStack(alignment: .leading, spacing: 0) {
-                name(15)
-                Spacer(minLength: 0)
-                sticker(253)
-                    .padding(.leading, 6)
-                title(50)
-                subtitle(19)
-                bubble(15)
-                    .padding(.top, 16)
-            }
-            .padding(.horizontal, 27)
-            .padding(.top, 32)
-            .padding(.bottom, 44)
+        VStack(alignment: .leading, spacing: 0) {
+            name(15)
+            Spacer(minLength: 0)
+            sticker(253)
+                .background(alignment: .topTrailing) {
+                    if let item = card.item {
+                        ShopItemIcon(item: item)
+                            .frame(width: 167, height: 167)
+                            .rotationEffect(.degrees(14))
+                            .offset(x: 57, y: -138)
+                    }
+                }
+                .padding(.leading, 6)
+            title(50)
+            subtitle(19)
+            bubble(15)
+                .padding(.top, 16)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 27)
+        .padding(.top, 32)
+        .padding(.bottom, 44)
     }
 
     // Name, "put on", the title, then the character in the lower half and her line.
@@ -138,7 +141,7 @@ public struct ShareCardView: View {
                             .tracking(13 * 0.06)
                             .padding(.bottom, 4)
                     }
-                    title(37)
+                    title(37, lines: 3)
                     subtitle(16)
                     bubble(13)
                         .padding(.top, 12)
@@ -158,11 +161,12 @@ public struct ShareCardView: View {
             .tracking(size * 0.06)
     }
 
-    // 样张 v3.1: at most two lines, then the text shrinks to 85% and no further.
-    private func title(_ size: CGFloat) -> some View {
+    // 样张 v3.1: at most two lines, then the text shrinks to 85% and no further. UI 审核 10/15 round 1: a 1:1 card
+    // takes three lines, so the longest Japanese name never ends in "…".
+    private func title(_ size: CGFloat, lines: Int = 2) -> some View {
         Text(words.title)
             .font(font(size, .black))
-            .lineLimit(2)
+            .lineLimit(lines)
             .minimumScaleFactor(0.85)
     }
 
