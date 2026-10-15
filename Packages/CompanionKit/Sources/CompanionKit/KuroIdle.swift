@@ -59,6 +59,10 @@ enum KuroIdle: CaseIterable, Sendable {
     case score
     /// Ski: the mitten pats the snow off her shoulder twice, the snow falls, then a small sneeze.
     case snow
+    // 动作展示总表 §3-3 (K5 for boxing): gloves stay on and the towel lives on her right shoulder (Mike 10/15 08:33Z,
+    // K5 拳击擦汗 v1, UI 审核 round 2 passed). 动态.
+    /// Boxing: the right glove takes the towel off her shoulder, wipes her brow twice and puts it back.
+    case boxWipe
 
     /// KURO's idle stream; HAKU has his own, so the two never blink together.
     static let seed: UInt64 = 0x4B55
@@ -69,7 +73,7 @@ enum KuroIdle: CaseIterable, Sendable {
         case .ears: 0.6
         case .stylus, .pen, .racket, .ponytail, .glasses: 1
         case .lookUp, .aside: 1.4
-        case .blow, .draw, .towel, .frame: 2
+        case .blow, .draw, .towel, .frame, .boxWipe: 2
         case .reach: 3
         case .tuck: 1.2
         case .collar: 1.5
@@ -103,8 +107,8 @@ enum KuroIdle: CaseIterable, Sendable {
         case .chill: [.ears, .blow, .aside]
         case .tennis: [.ears, .racket, .ponytail, .juggle, .twirl]
         case .desk: [.ears, .glasses, .pen]
-        // Boxing is an ordinary card for her (Mike 10/14): only the gloves tapping together.
-        case .box: [.ears, .gloves, .ponytail]
+        // Boxing is an ordinary card for her (Mike 10/14): the gloves tapping together and the towel wipe.
+        case .box: [.ears, .gloves, .ponytail, .boxWipe]
         case .fitness: [.ears, .ponytail, .lap, .reach, .towel]
         case .study: [.ears, .aside, .highlight, .collar, .phone]
         case .art: [.ears, .draw, .tuck, .frame]
@@ -185,6 +189,17 @@ enum KuroIdle: CaseIterable, Sendable {
             // Once the card props are all the way down they are out of the frame.
             if Self.hold(p, rise: 0.12, fall: 0.12) >= 1 { visible.subtract(putDown) }
             applyBase(p * length, to: &visible)
+        case .boxWipe:
+            // The glove takes the towel, comes up by her cheek, wipes, then puts it back.
+            let t = p * length
+            guard (0.12..<1.66).contains(t) else { return }
+            visible.subtract([.boxShoulderTowel, .boxGloveR])
+            switch t {
+            case ..<0.36, 1.42...: visible.insert(.idleBoxGrab)
+            case ..<0.56, 1.36...: visible.insert(.idleBoxRise)
+            default: visible.insert(.idleBoxWipe)
+            }
+            if (0.36..<1.36).contains(t) { Self.eyesShut(&visible) }
         default:
             break
         }
@@ -294,6 +309,11 @@ enum KuroIdle: CaseIterable, Sendable {
             return .zero
         case .reach, .towel, .tuck, .frame, .collar, .phone:
             return baseShift(part, at: p * length)
+        // Two strokes across her brow.
+        case .boxWipe where part == .idleBoxWipe:
+            let t = p * length
+            let wiping = Self.hold(p, from: 0.28, rise: 0.05, fall: 0.05, end: 0.68)
+            return CGSize(width: 3 * sin((t - 0.56) * .pi / 0.2) * wiping, height: 0)
         default: return .zero
         }
     }

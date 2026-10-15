@@ -70,4 +70,23 @@ import Testing
         let still = Set(KuroFigure.parts(for: .study, pose: KuroPose(look: .study, energy: 50)))
         #expect(still.isDisjoint(with: [.idlePhone, .idleCollarHands, .eyesWink]))
     }
+
+    @Test func boxingWipesWithTheTowelFromHerShoulder() {
+        #expect(KuroIdle.pool(.box).contains(.boxWipe) && !KuroIdle.pool(.box).contains(.reach))
+        // The towel waits on her shoulder, and the right glove takes it.
+        let rest = parts(.box, .boxWipe, at: 0)
+        #expect(rest.isSuperset(of: [.boxShoulderTowel, .boxGloveR]))
+        let moves = stride(from: 0.0, to: 2, by: 0.05).map { parts(.box, .boxWipe, at: $0) }
+        let held: [KuroPart] = [.idleBoxGrab, .idleBoxRise, .idleBoxWipe]
+        for frame in moves {
+            // Always one right glove and one towel.
+            let shown = held.filter(frame.contains)
+            #expect(shown.count + (frame.contains(.boxGloveR) ? 1 : 0) == 1)
+            #expect(frame.contains(.boxShoulderTowel) == frame.contains(.boxGloveR))
+        }
+        #expect(parts(.box, .boxWipe, at: 0.9).isSuperset(of: [.idleBoxWipe, .eyesClosed]))
+        #expect(parts(.box, .boxWipe, at: 1.9).isSuperset(of: [.boxShoulderTowel, .boxGloveR]))
+        let strokes = stride(from: 0.6, to: 1.3, by: 0.05).map { shift(.idleBoxWipe, .box, .boxWipe, at: $0).width }
+        #expect((strokes.max() ?? 0) > 2 && (strokes.min() ?? 0) < -2)
+    }
 }

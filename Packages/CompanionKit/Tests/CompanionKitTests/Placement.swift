@@ -338,6 +338,10 @@ enum Placement {
         .idleStrand: .figure,
         .idleReach: Spot(.handsFront, "伸展"),
         .idleTowelWipe: Spot(.handR, "毛巾"),
+        // K5 for boxing (Mike 10/15): the glove takes the shoulder towel and puts it back.
+        .idleBoxGrab: Spot(.handR, "毛巾"),
+        .idleBoxRise: Spot(.handR, "毛巾"),
+        .idleBoxWipe: Spot(.handR, "毛巾"),
         .idleTuckHand: Spot(.handR, "别头发"),
         .idleFrameHands: Spot(.handsFront, "取景框"),
         .idleCollarHands: Spot(.handsFront, "整理领口"),
