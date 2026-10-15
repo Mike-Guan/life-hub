@@ -643,3 +643,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   TestFlight release workflow for STG and PROD.
 - With the rain or picnic set's hat on, the second preset character's full-energy stars sit above the brim
   instead of on it.
+- Tapping the second preset character at bedtime gets a sleepy mumble instead of a daytime line, and no
+  longer switches the side-hustle card.

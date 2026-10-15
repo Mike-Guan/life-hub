@@ -595,7 +595,7 @@ public struct KuroView: View {
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
     ///   - cheer: increment to play her cheer.
     ///   - nods: increment to play the nod after an answer.
-    ///   - onTap: called after she reacts to a tap.
+    ///   - onTap: called after she reacts to a tap, except at bedtime.
     ///   - onWelcomeDone: called once she has answered a `.welcomeBack` event, even one already played.
     ///   - onBathDone: called after she shows the towel round her head on a tap during bath time.
     public init(
@@ -884,8 +884,9 @@ public struct KuroView: View {
             // KURO-02: at the desk with her chin on her hand she stays seated and taps her cheek.
             play(pose.overtime ? .chinTap : KuroTap(look: look, sleepy: sleepy), at: now)
         }
-        if showsBubble { say(Self.line(after: bubble, from: lines)) }
-        onTap?()
+        if showsBubble { say(Self.line(after: bubble, from: Self.tapLines(lines, bedtime: bedtime))) }
+        // 动作总表 C15: at bedtime a tap only gets a mumble; it never changes the mode.
+        if bedtime == .off { onTap?() }
     }
 
     /// Plays the unboxing, the workout cheer or the off-work move that `event` brings, if it is new.
@@ -1152,6 +1153,11 @@ public struct KuroView: View {
 
     private var lines: [String] {
         CompanionLines.lines(for: look.mode, need: need, activity: activity, moment: moment, persona: .kuro)
+    }
+
+    /// The lines a tap picks from: her mumbles at bedtime, otherwise `lines`.
+    nonisolated static func tapLines(_ lines: [String], bedtime: Bedtime) -> [String] {
+        bedtime == .on ? KuroBubbleLines.bedtime : lines
     }
 
     /// A random line from `lines` that isn't `shown`, unless it is the only one.

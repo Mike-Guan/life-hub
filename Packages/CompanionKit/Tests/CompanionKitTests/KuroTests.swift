@@ -154,6 +154,13 @@ import Testing
         #expect(KuroView.accessibilityLabel(.tennis, bedtime: .on) == "KURO，困了")
     }
 
+    @Test func atBedtimeATapGetsAMumble() {
+        let day = KuroBubbleLines.lines(for: .money)
+        #expect(KuroView.tapLines(day, bedtime: .on) == KuroBubbleLines.bedtime)
+        #expect(KuroView.tapLines(day, bedtime: .off) == day)
+        #expect(Set(KuroBubbleLines.bedtime).isDisjoint(with: day))
+    }
+
     @Test func sheSharesHakusFrame() {
         #expect(KuroArt.bounds == RunnerArt.bounds)
     }
