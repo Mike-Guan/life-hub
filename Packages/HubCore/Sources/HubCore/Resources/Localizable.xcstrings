@@ -12,6 +12,17 @@
         }
       }
     },
+    "%@的地方" : {
+      "comment" : "地点名，如 “Boxing spot”；activity 这里要首字母大写的卡名，见说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ spot"
+          }
+        }
+      }
+    },
     "energy 记录" : {
       "localizations" : {
         "en" : {
@@ -241,6 +252,16 @@
         }
       }
     },
+    "你自己选了「%@」" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You picked “%@” yourself"
+          }
+        }
+      }
+    },
     "做项目" : {
       "comment" : "“做项目”",
       "localizations" : {
@@ -330,6 +351,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "decision log"
+          }
+        }
+      }
+    },
+    "切到%@" : {
+      "comment" : "地点动作，按钮 ≤16 字母时 title 不超 6 字母；超了照样显示，UI 换行",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to %@"
           }
         }
       }
@@ -619,6 +651,16 @@
         }
       }
     },
+    "小组件数据没写进去：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widget data didn't save: %@"
+          }
+        }
+      }
+    },
     "帮你看着" : {
       "localizations" : {
         "en" : {
@@ -645,6 +687,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cracking open a can"
+          }
+        }
+      }
+    },
+    "当%@" : {
+      "comment" : "“当拳馆”：这里算作某地点",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Count as %@"
           }
         }
       }
@@ -822,12 +875,34 @@
         }
       }
     },
+    "搬不动旧记录 %1$@：%2$@" : {
+      "comment" : "多个占位符：按中文出现顺序编号，请工程核对顺序",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't move old records %1$@: %2$@"
+          }
+        }
+      }
+    },
     "散步晒太阳" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Walk in the sun"
+          }
+        }
+      }
+    },
+    "昨晚睡了 %1$@ 小时 %2$@ 分，算「%3$@」" : {
+      "comment" : "电量档进引号：“Low”；多个占位符：按中文出现顺序编号，请工程核对顺序",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slept %1$@h %2$@m last night. Calling it “%3$@”"
           }
         }
       }
@@ -1089,6 +1164,17 @@
         }
       }
     },
+    "第一次%@" : {
+      "comment" : "如 “First Boxing”；英语更顺的写法见说明（按卡给整句）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First %@"
+          }
+        }
+      }
+    },
     "第一次去健身房" : {
       "comment" : "长期记得的事",
       "localizations" : {
@@ -1326,6 +1412,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Twice this week I got you up. Not bad."
+          }
+        }
+      }
+    },
+    "这周你起来了 %@ 次。……我可没在数。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You got up %@ times this week. …Not that I'm counting."
           }
         }
       }

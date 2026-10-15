@@ -137,7 +137,7 @@ public enum ChangeEngine {
         case 0: return nil
         case 1: return "这周有一次，你真的起来了。我记着。"
         case 2: return "这周你被我叫起来两次。还行。"
-        default: return "这周你起来了 \(count) 次。……我可没在数。"
+        default: return String(format: "这周你起来了 %@ 次。……我可没在数。".localized, "\(count)")
         }
     }
 

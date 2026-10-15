@@ -260,8 +260,9 @@ struct WardrobeView: View {
 
     private func without(_ slots: [Slot]) -> Set<String> {
         var plain = wardrobe.showing(card: card)
-        slots.forEach { plain.clear($0) }
-        return Set(plain.equipped.values)
+        // The clothes default tile takes off the previewed mode's top or set.
+        slots.forEach { $0.shelf == .clothes ? plain.undress(previewMode) : plain.clear($0) }
+        return plain.worn(in: previewMode)
     }
 
     private func itemTile(_ item: ShopItem) -> some View {

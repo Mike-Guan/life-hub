@@ -132,7 +132,7 @@ struct HomeView: View {
                             activity: shownActivity(at: context.date),
                             moment: moment(at: context.date),
                             overtimeUntil: rules.eveningUntil(at: context.date),
-                            wearing: Set(wardrobe.equipped.values),
+                            wearing: wardrobe.worn(in: shownMode ?? .chill),
                             event: welcomeBack ?? event ?? revived(at: context.date)
                                 ?? sit?.stretched(at: context.date)
                                 ?? stayHome(at: context.date) ?? dailyDone,

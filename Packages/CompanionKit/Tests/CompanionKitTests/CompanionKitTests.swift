@@ -37,7 +37,9 @@ import Testing
 
     @Test func lowEnergyAddsEyeBags() {
         #expect(!RunnerFigure.parts(for: .money, pose: RunnerPose()).contains(.eyebags))
-        #expect(RunnerFigure.parts(for: .money, pose: RunnerPose(face: .low)).contains(.eyebags))
+        // Above the mask they sit by the eye corners instead (UI 审核 2026-10-14).
+        #expect(RunnerFigure.parts(for: .money, pose: RunnerPose(face: .low)).contains(.eyebagsMask))
+        #expect(RunnerFigure.parts(for: .boxing, pose: RunnerPose(face: .low)).contains(.eyebags))
     }
 
     @Test func energyPicksTheFace() {
@@ -54,8 +56,10 @@ import Testing
     func highEnergyAddsSparkles(_ mode: Mode) {
         let mid = Set(RunnerFigure.parts(for: mode, pose: RunnerPose()))
         let high = Set(RunnerFigure.parts(for: mode, pose: RunnerPose(face: .high)))
-        #expect(mid.isDisjoint(with: [.sparkle, .eyeGlint]))
-        #expect(high.contains(.sparkle))
+        #expect(mid.isDisjoint(with: [.sparkle, .sparkleWork, .eyeGlint]))
+        // With the headset on, the stars sit higher, clear of its band.
+        #expect(high.contains(mode == .work ? .sparkleWork : .sparkle))
+        #expect(!high.contains(mode == .work ? .sparkle : .sparkleWork))
         // The deadpan eyes open a notch and carry their own glint (Issue #236).
         let deadpan = mid.contains(.eyesWork)
         #expect(high.contains(.eyesBright) == deadpan)
@@ -66,8 +70,9 @@ import Testing
 
     @Test func tiredAtHomeDoesNotSmileLikeFull() {
         let tired = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .low)))
+        // UI 审核 2026-10-14 replaced the deadpan eyes of F7 with half-open smiling eyes and bags.
         #expect(!tired.contains(.eyesChill))
-        #expect(tired.isSuperset(of: [.eyesWork, .lidsWork, .eyebags]))
+        #expect(tired.isSuperset(of: [.eyesChillTired, .eyebagsChill]))
         #expect(Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .high))).contains(.eyesChill))
     }
 
@@ -175,7 +180,7 @@ import Testing
         var pose = RunnerPose.bedtimeStill()
         pose.face = .high
         let parts = Set(RunnerFigure.parts(for: .work, pose: pose))
-        #expect(parts.isDisjoint(with: [.sparkle, .eyeGlint]))
+        #expect(parts.isDisjoint(with: [.sparkle, .sparkleWork, .eyeGlint]))
     }
 
     @Test(arguments: Mode.allCases)
@@ -245,6 +250,26 @@ import Testing
         #expect(!RunnerFigure.parts(for: .chill, pose: notification).contains(.pillow))
         #expect(home.zzz >= 0)
         #expect(notification.zzz == -1)
+    }
+
+    // UI 审核 2026-10-14: tired has to read at a glance in every mode, at home and on the watch.
+    @Test func tiredShowsInEveryMode() {
+        let chill = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(mode: .chill, time: 0, face: .low, react: 0)))
+        #expect(chill.isSuperset(of: [.eyesChillTired, .eyebagsChill, .mouthSmile]) && !chill.contains(.eyesChill))
+        let rested = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(mode: .chill, time: 0, face: .mid, react: 0)))
+        #expect(rested.contains(.eyesChill) && !rested.contains(.eyesChillTired))
+        // How far the eyes open at most over 6 s of blinking.
+        func open(_ mode: Mode) -> CGFloat {
+            (0..<120).map { RunnerPose(mode: mode, time: Double($0) * 0.05, face: .low, react: 0).blink }.max() ?? 0
+        }
+        for mode in [Mode.work, .money] {
+            let parts = Set(RunnerFigure.parts(for: mode, pose: RunnerPose(mode: mode, time: 0, face: .low, react: 0)))
+            #expect(parts.contains(.eyebagsMask) && !parts.contains(.eyebags))
+            #expect(abs(open(mode) - 0.5) < 0.01)
+        }
+        let boxing = RunnerPose(mode: .boxing, time: 0, face: .low, react: 0)
+        #expect(Set(RunnerFigure.parts(for: .boxing, pose: boxing)).contains(.eyebags))
+        #expect(abs(open(.boxing) - 0.75) < 0.01)
     }
 
     @Test func sleepyLoopYawns() {
@@ -700,7 +725,8 @@ import Testing
         focus.cheerFocus(progress: 0.5)
         let parts = Set(RunnerFigure.parts(for: .work, pose: focus))
         #expect(focus.eyesShut && focus.fistPump >= 0 && focus.burst >= 0)
-        #expect(parts.isSuperset(of: [.backFist, .eyesClosed, .sparkle]) && !parts.contains(.headBack))
+        #expect(parts.isSuperset(of: [.backFist, .eyesClosed]) && !parts.contains(.headBack))
+        #expect(!parts.isDisjoint(with: [.sparkle, .sparkleWork]))
         #expect(CompanionView.newTaskDone(.taskDone(id: "t", focus: true), last: "") == "t")
         #expect(CompanionView.newTaskDone(.taskDone(id: "t", focus: false), last: "t") == nil)
         #expect(CompanionView.newTaskDone(.stretched(id: "t"), last: "") == nil)

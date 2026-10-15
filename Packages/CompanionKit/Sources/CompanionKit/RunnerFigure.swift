@@ -444,12 +444,14 @@ struct RunnerPose {
     ) {
         self.init(face: face, need: need, life: life, activity: activity, moment: moment)
         let t = time * face.speed
-        let open: CGFloat = tired ? 0.75 : 1
+        // UI 审核 2026-10-14: at 0.75 the eyes above the mask hardly changed, so tired reads at a glance there.
+        let open: CGFloat = tired ? (mode == .work || mode == .money ? 0.5 : 0.75) : 1
         let r = CGFloat(react)
         blink = open * Self.blink(at: t)
         squeeze = Self.blink(at: t)
         charmSway = sin(t * 2 * .pi / 2.4)
         // Sparkles twinkle out of step with the blink, 1.6 s period.
+        // UI 审核 2026-10-14: from 0.1 the stars looked dim on the blue and red cards.
         sparkle = 0.8 + 0.2 * sin(time * 2 * .pi / 1.6)
         // The mini speaker's ring lights up once every 3 s, as if music were playing (动态, UI 审核 R2).
         speakerGlow = 0.725 - 0.275 * cos(time * 2 * .pi / 3)
@@ -1500,11 +1502,6 @@ struct RunnerFigure: View {
             visible.remove(.monsterCan)
             visible.formUnion(props)
         }
-        // UI 审核 2026-10-13 (F7): a tired HAKU at home no longer smiles like a full one; he gets the half-shut eyes.
-        if pose.tired, mode == .chill, !pose.bedtime, visible.contains(.eyesChill) {
-            visible.remove(.eyesChill)
-            visible.formUnion([.eyesWork, .lidsWork, .eyebags])
-        }
         if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
             if mode != .chill, pose.need != .couchScroll { visible.insert(.eyeGlint) }
@@ -1518,6 +1515,14 @@ struct RunnerFigure: View {
             if pose.lie > 0 { visible.insert(.pillow) }
             if pose.zzz >= 0 { visible.insert(.zzz) }
         }
+        // UI 审核 2026-10-14: tired has to read at a glance in every mode. Off work the smile stays, with half-open
+        // eyes and bags; above the mask the bags move out to the eye corners, where they clear the mask by 2 pt.
+        if pose.tired, !pose.bedtime {
+            if visible.remove(.eyesChill) != nil { visible.formUnion([.eyesChillTired, .eyebagsChill]) }
+            if visible.contains(.maskUp), visible.remove(.eyebags) != nil { visible.insert(.eyebagsMask) }
+        }
+        // The headset band runs where the stars sit, so with it on they move up and out, 2 pt clear of it.
+        if visible.contains(.headset), visible.remove(.sparkle) != nil { visible.insert(.sparkleWork) }
         return visible
     }
 
@@ -1656,8 +1661,9 @@ struct RunnerFigure: View {
         .eyesMoney, .maskUp, .panelLines, .ledYen, .earringNeon, .chainGold, .coin,
     ]
     nonisolated private static let awakeFaceParts: Set<RunnerPart> = [
-        .eyesWork, .lidsWork, .browsWork, .eyesChill, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
-        .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen, .ledCode,
+        .eyesWork, .lidsWork, .browsWork, .eyesChill, .eyesChillTired, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
+        .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen, .ledCode, .eyebagsMask,
+        .eyebagsChill,
     ]
     nonisolated private static let warmupParts: Set<RunnerPart> = [.headband, .gloveL, .gloveR]
     // 商店衣服 pop: no ¥ or gold chain on any of the clothes, so the 副业 chain and coin go with the jacket.
@@ -1675,13 +1681,13 @@ struct RunnerFigure: View {
         .jacket, .hoodCollar, .hairBack, .earL, .earR, .headset, .cupL, .cupR, .headband,
     ]
     nonisolated private static let openEyes: Set<RunnerPart> = [
-        .eyesWork, .lidsWork, .eyesChill, .cateyeL, .cateyeR, .eyesMoney, .eyeGlint, .eyesSleepy,
+        .eyesWork, .lidsWork, .eyesChill, .eyesChillTired, .cateyeL, .cateyeR, .eyesMoney, .eyeGlint, .eyesSleepy,
         .eyesBright, .lidsBright,
     ]
     nonisolated private static let couchParts: Set<RunnerPart> = [.eyesSleepy, .phone, .phoneFeed, .phoneHand]
     nonisolated private static let couchHiddenParts: Set<RunnerPart> = [
-        .eyesWork, .lidsWork, .browsWork, .eyesChill, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
-        .mouthSmile, .mouthFang, .monsterCan,
+        .eyesWork, .lidsWork, .browsWork, .eyesChill, .eyesChillTired, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
+        .mouthSmile, .mouthFang, .monsterCan, .eyebagsChill,
     ]
     nonisolated private static let sleepyParts: Set<RunnerPart> = [.eyesSleepy, .eyebags, .maskDown]
     nonisolated private static let headsetParts: Set<RunnerPart> = [.headset, .cupL, .cupR, .mic]
@@ -1766,7 +1772,8 @@ struct RunnerFigure: View {
     @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat, headband: Bool) -> some View {
         Group {
             switch part {
-            case .eyesWork, .lidsWork, .eyesBright, .lidsBright, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
+            case .eyesWork, .lidsWork, .eyesBright, .lidsBright, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint,
+                .eyesChillTired:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 1, y: pose.blink, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale, y: pose.eyesDy * scale)
@@ -1856,12 +1863,12 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .offset(y: -5 * pose.feed * scale)
                     .opacity(Double(1 - 0.6 * pose.feed))
-            case .sparkle where pose.burst >= 0:
+            case .sparkle where pose.burst >= 0, .sparkleWork where pose.burst >= 0:
                 // Celebration: the sparkles fly out from the head and fade.
                 RunnerPartView(part: part)
                     .scaleEffect(0.8 + 0.7 * pose.burst, anchor: Self.unit(x: 60, y: 40))
                     .opacity(Double(sin(pose.burst * .pi)))
-            case .sparkle:
+            case .sparkle, .sparkleWork:
                 // UI 审核 2026-10-13: with the headset on, the sparkles sit 2pt clear of its band on the watch.
                 RunnerPartView(part: part)
                     .scaleEffect(x: headband ? 1.16 : 1, y: 1, anchor: Self.unit(x: 60, y: 27))
@@ -2091,11 +2098,12 @@ struct RunnerFigure: View {
 
     /// Parts that move with the head.
     private static let headParts: Set<RunnerPart> = [
-        .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .browsWork, .eyesChill,
+        .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .eyebagsMask, .browsWork, .eyesChill,
+        .eyesChillTired, .eyebagsChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
         .maskDots, .maskBolt,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .headband, .headset, .cupL, .cupR, .mic,
-        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
+        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .sparkleWork, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
         .dizzyStar, .setVarsityCap, .eyesBright, .lidsBright,
