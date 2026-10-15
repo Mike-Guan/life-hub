@@ -12,6 +12,7 @@ struct CanChip: View {
             Text("\(count)")
                 .font(Toy.body(17, weight: .heavy))
                 .monospacedDigit()
+                .contentTransition(.numericText(value: Double(count)))
         }
         .foregroundStyle(Toy.ink)
         .padding(.horizontal, 12)
