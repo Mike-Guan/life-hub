@@ -258,6 +258,17 @@
         }
       }
     },
+    "先给你 上班、下班、副业 三张卡，没有身份卡。睡觉时间、上班日算没设，不出相关提醒。都能在 设置 里补。" : {
+      "comment" : "引导「先用默认的？」确认框的说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You start with three cards: Work, Chill and Projects. No card for your thing yet. Bedtime and workdays stay unset, so there are no reminders for them. You can set all of it later in Settings."
+          }
+        }
+      }
+    },
     "全部删" : {
       "localizations" : {
         "en" : {
