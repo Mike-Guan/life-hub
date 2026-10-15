@@ -71,7 +71,7 @@ struct PlaceEditor: View {
                 }
                 .buttonStyle(ToyButtonStyle(fill: Toy.pink, isSelected: canSave))
                 .disabled(!canSave)
-                if let onDelete {
+                if onDelete != nil {
                     Button(place.kind == .custom ? "删除这个地点" : "清除") {
                         asksDelete = true
                     }
