@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The home page has a saved room per character: a furniture catalog and a layout that keeps what a newer
+  build wrote. The wardrobe's room item moves into the room once. Nothing on screen uses it yet (Issue #489).
 - HAKU makes small moves in each card look's base outfit now and then. In sport it stretches an arm across
   the chest, then the other, or drinks from a water bottle. Out, it looks at its wrist or tugs its backpack
   strap and shrugs. In craft, it spins its pencil and drops it, or wipes paint off its hand on the apron.
