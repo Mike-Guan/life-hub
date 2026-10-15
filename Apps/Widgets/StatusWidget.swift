@@ -85,7 +85,7 @@ struct StatusView: View {
     @ViewBuilder private func figure(_ mode: Mode, framing: CompanionPortrait.Framing) -> some View {
         if entry.persona == .kuro {
             KuroPortrait(
-                look: KuroLook(mode: mode),
+                look: KuroLook(mode: mode, card: entry.names.identity),
                 energy: entry.energy?.value,
                 bedtime: entry.bedtime,
                 wearing: entry.wardrobe.worn(in: mode),
@@ -95,6 +95,7 @@ struct StatusView: View {
         } else {
             CompanionPortrait(
                 mode: mode,
+                card: entry.names.identity,
                 energy: entry.energy?.value,
                 need: entry.need,
                 needSince: entry.needSince,

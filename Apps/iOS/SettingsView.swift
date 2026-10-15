@@ -509,19 +509,13 @@ private struct PlaceEdit: Identifiable {
 }
 
 extension SettingsView {
-    // Wording from the PM thread, 2026-10-07.
+    // Wording from the PM thread, 2026-10-07. 日语文案 2026-10-15: Japanese drops the pronouns, so each
+    // direction is one whole sentence to translate.
     /// The confirmation shown before switching from `old` to `new`.
     static func switchMessage(from old: Persona, to new: Persona) -> String {
-        "\(old.title) 会留在家里，\(old.pronoun)的罐子和东西都在。\(new.title) 用\(new.pronoun)自己的罐子，第一次从零开始。随时可以换回来。"
-    }
-}
-
-extension Persona {
-    /// How lines refer to the character: 他 or 她.
-    fileprivate var pronoun: String {
-        switch self {
-        case .haku: "他"
-        case .kuro: "她"
+        switch old {
+        case .haku: "HAKU 会留在家里，他的罐子和东西都在。KURO 用她自己的罐子，第一次从零开始。随时可以换回来。".localized
+        case .kuro: "KURO 会留在家里，她的罐子和东西都在。HAKU 用他自己的罐子，第一次从零开始。随时可以换回来。".localized
         }
     }
 }
