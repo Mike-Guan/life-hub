@@ -25,6 +25,7 @@ final class NeedTracker {
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
     @ObservationIgnored private var motion: HealthMotion.Reading?
+    @ObservationIgnored private var eventClear: Task<Void, Never>?
 
     /// Workouts from the last HealthKit reading; empty before the first one.
     var workouts: [WorkoutSummary] { motion?.workouts ?? [] }
@@ -110,7 +111,7 @@ final class NeedTracker {
     func celebrate(bedtime: Bedtime, now: Date = .now) {
         guard let due = due(bedtime: bedtime, now: now) else { return }
         AppGroup.defaults.set(Array(due.celebrated.union([due.workout.id])), forKey: Self.celebratedKey)
-        event = .celebrate(id: due.workout.id, kind: due.workout.kind)
+        play(.celebrate(id: due.workout.id, kind: due.workout.kind))
     }
 
     // The watch cheers when HealthKit wakes the app; the iPhone home still cheers on the next open.
@@ -131,9 +132,24 @@ final class NeedTracker {
 
     /// Plays the off-work animation for the day of `date`; HAKU plays it once per day.
     func offWork(at date: Date) {
-        event = .offWork(id: date.formatted(Self.day))
+        play(.offWork(id: date.formatted(Self.day)))
     }
 
+    // The home shows one event at a time and this one comes first, so a kept event would hide later stand-ups,
+    // revivals and finished tasks until the app restarts. RUNNER remembers what it played, so clearing is safe.
+    /// Shows `event`, then clears it once its animation is over.
+    private func play(_ event: CompanionEvent) {
+        self.event = event
+        eventClear?.cancel()
+        eventClear = Task {
+            try? await Task.sleep(for: Self.eventHold)
+            guard !Task.isCancelled else { return }
+            self.event = nil
+        }
+    }
+
+    // Longer than the longest one-off animation (the 6 s stretch), so nothing is cut short.
+    private static let eventHold = Duration.seconds(30)
     private static let celebratedKey = "celebratedWorkouts"
     // "yyyy-MM-dd" in local time, the id format of `CompanionEvent.offWork`.
     private static let day = Date.ISO8601FormatStyle(timeZone: .current).year().month().day()

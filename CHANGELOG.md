@@ -505,6 +505,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- After a workout cheer or the off-work move, HAKU can again stretch after a long sit, get up from the sofa,
+  wonder if you're staying home and cheer a finished task. Before, these waited until the app was restarted.
 - The wardrobe preview and its head icons dress the character for the picked identity card, so the art
   card shows the apron and sketchbook instead of the boxing kit.
 - Unboxing a top or full set shows HAKU in the mode it is worn in, not always off work.
