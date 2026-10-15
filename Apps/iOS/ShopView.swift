@@ -7,6 +7,8 @@ struct ShopView: View {
     let growth: GrowthStore
     @Binding var wardrobe: Wardrobe
     let persona: Persona
+    /// The current mode, for the unboxing.
+    var mode: Mode?
     @Environment(\.dismiss) private var dismiss
     @State private var buyError: String?
     @State private var unboxing: CanEntry?
@@ -57,7 +59,7 @@ struct ShopView: View {
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
         .fullScreenCover(item: $unboxing) { entry in
-            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
+            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona, mode: mode)
         }
     }
 
