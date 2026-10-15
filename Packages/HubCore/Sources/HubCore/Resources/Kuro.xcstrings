@@ -429,16 +429,6 @@
         }
       }
     },
-    "……别闹。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…quit it."
-          }
-        }
-      }
-    },
     "……包在门口。" : {
       "comment" : "锁屏两行：……バッグ、 / 玄関。",
       "localizations" : {

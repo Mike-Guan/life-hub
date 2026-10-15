@@ -315,7 +315,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Groceries & errands"
+            "value" : "Errands"
           }
         },
         "ja" : {
@@ -1733,7 +1733,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Slept %1$@h %2$@m last night. Calling it “%3$@”"
+            "value" : "%1$@ h %2$@ min of sleep last night, so “%3$@”"
           }
         },
         "ja" : {
@@ -1841,6 +1841,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "スタジャン"
+          }
+        }
+      }
+    },
+    "校队夹克" : {
+      "comment" : "商品名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsity jacket"
           }
         }
       }
@@ -2322,7 +2333,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yoga & stretching"
+            "value" : "Yoga"
           }
         },
         "ja" : {
@@ -3012,7 +3023,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Running the account"
+            "value" : "Content"
           }
         },
         "ja" : {
@@ -3099,6 +3110,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ミニスピーカー"
+          }
+        }
+      }
+    },
+    "那天的样子记录" : {
+      "comment" : "出错时显示的文件名，和 can records 并列",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "daily look records"
           }
         }
       }

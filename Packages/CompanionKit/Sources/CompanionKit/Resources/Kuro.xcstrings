@@ -61,6 +61,38 @@
         }
       }
     },
+    "KURO，托着腮等到 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, chin in hand, waiting till %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、頬杖をついて%@まで待っている"
+          }
+        }
+      }
+    },
+    "KURO，托着腮等着" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, chin in hand, waiting"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、頬杖をついて待っている"
+          }
+        }
+      }
+    },
     "KURO，抱着瑜伽砖" : {
       "localizations" : {
         "ja" : {
@@ -268,16 +300,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……線、引いた。"
-          }
-        }
-      }
-    },
-    "……刚才很认真。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…that was focused."
           }
         }
       }
@@ -701,16 +723,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……まぶた、ちょっと重い。"
-          }
-        }
-      }
-    },
-    "……给你。收好。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…for you. keep it safe."
           }
         }
       }

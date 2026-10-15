@@ -128,7 +128,7 @@ struct ShopView: View {
                 .frame(maxHeight: .infinity)
         }
         .padding(.horizontal, 12)
-        .frame(height: 118)
+        .frame(minHeight: 118)
         .frame(maxWidth: .infinity, alignment: .leading)
         .toyCard(fill: Mode.chill.color(for: persona))
         .accessibilityElement(children: .combine)
@@ -185,7 +185,7 @@ struct ShopView: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(item.week != nil ? Text("本周 \(item.title)") : Text(verbatim: item.title))
+        .accessibilityLabel(item.week != nil ? String(format: "本周 %@".localized, item.title) : item.title)
     }
 
     private func ownedRow(_ item: ShopItem) -> some View {
