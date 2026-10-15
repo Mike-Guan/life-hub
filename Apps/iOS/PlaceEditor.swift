@@ -47,7 +47,7 @@ struct PlaceEditor: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text(verbatim: place.kind == .custom ? place.kind.localizedTitle : shownTitle)
+                    Text(place.kind == .custom ? "地点".localized : shownTitle)
                         .font(Toy.display(24))
                     Spacer()
                     Button {
