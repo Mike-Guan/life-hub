@@ -95,6 +95,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   base outfits (sport, outing, craft), each with two tops to buy that every card on that base can wear; HAKU's
   boxing card and the second character's boxing and tennis cards have a top of their own. They go on sale once
   the character art draws them.
+- A wardrobe saved by a newer build keeps the outfits this build can't read, and an unreadable wardrobe is
+  copied aside before the next save replaces it.
 - With languages on, the work-day buttons in first-time setup show the phone language's weekday letters and
   start the week where the phone's calendar does. In Chinese they still run Monday to Sunday. They also fit
   narrow phones.
