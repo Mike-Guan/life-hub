@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
 - The second preset character's swimming, yoga, ball and outdoor cards, which still wear her tennis look, now
   get their base outfit's idle moves too: a stretch on her toes and a towel for the sport cards, the collar and
   a look at her phone for outdoor. The racket goes down out of the frame first.
