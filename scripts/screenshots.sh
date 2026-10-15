@@ -34,8 +34,8 @@ for pair in "$pro:promax" "$se:se"; do
   xcrun simctl launch "$d" "$bundle" -screenshot-growth shop "${ja[@]}"
   sleep 12
   shot "$d" "$p-ja-home" -screenshot-mode chill "${ja[@]}"
-  shot "$d" "$p-ja-home-line" -screenshot-mode chill -screenshot-line "门口那个包，在看你。" "${ja[@]}"
-  shot "$d" "$p-ja-home-line2" -screenshot-mode chill -screenshot-line "表在走，我们没走。" "${ja[@]}"
+  shot "$d" "$p-ja-home-line" -screenshot-mode chill -screenshot-line "玄関のバッグがこっち見てる。" "${ja[@]}"
+  shot "$d" "$p-ja-home-line2" -screenshot-mode chill -screenshot-line "ソファのひじ掛けだけが味方。" "${ja[@]}"
   shot "$d" "$p-ja-shop" -screenshot-growth shop -screenshot-persona haku "${ja[@]}"
   shot "$d" "$p-ja-settings" -screenshot-settings card "${ja[@]}"
   shot "$d" "$p-ja-onboarding-persona" -screenshot-onboarding persona "${ja[@]}"
