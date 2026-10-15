@@ -21,23 +21,30 @@ import Testing
     }
 
     @Test func workHoursReportsAreSlacking() throws {
-        let signals = NeedSignals(slackThresholdAt: date(5, 11), slackSeenAt: date(5, 11, 20))
+        let signals = NeedSignals(slackThresholdAt: date(5, 11), slackSeenAt: date(5, 11, 20), mode: .work)
         let reading = try #require(need(signals, at: date(5, 11, 30)))
         #expect(reading.need == .slacking)
         #expect(reading.since == date(5, 11))
         #expect(reading.until == date(5, 11, 40))
         // 20 minutes without a report ends it.
         #expect(need(signals, at: date(5, 11, 40)) == nil)
-        // Reports outside work hours, such as on a Sunday, are not slacking.
-        let sunday = NeedSignals(slackThresholdAt: date(4, 15))
-        #expect(need(sunday, at: date(4, 15, 5)) == nil)
+    }
+
+    // PM 动作总表 U1: a day off or leave at home on a work day isn't 上班, so there is no lookout.
+    @Test func slackingOnlyInWork() {
+        let home = NeedSignals(slackThresholdAt: date(5, 11), mode: .chill)
+        #expect(need(home, at: date(5, 11, 5)) == nil)
+        let unknown = NeedSignals(slackThresholdAt: date(5, 11))
+        #expect(need(unknown, at: date(5, 11, 5)) == nil)
+        let sunday = NeedSignals(slackThresholdAt: date(4, 15), mode: .work)
+        #expect(need(sunday, at: date(4, 15, 5))?.need == .slacking)
     }
 
     @Test func walkingOrAManualSwitchEndsSlacking() {
-        var walked = NeedSignals(slackThresholdAt: date(5, 11), slackSeenAt: date(5, 11, 10))
+        var walked = NeedSignals(slackThresholdAt: date(5, 11), slackSeenAt: date(5, 11, 10), mode: .work)
         walked.stillSince = date(5, 11, 15)
         #expect(need(walked, at: date(5, 11, 16)) == nil)
-        var switched = NeedSignals(slackThresholdAt: date(5, 11), slackSeenAt: date(5, 11, 10))
+        var switched = NeedSignals(slackThresholdAt: date(5, 11), slackSeenAt: date(5, 11, 10), mode: .work)
         switched.manualSince = date(5, 11, 12)
         #expect(need(switched, at: date(5, 11, 16)) == nil)
     }
@@ -45,13 +52,13 @@ import Testing
     @Test func slackingDoesNotCountAsCouchScrolling() {
         let couch = NeedSignals(scrollThresholdAt: date(5, 11))
         #expect(need(couch, at: date(5, 11, 5))?.need == .couchScroll)
-        let work = NeedSignals(slackThresholdAt: date(5, 11))
+        let work = NeedSignals(slackThresholdAt: date(5, 11), mode: .work)
         #expect(need(work, at: date(5, 11, 5))?.need == .slacking)
     }
 
     @Test func slackingNoticeSharesTheDailyInvite() {
         let now = date(5, 11)
-        let reading = need(NeedSignals(slackThresholdAt: now), at: now)
+        let reading = need(NeedSignals(slackThresholdAt: now, mode: .work), at: now)
         let calendar = calendar
         let time = { (last: Date?) in
             NeedEngine.inviteTime(for: reading, now: now, lastInviteAt: last, bedtime: .standard, calendar: calendar)

@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The home page has a saved room per character: a furniture catalog and a layout that keeps what a newer
+  build wrote. The wardrobe's room item moves into the room once. Nothing on screen uses it yet (Issue #489).
 - HAKU makes small moves in each card look's base outfit now and then. In sport it stretches an arm across
   the chest, then the other, or drinks from a water bottle. Out, it looks at its wrist or tugs its backpack
   strap and shrugs. In craft, it spins its pencil and drops it, or wipes paint off its hand on the apron.
@@ -74,9 +76,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- The room bag from the shop is bigger, standing in the bottom left corner. A mode's own backdrop now holds no
-  items: no heavy bag at the boxing gym, no gym bag on the floor for the fitness card, no speaker for the dance
-  card and no ukulele for the music card. The dance idle keeps its shrug without the notes.
+- On the watch app and the watch face, both characters wear the look of the identity card picked on the iPhone,
+  instead of the default boxing or tennis look. On cards without a look of their own, the second preset character
+  also does that card's base idles on the watch.
 - Swiping back to the character's page on the watch no longer replays its opening reaction, invite hop and line.
 - On another identity card's day, HAKU warms up without the boxing headband and gloves.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
@@ -107,6 +109,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
   colour instead of her own top, and her "…" bubble moves up off a set hat.
+- Without Screen Time, an evening of sitting still at home shows HAKU under the blanket instead of holding a
+  phone it can't know about.
 - A mode switched from the 切换模式 widget now reaches the watch, the off-work notice and the gym countdown at
   once. Before, they waited until the app was next opened.
 - After the off-work animation, HAKU no longer stays slumped in 上班 for the rest of the evening: leaving the
@@ -212,6 +216,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   preview is wearing in the user's own mode name.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
+- Japanese for the second and third copy batches: home bubbles, VoiceOver lines, identity cards, first-run setup,
+  shop, wardrobe, unboxing, settings, memory, place editor, item names and reasons.
 - After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
 - On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
   ponytail (unbox page and home card). The watch is unchanged.
@@ -231,6 +237,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   keep the system font.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
+- The companion keeps lookout for phone use at work only while the mode is 上班. On a day off or a leave at home
+  on a work day it plays the current mode instead.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
   the weekly 5 cans, and its gold keepsake counts that card only. Any other watch workout of 30 minutes (not a
   walk) earns 3 cans, shared with the gym's daily 3. The shop names the card instead of "周日拳击".
@@ -247,6 +255,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
 - With no mode yet, the watch tells you to pick one on the iPhone, in smaller type, instead of the iPhone's line.
+- The room bag from the shop is bigger, standing in the bottom left corner. A mode's own backdrop now holds no
+  items: no heavy bag at the boxing gym, no gym bag on the floor for the fitness card, no speaker for the dance
+  card and no ukulele for the music card. The dance idle keeps its shrug without the notes.
 - With VoiceOver, the confirmation sheets keep focus inside and the escape gesture cancels.
 - HAKU's room no longer stacks two things in one spot: the glowing monitor is smaller and stands clear of
   HAKU's ear, and steps aside for the pillow and the headphones; the room item and the running shoes step
@@ -724,6 +735,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   TestFlight release workflow for STG and PROD.
 - With the rain or picnic set's hat on, the second preset character's full-energy stars sit above the brim
   instead of on it.
+- The second preset character has the art for her new pose, dozing off hugging her tablet. It stays hidden
+  until it is wired to dozing.
 - When the second preset character is tapped in the middle of an idle move, what she put down slides back over
   0.2 s and notes or snow fade, instead of jumping back in one frame. A cup already at her lips stays there.
 - The second preset character's taps end more smoothly: her eyes shut for a moment instead of jumping back,
