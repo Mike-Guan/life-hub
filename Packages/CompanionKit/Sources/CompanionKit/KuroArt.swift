@@ -1735,7 +1735,7 @@ enum KuroArt {
                     p.closeSubpath()
                 },
                 fill: KuroPalette.yellow,
-                opacity: 0.55
+                opacity: 0.35
             )
         ]
     }
