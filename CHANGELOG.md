@@ -78,6 +78,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The Lock Screen and Dynamic Island countdown draws the character in the identity card's look picked on the
+  iPhone, such as HAKU in tennis kit, instead of always the boxing look.
 - The watch face says 还没有模式 when the iPhone has sent but no mode is set, instead of asking to open the
   iPhone.
 - On the watch app and the watch face, both characters wear the look of the identity card picked on the iPhone,
