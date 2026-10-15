@@ -1185,6 +1185,22 @@
         }
       }
     },
+    "再想想" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maybe later"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "また今度"
+          }
+        }
+      }
+    },
     "再点一次" : {
       "localizations" : {
         "en" : {
@@ -1716,6 +1732,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「%@」で着られるものだけ。手に入れたものはずっとここにあって、なくなりません。"
+          }
+        }
+      }
+    },
+    "只在 %@ 出现" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows only in %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ のときだけ出てくる"
           }
         }
       }

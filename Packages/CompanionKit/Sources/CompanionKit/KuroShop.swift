@@ -44,7 +44,7 @@ public enum KuroItem: String, CaseIterable, Sendable {
     // UI 五组 Sunday items r1 (位置规划图 §12): the hair pieces go with every look, the succulent also stands where
     // her tennis bag does, and the nightlight also hangs over her desk.
     /// Whether she shows the item in `look`.
-    func shows(in look: KuroLook) -> Bool {
+    public func shows(in look: KuroLook) -> Bool {
         switch self {
         case .mintTie, .cherryClip, .starTie: true
         case .succulent: look == .chill || look == .tennis
