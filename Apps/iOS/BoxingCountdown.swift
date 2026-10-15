@@ -31,7 +31,7 @@ enum BoxingCountdown {
             _ = try Activity.request(attributes: attributes, content: content)
             return nil
         } catch {
-            return "倒计时没能显示：\(error.localizedDescription)"
+            return String(format: "倒计时没能显示：%@".localized, error.localizedDescription)
         }
     }
 }
