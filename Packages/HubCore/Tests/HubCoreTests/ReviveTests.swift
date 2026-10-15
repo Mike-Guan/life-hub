@@ -48,17 +48,17 @@ import Testing
         #expect(bath == lateNight)
     }
 
-    @Test func switchIsVibeCodingOrTheBath() {
+    @Test func switchIsVibeCodingOrWalking() {
         let coding = ModeChange(mode: .money, source: .manual, at: date(6, 20), deviceID: "test")
         var shooting = coding
         shooting.tag = SideHustle.shooting.rawValue
         let chill = ModeChange(mode: .chill, source: .manual, at: date(6, 19), deviceID: "test")
-        let bath = DateInterval(start: date(6, 22, 45), duration: 30 * 60)
-        #expect(ReviveEngine.switchedAt(change: coding, bath: nil) == date(6, 20))
-        #expect(ReviveEngine.switchedAt(change: shooting, bath: nil) == nil)
-        #expect(ReviveEngine.switchedAt(change: chill, bath: nil) == nil)
-        #expect(ReviveEngine.switchedAt(change: chill, bath: bath) == date(6, 22, 45))
-        #expect(ReviveEngine.switchedAt(change: coding, bath: bath) == date(6, 22, 45))
-        #expect(ReviveEngine.switchedAt(change: nil, bath: nil) == nil)
+        let walked = date(6, 22, 45)
+        #expect(ReviveEngine.switchedAt(change: coding, stillSince: nil) == date(6, 20))
+        #expect(ReviveEngine.switchedAt(change: shooting, stillSince: nil) == nil)
+        #expect(ReviveEngine.switchedAt(change: chill, stillSince: nil) == nil)
+        #expect(ReviveEngine.switchedAt(change: chill, stillSince: walked) == walked)
+        #expect(ReviveEngine.switchedAt(change: coding, stillSince: walked) == walked)
+        #expect(ReviveEngine.switchedAt(change: nil, stillSince: nil) == nil)
     }
 }

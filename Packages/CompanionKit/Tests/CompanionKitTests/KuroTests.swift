@@ -186,7 +186,7 @@ import Testing
         let kinds: [WorkoutSummary.Kind] = [.boxing, .running, .strength, .other]
         let hers = kinds.map { CompanionLines.celebration($0, persona: .kuro) }
         #expect(Set(hers).count == kinds.count && hers != kinds.map { CompanionLines.celebration($0) })
-        #expect(CompanionLines.unlock("gloves.gold", persona: .kuro) == "……给你。收好。")
+        #expect(CompanionLines.unlock("gloves.gold", persona: .kuro) == "……给你。有点不好意思。")
         #expect(CompanionLines.unlock("room.plant", persona: .kuro) == "……还行吧。")
     }
 
@@ -212,7 +212,7 @@ import Testing
         #expect(KuroOneOff(.celebrate(id: "run-1", kind: .running)) == nil)
         #expect(KuroOneOff(kind: .taskDone, id: "d").heart && !KuroOneOff(kind: .stayHome, id: "a").heart)
         #expect(events.allSatisfy { !KuroBubbleLines.oneOff($0).isEmpty })
-        #expect(KuroBubbleLines.oneOff(.taskDone(id: "d", focus: true)) == ["……刚才很认真。"])
+        #expect(KuroBubbleLines.oneOff(.taskDone(id: "d", focus: true)) == ["……结束了。辛苦了。"])
         let quiet = ReturnReplay(tier: .box, cards: [], cans: 0)
         #expect(KuroBubbleLines.oneOff(.welcomeBack(id: "w", replay: quiet)) == ["……坐这边。"])
         let full = ReturnReplay(tier: .box, cards: [], cans: 3)
