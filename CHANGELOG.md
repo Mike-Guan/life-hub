@@ -40,6 +40,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
   Sunday items take turns now.
+- `HomeSnapshot`: what the home page shows, built from the app's own data (mode, cards, cans, items, face,
+  room) instead of the prototype's fake data (Issue #489). The page switches to it in its own change.
 - HAKU can wear six Sunday items: an orange or a mint headband, a dotted or a lightning-bolt mask, and a small
   cactus or a mini speaker in the room. The speaker's light ring glows every 3 seconds. The shop lists them once
   their catalog entries are marked drawn. The watch leaves room items out, since they stand on the floor.
