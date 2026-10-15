@@ -8,7 +8,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a
   side clip), a bear blanket and a cloud cushion on her lap, a succulent on the floor and a nightlight on the wall
   whose glow breathes slowly. The watch leaves out what is on her lap or the floor.
-- The second preset character has her own seven weekly items, in her own rotation.
+- Two new wear slots for weekly items: a badge on the clothes, worn in every mode, and a hat, worn only in
+  下班. HAKU's star badge and both characters' beanies use them and go on sale once their art is in.
+- The second preset character has her own eight weekly items, in her own rotation.
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
   Sunday items take turns now.
