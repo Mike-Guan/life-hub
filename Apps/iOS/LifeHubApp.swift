@@ -22,6 +22,7 @@ struct LifeHubApp: App {
     @State private var showsSettings = false
     @State private var showsShop = false
     @State private var showsWardrobe = false
+    @State private var showsHome = false
     @State private var showsOnboarding: Bool
     @State private var unboxing: CanEntry?
     @State private var welcomeBack: CompanionEvent?
@@ -57,7 +58,7 @@ struct LifeHubApp: App {
         }
         let missingFonts = AppFonts.register()
         if !missingFonts.isEmpty {
-            errors.append("日文字体没装上，日文会用系统字体：\(missingFonts.joined(separator: "、"))")
+            errors.append(String(format: "日文字体没装上，日文会用系统字体：%@".localized, missingFonts.joined(separator: "、")))
         }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
         let persona = Persona.stored(in: AppGroup.defaults)
@@ -178,6 +179,7 @@ struct LifeHubApp: App {
             onSettings: { showsSettings = true },
             cans: growth.ledger.only(persona).balance,
             onShop: { showsShop = true },
+            onHome: homeEntry,
             wardrobe: wardrobe,
             persona: persona,
             greetingName: Greeting.name(in: AppGroup.defaults),
@@ -254,7 +256,7 @@ struct LifeHubApp: App {
             )
             refreshNeeds()
         }
-        .sheet(isPresented: $showsSettings, onDismiss: showNextUnboxing) {
+        .sheet(isPresented: $showsSettings, onDismiss: afterSettings) {
             SettingsView(
                 bedtime: $bedtime,
                 remindsAtBedtime: $remindsAtBedtime,
@@ -266,7 +268,7 @@ struct LifeHubApp: App {
                 store: store,
                 energy: energy,
                 ledger: growth.ledger,
-                cards: cards,
+                cards: $cards,
                 onEraseAll: eraseAll
             )
         }
@@ -276,6 +278,9 @@ struct LifeHubApp: App {
         }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
             ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
+        }
+        .fullScreenCover(isPresented: $showsHome) {
+            HakuHomeView { showsHome = false }
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
             WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, cards: cards)
@@ -374,6 +379,7 @@ struct LifeHubApp: App {
         wardrobe = .stored(in: AppGroup.defaults, persona: persona)
         cards = .current(in: AppGroup.defaults, persona: persona)
         bedtime = .stored(in: AppGroup.defaults)
+        remindsAtBedtime = BedtimeSchedule.remindsAtBedtime(in: AppGroup.defaults)
         rules = .stored(in: AppGroup.defaults)
         places = .stored(in: AppGroup.defaults)
         bathDoneAt = nil
@@ -464,9 +470,28 @@ struct LifeHubApp: App {
         }
     }
 
+    // 交付差距 v1 工程 #7: after 删除全部数据 the app is as freshly installed, so the setup shows again.
+    // It opens once Settings has closed, since one view can't present two covers at once.
+    private func afterSettings() {
+        if OnboardingDraft.isNeeded(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty) {
+            showsOnboarding = true
+        } else {
+            showNextUnboxing()
+        }
+    }
+
+    // Issue #485: the home prototype opens from the home screen in DEV and STG builds only.
+    private var homeEntry: (() -> Void)? {
+        #if DEBUG || ENV_STG
+        return { showsHome = true }
+        #else
+        return nil
+        #endif
+    }
+
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.
     private func showNextUnboxing() {
-        guard !showsShop, !showsWardrobe, !showsSettings else { return }
+        guard !showsShop, !showsWardrobe, !showsSettings, !showsHome else { return }
         unboxing = UnboxLog.next(in: growth.ledger, persona: persona)
     }
 
@@ -682,7 +707,7 @@ struct LifeHubApp: App {
                 growth.record(earned.win, source: earned.source, at: earned.at)
             }
         } catch {
-            healthError = "读不到健康 App 里的日照、睡眠或步数：\(error.localizedDescription)"
+            healthError = String(format: "读不到健康 App 里的日照、睡眠或步数：%@".localized, error.localizedDescription)
         }
     }
 

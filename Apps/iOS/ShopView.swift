@@ -128,7 +128,7 @@ struct ShopView: View {
                 .frame(maxHeight: .infinity)
         }
         .padding(.horizontal, 12)
-        .frame(height: 118)
+        .frame(minHeight: 118)
         .frame(maxWidth: .infinity, alignment: .leading)
         .toyCard(fill: Mode.chill.color(for: persona))
         .accessibilityElement(children: .combine)
@@ -185,7 +185,7 @@ struct ShopView: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(item.week != nil ? Text("本周 \(item.title)") : Text(verbatim: item.title))
+        .accessibilityLabel(item.week != nil ? String(format: "本周 %@".localized, item.title) : item.title)
     }
 
     private func ownedRow(_ item: ShopItem) -> some View {
@@ -274,10 +274,10 @@ extension ShopItem.Keepsake {
 }
 
 extension IdentityKind {
-    // Until the card editor saves cards (#273), every install keeps its character's card from before.
+    // Launch saves the cards (ModeCards.adopt), so unreadable cards mean no card, never the character's old one.
     /// The identity card the user picked, `nil` when none.
     static func picked(for persona: Persona) -> IdentityKind? {
-        (ModeCards.stored(in: AppGroup.defaults) ?? .legacy(for: persona)).identity
+        ModeCards.current(in: AppGroup.defaults, persona: persona).identity
     }
 }
 
