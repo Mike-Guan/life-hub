@@ -41,7 +41,8 @@ public enum MomentEngine {
     public static let packUpAfter = 30
 
     /// The state HAKU acts out at `now`: stiff from sitting, the 副业 state, then the gym-day states, then
-    /// scrolling at work, then overtime, packing up or drowsy at the office, then the states at home.
+    /// scrolling at work, then overtime, packing up or drowsy at the office, then dozing on the couch before
+    /// bedtime, then the states at home.
     /// - Parameters:
     ///   - stiff: whether Mike has sat too long, from `SitState.isStiff(mode:at:)`.
     ///   - activity: what HAKU does alongside Mike; only the gym bag gives way to a gym-day state.
@@ -50,7 +51,7 @@ public enum MomentEngine {
     ///   - officeSince: when Mike arrived at the office, `nil` when he isn't there.
     ///   - home: what the states at home depend on, `nil` when Mike isn't home.
     ///   - work: the work days and hours, for the weekday morning.
-    ///   - bedtime: the bedtime, for the blanket.
+    ///   - bedtime: the bedtime, for the blanket and dozing.
     /// - Returns: `nil` when HAKU shows the plain mode, activity or need.
     public static func moment(
         mode: Mode?,
@@ -73,6 +74,13 @@ public enum MomentEngine {
         if need == .slacking { return .slacking }
         let atOffice = office(mode: mode, since: officeSince, now: now, work: work, rules: rules, calendar: calendar)
         if let atOffice { return atOffice }
+        // PM action table C2 (2026-10-15): scrolling on the couch in the hours before bedtime, HAKU dozes off
+        // with the phone instead of peeking at the gym bag.
+        if need == .couchScroll, activity == nil, let home, mode == nil || mode == .chill, home.since <= now,
+            isWindingDown(now, bedtime: bedtime, calendar: calendar)
+        {
+            return .dozing
+        }
         // At home the bag, the couch and the other needs come first.
         guard activity == nil, need == nil, let home else { return nil }
         return self.home(mode: mode, signals: home, now: now, work: work, bedtime: bedtime, calendar: calendar)
@@ -101,12 +109,19 @@ public enum MomentEngine {
         if waiting, isWorkMorning(signals, now: now, work: work, calendar: calendar) {
             return minute < work.workStartMinute ? .morning : .timeToLeave
         }
+        return isWindingDown(now, bedtime: bedtime, calendar: calendar) ? .blanket : nil
+    }
+
+    /// Whether `now` is in the hours before bedtime: from `blanketLead` minutes before it, or after midnight
+    /// until the day starts. Without a bedtime, only after midnight.
+    public static func isWindingDown(_ now: Date, bedtime: BedtimeSchedule, calendar: Calendar = .current) -> Bool {
+        let minute = minuteOfDay(now, calendar: calendar)
         let lateNight = calendar.startOfDay(for: now) > StateEngine.dayStart(for: now, calendar: calendar)
-        guard bedtime.isSet else { return lateNight ? .blanket : nil }
+        guard bedtime.isSet else { return lateNight }
         let start = blanketMinute(bedtime)
         // A bedtime after 07:30 starts the blanket after midnight, so it runs only until the day starts.
-        if start < StateEngine.dayStartHour * 60 { return lateNight && minute >= start ? .blanket : nil }
-        return lateNight || minute >= start ? .blanket : nil
+        if start < StateEngine.dayStartHour * 60 { return lateNight && minute >= start }
+        return lateNight || minute >= start
     }
 
     /// The give-up animation once HAKU stops waiting at the door: Mike was home when the wait ended and

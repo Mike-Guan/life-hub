@@ -52,6 +52,7 @@ enum KuroBubbleLines {
         case .shooting: ["光线不错。", "……这张可以。"]
         case .collapsed: ["……回来了。", "先让我窝五分钟。"]
         case .blanket: ["今天就这样吧。", "毯子分你一半。"]
+        case .dozing: []
         case .morning: ["……早。", "发圈去哪了。"]
         case .timeToLeave: ["……包收好了。", "嗯。"]
         case .stiff: ["……腰。", "……我站起来伸一下。你呢？", "ちょっと休憩。"]
@@ -89,7 +90,7 @@ enum KuroBubbleLines {
         case .stayHome: ["……今天不出门。", "门外的事，明天再说。", "……就在家。嗯。"]
         case .stretched: ["……腰，好一点了。", "ちょっと休憩。……好了。"]
         case .revived: ["……电量，回来一格。", "嗯。又活了。"]
-        case .taskDone(_, let focus): focus ? ["……刚才很认真。"] : ["……划掉了。", "做完了。……不错。"]
+        case .taskDone(_, let focus): focus ? ["……结束了。辛苦了。"] : ["……划掉了。", "做完了。……不错。"]
         case .welcomeBack(_, let replay):
             // Never asks where he was and never says it has been a while.
             [replay.isQuiet ? "……坐这边。" : replay.tier == .box ? "……没在等。真的。" : "……回来了。"]
@@ -100,6 +101,6 @@ enum KuroBubbleLines {
     /// What KURO says when unboxing the item with `itemID`.
     static func unlock(_ itemID: String) -> String {
         let keepsake = KuroItem(rawValue: itemID)?.isKeepsake ?? (ShopItem.item(itemID)?.keepsake != nil)
-        return keepsake ? "……给你。收好。" : "……还行吧。"
+        return keepsake ? "……给你。有点不好意思。" : "……还行吧。"
     }
 }
