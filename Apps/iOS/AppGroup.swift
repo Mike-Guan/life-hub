@@ -46,6 +46,7 @@ enum AppGroup {
             for: Persona.stored(in: defaults),
             ledger: ledger.since(since),
             arrivals: arrivals,
+            cards: ModeCards.stored(in: defaults),
             now: now
         )
         return rules.following(ModeRules.stored(in: defaults), bedtime: BedtimeSchedule.stored(in: defaults))
