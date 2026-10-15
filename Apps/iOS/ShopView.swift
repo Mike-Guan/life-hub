@@ -10,6 +10,7 @@ struct ShopView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var buyError: String?
     @State private var unboxing: CanEntry?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
     // promises a reward the app can't give yet. Add a win here when its source is wired.
@@ -231,18 +232,28 @@ struct ShopView: View {
     }
 
     private func buy(_ item: ShopItem) {
-        do {
-            try growth.buy(item)
-            buyError = growth.lastError
-            unboxing = ledger.unboxings(seen: UnboxLog.seen, persona: persona).last { $0.itemID == item.id }
-        } catch {
+        // 动态: the can count rolls down and the bought tile leaves smoothly, without a bounce.
+        let failure: GrowthStore.BuyError? = withAnimation(reduceMotion ? nil : .smooth) {
+            do {
+                try growth.buy(item)
+                return nil
+            } catch {
+                return error
+            }
+        }
+        if let failure {
             buyError =
-                switch error {
+                switch failure {
                 case .notForSale: "这个不卖。"
                 case .alreadyOwned: "已经有了。"
                 case .notEnoughCans: "能量罐还不够。"
                 }
+            return
         }
+        buyError = growth.lastError
+        // A failed save stays on screen; the unboxing, still unseen, plays when the shop closes.
+        guard buyError == nil else { return }
+        unboxing = ledger.unboxings(seen: UnboxLog.seen, persona: persona).last { $0.itemID == item.id }
     }
 }
 
