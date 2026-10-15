@@ -299,9 +299,10 @@ import Testing
     }
 
     @Test func kuroHasHerOwnCatalogAtHakusPrices() {
-        let haku = ShopItem.catalog(for: .haku)
-        let kuro = ShopItem.catalog(for: .kuro)
-        #expect(haku.count + kuro.count == ShopItem.catalog.count)
+        // Identity card clothes follow each character's own outfits, so those are left out.
+        let haku = ShopItem.catalog(for: .haku).filter { $0.mode != .boxing }
+        let kuro = ShopItem.catalog(for: .kuro).filter { $0.mode != .boxing }
+        #expect(ShopItem.catalog(for: .haku).count + ShopItem.catalog(for: .kuro).count == ShopItem.catalog.count)
         #expect(kuro.compactMap(\.price).sorted() == haku.compactMap(\.price).sorted())
         #expect(kuro.compactMap(\.keepsake).map(\.win) == [.gotUp, .run5k, .boxing])
     }
@@ -388,12 +389,12 @@ import Testing
 
     // QA S2: every character gets a whole shop, not a few items borrowed from HAKU.
     @Test func everyCharacterHasAWholeShop() {
-        let haku = ShopItem.catalog(for: .haku)
+        let haku = ShopItem.catalog(for: .haku).filter { $0.mode != .boxing }
         func keepsakes(_ items: [ShopItem]) -> [String] {
             items.compactMap(\.keepsake).map { "\($0.win.rawValue)×\($0.count)" }.sorted()
         }
         for persona in Persona.allCases {
-            let items = ShopItem.catalog(for: persona)
+            let items = ShopItem.catalog(for: persona).filter { $0.mode != .boxing }
             #expect(items.count == haku.count, "\(persona)")
             #expect(Set(items.map(\.slot)) == Set(Slot.allCases), "\(persona)")
             #expect(keepsakes(items) == keepsakes(haku), "\(persona)")
@@ -442,7 +443,7 @@ import Testing
     // Prices from the shop catalogue (2026-10-14): tops 30-40, full sets 80-90.
     @Test func clothesFollowTheApprovedPricesAndOnlyHakusAreOnTheShelf() {
         for persona in Persona.allCases {
-            let clothes = ShopItem.catalog(for: persona).filter { $0.mode != nil }
+            let clothes = ShopItem.catalog(for: persona).filter { $0.mode != nil && $0.mode != .boxing }
             #expect(Set(clothes.compactMap(\.mode)) == [.work, .chill, .money], "\(persona)")
             for item in clothes {
                 let range = item.slot == .fullSet ? 80...90 : 30...40
@@ -521,5 +522,61 @@ import Testing
                 )
         )
         #expect(wardrobe.showing(card: .boxing) == wardrobe)
+    }
+
+    @Test func cardsWithoutTheirOwnOutfitShareABaseOutfit() {
+        #expect(IdentityKind.boxing.baseOutfit(for: .haku) == nil)
+        #expect(IdentityKind.boxing.baseOutfit(for: .kuro) == .sport)
+        #expect(IdentityKind.tennis.baseOutfit(for: .haku) == .sport)
+        #expect(IdentityKind.tennis.baseOutfit(for: .kuro) == nil)
+        for persona in Persona.allCases {
+            #expect(IdentityKind.fitness.baseOutfit(for: persona) == .sport)
+            #expect(IdentityKind.study.baseOutfit(for: persona) == .outing)
+            #expect(IdentityKind.art.baseOutfit(for: persona) == .craft)
+        }
+    }
+
+    @Test func baseClothesSuitEveryCardOnTheirBase() throws {
+        let tank = try item("haku.top.gym.tank")
+        #expect(tank.suits(.fitness) && tank.suits(.tennis) && tank.suits(.ski))
+        #expect(!tank.suits(.boxing) && !tank.suits(.art) && !tank.suits(nil))
+        let apron = try item("haku.top.art.apron")
+        #expect(apron.suits(.art) && !apron.suits(.study))
+        let track = try item("kuro.top.gym.track")
+        #expect(track.suits(.boxing) && !track.suits(.tennis))
+        #expect(tank.shows(in: .boxing, card: .fitness))
+        #expect(!tank.shows(in: .chill, card: .fitness))
+    }
+
+    @Test func cardTopsSuitOnlyTheirCard() throws {
+        let jacket = try item("haku.top.boxing.blackgold")
+        #expect(jacket.suits(.boxing) && !jacket.suits(.tennis) && !jacket.suits(nil))
+        let lilac = try item("kuro.top.boxing.lilac")
+        #expect(lilac.suits(.boxing) && !lilac.suits(.fitness))
+        #expect(try item("kuro.top.tennis.sakura").suits(.tennis))
+    }
+
+    @Test func identityClothesAreWornInTheCardsModeAtTheirPrices() {
+        let clothes = ShopItem.catalog.filter { $0.mode == .boxing }
+        #expect(clothes.count == 15)
+        for item in clothes {
+            #expect(item.slot == .top, "\(item.id)")
+            #expect((item.card == nil) != (item.base == nil), "\(item.id)")
+            #expect(item.price == 30 || item.price == 40, "\(item.id)")
+            #expect(!item.isDrawn, "\(item.id)")
+        }
+        for persona in Persona.allCases {
+            for base in BaseOutfit.allCases {
+                let prices = clothes.filter { $0.persona == persona && $0.base == base }.compactMap(\.price)
+                #expect(prices == [30, 40], "\(persona) \(base)")
+            }
+        }
+    }
+
+    @Test func switchingToACardOnAnotherBaseHidesTheWornBaseTop() {
+        let wardrobe = Wardrobe(clothes: [.boxing: "haku.top.gym.tank"])
+        #expect(wardrobe.showing(card: .tennis) == wardrobe)
+        #expect(wardrobe.showing(card: .art).clothes.isEmpty)
+        #expect(wardrobe.clothes[.boxing] == "haku.top.gym.tank")
     }
 }

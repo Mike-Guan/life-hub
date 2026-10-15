@@ -39,6 +39,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
   colour instead of her own top, and her "…" bubble moves up off a set hat.
+- The shop catalogue has clothes for identity cards. Cards without an outfit of their own share one of three
+  base outfits (sport, outing, craft), each with two tops to buy that every card on that base can wear; HAKU's
+  boxing card and the second character's boxing and tennis cards have a top of their own. They go on sale once
+  the character art draws them.
 - The second preset character's 6 tops and 2 full sets are on sale. She wears the one of the mode she is in,
   on the home screen, the shop, the wardrobe, unboxing, widgets and the watch.
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
@@ -480,6 +484,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- Unboxing a top or full set shows HAKU in the mode it is worn in, not always off work.
 - The wardrobe keeps what a newer build put on (new slots or modes) instead of losing the whole wardrobe,
   and writes it back when saving.
 - Watch: the app opens without the system killing it (a hand-made pager replaces the vertical page view),
