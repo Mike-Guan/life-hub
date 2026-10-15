@@ -109,6 +109,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
   names two apps and says only this iPhone knows how long you scrolled.
+- The small buttons in Settings (看看, 选 App, 导出) and the place editor (取消, 设为当前位置) now have the full
+  44 pt tap area. The shop banner grows with longer text instead of cutting it off.
 - Opening a keepsake or going through the first-run setup no longer uses up HAKU's late-night "还不睡。" or its
   slow look up after half a day away. Both now wait for the home screen.
 - Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
@@ -537,8 +539,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
-- The small buttons in Settings (看看, 选 App, 导出) and the place editor (取消, 设为当前位置) now have the full
-  44 pt tap area. The shop banner grows with longer text instead of cutting it off.
 - After a workout cheer or the off-work move, HAKU can again stretch after a long sit, get up from the sofa,
   wonder if you're staying home and cheer a finished task. Before, these waited until the app was restarted.
 - On a gym day you already trained, went to the gym or set off for it, scrolling on the phone no longer brings
