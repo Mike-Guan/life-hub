@@ -70,8 +70,9 @@ import Testing
 
     @Test func tiredAtHomeDoesNotSmileLikeFull() {
         let tired = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .low)))
+        // UI 审核 2026-10-14 replaced the deadpan eyes of F7 with half-open smiling eyes and bags.
         #expect(!tired.contains(.eyesChill))
-        #expect(tired.isSuperset(of: [.eyesWork, .lidsWork, .eyebags]))
+        #expect(tired.isSuperset(of: [.eyesChillTired, .eyebagsChill]))
         #expect(Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .high))).contains(.eyesChill))
     }
 

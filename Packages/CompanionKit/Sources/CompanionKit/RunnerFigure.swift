@@ -1471,11 +1471,6 @@ struct RunnerFigure: View {
             visible.remove(.monsterCan)
             visible.formUnion(props)
         }
-        // UI 审核 2026-10-13 (F7): a tired HAKU at home no longer smiles like a full one; he gets the half-shut eyes.
-        if pose.tired, mode == .chill, !pose.bedtime, visible.contains(.eyesChill) {
-            visible.remove(.eyesChill)
-            visible.formUnion([.eyesWork, .lidsWork, .eyebags])
-        }
         if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
             if mode != .chill, pose.need != .couchScroll { visible.insert(.eyeGlint) }
