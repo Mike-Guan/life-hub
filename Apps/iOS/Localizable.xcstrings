@@ -1303,6 +1303,22 @@
         }
       }
     },
+    "通知被关掉了，睡觉提醒和下班提醒发不出去。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications are off, so bedtime and off-work reminders can't go out."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知がオフなので、寝る時間と終業前の通知が届きません。"
+          }
+        }
+      }
+    },
     "锁屏上也是这样" : {
       "localizations" : {
         "en" : {
