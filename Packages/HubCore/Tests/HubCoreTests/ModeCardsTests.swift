@@ -208,27 +208,35 @@ import Testing
     @Test func identityCardCanBeAddedChangedAndCleared() {
         var cards = ModeCards()
         #expect(cards.identity == nil)
-        #expect(!cards.pickIdentity(.swimming))
+        // #expect can't call a mutating method, so each result is kept first.
+        let swimming = cards.pickIdentity(.swimming)
+        #expect(!swimming)
         #expect(cards.identity == .swimming)
         #expect(cards.title(for: .boxing, persona: .haku) == IdentityKind.swimming.title)
-        #expect(!cards.pickIdentity(.study))
+        let study = cards.pickIdentity(.study)
+        #expect(!study)
         #expect(cards.identity == .study)
-        #expect(!cards.pickIdentity(nil))
+        let cleared = cards.pickIdentity(nil)
+        #expect(!cleared)
         #expect(cards.identity == nil)
         #expect(cards.chill == Set(ChillActivity.allCases))
     }
 
     @Test func fitnessCardTakesTheGymOutOfChillAndGivesItBack() {
         var cards = ModeCards()
-        #expect(cards.pickIdentity(.fitness))
+        let fitness = cards.pickIdentity(.fitness)
+        #expect(fitness)
         #expect(!cards.chill.contains(.fitness))
         // Picking it again moves nothing.
-        #expect(!cards.pickIdentity(.fitness))
-        #expect(!cards.pickIdentity(.boxing))
+        let again = cards.pickIdentity(.fitness)
+        #expect(!again)
+        let boxing = cards.pickIdentity(.boxing)
+        #expect(!boxing)
         #expect(cards.chill.contains(.fitness))
         // Leaving the fitness card puts 健身 in Chill even if it wasn't there before: it was on the card.
         var noGym = ModeCards(chill: [.walking])
-        #expect(!noGym.pickIdentity(.fitness))
+        let moved = noGym.pickIdentity(.fitness)
+        #expect(!moved)
         noGym.pickIdentity(nil)
         #expect(noGym.chill == [.walking, .fitness])
     }
