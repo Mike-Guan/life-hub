@@ -189,6 +189,8 @@ struct RunnerPose {
     var welcome: Welcome?
     /// What HAKU wears from the wardrobe.
     var outfit = Outfit()
+    /// What HAKU wears for an identity card other than boxing, or nil for the boxing kit.
+    var cardLook: RunnerCardLook?
     /// -1...1 over a 2.4 s breath: the swing of hanging clothes charms.
     var charmSway: Double = 0
 
@@ -1245,12 +1247,12 @@ struct RunnerFigure: View {
                             .offset(x: 3 * pose.sleepTalk * scale, y: (pose.headDy - 6 * pose.sleepTalk) * scale)
                             .opacity(Double(sin(pose.sleepTalk * .pi)))
                     }
-                    if pose.tired, mode == .boxing, !pose.bedtime {
+                    if pose.tired, mode == .boxing, pose.cardLook?.sporty ?? true, !pose.bedtime {
                         SweatDrop()
                             .offset(x: 0, y: pose.headDy * scale)
                     }
                     if pose.armsUp > 0 {
-                        StretchArms(raise: pose.armsUp, sleeve: Self.jacketColor(mode))
+                        StretchArms(raise: pose.armsUp, sleeve: jacket)
                     }
                 }
                 .rotationEffect(.degrees(pose.lean), anchor: Self.unit(x: 60, y: 140))
@@ -1265,7 +1267,7 @@ struct RunnerFigure: View {
                     GiftBox(progress: pose.unbox)
                 }
                 if let welcome = pose.welcome {
-                    WelcomeProps(welcome: welcome, shoulder: 82 + pose.shift, sleeve: Self.jacketColor(mode))
+                    WelcomeProps(welcome: welcome, shoulder: 82 + pose.shift, sleeve: jacket)
                 }
             }
         }
@@ -1464,7 +1466,14 @@ struct RunnerFigure: View {
                 if pose.scratch >= 0 { visible.insert(.scratchHand) }
                 if pose.tuft > 0 { visible.insert(.hairTuft) }
             case .boxing:
-                visible.formUnion(boxingParts)
+                if let look = pose.cardLook {
+                    // Asleep, HAKU holds nothing (QA spec S6).
+                    visible = look.parts
+                    if pose.bedtime { visible.subtract(look.held) }
+                    if !pose.holdsCardProps { visible.subtract(look.props) }
+                } else {
+                    visible.formUnion(boxingParts)
+                }
             case .money:
                 visible.formUnion(moneyParts)
             }
@@ -1874,7 +1883,7 @@ struct RunnerFigure: View {
                 }
             case .jacket:
                 let back = pose.turnedAway ? pose.outfit.clothesBack[mode] : nil
-                RunnerPartView(part: part, fillOverride: back ?? Self.jacketColor(mode))
+                RunnerPartView(part: part, fillOverride: back ?? jacket)
             case .gymBag:
                 // Lifted from the floor by the door onto the left shoulder.
                 RunnerPartView(part: part)
@@ -2098,6 +2107,12 @@ struct RunnerFigure: View {
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
     private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown]
+
+    /// The jacket fill for the mode, or for the identity card's look.
+    private var jacket: Color {
+        guard mode == .boxing, let look = pose.cardLook else { return Self.jacketColor(mode) }
+        return look.jacket
+    }
 
     private static func jacketColor(_ mode: Mode) -> Color {
         switch mode {
@@ -2391,6 +2406,7 @@ public struct CompanionPortrait: View {
     }
 
     let mode: Mode
+    let card: IdentityKind?
     let energy: Double?
     let need: CompanionNeed?
     let needSince: Date?
@@ -2409,6 +2425,7 @@ public struct CompanionPortrait: View {
 
     // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
     /// - Parameters:
+    ///   - card: the identity card worn in the identity card mode, or nil for the boxing kit.
     ///   - needSince: when `need` started; after 30 minutes of couch scrolling HAKU eyes the gym bag.
     ///   - activity: what HAKU does alongside Mike; it replaces the need.
     ///   - moment: the state within the mode, such as vibe coding; it replaces the need.
@@ -2422,6 +2439,7 @@ public struct CompanionPortrait: View {
     ///   - bath: bath time before bed; HAKU carries shampoo and a rubber duck.
     public init(
         mode: Mode,
+        card: IdentityKind? = nil,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
         needSince: Date? = nil,
@@ -2439,6 +2457,7 @@ public struct CompanionPortrait: View {
         framing: Framing = .full
     ) {
         self.mode = mode
+        self.card = card
         self.energy = energy
         self.need = need
         self.needSince = needSince
@@ -2485,7 +2504,7 @@ public struct CompanionPortrait: View {
     }
 
     private var figure: RunnerFigure {
-        RunnerFigure(mode: mode, pose: pose.wearing(Outfit(wardrobe)).leaving(traces))
+        RunnerFigure(mode: mode, pose: pose.wearing(Outfit(wardrobe)).leaving(traces).dressed(for: card, in: mode))
     }
 
     /// The pose shown at `date`. A plain mode changes still every 15 minutes; at home HAKU does the same

@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- HAKU can dress for four more identity cards: tennis (visor, racket and ball), fitness (gym bag and a small
+  dumbbell), study (green jacket and an open book) and art (green jacket, apron, sketchbook and pencil).
+  The watch leaves the gym bag off the floor.
+  Boxing and the other cards keep the boxing kit. The home screen doesn't pass the picked card yet.
 - The second preset character's eight Sunday items and a plain back view of every top, for when she turns
   away, in her clothes layer file. Nothing in the app shows them yet.
 - A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
