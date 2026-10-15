@@ -881,6 +881,22 @@
         }
       }
     },
+    "位置权限关着，定不了位。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location access is off, so I can't find you."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "位置情報がオフなので、現在地を取得できません。"
+          }
+        }
+      }
+    },
     "你到了哪里，我就跟着换样子。可以让我知道你在哪吗？" : {
       "localizations" : {
         "ja" : {
@@ -1165,6 +1181,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "土"
+          }
+        }
+      }
+    },
+    "再点一次" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度"
           }
         }
       }
@@ -2138,6 +2170,22 @@
         }
       }
     },
+    "定位要用网络，联网后再点一次。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location needs a connection. Try again once you're online."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在地の取得にはネット接続が必要です。つながったら、もう一度タップしてください。"
+          }
+        }
+      }
+    },
     "家" : {
       "localizations" : {
         "ja" : {
@@ -2328,16 +2376,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "忘れる"
-          }
-        }
-      }
-    },
-    "忘掉%@？" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「%@」を忘れる？"
           }
         }
       }
@@ -2868,6 +2906,22 @@
         }
       }
     },
+    "没定到位置，再点一次试试。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't get a location. Try again."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在地を取得できませんでした。もう一度タップしてください。"
+          }
+        }
+      }
+    },
     "没开「运动与健身」权限：通勤路上 HAKU 只会走路。可以在设置 > 隐私与安全性里打开。" : {
       "localizations" : {
         "en" : {
@@ -3042,6 +3096,22 @@
         }
       }
     },
+    "现在定不到位置，到窗边或室外再点一次。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't get a location right now. Try again by a window or outside."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いまは現在地を取得できません。窓ぎわか外で、もう一度タップしてください。"
+          }
+        }
+      }
+    },
     "现在就在这儿" : {
       "localizations" : {
         "ja" : {
@@ -3186,6 +3256,22 @@
         }
       }
     },
+    "留着" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "残す"
+          }
+        }
+      }
+    },
     "监测没启动：%@" : {
       "localizations" : {
         "ja" : {
@@ -3202,22 +3288,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "そのまま%@に切り替え。"
-          }
-        }
-      }
-    },
-    "留着" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "残す"
           }
         }
       }
@@ -4090,6 +4160,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notifications are off, so the bedtime reminder can't go out. You can turn them on in Settings."
+          }
+        }
+      }
+    },
+    "通知被关掉了，睡觉提醒和下班提醒发不出去。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications are off, so bedtime and off-work reminders can't go out."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知がオフなので、寝る時間と終業前の通知が届きません。"
           }
         }
       }
