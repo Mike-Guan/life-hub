@@ -91,6 +91,22 @@
         }
       }
     },
+    "%@ · 还没有模式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · No mode yet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@・モードなし"
+          }
+        }
+      }
+    },
     "%@ 从睡觉时间开始变困，一直到起床时间。打开提醒，到点发一条通知，只提醒一次。" : {
       "localizations" : {
         "ja" : {
