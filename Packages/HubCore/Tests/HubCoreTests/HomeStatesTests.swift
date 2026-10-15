@@ -108,6 +108,30 @@ import Testing
         #expect(moment(phone: false, mode: .money) == nil)
     }
 
+    // PM action table C2: couch scrolling in the blanket hours dozes off instead of peeking at the bag.
+    @Test func scrollingBeforeBedtimeDozesOff() {
+        let signals = HomeSignals(since: date(4, 18), workedToday: 0, manualAt: nil)
+        func moment(_ need: CompanionNeed?, mode: Mode? = .chill, at now: Date) -> CompanionMoment? {
+            MomentEngine.moment(
+                mode: mode,
+                sideHustle: nil,
+                activity: nil,
+                need: need,
+                departing: false,
+                officeSince: nil,
+                home: signals,
+                now: now,
+                calendar: calendar
+            )
+        }
+        #expect(moment(.couchScroll, at: date(4, 20, 59)) == nil)
+        #expect(moment(.couchScroll, at: date(4, 21)) == .dozing)
+        #expect(moment(.couchScroll, at: date(5, 1)) == .dozing)
+        #expect(moment(nil, at: date(4, 21)) == .blanket)
+        #expect(moment(.couchScroll, mode: .money, at: date(4, 21)) == nil)
+        #expect(moment(.boxingWarmup, at: date(4, 21)) == nil)
+    }
+
     @Test func theBlanketComesTwoAndAHalfHoursBeforeBedtime() {
         let signals = HomeSignals(since: date(4, 18), workedToday: 0, manualAt: nil)
         func home(bedtime startMinute: Int, at now: Date) -> CompanionMoment? {

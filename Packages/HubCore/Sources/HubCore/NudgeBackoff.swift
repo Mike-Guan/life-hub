@@ -42,6 +42,14 @@ public struct NudgeBackoff: Codable, Equatable, Sendable {
         return date >= at && date < at.addingTimeInterval(Self.pause)
     }
 
+    // PM 动作总表 U2 (Mike 10/15): while an invite is paused, the character only slumps along and doesn't peek at
+    // the bag, since nothing will follow the peek.
+    /// When `reading`'s need started, for how far the couch scene has gone, or `nil` while its invite is paused.
+    public func peekSince(_ reading: NeedReading?, at date: Date) -> Date? {
+        guard let reading, !isPaused(reading.need, at: date) else { return nil }
+        return reading.since
+    }
+
     /// The character's line on the hub day an invite was paused, else `nil`.
     /// - Parameters:
     ///   - date: the time to check.

@@ -156,6 +156,17 @@
         }
       }
     },
+    "上班日" : {
+      "comment" : "设置：上班时段组里的行名，点开改上班日",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workdays"
+          }
+        }
+      }
+    },
     "上班时段" : {
       "localizations" : {
         "en" : {
@@ -203,6 +214,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Doesn't switch. Used to tell if you're holed up at home."
+          }
+        }
+      }
+    },
+    "不固定" : {
+      "comment" : "引导上班日的开关；设置里上班日没定时那行的值",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It varies"
           }
         }
       }
@@ -400,6 +422,22 @@
         }
       }
     },
+    "先收起来" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it away"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "しまっておく"
+          }
+        }
+      }
+    },
     "先放衣柜" : {
       "comment" : "E6 按钮 ≤16",
       "localizations" : {
@@ -417,6 +455,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Use the defaults?"
+          }
+        }
+      }
+    },
+    "先给你 上班、下班、副业 三张卡，没有身份卡。睡觉时间、上班日算没设，不出相关提醒。都能在 设置 里补。" : {
+      "comment" : "引导「先用默认的？」确认框的说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You start with three cards: Work, Chill and Projects. No card for your thing yet. Bedtime and workdays stay unset, so there are no reminders for them. You can set all of it later in Settings."
           }
         }
       }
@@ -468,6 +517,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Switch to Projects · vibe coding"
+          }
+        }
+      }
+    },
+    "删掉" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
+          }
+        }
+      }
+    },
+    "删掉「%@」？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete “%@”?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%@」を削除しますか？"
+          }
+        }
+      }
+    },
+    "删掉以后，到这里不会再自动换模式。以前的记录还在。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After this, arriving here won't switch your mode. Past records stay."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除すると、ここに着いてもモードは自動で切り替わりません。これまでの記録は残ります。"
           }
         }
       }
@@ -781,6 +878,17 @@
         }
       }
     },
+    "周一到周五" : {
+      "comment" : "设置：上班日那行的值，周一到周五都上班",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon–Fri"
+          }
+        }
+      }
+    },
     "商店" : {
       "localizations" : {
         "en" : {
@@ -845,7 +953,7 @@
       }
     },
     "地点" : {
-      "comment" : "同一中文要两种译法（见上一行），请工程把中文改得稍有不同",
+      "comment" : "设置分组标题（多个地点）",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -944,6 +1052,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Done"
+          }
+        }
+      }
+    },
+    "定位" : {
+      "comment" : "引导下班活动的感应来源：靠定位",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
+          }
+        }
+      }
+    },
+    "定位 · 手表" : {
+      "comment" : "引导下班活动的感应来源：定位和手表",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location · watch"
           }
         }
       }
@@ -1072,6 +1202,17 @@
         }
       }
     },
+    "忘掉%@？" : {
+      "comment" : "记忆页：忘掉一条规律前的确认，%@ 是规律名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forget %@?"
+          }
+        }
+      }
+    },
     "忘掉后从你之后的日子重新学。" : {
       "localizations" : {
         "en" : {
@@ -1135,11 +1276,28 @@
       }
     },
     "手表" : {
+      "comment" : "引导下班活动的感应来源：只有手表",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Watch"
+          }
+        }
+      }
+    },
+    "打开后先用这个角色的默认模式卡，你自己的卡先存起来；关掉就换回来。地点和学到的作息不变。只在测试版里有。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "While on, her default mode cards replace yours, which are kept aside; turn it off to get them back. Places and learned routines stay. Test builds only."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オンの間は彼女のデフォルトのモードカードを使い、あなたのカードは取っておきます。オフで元に戻ります。場所と覚えた生活リズムはそのまま。テスト版だけの機能です。"
           }
         }
       }
@@ -1299,6 +1457,23 @@
         }
       }
     },
+    "模式卡名字" : {
+      "comment" : "设置：改三张通用模式卡名字的分组标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode names"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モードの名前"
+          }
+        }
+      }
+    },
     "每个角色有自己的能量罐和东西，换过去从零开始，原来的都留着。生活记录和规则都不变。" : {
       "localizations" : {
         "en" : {
@@ -1335,6 +1510,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Motion & Fitness is off, so on the commute HAKU can only walk. You can turn it on in Settings > Privacy & Security."
+          }
+        }
+      }
+    },
+    "没有" : {
+      "comment" : "设置：没选身份卡时那行显示的字",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
           }
         }
       }
@@ -1389,6 +1575,38 @@
         }
       }
     },
+    "清除「%@」的位置？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear the location for “%@”?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%@」の位置をクリアしますか？"
+          }
+        }
+      }
+    },
+    "清除以后，到这里不会再自动换模式。随时可以再设。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After this, arriving here won't switch your mode. You can set it again anytime."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クリアすると、ここに着いてもモードは自動で切り替わりません。いつでも設定し直せます。"
+          }
+        }
+      }
+    },
     "灵魂可以先走。" : {
       "comment" : "HAKU 口气；中文“灵魂可以先走。”",
       "localizations" : {
@@ -1416,6 +1634,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wear it now"
+          }
+        }
+      }
+    },
+    "现在摆上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it out now"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま飾る"
+          }
+        }
+      }
+    },
+    "现在用上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use it now"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま使う"
           }
         }
       }
@@ -1458,6 +1708,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Studio"
+          }
+        }
+      }
+    },
+    "留着" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "残す"
           }
         }
       }
@@ -1686,6 +1952,17 @@
         }
       }
     },
+    "规律、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。能量罐、商店物品、衣柜和纪念品不算记忆，留着。删了不能恢复。" : {
+      "comment" : "记忆页：删掉所有记忆前的确认说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Routines, long-term memories, daily records and decisions are all deleted. Every character will meet you like it's the first time. Cans, shop items, wardrobe and keepsakes aren't memories, so they stay. This can't be undone."
+          }
+        }
+      }
+    },
     "角色" : {
       "localizations" : {
         "en" : {
@@ -1731,7 +2008,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "I'm here"
+            "value" : "Use current location"
           }
         }
       }
@@ -1860,6 +2137,17 @@
         }
       }
     },
+    "身份卡" : {
+      "comment" : "设置：身份卡分组标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your card"
+          }
+        }
+      }
+    },
     "运动 30 分钟" : {
       "localizations" : {
         "en" : {
@@ -1937,6 +2225,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "In Projects, tap the outfit to switch to another one."
+          }
+        }
+      }
+    },
+    "连同她的默认模式一起试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try her default modes too"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "彼女のデフォルトのモードでも試す"
           }
         }
       }
