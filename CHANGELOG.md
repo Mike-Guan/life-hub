@@ -30,6 +30,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 - Debug builds have a 「日文和英文」 switch in settings. It is off by default, so every build shows Chinese
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
+- HAKU's eight pop clothes are in the shop: two tops for each of work, off work and 副业, plus the varsity
+  and raincoat sets. Each is worn only in its mode, in place of the jacket. The hoodie strings and the
+  raincoat's duck swing a little with his breath.
 
 ### Changed
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
