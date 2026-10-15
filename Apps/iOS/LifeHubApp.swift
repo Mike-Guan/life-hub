@@ -122,6 +122,27 @@ struct LifeHubApp: App {
         )
         UNUserNotificationCenter.current().delegate = taps
         _taps = State(initialValue: taps)
+        // Issue #481: a widget mode button runs in the app's process, so the watch, the off-work notice and the
+        // countdown follow at once instead of on the next open.
+        WidgetTaps.apply = {
+            widgets.sync(mode: store, energy: energy)
+            needs.refresh(
+                places: PlaceSettings.stored(in: AppGroup.defaults),
+                manualSince: store.log.active.last(where: \.source.isManual)?.at,
+                mode: store.current
+            )
+            widgets.need = needs.reading
+            widgets.rules = AppGroup.needRules()
+            widgets.writeSnapshot(mode: store, energy: energy)
+            WidgetCenter.shared.reloadAllTimelines()
+            Self.sendToWatch(store: store, needs: needs, growth: growth)
+            let rules = ModeRules.stored(in: AppGroup.defaults)
+            let atOffice = PlacePresence.stored(in: AppGroup.defaults).since(.office) != nil
+            Task {
+                _ = await OffWorkReminder.schedule(rules, mode: store.current, atOffice: atOffice)
+                _ = await BoxingCountdown.update(for: needs.reading)
+            }
+        }
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
         guard !ScreenshotMode.isOn else { return }
         _screenTimeError = State(initialValue: Self.restartScrollWatch())
