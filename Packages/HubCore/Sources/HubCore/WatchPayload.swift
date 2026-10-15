@@ -78,18 +78,37 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         theirs.scenes = []
         mine.event = nil
         theirs.event = nil
-        return mine == theirs && Self.sameScenes(scenes, other.scenes)
+        return mine == theirs && Self.sameFaces(faceScenes, other.faceScenes)
+    }
+
+    // The face draws only these parts of a scene; the rest (cans, events, invites) plays in the watch app.
+    // The first scene starts when the iPhone sends, so what plays from then on counts as already playing.
+    /// The changes in what the watch face draws, each with when it starts; a start of `distantPast` is
+    /// already playing when the iPhone sent.
+    var faceScenes: [TimedScene] {
+        var faces: [TimedScene] = []
+        for timed in scenes {
+            let scene = timed.scene
+            let face = HomeScene(
+                activity: scene.activity,
+                moment: scene.moment,
+                walking: scene.walking,
+                bath: scene.bath,
+                daily: scene.daily
+            )
+            guard face != (faces.last?.scene ?? HomeScene()) else { continue }
+            faces.append(TimedScene(from: timed.from == scenes.first?.from ? .distantPast : timed.from, scene: face))
+        }
+        return faces
     }
 
     // The iPhone samples scenes every 5 minutes from when it sends, so the same change lands up to a step
-    // apart in two sends, and the first scene always starts at the send. Redrawing for those alone would
-    // spend the watch face's daily reloads and complication transfers.
-    /// Whether `a` and `b` play the same scenes, each starting within `HomeSceneInputs.timelineStep`.
-    static func sameScenes(_ a: [TimedScene], _ b: [TimedScene]) -> Bool {
+    // apart in two sends. Redrawing for that alone would spend the watch face's daily reloads and
+    // complication transfers.
+    /// Whether `a` and `b` draw the same faces, each starting within `HomeSceneInputs.timelineStep`.
+    static func sameFaces(_ a: [TimedScene], _ b: [TimedScene]) -> Bool {
         guard a.map(\.scene) == b.map(\.scene) else { return false }
-        return zip(a.dropFirst(), b.dropFirst()).allSatisfy {
-            abs($0.from.timeIntervalSince($1.from)) <= HomeSceneInputs.timelineStep
-        }
+        return zip(a, b).allSatisfy { abs($0.from.timeIntervalSince($1.from)) <= HomeSceneInputs.timelineStep }
     }
 
     // The first scene starts at the iPhone's clock when it sent them, and the watch draws at the start of
