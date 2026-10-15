@@ -389,7 +389,6 @@ struct SettingsView: View {
                 .labelsHidden()
                 .font(Toy.body(16, weight: .heavy))
                 .foregroundStyle(muted ? Toy.muted : Toy.ink)
-                .opacity(muted ? 0.6 : 1)
                 .padding(3)
                 .toyCard(fill: Toy.card, radius: 10, shadow: 2)
         }

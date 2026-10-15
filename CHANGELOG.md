@@ -237,6 +237,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   picked apps (it reports every 10 more minutes of use), as soon as you walk, or when you change mode by
   hand. Before, it lay on the couch for 3 hours after the daily 30 minutes.
 - Cans have caps: Sunday boxing earns once a week; runs, the gym and other wins once a day.
+- An unset bedtime's times in Settings are grey without the extra fade, so they stay readable.
 - The companion is called HAKU everywhere you see it: the widget name, notifications, Settings and
   VoiceOver. Code names stay RUNNER.
 - Tapping HAKU on the phone plays the same body move as on the watch (pushes up a headset cup, clinks the can,
