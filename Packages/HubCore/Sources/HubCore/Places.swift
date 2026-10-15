@@ -24,6 +24,9 @@ public struct HubPlace: Codable, Equatable, Identifiable, Sendable {
             }
         }
 
+        /// The kind's name in the app's language.
+        public var localizedTitle: String { title.localized }
+
         /// What arriving at a place of this kind does.
         public var action: Action {
             switch self {
@@ -128,7 +131,7 @@ public struct HubPlace: Codable, Equatable, Identifiable, Sendable {
     }
 
     /// The name shown in Settings.
-    public var title: String { name ?? kind.title }
+    public var title: String { name ?? kind.localizedTitle }
 
     // An added gym counts as the preset gym, so activities, needs and cans work the same there.
     /// The presence keys an arrival here sets: its id, plus the preset it acts as.

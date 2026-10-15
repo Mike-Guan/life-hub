@@ -143,6 +143,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
   fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
   own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- In first-time setup, the Chill activities say how the app senses them as 定位 (location) instead of 地点, which
+  also named the places list. With languages on, those labels, the place names and the place editor title follow
+  the phone's language.
 - The welcome back scene no longer ends with a cut: HAKU settles back over the last second and the sofa,
   blanket, phone and crate drop a little and fade out. A tap that skips it does the same over 0.3 s.
 - Tennis is her main card: she bounces the ball on a flat racket and spins the racket while idle, and a tap
@@ -150,6 +153,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- Settings has a 上班日 row and a 身份卡 group. Each opens the same screen as the first-run setup, so work days
+  and the identity card can be set, changed or cleared later.
 - On the watch the second preset character holds her racket, books, cup and tablet higher, so the bottom of the
   screen no longer cuts them off. The pen, stylus and badge are left off on the watch. The iPhone is unchanged.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
@@ -219,6 +224,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   records, sleep and the weekly changes are shared.
 - KURO has her own shop, wardrobe and unboxing: her 5 items and 3 keepsakes, at the same can prices. Each
   character keeps what she wears; the home card, widgets and watch show it.
+- The unboxing buttons fit the item: 现在摆上 / 先收起来 for room items, 现在用上 / 先放衣柜 for celebrations.
 - HAKU's blanket is now cream with a white folded hem, two small orange-and-white cats and faint paw prints,
   everywhere it shows.
 - After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.

@@ -156,6 +156,17 @@
         }
       }
     },
+    "上班日" : {
+      "comment" : "设置：上班时段组里的行名，点开改上班日",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workdays"
+          }
+        }
+      }
+    },
     "上班时段" : {
       "localizations" : {
         "en" : {
@@ -203,6 +214,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Doesn't switch. Used to tell if you're holed up at home."
+          }
+        }
+      }
+    },
+    "不固定" : {
+      "comment" : "引导上班日的开关；设置里上班日没定时那行的值",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It varies"
           }
         }
       }
@@ -400,6 +422,22 @@
         }
       }
     },
+    "先收起来" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it away"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "しまっておく"
+          }
+        }
+      }
+    },
     "先放衣柜" : {
       "comment" : "E6 按钮 ≤16",
       "localizations" : {
@@ -417,6 +455,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Use the defaults?"
+          }
+        }
+      }
+    },
+    "先给你 上班、下班、副业 三张卡，没有身份卡。睡觉时间、上班日算没设，不出相关提醒。都能在 设置 里补。" : {
+      "comment" : "引导「先用默认的？」确认框的说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You start with three cards: Work, Chill and Projects. No card for your thing yet. Bedtime and workdays stay unset, so there are no reminders for them. You can set all of it later in Settings."
           }
         }
       }
@@ -829,6 +878,17 @@
         }
       }
     },
+    "周一到周五" : {
+      "comment" : "设置：上班日那行的值，周一到周五都上班",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon–Fri"
+          }
+        }
+      }
+    },
     "商店" : {
       "localizations" : {
         "en" : {
@@ -893,7 +953,7 @@
       }
     },
     "地点" : {
-      "comment" : "同一中文要两种译法（见上一行），请工程把中文改得稍有不同",
+      "comment" : "设置分组标题（多个地点）",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -992,6 +1052,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Done"
+          }
+        }
+      }
+    },
+    "定位" : {
+      "comment" : "引导下班活动的感应来源：靠定位",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
+          }
+        }
+      }
+    },
+    "定位 · 手表" : {
+      "comment" : "引导下班活动的感应来源：定位和手表",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location · watch"
           }
         }
       }
@@ -1183,6 +1265,7 @@
       }
     },
     "手表" : {
+      "comment" : "引导下班活动的感应来源：只有手表",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1387,6 +1470,17 @@
         }
       }
     },
+    "没有" : {
+      "comment" : "设置：没选身份卡时那行显示的字",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        }
+      }
+    },
     "没有位置权限，到了地方不会自动换。" : {
       "localizations" : {
         "en" : {
@@ -1496,6 +1590,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wear it now"
+          }
+        }
+      }
+    },
+    "现在摆上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it out now"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま飾る"
+          }
+        }
+      }
+    },
+    "现在用上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use it now"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま使う"
           }
         }
       }
@@ -1952,6 +2078,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Running 5K"
+          }
+        }
+      }
+    },
+    "身份卡" : {
+      "comment" : "设置：身份卡分组标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your card"
           }
         }
       }
