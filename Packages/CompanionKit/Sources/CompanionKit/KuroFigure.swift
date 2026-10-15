@@ -224,7 +224,7 @@ struct KuroFigure: View {
                 pose.tired || pose.calm ? .mouthFlat : Self.smiling.contains(look) ? .mouthSmile : .mouthCat
             visible.insert(pose.mouthO ? .mouthO : mouth)
         }
-        for item in pose.items where item.look == look {
+        for item in pose.items where item.look == look && item.clothes == nil {
             visible.insert(item.part)
             if let replaced = item.replaces { visible.remove(replaced) }
         }
@@ -240,9 +240,49 @@ struct KuroFigure: View {
         }
         if pose.heart { visible.insert(.tapHeart) }
         if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
+        // One top or set per mode, so the first worn one in catalog order is the only one.
+        let worn = KuroItem.allCases.filter { $0.look == look && pose.items.contains($0) }
+        if let clothes = worn.lazy.compactMap(\.clothes).first {
+            dress(look, in: clothes, back: pose.tap == .turnAway, &visible)
+        }
         // UI 审核 2026-10-14 (位置规划图 §12): the watch draws nothing on the floor.
         if watch { visible.remove(.danceSpeaker) }
         return KuroPart.allCases.filter { visible.contains($0) }
+    }
+
+    // Her own top stays wherever a scene or tap leaves it, so the clothes go only where it is drawn. UI 审核
+    // 2026-10-14: from behind, no front pattern shows, so her own plain top stays until the clothes have backs;
+    // the set hats look the same from behind.
+    /// Swaps her own top, sleeves and, for the rain set, cat ears in `visible` for `clothes`; when `back`, only the
+    /// hat changes.
+    nonisolated private static func dress(
+        _ look: KuroLook, in clothes: KuroClothes, back: Bool, _ visible: inout Set<KuroPart>
+    ) {
+        if visible.contains(jacket(look)) {
+            if !back {
+                visible.remove(jacket(look))
+                visible.insert(clothes.top)
+            }
+            // A hat goes where her cat ears are; the bath towel takes both off. The rain hat draws its own ears.
+            if let hat = clothes.hat, visible.contains(.catEars) {
+                visible.insert(hat)
+                if hat == .setRainHat { visible.remove(.catEars) }
+            }
+        }
+        if visible.remove(rubSleeve(look)) != nil { visible.insert(clothes.rubSleeve) }
+        if visible.remove(KuroScene.sleeve(look)) != nil { visible.insert(clothes.inviteSleeve) }
+    }
+
+    /// Her own top in `look`.
+    nonisolated static func jacket(_ look: KuroLook) -> KuroPart {
+        switch look {
+        case .work: .jacketWork
+        case .chill, .study, .music: .jacketChill
+        case .tennis, .fitness, .dance, .ski: .jacketTennis
+        case .desk: .jacketDesk
+        case .box: .jacketBox
+        case .art: .jacketSmock
+        }
     }
 
     /// How far `part` moves from where the SVG draws it, in SVG units; full energy raises her ears a little.
