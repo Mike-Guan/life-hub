@@ -93,7 +93,7 @@ public final class WidgetBridge {
             try snapshot.write(to: url)
             lastError = nil
         } catch {
-            lastError = "小组件数据没写进去：\(error.localizedDescription)"
+            lastError = String(format: "小组件数据没写进去：%@".localized, error.localizedDescription)
         }
     }
 }

@@ -1,4 +1,5 @@
 import AppIntents
+import CompanionKit
 import FamilyControls
 import HubCore
 import SwiftUI
@@ -54,6 +55,10 @@ struct LifeHubApp: App {
         if !AppGroup.isAvailable {
             errors.append("小组件连不上共享文件夹（App Group），它们会一直是空的")
         }
+        let missingFonts = AppFonts.register()
+        if !missingFonts.isEmpty {
+            errors.append("日文字体没装上，日文会用系统字体：\(missingFonts.joined(separator: "、"))")
+        }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
         let persona = Persona.stored(in: AppGroup.defaults)
         Greeting.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
@@ -73,6 +78,14 @@ struct LifeHubApp: App {
         let needs = NeedTracker()
         let growth = GrowthStore.live(in: container, defaults: AppGroup.defaults)
         growth.persona = Persona.stored(in: AppGroup.defaults)
+        growth.lookAt = { persona, date in
+            Look.at(
+                date,
+                log: store.log,
+                wardrobe: .stored(in: AppGroup.defaults, persona: persona),
+                card: .picked(for: persona)
+            )
+        }
         _store = State(initialValue: store)
         // The Focus filter switches mode through this store, so the app keeps one writer for the log.
         AppDependencyManager.shared.add { store }
