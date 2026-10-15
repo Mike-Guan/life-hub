@@ -14,14 +14,16 @@ struct OnboardingView: View {
     let monitor: PlaceMonitor
     /// Called with the finished draft after the last screen or after 用默认.
     let onDone: (OnboardingDraft) -> Void
+    // Issue #416: Settings reuses the work-day and identity screens to change those answers later.
+    private let isEditing: Bool
 
-    @State private var draft = OnboardingDraft.stored(in: AppGroup.defaults)
+    @State private var draft: OnboardingDraft
     @State private var picked: Persona?
     @State private var history: [OnboardingDraft.Step] = []
     @State private var asksDefaults = false
     @State private var bedMinute = 0
-    @State private var work = OnboardingDraft.Work.shown
-    @State private var irregular = false
+    @State private var work: OnboardingDraft.Work
+    @State private var irregular: Bool
     @State private var movedFitness = false
     @State private var sideFull = 0
     @State private var location = CLLocationManager().authorizationStatus
@@ -30,6 +32,29 @@ struct OnboardingView: View {
     @State private var error: String?
     @FocusState private var naming: Mode?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dismiss) private var dismiss
+
+    /// - Parameters:
+    ///   - editing: one step's draft from `OnboardingDraft.editing`, shown alone with 取消 in place of 跳过;
+    ///     `onDone` gets it when the user confirms. `nil` for the whole setup.
+    init(
+        places: Binding<PlaceSettings>,
+        monitor: PlaceMonitor,
+        editing: OnboardingDraft? = nil,
+        onDone: @escaping (OnboardingDraft) -> Void
+    ) {
+        _places = places
+        self.monitor = monitor
+        self.onDone = onDone
+        isEditing = editing != nil
+        let draft = editing ?? .stored(in: AppGroup.defaults)
+        _draft = State(initialValue: draft)
+        let irregular = editing?.work?.workdays.isEmpty == true
+        _irregular = State(initialValue: irregular)
+        var work = editing?.work ?? .shown
+        if irregular { work.workdays = OnboardingDraft.Work.shown.workdays }
+        _work = State(initialValue: work)
+    }
 
     var body: some View {
         ZStack {
@@ -41,7 +66,7 @@ struct OnboardingView: View {
             if asksDefaults {
                 ToyConfirmSheet(
                     question: "先用默认的？",
-                    warning: "先给你 上班、下班、副业 三张卡，没有身份卡。睡觉时间、上班日算没设，不出相关提醒。都能在 设置 > 模式 里补。",
+                    warning: "先给你 上班、下班、副业 三张卡，没有身份卡。睡觉时间、上班日算没设，不出相关提醒。都能在 设置 里补。",
                     cancel: "回去说说",
                     confirm: "用默认",
                     confirmFill: Toy.pink,
@@ -53,7 +78,9 @@ struct OnboardingView: View {
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
-        .onChange(of: draft) { draft.store(in: AppGroup.defaults) }
+        .onChange(of: draft) {
+            if !isEditing { draft.store(in: AppGroup.defaults) }
+        }
     }
 
     // MARK: - Screens
@@ -128,7 +155,14 @@ struct OnboardingView: View {
         page(dot: 1) {
             hero(line(.chill), sub: "勾常做的，不勾也行。")
             LazyVGrid(columns: Self.columns, spacing: 12) {
-                chip("在家休息", detail: "默认，不能取消", symbol: "sofa.fill", isOn: true, fill: chillColor, locked: true) {}
+                chip(
+                    "在家休息".localized,
+                    detail: "默认，不能取消".localized,
+                    symbol: "sofa.fill",
+                    isOn: true,
+                    fill: chillColor,
+                    locked: true
+                ) {}
                 ForEach(ChillActivity.allCases, id: \.self) { activity in
                     let isOn = draft.chill?.contains(activity) ?? false
                     chip(activity.title, detail: activity.source, symbol: activity.symbol, isOn: isOn, fill: chillColor)
@@ -206,9 +240,10 @@ struct OnboardingView: View {
                 sub: irregular ? "" : "默认周一到周五，\(clock(9 * 60)) 到 \(clock(18 * 60))。")
             if !irregular {
                 VStack(alignment: .leading, spacing: 14) {
-                    HStack {
-                        ForEach(Self.weekdays, id: \.self) { day in
-                            dayButton(day)
+                    HStack(spacing: 4) {
+                        let week = Languages.weekCalendar()
+                        ForEach(week.weekdaysInOrder, id: \.self) { day in
+                            dayButton(day, in: week)
                         }
                     }
                     HStack {
@@ -231,8 +266,10 @@ struct OnboardingView: View {
                 .padding(16)
                 .toyCard()
         } foot: {
-            primary("下一步") {
-                draft.work = irregular ? .irregular : work
+            primary(isEditing ? "保存" : "下一步") {
+                // 不固定 keeps the hours, so a later change from Settings doesn't reset them.
+                draft.work =
+                    irregular ? .init(workdays: [], startMinute: work.startMinute, endMinute: work.endMinute) : work
                 next()
             }
         } onSkip: {
@@ -381,11 +418,15 @@ struct OnboardingView: View {
                     Color.clear.frame(width: 44, height: 44)
                 }
                 Spacer()
-                if let dot {
+                if let dot, !isEditing {
                     dots(dot)
                 }
                 Spacer()
-                if skips, let onSkip {
+                if isEditing {
+                    Button("取消") { dismiss() }
+                        .font(Toy.body(15, weight: .heavy))
+                        .frame(minWidth: 44, minHeight: 44)
+                } else if skips, let onSkip {
                     Button("跳过", action: onSkip)
                         .font(Toy.body(15, weight: .heavy))
                         .frame(minWidth: 44, minHeight: 44)
@@ -454,9 +495,9 @@ struct OnboardingView: View {
     @ViewBuilder private func figure(_ mode: Mode, width: CGFloat) -> some View {
         Group {
             if draft.persona == .kuro {
-                KuroView(look: KuroLook(mode: mode), showsBubble: false)
+                KuroView(look: KuroLook(mode: mode, card: draft.identity), showsBubble: false)
             } else {
-                CompanionView(mode: mode, showsBubble: false)
+                CompanionView(mode: mode, card: draft.identity, showsBubble: false, notices: false)
             }
         }
         .frame(width: width, height: (width * 1.32).rounded())
@@ -475,7 +516,7 @@ struct OnboardingView: View {
                     if persona == .kuro {
                         KuroView(look: .chill, showsBubble: false)
                     } else {
-                        CompanionView(mode: .chill, showsBubble: false)
+                        CompanionView(mode: .chill, showsBubble: false, notices: false)
                     }
                 }
                 .frame(height: 180)
@@ -573,14 +614,17 @@ struct OnboardingView: View {
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 
-    private func dayButton(_ day: Int) -> some View {
+    private func dayButton(_ day: Int, in week: Calendar) -> some View {
         let isOn = work.workdays.contains(day)
         return Button {
             work.workdays = work.workdays.symmetricDifference([day])
         } label: {
-            Text(Self.dayNames[day] ?? "")
+            Text(week.veryShortWeekdaySymbols[day - 1])
                 .font(Toy.body(15, weight: .black))
-                .frame(width: 40, height: 40)
+                // Seven columns share the card's width; the circle is 40 pt or the column, whichever is less.
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .aspectRatio(1, contentMode: .fit)
+                .frame(maxWidth: 40)
                 .background(Circle().fill(isOn ? workColor : Toy.card))
                 .overlay(Circle().stroke(Toy.ink, lineWidth: 2.5))
                 .frame(maxWidth: .infinity, minHeight: 44)
@@ -588,7 +632,7 @@ struct OnboardingView: View {
                 .animation(.easeOut(duration: 0.12), value: isOn)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("周\(Self.dayNames[day] ?? "")")
+        .accessibilityLabel(week.standaloneWeekdaySymbols[day - 1])
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 
@@ -768,6 +812,10 @@ struct OnboardingView: View {
     // MARK: - Actions
 
     private func next() {
+        if isEditing {
+            onDone(draft)
+            return
+        }
         naming = nil
         history.append(draft.step)
         withAnimation(reduceMotion ? .easeOut(duration: 0.2) : .easeOut(duration: 0.32)) {
@@ -913,9 +961,6 @@ struct OnboardingView: View {
     }
 
     private static let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
-    /// Monday first, as `Calendar` weekdays.
-    private static let weekdays = [2, 3, 4, 5, 6, 7, 1]
-    private static let dayNames = [2: "一", 3: "二", 4: "三", 5: "四", 6: "五", 7: "六", 1: "日"]
     private static let sideStates: [SideHustle] = [.project, .vibeCoding, .shooting, .writing, .operating, .studying]
     private static let sidePlaceID = "onboardingSide"
 }
@@ -1054,9 +1099,9 @@ extension ChillActivity {
     /// What tells the app the activity happened.
     fileprivate var source: String {
         switch self {
-        case .fitness: "地点 · 手表"
-        case .shopping: "地点"
-        default: "手表"
+        case .fitness: "定位 · 手表".localized
+        case .shopping: "定位".localized
+        default: "手表".localized
         }
     }
 }

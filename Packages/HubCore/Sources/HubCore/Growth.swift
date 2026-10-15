@@ -465,7 +465,10 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
 
     public var id: String
     public var slot: Slot
-    public var title: String
+    // Issue #350: the Chinese name is the String Catalog key.
+    let titleKey: String
+    /// The name shown to the user, in the app's language.
+    public var title: String { titleKey.localized }
     /// Price in cans; `nil` for a keepsake, which can't be bought.
     public var price: Int?
     public var keepsake: Keepsake?
@@ -602,31 +605,15 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(weekly: "haku.weekly.mask.bolt", slot: .mask, title: "闪电贴纸面罩", price: 18, week: 6),
         ShopItem(weekly: "haku.weekly.room.speaker", slot: .room, title: "迷你音箱", price: 20, week: 7),
         ShopItem(weekly: "haku.weekly.hat.beanie", slot: .hat, title: "毛线帽", price: 20, week: 8, drawn: false),
-        // The second character's (§2.4, approved 2026-10-14), off the shelf until wired into her figure.
-        ShopItem(
-            weekly: "kuro.weekly.hair.mint", slot: .headband, title: "薄荷发圈", price: 15, week: 1, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.blanket.bear", slot: .mask, title: "小熊毯", price: 18, week: 2, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.room.succulent", slot: .room, title: "多肉盆栽", price: 15, week: 3, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.hair.cherry", slot: .headband, title: "樱桃发夹", price: 18, week: 4, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.hair.star", slot: .headband, title: "星星发圈", price: 15, week: 5, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.room.cloud", slot: .room, title: "云朵靠垫", price: 20, week: 6, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.room.nightlight", slot: .room, title: "小夜灯", price: 20, week: 7, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.hat.beanie", slot: .hat, title: "毛线帽", price: 20, week: 8, persona: .kuro, drawn: false
-        ),
+        // The second character's (§2.4, approved 2026-10-14).
+        ShopItem(weekly: "kuro.weekly.hair.mint", slot: .headband, title: "薄荷发圈", price: 15, week: 1, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.blanket.bear", slot: .mask, title: "小熊毯", price: 18, week: 2, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.room.succulent", slot: .room, title: "多肉盆栽", price: 15, week: 3, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.hair.cherry", slot: .headband, title: "樱桃发夹", price: 18, week: 4, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.hair.star", slot: .headband, title: "星星发圈", price: 15, week: 5, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.room.cloud", slot: .room, title: "云朵靠垫", price: 20, week: 6, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.room.nightlight", slot: .room, title: "小夜灯", price: 20, week: 7, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.hat.beanie", slot: .hat, title: "毛线帽", price: 20, week: 8, persona: .kuro),
     ]
 
     init(
@@ -640,7 +627,7 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     ) {
         self.id = id
         self.slot = slot
-        self.title = title
+        self.titleKey = title
         self.price = price
         self.keepsake = keepsake
         self.persona = persona
@@ -746,10 +733,10 @@ public struct Wardrobe: Codable, Equatable, Sendable {
         self.clothes = clothes
     }
 
-    // DW-02: slots and modes from a newer build are kept as they are and written back, so an older build
-    // never drops what a newer one put on.
-    var otherSlots: [String: String] = [:]
-    var otherModes: [String: String] = [:]
+    // DW-02: slots, modes and values from a newer build are kept as they are and written back, so an older
+    // build never drops what a newer one put on.
+    var otherSlots: [String: JSONValue] = [:]
+    var otherModes: [String: JSONValue] = [:]
 
     // Clothes are keyed by the mode's raw value, so the JSON stays an object. Wardrobes saved before clothes load
     // with none, and older builds skip the field.
@@ -760,21 +747,34 @@ public struct Wardrobe: Codable, Equatable, Sendable {
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let slots = try container.decode([String: String].self, forKey: .equipped)
-        equipped = Dictionary(
-            uniqueKeysWithValues: slots.compactMap { key, id in Slot(rawValue: key).map { ($0, id) } })
-        otherSlots = slots.filter { Slot(rawValue: $0.key) == nil }
-        let modes = try container.decodeIfPresent([String: String].self, forKey: .clothes) ?? [:]
-        clothes = Dictionary(uniqueKeysWithValues: modes.compactMap { key, id in Mode(rawValue: key).map { ($0, id) } })
-        otherModes = modes.filter { Mode(rawValue: $0.key) == nil }
+        let slots = try container.decodeIfPresent([String: JSONValue].self, forKey: .equipped) ?? [:]
+        (equipped, otherSlots) = Self.split(slots, Slot.init(rawValue:))
+        let modes = try container.decodeIfPresent([String: JSONValue].self, forKey: .clothes) ?? [:]
+        (clothes, otherModes) = Self.split(modes, Mode.init(rawValue:))
+    }
+
+    // The ids this build can wear, and everything else as it was.
+    private static func split<Key>(
+        _ values: [String: JSONValue], _ key: (String) -> Key?
+    ) -> (known: [Key: String], other: [String: JSONValue]) {
+        var known: [Key: String] = [:]
+        var other: [String: JSONValue] = [:]
+        for (name, value) in values {
+            if let key = key(name), case .string(let id) = value {
+                known[key] = id
+            } else {
+                other[name] = value
+            }
+        }
+        return (known, other)
     }
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(
-            otherSlots.merging(equipped.map { ($0.key.rawValue, $0.value) }) { $1 }, forKey: .equipped)
+            otherSlots.merging(equipped.map { ($0.key.rawValue, .string($0.value)) }) { $1 }, forKey: .equipped)
         try container.encode(
-            otherModes.merging(clothes.map { ($0.key.rawValue, $0.value) }) { $1 }, forKey: .clothes)
+            otherModes.merging(clothes.map { ($0.key.rawValue, .string($0.value)) }) { $1 }, forKey: .clothes)
     }
 
     /// Wears `item`: clothes in their mode, replacing that mode's top or set, anything else in its slot.
@@ -822,8 +822,15 @@ public struct Wardrobe: Codable, Equatable, Sendable {
 
     /// `persona`'s wardrobe saved in `defaults`, or an empty one when none is saved or it can't be read.
     public static func stored(in defaults: UserDefaults, persona: Persona = .haku) -> Wardrobe {
-        guard let data = defaults.data(forKey: defaultsKey(for: persona)) else { return Wardrobe() }
-        return (try? JSONDecoder().decode(Wardrobe.self, from: data)) ?? Wardrobe()
+        let key = defaultsKey(for: persona)
+        guard let data = defaults.data(forKey: key) else { return Wardrobe() }
+        do {
+            return try JSONDecoder().decode(Wardrobe.self, from: data)
+        } catch {
+            // DW-02: the next save replaces what this build can't read, so a copy stays aside.
+            defaults.set(data, forKey: "\(key).unreadable")
+            return Wardrobe()
+        }
     }
 
     /// Saves the wardrobe in `defaults` as `persona`'s.

@@ -15,7 +15,8 @@ final class NeedTracker {
     /// Today's invite text while its need lasts, `nil` when none went out for it.
     private(set) var invite: String?
     /// The celebration or off-work animation RUNNER should play, `nil` when there is none.
-    private(set) var event: CompanionEvent?
+    var event: CompanionEvent? { slot.event }
+    private var slot = EventSlot()
     /// Whether Mike sat too long or just stood up, from the last stand hours; `nil` before the first reading.
     private(set) var sit: SitState?
     /// The last Screen Time report of couch scrolling, `nil` when there was none.
@@ -25,6 +26,10 @@ final class NeedTracker {
     /// Last failure, for the UI to show.
     private(set) var lastError: String?
     @ObservationIgnored private var motion: HealthMotion.Reading?
+    @ObservationIgnored private var eventClear: Task<Void, Never>?
+
+    /// Start of the current stretch without walking, from the last HealthKit reading.
+    var stillSince: Date? { motion?.stillSince }
 
     /// Workouts from the last HealthKit reading; empty before the first one.
     var workouts: [WorkoutSummary] { motion?.workouts ?? [] }
@@ -110,7 +115,7 @@ final class NeedTracker {
     func celebrate(bedtime: Bedtime, now: Date = .now) {
         guard let due = due(bedtime: bedtime, now: now) else { return }
         AppGroup.defaults.set(Array(due.celebrated.union([due.workout.id])), forKey: Self.celebratedKey)
-        event = .celebrate(id: due.workout.id, kind: due.workout.kind)
+        play(.celebrate(id: due.workout.id, kind: due.workout.kind))
     }
 
     // The watch cheers when HealthKit wakes the app; the iPhone home still cheers on the next open.
@@ -131,7 +136,18 @@ final class NeedTracker {
 
     /// Plays the off-work animation for the day of `date`; HAKU plays it once per day.
     func offWork(at date: Date) {
-        event = .offWork(id: date.formatted(Self.day))
+        play(.offWork(id: date.formatted(Self.day)))
+    }
+
+    /// Shows `event`, then clears it once its animation is over.
+    private func play(_ event: CompanionEvent) {
+        slot.raise(event, at: .now)
+        eventClear?.cancel()
+        eventClear = Task {
+            try? await Task.sleep(for: .seconds(EventSlot.hold))
+            guard !Task.isCancelled else { return }
+            slot.expire(at: .now)
+        }
     }
 
     private static let celebratedKey = "celebratedWorkouts"

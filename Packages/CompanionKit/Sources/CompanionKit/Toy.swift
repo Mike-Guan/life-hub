@@ -10,6 +10,9 @@ public enum Toy {
     public static let muted = Color(hex: 0x6B6257)
     public static let pink = Color(hex: 0xFF3EA5)
     public static let alert = Color(hex: 0xFF4D4D)
+    // UI 二组 空状态与报错 v1.1 §7: `alert` as text is about 3:1; this red reads at 5.6 on card and 5.2 on paper.
+    /// Red for text, such as a delete button's title. Icons and outlines keep `alert`.
+    public static let alertText = Color(hex: 0xC62828)
 
     public static let outline: CGFloat = 3
     public static let shadow: CGFloat = 5

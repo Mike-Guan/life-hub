@@ -95,6 +95,13 @@ import Testing
         #expect(RunnerFigure.baseParts.isSubset(of: parts))
     }
 
+    @Test func anotherCardWarmsUpWithoutTheBoxingKit() {
+        var pose = RunnerPose(need: .boxingWarmup)
+        pose.otherCard = true
+        let parts = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(parts.isDisjoint(with: [.headband, .gloveL, .gloveR]))
+    }
+
     @Test func warmupLooksAtTheDoorNowAndThen() {
         let glances = (0..<80).map {
             RunnerPose(mode: .chill, time: Double($0) * 0.05, face: .mid, need: .boxingWarmup, react: 0).eyesDx
@@ -327,6 +334,19 @@ import Testing
         #expect(CompanionView.newOffWork(.offWork(id: "2026-10-05"), last: "2026-10-05") == nil)
         #expect(CompanionView.newOffWork(.celebrate(id: "run-1", kind: .running), last: "") == nil)
         #expect(CompanionView.newCelebration(.offWork(id: "2026-10-05"), last: "") == nil)
+    }
+
+    @Test func heldOffWorkLetsGoTheNextDay() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        let start = Date(timeIntervalSince1970: 1_760_000_000)
+        let later = start.addingTimeInterval(3600)
+        let nextDay = calendar.date(byAdding: .day, value: 1, to: start)!
+        #expect(CompanionView.holdsOffWork(since: start, mode: .work, at: later, calendar: calendar))
+        #expect(!CompanionView.holdsOffWork(since: start, mode: .work, at: nextDay, calendar: calendar))
+        #expect(!CompanionView.holdsOffWork(since: start, mode: .chill, at: later, calendar: calendar))
+        #expect(!CompanionView.holdsOffWork(since: nil, mode: .work, at: later, calendar: calendar))
+        #expect(!CompanionView.holdsOffWork(since: later, mode: .work, at: start, calendar: calendar))
     }
 
     @Test(arguments: Mode.allCases)
@@ -1278,7 +1298,7 @@ import Testing
     }
 
     @Test func keepsakesAndPurchasesGetTheirOwnLine() {
-        #expect(CompanionLines.unlock("gloves.gold") == "……给你的。才不是特意挑的。")
+        #expect(CompanionLines.unlock("gloves.gold") == "……给你的。顺手。")
         #expect(CompanionLines.unlock("room.plant") != CompanionLines.unlock("gloves.gold"))
     }
 
@@ -1304,6 +1324,29 @@ import Testing
         #expect(RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
         pose.bedtime = true
         #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
+    }
+
+    @Test func aStateSwapShowsOnlyTheSparkles() {
+        var pose = RunnerPose().wearing(Outfit(Wardrobe(equipped: [.celebration: "celebrate.up"])))
+        pose.burst = 0.5
+        pose.swapping = true
+        pose.lift = 0
+        let parts = RunnerFigure.parts(for: .work, pose: pose)
+        #expect(parts.contains(.sparkleWork))
+        #expect(!parts.contains(.peaceHand))
+        #expect(pose.dumbbellRise == 0)
+        #expect(pose.holdsCardProps)
+    }
+
+    @Test @MainActor func aStillPortraitStandsWhateverTheHour() {
+        let slots = (0..<96).map { Date(timeIntervalSince1970: 1_760_000_000 + Double($0) * IdleLife.slotLength) }
+        #expect(slots.contains { CompanionPortrait(mode: .chill, date: $0).pose.life != nil })
+        for date in slots {
+            let still = CompanionPortrait(mode: .chill, date: date, idles: false).pose
+            #expect(still.life == nil)
+            #expect(still.eyesDx == 0)
+            #expect(RunnerFigure.parts(for: .chill, pose: still) == RunnerFigure.parts(for: .chill, pose: RunnerPose()))
+        }
     }
 
     @Test func everySlotHasAShowcaseMode() {

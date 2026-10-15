@@ -154,6 +154,8 @@ struct RunnerPose {
     var sparkle: Double = 1
     /// Progress of the celebration sparkle burst, 0..<1, or -1 when none is playing.
     var burst: CGFloat = -1
+    /// Whether `burst` is only the sparkles of a state swap, with no celebration props or moves.
+    var swapping = false
     /// The workout being celebrated, which picks the move and the props, such as gloves up or a helmet.
     var cheerKind: WorkoutSummary.Kind?
     /// Scroll position of the feed on the phone screen while couch scrolling, 0...1.
@@ -196,6 +198,8 @@ struct RunnerPose {
     var outfit = Outfit()
     /// What HAKU wears for an identity card other than boxing, or nil for the boxing kit.
     var cardLook: RunnerCardLook?
+    /// Whether the user's identity card is one other than boxing, in any mode.
+    var otherCard = false
     /// Seconds into the card look's own idle, or -1 when it isn't playing.
     var cardBeat: CGFloat = -1
     /// Drawn in the watch's frame, whose bottom edge would leave only a scrap of what stands on the floor.
@@ -360,7 +364,7 @@ struct RunnerPose {
         pokeKind == kind && pokeProgress >= 0 ? WatchPoke.hold(pokeProgress) : 0
     }
     /// How high the dumbbell is: the celebration reps while one plays, else the lift.
-    var dumbbellRise: CGFloat { burst >= 0 ? abs(sin(burst * 2 * .pi)) : lift }
+    var dumbbellRise: CGFloat { burst >= 0 && !swapping ? abs(sin(burst * 2 * .pi)) : lift }
     /// HAKU's height while unboxing: 0 = inside the box, then a pop past full height that settles at 1.
     var popOut: CGFloat {
         guard unbox >= 0 else { return 1 }
@@ -1406,7 +1410,7 @@ struct RunnerFigure: View {
         // stands in the mountains.
         if mode == .chill, let room = outfit.room, visible.isDisjoint(with: awayParts) { visible.insert(room) }
         if visible.contains(.roomSpeaker) { visible.insert(.roomSpeakerRing) }
-        if outfit.peaceSign, pose.burst >= 0, !pose.bedtime { visible.insert(.peaceHand) }
+        if outfit.peaceSign, pose.burst >= 0, !pose.swapping, !pose.bedtime { visible.insert(.peaceHand) }
         // Today's traces: the bandage goes everywhere, the monitor and the sunlight are in the room at home.
         if pose.traces.contains(.bandage) { visible.insert(.bandage) }
         let home = mode == .chill && visible.isDisjoint(with: awayParts.union([.door]))
@@ -1532,7 +1536,8 @@ struct RunnerFigure: View {
             visible.formUnion(couchParts)
         }
         if pose.need == .boxingWarmup, !pose.bedtime {
-            visible.formUnion(warmupParts)
+            // 写死作息 #5 (PM 10/15): another card's warm-up keeps the boxing kit off; its lines carry it.
+            if !pose.otherCard { visible.formUnion(warmupParts) }
             visible.remove(.monsterCan)
         }
         if pose.bagLift >= 0, !pose.bedtime { visible.insert(.gymBag) }
@@ -2479,6 +2484,7 @@ public struct CompanionPortrait: View {
     let daily: DailyCue?
     let walking: HubPlace.Kind?
     let bath: Bool
+    let idles: Bool
     let framing: Framing
 
     // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
@@ -2495,6 +2501,7 @@ public struct CompanionPortrait: View {
     ///   - daily: a planned Daily Widget task starting soon or now; HAKU holds up its prop.
     ///   - walking: the place Mike just left; HAKU walks with what it carries from there.
     ///   - bath: bath time before bed; HAKU carries shampoo and a rubber duck.
+    ///   - idles: whether a plain pose shows what HAKU does on its own at `date`; `false` keeps it standing still.
     public init(
         mode: Mode,
         card: IdentityKind? = nil,
@@ -2512,6 +2519,7 @@ public struct CompanionPortrait: View {
         daily: DailyCue? = nil,
         walking: HubPlace.Kind? = nil,
         bath: Bool = false,
+        idles: Bool = true,
         framing: Framing = .full
     ) {
         self.mode = mode
@@ -2530,6 +2538,7 @@ public struct CompanionPortrait: View {
         self.daily = daily
         self.walking = walking
         self.bath = bath
+        self.idles = idles
         self.framing = framing
     }
 
@@ -2551,7 +2560,8 @@ public struct CompanionPortrait: View {
                 peeking: peeking,
                 activity: activity,
                 moment: activity == nil ? moment : nil,
-                bedtime: bedtime
+                bedtime: bedtime,
+                card: card
             )
         )
     }
@@ -2570,7 +2580,7 @@ public struct CompanionPortrait: View {
     var pose: RunnerPose {
         guard bedtime == .off else { return RunnerPose.bedtimeStill() }
         let plain = need == nil && activity == nil && moment == nil && daily == nil && walking == nil && !bath
-        let life = plain && mode == .chill ? IdleLife.at(date, stamina: vitals.stamina) : nil
+        let life = plain && idles && mode == .chill ? IdleLife.at(date, stamina: vitals.stamina) : nil
         var pose = RunnerPose(
             face: EnergyFace(energy: energy),
             need: need,
@@ -2580,7 +2590,7 @@ public struct CompanionPortrait: View {
         )
         pose.codingCans = codingCans
         pose.headDy += vitals.slouch
-        if plain, life == nil { pose.show(PortraitStill.at(date), mode: mode) }
+        if plain, idles, life == nil { pose.show(PortraitStill.at(date), mode: mode) }
         if peeking {
             pose.bagLift = 0
             pose.eyesDx = -3

@@ -18,8 +18,8 @@ struct SettingsView: View {
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
-    /// The user's cards, for the place names and actions.
-    let cards: ModeCards
+    /// The user's cards, for the place names and actions and the identity card row.
+    @Binding var cards: ModeCards
     /// Deletes every record and setting on this iPhone, as on a fresh install.
     let onEraseAll: () -> Void
     /// Starts at the bottom of the page, with the 删除全部数据 confirmation open when `true`. For screenshots only.
@@ -28,11 +28,13 @@ struct SettingsView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
+    @State private var answering: StepEdit?
     @State private var scrollApps = ScrollWatch.selection
     @State private var pickingApps = false
     @State private var screenTimeError: String?
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
+    @State private var showsHome = false
     @State private var asksErase = false
     @AppStorage(Languages.key, store: AppGroup.defaults) private var languagesOn = false
 
@@ -132,6 +134,9 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("上班时段")
                     .font(Toy.body(16, weight: .heavy))
+                placeRow(title: "上班日".localized, detail: workdaysLabel) {
+                    answering = StepEdit(step: .work)
+                }
                 timeRow("上班", selection: time($rules.workStartMinute))
                 timeRow("下班", selection: time($rules.workEndMinute))
                 Toggle("晚间延长", isOn: eveningBinding)
@@ -146,6 +151,16 @@ struct SettingsView: View {
             .padding(16)
             .toyCard()
 
+            VStack(alignment: .leading, spacing: 8) {
+                Text("身份卡")
+                    .font(Toy.body(16, weight: .heavy))
+                placeRow(title: cards.identity?.title ?? "没有".localized, detail: "") {
+                    answering = StepEdit(step: .identity)
+                }
+            }
+            .padding(16)
+            .toyCard()
+
             placesCard
 
             dailyCard
@@ -156,6 +171,7 @@ struct SettingsView: View {
             // Remove the condition with the CI-CD.md Screen Time step.
             #if DEBUG || ENV_STG
             scrollCard
+            homeCard
             #endif
             #if DEBUG
             languagesCard
@@ -165,6 +181,29 @@ struct SettingsView: View {
             eraseCard
         }
         .padding(20)
+        .sheet(item: $answering) { edit in
+            OnboardingView(
+                places: $places,
+                monitor: monitor,
+                editing: .editing(edit.step, persona: persona, cards: cards, rules: rules)
+            ) { draft in
+                draft.applyStep(to: &cards, rules: &rules)
+                cards.store(in: AppGroup.defaults)
+                answering = nil
+            }
+        }
+    }
+
+    // Issue #416: 周一到周五 as one phrase, else the days in order, Monday first.
+    private var workdaysLabel: String {
+        if rules.workdays.isEmpty { return "不固定".localized }
+        if rules.workdays == [2, 3, 4, 5, 6] { return "周一到周五".localized }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Languages.locale
+        let days = [2, 3, 4, 5, 6, 7, 1].filter(rules.workdays.contains).map { calendar.shortWeekdaySymbols[$0 - 1] }
+        let list = ListFormatter()
+        list.locale = Languages.locale
+        return list.string(from: days) ?? days.joined(separator: " ")
     }
 
     // PRD §21.2: the way to take everything back, at the very bottom. The sheet is the second step.
@@ -179,7 +218,7 @@ struct SettingsView: View {
                 } label: {
                     Text("删除…")
                         .font(Toy.body(13, weight: .heavy))
-                        .foregroundStyle(Toy.alert)
+                        .foregroundStyle(Toy.alertText)
                         .padding(.horizontal, 12)
                         .frame(minHeight: 36)
                         .toyCard(radius: 12, shadow: 3)
@@ -203,9 +242,12 @@ struct SettingsView: View {
                 Text("记得的事")
                     .font(Toy.body(16, weight: .heavy))
                 Spacer()
-                Button("看看") { showsMemory = true }
-                    .font(Toy.body(13, weight: .heavy))
-                    .frame(minHeight: 44)
+                Button {
+                    showsMemory = true
+                } label: {
+                    Text("看看").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
             }
             Text("学到的规律、长期记得的事和做过的判断。都只在这台 iPhone 上。")
                 .font(Toy.body(12))
@@ -216,12 +258,38 @@ struct SettingsView: View {
         .sheet(isPresented: $showsMemory) {
             MemoryView(
                 persona: persona,
+                cards: cards,
                 store: store,
                 energy: energy,
                 ledger: ledger,
                 places: places.places,
                 decisionLogURL: AppGroup.container.decisionLogURL
             )
+        }
+    }
+
+    // Issue #485: the home prototype runs on mock data, so it stays out of PROD.
+    private var homeCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Text("家（原型）")
+                    .font(Toy.body(16, weight: .heavy))
+                Spacer()
+                Button {
+                    showsHome = true
+                } label: {
+                    Text("进去").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
+            }
+            Text("HAKU 的房间。罐子、衣服和记录都是假数据，不影响真实记录。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(16)
+        .toyCard()
+        .fullScreenCover(isPresented: $showsHome) {
+            HakuHomeView { showsHome = false }
         }
     }
 
@@ -264,11 +332,12 @@ struct SettingsView: View {
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
-                Button("选 App") {
+                Button {
                     Task { await pickApps() }
+                } label: {
+                    Text("选 App").tapTarget()
                 }
                 .font(Toy.body(13, weight: .heavy))
-                .frame(minHeight: 44)
             }
             Text("选你最容易刷停不下来的 App。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
                 .font(Toy.body(12))
@@ -327,9 +396,11 @@ struct SettingsView: View {
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
-                ShareLink("导出", item: export)
-                    .font(Toy.body(13, weight: .heavy))
-                    .disabled(log.entries.isEmpty && decisions.kept.isEmpty)
+                ShareLink(item: export) {
+                    Text("导出").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
+                .disabled(log.entries.isEmpty && decisions.kept.isEmpty)
             }
             ForEach(Array(log.entries.suffix(5).reversed().enumerated()), id: \.offset) { _, entry in
                 Text("\(entry.at.formatted(date: .omitted, time: .shortened)) \(entry.kind)：\(entry.detail)")
@@ -382,7 +453,6 @@ struct SettingsView: View {
                 .labelsHidden()
                 .font(Toy.body(16, weight: .heavy))
                 .foregroundStyle(muted ? Toy.muted : Toy.ink)
-                .opacity(muted ? 0.6 : 1)
                 .padding(3)
                 .toyCard(fill: Toy.card, radius: 10, shadow: 2)
         }
@@ -449,6 +519,8 @@ struct SettingsView: View {
                 Text(detail)
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(Toy.body(13, weight: .heavy))
@@ -497,6 +569,12 @@ struct SettingsView: View {
     }
 }
 
+/// The setup step Settings opens to change one answer.
+private struct StepEdit: Identifiable {
+    let step: OnboardingDraft.Step
+    var id: Int { step.rawValue }
+}
+
 /// A place open in the editor; `isNew` until it has a location.
 private struct PlaceEdit: Identifiable {
     var place: HubPlace
@@ -506,19 +584,13 @@ private struct PlaceEdit: Identifiable {
 }
 
 extension SettingsView {
-    // Wording from the PM thread, 2026-10-07.
+    // Wording from the PM thread, 2026-10-07. 日语文案 2026-10-15: Japanese drops the pronouns, so each
+    // direction is one whole sentence to translate.
     /// The confirmation shown before switching from `old` to `new`.
     static func switchMessage(from old: Persona, to new: Persona) -> String {
-        "\(old.title) 会留在家里，\(old.pronoun)的罐子和东西都在。\(new.title) 用\(new.pronoun)自己的罐子，第一次从零开始。随时可以换回来。"
-    }
-}
-
-extension Persona {
-    /// How lines refer to the character: 他 or 她.
-    fileprivate var pronoun: String {
-        switch self {
-        case .haku: "他"
-        case .kuro: "她"
+        switch old {
+        case .haku: "HAKU 会留在家里，他的罐子和东西都在。KURO 用她自己的罐子，第一次从零开始。随时可以换回来。".localized
+        case .kuro: "KURO 会留在家里，她的罐子和东西都在。HAKU 用他自己的罐子，第一次从零开始。随时可以换回来。".localized
         }
     }
 }

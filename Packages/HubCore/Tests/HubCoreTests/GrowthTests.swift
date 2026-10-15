@@ -441,6 +441,31 @@ import Testing
         #expect(saved["clothes"] == ["dance": "x.top", "chill": "haku.top.chill.aloha"])
     }
 
+    @Test func valuesFromANewerBuildAreWrittenBack() throws {
+        let future = Data(
+            #"{"equipped":{"mask":{"id":"mask.stripes","tint":2},"room":"room.bag"},"clothes":{"work":["a","b"]}}"#.utf8
+        )
+        var wardrobe = try JSONDecoder().decode(Wardrobe.self, from: future)
+        #expect(wardrobe.equipped == [.room: "room.bag"])
+        #expect(wardrobe.clothes.isEmpty)
+        wardrobe.equip(try item("haku.top.chill.aloha"))
+        let saved = try JSONDecoder().decode(JSONValue.self, from: JSONEncoder().encode(wardrobe))
+        let expected = try JSONDecoder().decode(
+            JSONValue.self,
+            from: Data(
+                #"{"equipped":{"mask":{"id":"mask.stripes","tint":2},"room":"room.bag"},"clothes":{"work":["a","b"],"chill":"haku.top.chill.aloha"}}"#
+                    .utf8))
+        #expect(saved == expected)
+    }
+
+    @Test func anUnreadableWardrobeIsKeptAside() throws {
+        let defaults = try #require(UserDefaults(suiteName: "wardrobe-\(UUID())"))
+        let broken = Data(#"{"equipped":["mask.stripes"]}"#.utf8)
+        defaults.set(broken, forKey: "wardrobe")
+        #expect(Wardrobe.stored(in: defaults) == Wardrobe())
+        #expect(defaults.data(forKey: "wardrobe.unreadable") == broken)
+    }
+
     // Prices from the shop catalogue (2026-10-14): tops 30-40, full sets 80-90.
     @Test func clothesFollowTheApprovedPricesAndOnlyHakusAreOnTheShelf() {
         for persona in Persona.allCases {
@@ -503,14 +528,14 @@ import Testing
         #expect(weekly.filter { !$0.isDrawn }.map(\.slot) == [.badge, .hat])
         let hers = ShopItem.catalog(for: .kuro).filter { $0.week != nil }
         #expect(hers.map(\.week) == Array(1...8))
-        #expect(hers.allSatisfy { !$0.isDrawn })
+        #expect(hers.allSatisfy { $0.isDrawn })
     }
 
     @Test func noWeeklyItemWithoutCansOrArt() throws {
         #expect(ShopItem.weekly(for: .haku, ledger: CanLedger(), now: at) == nil)
         let store = GrowthStore(fileURL: nil, deviceID: "t")
         store.record(.boxing, source: "old", at: at.addingTimeInterval(-60 * 86_400))
-        // HAKU's items are drawn; the second character's are not yet.
+        // Only HAKU has cans here, so only his rotation has started.
         #expect(ShopItem.weekly(for: .haku, ledger: store.ledger, now: at) != nil)
         #expect(ShopItem.weekly(for: .kuro, ledger: store.ledger, now: at) == nil)
     }
