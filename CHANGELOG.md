@@ -214,6 +214,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   preview is wearing in the user's own mode name.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
+- Japanese for the second and third copy batches: home bubbles, VoiceOver lines, identity cards, first-run setup,
+  shop, wardrobe, unboxing, settings, memory, place editor, item names and reasons.
 - After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
 - On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
   ponytail (unbox page and home card). The watch is unchanged.
