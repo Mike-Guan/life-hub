@@ -83,7 +83,7 @@ public struct HakuHomeView: View {
     private func header(_ model: HomeModel) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                Text(verbatim: "\(Self.dateLine) · \(model.mode.title)")
+                Text(verbatim: "\(Self.dateLine) · \(model.title(model.mode))")
                     .font(Toy.body(13))
                     .foregroundStyle(Toy.muted)
                 Spacer()
@@ -100,7 +100,6 @@ public struct HakuHomeView: View {
                     .foregroundStyle(.white)
                 }
                 .buttonStyle(.plain)
-                EnergyPill(energy: model.energy)
                 Button {
                     model.toggleNight()
                 } label: {
@@ -246,9 +245,11 @@ public struct HakuHomeView: View {
                     model.switchMode(mode)
                 } label: {
                     HStack(spacing: 10) {
-                        Image(systemName: mode.symbol).font(.system(size: 20, weight: .bold)).frame(width: 26)
+                        Image(systemName: mode == .boxing ? model.card.symbol : mode.symbol).font(
+                            .system(size: 20, weight: .bold)
+                        ).frame(width: 26)
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(mode.title).font(Toy.body(17, weight: .heavy))
+                            Text(model.title(mode)).font(Toy.body(17, weight: .heavy))
                             Text(verbatim: mode.code).font(Toy.body(11, weight: .bold)).foregroundStyle(Toy.muted)
                         }
                         Spacer(minLength: 0)
@@ -279,24 +280,6 @@ public struct HakuHomeView: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .toyCard()
-    }
-}
-
-/// The energy as a short bar, without a number.
-private struct EnergyPill: View {
-    let energy: Double
-
-    var body: some View {
-        let fill: Color =
-            energy < 35 ? Color(hex: 0xFF8FA3) : energy < 65 ? Color(hex: 0xFFD23F) : Color(hex: 0x7CC77F)
-        ZStack(alignment: .leading) {
-            Capsule().fill(Toy.card)
-            Capsule().fill(fill).frame(width: max(6, 40 * energy / 100))
-        }
-        .frame(width: 40, height: 12)
-        .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
-        .animation(.smooth, value: energy)
-        .accessibilityLabel(Text("能量"))
     }
 }
 
@@ -389,7 +372,7 @@ private struct HomeSheetView: View {
                 .padding(14)
                 .toyCard()
             }
-            ForEach(HomeProduct.all, id: \.self) { product in
+            ForEach(HomeProduct.offered(card: model.card), id: \.self) { product in
                 let owned = model.owns(product)
                 let affordable = model.cans >= product.price
                 HStack(spacing: 12) {

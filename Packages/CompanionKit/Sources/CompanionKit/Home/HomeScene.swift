@@ -415,7 +415,7 @@ final class HomeScene: SKScene {
 
         haku.apply(
             pose, face: face, outfit: model.outfit, facingRight: facing,
-            gloves: model.mode == .boxing, t: clock)
+            gloves: model.mode == .boxing && model.card == .boxing, t: clock)
 
         var position = HomeGrid.scene(HomeGrid.plan(point))
         if let hop = hopStart {

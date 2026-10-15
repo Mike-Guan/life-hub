@@ -25,7 +25,7 @@ enum HomeOutfit: String, CaseIterable, Sendable {
         switch self {
         case .jacket, .blazer, .aloha: nil
         case .flame: 40
-        case .varsity: 35
+        case .varsity: 80
         }
     }
 
@@ -93,9 +93,14 @@ enum HomeProduct: Hashable, Sendable {
         .item(.plant), .item(.bag), .item(.cactus), .item(.speaker), .outfit(.flame), .outfit(.varsity),
     ]
 
+    /// What the shop offers with `card` as the identity card: the bag is a boxing card item.
+    static func offered(card: IdentityKind) -> [HomeProduct] {
+        all.filter { $0 != .item(.bag) || card == .boxing }
+    }
+
     var name: String {
         switch self {
-        case .item(.plant): "绿植"
+        case .item(.plant): "房间绿植"
         case .item(.bag): "小沙袋"
         case .item(.cactus): "小仙人掌"
         case .item(.speaker): "迷你音箱"
@@ -105,10 +110,10 @@ enum HomeProduct: Hashable, Sendable {
 
     var price: Int {
         switch self {
-        case .item(.plant): 15
-        case .item(.bag): 20
-        case .item(.cactus): 8
-        case .item(.speaker): 15
+        case .item(.plant): 8
+        case .item(.bag): 15
+        case .item(.cactus): 15
+        case .item(.speaker): 20
         case .outfit(let o): o.price ?? 0
         }
     }
@@ -147,6 +152,8 @@ enum HomeCue: Equatable, Sendable {
 @Observable
 final class HomeModel {
     private(set) var mode: Mode = .chill
+    /// The user's identity card, the fourth mode. Only the boxing card is drawn in the prototype.
+    let card: IdentityKind
     /// Where HAKU is, or is walking to.
     private(set) var spot: HomeSpot = .idle
     /// Where HAKU was dropped after being carried, until he walks somewhere.
@@ -176,8 +183,9 @@ final class HomeModel {
     private var taps: [Date] = []
     private var lineIndex = 0
 
-    init(night: Bool? = nil, cans: Int = 46, now: Date = .now) {
+    init(night: Bool? = nil, cans: Int = 46, card: IdentityKind = .boxing, now: Date = .now) {
         self.cans = cans
+        self.card = card
         let hour = Calendar.current.component(.hour, from: now)
         isNight = night ?? (hour >= 18 || hour < 6)
         timeline = [
@@ -197,10 +205,10 @@ final class HomeModel {
     /// Switches the mode and sends HAKU to act it out.
     func switchMode(_ new: Mode, at time: String = HomeModel.clock()) {
         mode = new
-        timeline.append(HomeTimelineEntry(time: time, mode: new, title: new.title))
+        timeline.append(HomeTimelineEntry(time: time, mode: new, title: title(new)))
         energy = max(5, min(100, energy + Self.energyCost(new)))
-        go(Self.spot(for: new, hasBag: items.contains(.bag)))
-        line = Self.modeLine(new, hasBag: items.contains(.bag))
+        go(Self.spot(for: new, card: card, hasBag: items.contains(.bag)))
+        line = Self.modeLine(new, card: card, hasBag: items.contains(.bag))
     }
 
     /// Reacts to a tap in the room.
@@ -346,20 +354,37 @@ final class HomeModel {
         revision += 1
     }
 
-    static func spot(for mode: Mode, hasBag: Bool) -> HomeSpot {
+    /// The mode's name; the fourth mode is named after the identity card.
+    func title(_ mode: Mode) -> String {
+        mode == .boxing ? card.title : mode.title
+    }
+
+    // PM 2026-10-15: the fourth mode follows the user's identity card, so its spot and line branch on the card.
+    static func spot(for mode: Mode, card: IdentityKind, hasBag: Bool) -> HomeSpot {
         switch mode {
         case .work: .work
         case .chill: .sofa
-        case .boxing: hasBag ? .box : .shadowbox
+        case .boxing: cardSpot(card, hasBag: hasBag)
         case .money: .side
         }
     }
 
-    static func modeLine(_ mode: Mode, hasBag: Bool) -> String {
+    static func cardSpot(_ card: IdentityKind, hasBag: Bool) -> HomeSpot {
+        switch card {
+        case .boxing: hasBag ? .box : .shadowbox
+        default: .idle
+        }
+    }
+
+    static func modeLine(_ mode: Mode, card: IdentityKind, hasBag: Bool) -> String {
         switch mode {
         case .work: "上班。脑子开机中。"
         case .chill: "下班。今天到此为止。"
-        case .boxing: hasBag ? "拳击日。沙袋先挨几下。" : "拳击日。没沙袋，打空气也行。"
+        case .boxing:
+            switch card {
+            case .boxing: hasBag ? "拳击日。沙袋先挨几下。" : "拳击日。没沙袋，打空气也行。"
+            default: "\(card.title)。准备出门。"
+            }
         case .money: "副业时间。别打扰，也别走。"
         }
     }

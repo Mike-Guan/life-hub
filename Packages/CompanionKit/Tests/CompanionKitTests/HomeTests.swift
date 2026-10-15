@@ -79,6 +79,14 @@ import Testing
         #expect(model.timeline.last?.mode == .money)
     }
 
+    @Test func otherCardsDoNotBox() {
+        let model = HomeModel(night: false, card: .tennis)
+        model.switchMode(.boxing)
+        #expect(model.spot == .idle)
+        #expect(!HomeProduct.offered(card: .tennis).contains(.item(.bag)))
+        #expect(HomeProduct.offered(card: .boxing).contains(.item(.bag)))
+    }
+
     @Test func withTheBagBoxingDayHitsIt() {
         let model = HomeModel(night: false)
         #expect(model.buy(.item(.bag)))
@@ -89,12 +97,12 @@ import Testing
     @Test func buyingSpendsCansOnceAndPlacesTheItem() {
         let model = HomeModel(night: false, cans: 30)
         #expect(model.buy(.item(.plant)))
-        #expect(model.cans == 15)
+        #expect(model.cans == 22)
         #expect(model.items.contains(.plant))
         #expect(model.takeCues() == [.placed(.plant)])
         #expect(!model.buy(.item(.plant)))
         #expect(!model.buy(.outfit(.flame)))
-        #expect(model.cans == 15)
+        #expect(model.cans == 22)
     }
 
     @Test func onlyOwnedOutfitsCanBeWorn() {
