@@ -6,8 +6,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Added
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
-  starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. Items go
-  on sale once the character art draws them.
+  starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
+  Sunday items take turns now.
 - HAKU can wear six Sunday items: an orange or a mint headband, a dotted or a lightning-bolt mask, and a small
   cactus or a mini speaker in the room. The speaker's light ring glows every 3 seconds. The shop lists them once
   their catalog entries are marked drawn. The watch leaves room items out, since they stand on the floor.

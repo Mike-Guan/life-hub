@@ -583,8 +583,8 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(cardTop: "kuro.base.outing.trench", title: "短风衣", price: 40, base: .outing, persona: .kuro),
         ShopItem(cardTop: "kuro.top.art.smock", title: "画画罩衫", price: 30, base: .craft, persona: .kuro),
         ShopItem(cardTop: "kuro.base.craft.pinafore", title: "背带裙", price: 40, base: .craft, persona: .kuro),
-        // HAKU's weekly items (商店完整目录 v0 §1.4), off the shelf until drawn. The star badge (week 4) and the
-        // beanie (week 8) wait for their own wear slots. The second character's (§2.4) wait for approval.
+        // HAKU's weekly items (商店完整目录 v0 §1.4), drawn in #383. The star badge (week 4) and the beanie
+        // (week 8) wait for their own wear slots. The second character's (§2.4) come in their own change.
         ShopItem(weekly: "haku.weekly.headband.orange", slot: .headband, title: "橙色头带", price: 15, week: 1),
         ShopItem(weekly: "haku.weekly.mask.dots", slot: .mask, title: "波点面罩", price: 18, week: 2),
         ShopItem(weekly: "haku.weekly.room.cactus", slot: .room, title: "小仙人掌", price: 15, week: 3),
@@ -627,7 +627,6 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     init(weekly id: String, slot: Slot, title: String, price: Int, week: Int, persona: Persona = .haku) {
         self.init(id: id, slot: slot, title: title, price: price, persona: persona)
         self.week = week
-        isDrawn = false
     }
 
     // The identity card lives in the boxing mode slot (ModeCards), so its clothes are worn there.

@@ -490,11 +490,18 @@ import Testing
         #expect(try weeklyItem(firstCan: "2026-10-03 23:59", now: "2026-10-18 00:00", persona: .kuro) == nil)
     }
 
+    @Test func hakusWeeklyItemsAreDrawn() {
+        let weekly = ShopItem.catalog(for: .haku).filter { $0.week != nil }
+        #expect(weekly.count == 6)
+        #expect(weekly.allSatisfy { $0.isDrawn })
+    }
+
     @Test func noWeeklyItemWithoutCansOrArt() throws {
         #expect(ShopItem.weekly(for: .haku, ledger: CanLedger(), now: at) == nil)
         let store = GrowthStore(fileURL: nil, deviceID: "t")
         store.record(.boxing, source: "old", at: at.addingTimeInterval(-60 * 86_400))
-        #expect(ShopItem.weekly(for: .haku, ledger: store.ledger, now: at) == nil)
+        // HAKU's items are drawn; the second character has none in the catalog yet.
+        #expect(ShopItem.weekly(for: .haku, ledger: store.ledger, now: at) != nil)
         #expect(ShopItem.weekly(for: .kuro, ledger: store.ledger, now: at) == nil)
     }
 
