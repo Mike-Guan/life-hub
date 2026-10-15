@@ -87,7 +87,8 @@ struct WatchHomeView: View {
         return Group {
             if payload.persona == .kuro {
                 KuroView(
-                    look: KuroLook(mode: mode ?? .chill),
+                    look: KuroLook(mode: mode ?? .chill, card: mode.flatMap(payload.card(for:))),
+                    card: mode.flatMap(payload.card(for:)),
                     energy: snapshot.energy(at: date)?.value,
                     bedtime: payload.bedtime.state(at: date),
                     need: snapshot.need(at: date),
@@ -101,6 +102,7 @@ struct WatchHomeView: View {
             } else {
                 CompanionView(
                     mode: mode,
+                    card: mode.flatMap(payload.card(for:)),
                     energy: snapshot.energy(at: date)?.value,
                     need: snapshot.need(at: date),
                     needSince: snapshot.needSince(at: date),
@@ -163,10 +165,18 @@ private struct WatchPager<First: View, Second: View>: View {
     }
 
     var body: some View {
-        ZStack {
-            if page == 0 {
-                first.transition(.move(edge: .top))
-            } else {
+        // Page 1 stays in the view tree while page 2 shows: rebuilt, the character would replay its opening
+        // reactions, invite hop and line on every swipe back (PM 动作展示总表 C20). Off screen its frame clock stops.
+        let onFirst = page == 0
+        return ZStack {
+            first
+                .visualEffect { content, proxy in
+                    content.offset(y: onFirst ? 0 : -proxy.size.height)
+                }
+                .allowsHitTesting(onFirst)
+                .accessibilityHidden(!onFirst)
+                .environment(\.companionOffscreen, !onFirst)
+            if page == 1 {
                 second.transition(.move(edge: .bottom))
             }
         }
