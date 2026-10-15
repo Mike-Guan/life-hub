@@ -29,8 +29,10 @@ struct WardrobeView: View {
         self.growth = growth
         _wardrobe = wardrobe
         self.persona = persona
-        self.cards = cards ?? .legacy(for: persona)
-        _previewMode = State(initialValue: mode ?? .chill)
+        let cards = cards ?? .legacy(for: persona)
+        self.cards = cards
+        // A mode with no button in the user's cards (boxing without a card) previews as 下班.
+        _previewMode = State(initialValue: mode.flatMap { cards.modes.contains($0) ? $0 : nil } ?? .chill)
         _shelf = State(initialValue: shelf)
     }
 
@@ -151,9 +153,9 @@ struct WardrobeView: View {
         .padding(.top, 8)
     }
 
-    /// "2026-11-02 · 累计 10 次拳击日": when and how a keepsake was earned.
+    /// "2026年11月2日 · 累计 10 次拳击日": when and how a keepsake was earned.
     private func earnedLine(_ item: ShopItem, at date: Date) -> String {
-        let day = date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
+        let day = date.formatted(.dateTime.year().month().day())
         guard let keepsake = item.keepsake else { return day }
         return "\(day) · 累计 \(keepsake.count) 次\(keepsake.title(for: persona))"
     }

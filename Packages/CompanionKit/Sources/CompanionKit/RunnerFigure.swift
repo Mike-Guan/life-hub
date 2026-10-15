@@ -200,8 +200,12 @@ struct RunnerPose {
     var cardLook: RunnerCardLook?
     /// Whether the user's identity card is one other than boxing, in any mode.
     var otherCard = false
-    /// Seconds into the card look's own idle, or -1 when it isn't playing.
+    /// Seconds into the card look's idle, or -1 when none is playing.
     var cardBeat: CGFloat = -1
+    /// The base-outfit move `cardBeat` times, or nil for the look's own idle.
+    var baseIdle: RunnerBaseIdle?
+    /// How far the body rises in a shrug, in SVG units (negative is up); the head stays.
+    var shrug: CGFloat = 0
     /// Drawn in the watch's frame, whose bottom edge would leave only a scrap of what stands on the floor.
     var watchFrame = false
     /// -1...1 over a 2.4 s breath: the swing of hanging clothes charms.
@@ -553,9 +557,9 @@ struct RunnerPose {
             // Every 18-30 s, one of: shake the wrists out, then a glove up to fix the headband; bump the gloves; or
             // slip left, slip right and duck.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
-            // A card look with its own idle plays only that one; both streams together mixed the slip into its nod.
-            let ownIdle = RunnerCardLook(card: card)?.beatLength != nil
-            if plain, r == 0, !ownIdle,
+            // A card look plays only its own idles; both streams together mixed the slip into its nod.
+            let cardIdles = RunnerCardLook(card: card) != nil
+            if plain, r == 0, !cardIdles,
                 let beat = IdleClock.beat(
                     at: t, every: 24, spread: 6, lengths: Self.boxingBeats, seed: Self.seed)
             {
@@ -1517,6 +1521,8 @@ struct RunnerFigure: View {
                     if pose.bedtime { visible.subtract(look.held) }
                     if !pose.holdsCardProps {
                         visible.subtract(look.props)
+                    } else if pose.cardBeat >= 0, let idle = pose.baseIdle {
+                        idle.parts(look, at: pose.cardBeat, &visible)
                     } else if pose.cardBeat >= 0 {
                         look.beatParts(at: pose.cardBeat, &visible)
                     }
@@ -1802,7 +1808,7 @@ struct RunnerFigure: View {
                 moved(part, move, scale: scale)
             } else if let move = SceneMove.welcome(part, pose: pose) {
                 moved(part, move, scale: scale)
-            } else if pose.cardBeat >= 0, let move = pose.cardLook?.move(part, at: pose.cardBeat) {
+            } else if pose.cardBeat >= 0, let move = cardMove(part) {
                 moved(part, move, scale: scale)
             } else if part == .walkDust, pose.walkFrom != nil {
                 moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
@@ -1811,11 +1817,19 @@ struct RunnerFigure: View {
             }
         }
         .offset(y: (isHead ? pose.headDy : 0) * scale)
+        .offset(y: Self.shrugParts.contains(part) ? pose.shrug * scale : 0)
         .offset(y: isHead || Self.chinParts.contains(part) ? 30 * pose.slump * scale : 0)
         .rotationEffect(
             .degrees(isHead ? -14 * Double(pose.lie) + pose.headTilt : 0),
             anchor: Self.unit(x: 60, y: 96)
         )
+    }
+
+    /// How `part` moves in the card look's idle that is playing, or nil when it stays put.
+    private func cardMove(_ part: RunnerPart) -> SceneMove? {
+        guard let look = pose.cardLook else { return nil }
+        if let idle = pose.baseIdle { return idle.move(part, look, at: pose.cardBeat) }
+        return look.move(part, at: pose.cardBeat)
     }
 
     private func moved(_ part: RunnerPart, _ move: SceneMove, scale: CGFloat) -> some View {
@@ -2168,6 +2182,9 @@ struct RunnerFigure: View {
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
         .dizzyStar, .setVarsityCap, .eyesBright, .lidsBright, .countMouth, .skiGoggles, .goggleHand, .breathPuff,
     ]
+
+    /// Parts of the body that rise in a shrug while the head stays.
+    private static let shrugParts: Set<RunnerPart> = [.jacket, .stripeNeon, .stripeSport, .hoodCollar]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
     private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown, .maskDotsDown, .maskBoltDown]
