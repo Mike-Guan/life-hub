@@ -133,6 +133,29 @@ import Testing
         #expect(list == [LongMemory(title: "第一次网球日", date: date(4, 10))])
     }
 
+    @Test func aUserWithoutACardHasNoIdentityMemories() {
+        let cards = ModeCards()
+        let learned = Memory.habits(
+            persona: .haku,
+            cards: cards,
+            days: .standard,
+            ledger: CanLedger(entries: wins(.boxing, [3, 10])),
+            resets: MemoryResets(),
+            now: date(20),
+            calendar: calendar
+        )
+        #expect(learned.isEmpty)
+        let list = Memory.longTerm(
+            persona: .haku,
+            cards: cards,
+            changes: [ModeChange(mode: .boxing, source: .manual, at: date(4, 10), deviceID: "t")],
+            ledger: CanLedger(),
+            places: [],
+            resets: MemoryResets()
+        )
+        #expect(list.isEmpty)
+    }
+
     @Test func deletedChangesAreNotRemembered() {
         var boxing = ModeChange(mode: .boxing, at: date(4, 10), deviceID: "t")
         boxing.deletedAt = date(5)
