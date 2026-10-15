@@ -1,6 +1,38 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
+    "KURO，托着腮等到 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, chin in hand, waiting till %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、頬杖をついて%@まで待っている"
+          }
+        }
+      }
+    },
+    "KURO，托着腮等着" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, chin in hand, waiting"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、頬杖をついて待っている"
+          }
+        }
+      }
+    },
     "……お疲れ。" : {
       "comment" : "下班提醒点开",
       "localizations" : {
