@@ -73,7 +73,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
   translation exists.
 - The shop no longer falls back to the character's old identity card when the saved cards can't be read.
-- In the wardrobe, changing an outfit, the previewed mode or the shelf fades over 0.25 s instead of cutting.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
@@ -119,6 +118,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
   names two apps and says only this iPhone knows how long you scrolled.
+- In the wardrobe, changing an outfit, the previewed mode or the shelf fades over 0.25 s instead of cutting.
 - Opening a keepsake or going through the first-run setup no longer uses up HAKU's late-night "还不睡。" or its
   slow look up after half a day away. Both now wait for the home screen.
 - Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
