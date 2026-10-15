@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character's swimming, yoga, ball and outdoor cards, which still wear her tennis look, now
+  get their base outfit's idle moves too: a stretch on her toes and a towel for the sport cards, the collar and
+  a look at her phone for outdoor. The racket goes down out of the frame first.
 - The second preset character can wear her Sunday beanie in 下班, between her cat ears, with its pom swaying a
   little. A set hat or the bath towel takes it off; it stays on when she turns away and on the watch.
 - The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a

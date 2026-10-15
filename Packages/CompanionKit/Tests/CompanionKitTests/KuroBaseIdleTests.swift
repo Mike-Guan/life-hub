@@ -1,4 +1,5 @@
 import Foundation
+import HubCore
 import Testing
 
 @testable import CompanionKit
@@ -20,6 +21,22 @@ import Testing
         #expect(KuroIdle.pool(.art).contains(.tuck) && KuroIdle.pool(.art).contains(.frame))
         #expect(KuroIdle.pool(.study).contains(.collar) && KuroIdle.pool(.study).contains(.phone))
         #expect([KuroIdle.reach, .towel, .tuck, .frame, .collar, .phone].map(\.length) == [3, 2, 1.2, 2, 1.5, 2.5])
+    }
+
+    // 动作展示总表 §3-3: cards without a look of their own wear her tennis look and add their base outfit's moves.
+    @Test func cardsWithoutALookStillGetTheirBaseMoves() {
+        for card in [IdentityKind.swimming, .yoga, .ball] {
+            #expect(KuroIdle.pool(.tennis, card: card).contains(.reach), "\(card)")
+            #expect(KuroIdle.pool(.tennis, card: card).contains(.towel), "\(card)")
+        }
+        #expect(KuroIdle.pool(.tennis, card: .outdoor).contains(.collar))
+        #expect(KuroIdle.pool(.tennis, card: .outdoor).contains(.phone))
+        // Her own tennis card keeps its own moves only.
+        #expect(KuroIdle.pool(.tennis, card: .tennis) == KuroIdle.pool(.tennis))
+        #expect(KuroIdle.pool(.fitness, card: .fitness) == KuroIdle.pool(.fitness))
+        // The racket goes down out of the frame first.
+        #expect(shift(.tennisRacket, .tennis, .towel, at: 0.2).height > 10)
+        #expect(!parts(.tennis, .phone, at: 1.2).contains(.tennisRacket))
     }
 
     @Test func herHandsAreFreeBeforeTheMove() {
