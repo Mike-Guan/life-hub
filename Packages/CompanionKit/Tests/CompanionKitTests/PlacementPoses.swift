@@ -241,7 +241,9 @@ enum PlacementPoses {
                             states.append(("tap.\(tap).\(progress)", pose))
                         }
                     }
-                    for idle in KuroIdle.pool(look) {
+                    // Cards without a look of their own add their base moves to the tennis look.
+                    let pools = [KuroIdle.pool(look)] + IdentityKind.allCases.map { KuroIdle.pool(look, card: $0) }
+                    for idle in KuroIdle.allCases where pools.contains(where: { $0.contains(idle) }) {
                         for progress in [0.25, 0.5, 0.75] {
                             var pose = base
                             pose.idle = idle

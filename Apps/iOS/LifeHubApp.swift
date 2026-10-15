@@ -277,13 +277,13 @@ struct LifeHubApp: App {
                 .interactiveDismissDisabled()
         }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
-            ShopView(growth: growth, wardrobe: $wardrobe, persona: persona)
+            ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
             WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, cards: cards)
         }
         .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in
-            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
+            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona, mode: store.current)
         }
         .onChange(of: persona) {
             persona.store(in: AppGroup.defaults)
