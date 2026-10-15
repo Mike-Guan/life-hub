@@ -136,13 +136,14 @@ struct KuroPose: Sendable {
     /// How bright the nightlight's glow is, 0...1.
     var glow = KuroPose.restingGlow
 
+    // UI 审核 2026-10-15: on the SVG's 0.55 the still glow shows at about 0.35, as in UI 五组's approved preview.
     /// The nightlight's glow when it holds still, as on widgets and the dimmed watch.
-    static let restingGlow = 0.9
+    static let restingGlow = 0.65
 
-    // UI 五组 Sunday items r1: the glow breathes slowly between 0.55 and 0.9, once every 3 s.
-    /// The nightlight's glow at `time`.
+    // UI 审核 2026-10-15: 0.55 to 0.9 on the old 0.35 was too faint to see move, so it now runs 0.4 to 1 on 0.55.
+    /// The nightlight's glow at `time`: slowly brighter and back once every 3 s.
     static func glow(at time: TimeInterval) -> Double {
-        0.725 - 0.175 * cos(time * 2 * .pi / 3)
+        0.7 - 0.3 * cos(time * 2 * .pi / 3)
     }
 
     /// The resting pose for `look` at `energy` (0-100, or nil when unknown); `bedtime` makes her sleepy.

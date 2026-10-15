@@ -78,9 +78,9 @@ import Testing
             let shown = look == .chill || look == .desk
             #expect(parts.isSuperset(of: [.weeklyRoomNightlightGlow, .weeklyRoomNightlight]) == shown, "\(look)")
         }
-        // The glow breathes from 0.55 to 0.9 and back every 3 s, and rests at 0.9.
-        #expect(abs(KuroPose.glow(at: 0) - 0.55) < 0.001 && abs(KuroPose.glow(at: 1.5) - 0.9) < 0.001)
-        #expect(abs(KuroPose.glow(at: 3) - 0.55) < 0.001)
+        // The glow breathes from 0.4 to 1 and back every 3 s, and rests at 0.65.
+        #expect(abs(KuroPose.glow(at: 0) - 0.4) < 0.001 && abs(KuroPose.glow(at: 1.5) - 1) < 0.001)
+        #expect(abs(KuroPose.glow(at: 3) - 0.4) < 0.001)
         #expect(KuroFigure.opacity(.weeklyRoomNightlightGlow, pose: pose) == KuroPose.restingGlow)
         #expect(KuroFigure.opacity(.weeklyRoomNightlightGlow, pose: pose.glowing(0.6)) == 0.6)
         #expect(KuroItemIcon.parts(.nightlight) == [.weeklyRoomNightlightGlow, .weeklyRoomNightlight])
