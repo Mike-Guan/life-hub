@@ -185,6 +185,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   Debug. The App Store build still leaves it out.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
   turned off it is still given.
+- VoiceOver in the shop and wardrobe says what a buy button gets, how far a keepsake has come, and what the
+  preview is wearing in the user's own mode name.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
 - After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
