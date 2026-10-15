@@ -75,11 +75,30 @@ import Testing
         #expect(scene == HomeScene(moment: .vibeCoding, bath: true))
     }
 
-    @Test func scenesDontChangeTheWatchFace() {
+    @Test func onlyScenesTheFaceDrawsChangeTheWatchFace() {
         let snapshot = WidgetSnapshot(mode: .money, since: at, updatedAt: at)
         let plain = WatchPayload(snapshot: snapshot)
         let playing = WatchPayload(snapshot: snapshot, scenes: [TimedScene(from: at, scene: HomeScene(codingCans: 1))])
         #expect(plain.drawsLike(playing))
+        let bath = WatchPayload(snapshot: snapshot, scenes: [TimedScene(from: at, scene: HomeScene(bath: true))])
+        #expect(!plain.drawsLike(bath))
+    }
+
+    @Test func theBathClockAloneDoesNotRevive() throws {
+        let bedtime = BedtimeSchedule(startMinute: 23 * 60 + 30, endMinute: 7 * 60)
+        let bath = try #require(BathTime.times(after: at, bedtime: bedtime).first)
+        let store = ModeStore(fileURL: nil, deviceID: "test")
+        store.switchTo(.chill, at: bath - 3 * 3600)
+        var presence = PlacePresence()
+        presence.record(.home, entered: true, at: bath - 3 * 3600)
+        let signals = ActivitySignals(presence: presence)
+        let seen = bath - 5 * 60
+        let couch = HomeSceneInputs(log: store.log, bedtime: bedtime, signals: signals, scrollSeenAt: seen)
+        #expect(couch.scene(at: bath + 60).bath)
+        #expect(couch.revived(at: bath + 60) == nil)
+        let walked = HomeSceneInputs(
+            log: store.log, bedtime: bedtime, signals: signals, scrollSeenAt: seen, stillSince: bath)
+        #expect(walked.revived(at: bath + 60) != nil)
     }
 
     @Test func theInviteShowsOnlyWhileItsNeedLasts() {
@@ -110,7 +129,11 @@ import Testing
             let payload = WatchPayload(snapshot: snapshot, scenes: [TimedScene(from: at, scene: scene)], event: event)
             let message = try #require(payload.message)
             #expect(WatchPayload(message: message) == payload)
-            #expect(payload.drawsLike(WatchPayload(snapshot: snapshot)))
+            // The event plays only in the watch app; the Daily cue shows on the face too.
+            let eventScene = TimedScene(from: at, scene: HomeScene(event: event))
+            let eventOnly = WatchPayload(snapshot: snapshot, scenes: [eventScene])
+            #expect(eventOnly.drawsLike(WatchPayload(snapshot: snapshot)))
+            #expect(!payload.drawsLike(WatchPayload(snapshot: snapshot)))
         }
     }
 }
