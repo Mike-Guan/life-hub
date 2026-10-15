@@ -126,6 +126,44 @@ struct FrameSheets {
         try write("haku-7-welcome-end", rows, frames: 16, step: 0.05)
     }
 
+    @Test func hakuBaseIdles() throws {
+        let cases: [(IdentityKind, RunnerBaseIdle)] = [
+            (.fitness, .stretch), (.dance, .stretch), (.fitness, .drink), (.ski, .drink), (.study, .checkWrist),
+            (.music, .checkWrist), (.study, .hitchPack), (.art, .twirlPencil), (.art, .wipeHands),
+        ]
+        let rows = cases.map { card, idle in
+            Row(label: "\(card.rawValue) · \(idle)", start: Self.base) {
+                AnyView(BaseIdleFrame(card: card, idle: idle, start: Self.base))
+            }
+        }
+        try write("haku-base-idles", rows, frames: 13, step: 0.25)
+    }
+
+    /// HAKU in `card`'s look, `idle` playing from `start`.
+    struct BaseIdleFrame: View {
+        let card: IdentityKind
+        let idle: RunnerBaseIdle
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            let t = CGFloat((clock ?? start).timeIntervalSince(start))
+            var pose = RunnerPose(face: .mid).dressed(for: card, in: .boxing)
+            if t < idle.length, let look = pose.cardLook {
+                pose.cardBeat = t
+                pose.baseIdle = idle
+                let eyes = idle.eyes(look, at: t)
+                pose.eyesDx += eyes.width
+                pose.eyesDy += eyes.height
+                pose.headTilt += idle.tilt(look, at: t)
+                pose.shrug = idle.shrug(look, at: t)
+            }
+            return RunnerFigure(mode: .boxing, pose: pose)
+                .padding(12)
+                .background(Mode.boxing.color)
+        }
+    }
+
     @Test func kuroLooks() throws {
         var rows: [Row] = []
         for look in KuroLook.allCases {
