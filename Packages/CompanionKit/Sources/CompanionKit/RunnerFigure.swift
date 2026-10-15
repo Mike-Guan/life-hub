@@ -446,6 +446,7 @@ struct RunnerPose {
         life: IdleLife? = nil,
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
+        card: IdentityKind? = nil,
         react: Double
     ) {
         self.init(face: face, need: need, life: life, activity: activity, moment: moment)
@@ -522,7 +523,9 @@ struct RunnerPose {
             // Every 18-30 s, one of: shake the wrists out, then a glove up to fix the headband; bump the gloves; or
             // slip left, slip right and duck.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
-            if plain, r == 0,
+            // A card look with its own idle plays only that one; both streams together mixed the slip into its nod.
+            let ownIdle = RunnerCardLook(card: card)?.beatLength != nil
+            if plain, r == 0, !ownIdle,
                 let beat = IdleClock.beat(
                     at: t, every: 24, spread: 6, lengths: Self.boxingBeats, seed: Self.seed)
             {

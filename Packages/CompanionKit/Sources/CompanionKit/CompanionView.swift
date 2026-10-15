@@ -525,6 +525,7 @@ public struct CompanionView: View {
             life: life,
             activity: activity,
             moment: shownMoment,
+            card: card,
             react: react
         )
         pose.codingCans = codingCans

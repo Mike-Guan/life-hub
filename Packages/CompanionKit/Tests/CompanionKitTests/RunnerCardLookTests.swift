@@ -131,4 +131,22 @@ import Testing
         // Looks without their own idle yet stay still.
         #expect(times.allSatisfy { RunnerPose(face: .mid).dressed(for: .tennis, in: .boxing, time: $0).cardBeat < 0 })
     }
+
+    // 动作展示总表 C12: the boxing idle's slip and glove bump never play over a card look's own idle.
+    @Test func aCardWithItsOwnIdleSkipsTheBoxingIdle() {
+        let times = Array(stride(from: 0.0, to: 600, by: 0.05))
+        func boxing(_ pose: RunnerPose) -> Bool {
+            pose.shift != 0 || pose.lean != 0 || pose.puff || pose.eyesDy != 0 || pose.gloveL.width != 0
+        }
+        func pose(_ card: IdentityKind?, at t: Double) -> RunnerPose {
+            RunnerPose(mode: .boxing, time: t, face: .mid, card: card, react: 0)
+                .dressed(for: card, in: .boxing, time: t)
+        }
+        #expect(times.contains { boxing(pose(nil, at: $0)) })
+        #expect(times.contains { boxing(pose(.tennis, at: $0)) })
+        for card in [IdentityKind.dance, .music, .ski] {
+            #expect(times.contains { pose(card, at: $0).cardBeat >= 0 })
+            #expect(!times.contains { boxing(pose(card, at: $0)) })
+        }
+    }
 }
