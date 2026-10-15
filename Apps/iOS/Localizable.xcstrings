@@ -783,6 +783,17 @@
         }
       }
     },
+    "在家休息" : {
+      "comment" : "UI 二组实测：选项一行 ≤12 字母（SE 93pt）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staying in"
+          }
+        }
+      }
+    },
     "地点" : {
       "comment" : "同一中文要两种译法（见上一行），请工程把中文改得稍有不同",
       "localizations" : {
@@ -1670,7 +1681,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Use current location"
+            "value" : "I'm here"
           }
         }
       }
@@ -1988,7 +1999,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Default, can't uncheck"
+            "value" : "Always on"
           }
         }
       }

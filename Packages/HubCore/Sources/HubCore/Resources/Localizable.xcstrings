@@ -225,7 +225,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Groceries & errands"
+            "value" : "Errands"
           }
         }
       }
@@ -1267,7 +1267,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yoga & stretching"
+            "value" : "Yoga"
           }
         }
       }
