@@ -37,7 +37,7 @@ enum BedtimeReminder {
             }
             let content = UNMutableNotificationContent()
             content.title = "到你定的睡觉时间了"
-            content.body = "\(persona.title) 已经在打哈欠了。"
+            content.body = String(format: "%@ 已经在打哈欠了。".localized, persona.title)
             content.sound = .default
             content.categoryIdentifier = category
             let trigger = UNCalendarNotificationTrigger(dateMatching: time, repeats: true)
@@ -45,7 +45,7 @@ enum BedtimeReminder {
             try await center.add(UNNotificationRequest(identifier: requestID, content: content, trigger: trigger))
             return nil
         } catch {
-            return "睡觉提醒没设上：\(error.localizedDescription)"
+            return String(format: "睡觉提醒没设上：%@".localized, error.localizedDescription)
         }
     }
 }

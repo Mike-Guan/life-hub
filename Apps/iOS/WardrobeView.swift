@@ -245,7 +245,8 @@ struct WardrobeView: View {
                         .frame(width: 56, height: 56)
                 } else if persona == .haku {
                     CompanionPortrait(
-                        mode: previewMode, card: card, wardrobe: wardrobe.showing(card: card), framing: .head
+                        mode: previewMode, card: card, wardrobe: wardrobe.showing(card: card), idles: false,
+                        framing: .head
                     )
                     .frame(width: 56, height: 56)
                 } else {

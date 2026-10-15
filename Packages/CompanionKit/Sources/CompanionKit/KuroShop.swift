@@ -20,14 +20,36 @@ public enum KuroItem: String, CaseIterable, Sendable {
     case sideDenim = "kuro.top.side.denim"
     case picnic = "kuro.set.chill.picnic"
     case rain = "kuro.set.work.rain"
+    // Sunday items (商店完整目录 v0 §2.4, Mike approved 2026-10-14). The beanie follows with its hat slot.
+    case mintTie = "kuro.weekly.hair.mint"
+    case bearBlanket = "kuro.weekly.blanket.bear"
+    case succulent = "kuro.weekly.room.succulent"
+    case cherryClip = "kuro.weekly.hair.cherry"
+    case starTie = "kuro.weekly.hair.star"
+    case cloud = "kuro.weekly.room.cloud"
+    case nightlight = "kuro.weekly.room.nightlight"
+    case beanie = "kuro.weekly.hat.beanie"
 
     /// The look she shows the item in.
     public var look: KuroLook {
         switch self {
         case .flower, .blanket, .spin, .chillCardigan, .chillHoodie, .picnic: .chill
-        case .scrunchie, .bag, .sakura, .goldRacket: .tennis
+        case .bearBlanket, .succulent, .cloud, .nightlight, .beanie: .chill
+        case .scrunchie, .bag, .sakura, .goldRacket, .mintTie, .cherryClip, .starTie: .tennis
         case .lamp, .sideSmock, .sideDenim: .desk
         case .workBlouse, .workVest, .rain: .work
+        }
+    }
+
+    // UI 五组 Sunday items r1 (位置规划图 §12): the hair pieces go with every look, the succulent also stands where
+    // her tennis bag does, and the nightlight also hangs over her desk.
+    /// Whether she shows the item in `look`.
+    func shows(in look: KuroLook) -> Bool {
+        switch self {
+        case .mintTie, .cherryClip, .starTie: true
+        case .succulent: look == .chill || look == .tennis
+        case .nightlight: look == .chill || look == .desk
+        default: self.look == look
         }
     }
 
@@ -58,6 +80,27 @@ public enum KuroItem: String, CaseIterable, Sendable {
         case .sideDenim: .topSideDenim
         case .picnic: .setPicnicTop
         case .rain: .setRainTop
+        case .mintTie: .weeklyHairMintPony
+        case .bearBlanket: .weeklyBlanketBear
+        case .succulent: .weeklyRoomSucculent
+        case .cherryClip: .weeklyHairCherryPony
+        case .starTie: .weeklyHairStarPony
+        case .cloud: .weeklyRoomCloud
+        case .nightlight: .weeklyRoomNightlight
+        case .beanie: .weeklyHatBeanie
+        }
+    }
+
+    /// The parts that draw the item on her; a hair piece goes on her ponytail when `ponytail`, else on the clip
+    /// point on the right of her hair.
+    func parts(ponytail: Bool) -> Set<KuroPart> {
+        switch self {
+        case .mintTie: [ponytail ? .weeklyHairMintPony : .weeklyHairMintSide]
+        case .cherryClip: [ponytail ? .weeklyHairCherryPony : .weeklyHairCherrySide]
+        case .starTie: [ponytail ? .weeklyHairStarPony : .weeklyHairStarSide]
+        case .nightlight: [.weeklyRoomNightlightGlow, .weeklyRoomNightlight]
+        case .beanie: [.weeklyHatBeanie, .weeklyHatBeaniePom]
+        default: [part]
         }
     }
 
@@ -82,12 +125,16 @@ public enum KuroItem: String, CaseIterable, Sendable {
         }
     }
 
-    /// The part of her look the item takes the place of, if any.
-    var replaces: KuroPart? {
+    // One thing on her lap and one on the floor: the cushion is hugged over a blanket, and the succulent takes
+    // the tennis bag's spot.
+    /// The parts the item takes the place of.
+    var replaces: Set<KuroPart> {
         switch self {
-        case .sakura: .tennisHeadband
-        case .goldRacket: .tennisRacket
-        default: nil
+        case .sakura: [.tennisHeadband]
+        case .goldRacket: [.tennisRacket]
+        case .cloud: [.itemBlanket, .weeklyBlanketBear]
+        case .succulent: [.itemFlower, .itemBag]
+        default: []
         }
     }
 
@@ -147,6 +194,8 @@ public struct KuroItemIcon: View {
     /// The parts that picture `item`.
     nonisolated static func parts(_ item: KuroItem) -> [KuroPart] {
         if let clothes = item.clothes { return [clothes.top] + (clothes.hat.map { [$0] } ?? []) }
+        if item == .nightlight { return [.weeklyRoomNightlightGlow, .weeklyRoomNightlight] }
+        if item == .beanie { return [.weeklyHatBeanie, .weeklyHatBeaniePom] }
         guard item == .spin else { return [item.part] }
         return [.hairBack, .earL, .earR, .faceBase, .blush, .eyesHappy, .mouthCat, .hairFringe, .catEars, .itemSpin]
     }

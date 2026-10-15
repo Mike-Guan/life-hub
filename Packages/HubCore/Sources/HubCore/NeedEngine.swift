@@ -256,6 +256,8 @@ public struct NeedSignals: Equatable, Sendable {
     public var sit: SitState?
     /// The current mode, for the needs that depend on it.
     public var mode: Mode?
+    /// Start of the hub day of the last workout other than a run, for when `workouts` can't be read.
+    public var trainedDay: Date?
 
     public init(
         scrollThresholdAt: Date? = nil,
@@ -271,7 +273,8 @@ public struct NeedSignals: Equatable, Sendable {
         slackThresholdAt: Date? = nil,
         slackSeenAt: Date? = nil,
         sit: SitState? = nil,
-        mode: Mode? = nil
+        mode: Mode? = nil,
+        trainedDay: Date? = nil
     ) {
         self.scrollThresholdAt = scrollThresholdAt
         self.scrollSeenAt = scrollSeenAt
@@ -287,6 +290,7 @@ public struct NeedSignals: Equatable, Sendable {
         self.slackSeenAt = slackSeenAt
         self.sit = sit
         self.mode = mode
+        self.trainedDay = trainedDay
     }
 }
 
@@ -539,7 +543,9 @@ public enum NeedEngine {
         guard now >= start, now < end else { return nil }
         let midnight = calendar.startOfDay(for: now)
         let boxedToday = signals.workouts.contains { $0.kind == .boxing && $0.end >= midnight }
-        guard !boxedToday else { return nil }
+        // The Screen Time extension only knows the day of the last workout, so any workout today counts there.
+        let trainedToday = (signals.trainedDay ?? .distantPast) >= StateEngine.dayStart(for: now, calendar: calendar)
+        guard !boxedToday, !trainedToday else { return nil }
         return NeedReading(need: .boxingWarmup, since: start, reasons: [boxingReason(rules.persona)], until: end)
     }
 
@@ -566,7 +572,8 @@ public enum NeedEngine {
         let midnight = calendar.startOfDay(for: now)
         if let seen = signals.fitnessSeenAt, seen >= midnight { return nil }
         let trained = signals.workouts.contains { $0.kind != .running && $0.end >= midnight }
-        guard !trained else { return nil }
+        let trainedToday = (signals.trainedDay ?? .distantPast) >= StateEngine.dayStart(for: now, calendar: calendar)
+        guard !trained, !trainedToday else { return nil }
         return NeedReading(need: .gymDay, since: start, reasons: ["健身日，包我背好了"], until: end)
     }
 
