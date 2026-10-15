@@ -133,6 +133,25 @@ struct KuroPose: Sendable {
     var idleProgress = 0.0
     /// The home scene she is playing, if any: the invite, a walk or the bath.
     var scene: KuroScene?
+    /// How bright the nightlight's glow is, 0...1.
+    var glow = KuroPose.restingGlow
+    /// How far the beanie's pom leans, in degrees.
+    var pom = 0.0
+
+    /// The nightlight's glow when it holds still, as on widgets, the always-on screen and with reduced motion.
+    static let restingGlow = 0.4
+
+    // UI 五组 2026-10-15 (after UI 审核 found 0.55 to 0.9 on the old baked 0.35 too faint to see move).
+    /// The nightlight's glow at `time`: from 0.2 to 0.65 and back every 3 s, easing in and out.
+    static func glow(at time: TimeInterval) -> Double {
+        0.425 - 0.225 * cos(time * 2 * .pi / 3)
+    }
+
+    // UI 五组 Sunday items r1: the beanie moves with her head and its pom sways ±4°.
+    /// The beanie's pom lean at `time`: 4° each way every 2.4 s.
+    static func pom(at time: TimeInterval) -> Double {
+        4 * sin(time * 2 * .pi / 2.4)
+    }
 
     /// The resting pose for `look` at `energy` (0-100, or nil when unknown); `bedtime` makes her sleepy.
     init(look: KuroLook, energy: Double?, bedtime: Bedtime = .off) {
@@ -150,6 +169,14 @@ struct KuroPose: Sendable {
         case .mid:
             eyes = look == .tennis ? .bright : look == .desk ? .down : .open
         }
+    }
+
+    /// The same pose with the nightlight's glow at `glow` and the beanie's pom leaning `pom` degrees.
+    func glowing(_ glow: Double, pom: Double = 0) -> KuroPose {
+        var pose = self
+        pose.glow = glow
+        pose.pom = pom
+        return pose
     }
 
     /// The same pose with `eyes`.
@@ -181,16 +208,19 @@ struct KuroPose: Sendable {
 struct KuroFigure: View {
     let look: KuroLook
     let pose: KuroPose
-    /// Leaves off what stands on the floor, which the watch's bottom edge cuts.
+    /// Holds her props higher and leaves off what sits on the floor or her lap, so the watch's bottom edge cuts
+    /// nothing.
     var watch = false
 
     var body: some View {
         let parts = Self.parts(for: look, pose: pose, watch: watch)
         let hatted = parts.contains(.setPicnicHat) || parts.contains(.setRainHat)
+        let beanie = parts.contains(.weeklyHatBeanie)
         ZStack {
             ForEach(parts, id: \.self) { part in
                 KuroPartView(
-                    part: part, shift: Self.offset(part, pose: pose, hatted: hatted), turn: Self.turn(part, pose: pose)
+                    part: part, shift: Self.offset(part, pose: pose, hatted: hatted, beanie: beanie),
+                    turn: Self.turn(part, pose: pose)
                 )
                 .opacity(Self.opacity(part, pose: pose))
             }
@@ -201,7 +231,8 @@ struct KuroFigure: View {
         .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
     }
 
-    /// Visible parts in back-to-front order; `watch` leaves off what stands on the floor.
+    /// Visible parts in back-to-front order; `watch` swaps her low props for the raised watch ones and leaves off
+    /// what sits on the floor or her lap.
     nonisolated static func parts(for look: KuroLook, pose: KuroPose, watch: Bool = false) -> [KuroPart] {
         var visible: Set<KuroPart> = [.hairBack, .earL, .earR, .faceBase, .hairFringe, .catEars]
         visible.formUnion(outfit(look))
@@ -228,10 +259,10 @@ struct KuroFigure: View {
                 pose.tired || pose.calm ? .mouthFlat : Self.smiling.contains(look) ? .mouthSmile : .mouthCat
             visible.insert(pose.mouthO ? .mouthO : mouth)
         }
-        for item in pose.items where item.look == look && item.clothes == nil {
-            visible.insert(item.part)
-            if let replaced = item.replaces { visible.remove(replaced) }
-        }
+        let shown = pose.items.filter { $0.clothes == nil && $0.shows(in: look) }
+        let ponytail = visible.contains(.tennisPonytail)
+        for item in shown { visible.formUnion(item.parts(ponytail: ponytail)) }
+        for item in shown { visible.subtract(item.replaces) }
         pose.scene?.dress(look, items: pose.items, &visible)
         if let tap = pose.tap {
             apply(tap, progress: pose.tapProgress, to: &visible)
@@ -249,8 +280,11 @@ struct KuroFigure: View {
         if let clothes = worn.lazy.compactMap(\.clothes).first {
             dress(look, in: clothes, back: pose.tap == .turnAway, &visible)
         }
-        // UI 审核 2026-10-14 (位置规划图 §12): the watch draws nothing on the floor.
-        if watch { visible.remove(.danceSpeaker) }
+        // 位置规划图 §10-2: the beanie needs her cat ears to sit between, so a set hat or the bath towel takes it off.
+        if visible.contains(.setPicnicHat) || visible.contains(.setRainHat) || !visible.contains(.catEars) {
+            visible.subtract([.weeklyHatBeanie, .weeklyHatBeaniePom])
+        }
+        if watch { raise(&visible) }
         return KuroPart.allCases.filter { visible.contains($0) }
     }
 
@@ -289,23 +323,65 @@ struct KuroFigure: View {
     // by 2 pt, and its small dots stay off her cat ears.
     /// How far her "…" thought bubble moves when she wears a set hat, in SVG units.
     nonisolated static let hattedDots = CGSize(width: -6, height: -16.5)
+    // The beanie's pom stands where the set hats' bubble goes, so the bubble moves right of it instead.
+    /// How far her "…" thought bubble moves when she wears the beanie, in SVG units.
+    nonisolated static let beanieDots = CGSize(width: 16, height: -9)
+    // UI 一组 位置规划图 F11 (after UI 审核 2026-10-15): both set hats' brims ran under her two full-energy stars.
+    // Both stars share one part and the left one has no room further out, so they go up: 14 clears both brims and
+    // her raised cat ears by 2 pt.
+    /// How far her full-energy stars move when she wears a set hat, in SVG units.
+    nonisolated static let hattedStars = CGSize(width: 0, height: -14)
 
-    /// How far `part` moves from where the SVG draws it, in SVG units; full energy raises her ears a little, and
-    /// her thought bubble moves above a set hat when `hatted`.
-    nonisolated static func offset(_ part: KuroPart, pose: KuroPose, hatted: Bool = false) -> CGSize {
-        let moved = shift(part, pose: pose)
+    // UI 五组 Sunday items r1: hair pieces are static and move with her head.
+    /// The hair a hair piece is worn on, which it moves with.
+    nonisolated private static let wornOn: [KuroPart: KuroPart] = [
+        .itemScrunchie: .tennisPonytail, .weeklyHairMintPony: .tennisPonytail, .weeklyHairCherryPony: .tennisPonytail,
+        .weeklyHairStarPony: .tennisPonytail, .weeklyHairMintSide: .hairFringe, .weeklyHairCherrySide: .hairFringe,
+        .weeklyHairStarSide: .hairFringe,
+    ]
+
+    /// How far `part` moves from where the SVG draws it, in SVG units; a hair piece moves with its hair, full
+    /// energy raises her ears a little, and her thought bubble and stars move clear of a set hat when `hatted`, the
+    /// bubble also of the beanie when `beanie`.
+    nonisolated static func offset(
+        _ part: KuroPart, pose: KuroPose, hatted: Bool = false, beanie: Bool = false
+    ) -> CGSize {
+        let moved = shift(wornOn[part] ?? part, pose: pose)
         let lift: CGFloat = pose.full && part == .catEars ? 3 : 0
-        let dots = hatted && part == .tapDots ? hattedDots : .zero
-        return CGSize(width: moved.width + dots.width, height: moved.height - lift + dots.height)
+        var clear = CGSize.zero
+        if part == .tapDots { clear = beanie ? beanieDots : hatted ? hattedDots : .zero }
+        if part == .sparkle, hatted { clear = hattedStars }
+        return CGSize(width: moved.width + clear.width, height: moved.height - lift + clear.height)
     }
 
     /// The looks in her sportswear, where she smiles.
     nonisolated private static let smiling: Set<KuroLook> = [.tennis, .fitness, .dance, .ski]
 
-    /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out.
+    /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out. The nightlight's glow is
+    /// `pose.glow`.
     nonisolated static func opacity(_ part: KuroPart, pose: KuroPose) -> Double {
+        if part == .weeklyRoomNightlightGlow { return pose.glow }
         guard pose.tap == nil, let idle = pose.idle else { return 1 }
         return idle.opacity(part, progress: pose.idleProgress)
+    }
+
+    // UI 审核 2026-10-14 (direction 2): the watch crop cuts her low props, so on the watch she holds each one
+    // higher instead of the face getting smaller. The pen, stylus and badge have no room there and stay off.
+    // UI 审核 2026-10-14 (位置规划图 §12): the watch draws nothing on the floor or on her lap; its bottom edge
+    // leaves only a scrap of them.
+    /// Swaps each low prop in `visible` for its raised watch version and hides what sits on the floor or her lap.
+    nonisolated private static func raise(_ visible: inout Set<KuroPart>) {
+        let raised: [KuroPart: KuroPart] = [
+            .tennisRacket: .watchRacket, .deskBooks: .watchBooks, .chillCup: .watchCup, .workTablet: .watchTablet,
+        ]
+        for (low, high) in raised where visible.contains(low) {
+            visible.remove(low)
+            visible.insert(high)
+        }
+        visible.subtract([
+            .deskPen, .workStylus, .workBadge, .itemFlower, .itemLamp, .itemBlanket, .danceSpeaker,
+            .weeklyRoomSucculent, .weeklyBlanketBear, .weeklyRoomCloud,
+        ])
     }
 
     /// The parts only `look` wears.
@@ -424,6 +500,8 @@ struct KuroPartView: View {
 /// KURO with an idle loop for her look; energy picks her face and a tap gets a line.
 public struct KuroView: View {
     let look: KuroLook
+    /// The identity card she wears `look` for, if any; a card without a look of its own still adds its base moves.
+    let card: IdentityKind?
     let energy: Double?
     let bedtime: Bedtime
     let need: CompanionNeed?
@@ -497,6 +575,7 @@ public struct KuroView: View {
 
     /// - Parameters:
     ///   - look: what she wears.
+    ///   - card: the identity card she wears `look` for, if any.
     ///   - energy: energy 0-100, or nil when unknown. Below 30 she looks tired; from 70 she looks bright.
     ///   - bedtime: `.on` makes her sleepy and slows her to a breath.
     ///   - need: what the user needs, which picks her lines.
@@ -521,6 +600,7 @@ public struct KuroView: View {
     ///   - onBathDone: called after she shows the towel round her head on a tap during bath time.
     public init(
         look: KuroLook,
+        card: IdentityKind? = nil,
         energy: Double? = nil,
         bedtime: Bedtime = .off,
         need: CompanionNeed? = nil,
@@ -541,6 +621,7 @@ public struct KuroView: View {
         onBathDone: (() -> Void)? = nil
     ) {
         self.look = look
+        self.card = card
         self.energy = energy
         self.bedtime = bedtime
         self.need = need
@@ -603,10 +684,14 @@ public struct KuroView: View {
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 // Her small idle moves play only in the plain idle.
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
-                let fidget = busy ? nil : KuroIdle.at(idleTime, look: look)
+                let fidget = busy ? nil : KuroIdle.at(idleTime, look: look, card: card)
+                let shown = still || tap != nil ? pose : pose.blink(at: time).idling(fidget)
                 ZStack {
                     KuroFigure(
-                        look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget),
+                        look: look,
+                        pose: still
+                            ? shown.glowing(KuroPose.restingGlow)
+                            : shown.glowing(KuroPose.glow(at: time), pom: KuroPose.pom(at: time)),
                         watch: style == .watch
                     )
                     .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
@@ -1118,7 +1203,10 @@ public struct KuroView: View {
 
     nonisolated static func accessibilityLabel(_ look: KuroLook, bedtime: Bedtime, pose: KuroPose? = nil) -> String {
         if bedtime == .on { return "KURO，困了" }
-        if let pose, pose.overtime { return pose.sign.map { "KURO，托着腮等到 \($0)" } ?? "KURO，托着腮等着" }
+        if let pose, pose.overtime {
+            return pose.sign.map { String(format: "KURO，托着腮等到 %@".localized(for: .kuro), $0) }
+                ?? "KURO，托着腮等着".localized(for: .kuro)
+        }
         return switch look {
         case .work: "KURO，在忙"
         case .chill: "KURO，捧着热饮"

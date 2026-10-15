@@ -37,7 +37,7 @@ final class DailyLink {
             isOn = true
             await read()
         } catch {
-            lastError = "联动 Daily 失败：\(error.localizedDescription)"
+            lastError = String(format: "联动 Daily 失败：%@".localized, error.localizedDescription)
         }
     }
 
@@ -68,7 +68,7 @@ final class DailyLink {
             noteDone(DailyAgenda.occurrences(read, now: .now))
             lastError = nil
         case .failure(let error):
-            lastError = "读不到 Daily 的文件夹：\(error.localizedDescription)"
+            lastError = String(format: "读不到 Daily 的文件夹：%@".localized, error.localizedDescription)
         }
         if stale, let fresh = try? Self.bookmark(for: folder) {
             AppGroup.defaults.set(fresh, forKey: Self.bookmarkKey)

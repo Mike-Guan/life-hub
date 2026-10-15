@@ -53,6 +53,10 @@ public struct CompanionView: View {
     let wardrobe: Wardrobe
     let style: CompanionStyle
     let showsBubble: Bool
+    // C19 (动作展示总表): a second HAKU, in a sheet or the first-run setup, would use up the home screen's
+    // once-a-night "还不睡。" and the look up after half a day away.
+    /// Whether HAKU plays the app-open notice turn and keeps the shared record of when the app was last seen.
+    let notices: Bool
     /// Called after HAKU reacts to a tap, for example to switch the 副业 state.
     let onTap: (() -> Void)?
     /// Called once the welcome back scene ends or is skipped with a tap.
@@ -170,6 +174,7 @@ public struct CompanionView: View {
         wardrobe: Wardrobe = Wardrobe(),
         style: CompanionStyle = .standard,
         showsBubble: Bool = true,
+        notices: Bool = true,
         onTap: (() -> Void)? = nil,
         onBathDone: (() -> Void)? = nil,
         onWelcomeDone: (() -> Void)? = nil
@@ -196,6 +201,7 @@ public struct CompanionView: View {
         self.wardrobe = wardrobe
         self.style = style
         self.showsBubble = showsBubble
+        self.notices = notices
         self.onTap = onTap
         self.onBathDone = onBathDone
         self.onWelcomeDone = onWelcomeDone
@@ -250,7 +256,7 @@ public struct CompanionView: View {
             if welcomeStart == nil { say(nil) }
         }
         .onAppear {
-            startNotice()
+            if notices { startNotice() }
             startStretchUp()
             startPackUp()
             startCue()
@@ -272,12 +278,12 @@ public struct CompanionView: View {
         .onChange(of: daily) { _, _ in startCue() }
         .onChange(of: scenePhase) { _, new in
             if new == .active {
-                startNotice()
+                if notices { startNotice() }
                 startStretchUp()
                 startPackUp()
                 startCue()
             }
-            if new == .background { lastSeen = Date.now.timeIntervalSinceReferenceDate }
+            if new == .background, notices { lastSeen = Date.now.timeIntervalSinceReferenceDate }
         }
         .onChange(of: moment) { _, _ in
             startPackUp()
@@ -287,6 +293,10 @@ public struct CompanionView: View {
         }
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
+        }
+        // C13 (动作展示总表): leaving the office lets go of the held off-work pose, also before the mode changes.
+        .onChange(of: walking) { _, new in
+            if new == .office, offWork(at: Date.now.timeIntervalSinceReferenceDate) == nil { offWorkStart = nil }
         }
         .onChange(of: nods) { _, _ in nodStart = .now }
         .onChange(of: asleep) { _, new in
@@ -320,7 +330,9 @@ public struct CompanionView: View {
                     // HAKU-04: a new bit at home starts with a quick squash instead of parts just swapping.
                     let turn = reduceMotion ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
                     let posed = pose(mode, life: life, time: time, react: react)
-                    let dressed = posed.dressed(for: card, in: mode, watch: style == .watch)
+                    let dressed = posed.dressed(
+                        for: card, in: mode, watch: style == .watch, time: reduceMotion ? nil : time
+                    )
                     RunnerFigure(mode: mode, pose: glance(dressed.wearing(wardrobeOutfit).leaving(traces)))
                         .saturation(vitals.saturation)
                         .brightness(vitals.brightness)
@@ -473,7 +485,7 @@ public struct CompanionView: View {
         }
         // HAKU-02 (UI 审核 2026-10-13): once it has played, the off-work pose holds until the mode really changes,
         // instead of putting the headset back on.
-        if mode == .work, let start = offWorkStart?.timeIntervalSinceReferenceDate, time >= start {
+        if Self.holdsOffWork(since: offWorkStart, mode: mode, at: Date(timeIntervalSinceReferenceDate: time)) {
             return RunnerPose.offWork(time: time, progress: 1, face: face)
         }
         if let progress = stayHome(at: time) {
@@ -523,6 +535,7 @@ public struct CompanionView: View {
             life: life,
             activity: activity,
             moment: shownMoment,
+            card: card,
             react: react
         )
         pose.codingCans = codingCans
@@ -530,10 +543,15 @@ public struct CompanionView: View {
         if stage == .peeking { pose.peekAtBag(time: time) }
         if stage == .up { pose.bagLift = 1 }
         if let progress = Self.progress(since: swapStart, at: time, duration: Self.swapDuration) {
-            // Switching state: a quick burst of sparkles over the squash.
+            // Switching state: a quick burst of sparkles over the squash. C17 (动作展示总表): only the sparkles,
+            // so the peace sign, the dumbbell reps and the card's props stay with real celebrations.
             pose.burst = CGFloat(progress)
+            pose.swapping = true
         }
-        if let progress = lifeSwap(mode, life: life, at: time) { pose.burst = CGFloat(progress) }
+        if let progress = lifeSwap(mode, life: life, at: time) {
+            pose.burst = CGFloat(progress)
+            pose.swapping = true
+        }
         if let commute, daily?.scene == nil, activity == nil {
             pose.commute(commute, time: CGFloat(time))
         } else if let walking, daily?.scene == nil, activity == nil {
@@ -638,6 +656,14 @@ public struct CompanionView: View {
                     closeUp = false
                 }
             }
+    }
+
+    /// Whether the off-work pose that played from `start` still holds at `date` in `mode`: in work mode, the same day.
+    nonisolated static func holdsOffWork(
+        since start: Date?, mode: Mode, at date: Date, calendar: Calendar = .current
+    ) -> Bool {
+        guard mode == .work, let start, date >= start else { return false }
+        return calendar.isDate(start, inSameDayAs: date)
     }
 
     /// Starts the notice turn as the app opens, as a slow look up when the app was closed for half a day.

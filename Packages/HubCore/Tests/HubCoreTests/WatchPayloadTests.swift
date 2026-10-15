@@ -139,4 +139,13 @@ import Testing
         sent.cards = ModeCards(identity: .tennis)
         #expect(sent.card(for: .boxing) == nil)
     }
+
+    @Test func dropsTheLastSceneOnceTheScenesRunOut() {
+        let late = HomeScene(moment: .lateCoding)
+        var sent = payload()
+        sent.scenes = [TimedScene(from: date(7, 20), scene: HomeScene()), TimedScene(from: date(7, 22), scene: late)]
+        // The iPhone sent at 20:00 and worked out scenes until 23:00.
+        #expect(sent.scene(at: date(7, 23)) == late)
+        #expect(sent.scene(at: date(7, 23, 1)) == nil)
+    }
 }

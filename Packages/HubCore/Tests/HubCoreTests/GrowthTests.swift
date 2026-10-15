@@ -503,14 +503,14 @@ import Testing
         #expect(weekly.filter { !$0.isDrawn }.map(\.slot) == [.badge, .hat])
         let hers = ShopItem.catalog(for: .kuro).filter { $0.week != nil }
         #expect(hers.map(\.week) == Array(1...8))
-        #expect(hers.allSatisfy { !$0.isDrawn })
+        #expect(hers.allSatisfy { $0.isDrawn })
     }
 
     @Test func noWeeklyItemWithoutCansOrArt() throws {
         #expect(ShopItem.weekly(for: .haku, ledger: CanLedger(), now: at) == nil)
         let store = GrowthStore(fileURL: nil, deviceID: "t")
         store.record(.boxing, source: "old", at: at.addingTimeInterval(-60 * 86_400))
-        // HAKU's items are drawn; the second character's are not yet.
+        // Only HAKU has cans here, so only his rotation has started.
         #expect(ShopItem.weekly(for: .haku, ledger: store.ledger, now: at) != nil)
         #expect(ShopItem.weekly(for: .kuro, ledger: store.ledger, now: at) == nil)
     }

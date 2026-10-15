@@ -7,6 +7,8 @@ struct ShopView: View {
     let growth: GrowthStore
     @Binding var wardrobe: Wardrobe
     let persona: Persona
+    /// The current mode, for the unboxing.
+    var mode: Mode?
     @Environment(\.dismiss) private var dismiss
     @State private var buyError: String?
     @State private var unboxing: CanEntry?
@@ -57,7 +59,7 @@ struct ShopView: View {
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
         .fullScreenCover(item: $unboxing) { entry in
-            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
+            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona, mode: mode)
         }
     }
 
@@ -272,10 +274,10 @@ extension ShopItem.Keepsake {
 }
 
 extension IdentityKind {
-    // Until the card editor saves cards (#273), every install keeps its character's card from before.
+    // Launch saves the cards (ModeCards.adopt), so unreadable cards mean no card, never the character's old one.
     /// The identity card the user picked, `nil` when none.
     static func picked(for persona: Persona) -> IdentityKind? {
-        (ModeCards.stored(in: AppGroup.defaults) ?? .legacy(for: persona)).identity
+        ModeCards.current(in: AppGroup.defaults, persona: persona).identity
     }
 }
 
@@ -303,7 +305,8 @@ struct PersonaPortrait: View {
         if persona == .kuro {
             KuroPortrait(look: KuroLook(mode: mode, card: card), wearing: wardrobe.worn(in: mode))
         } else {
-            CompanionPortrait(mode: mode, card: card, wardrobe: wardrobe)
+            // C18 (动作展示总表): the shop and the wardrobe show the clothes, so no nap or handheld.
+            CompanionPortrait(mode: mode, card: card, wardrobe: wardrobe, idles: false)
         }
     }
 }

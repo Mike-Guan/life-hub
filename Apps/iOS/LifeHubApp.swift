@@ -277,13 +277,13 @@ struct LifeHubApp: App {
                 .interactiveDismissDisabled()
         }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
-            ShopView(growth: growth, wardrobe: $wardrobe, persona: persona)
+            ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
             WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, cards: cards)
         }
         .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in
-            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
+            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona, mode: store.current)
         }
         .onChange(of: persona) {
             persona.store(in: AppGroup.defaults)
@@ -367,7 +367,7 @@ struct LifeHubApp: App {
         do {
             try ScrollWatch.start(FamilyActivitySelection(), work: rules)
         } catch {
-            errors.append("Screen Time 监测没停：\(error.localizedDescription)")
+            errors.append(String(format: "Screen Time 监测没停：%@".localized, error.localizedDescription))
         }
         setupErrors = errors
         // Settings go back to their defaults; their onChange handlers store them and clear the geofences.
@@ -417,7 +417,7 @@ struct LifeHubApp: App {
         do {
             nights = try await HealthSleep.nights(from: since, to: .now)
         } catch {
-            healthError = "读不到健康 App 里的睡眠：\(error.localizedDescription)"
+            healthError = String(format: "读不到健康 App 里的睡眠：%@".localized, error.localizedDescription)
         }
         let replay = ReturnReplay.make(
             lastSeen: since,
@@ -608,7 +608,7 @@ struct LifeHubApp: App {
             return nil
         } catch {
             Dogfood.note("screenTime", "监测没启动：\(error.localizedDescription)")
-            return "Screen Time 监测没启动：\(error.localizedDescription)"
+            return String(format: "Screen Time 监测没启动：%@".localized, error.localizedDescription)
         }
     }
 
@@ -696,7 +696,7 @@ struct LifeHubApp: App {
             }
             healthError = nil
         } catch {
-            healthError = "读不到健康 App 里的睡眠：\(error.localizedDescription)"
+            healthError = String(format: "读不到健康 App 里的睡眠：%@".localized, error.localizedDescription)
         }
     }
 }

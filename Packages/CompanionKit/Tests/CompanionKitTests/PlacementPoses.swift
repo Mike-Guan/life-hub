@@ -205,6 +205,13 @@ enum PlacementPoses {
                     }
                 }
             }
+            // The look's own idle, every 0.1 s.
+            guard let length = RunnerCardLook(card: card)?.beatLength else { continue }
+            for step in 0..<Int(length * 10) {
+                var pose = RunnerPose(face: .mid).dressed(for: card, in: .boxing)
+                pose.cardBeat = CGFloat(step) / 10
+                all.append(Haku(label: "card.\(card.rawValue) beat \(pose.cardBeat)", mode: .boxing, pose: pose))
+            }
         }
         return all
     }
@@ -228,7 +235,9 @@ enum PlacementPoses {
                             states.append(("tap.\(tap).\(progress)", pose))
                         }
                     }
-                    for idle in KuroIdle.pool(look) {
+                    // Cards without a look of their own add their base moves to the tennis look.
+                    let pools = [KuroIdle.pool(look)] + IdentityKind.allCases.map { KuroIdle.pool(look, card: $0) }
+                    for idle in KuroIdle.allCases where pools.contains(where: { $0.contains(idle) }) {
                         for progress in [0.25, 0.5, 0.75] {
                             var pose = base
                             pose.idle = idle
