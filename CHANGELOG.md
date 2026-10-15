@@ -271,6 +271,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   chain when he hits it.
 - When HAKU puts the pillow behind his shoulder to lean on it, it now lands exactly where it rests, so it no
   longer jumps from his chest to behind his shoulder.
+- On small watches (40 and 41 mm) the second page fits its mode, energy and the character's line, and the
+  page dots no longer sit on the card's outline. VoiceOver reads each row as one item.
 - Both characters now dress for the picked identity card on the home screen, in widgets, in the notification
   and in onboarding, not only in the shop and wardrobe. On the home screen the second preset character also
   points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
