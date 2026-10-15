@@ -521,6 +521,54 @@
         }
       }
     },
+    "删掉" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
+          }
+        }
+      }
+    },
+    "删掉「%@」？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete “%@”?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%@」を削除しますか？"
+          }
+        }
+      }
+    },
+    "删掉以后，到这里不会再自动换模式。以前的记录还在。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After this, arriving here won't switch your mode. Past records stay."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除すると、ここに着いてもモードは自動で切り替わりません。これまでの記録は残ります。"
+          }
+        }
+      }
+    },
     "删掉所有判断和纠正？" : {
       "comment" : "E4",
       "localizations" : {
@@ -1494,6 +1542,38 @@
         }
       }
     },
+    "清除「%@」的位置？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear the location for “%@”?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%@」の位置をクリアしますか？"
+          }
+        }
+      }
+    },
+    "清除以后，到这里不会再自动换模式。随时可以再设。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After this, arriving here won't switch your mode. You can set it again anytime."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クリアすると、ここに着いてもモードは自動で切り替わりません。いつでも設定し直せます。"
+          }
+        }
+      }
+    },
     "灵魂可以先走。" : {
       "comment" : "HAKU 口气；中文“灵魂可以先走。”",
       "localizations" : {
@@ -1595,6 +1675,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Studio"
+          }
+        }
+      }
+    },
+    "留着" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "残す"
           }
         }
       }
