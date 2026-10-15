@@ -7,4 +7,6 @@ extension EnvironmentValues {
     /// Whether the companion views draw as with Reduce Motion on, or nil to follow the system setting.
     // The system value is read-only, so frame sheets set this to draw the reduced-motion frame.
     @Entry var frameReduceMotion: Bool?
+    /// Whether the companion view is kept in the view tree off screen, which stops its frame clock.
+    @Entry public var companionOffscreen = false
 }

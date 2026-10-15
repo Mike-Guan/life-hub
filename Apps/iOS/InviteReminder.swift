@@ -45,7 +45,8 @@ enum InviteReminder {
             content.body = NeedEngine.inviteText(
                 for: reading.need,
                 taskSoon: taskSoon(after: at),
-                persona: rules.persona
+                persona: rules.persona,
+                identity: rules.identity
             )
             content.sound = .default
             // Work-time notices have no 走 button.
@@ -129,7 +130,13 @@ enum InviteReminder {
         guard let reading, let sent = InviteLog.stored(in: AppGroup.defaults).lastSentAt else { return nil }
         guard sent >= reading.since else { return nil }
         let persona = Persona.stored(in: AppGroup.defaults)
-        return NeedEngine.inviteText(for: reading.need, taskSoon: taskSoon(after: sent), persona: persona)
+        let identity = (ModeCards.stored(in: AppGroup.defaults) ?? .legacy(for: persona)).identity
+        return NeedEngine.inviteText(
+            for: reading.need,
+            taskSoon: taskSoon(after: sent),
+            persona: persona,
+            identity: identity
+        )
     }
 
     /// Whether a Daily task starts within the hour after `date`.

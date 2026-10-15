@@ -58,6 +58,7 @@ public final class WidgetBridge {
         snapshot.need = need?.need
         snapshot.needSince = need?.since
         snapshot.needUntil = need?.until
+        snapshot.needPhone = need?.phone
         let done = ActivitySignals(workouts: workouts, calendar: calendar)
         snapshot.trainedDay = done.trainedDay
         snapshot.ranDay = done.ranDay

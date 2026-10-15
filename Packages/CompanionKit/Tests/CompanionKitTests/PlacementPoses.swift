@@ -205,12 +205,18 @@ enum PlacementPoses {
                     }
                 }
             }
-            // The look's own idle, every 0.1 s.
-            guard let length = RunnerCardLook(card: card)?.beatLength else { continue }
-            for step in 0..<Int(length * 10) {
-                var pose = RunnerPose(face: .mid).dressed(for: card, in: .boxing)
-                pose.cardBeat = CGFloat(step) / 10
-                all.append(Haku(label: "card.\(card.rawValue) beat \(pose.cardBeat)", mode: .boxing, pose: pose))
+            // The look's own idle and its base outfit's moves, every 0.1 s.
+            guard let look = RunnerCardLook(card: card) else { continue }
+            let idles: [RunnerBaseIdle?] = [nil] + RunnerBaseIdle.pool(look)
+            for idle in idles {
+                guard let length = idle.map({ Double($0.length) }) ?? look.beatLength else { continue }
+                for step in 0..<Int(length * 10) {
+                    var pose = RunnerPose(face: .mid).dressed(for: card, in: .boxing)
+                    pose.cardBeat = CGFloat(step) / 10
+                    pose.baseIdle = idle
+                    let name = idle.map { "\($0)" } ?? "beat"
+                    all.append(Haku(label: "card.\(card.rawValue) \(name) \(pose.cardBeat)", mode: .boxing, pose: pose))
+                }
             }
         }
         return all
