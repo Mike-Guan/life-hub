@@ -187,6 +187,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- The wardrobe opens on 下班 when the current mode has no button in the user's cards, and keepsake dates follow
+  the phone's language.
 - Leaving the office ends 上班 at any time, a lunch break too; coming back switches to 上班 again. Before, a
   leave earlier than an hour before the end of work hours kept 上班 until you got home.
 - Settings has a 上班日 row and a 身份卡 group. Each opens the same screen as the first-run setup, so work days
