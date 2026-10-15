@@ -156,6 +156,8 @@ struct RunnerPose {
     var burst: CGFloat = -1
     /// Whether `burst` is only the sparkles of a state swap, with no celebration props or moves.
     var swapping = false
+    /// How far the sparkles beside the headset sit below their place, in figure units.
+    var starDrop: CGFloat = 0
     /// The workout being celebrated, which picks the move and the props, such as gloves up or a helmet.
     var cheerKind: WorkoutSummary.Kind?
     /// Scroll position of the feed on the phone screen while couch scrolling, 0...1.
@@ -1928,7 +1930,7 @@ struct RunnerFigure: View {
                 // UI 审核 2026-10-13: with the headset on, the sparkles sit 2pt clear of its band on the watch.
                 RunnerPartView(part: part)
                     .scaleEffect(x: headband ? 1.16 : 1, y: 1, anchor: Self.unit(x: 60, y: 27))
-                    .offset(y: headband ? -14 * scale : 0)
+                    .offset(y: headband ? (pose.starDrop - 14) * scale : 0)
                     .scaleEffect(0.8 + 0.2 * pose.sparkle, anchor: Self.unit(x: 60, y: 27))
                     .opacity(pose.sparkle)
             case .ledYen:

@@ -327,6 +327,9 @@ import Testing
         #expect(CompanionView.bubbleRoom(style: .standard, showsBubble: false) == 0)
         #expect(CompanionView.bubbleRoom(style: .watch, showsBubble: true) == 0)
         #expect(CompanionView.bubbleRoom(style: .notification, showsBubble: true) == 0)
+        #expect(CompanionView.starDrop(style: .standard, showsBubble: true) == 8)
+        #expect(CompanionView.starDrop(style: .standard, showsBubble: false) == 0)
+        #expect(CompanionView.starDrop(style: .watch, showsBubble: true) == 0)
     }
 
     @Test func offWorkPlaysOncePerDay() {

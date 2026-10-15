@@ -620,6 +620,7 @@ public struct CompanionView: View {
     private func glance(_ pose: RunnerPose) -> RunnerPose {
         var pose = pose
         if style == .watch { pose.propLift = 1 }
+        if !closeUp { pose.starDrop = Self.starDrop(style: style, showsBubble: showsBubble) }
         pose.eyesDx += 4 * look
         pose.headTilt += 4 * Double(look)
         if closeUp { pose.eyesDy -= 1 }
@@ -664,6 +665,13 @@ public struct CompanionView: View {
     /// How far the figure sits below its usual place to leave room for the bubble at the top, in points.
     nonisolated static func bubbleRoom(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
         style == .standard && showsBubble ? 24 : 0
+    }
+
+    // D5 (UI 审核 10/15): with the figure 24 pt lower, the sparkles beside the headset still touched the bubble,
+    // and a Japanese line is about 13 pt taller. They drop to clear the bubble while staying off the band.
+    /// How far the sparkles beside the headset sit lower to clear the bubble, in figure units.
+    nonisolated static func starDrop(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
+        bubbleRoom(style: style, showsBubble: showsBubble) > 0 ? 8 : 0
     }
 
     /// Whether the off-work pose that played from `start` still holds at `date` in `mode`: in work mode, the same day.
