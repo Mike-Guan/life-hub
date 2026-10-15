@@ -441,7 +441,7 @@ import Testing
     }
 
     // Prices from the shop catalogue (2026-10-14): tops 30-40, full sets 80-90.
-    @Test func clothesFollowTheApprovedPricesAndStayOffTheShelfUntilDrawn() {
+    @Test func clothesFollowTheApprovedPricesAndOnlyHakusAreOnTheShelf() {
         for persona in Persona.allCases {
             let clothes = ShopItem.catalog(for: persona).filter { $0.mode != nil }
             #expect(Set(clothes.compactMap(\.mode)) == [.work, .chill, .money], "\(persona)")
@@ -449,9 +449,10 @@ import Testing
                 let range = item.slot == .fullSet ? 80...90 : 30...40
                 #expect(range.contains(item.price ?? 0), "\(item.id)")
                 #expect(item.slot == .top || item.slot == .fullSet)
-                #expect(!item.isDrawn)
+                #expect(item.isDrawn, "\(item.id)")
             }
-            #expect(ShopItem.catalog(for: persona, card: .boxing).allSatisfy { $0.mode == nil })
+            let onShelf = ShopItem.catalog(for: persona, card: .boxing).filter { $0.mode != nil }
+            #expect(onShelf.count == clothes.count, "\(persona)")
         }
     }
 
@@ -549,6 +550,15 @@ import Testing
         #expect(wardrobe.isWearing(mask))
         wardrobe.undress(.chill)
         #expect(!wardrobe.isWearing(aloha))
+    }
+
+    @Test func wornHasOnlyThatModesClothes() {
+        let wardrobe = Wardrobe(
+            equipped: [.mask: "mask.stripes"],
+            clothes: [.work: "kuro.top.work.blouse", .chill: "kuro.top.chill.cardigan"]
+        )
+        #expect(wardrobe.worn(in: .work) == ["mask.stripes", "kuro.top.work.blouse"])
+        #expect(wardrobe.worn(in: .money) == ["mask.stripes"])
     }
 
     @Test func anotherCardsItemsAreHiddenButKept() {

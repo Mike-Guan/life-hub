@@ -39,6 +39,17 @@ enum PlacementPoses {
                 }
             }
         }
+        // The clothes with extra parts (hood, charm, cap, cassette, strings), then the plain tops.
+        let sets: [(String, [Mode: String])] = [
+            (
+                "sets",
+                [.work: "haku.set.work.raincoat", .chill: "haku.set.chill.varsity", .money: "haku.top.side.arcade"]
+            ),
+            ("tops", [.work: "haku.top.work.blazer", .chill: "haku.top.chill.flame", .money: "haku.top.side.sukajan"]),
+        ]
+        for (label, clothes) in sets {
+            outfits.append((label, Outfit(Wardrobe(clothes: clothes))))
+        }
         return outfits
     }
 

@@ -300,7 +300,7 @@ struct PersonaPortrait: View {
 
     var body: some View {
         if persona == .kuro {
-            KuroPortrait(look: KuroLook(mode: mode), wearing: Set(wardrobe.equipped.values))
+            KuroPortrait(look: KuroLook(mode: mode), wearing: wardrobe.worn(in: mode))
         } else {
             CompanionPortrait(mode: mode, wardrobe: wardrobe)
         }

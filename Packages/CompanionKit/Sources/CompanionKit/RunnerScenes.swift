@@ -450,12 +450,17 @@ extension RunnerPose {
         var glow: Double = 0
         /// Height of the hand patting the seat, 0...1, or -1 when it isn't patting.
         var pat: CGFloat = -1
+        /// How far the props have been put away at the end, 0...1: they drop and fade out.
+        var exit: CGFloat = 0
     }
 
     /// HAKU `time` seconds into `scene`; the crate opens at `open`, or stays shut when nil. In `mode` work the
-    /// glance and the quiet scene play at the desk.
+    /// glance and the quiet scene play at the desk. A scene `length` seconds long eases HAKU back to rest over its
+    /// last 1.2 s and puts the props away over its last 0.3 s. A scene skipped at `skippedAt` does both over the
+    /// 0.3 s after it.
     static func welcome(
-        _ scene: WelcomeScene, time t: CGFloat, open: CGFloat?, face: EnergyFace, mode: Mode = .chill
+        _ scene: WelcomeScene, time t: CGFloat, open: CGFloat?, face: EnergyFace, mode: Mode = .chill,
+        length: CGFloat = .infinity, skippedAt: CGFloat? = nil
     ) -> RunnerPose {
         var pose = RunnerPose(face: face)
         // HAKU-17 (UI 审核 2026-10-08): opening the app at the office showed the sofa and blanket.
@@ -505,14 +510,27 @@ extension RunnerPose {
             w.phoneDrop = 14 * ease(ramp(t, from: 2.9, to: 3.2))
             if t > 3.2 { w.pat = abs(sin((t - 3.2) * .pi * 2.2)) }
         }
+        // HAKU-03 (UI 审核 2026-10-13): the scene used to cut to the idle pose in one frame. The body settles
+        // slowly enough to move at most about 2 pt a frame; the props drop and fade in the last 0.3 s.
+        // UI 审核 2026-10-13: a tap that skips the scene gets the same ending, over 0.3 s.
+        let skip = skippedAt.map { ease(ramp(t, from: $0, to: $0 + 0.3)) } ?? 0
+        if length.isFinite || skippedAt != nil {
+            let settle = max(length.isFinite ? ease(ramp(t, from: length - 1.2, to: length)) : 0, skip)
+            pose.bounce *= 1 - settle
+            pose.lean *= Double(1 - settle)
+            pose.shift *= 1 - settle
+            pose.headDy *= 1 - settle
+            pose.headTilt *= Double(1 - settle)
+            w.exit = max(length.isFinite ? ease(ramp(t, from: length - 0.3, to: length)) : 0, skip)
+        }
         pose.welcome = w
         return pose
     }
 }
 
 extension SceneMove {
-    /// The move of the phone, the hands holding it or the furniture in the welcome back scene, or nil when
-    /// `part` isn't one.
+    /// The move of the phone, the hands holding it, the furniture or the can in the welcome back scene, or nil
+    /// when `part` isn't one.
     static func welcome(_ part: RunnerPart, pose: RunnerPose) -> SceneMove? {
         guard let w = pose.welcome else { return nil }
         var move = SceneMove()
@@ -528,14 +546,23 @@ extension SceneMove {
             move.scaleY = abs(1 - 2 * f) * (1 - 0.4 * f) + 0.01
             move.anchor = anchor(59, 102)
             if part == .phoneFeed { move.opacity = Double(1 - 0.6 * pose.feed) }
+            move.offset.height += 8 * w.exit
+            move.opacity *= Double(1 - w.exit)
         case .phoneHand:
-            move.offset.height = w.phoneDrop + 22 * w.phoneFlip
-            move.opacity = Double(1 - w.phoneFlip)
+            move.offset.height = w.phoneDrop + 22 * w.phoneFlip + 8 * w.exit
+            move.opacity = Double((1 - w.phoneFlip) * (1 - w.exit))
         case .sofaArm, .desk:
             // The furniture stays put while HAKU leans and scoots.
-            move.offset = CGSize(width: -pose.shift, height: -pose.bounce)
+            move.offset = CGSize(width: -pose.shift, height: -pose.bounce + 8 * w.exit)
             move.angle = -pose.lean
             move.anchor = anchor(60, 140)
+            move.opacity = Double(1 - w.exit)
+        case .blanket:
+            move.offset.height = 8 * w.exit
+            move.opacity = Double(1 - w.exit)
+        case .monsterCan:
+            move.offset.height = 8 * (1 - w.exit)
+            move.opacity = Double(w.exit)
         default:
             return nil
         }
