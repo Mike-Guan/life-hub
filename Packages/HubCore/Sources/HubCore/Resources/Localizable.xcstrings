@@ -137,12 +137,18 @@
       }
     },
     "上班" : {
-      "comment" : "卡名；同一中文要两种译法，请工程把中文改得稍有不同",
+      "comment" : "模式名，宽 4",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Work"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仕事"
           }
         }
       }
@@ -159,22 +165,35 @@
       }
     },
     "下班" : {
-      "comment" : "同上；第二个预设角色的下班卡名；同一中文要两种译法，请工程把中文改得稍有不同",
+      "comment" : "模式名，宽 4",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chill"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オフ"
+          }
         }
       }
     },
     "乐器" : {
+      "comment" : "宽 4",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Music"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽器"
           }
         }
       }
@@ -274,11 +293,18 @@
       }
     },
     "健身" : {
+      "comment" : "宽 6",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gym"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筋トレ"
           }
         }
       }
@@ -428,12 +454,18 @@
       }
     },
     "副业" : {
-      "comment" : "副业卡名，见语气卡 §7",
+      "comment" : "模式名，宽 4；台词里按“自己的事”写",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Projects"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "副業"
           }
         }
       }
@@ -611,12 +643,18 @@
       }
     },
     "备课" : {
-      "comment" : "第二个预设角色的副业卡默认名（备课）",
+      "comment" : "第二个预设角色的副业默认名，宽 8",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prep"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "授業準備"
           }
         }
       }
@@ -773,11 +811,18 @@
       }
     },
     "户外" : {
+      "comment" : "身份卡名，宽 10，手表会截",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Outdoors"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アウトドア"
           }
         }
       }
@@ -824,22 +869,35 @@
       }
     },
     "拳击" : {
-      "comment" : "默认卡名。整句 “\\(title) \\(time) 开始” → “\\(title) starts at \\(time)”",
+      "comment" : "活动名（倒计时、地点名里用）",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Boxing"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボクシング"
+          }
         }
       }
     },
     "拳击日" : {
+      "comment" : "身份卡名，宽 10，手表会截",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Boxing"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボクシング"
           }
         }
       }
@@ -1010,22 +1068,35 @@
       }
     },
     "游泳" : {
-      "comment" : "同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "comment" : "宽 4",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Swimming"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "水泳"
+          }
         }
       }
     },
     "滑雪" : {
+      "comment" : "身份卡名，宽 14，手表会截",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ski"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキー・スノボ"
           }
         }
       }
@@ -1092,23 +1163,35 @@
       }
     },
     "球类" : {
-      "comment" : "球类：羽毛球、篮球、足球都在这",
+      "comment" : "宽 4",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sports"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "球技"
+          }
         }
       }
     },
     "瑜伽" : {
-      "comment" : "含普拉提",
+      "comment" : "宽 4",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yoga"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヨガ"
           }
         }
       }
@@ -1124,12 +1207,18 @@
       }
     },
     "画画手作" : {
-      "comment" : "画画手作",
+      "comment" : "身份卡名，宽 12，手表会截",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Art"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "描く・つくる"
           }
         }
       }
@@ -1238,12 +1327,18 @@
       }
     },
     "网球" : {
-      "comment" : "句中用，小写；同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "comment" : "活动名",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tennis"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テニス"
           }
         }
       }
@@ -1260,11 +1355,18 @@
       }
     },
     "网球日" : {
+      "comment" : "身份卡名，宽 6",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tennis"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テニス"
           }
         }
       }
@@ -1292,11 +1394,18 @@
       }
     },
     "自习" : {
+      "comment" : "宽 4",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Study"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "勉強"
           }
         }
       }
@@ -1376,11 +1485,18 @@
       }
     },
     "跳舞" : {
+      "comment" : "宽 6",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dance"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダンス"
           }
         }
       }

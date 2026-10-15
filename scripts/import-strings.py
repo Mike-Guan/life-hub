@@ -20,7 +20,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-TABLES = {"Haku", "Kuro", "Localizable"}
+TABLES = {"Haku", "Kuro", "Localizable", "Short"}
 # Source folder -> folder holding its catalogs. Apps/Shared builds into the iOS app.
 APPS = {
     "Apps/Shared": "Apps/iOS",
