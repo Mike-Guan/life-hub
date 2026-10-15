@@ -8,6 +8,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. Items go
   on sale once the character art draws them.
+- HAKU can dress for four more identity cards: tennis (visor, racket and ball), fitness (gym bag and a small
+  dumbbell), study (green jacket and an open book) and art (green jacket, apron, sketchbook and pencil).
+  The watch leaves the gym bag off the floor.
+  Boxing and the other cards keep the boxing kit. The home screen doesn't pass the picked card yet.
 - The second preset character's eight Sunday items and a plain back view of every top, for when she turns
   away, in her clothes layer file. Nothing in the app shows them yet.
 - A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
@@ -40,6 +44,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The shop catalogue has a prop colour and a gold prop (earned on the card's 10th win) for the other
+  first-batch identity cards of each character. They go on sale once the character art draws them; a gold prop
+  earned before its art is done is granted on the card's next win after that.
 - The shop catalogue has clothes for identity cards. Cards without an outfit of their own share one of three
   base outfits (sport, outing, craft), each with two tops to buy that every card on that base can wear; HAKU's
   boxing card and the second character's boxing and tennis cards have a top of their own. They go on sale once

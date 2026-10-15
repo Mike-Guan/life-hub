@@ -191,6 +191,21 @@ enum PlacementPoses {
                 }
             }
         }
+        // The identity card slot in each card look.
+        for card in IdentityKind.allCases where RunnerCardLook(card: card) != nil {
+            for face in faces {
+                for (state, pose) in hakuStates(face: face) {
+                    for (outfitLabel, outfit) in outfits {
+                        for (traceLabel, traces) in traceSets {
+                            let label = ["card.\(card.rawValue)", "\(face)", state, outfitLabel, traceLabel]
+                                .filter { !$0.isEmpty }.joined(separator: " ")
+                            let dressed = pose.dressed(for: card, in: .boxing).wearing(outfit).leaving(traces)
+                            all.append(Haku(label: label, mode: .boxing, pose: dressed))
+                        }
+                    }
+                }
+            }
+        }
         return all
     }
 
