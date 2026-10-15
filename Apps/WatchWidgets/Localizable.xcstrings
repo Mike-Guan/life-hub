@@ -20,6 +20,16 @@
           }
         }
       }
+    },
+    "还没有模式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No mode yet"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
