@@ -63,9 +63,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- In first-time setup, the Chill activities say how the app senses them as 定位 (location) instead of 地点, which
-  also named the places list. With languages on, those labels, the place names and the place editor title follow
-  the phone's language.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
@@ -126,6 +123,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
   fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
   own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- In first-time setup, the Chill activities say how the app senses them as 定位 (location) instead of 地点, which
+  also named the places list. With languages on, those labels, the place names and the place editor title follow
+  the phone's language.
 - The welcome back scene no longer ends with a cut: HAKU settles back over the last second and the sofa,
   blanket, phone and crate drop a little and fade out. A tap that skips it does the same over 0.3 s.
 - Tennis is her main card: she bounces the ball on a flat racket and spins the racket while idle, and a tap
