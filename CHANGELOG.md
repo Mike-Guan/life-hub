@@ -66,13 +66,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- Tapping an item's price in the shop shows the character wearing it first. Cans are spent only on the confirm
-  button, not on the first tap.
 - On another identity card's day, HAKU warms up without the boxing headband and gloves.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
+- Tapping an item's price in the shop shows the character wearing it first. Cans are spent only on the confirm
+  button, not on the first tap.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
   translation exists.
 - The shop no longer falls back to the character's old identity card when the saved cards can't be read.
