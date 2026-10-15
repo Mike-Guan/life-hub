@@ -1,7 +1,26 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
-
+    "打开 iPhone" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open iPhone"
+          }
+        }
+      }
+    },
+    "角色现在在干什么。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What your character is up to."
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }
