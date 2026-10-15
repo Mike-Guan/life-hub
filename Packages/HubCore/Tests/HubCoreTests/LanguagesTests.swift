@@ -22,4 +22,18 @@ import Testing
         #expect(Languages.isOn)
         #expect(Languages.locale.identifier == Locale.autoupdatingCurrent.identifier)
     }
+
+    @Test func weekStartsWhereThePhoneSays() {
+        #expect(Languages.weekCalendar(firstWeekday: 2).weekdaysInOrder == [2, 3, 4, 5, 6, 7, 1])
+        #expect(Languages.weekCalendar(firstWeekday: 1).weekdaysInOrder == [1, 2, 3, 4, 5, 6, 7])
+    }
+
+    @Test func weekdayNamesFollowTheSwitch() {
+        Languages.isOn = false
+        let chinese = Languages.weekCalendar(firstWeekday: 2)
+        // Index 1 is Monday.
+        #expect(chinese.veryShortWeekdaySymbols[1] == "一")
+        #expect(chinese.standaloneWeekdaySymbols[1] == "星期一")
+        #expect(Languages.weekCalendar().weekdaysInOrder.first == 2)
+    }
 }

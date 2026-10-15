@@ -64,6 +64,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - On another identity card's day, HAKU warms up without the boxing headband and gloves.
+- A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
+  and of the user's own identity card, unless the item only shows in another mode.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
@@ -87,6 +89,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   base outfits (sport, outing, craft), each with two tops to buy that every card on that base can wear; HAKU's
   boxing card and the second character's boxing and tennis cards have a top of their own. They go on sale once
   the character art draws them.
+- With languages on, the work-day buttons in first-time setup show the phone language's weekday letters and
+  start the week where the phone's calendar does. In Chinese they still run Monday to Sunday. They also fit
+  narrow phones.
 - The second preset character's 6 tops and 2 full sets are on sale. She wears the one of the mode she is in,
   on the home screen, the shop, the wardrobe, unboxing, widgets and the watch.
 - When HAKU switches between idle scenes, only the sparkles show. The peace sign, the dumbbell reps and the
@@ -117,6 +122,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
   room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
   back puts them on again. The wardrobe screen moves to these groups in a separate change.
+- In the wardrobe, item names can take two lines, and a long shelf name (Accessories) shrinks to fit its tab
+  instead of breaking inside the word.
 - The wardrobe screen picks a mode first, then shows four tabs: clothes, accessories, props (only in the identity
   card's mode) and room. Celebrations are the last group of accessories. Keepsakes not yet earned no longer show.
 - The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
@@ -171,6 +178,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   for time in daylight in Health. Only the win is kept, never the daylight or sleep times.
 - With the fitness card picked, a visit to the fitness gym earns the card's weekly cans, the same as a
   strength workout, so one session no longer pays twice.
+- 删掉所有记忆 is greyed out and can't be tapped when there is nothing to forget.
 - On the smallest watch, a long mode name in the clock row shrinks to fit instead of running into the clock.
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
