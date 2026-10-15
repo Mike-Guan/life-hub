@@ -63,6 +63,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- On another identity card's day, HAKU warms up without the boxing headband and gloves.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
   translation exists.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
