@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
 - The home prototype's room is now rendered in Blender: soft sofa and bed, wood floor, real light and shadows,
   a night version lit by the lamps and the vending machine, and the room floats on the page with a hard shadow.
   A sports corner holds the standing bag, a bench (25 cans, any card) and a snowboard (20 cans, ski card). Gloves
