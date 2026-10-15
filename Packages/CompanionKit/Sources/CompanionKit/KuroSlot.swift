@@ -31,7 +31,7 @@ enum KuroSlot: CaseIterable, Sendable {
             case .overtime:
                 guard look != .work else { return nil }
                 self = .tired
-            case .drowsy, .collapsed, .lateCoding, .stiff, .morning, .blanket: self = .tired
+            case .drowsy, .collapsed, .lateCoding, .stiff, .morning, .blanket, .dozing: self = .tired
             case .slacking, .vibeCoding, .flow, .shooting: self = .focus
             case .gymInvite, .timeToLeave, .heading: self = .invite
             case .packingUp: self = .packingUp
