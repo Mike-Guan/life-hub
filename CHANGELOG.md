@@ -478,6 +478,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- Unboxing a top or full set shows HAKU in the mode it is worn in, not always off work.
 - The wardrobe keeps what a newer build put on (new slots or modes) instead of losing the whole wardrobe,
   and writes it back when saving.
 - Watch: the app opens without the system killing it (a hand-made pager replaces the vertical page view),
