@@ -120,7 +120,7 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
     public func lines(for persona: Persona) -> [String] {
         let lines: (haku: [String], kuro: [String])
         switch self {
-        case .boxing: lines = (["……别碰，手带刚缠好。", "打完再说。", "拳套有点味道。不是我的问题。"], ["……别闹。", "等一下，在系。", "……你看什么。"])
+        case .boxing: lines = (["……别碰，手带刚缠好。", "打完再说。", "拳套有点味道。不是我的问题。"], ["……真是的。", "等一下，在系。", "……你看什么。"])
         case .tennis: lines = (["球拍比我想的重。还是重。", "……别抢。", "捡球的不是我。"], ["……拍子别碰。", "等我颠完。", "……嗯。"])
         case .fitness: lines = (["……我数，你练。", "……这个不重。", "别看我，看镜子。"], ["……我在这儿。", "数到几了？", "……慢点。"])
         case .study: lines = (["安静。", "……这页我看过了。", "你看你的，我看我的。"], ["……嘘。", "这里有点难。", "……翻一页。"])
@@ -309,7 +309,7 @@ public struct ModeCards: Codable, Equatable, Sendable {
     public func title(for mode: Mode, persona: Persona) -> String {
         if let name = names[mode.rawValue] { return name }
         if mode == .boxing, let identity { return identity.title }
-        return mode.title(for: persona)
+        return mode.title(for: persona).localized
     }
 
     /// The identity slot's activity for sentences, without 日: the picked card's, else the character's default.
@@ -387,6 +387,18 @@ public struct ModeCards: Codable, Equatable, Sendable {
         unknownSideStates = []
         sideStatesFilledIn = false
         return true
+    }
+
+    // 活动分类 v1: one activity sits on one card, so the fitness card takes 健身 out of Chill and gives it back
+    // when another card replaces it.
+    /// Picks `kind` as the identity card, or none for `nil`. Records made with the old card are kept.
+    /// - Returns: `true` when 健身 moved out of Chill into the fitness card.
+    @discardableResult
+    public mutating func pickIdentity(_ kind: IdentityKind?) -> Bool {
+        if identity == .fitness, kind != .fitness { chill.insert(.fitness) }
+        identity = kind
+        guard kind == .fitness else { return false }
+        return chill.remove(.fitness) != nil
     }
 
     /// The 副业 state after `state` when the user taps the character. A state not picked goes to the first.

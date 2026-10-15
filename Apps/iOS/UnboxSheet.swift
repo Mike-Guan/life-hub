@@ -74,7 +74,7 @@ struct UnboxSheet: View {
                 wardrobe = wearing
                 dismiss()
             } label: {
-                Text("现在戴上")
+                Text(buttons.use)
                     .font(Toy.body(18, weight: .black))
                     .foregroundStyle(Toy.ink)
                     .frame(maxWidth: .infinity, minHeight: 56)
@@ -83,7 +83,7 @@ struct UnboxSheet: View {
             Button {
                 dismiss()
             } label: {
-                Text("先放衣柜")
+                Text(buttons.keep)
                     .font(Toy.body(16, weight: .black))
                     .frame(maxWidth: .infinity, minHeight: 48)
             }
@@ -113,6 +113,16 @@ struct UnboxSheet: View {
         var copy = wardrobe
         copy.equip(item)
         return copy
+    }
+
+    // PM 10-15: a room item isn't worn and a celebration is played, so the buttons say what happens to each.
+    /// The two button titles for the item's kind.
+    private var buttons: (use: LocalizedStringKey, keep: LocalizedStringKey) {
+        switch item.slot {
+        case .room: ("现在摆上", "先收起来")
+        case .celebration: ("现在用上", "先放衣柜")
+        default: ("现在戴上", "先放衣柜")
+        }
     }
 
     private var subtitle: String {

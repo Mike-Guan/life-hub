@@ -93,6 +93,8 @@ public struct HomeSceneInputs {
     public var invite: String?
     /// How Mike moved since leaving home or the office.
     public var motion: [MotionSample]
+    /// Start of the current stretch without walking, `nil` when unknown.
+    public var stillSince: Date?
 
     public init(
         log: ModeLog,
@@ -107,7 +109,8 @@ public struct HomeSceneInputs {
         scrollSeenAt: Date? = nil,
         daily: DailyPlan? = nil,
         invite: String? = nil,
-        motion: [MotionSample] = []
+        motion: [MotionSample] = [],
+        stillSince: Date? = nil
     ) {
         self.log = log
         self.rules = rules
@@ -122,6 +125,7 @@ public struct HomeSceneInputs {
         self.daily = daily
         self.invite = invite
         self.motion = motion
+        self.stillSince = stillSince
     }
 
     private var mode: Mode? { log.current?.mode }
@@ -194,9 +198,8 @@ public struct HomeSceneInputs {
 
     /// Getting up from the sofa at `date`, after long couch scrolling.
     public func revived(at date: Date) -> CompanionEvent? {
-        let window = bath(at: date) ? BathTime.window(at: date, bedtime: bedtime) : nil
-        return ReviveEngine.revived(
-            switchedAt: ReviveEngine.switchedAt(change: log.current, bath: window),
+        ReviveEngine.revived(
+            switchedAt: ReviveEngine.switchedAt(change: log.current, stillSince: stillSince),
             scrollSeenAt: scrollSeenAt,
             atHome: atHome,
             now: date
@@ -241,11 +244,14 @@ public struct HomeSceneInputs {
     /// How many hours of scenes the iPhone works out for the watch.
     public static let timelineHours: Double = 3
 
+    /// How often the iPhone checks the scene for the watch, in seconds.
+    public static let timelineStep: TimeInterval = 5 * 60
+
     /// The scenes from `now` for `hours`, checked every `step`, each kept only where it changes.
     public func timeline(
         from now: Date,
         hours: Double = timelineHours,
-        step: TimeInterval = 5 * 60
+        step: TimeInterval = timelineStep
     ) -> [TimedScene] {
         var scenes: [TimedScene] = []
         var date = now
