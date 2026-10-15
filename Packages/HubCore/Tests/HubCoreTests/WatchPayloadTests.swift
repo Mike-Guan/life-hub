@@ -104,10 +104,36 @@ import Testing
         let expected = WidgetSnapshot.timelineDates(
             after: now,
             bedtime: .standard,
-            needTimes: sent.snapshot.needTimes,
+            needTimes: sent.snapshot.needTimes + WidgetSnapshot.slotDates(after: now),
             calendar: calendar
         )
         #expect(sent.timelineDates(after: now, calendar: calendar) == expected)
+    }
+
+    @Test func redrawsWhenAScenePlays() {
+        let now = date(7, 12)
+        var sent = payload()
+        let start = date(7, 12, 5)
+        sent.scenes = [TimedScene(from: now, scene: HomeScene()), TimedScene(from: start, scene: HomeScene(bath: true))]
+        #expect(sent.timelineDates(after: now, calendar: calendar).contains(start))
+    }
+
+    @Test func drawsLikeComparesScenesWithinAStep() {
+        let bath = HomeScene(bath: true)
+        var sent = payload()
+        sent.scenes = [TimedScene(from: date(7, 12), scene: HomeScene()), TimedScene(from: date(7, 13), scene: bath)]
+        // A send two minutes later samples the same change up to one step apart.
+        var again = payload()
+        again.scenes = [
+            TimedScene(from: date(7, 12, 2), scene: HomeScene()), TimedScene(from: date(7, 13, 2), scene: bath),
+        ]
+        #expect(sent.drawsLike(again))
+        var moved = again
+        moved.scenes[1].from = date(7, 14)
+        #expect(!sent.drawsLike(moved))
+        var other = again
+        other.scenes[1].scene = HomeScene(moment: .lateCoding)
+        #expect(!sent.drawsLike(other))
     }
 
     @Test func carriesThePersona() throws {

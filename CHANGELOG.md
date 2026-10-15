@@ -49,6 +49,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The character on the watch face shows the same scene as the watch app and the iPhone Lock Screen (the gym
+  bag, setting off, the bath) and changes its pose every 15 minutes, instead of only the plain mode look.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
