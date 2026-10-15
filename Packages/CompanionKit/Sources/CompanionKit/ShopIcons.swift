@@ -101,6 +101,10 @@ struct ItemPicture: Equatable {
             let worn = outfit.clothes.values.reduce(into: Set<RunnerPart>()) { $0.formUnion($1) }
             parts = RunnerPart.allCases.filter(worn.contains)
             crop = CGRect(x: 22, y: 84, width: 76, height: 58)
+        case .badge, .hat:
+            // Placeholder until UI 一组 draws the weekly badge and beanie. Undrawn items stay off the shelf.
+            parts = []
+            crop = CGRect(x: 23, y: -0.5, width: 86, height: 86)
         }
     }
 }
@@ -122,6 +126,7 @@ extension Slot {
         case .mask: .money
         case .room: .chill
         case .celebration, .top, .fullSet: nil
+        case .badge, .hat: nil
         }
     }
 
@@ -131,6 +136,7 @@ extension Slot {
         case .gloves, .headband: .boxing
         case .mask: .work
         case .room, .celebration, .top, .fullSet: .chill
+        case .badge, .hat: .chill
         }
     }
 }
