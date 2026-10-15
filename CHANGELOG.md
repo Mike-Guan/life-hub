@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a
+  side clip), a bear blanket and a cloud cushion on her lap, a succulent on the floor and a nightlight on the wall
+  whose glow breathes slowly. The watch leaves out what is on her lap or the floor.
 - HAKU can wear six Sunday items: an orange or a mint headband, a dotted or a lightning-bolt mask, and a small
   cactus or a mini speaker in the room. The speaker's light ring glows every 3 seconds. The shop lists them once
   their catalog entries are marked drawn. The watch leaves room items out, since they stand on the floor.

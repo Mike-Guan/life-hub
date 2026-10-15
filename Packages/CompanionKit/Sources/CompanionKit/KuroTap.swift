@@ -109,8 +109,12 @@ extension KuroFigure {
     nonisolated private static let backView: Set<KuroPart> = [
         .itemFlower, .itemLamp, .tennisPonytail, .hairBack, .itemScrunchie, .jacketWork, .jacketChill,
         .itemBlanket, .jacketTennis, .itemBag, .jacketDesk, .earL, .earR, .catEars, .deskBooks, .jacketBox,
-        .jacketSmock, .boxSandbag, .danceSpeaker,
+        .jacketSmock, .boxSandbag, .danceSpeaker, .weeklyHairMintPony, .weeklyHairCherryPony, .weeklyHairStarPony,
+        .weeklyBlanketBear, .weeklyRoomCloud, .weeklyRoomSucculent, .weeklyRoomNightlightGlow, .weeklyRoomNightlight,
     ]
+
+    /// What lies on her lap; put away when she drinks.
+    nonisolated static let lap: Set<KuroPart> = [.itemBlanket, .weeklyBlanketBear, .weeklyRoomCloud]
 
     /// Changes `visible` for `tap` at `progress`.
     nonisolated static func apply(_ tap: KuroTap, progress p: Double, to visible: inout Set<KuroPart>) {
@@ -121,7 +125,7 @@ extension KuroFigure {
         case .sip:
             guard p < 0.75 else { return }
             visible.remove(.chillCup)
-            visible.remove(.itemBlanket)
+            visible.subtract(lap)
             visible.insert(.tapCup)
             if (0.2..<0.55).contains(p) { visible.insert(.tapPuff) }
         case .swing:

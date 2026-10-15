@@ -133,6 +133,17 @@ struct KuroPose: Sendable {
     var idleProgress = 0.0
     /// The home scene she is playing, if any: the invite, a walk or the bath.
     var scene: KuroScene?
+    /// How bright the nightlight's glow is, 0...1.
+    var glow = KuroPose.restingGlow
+
+    /// The nightlight's glow when it holds still, as on widgets and the dimmed watch.
+    static let restingGlow = 0.9
+
+    // UI 五组 Sunday items r1: the glow breathes slowly between 0.55 and 0.9, once every 3 s.
+    /// The nightlight's glow at `time`.
+    static func glow(at time: TimeInterval) -> Double {
+        0.725 - 0.175 * cos(time * 2 * .pi / 3)
+    }
 
     /// The resting pose for `look` at `energy` (0-100, or nil when unknown); `bedtime` makes her sleepy.
     init(look: KuroLook, energy: Double?, bedtime: Bedtime = .off) {
@@ -150,6 +161,13 @@ struct KuroPose: Sendable {
         case .mid:
             eyes = look == .tennis ? .bright : look == .desk ? .down : .open
         }
+    }
+
+    /// The same pose with the nightlight's glow at `glow`.
+    func glowing(_ glow: Double) -> KuroPose {
+        var pose = self
+        pose.glow = glow
+        return pose
     }
 
     /// The same pose with `eyes`.
@@ -228,10 +246,10 @@ struct KuroFigure: View {
                 pose.tired || pose.calm ? .mouthFlat : Self.smiling.contains(look) ? .mouthSmile : .mouthCat
             visible.insert(pose.mouthO ? .mouthO : mouth)
         }
-        for item in pose.items where item.look == look && item.clothes == nil {
-            visible.insert(item.part)
-            if let replaced = item.replaces { visible.remove(replaced) }
-        }
+        let shown = pose.items.filter { $0.clothes == nil && $0.shows(in: look) }
+        let ponytail = visible.contains(.tennisPonytail)
+        for item in shown { visible.formUnion(item.parts(ponytail: ponytail)) }
+        for item in shown { visible.subtract(item.replaces) }
         pose.scene?.dress(look, items: pose.items, &visible)
         if let tap = pose.tap {
             apply(tap, progress: pose.tapProgress, to: &visible)
@@ -250,7 +268,7 @@ struct KuroFigure: View {
             dress(look, in: clothes, back: pose.tap == .turnAway, &visible)
         }
         // UI 审核 2026-10-14 (位置规划图 §12): the watch draws nothing on the floor.
-        if watch { visible.remove(.danceSpeaker) }
+        if watch { visible.subtract([.danceSpeaker, .weeklyRoomSucculent, .weeklyBlanketBear, .weeklyRoomCloud]) }
         return KuroPart.allCases.filter { visible.contains($0) }
     }
 
@@ -290,10 +308,18 @@ struct KuroFigure: View {
     /// How far her "…" thought bubble moves when she wears a set hat, in SVG units.
     nonisolated static let hattedDots = CGSize(width: -6, height: -16.5)
 
-    /// How far `part` moves from where the SVG draws it, in SVG units; full energy raises her ears a little, and
-    /// her thought bubble moves above a set hat when `hatted`.
+    // UI 五组 Sunday items r1: hair pieces are static and move with her head.
+    /// The hair a hair piece is worn on, which it moves with.
+    nonisolated private static let worn: [KuroPart: KuroPart] = [
+        .itemScrunchie: .tennisPonytail, .weeklyHairMintPony: .tennisPonytail, .weeklyHairCherryPony: .tennisPonytail,
+        .weeklyHairStarPony: .tennisPonytail, .weeklyHairMintSide: .hairFringe, .weeklyHairCherrySide: .hairFringe,
+        .weeklyHairStarSide: .hairFringe,
+    ]
+
+    /// How far `part` moves from where the SVG draws it, in SVG units; a hair piece moves with its hair, full
+    /// energy raises her ears a little, and her thought bubble moves above a set hat when `hatted`.
     nonisolated static func offset(_ part: KuroPart, pose: KuroPose, hatted: Bool = false) -> CGSize {
-        let moved = shift(part, pose: pose)
+        let moved = shift(worn[part] ?? part, pose: pose)
         let lift: CGFloat = pose.full && part == .catEars ? 3 : 0
         let dots = hatted && part == .tapDots ? hattedDots : .zero
         return CGSize(width: moved.width + dots.width, height: moved.height - lift + dots.height)
@@ -302,8 +328,10 @@ struct KuroFigure: View {
     /// The looks in her sportswear, where she smiles.
     nonisolated private static let smiling: Set<KuroLook> = [.tennis, .fitness, .dance, .ski]
 
-    /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out.
+    /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out. The nightlight's glow is
+    /// `pose.glow`.
     nonisolated static func opacity(_ part: KuroPart, pose: KuroPose) -> Double {
+        if part == .weeklyRoomNightlightGlow { return pose.glow }
         guard pose.tap == nil, let idle = pose.idle else { return 1 }
         return idle.opacity(part, progress: pose.idleProgress)
     }
@@ -604,9 +632,10 @@ public struct KuroView: View {
                 // Her small idle moves play only in the plain idle.
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
                 let fidget = busy ? nil : KuroIdle.at(idleTime, look: look)
+                let shown = still || tap != nil ? pose : pose.blink(at: time).idling(fidget)
                 ZStack {
                     KuroFigure(
-                        look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget),
+                        look: look, pose: shown.glowing(still ? KuroPose.restingGlow : KuroPose.glow(at: time)),
                         watch: style == .watch
                     )
                     .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
