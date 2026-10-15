@@ -300,8 +300,8 @@ final class HomeModel {
         case .desk: go(mode == .money ? .side : .work)
         case .bag: go(.box)
         default:
-            let inside = GridPoint(x: min(max(point.x, 2.4), 6.2), y: min(max(point.y, 3.2), 9.4))
-            dropPoint = inside
+            // Dropped on something HAKU can't stand on: he lands on the nearest open floor.
+            dropPoint = HomeNav.room(items: items).nearestOpen(to: point)
             spot = .idle
             cues.append(.bounce)
         }
