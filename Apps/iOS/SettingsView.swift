@@ -148,7 +148,10 @@ struct SettingsView: View {
 
             placesCard
 
+            // Daily Widget is Mike's own app; testers don't have it, so only DEV builds show the link.
+            #if DEBUG
             dailyCard
+            #endif
 
             memoryCard
 
