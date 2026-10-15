@@ -17,6 +17,8 @@ struct PlaceEditor: View {
     @State private var hasLocation: Bool
     @State private var locating = false
     @State private var error: String?
+    @State private var asksDelete = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// - Parameters:
     ///   - place: the place to edit, or a new one with `hasLocation` false.
@@ -71,8 +73,7 @@ struct PlaceEditor: View {
                 .disabled(!canSave)
                 if let onDelete {
                     Button(place.kind == .custom ? "删除这个地点" : "清除") {
-                        onDelete()
-                        dismiss()
+                        asksDelete = true
                     }
                     .font(Toy.body(14, weight: .heavy))
                     .foregroundStyle(Toy.alert)
@@ -83,6 +84,35 @@ struct PlaceEditor: View {
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
+        .overlay {
+            if asksDelete, let onDelete {
+                deleteSheet(onDelete)
+                    .transition(reduceMotion ? .identity : .opacity)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: asksDelete)
+    }
+
+    // UI 二组 gap #14: a place switches modes on arrival, so losing it is asked first. Nothing is lost
+    // for good, so the answer takes the pink, not the red.
+    private func deleteSheet(_ onDelete: @escaping () -> Void) -> some View {
+        let custom = place.kind == .custom
+        return ToyConfirmSheet(
+            question: String(format: (custom ? "删掉「%@」？" : "清除「%@」的位置？").localized, place.title.localized),
+            warning: custom
+                ? "删掉以后，到这里不会再自动换模式。以前的记录还在。".localized
+                : "清除以后，到这里不会再自动换模式。随时可以再设。".localized,
+            cancel: "留着".localized,
+            confirm: (custom ? "删掉" : "清除").localized,
+            confirmFill: Toy.pink,
+            confirmText: Toy.ink,
+            onCancel: { asksDelete = false },
+            onConfirm: {
+                asksDelete = false
+                onDelete()
+                dismiss()
+            }
+        )
     }
 
     private var nameCard: some View {
