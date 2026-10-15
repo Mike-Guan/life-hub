@@ -1250,22 +1250,22 @@
         }
       }
     },
+    "裹着毯子打瞌睡" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dozing in a blanket"
+          }
+        }
+      }
+    },
     "裹着毯子瘫在沙发上" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "wrapped in a blanket on the couch"
-          }
-        }
-      }
-    },
-    "裹着毯子，抱着手机打瞌睡" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "dozing in a blanket, hugging the phone"
           }
         }
       }
