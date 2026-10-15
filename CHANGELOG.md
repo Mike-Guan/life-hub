@@ -5,8 +5,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
-- Settings has a 上班日 row and a 身份卡 group. Each opens the same screen as the first-run setup, so work days
-  and the identity card can be set, changed or cleared later.
 - The second preset character can wear her Sunday beanie in 下班, between her cat ears, with its pom swaying a
   little. A set hat or the bath towel takes it off; it stays on when she turns away and on the watch.
 - The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a
@@ -132,6 +130,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- Settings has a 上班日 row and a 身份卡 group. Each opens the same screen as the first-run setup, so work days
+  and the identity card can be set, changed or cleared later.
 - On the watch the second preset character holds her racket, books, cup and tablet higher, so the bottom of the
   screen no longer cuts them off. The pen, stylus and badge are left off on the watch. The iPhone is unchanged.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
