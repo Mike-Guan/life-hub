@@ -244,6 +244,9 @@ enum Placement {
         .cheerCrack: .fx,
         .cheerNotes: .fx,
         .cheerWind: .fx,
+        .speakerNoteA: .fx,
+        .speakerNoteB: .fx,
+        .breathPuff: .fx,
     ]
 
     static let kuro: [KuroPart: Spot] = [
@@ -435,9 +438,6 @@ enum Placement {
         .walkDust: .fx,
         .bathBubbles: .fx,
         .sparkle: .fx,
-        .speakerNoteA: .fx,
-        .speakerNoteB: .fx,
-        .breathPuff: .fx,
     ]
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
