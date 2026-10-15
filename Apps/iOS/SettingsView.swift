@@ -335,7 +335,7 @@ struct SettingsView: View {
                     Text("导出").tapTarget()
                 }
                 .font(Toy.body(13, weight: .heavy))
-                    .disabled(log.entries.isEmpty && decisions.kept.isEmpty)
+                .disabled(log.entries.isEmpty && decisions.kept.isEmpty)
             }
             ForEach(Array(log.entries.suffix(5).reversed().enumerated()), id: \.offset) { _, entry in
                 Text("\(entry.at.formatted(date: .omitted, time: .shortened)) \(entry.kind)：\(entry.detail)")
