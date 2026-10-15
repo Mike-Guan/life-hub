@@ -101,7 +101,7 @@ public struct ShareCard: Equatable, Sendable {
         let title = item?.title ?? ""
         switch subject {
         case .keepsake:
-            let subtitle = item?.keepsake.map { String(format: "第 %lld 次%@".localized, $0.count, counted) }
+            let subtitle = item?.keepsake.map { String(format: "第 %1$lld 次%2$@".localized, $0.count, counted) }
             return Words(name: persona.title, title: title, subtitle: subtitle, line: line)
         case .outfit:
             return Words(name: persona.title, eyebrow: "换上了".localized, title: title, line: line)
