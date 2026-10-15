@@ -237,7 +237,7 @@ struct ShopView: View {
         // 动态: the can count rolls down and the bought tile leaves smoothly, without a bounce.
         var failure: GrowthStore.BuyError?
         withAnimation(reduceMotion ? nil : .smooth) {
-            do {
+            do throws(GrowthStore.BuyError) {
                 try growth.buy(item)
             } catch {
                 failure = error
