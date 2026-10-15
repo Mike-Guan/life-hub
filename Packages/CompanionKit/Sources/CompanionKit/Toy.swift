@@ -1,3 +1,4 @@
+import CoreText
 import HubCore
 import SwiftUI
 
@@ -23,10 +24,15 @@ public enum Toy {
     }
 
     private static func font(_ size: CGFloat, weight: Font.Weight) -> Font {
-        if let face = japaneseFace(weight, language: Languages.locale.language) {
+        if let face = japaneseFace(weight, language: Languages.locale.language), isRegistered(face) {
             return .custom(face, fixedSize: size)
         }
         return .system(size: size, weight: weight, design: .rounded)
+    }
+
+    // The watch app does not register the fonts; there Japanese keeps the system font instead of a plain fallback.
+    private static func isRegistered(_ face: String) -> Bool {
+        CTFontCopyPostScriptName(CTFontCreateWithName(face as CFString, 12, nil)) as String == face
     }
 
     // Three-language typesetting spec §1 (UI 二组): Japanese text uses Zen Maru Gothic, Bold for semibold and bold,
