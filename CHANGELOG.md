@@ -150,6 +150,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   instead of breaking inside the word.
 - The wardrobe screen picks a mode first, then shows four tabs: clothes, accessories, props (only in the identity
   card's mode) and room. Celebrations are the last group of accessories. Keepsakes not yet earned no longer show.
+- The shop says when everything on the shelf is owned, and with no cans yet it shows how to earn them right
+  under the banner. The identity card's line uses the user's own name for it (「… 那天 +5（每周一次）」) and is
+  left out without a card. Clothes in the shop carry a tag naming the mode they are worn in.
+- The wardrobe shows a dashed placeholder on an empty shelf and an empty 人生收藏 instead of hiding it.
 - The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
   hustle); a full set replaces that mode's top. They go on sale once the character art draws them.
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
