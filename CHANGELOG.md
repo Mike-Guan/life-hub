@@ -222,6 +222,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   records, sleep and the weekly changes are shared.
 - KURO has her own shop, wardrobe and unboxing: her 5 items and 3 keepsakes, at the same can prices. Each
   character keeps what she wears; the home card, widgets and watch show it.
+- The unboxing buttons fit the item: 现在摆上 / 先收起来 for room items, 现在用上 / 先放衣柜 for celebrations.
 - HAKU's blanket is now cream with a white folded hem, two small orange-and-white cats and faint paw prints,
   everywhere it shows.
 - After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.
