@@ -164,7 +164,7 @@ public struct ShareCardView: View {
     // 样张 v3.1: at most two lines, then the text shrinks to 85% and no further. UI 审核 10/15 round 1: a 1:1 card
     // takes three lines, so the longest Japanese name never ends in "…".
     private func title(_ size: CGFloat, lines: Int = 2) -> some View {
-        Text(words.title)
+        Text(Self.breakable(words.title, language: language))
             .font(font(size, .black))
             .lineLimit(lines)
             .minimumScaleFactor(0.85)

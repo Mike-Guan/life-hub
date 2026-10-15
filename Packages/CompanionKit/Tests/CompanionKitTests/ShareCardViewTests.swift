@@ -43,5 +43,17 @@ import Testing
         #expect(try make("kuro.top.work.blouse", persona: .kuro).mode == .work)
         #expect(ShareCard(persona: .haku, look: look, subject: .outfit("future.item")).mode == .work)
     }
+
+    // 日语文案 10/15: a Japanese name breaks only between its marked phrases; other languages keep their breaks.
+    @Test func japaneseNamesBreakOnlyBetweenPhrases() {
+        let ja = Locale.Language(identifier: "ja")
+        let (joiner, space) = ("\u{2060}", "\u{200B}")
+        let cushion = ["雲", joiner, "の", space, ["ク", "ッ", "シ", "ョ", "ン"].joined(separator: joiner)].joined()
+        #expect(ShareCardView.breakable("雲のクッション", language: ja) == cushion)
+        #expect(ShareCardView.breakable("観葉植物", language: ja) == ["観", "葉", "植", "物"].joined(separator: joiner))
+        let zh = Locale.Language(identifier: "zh-Hans")
+        #expect(ShareCardView.breakable("雲のクッション", language: zh) == "雲のクッション")
+        #expect(ShareCardView.breakable("新しい名前", language: ja) == "新しい名前")
+    }
 }
 #endif

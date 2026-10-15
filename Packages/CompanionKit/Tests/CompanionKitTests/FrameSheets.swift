@@ -406,7 +406,7 @@ struct FrameSheets {
     }
 
     // Issue #352 PR B, for UI 审核: each card in both shapes, plus the longest Japanese keepsake name to check the
-    // 85% shrink and the line breaks. The Japanese text is made up until the writers translate the items.
+    // 85% shrink and the line breaks.
     @Test func shareCards() throws {
         let fonts = URL(filePath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
@@ -418,12 +418,16 @@ struct FrameSheets {
         let hoodie = try #require(ShopItem.item("kuro.top.chill.hoodie"))
         let chill = Look(mode: .chill, wardrobe: Wardrobe(), card: nil)
         let outfit = try #require(ShareCard(persona: .kuro, look: chill, item: hoodie))
+        // The longest Japanese keepsake name with the writers' phrase breaks; the count line is made up until
+        // the writers translate it.
+        let runner = try #require(ShopItem.item("keepsake.headband.runner"))
+        let runnerCard = try #require(ShareCard(persona: .haku, look: look, item: runner))
         let japanese = ShareCard.Words(
-            name: "HAKU", title: "ゴールデンボクシンググローブ", subtitle: "ボクシング 10 回目", line: "……やる。ついでだ。")
+            name: "HAKU", title: "ランナーのヘッドバンド", subtitle: "5 km ラン 4 回目", line: "……やる。ついでだ。")
         let ja = Locale.Language(identifier: "ja")
         let cards: [(String, ShareCard, ShareCard.Words, Locale.Language)] = [
             ("zh-keepsake", keepsake, keepsake.words(counting: "拳击"), Locale.Language(identifier: "zh-Hans")),
-            ("ja-keepsake-longest", keepsake, japanese, ja),
+            ("ja-keepsake-longest", runnerCard, japanese, ja),
             ("zh-outfit", outfit, outfit.words(counting: "网球"), Locale.Language(identifier: "zh-Hans")),
         ]
         for (name, card, words, language) in cards {
