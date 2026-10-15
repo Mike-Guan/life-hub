@@ -505,6 +505,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- On a gym day you already trained, went to the gym or set off for it, scrolling on the phone no longer brings
+  back the evening gym invite.
 - The wardrobe preview and its head icons dress the character for the picked identity card, so the art
   card shows the apron and sketchbook instead of the boxing kit.
 - Unboxing a top or full set shows HAKU in the mode it is worn in, not always off work.
