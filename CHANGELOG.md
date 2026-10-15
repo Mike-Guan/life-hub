@@ -554,6 +554,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The second preset character's identity-card idle moves now show on the home screen and in notifications.
+  Before, those screens didn't pass her card, so only her base moves played.
 - With languages on (Debug and STG), VoiceOver reads the second preset character's overtime lines from her
   string table, so they can show in Japanese and English.
 - After a workout cheer or the off-work move, HAKU can again stretch after a long sit, get up from the sofa,
