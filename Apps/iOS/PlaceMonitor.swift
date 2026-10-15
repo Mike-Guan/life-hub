@@ -61,7 +61,7 @@ final class PlaceMonitor {
                     onEvent(place, entered)
                 }
             } catch {
-                lastError = "地点监测停了：\(error.localizedDescription)"
+                lastError = String(format: "地点监测停了：%@".localized, error.localizedDescription)
             }
         }
     }

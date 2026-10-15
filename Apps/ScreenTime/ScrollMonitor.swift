@@ -18,17 +18,22 @@ final class ScrollMonitor: DeviceActivityMonitor {
             return
         }
         let presence = PlacePresence.stored(in: AppGroup.defaults)
+        let snapshot = AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))
         let signals = NeedSignals(
             scrollThresholdAt: ScrollWatch.reachedAt,
             scrollSeenAt: ScrollWatch.seenAt,
             atHomeSince: presence.since(.home),
             homeKnown: PlaceSettings.stored(in: AppGroup.defaults)[.home] != nil,
             atGym: presence.since(.gym) != nil,
+            // Without these a gym day already trained or on the way would still get its invite.
+            fitnessSeenAt: presence.since(.fitness) ?? presence.left(.fitness),
+            departing: GymDeparture.stored(in: AppGroup.defaults)?.isActive(at: now, presence: presence) ?? false,
             slackThresholdAt: ScrollWatch.workReachedAt,
             slackSeenAt: ScrollWatch.workSeenAt,
             // Without these the plan below would drop a pending sitting notice.
             sit: SitState.stored(in: AppGroup.defaults),
-            mode: AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))?.mode
+            mode: snapshot?.mode,
+            trainedDay: snapshot?.trainedDay
         )
         let days = AppGroup.activityDays(now: now)
         let work = ModeRules.stored(in: AppGroup.defaults)

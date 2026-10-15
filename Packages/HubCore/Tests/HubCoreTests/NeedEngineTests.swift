@@ -124,6 +124,11 @@ import Testing
         #expect(need(boxed, at: date(4, 9, 30)) == nil)
         let yesterday = NeedSignals(workouts: [workout(.boxing, date(3, 10), minutes: 45)])
         #expect(need(yesterday, at: date(4, 9, 30))?.need == .boxingWarmup)
+        // The Screen Time extension only has the day of the last workout.
+        let trainedToday = NeedSignals(trainedDay: StateEngine.dayStart(for: date(4, 7), calendar: calendar))
+        #expect(need(trainedToday, at: date(4, 9, 30)) == nil)
+        let trainedYesterday = NeedSignals(trainedDay: StateEngine.dayStart(for: date(3, 10), calendar: calendar))
+        #expect(need(trainedYesterday, at: date(4, 9, 30))?.need == .boxingWarmup)
     }
 
     @Test func boxingComesFirstOnBoxingMorningThenCouch() {

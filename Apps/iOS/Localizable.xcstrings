@@ -1,6 +1,36 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
+    "%@ 已经在打哈欠了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is already yawning."
+          }
+        }
+      }
+    },
+    "Screen Time 监测没停：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen Time tracking didn't stop: %@"
+          }
+        }
+      }
+    },
+    "Screen Time 监测没启动：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen Time tracking didn't start: %@"
+          }
+        }
+      }
+    },
     "……随便看看，不急。" : {
       "comment" : "第二个预设角色",
       "localizations" : {
@@ -161,6 +191,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Save"
+          }
+        }
+      }
+    },
+    "倒计时没能显示：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Countdown couldn't show: %@"
           }
         }
       }
@@ -448,6 +488,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Places stay on this iPhone. Set Location to “Always” so modes switch even when the app is closed."
+          }
+        }
+      }
+    },
+    "地点监测停了：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Place tracking stopped: %@"
           }
         }
       }
@@ -868,6 +918,16 @@
         }
       }
     },
+    "睡觉提醒没设上：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedtime reminder didn't get set: %@"
+          }
+        }
+      }
+    },
     "睡觉时间" : {
       "localizations" : {
         "en" : {
@@ -935,6 +995,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Link Daily Widget"
+          }
+        }
+      }
+    },
+    "联动 Daily 失败：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't link Daily: %@"
           }
         }
       }
@@ -1066,6 +1136,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Settings"
+          }
+        }
+      }
+    },
+    "读不到 Daily 的文件夹：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't read the Daily folder: %@"
+          }
+        }
+      }
+    },
+    "读不到健康 App 里的睡眠：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't read sleep from the Health app: %@"
+          }
+        }
+      }
+    },
+    "读不到健康 App 里的运动和步数：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't read workouts and steps from the Health app: %@"
+          }
+        }
+      }
+    },
+    "读不到通勤路上的运动状态：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't read your motion on the commute: %@"
           }
         }
       }

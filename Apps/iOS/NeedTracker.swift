@@ -45,7 +45,7 @@ final class NeedTracker {
             }
             lastError = nil
         } catch {
-            lastError = "读不到健康 App 里的运动和步数：\(error.localizedDescription)"
+            lastError = String(format: "读不到健康 App 里的运动和步数：%@".localized, error.localizedDescription)
         }
     }
 
@@ -65,7 +65,7 @@ final class NeedTracker {
             lastError = "没开「运动与健身」权限：通勤路上 HAKU 只会走路。可以在设置 > 隐私与安全性里打开。"
         } catch {
             commuteMotion = []
-            lastError = "读不到通勤路上的运动状态：\(error.localizedDescription)"
+            lastError = String(format: "读不到通勤路上的运动状态：%@".localized, error.localizedDescription)
         }
     }
 
