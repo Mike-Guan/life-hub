@@ -354,7 +354,7 @@ public enum NeedEngine {
         if let slacking = slacking(signals, now: now, rules: rules, work: work, calendar: calendar) {
             return slacking
         }
-        if let sitting = sitting(signals, now: now, work: work, calendar: calendar) { return sitting }
+        if let sitting = sitting(signals, now: now, rules: rules, work: work, calendar: calendar) { return sitting }
         let boxing = boxingWarmup(signals, now: now, rules: rules, calendar: calendar)
         if boxing != nil, now < time(rules.boxingFirstUntilMinute, on: now, calendar: calendar) {
             return boxing
@@ -608,6 +608,7 @@ public enum NeedEngine {
     private static func sitting(
         _ signals: NeedSignals,
         now: Date,
+        rules: NeedRules,
         work: ModeRules,
         calendar: Calendar
     ) -> NeedReading? {
