@@ -63,7 +63,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- The bedtime reminder can be turned on only after a bedtime is picked. It no longer saves the prefilled time.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
@@ -180,6 +179,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   opening of coming back), the Daily task cue and the invite, and KURO's need and overtime sign, like the phone.
 - Groundwork for the watch commute: Life Hub can tell walking to work, riding the train and walking home
   between home and the office. Nothing shows it yet.
+- The bedtime reminder can be turned on only after a bedtime is picked. It no longer saves the prefilled time.
 - The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
   lifting, running, morning, overtime, just home, the bath and the vibe-coding cans.
 - Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat
