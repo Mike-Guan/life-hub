@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Japanese for the first batch of lock-screen lines (both characters) and English for 842 strings
+  are in the String Catalogs, behind the Debug-only 「日文和英文」 switch. `scripts/import-strings.py` adds a
+  writers' delivery to the right catalogs.
 - The app ships the Japanese font Zen Maru Gothic (Bold and Black, SIL Open Font License in `Apps/iOS/Fonts`)
   and registers it in the app, the widgets and the notification. Nothing uses it yet; Japanese text switches
   to it in a separate change. If the font fails to load, the app says so in its error list.
