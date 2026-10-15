@@ -64,6 +64,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - The unboxing buttons fit the item: 现在摆上 / 先收起来 for room items, 现在用上 / 先放衣柜 for celebrations.
+- With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
+  translation exists.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
