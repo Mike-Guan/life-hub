@@ -7,7 +7,7 @@ import SwiftUI
 enum RunnerBaseIdle: CaseIterable, Sendable {
     /// Sport (H6): one arm across the chest, pulled in, then the other side, and a shake of the hand.
     case stretch
-    /// Sport (H7): the bottle comes out from under the arm, the cap comes off, a sip, the cap goes back on.
+    /// Sport (H7): a bottle in the fist, the cap comes off, a sip, the cap goes back on.
     case drink
     /// Out (H8): the left wrist comes up, a look at it, then a look ahead.
     case checkWrist
@@ -68,16 +68,13 @@ enum RunnerBaseIdle: CaseIterable, Sendable {
                 visible.formUnion([.crossArmL, .wristbandPull])
             }
         case .drink:
+            // UI 审核 2026-10-15: the bottle shows only while the fist holds it; the hand never vanishes on its own.
+            guard (1...4).contains(k) else { return }
             visible.remove(.wristbandHand)
-            visible.insert(.waterBottle)
+            visible.formUnion([.waterBottle, .bottleFist, .chinHand])
             // The cap is in the closed left hand while HAKU drinks.
             if k != 2, k != 3 { visible.insert(.bottleCap) }
-            if (1...4).contains(k) { visible.formUnion([.bottleFist, .chinHand]) }
-            if k == 3 {
-                Self.swapEyes(&visible, to: .eyesClosed)
-            } else if k > 0, k < 5 {
-                Self.swapEyes(&visible, to: .eyesWork)
-            }
+            Self.swapEyes(&visible, to: k == 3 ? .eyesClosed : .eyesWork)
         case .checkWrist:
             if (1...4).contains(k) {
                 visible.insert(.wristArm)
@@ -106,7 +103,9 @@ enum RunnerBaseIdle: CaseIterable, Sendable {
     func move(_ part: RunnerPart, _ look: RunnerCardLook, at t: CGFloat) -> SceneMove? {
         var move = SceneMove()
         if putDown(look).contains(part) {
+            // It fades as it goes, so it never rests below her feet where the frame has room.
             move.offset.height = 45 * hold(at: t)
+            move.opacity = Double(1 - hold(at: t))
             return move
         }
         let u = clock(look, at: t)
@@ -121,7 +120,8 @@ enum RunnerBaseIdle: CaseIterable, Sendable {
             move.anchor = Self.point(97, 121)
             move.offset = CGSize(
                 width: key([0, 1, -20, -21, 1, 0], at: u), height: key([0, -18, -32, -34, -18, 0], at: u))
-            move.opacity = Double(fadeInOut(at: t))
+            let shown = Self.ramp(u, 0.5 * step, 0.5 * step + Self.fade)
+            move.opacity = Double(shown * (1 - Self.ramp(u, 4.5 * step - Self.fade, 4.5 * step)))
         case (.drink, .bottleFist):
             move.offset = CGSize(
                 width: key([-1, -1, -12, -12, -1, -1], at: u), height: key([-1, -1, -20, -22, -1, -1], at: u))
@@ -221,7 +221,7 @@ enum RunnerBaseIdle: CaseIterable, Sendable {
         return values[i] + (values[i + 1] - values[i]) * Self.ramp(u, CGFloat(i) * step, CGFloat(i + 1) * step)
     }
 
-    /// The bottle and the backpack fade in at the start and out at the end.
+    /// The backpack fades in at the start and out at the end.
     private func fadeInOut(at t: CGFloat) -> CGFloat {
         Self.ramp(t, 0, Self.fade) * (1 - Self.ramp(t, length - Self.fade, length))
     }

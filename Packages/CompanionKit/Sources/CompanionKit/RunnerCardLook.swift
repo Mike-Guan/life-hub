@@ -107,7 +107,7 @@ extension RunnerPose {
     // card's props, the way the can goes away.
     /// Whether HAKU shows the card look's props: nothing else is in its hands, on its head or in the corner.
     var holdsCardProps: Bool {
-        need == nil && activity == nil && life == nil && moment == nil && burst < 0 && dailyProp == nil
+        need == nil && activity == nil && life == nil && moment == nil && (burst < 0 || swapping) && dailyProp == nil
             && dailyScene == nil && walkFrom == nil && commuteLeg == nil && bathCall < 0 && bathDry < 0
             && thump < 0 && fistPump < 0 && !watchTap
     }
