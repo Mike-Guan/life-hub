@@ -39,7 +39,10 @@ for pair in "$se:se"; do
       shot "$d" "$p-$v-$mode-ja" -screenshot-mode "$mode" \
         -screenshot-line "時計は進む。俺らは進まない。" -AppleLanguages "(ja)" -AppleLocale ja_JP -languages.on YES
       shot "$d" "$p-$v-$mode-en" -screenshot-mode "$mode" \
-        -screenshot-line "Something's coming up. Get up and get ready?" -AppleLanguages "(en)" -AppleLocale en_US \
+        -screenshot-line "15 minutes. I'm nervous for you." -AppleLanguages "(en)" -AppleLocale en_US \
+        -languages.on YES
+      shot "$d" "$p-$v-$mode-en2" -screenshot-mode "$mode" \
+        -screenshot-line "…You came. I'll hold the gloves." -AppleLanguages "(en)" -AppleLocale en_US \
         -languages.on YES
     done
   done
