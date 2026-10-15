@@ -584,13 +584,36 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(cardTop: "kuro.top.art.smock", title: "画画罩衫", price: 30, base: .craft, persona: .kuro),
         ShopItem(cardTop: "kuro.base.craft.pinafore", title: "背带裙", price: 40, base: .craft, persona: .kuro),
         // HAKU's weekly items (商店完整目录 v0 §1.4), drawn in #383. The star badge (week 4) and the beanie
-        // (week 8) wait for their own wear slots. The second character's (§2.4) come in their own change.
+        // (week 8) wait for their own wear slots.
         ShopItem(weekly: "haku.weekly.headband.orange", slot: .headband, title: "橙色头带", price: 15, week: 1),
         ShopItem(weekly: "haku.weekly.mask.dots", slot: .mask, title: "波点面罩", price: 18, week: 2),
         ShopItem(weekly: "haku.weekly.room.cactus", slot: .room, title: "小仙人掌", price: 15, week: 3),
         ShopItem(weekly: "haku.weekly.headband.mint", slot: .headband, title: "薄荷头带", price: 15, week: 5),
         ShopItem(weekly: "haku.weekly.mask.bolt", slot: .mask, title: "闪电贴纸面罩", price: 18, week: 6),
         ShopItem(weekly: "haku.weekly.room.speaker", slot: .room, title: "迷你音箱", price: 20, week: 7),
+        // The second character's (§2.4, approved 2026-10-14), off the shelf until wired into her figure. Her
+        // beanie (week 8) waits for the hat slot.
+        ShopItem(
+            weekly: "kuro.weekly.hair.mint", slot: .headband, title: "薄荷发圈", price: 15, week: 1, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.blanket.bear", slot: .mask, title: "小熊毯", price: 18, week: 2, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.room.succulent", slot: .room, title: "多肉盆栽", price: 15, week: 3, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.hair.cherry", slot: .headband, title: "樱桃发夹", price: 18, week: 4, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.hair.star", slot: .headband, title: "星星发圈", price: 15, week: 5, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.room.cloud", slot: .room, title: "云朵靠垫", price: 20, week: 6, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.room.nightlight", slot: .room, title: "小夜灯", price: 20, week: 7, persona: .kuro,
+            drawn: false),
     ]
 
     init(
@@ -624,9 +647,13 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         self.mode = mode
     }
 
-    init(weekly id: String, slot: Slot, title: String, price: Int, week: Int, persona: Persona = .haku) {
+    init(
+        weekly id: String, slot: Slot, title: String, price: Int, week: Int, persona: Persona = .haku,
+        drawn: Bool = true
+    ) {
         self.init(id: id, slot: slot, title: title, price: price, persona: persona)
         self.week = week
+        isDrawn = drawn
     }
 
     // The identity card lives in the boxing mode slot (ModeCards), so its clothes are worn there.

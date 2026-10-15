@@ -486,21 +486,29 @@ import Testing
         #expect(try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-11-08 08:00") == "haku.weekly.headband.mint")
         // Six drawn items, then it starts over.
         #expect(try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-11-29 08:00") == "haku.weekly.headband.orange")
-        // The second character's rotation waits for approval.
-        #expect(try weeklyItem(firstCan: "2026-10-03 23:59", now: "2026-10-18 00:00", persona: .kuro) == nil)
+        // The second character has her own rotation, counted from her own first can.
+        #expect(
+            try weeklyItem(firstCan: "2026-10-03 23:59", now: "2026-10-18 00:00", persona: .kuro)
+                == "kuro.weekly.blanket.bear")
+        #expect(
+            try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-11-08 08:00", persona: .kuro)
+                == "kuro.weekly.hair.cherry")
     }
 
     @Test func hakusWeeklyItemsAreDrawn() {
         let weekly = ShopItem.catalog(for: .haku).filter { $0.week != nil }
         #expect(weekly.count == 6)
         #expect(weekly.allSatisfy { $0.isDrawn })
+        let hers = ShopItem.catalog(for: .kuro).filter { $0.week != nil }
+        #expect(hers.map(\.week) == Array(1...7))
+        #expect(hers.allSatisfy { !$0.isDrawn })
     }
 
     @Test func noWeeklyItemWithoutCansOrArt() throws {
         #expect(ShopItem.weekly(for: .haku, ledger: CanLedger(), now: at) == nil)
         let store = GrowthStore(fileURL: nil, deviceID: "t")
         store.record(.boxing, source: "old", at: at.addingTimeInterval(-60 * 86_400))
-        // HAKU's items are drawn; the second character has none in the catalog yet.
+        // HAKU's items are drawn; the second character's are not yet.
         #expect(ShopItem.weekly(for: .haku, ledger: store.ledger, now: at) != nil)
         #expect(ShopItem.weekly(for: .kuro, ledger: store.ledger, now: at) == nil)
     }
