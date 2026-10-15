@@ -45,9 +45,10 @@ extension ModeRules {
     public static let offWorkLead = 15
 
     // Mike 2026-10-05 set 17:30 for his 18:30 end; PM 2026-10-13 (写死作息排查 v0 #4) made it an hour
-    // before the end of work hours, so it moves with them.
-    /// From this minute after midnight, leaving the office ends work: an hour before work ends, or any time
-    /// for irregular work.
+    // before the end of work hours, so it moves with them. Since 2026-10-15 a leave ends work at any time,
+    // and this only decides whether the companion says the off-work line.
+    /// From this minute after midnight, leaving the office counts as the end of the working day: an hour
+    /// before work ends, or any time for irregular work.
     public var offWorkFromMinute: Int { isIrregular ? 0 : workEndMinute - 60 }
 
     // PM 2026-10-13 (写死作息排查 v0 #3): someone without fixed work days picks 不固定. Then nothing follows
@@ -190,11 +191,9 @@ public enum ModeEngine {
             return ModeDecision(mode: .work, source: .location, reason: "到公司了")
 
         case .leftOffice:
+            // Mike, 2026-10-15: leaving the office ends work at any time. A lunch break ends it too, and coming
+            // back switches to work again.
             guard !isHeld(changes, now: now, rules: rules), current?.mode == .work else { return nil }
-            // Mike, 2026-10-05: stepping out for lunch isn't the end of work; only a leave from an hour before
-            // the end of work hours is.
-            let parts = calendar.dateComponents([.hour, .minute], from: now)
-            guard (parts.hour ?? 0) * 60 + (parts.minute ?? 0) >= rules.offWorkFromMinute else { return nil }
             return ModeDecision(mode: .chill, source: .location, reason: "离开公司了")
 
         case .enteredFitness:
@@ -224,27 +223,24 @@ public enum ModeEngine {
         }
     }
 
-    // Mike, 2026-10-07: place comes first. A leave can be held by a manual change, come too early, or be
-    // reported before he really left, and then no second event comes. So the app checks again at every place
+    // Mike, 2026-10-07: place comes first. A leave can be held by a manual change or be reported before
+    // he really left, and then no second event comes. So the app checks again at every place
     // event and every open, not only at the moment of leaving.
-    /// Ends work when, from `rules.offWorkFromMinute` today, the user left the office or came home and nothing
-    /// changed the mode since.
+    /// Ends work when, earlier today, the user left the office or came home and nothing changed the mode since.
     /// - Returns: the switch to chill, or `nil` to leave the mode alone.
     public static func settle(
         log: ModeLog,
         presence: PlacePresence,
         now: Date,
-        rules: ModeRules = .standard,
         calendar: Calendar = .current
     ) -> ModeDecision? {
-        let from = rules.offWorkFromMinute
         guard let current = log.active.last(where: { $0.at <= now }), current.mode == .work,
-            presence.since(.office) == nil,
-            let evening = calendar.date(bySettingHour: from / 60, minute: from % 60, second: 0, of: now)
+            presence.since(.office) == nil
         else { return nil }
+        let today = calendar.startOfDay(for: now)
         let moves = [(presence.left(.office), "离开公司了"), (presence.since(.home), "到家了")]
             .compactMap { at, reason in at.map { (at: $0, reason: reason) } }
-            .filter { $0.at >= evening && $0.at <= now && $0.at > current.at }
+            .filter { $0.at >= today && $0.at <= now && $0.at > current.at }
         guard let move = moves.max(by: { $0.at < $1.at }) else { return nil }
         return ModeDecision(mode: .chill, source: .location, reason: move.reason)
     }

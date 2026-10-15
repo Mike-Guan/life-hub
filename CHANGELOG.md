@@ -63,6 +63,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- Leaving the office ends 上班 at any time, a lunch break too; coming back switches to 上班 again. Before, a
+  leave earlier than an hour before the end of work hours kept 上班 until you got home.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
