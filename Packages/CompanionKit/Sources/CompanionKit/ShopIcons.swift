@@ -97,9 +97,10 @@ struct ItemPicture: Equatable {
             parts = peace ? [.peaceHand] : [.sparkle]
             crop = peace ? CGRect(x: 77, y: 48, width: 40, height: 40) : CGRect(x: 3, y: 14, width: 20, height: 20)
         case .top, .fullSet:
-            // Placeholder: UI 一组 replaces this when drawing the clothes (map §11). Undrawn clothes stay off the shelf.
-            parts = []
-            crop = CGRect(x: 23, y: 60, width: 74, height: 74)
+            // The torso only: a set's cap sits too far above it for a small tile. Parts in figure order.
+            let worn = outfit.clothes.values.reduce(into: Set<RunnerPart>()) { $0.formUnion($1) }
+            parts = RunnerPart.allCases.filter(worn.contains)
+            crop = CGRect(x: 22, y: 84, width: 76, height: 58)
         }
     }
 }
