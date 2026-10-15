@@ -322,6 +322,21 @@ import Testing
         #expect(!CompanionLines.lines(for: nil).isEmpty)
     }
 
+    @Test func theAppOpensWithItsMostImportantLineOnly() {
+        #expect(CompanionView.speaks(.stretch, over: nil))
+        #expect(CompanionView.speaks(.celebration, over: .invite))
+        #expect(!CompanionView.speaks(.invite, over: .celebration))
+        #expect(!CompanionView.speaks(.bath, over: .goodnight))
+        #expect(CompanionView.speaks(.daily, over: .daily))
+        let order: [OpeningLine] = [.celebration, .invite, .goodnight, .lateNight, .daily, .bath, .stretch]
+        #expect(order.shuffled().sorted() == order)
+    }
+
+    @Test func bedtimeTapsOnlyMumble() {
+        #expect(CompanionView.bedtimeMumbles.count == 3)
+        #expect(CompanionView.bedtimeMumbles.allSatisfy { $0.hasPrefix("……") })
+    }
+
     @Test func offWorkPlaysOncePerDay() {
         #expect(CompanionView.newOffWork(.offWork(id: "2026-10-05"), last: "") == "2026-10-05")
         #expect(CompanionView.newOffWork(.offWork(id: "2026-10-05"), last: "2026-10-05") == nil)
