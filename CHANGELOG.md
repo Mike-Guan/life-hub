@@ -38,7 +38,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
-  colour instead of her own top.
+  colour instead of her own top, and her "…" bubble moves up off a set hat.
 - The second preset character's 6 tops and 2 full sets are on sale. She wears the one of the mode she is in,
   on the home screen, the shop, the wardrobe, unboxing, widgets and the watch.
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z

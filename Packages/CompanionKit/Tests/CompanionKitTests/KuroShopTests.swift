@@ -107,6 +107,12 @@ import Testing
         if let hat = clothes.hat { #expect(back.contains(hat)) }
     }
 
+    @Test func herThoughtBubbleMovesAboveASetHat() {
+        #expect(KuroFigure.offset(.tapDots, pose: KuroPose(look: .work, energy: nil)) == .zero)
+        #expect(KuroFigure.offset(.tapDots, pose: KuroPose(look: .work, energy: nil), hatted: true).height < 0)
+        #expect(KuroFigure.offset(.backHead, pose: KuroPose(look: .work, energy: nil), hatted: true) == .zero)
+    }
+
     @Test func actingCalmFlattensHerMouthButKeepsTheBlush() {
         var pose = KuroPose(look: .chill, energy: nil).showing(.low)
         pose.calm = true
