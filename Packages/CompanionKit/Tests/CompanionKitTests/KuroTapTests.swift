@@ -7,7 +7,7 @@ import Testing
 @Suite struct KuroTapTests {
     @Test func eachLookHasItsOwnMoveAndSleepyMeansRubbing() {
         let moves = KuroLook.allCases.map { KuroTap(look: $0, sleepy: false) }
-        #expect(moves == [.tablet, .sip, .swing, .glasses, .bump, .hug, .mark, .sketch])
+        #expect(moves == [.tablet, .sip, .swing, .glasses, .bump, .hug, .mark, .sketch, .hug, .hug, .hug])
         #expect(KuroLook.allCases.allSatisfy { KuroTap(look: $0, sleepy: true) == .rub })
     }
 
