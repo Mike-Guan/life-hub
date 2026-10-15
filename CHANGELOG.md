@@ -285,6 +285,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The clock no longer switches the mode. Work starts when you arrive at the office and ends when you
   leave it (or by hand); before, the app switched to 上班 at 9:30 even if you were still at home. The
   off-work notice now goes out only on days you're in 上班 mode or at the office.
+- The identity day follows the user's card: its warm-up line and invite use the card's own invite, and a user
+  without a card has no identity day. A character's own card keeps its lines.
 - HAKU's sleeping pillow is light blue, so it no longer blends into the white hair.
 - HAKU stops couch scrolling when you do: it gets up 20 minutes after Screen Time last saw you on the
   picked apps (it reports every 10 more minutes of use), as soon as you walk, or when you change mode by
