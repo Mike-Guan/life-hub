@@ -43,6 +43,22 @@
         }
       }
     },
+    "到常去的地方会自己换" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switches by place"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よく行く場所で切り替え"
+          }
+        }
+      }
+    },
     "占浴室中" : {
       "comment" : "中文改为“占浴室中”",
       "localizations" : {
@@ -171,6 +187,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No mode yet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだモードなし"
           }
         }
       }
