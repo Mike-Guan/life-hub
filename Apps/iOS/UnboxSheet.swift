@@ -104,7 +104,9 @@ struct UnboxSheet: View {
     // mode it is in and of the user's own card; an item that doesn't show there falls back to its own mode.
     private var shownMode: Mode {
         if let mode, item.shows(in: mode, card: card) { return mode }
-        return item.mode ?? item.slot.showcaseMode
+        let own = item.mode ?? item.slot.showcaseMode
+        // Without a card the identity slot is the old boxing kit, so the item shows in Chill instead.
+        return own == .boxing && card == nil ? .chill : own
     }
 
     private var wearing: Wardrobe {
