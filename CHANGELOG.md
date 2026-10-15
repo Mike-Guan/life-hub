@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The home page has a saved room per character: a furniture catalog and a layout that keeps what a newer
+  build wrote. The wardrobe's room item moves into the room once. Nothing on screen uses it yet (Issue #489).
 - HAKU makes small moves in each card look's base outfit now and then. In sport it stretches an arm across
   the chest, then the other, or drinks from a water bottle. Out, it looks at its wrist or tugs its backpack
   strap and shrugs. In craft, it spins its pencil and drops it, or wipes paint off its hand on the apron.
@@ -74,6 +76,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- On the watch app and the watch face, both characters wear the look of the identity card picked on the iPhone,
+  instead of the default boxing or tennis look. On cards without a look of their own, the second preset character
+  also does that card's base idles on the watch.
 - Swiping back to the character's page on the watch no longer replays its opening reaction, invite hop and line.
 - On another identity card's day, HAKU warms up without the boxing headband and gloves.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
@@ -211,6 +216,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   preview is wearing in the user's own mode name.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
+- Japanese for the second and third copy batches: home bubbles, VoiceOver lines, identity cards, first-run setup,
+  shop, wardrobe, unboxing, settings, memory, place editor, item names and reasons.
 - After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
 - On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
   ponytail (unbox page and home card). The watch is unchanged.

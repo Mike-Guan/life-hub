@@ -87,7 +87,8 @@ struct WatchHomeView: View {
         return Group {
             if payload.persona == .kuro {
                 KuroView(
-                    look: KuroLook(mode: mode ?? .chill),
+                    look: KuroLook(mode: mode ?? .chill, card: mode.flatMap(payload.card(for:))),
+                    card: mode.flatMap(payload.card(for:)),
                     energy: snapshot.energy(at: date)?.value,
                     bedtime: payload.bedtime.state(at: date),
                     need: snapshot.need(at: date),
@@ -101,6 +102,7 @@ struct WatchHomeView: View {
             } else {
                 CompanionView(
                     mode: mode,
+                    card: mode.flatMap(payload.card(for:)),
                     energy: snapshot.energy(at: date)?.value,
                     need: snapshot.need(at: date),
                     needSince: snapshot.needSince(at: date),
