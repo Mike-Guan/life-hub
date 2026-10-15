@@ -8,6 +8,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a
   side clip), a bear blanket and a cloud cushion on her lap, a succulent on the floor and a nightlight on the wall
   whose glow breathes slowly. The watch leaves out what is on her lap or the floor.
+- HAKU dresses for the dance, music and ski cards, each with its own idle now and then: it bobs to a small
+  speaker as notes float up and stops when caught, plays air chords by a ukulele while counting silently, or
+  pulls its ski goggles down and back and breathes out a white puff. The watch leaves out the speaker and the
+  fist, and raises the ukulele into view. The cards stay out of the picker for now.
+- The second preset character has her own seven weekly items, in her own rotation. They go on sale once
 - Two new wear slots for weekly items: a badge on the clothes, worn in every mode, and a hat, worn only in
   下班. HAKU's star badge and both characters' beanies use them and go on sale once their art is in.
 - The second preset character has her own eight weekly items, in her own rotation.
@@ -48,6 +53,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 - Debug builds have a 「日文和英文」 switch in settings. It is off by default, so every build shows Chinese
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
+- The second preset character has two small idle moves in each base outfit: in sportswear she reaches up onto her
+  toes or wipes her forehead with a towel, in the smock she tucks her hair behind her ear or makes a viewfinder
+  with her hands, and in the lilac top she straightens her collar or smiles at her phone.
 - HAKU's eight pop clothes are in the shop: two tops for each of work, off work and 副业, plus the varsity
   and raincoat sets. Each is worn only in its mode, in place of the jacket. The hoodie strings and the
   raincoat's duck swing a little with his breath.

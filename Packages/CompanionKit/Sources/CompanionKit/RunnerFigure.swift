@@ -196,6 +196,10 @@ struct RunnerPose {
     var outfit = Outfit()
     /// What HAKU wears for an identity card other than boxing, or nil for the boxing kit.
     var cardLook: RunnerCardLook?
+    /// Seconds into the card look's own idle, or -1 when it isn't playing.
+    var cardBeat: CGFloat = -1
+    /// Drawn in the watch's frame, whose bottom edge would leave only a scrap of what stands on the floor.
+    var watchFrame = false
     /// -1...1 over a 2.4 s breath: the swing of hanging clothes charms.
     var charmSway: Double = 0
 
@@ -467,6 +471,7 @@ struct RunnerPose {
         life: IdleLife? = nil,
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
+        card: IdentityKind? = nil,
         react: Double
     ) {
         self.init(face: face, need: need, life: life, activity: activity, moment: moment)
@@ -543,7 +548,9 @@ struct RunnerPose {
             // Every 18-30 s, one of: shake the wrists out, then a glove up to fix the headband; bump the gloves; or
             // slip left, slip right and duck.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
-            if plain, r == 0,
+            // A card look with its own idle plays only that one; both streams together mixed the slip into its nod.
+            let ownIdle = RunnerCardLook(card: card)?.beatLength != nil
+            if plain, r == 0, !ownIdle,
                 let beat = IdleClock.beat(
                     at: t, every: 24, spread: 6, lengths: Self.boxingBeats, seed: Self.seed)
             {
@@ -1503,7 +1510,15 @@ struct RunnerFigure: View {
                     // Asleep, HAKU holds nothing (QA spec S6).
                     visible = look.parts
                     if pose.bedtime { visible.subtract(look.held) }
-                    if !pose.holdsCardProps { visible.subtract(look.props) }
+                    if !pose.holdsCardProps {
+                        visible.subtract(look.props)
+                    } else if pose.cardBeat >= 0 {
+                        look.beatParts(at: pose.cardBeat, &visible)
+                    }
+                    // UI 审核 10/14: the watch's bottom edge cuts the speaker and the fist with the wristband.
+                    if pose.watchFrame { visible.subtract([.danceSpeaker, .wristbandHand]) }
+                    // One thing per corner: the gym bag by the door takes it from the speaker or the ukulele.
+                    if pose.bagLift >= 0, !pose.bedtime { visible.subtract([.danceSpeaker, .ukulele]) }
                 } else {
                     visible.formUnion(boxingParts)
                 }
@@ -1781,6 +1796,8 @@ struct RunnerFigure: View {
                 moved(part, move, scale: scale)
             } else if let move = SceneMove.welcome(part, pose: pose) {
                 moved(part, move, scale: scale)
+            } else if pose.cardBeat >= 0, let move = pose.cardLook?.move(part, at: pose.cardBeat) {
+                moved(part, move, scale: scale)
             } else if part == .walkDust, pose.walkFrom != nil {
                 moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
             } else {
@@ -1835,6 +1852,9 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
             case .roomSpeakerRing:
                 RunnerPartView(part: part).opacity(pose.speakerGlow)
+            case .ukulele where pose.watchFrame:
+                // UI 审核 10/14: raised into the watch's frame, so it shows beside HAKU.
+                RunnerPartView(part: part).offset(y: -22 * scale)
             case .cupR where pose.cupRUp > 0:
                 // Pushed up off the ear, tilting back.
                 RunnerPartView(part: part)
@@ -2140,7 +2160,7 @@ struct RunnerFigure: View {
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .sparkleWork, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
-        .dizzyStar, .setVarsityCap, .eyesBright, .lidsBright,
+        .dizzyStar, .setVarsityCap, .eyesBright, .lidsBright, .countMouth, .skiGoggles, .goggleHand, .breathPuff,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
