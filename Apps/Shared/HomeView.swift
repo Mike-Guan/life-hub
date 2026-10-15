@@ -125,24 +125,29 @@ struct HomeView: View {
                     if persona == .kuro {
                         // Issue #164: her look per mode, energy face and bedtime; a tap shows a line for now.
                         KuroView(
-                            look: KuroLook(mode: shownMode ?? .chill),
+                            look: KuroLook(mode: shownMode ?? .chill, card: shownCards.identity),
                             energy: reading?.value,
                             bedtime: bedtime.state(at: context.date),
                             need: activeNeed(at: context.date)?.need,
                             activity: shownActivity(at: context.date),
                             moment: moment(at: context.date),
                             overtimeUntil: rules.eveningUntil(at: context.date),
+                            invite: activeNeed(at: context.date) == nil ? nil : invite,
+                            walking: walking(at: context.date),
+                            bath: bath(at: context.date),
                             wearing: wardrobe.worn(in: shownMode ?? .chill),
                             event: welcomeBack ?? event ?? revived(at: context.date)
                                 ?? sit?.stretched(at: context.date)
                                 ?? stayHome(at: context.date) ?? dailyDone,
                             cheer: cheer,
                             nods: nods,
-                            onWelcomeDone: onWelcomeDone
+                            onWelcomeDone: onWelcomeDone,
+                            onBathDone: onBathDone
                         )
                     } else {
                         CompanionView(
                             mode: shownMode,
+                            card: shownCards.identity,
                             energy: reading?.value,
                             need: activeNeed(at: context.date)?.need,
                             needSince: activeNeed(at: context.date)?.since,
@@ -534,7 +539,7 @@ private struct Header: View {
         VStack(alignment: .leading, spacing: 6) {
             // The badges and buttons share a row with the date, so the greeting keeps the full width.
             HStack(alignment: .center) {
-                Text(subtitle)
+                subtitle
                     .font(Toy.body(13, weight: .bold))
                     .foregroundStyle(Toy.muted)
                     .lineLimit(1)
@@ -583,9 +588,11 @@ private struct Header: View {
         Greeting.text(hour: Calendar.current.component(.hour, from: .now), name: name)
     }
 
-    private var subtitle: String {
+    // UI 二组 preview 6: a new user has no mode yet, and says so in words, not in a code.
+    private var subtitle: Text {
         let date = Date.now.formatted(.dateTime.month().day().weekday(.wide))
-        return "\(date) · \(mode.map { "\(cards.code(for: $0, persona: persona)) MODE" } ?? "NO MODE")"
+        guard let mode else { return Text("\(date) · 还没有模式") }
+        return Text(verbatim: "\(date) · \(cards.code(for: mode, persona: persona)) MODE")
     }
 }
 
