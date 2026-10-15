@@ -225,6 +225,22 @@
         }
       }
     },
+    "先收起来" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it away"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "しまっておく"
+          }
+        }
+      }
+    },
     "先放衣柜" : {
       "comment" : "E6 按钮 ≤16",
       "localizations" : {
@@ -873,6 +889,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wear it now"
+          }
+        }
+      }
+    },
+    "现在摆上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it out now"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま飾る"
+          }
+        }
+      }
+    },
+    "现在用上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use it now"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま使う"
           }
         }
       }
