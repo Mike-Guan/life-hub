@@ -106,6 +106,34 @@ public struct OnboardingDraft: Codable, Equatable, Sendable {
         defaults.removeObject(forKey: Self.defaultsKey)
     }
 
+    // Issue #416: Settings opens the work-day and identity screens again, starting from what is set now.
+    /// A draft for changing one answer later from Settings: at `step`, filled in from the current settings.
+    public static func editing(_ step: Step, persona: Persona, cards: ModeCards, rules: ModeRules) -> OnboardingDraft {
+        var draft = OnboardingDraft()
+        draft.step = step
+        draft.persona = persona
+        draft.chill = cards.chill
+        draft.identity = cards.identity
+        draft.work = Work(workdays: rules.workdays, startMinute: rules.workStartMinute, endMinute: rules.workEndMinute)
+        return draft
+    }
+
+    /// Writes this draft's answer for its step into `cards` or `rules`: the identity card, or the work days
+    /// and hours. Other steps change nothing.
+    public func applyStep(to cards: inout ModeCards, rules: inout ModeRules) {
+        switch step {
+        case .identity:
+            cards.pickIdentity(identity)
+        case .work:
+            let work = work ?? .irregular
+            rules.workdays = work.workdays
+            rules.workStartMinute = work.startMinute
+            rules.workEndMinute = work.endMinute
+        default:
+            break
+        }
+    }
+
     /// The draft saved in `defaults`, or a new one when none is saved or it can't be read.
     public static func stored(in defaults: UserDefaults) -> OnboardingDraft {
         guard let data = defaults.data(forKey: defaultsKey) else { return OnboardingDraft() }

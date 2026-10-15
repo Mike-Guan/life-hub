@@ -194,7 +194,7 @@ public enum HakuLines {
     // 台词 泛化修改 v0 §1, §3: the character's own lines stay for her default card (拳击 for HAKU, 网球 for
     // KURO); another card brings its own, and a user with no sport gets no sports bag.
     /// The lines for `scene` in `persona`'s voice, fitted to `cards`.
-    static func pool(_ scene: LineScene, persona: Persona, cards: ModeCards?) -> [String] {
+    public static func pool(_ scene: LineScene, persona: Persona, cards: ModeCards?) -> [String] {
         let base = (persona == .kuro ? KuroLines.library : library)[scene] ?? []
         guard let cards else { return base }
         let own = cards.identity == ModeCards.legacy(for: persona).identity
