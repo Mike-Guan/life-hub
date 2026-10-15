@@ -247,7 +247,7 @@ struct WardrobeView: View {
                     CompanionPortrait(
                         mode: previewMode, card: card, wardrobe: wardrobe.showing(card: card), framing: .head
                     )
-                        .frame(width: 56, height: 56)
+                    .frame(width: 56, height: 56)
                 } else {
                     KuroPortrait(look: KuroLook(mode: previewMode, card: card), wearing: without(slots), framing: .head)
                         .frame(width: 56, height: 56)
