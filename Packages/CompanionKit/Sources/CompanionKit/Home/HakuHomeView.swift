@@ -461,6 +461,10 @@ private struct HomeSheetView: View {
                 Text("夜晚").font(Toy.body(16, weight: .bold))
             }
             .tint(Color(hex: 0x58C25A))
+            Toggle(isOn: Binding(get: { model.previewsAllItems }, set: { _ in model.togglePreviewItems() })) {
+                Text("预览：摆满所有物品").font(Toy.body(16, weight: .bold))
+            }
+            .tint(Color(hex: 0x58C25A))
             Button {
                 dismiss()
                 onExit()
