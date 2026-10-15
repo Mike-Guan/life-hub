@@ -173,6 +173,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
   full night stay brighter and clear the headset.
 - The watch has no dark band behind the clock any more; every screen keeps its own background.
+- The memory page names the identity day and its first time after the card the user picked, not always 拳击日.
 - With Japanese on, headings and bold text use the rounded Japanese font Zen Maru Gothic. Chinese and English
   keep the system font.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.

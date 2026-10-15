@@ -219,6 +219,7 @@ struct SettingsView: View {
         .sheet(isPresented: $showsMemory) {
             MemoryView(
                 persona: persona,
+                cards: cards,
                 store: store,
                 energy: energy,
                 ledger: ledger,
