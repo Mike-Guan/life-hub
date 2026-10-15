@@ -71,7 +71,9 @@ import Testing
     }
 
     @Test func theShapesRenderAtTheSpecSizes() {
-        #expect(ShareCard.Shape.story.size == CGSize(width: 360, height: 640))
-        #expect(ShareCard.Shape.square.size == CGSize(width: 360, height: 360))
+        let story = ShareCard.Shape.story.size
+        let square = ShareCard.Shape.square.size
+        #expect([story.width, story.height] == [360, 640])
+        #expect([square.width, square.height] == [360, 360])
     }
 }
