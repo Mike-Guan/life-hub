@@ -11,6 +11,28 @@
         }
       }
     },
+    "HAKU 会留在家里，他的罐子和东西都在。KURO 用她自己的罐子，第一次从零开始。随时可以换回来。" : {
+      "comment" : "设置：换角色前的确认",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAKUは家に残ります。缶も持ち物もそのまま。KUROは自分の缶を使い、最初はゼロから。いつでも戻せます。"
+          }
+        }
+      }
+    },
+    "KURO 会留在家里，她的罐子和东西都在。HAKU 用他自己的罐子，第一次从零开始。随时可以换回来。" : {
+      "comment" : "设置：换角色前的确认",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KUROは家に残ります。缶も持ち物もそのまま。HAKUは自分の缶を使い、最初はゼロから。いつでも戻せます。"
+          }
+        }
+      }
+    },
     "Screen Time 监测没停：%@" : {
       "localizations" : {
         "en" : {
