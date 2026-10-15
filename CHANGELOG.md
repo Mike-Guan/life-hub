@@ -683,3 +683,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   instead of on it.
 - When the second preset character is tapped in the middle of an idle move, what she put down slides back over
   0.2 s and notes or snow fade, instead of jumping back in one frame. A cup already at her lips stays there.
+- The second preset character's taps end more smoothly: her eyes shut for a moment instead of jumping back,
+  she turns away and back like a card flipping, her lap blanket slides away and back around a sip, and a tap
+  still playing stops when the mode changes; the off-work move waits for the switch.
