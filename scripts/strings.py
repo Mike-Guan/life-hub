@@ -4,7 +4,9 @@
 Chinese is the source language, so a key is the Chinese text itself. Each package has one table per
 character (Haku.xcstrings, Kuro.xcstrings) and Localizable.xcstrings for everything else. Translations
 come from the writers; this script fails when a catalog holds a key that no longer appears as a string
-literal in that package's source, so a reworded line can't keep a stale translation.
+literal in that package's source, so a reworded line can't keep a stale translation. It also fails when a
+translation in any catalog has different placeholders from its key, since `String(format:)` would read the
+wrong arguments.
 
     scripts/strings.py   exit 1 and name each stale key
 """
@@ -18,6 +20,16 @@ PACKAGES = ["HubCore", "CompanionKit"]
 TABLES = ["Localizable", "Haku", "Kuro"]
 # A one-line string literal with no interpolation.
 LITERAL = re.compile(r'"((?:[^"\\\n]|\\[^(])*)"')
+# A format placeholder such as %@, %1$@ or %lld; %% is a literal percent sign.
+PLACEHOLDER = re.compile(r"%(?:(\d+)\$)?(@|lld|ld|d)")
+
+
+def placeholders(text: str) -> list[str]:
+    """The placeholder types in argument order, whether numbered or not."""
+    found = PLACEHOLDER.findall(text.replace("%%", ""))
+    if all(number for number, _ in found):
+        found.sort(key=lambda match: int(match[0]))
+    return [kind for _, kind in found]
 
 
 def literals(sources: pathlib.Path) -> set[str]:
@@ -41,6 +53,13 @@ def main() -> int:
             for key in catalog.get("strings", {}):
                 if key not in known:
                     stale.append(f"{path.relative_to(ROOT)}: no source text {key!r}")
+    for path in sorted(ROOT.glob("*/**/*.xcstrings")):
+        catalog = json.loads(path.read_text(encoding="utf-8"))
+        for key, entry in catalog.get("strings", {}).items():
+            for language, localization in entry.get("localizations", {}).items():
+                value = localization.get("stringUnit", {}).get("value", "")
+                if placeholders(value) != placeholders(key):
+                    stale.append(f"{path.relative_to(ROOT)}: {language} for {key!r} has other placeholders")
     for line in stale:
         print(f"::error::{line}")
     return 1 if stale else 0

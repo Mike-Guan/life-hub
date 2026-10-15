@@ -1,5 +1,980 @@
 {
   "sourceLanguage" : "zh-Hans",
-  "strings" : {},
+  "strings" : {
+    "……お疲れ。" : {
+      "comment" : "下班提醒点开",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…otsukare."
+          }
+        }
+      }
+    },
+    "……不许看。" : {
+      "comment" : "E1；同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…eyes elsewhere."
+          }
+        }
+      }
+    },
+    "……不错。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…nice."
+          }
+        }
+      }
+    },
+    "……今天不出门。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…indoor day."
+          }
+        }
+      }
+    },
+    "……今天手感不错。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…feeling good today."
+          }
+        }
+      }
+    },
+    "……先热个身。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…stretching first."
+          }
+        }
+      }
+    },
+    "……先选一个吧。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…pick one first."
+          }
+        }
+      }
+    },
+    "……再一个。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…one more."
+          }
+        }
+      }
+    },
+    "……出门了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…heading out."
+          }
+        }
+      }
+    },
+    "……划掉了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…crossed off."
+          }
+        }
+      }
+    },
+    "……刚才很认真。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…that was focused."
+          }
+        }
+      }
+    },
+    "……别吵，快好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…shh. almost done."
+          }
+        }
+      }
+    },
+    "……别看我，看球。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…don't watch me. watch the ball."
+          }
+        }
+      }
+    },
+    "……包收好了。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…bag's zipped."
+          }
+        }
+      }
+    },
+    "……嗯，这样可以。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…mm. that works."
+          }
+        }
+      }
+    },
+    "……嘘。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…shh."
+          }
+        }
+      }
+    },
+    "……回去了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…heading back."
+          }
+        }
+      }
+    },
+    "……回来了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…you're back."
+          }
+        }
+      }
+    },
+    "……在听。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…mm-hm."
+          }
+        }
+      }
+    },
+    "……在弄自己的事。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…doing my own thing."
+          }
+        }
+      }
+    },
+    "……在收。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…packing up."
+          }
+        }
+      }
+    },
+    "……坐这边。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…sit here."
+          }
+        }
+      }
+    },
+    "……就在家。嗯。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…home. mm."
+          }
+        }
+      }
+    },
+    "……干嘛。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…hm?"
+          }
+        }
+      }
+    },
+    "……开始了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…here we go."
+          }
+        }
+      }
+    },
+    "……我们今天，真的不动了吗。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…are we really not moving today."
+          }
+        }
+      }
+    },
+    "……我先去洗澡了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…shower first."
+          }
+        }
+      }
+    },
+    "……我站起来伸一下。你呢？" : {
+      "comment" : "中文改为“……我站起来伸一下。你呢？”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…standing up to stretch. you?"
+          }
+        }
+      }
+    },
+    "……手腕转好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…wrists warmed up."
+          }
+        }
+      }
+    },
+    "……整理一下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…tidying up."
+          }
+        }
+      }
+    },
+    "……早。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…morning."
+          }
+        }
+      }
+    },
+    "……明天还在。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…it'll keep till tomorrow."
+          }
+        }
+      }
+    },
+    "……比想的重。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…heavier than I thought."
+          }
+        }
+      }
+    },
+    "……没吃。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…wasn't me."
+          }
+        }
+      }
+    },
+    "……没在等。真的。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…wasn't waiting. really."
+          }
+        }
+      }
+    },
+    "……没在练。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…just tuning."
+          }
+        }
+      }
+    },
+    "……洗好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…all clean."
+          }
+        }
+      }
+    },
+    "……电量，回来一格。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…one bar of battery back."
+          }
+        }
+      }
+    },
+    "……真跑完了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…you actually finished."
+          }
+        }
+      }
+    },
+    "……眼皮有点重。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…blinking slower."
+          }
+        }
+      }
+    },
+    "……给你。收好。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…for you. keep it safe."
+          }
+        }
+      }
+    },
+    "……腰。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…my back."
+          }
+        }
+      }
+    },
+    "……腰，好一点了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…back feels better."
+          }
+        }
+      }
+    },
+    "……腿是你的。我陪着。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…your legs. I'm just here."
+          }
+        }
+      }
+    },
+    "……让一让。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…scoot over."
+          }
+        }
+      }
+    },
+    "……走吗。网球包拎好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…going? tennis bag's ready."
+          }
+        }
+      }
+    },
+    "……还没结束啊。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…still not over."
+          }
+        }
+      }
+    },
+    "……还行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…not bad."
+          }
+        }
+      }
+    },
+    "……还行吧。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…not bad, I guess."
+          }
+        }
+      }
+    },
+    "……这关快过了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…almost past this level."
+          }
+        }
+      }
+    },
+    "……这张可以。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…that one works."
+          }
+        }
+      }
+    },
+    "お疲れ。……先说了。" : {
+      "comment" : "otsukare 只留下班/累了的一两句（PM 10/14）；同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…good job. in advance."
+          }
+        }
+      }
+    },
+    "お疲れ。……走了。" : {
+      "comment" : "otsukare 只留下班/累了的一两句（PM 10/14）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "long day. …I'm off."
+          }
+        }
+      }
+    },
+    "ちょっと休憩。" : {
+      "comment" : "ちょっと休憩（otsukare 方案 A 只留 otsukare）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "quick break."
+          }
+        }
+      }
+    },
+    "ちょっと休憩。……好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "quick break. …ok, done."
+          }
+        }
+      }
+    },
+    "まあね。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eh."
+          }
+        }
+      }
+    },
+    "一件一件来。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "one thing at a time."
+          }
+        }
+      }
+    },
+    "不给你玩。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not sharing."
+          }
+        }
+      }
+    },
+    "什么都没看见。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "saw nothing."
+          }
+        }
+      }
+    },
+    "什么零食。没看见。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "what snacks. didn't see any."
+          }
+        }
+      }
+    },
+    "今天也开着。……只是说说。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "open today too. …just saying."
+          }
+        }
+      }
+    },
+    "今天就这样吧。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…calling it."
+          }
+        }
+      }
+    },
+    "今天网球。……拍子带好了。" : {
+      "comment" : "同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…tennis. racket's in."
+          }
+        }
+      }
+    },
+    "你也在刷？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "scrolling too?"
+          }
+        }
+      }
+    },
+    "做完了。……不错。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "done. …nice."
+          }
+        }
+      }
+    },
+    "先拍两下球。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a few bounces first."
+          }
+        }
+      }
+    },
+    "先让我窝五分钟。" : {
+      "comment" : "同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "curling up. five min."
+          }
+        }
+      }
+    },
+    "光线不错。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…the light's soft."
+          }
+        }
+      }
+    },
+    "再一会儿。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a little longer."
+          }
+        }
+      }
+    },
+    "再一组。……你先。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…another set. after you."
+          }
+        }
+      }
+    },
+    "再睡五分钟。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…five more. blanket stays."
+          }
+        }
+      }
+    },
+    "包在门口。……随你。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bag's by the door. …up to you."
+          }
+        }
+      }
+    },
+    "包我拎着。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I've got the bag."
+          }
+        }
+      }
+    },
+    "发圈去哪了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "where's my hair tie."
+          }
+        }
+      }
+    },
+    "呼……先不说话。" : {
+      "comment" : "中文改为“呼……先不说话。”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hoo… no talking yet."
+          }
+        }
+      }
+    },
+    "嗯。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mm."
+          }
+        }
+      }
+    },
+    "嗯。……还行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mm. …not bad."
+          }
+        }
+      }
+    },
+    "嗯。又活了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mm. alive again."
+          }
+        }
+      }
+    },
+    "头带系好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "headband's on."
+          }
+        }
+      }
+    },
+    "快了。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…nearly."
+          }
+        }
+      }
+    },
+    "托腮，等着。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "chin in hand. waiting."
+          }
+        }
+      }
+    },
+    "正手。……反手。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "forehand. …backhand."
+          }
+        }
+      }
+    },
+    "正手，反手。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "forehand. backhand."
+          }
+        }
+      }
+    },
+    "毯子分你一半。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "half the blanket?"
+          }
+        }
+      }
+    },
+    "没画什么。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…just doodles."
+          }
+        }
+      }
+    },
+    "活动一下手腕而已。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "just loosening my wrist."
+          }
+        }
+      }
+    },
+    "热奶茶，喝一口？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "warm milk tea. sip?"
+          }
+        }
+      }
+    },
+    "热饮，分你一口。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "warm drink. sip?"
+          }
+        }
+      }
+    },
+    "走了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "off we go."
+          }
+        }
+      }
+    },
+    "这个有点好笑。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "this one's kind of funny."
+          }
+        }
+      }
+    },
+    "这球，有点欠。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "this ball's asking for it."
+          }
+        }
+      }
+    },
+    "那个包……算了。" : {
+      "comment" : "E1 分角色",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…the bag can wait."
+          }
+        }
+      }
+    },
+    "门外的事，明天再说。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "outside can wait till tomorrow."
+          }
+        }
+      }
+    },
+    "门就在那。……问问而已。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "door's right there. …just asking."
+          }
+        }
+      }
+    },
+    "鞋带系好了。你的呢。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "laces tied. yours?"
+          }
+        }
+      }
+    }
+  },
   "version" : "1.0"
 }

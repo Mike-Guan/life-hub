@@ -1,5 +1,1514 @@
 {
   "sourceLanguage" : "zh-Hans",
-  "strings" : {},
+  "strings" : {
+    "%@中" : {
+      "comment" : "没标语的卡；“画画手作中”的意思",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ time"
+          }
+        }
+      }
+    },
+    "%@的地方" : {
+      "comment" : "地点名，如 “Boxing spot”；activity 这里要首字母大写的卡名，见说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ spot"
+          }
+        }
+      }
+    },
+    "energy 记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "energy records"
+          }
+        }
+      }
+    },
+    "mode 记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mode records"
+          }
+        }
+      }
+    },
+    "……今天好像没睡够。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…short on sleep, maybe."
+          }
+        }
+      }
+    },
+    "……今天状态不错。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…good day, looks like."
+          }
+        }
+      }
+    },
+    "……今天还可以吧。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…okay today, I think."
+          }
+        }
+      }
+    },
+    "……又不是在等你。" : {
+      "comment" : "ツンデレ式那一句，只在这里",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Not like I was waiting."
+          }
+        }
+      }
+    },
+    "……嗯。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…mm."
+          }
+        }
+      }
+    },
+    "……坐。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Sit."
+          }
+        }
+      }
+    },
+    "……开始了" : {
+      "comment" : "首页卡标语，第二个预设角色",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…here we go"
+          }
+        }
+      }
+    },
+    "、" : {
+      "comment" : "分隔符",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ","
+          }
+        }
+      }
+    },
+    "一件一件来" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "one thing at a time"
+          }
+        }
+      }
+    },
+    "上班" : {
+      "comment" : "卡名；同一中文要两种译法，请工程把中文改得稍有不同",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work"
+          }
+        }
+      }
+    },
+    "下一件" : {
+      "comment" : "“下一件 18:00”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        }
+      }
+    },
+    "下班" : {
+      "comment" : "同上；第二个预设角色的下班卡名；同一中文要两种译法，请工程把中文改得稍有不同",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chill"
+          }
+        }
+      }
+    },
+    "乐器" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Music"
+          }
+        }
+      }
+    },
+    "书摊开了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Book open"
+          }
+        }
+      }
+    },
+    "买菜逛街" : {
+      "comment" : "E6",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Groceries & errands"
+          }
+        }
+      }
+    },
+    "低电量" : {
+      "comment" : "电量档；和 “low battery” 比喻一致：Low / Okay / Full",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low"
+          }
+        }
+      }
+    },
+    "你在健身房" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're at the gym"
+          }
+        }
+      }
+    },
+    "你在拳馆" : {
+      "comment" : "VoiceOver / 说明文字",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're at the boxing gym"
+          }
+        }
+      }
+    },
+    "你在网球场" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're at the tennis court"
+          }
+        }
+      }
+    },
+    "你在跑步" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're on a run"
+          }
+        }
+      }
+    },
+    "你自己选了「%@」" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You picked “%@” yourself"
+          }
+        }
+      }
+    },
+    "做项目" : {
+      "comment" : "“做项目”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Building"
+          }
+        }
+      }
+    },
+    "健身" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gym"
+          }
+        }
+      }
+    },
+    "健身房" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gym"
+          }
+        }
+      }
+    },
+    "健身日" : {
+      "comment" : "学到的习惯",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gym days"
+          }
+        }
+      }
+    },
+    "健身日，下班了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gym day, and work's over"
+          }
+        }
+      }
+    },
+    "公司" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Office"
+          }
+        }
+      }
+    },
+    "其实很累" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actually wiped"
+          }
+        }
+      }
+    },
+    "写作" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Writing"
+          }
+        }
+      }
+    },
+    "决策记录" : {
+      "comment" : "错误提示里的 name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "decision log"
+          }
+        }
+      }
+    },
+    "切到%@" : {
+      "comment" : "地点动作，按钮 ≤16 字母时 title 不超 6 字母；超了照样显示，UI 换行",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to %@"
+          }
+        }
+      }
+    },
+    "切到上班" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to Work"
+          }
+        }
+      }
+    },
+    "切到下班" : {
+      "comment" : "同上",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to Chill"
+          }
+        }
+      }
+    },
+    "切到副业" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to Projects"
+          }
+        }
+      }
+    },
+    "到健身房了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got to the gym"
+          }
+        }
+      }
+    },
+    "到公司了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got to the office"
+          }
+        }
+      }
+    },
+    "到家了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got home"
+          }
+        }
+      }
+    },
+    "副业" : {
+      "comment" : "副业卡名，见语气卡 §7",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projects"
+          }
+        }
+      }
+    },
+    "包背好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bag on"
+          }
+        }
+      }
+    },
+    "只是路过" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just passing by"
+          }
+        }
+      }
+    },
+    "只记录，不切换" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just note it, don't switch"
+          }
+        }
+      }
+    },
+    "周一" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon"
+          }
+        }
+      }
+    },
+    "周三" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wed"
+          }
+        }
+      }
+    },
+    "周二" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tue"
+          }
+        }
+      }
+    },
+    "周五" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fri"
+          }
+        }
+      }
+    },
+    "周六" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sat"
+          }
+        }
+      }
+    },
+    "周四" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thu"
+          }
+        }
+      }
+    },
+    "周日" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sun"
+          }
+        }
+      }
+    },
+    "呼——吸" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "in… and out"
+          }
+        }
+      }
+    },
+    "哦。" : {
+      "comment" : "被纠正后",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oh."
+          }
+        }
+      }
+    },
+    "哦，回来了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oh. You're back."
+          }
+        }
+      }
+    },
+    "嗯。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mm."
+          }
+        }
+      }
+    },
+    "地上小粉花" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Little pink flowers"
+          }
+        }
+      }
+    },
+    "地点" : {
+      "comment" : "同一中文要两种译法，请工程把中文改得稍有不同",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Place"
+          }
+        }
+      }
+    },
+    "垫子卷好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mat rolled"
+          }
+        }
+      }
+    },
+    "备课" : {
+      "comment" : "第二个预设角色的副业卡默认名（备课）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prep"
+          }
+        }
+      }
+    },
+    "头带系紧" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Headband tight"
+          }
+        }
+      }
+    },
+    "学习" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Studying"
+          }
+        }
+      }
+    },
+    "家" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        }
+      }
+    },
+    "小组件数据没写进去：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widget data didn't save: %@"
+          }
+        }
+      }
+    },
+    "帮你看着" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "on the sidelines"
+          }
+        }
+      }
+    },
+    "常待的地方" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Places you're often at"
+          }
+        }
+      }
+    },
+    "开一罐能量饮料" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cracking open a can"
+          }
+        }
+      }
+    },
+    "当%@" : {
+      "comment" : "“当拳馆”：这里算作某地点",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Count as %@"
+          }
+        }
+      }
+    },
+    "当健身房" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Count as gym"
+          }
+        }
+      }
+    },
+    "当拳馆" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Count as boxing gym"
+          }
+        }
+      }
+    },
+    "当网球场" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Count as tennis court"
+          }
+        }
+      }
+    },
+    "慢慢走" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "slow and steady"
+          }
+        }
+      }
+    },
+    "我觉得你今天没睡够。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I think you didn't get enough sleep."
+          }
+        }
+      }
+    },
+    "我觉得你今天电挺满。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I think you're fully charged today."
+          }
+        }
+      }
+    },
+    "我觉得你今天还行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I think you're doing okay today."
+          }
+        }
+      }
+    },
+    "户外" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outdoors"
+          }
+        }
+      }
+    },
+    "房间小沙袋" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mini punching bag"
+          }
+        }
+      }
+    },
+    "房间绿植" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Room plant"
+          }
+        }
+      }
+    },
+    "拍摄" : {
+      "comment" : "副业状态名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shooting"
+          }
+        }
+      }
+    },
+    "拍线刚调过" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fresh strings"
+          }
+        }
+      }
+    },
+    "拳击" : {
+      "comment" : "默认卡名。整句 “\\(title) \\(time) 开始” → “\\(title) starts at \\(time)”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boxing"
+          }
+        }
+      }
+    },
+    "拳击日" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boxing"
+          }
+        }
+      }
+    },
+    "拳套磨旧了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The gloves wore in."
+          }
+        }
+      }
+    },
+    "拳套系好了" : {
+      "comment" : "第二个预设角色，小写",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gloves on"
+          }
+        }
+      }
+    },
+    "拳馆" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boxing gym"
+          }
+        }
+      }
+    },
+    "搬不动旧记录 %1$@：%2$@" : {
+      "comment" : "多个占位符：按中文出现顺序编号，请工程核对顺序",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't move old records %1$@: %2$@"
+          }
+        }
+      }
+    },
+    "散步晒太阳" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walk in the sun"
+          }
+        }
+      }
+    },
+    "昨晚睡了 %1$@ 小时 %2$@ 分，算「%3$@」" : {
+      "comment" : "电量档进引号：“Low”；多个占位符：按中文出现顺序编号，请工程核对顺序",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slept %1$@h %2$@m last night. Calling it “%3$@”"
+          }
+        }
+      }
+    },
+    "有一天睡得挺好。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One night of decent sleep."
+          }
+        }
+      }
+    },
+    "有几天睡得挺好。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A few nights of decent sleep."
+          }
+        }
+      }
+    },
+    "本子翻开了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sketchbook open"
+          }
+        }
+      }
+    },
+    "条纹面罩" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Striped mask"
+          }
+        }
+      }
+    },
+    "桌上多了台显示器。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A monitor showed up on the desk."
+          }
+        }
+      }
+    },
+    "樱色运动发带" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakura sweatband"
+          }
+        }
+      }
+    },
+    "毛巾带上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "towel packed"
+          }
+        }
+      }
+    },
+    "水瓶装满了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bottle's full"
+          }
+        }
+      }
+    },
+    "没那么累" : {
+      "comment" : "“不对”纠正按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not that tired"
+          }
+        }
+      }
+    },
+    "泳帽塞好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cap on, hair in"
+          }
+        }
+      }
+    },
+    "游泳" : {
+      "comment" : "同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swimming"
+          }
+        }
+      }
+    },
+    "滑雪" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ski"
+          }
+        }
+      }
+    },
+    "满格" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full"
+          }
+        }
+      }
+    },
+    "热饮，窝着" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "warm drink, curled up"
+          }
+        }
+      }
+    },
+    "猫耳台灯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cat-ear lamp"
+          }
+        }
+      }
+    },
+    "现在" : {
+      "comment" : "“现在 18:00”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Now"
+          }
+        }
+      }
+    },
+    "球打满气了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ball pumped up"
+          }
+        }
+      }
+    },
+    "球拍拿好" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racket in hand"
+          }
+        }
+      }
+    },
+    "球类" : {
+      "comment" : "球类：羽毛球、篮球、足球都在这",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sports"
+          }
+        }
+      }
+    },
+    "瑜伽" : {
+      "comment" : "含普拉提",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yoga"
+          }
+        }
+      }
+    },
+    "瑜伽拉伸" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yoga & stretching"
+          }
+        }
+      }
+    },
+    "画画手作" : {
+      "comment" : "画画手作",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Art"
+          }
+        }
+      }
+    },
+    "眼镜戴上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "glasses on"
+          }
+        }
+      }
+    },
+    "离开公司了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left the office"
+          }
+        }
+      }
+    },
+    "笔在手上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pen in hand"
+          }
+        }
+      }
+    },
+    "第一次%@" : {
+      "comment" : "如 “First Boxing”；英语更顺的写法见说明（按卡给整句）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First %@"
+          }
+        }
+      }
+    },
+    "第一次去健身房" : {
+      "comment" : "长期记得的事",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First time at the gym"
+          }
+        }
+      }
+    },
+    "第一次跑完 5 公里" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First 5K"
+          }
+        }
+      }
+    },
+    "粉色发圈" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pink scrunchie"
+          }
+        }
+      }
+    },
+    "粉色猫猫毯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pink cat blanket"
+          }
+        }
+      }
+    },
+    "粉色网球包" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pink tennis bag"
+          }
+        }
+      }
+    },
+    "编程专注模式开了" : {
+      "comment" : "系统“专注模式”英文叫 Focus",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coding Focus turned on"
+          }
+        }
+      }
+    },
+    "网球" : {
+      "comment" : "句中用，小写；同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tennis"
+          }
+        }
+      }
+    },
+    "网球场" : {
+      "comment" : "地点名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tennis court"
+          }
+        }
+      }
+    },
+    "网球日" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tennis"
+          }
+        }
+      }
+    },
+    "耳机戴上，开工" : {
+      "comment" : "首页卡标语，HAKU",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earbuds in. Clocking in."
+          }
+        }
+      }
+    },
+    "能量罐记录" : {
+      "comment" : "错误提示里的 name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "can records"
+          }
+        }
+      }
+    },
+    "自习" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Study"
+          }
+        }
+      }
+    },
+    "自己的事，开工" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Own stuff. Starting"
+          }
+        }
+      }
+    },
+    "藏不住转一圈" : {
+      "comment" : "纪念品（庆祝动作）：“藏不住转一圈”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Happy little spin"
+          }
+        }
+      }
+    },
+    "行，我不念了。" : {
+      "comment" : "邀请停一周那天，HAKU",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fine. I'll drop it."
+          }
+        }
+      }
+    },
+    "起身庆祝" : {
+      "comment" : "纪念品（庆祝动作）；同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stand-up cheer"
+          }
+        }
+      }
+    },
+    "跑步" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running"
+          }
+        }
+      }
+    },
+    "跑步日，傍晚了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run day, and it's evening"
+          }
+        }
+      }
+    },
+    "跑者头带" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runner's headband"
+          }
+        }
+      }
+    },
+    "跳舞" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dance"
+          }
+        }
+      }
+    },
+    "运营" : {
+      "comment" : "“运营”：运营自己的账号/店",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running the account"
+          }
+        }
+      }
+    },
+    "还行" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Okay"
+          }
+        }
+      }
+    },
+    "这周你被我叫起来两次。还行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Twice this week I got you up. Not bad."
+          }
+        }
+      }
+    },
+    "这周你起来了 %@ 次。……我可没在数。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You got up %@ times this week. …Not that I'm counting."
+          }
+        }
+      }
+    },
+    "这周有一次，你真的起来了。我记着。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once this week, you actually got up. I noticed."
+          }
+        }
+      }
+    },
+    "金拳套" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold gloves"
+          }
+        }
+      }
+    },
+    "金色网球拍" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold racket"
+          }
+        }
+      }
+    },
+    "门口多了双跑鞋。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New running shoes by the door."
+          }
+        }
+      }
+    },
+    "霓虹粉拳套" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neon pink gloves"
+          }
+        }
+      }
+    },
+    "青色头带" : {
+      "comment" : "商品名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cyan headband"
+          }
+        }
+      }
+    },
+    "鞋带系紧" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laces tight"
+          }
+        }
+      }
+    },
+    "骑车" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cycling"
+          }
+        }
+      }
+    }
+  },
   "version" : "1.0"
 }

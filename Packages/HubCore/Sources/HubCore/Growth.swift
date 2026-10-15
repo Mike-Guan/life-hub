@@ -586,7 +586,6 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     init(clothes id: String, slot: Slot, title: String, price: Int, mode: Mode, persona: Persona = .haku) {
         self.init(id: id, slot: slot, title: title, price: price, persona: persona)
         self.mode = mode
-        isDrawn = false
     }
 
     // The identity card lives in the boxing mode slot (ModeCards), so its clothes are worn there.
@@ -694,6 +693,11 @@ public struct Wardrobe: Codable, Equatable, Sendable {
     public func isWearing(_ item: ShopItem) -> Bool {
         if let mode = item.mode { return clothes[mode] == item.id }
         return equipped[item.slot] == item.id
+    }
+
+    /// The ids worn in `mode`: every slot plus that mode's top or set.
+    public func worn(in mode: Mode) -> Set<String> {
+        Set(equipped.values).union(clothes[mode].map { [$0] } ?? [])
     }
 
     // A switched-away card's items stay stored, so switching back puts them on again. Ids this build

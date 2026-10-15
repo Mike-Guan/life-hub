@@ -10,18 +10,27 @@ struct WardrobeView: View {
     private let cards: ModeCards
     @Environment(\.dismiss) private var dismiss
     @State private var previewMode: Mode
-    @State private var slot: Slot = .gloves
+    @State private var shelf: WardrobeShelf = .clothes
 
     /// - Parameters:
     ///   - persona: the character whose wardrobe it is.
     ///   - mode: the mode to preview first, usually the current one.
     ///   - cards: the user's mode cards, which name the mode buttons; the character's defaults when `nil`.
-    init(growth: GrowthStore, wardrobe: Binding<Wardrobe>, persona: Persona, mode: Mode?, cards: ModeCards? = nil) {
+    ///   - shelf: the tab to show first.
+    init(
+        growth: GrowthStore,
+        wardrobe: Binding<Wardrobe>,
+        persona: Persona,
+        mode: Mode?,
+        cards: ModeCards? = nil,
+        shelf: WardrobeShelf = .clothes
+    ) {
         self.growth = growth
         _wardrobe = wardrobe
         self.persona = persona
         self.cards = cards ?? .legacy(for: persona)
         _previewMode = State(initialValue: mode ?? .chill)
+        _shelf = State(initialValue: shelf)
     }
 
     var body: some View {
@@ -30,17 +39,15 @@ struct WardrobeView: View {
                 header
                 preview
                 modePicker
-                slotTabs
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
-                    defaultTile
-                    ForEach(ownedItems) { item in
-                        itemTile(item)
-                    }
-                    ForEach(lockedKeepsakes) { item in
-                        lockedTile(item)
-                    }
+                shelfTabs
+                grid(defaultSlots: shownShelf.defaultSlots, items: shelfItems)
+                // 商店完整目录 §9.1: celebrations are the last group of accessories, shown once one is owned.
+                if shownShelf == .accessories && !celebrations.isEmpty {
+                    Text("庆祝")
+                        .font(Toy.body(15, weight: .black))
+                    grid(defaultSlots: [.celebration], items: celebrations)
                 }
-                Text("点一下就换上。拿到的东西永远在这，不会丢。")
+                Text(shelfNote)
                     .font(Toy.body(13, weight: .bold))
                     .foregroundStyle(Toy.muted)
                 if !collection.isEmpty {
@@ -59,14 +66,35 @@ struct WardrobeView: View {
     private var ledger: CanLedger { growth.ledger.only(persona) }
     private var owned: Set<String> { ledger.owned }
 
-    private var ownedItems: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { $0.slot == slot && owned.contains($0.id) }
+    private var card: IdentityKind? { cards.identity }
+
+    // Props leave when the picker moves off the identity card's mode, so the clothes take their place.
+    private var shownShelf: WardrobeShelf {
+        WardrobeShelf.shelves(in: previewMode, card: card).contains(shelf) ? shelf : .clothes
     }
 
-    private var lockedKeepsakes: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { item in
-            guard item.slot == slot, let keepsake = item.keepsake, !owned.contains(item.id) else { return false }
-            return ShopView.liveWins.contains(keepsake.win) && item.suits(.picked(for: persona))
+    // 商店完整目录 §9.3: an unearned keepsake stays hidden, as in the life collection. A keepsake can be earned
+    // before its art exists, so it waits until the character draws it.
+    private var ownedShowing: [ShopItem] {
+        ShopItem.catalog(for: persona).filter {
+            owned.contains($0.id) && $0.isDrawn && $0.shows(in: previewMode, card: card)
+        }
+    }
+
+    private var shelfItems: [ShopItem] {
+        ownedShowing.filter { $0.slot.shelf == shownShelf && $0.slot != .celebration }
+    }
+
+    private var celebrations: [ShopItem] {
+        ownedShowing.filter { $0.slot == .celebration }
+    }
+
+    private var shelfNote: String {
+        switch shownShelf {
+        case .clothes: "只列\(cards.title(for: previewMode, persona: persona))能穿的。拿到的东西永远在这，不会丢。"
+        case .accessories: "配饰每个模式都戴。拿到的东西永远在这，不会丢。"
+        case .props: "道具只在这张卡的模式里拿着。拿到的东西永远在这，不会丢。"
+        case .room: "房间里一次摆一件。拿到的东西永远在这，不会丢。"
         }
     }
 
@@ -135,7 +163,7 @@ struct WardrobeView: View {
     // UI 审核 R1: a label on the card covered the gloves, so it sits under the card.
     private var preview: some View {
         VStack(alignment: .leading, spacing: 8) {
-            PersonaPortrait(persona: persona, mode: previewMode, wardrobe: wardrobe)
+            PersonaPortrait(persona: persona, mode: previewMode, wardrobe: wardrobe.showing(card: card))
                 .frame(width: 210, height: 276)
                 .frame(maxWidth: .infinity, alignment: .bottom)
                 .frame(height: 300, alignment: .bottom)
@@ -167,43 +195,59 @@ struct WardrobeView: View {
         .accessibilityLabel("看哪个模式的样子")
     }
 
-    // Slots with nothing drawn yet (clothes before their art) get no tab.
-    private var tabs: [Slot] {
-        Slot.allCases.filter { tab in ShopItem.catalog(for: persona).contains { $0.slot == tab && $0.isDrawn } }
-    }
-
-    private var slotTabs: some View {
+    private var shelfTabs: some View {
         HStack(spacing: 6) {
-            ForEach(tabs, id: \.self) { tab in
+            ForEach(WardrobeShelf.shelves(in: previewMode, card: card), id: \.self) { tab in
                 Button {
-                    slot = tab
+                    shelf = tab
                 } label: {
-                    Text(tab.title(for: persona))
+                    Text(tab.title)
                         .font(Toy.body(14, weight: .heavy))
-                        .foregroundStyle(slot == tab ? Toy.paper : Toy.ink)
+                        .foregroundStyle(shownShelf == tab ? Toy.paper : Toy.ink)
                         .frame(maxWidth: .infinity, minHeight: 44)
-                        .background(Capsule().fill(slot == tab ? Toy.ink : Toy.card))
+                        .background(Capsule().fill(shownShelf == tab ? Toy.ink : Toy.card))
                         .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
+                        .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
-                .accessibilityAddTraits(slot == tab ? .isSelected : [])
+                .accessibilityAddTraits(shownShelf == tab ? .isSelected : [])
             }
         }
     }
 
-    private var defaultTile: some View {
-        let isWorn = wardrobe.equipped[slot] == nil
+    private func grid(defaultSlots: [Slot], items: [ShopItem]) -> some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
+            defaultTile(defaultSlots)
+            ForEach(items) { item in
+                itemTile(item)
+            }
+        }
+    }
+
+    // The default tile takes off what the shelf's items put on: the mode's clothes, or the listed slots.
+    private func defaultTile(_ slots: [Slot]) -> some View {
+        let clothes = slots == [.top]
+        let isWorn = clothes ? wardrobe.clothes[previewMode] == nil : slots.allSatisfy { wardrobe.equipped[$0] == nil }
+        let slot = slots[0]
         return Button {
-            wardrobe.clear(slot)
+            if clothes {
+                wardrobe.undress(previewMode)
+            } else {
+                slots.forEach { wardrobe.clear($0) }
+            }
         } label: {
-            tile(isWorn: isWorn) {
-                // KURO has no default item to wear, so her worn slots show her head without this slot's item.
-                // Room and celebration are not worn, so they show the same picture as HAKU's.
-                if persona == .haku || slot == .room || slot == .celebration {
+            tile(isWorn: isWorn, fill: slot.tileColor(for: persona)) {
+                // KURO has no default item to wear, so her worn slots show her head without this shelf's items.
+                // HAKU's default clothes have no item picture either, so they show his head the same way.
+                // Room and celebration are not worn, so they show the same picture for both.
+                if slot == .room || slot == .celebration || (persona == .haku && !clothes) {
                     WardrobeItemIcon(slotDefault: slot)
                         .frame(width: 56, height: 56)
+                } else if persona == .haku {
+                    CompanionPortrait(mode: previewMode, wardrobe: wardrobe.showing(card: card), framing: .head)
+                        .frame(width: 56, height: 56)
                 } else {
-                    KuroPortrait(look: KuroLook(mode: previewMode), wearing: withoutSlot, framing: .head)
+                    KuroPortrait(look: KuroLook(mode: previewMode), wearing: without(slots), framing: .head)
                         .frame(width: 56, height: 56)
                 }
                 Text(slot == .room ? "无" : "默认")
@@ -214,14 +258,15 @@ struct WardrobeView: View {
         .accessibilityAddTraits(isWorn ? .isSelected : [])
     }
 
-    private var withoutSlot: Set<String> {
-        var plain = wardrobe
-        plain.clear(slot)
-        return Set(plain.equipped.values)
+    private func without(_ slots: [Slot]) -> Set<String> {
+        var plain = wardrobe.showing(card: card)
+        // The clothes default tile takes off the previewed mode's top or set.
+        slots.forEach { $0.shelf == .clothes ? plain.undress(previewMode) : plain.clear($0) }
+        return plain.worn(in: previewMode)
     }
 
     private func itemTile(_ item: ShopItem) -> some View {
-        let isWorn = wardrobe.equipped[slot] == item.id
+        let isWorn = wardrobe.isWearing(item)
         return Button {
             wardrobe.equip(item)
             // Her items show only in their own look, so the preview switches to it.
@@ -229,7 +274,7 @@ struct WardrobeView: View {
                 previewMode = Mode.allCases.first { KuroLook(mode: $0) == look } ?? previewMode
             }
         } label: {
-            tile(isWorn: isWorn) {
+            tile(isWorn: isWorn, fill: item.slot.tileColor(for: persona)) {
                 ShopItemIcon(item: item)
                     .frame(width: 56, height: 56)
                 Text(item.title)
@@ -242,11 +287,11 @@ struct WardrobeView: View {
         .accessibilityAddTraits(isWorn ? .isSelected : [])
     }
 
-    private func tile<Content: View>(isWorn: Bool, @ViewBuilder content: () -> Content) -> some View {
+    private func tile<Content: View>(isWorn: Bool, fill: Color, @ViewBuilder content: () -> Content) -> some View {
         VStack(spacing: 6, content: content)
             .padding(8)
             .frame(maxWidth: .infinity, minHeight: 128)
-            .toyCard(fill: isWorn ? slot.tileColor(for: persona) : Toy.card, radius: 16, shadow: isWorn ? 1 : 4)
+            .toyCard(fill: isWorn ? fill : Toy.card, radius: 16, shadow: isWorn ? 1 : 4)
             .overlay(alignment: .topTrailing) {
                 if isWorn {
                     Text("穿着")
@@ -259,42 +304,27 @@ struct WardrobeView: View {
                 }
             }
     }
-
-    private func lockedTile(_ item: ShopItem) -> some View {
-        let keepsake = item.keepsake
-        let count = keepsake.map { min(ledger.count($0.win, card: $0.card), $0.count) } ?? 0
-        return VStack(spacing: 6) {
-            ShopItemIcon(item: item)
-                .frame(width: 56, height: 56)
-                .opacity(0.25)
-            Text(item.title)
-                .font(Toy.body(13, weight: .heavy))
-            Text("\(keepsake?.title(for: persona) ?? "") \(count)/\(keepsake?.count ?? 1)")
-                .font(Toy.body(11, weight: .bold))
-                .foregroundStyle(Toy.muted)
-        }
-        .padding(8)
-        .frame(maxWidth: .infinity, minHeight: 128)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Toy.muted, style: StrokeStyle(lineWidth: Toy.outline, dash: [6, 4]))
-        )
-        .accessibilityElement(children: .combine)
-    }
 }
 
-extension Slot {
-    // KURO's items reuse HAKU's slots: her tennis things are gloves, hair ties headbands, the blanket a mask.
-    /// The slot's name on `persona`'s tab.
-    func title(for persona: Persona) -> String {
+extension WardrobeShelf {
+    /// The shelf's name on its tab.
+    var title: String {
         switch self {
-        case .gloves: persona == .kuro ? "网球" : "拳套"
-        case .headband: persona == .kuro ? "发饰" : "头带"
-        case .mask: persona == .kuro ? "毯子" : "面罩"
+        case .clothes: "衣服"
+        case .accessories: "配饰"
+        case .props: "道具"
         case .room: "房间"
-        case .celebration: "庆祝"
-        case .top: "上衣"
-        case .fullSet: "整套"
+        }
+    }
+
+    // KURO's items reuse HAKU's slots: her hair ties are headbands, her blanket the mask.
+    /// The slots the shelf's default tile takes off.
+    var defaultSlots: [Slot] {
+        switch self {
+        case .clothes: [.top]
+        case .accessories: [.headband, .mask]
+        case .props: [.gloves]
+        case .room: [.room]
         }
     }
 }
