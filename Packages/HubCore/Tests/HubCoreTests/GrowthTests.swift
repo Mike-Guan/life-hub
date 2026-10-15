@@ -299,9 +299,9 @@ import Testing
     }
 
     @Test func kuroHasHerOwnCatalogAtHakusPrices() {
-        // Identity card clothes follow each character's own outfits, so those are left out.
-        let haku = ShopItem.catalog(for: .haku).filter { $0.mode != .boxing }
-        let kuro = ShopItem.catalog(for: .kuro).filter { $0.mode != .boxing }
+        // Identity card clothes and weekly items follow each character's own line, so those are left out.
+        let haku = ShopItem.catalog(for: .haku).filter { $0.week == nil && $0.mode != .boxing }
+        let kuro = ShopItem.catalog(for: .kuro).filter { $0.week == nil && $0.mode != .boxing }
         #expect(ShopItem.catalog(for: .haku).count + ShopItem.catalog(for: .kuro).count == ShopItem.catalog.count)
         #expect(kuro.compactMap(\.price).sorted() == haku.compactMap(\.price).sorted())
         #expect(kuro.filter(\.isDrawn).compactMap(\.keepsake).map(\.win) == [.gotUp, .run5k, .boxing])
@@ -389,12 +389,12 @@ import Testing
 
     // QA S2: every character gets a whole shop, not a few items borrowed from HAKU.
     @Test func everyCharacterHasAWholeShop() {
-        let haku = ShopItem.catalog(for: .haku).filter { $0.mode != .boxing }
+        let haku = ShopItem.catalog(for: .haku).filter { $0.week == nil && $0.mode != .boxing }
         func keepsakes(_ items: [ShopItem]) -> [String] {
             items.compactMap(\.keepsake).map { "\($0.win.rawValue)×\($0.count)" }.sorted()
         }
         for persona in Persona.allCases {
-            let items = ShopItem.catalog(for: persona).filter { $0.mode != .boxing }
+            let items = ShopItem.catalog(for: persona).filter { $0.week == nil && $0.mode != .boxing }
             #expect(items.count == haku.count, "\(persona)")
             #expect(Set(items.map(\.slot)) == Set(Slot.allCases), "\(persona)")
             #expect(keepsakes(items) == keepsakes(haku), "\(persona)")
@@ -453,6 +453,73 @@ import Testing
             }
             let onShelf = ShopItem.catalog(for: persona, card: .boxing).filter { $0.mode != nil }
             #expect(onShelf.count == clothes.count, "\(persona)")
+        }
+    }
+
+    // 2026-10-04 is a Sunday.
+    func weeklyItem(firstCan: String, now: String, persona: Persona = .haku) throws -> String? {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        let day = DateFormatter()
+        day.calendar = calendar
+        day.timeZone = calendar.timeZone
+        day.dateFormat = "yyyy-MM-dd HH:mm"
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        store.persona = persona
+        store.record(.boxing, source: "first", at: try #require(day.date(from: firstCan)))
+        let drawn = ShopItem.catalog.map { item in
+            var item = item
+            item.isDrawn = item.isDrawn || item.week != nil
+            return item
+        }
+        return ShopItem.weekly(
+            for: persona, from: drawn, ledger: store.ledger, now: try #require(day.date(from: now)), calendar: calendar
+        )?.id
+    }
+
+    @Test func aWeeklyItemShowsFromTheThirdWeekAndTakesTurns() throws {
+        #expect(try weeklyItem(firstCan: "2026-10-07 12:00", now: "2026-10-17 23:59") == nil)
+        #expect(try weeklyItem(firstCan: "2026-10-07 12:00", now: "2026-10-18 00:00") == "haku.weekly.headband.orange")
+        #expect(try weeklyItem(firstCan: "2026-10-07 12:00", now: "2026-10-24 23:59") == "haku.weekly.headband.orange")
+        #expect(try weeklyItem(firstCan: "2026-10-07 12:00", now: "2026-10-25 00:00") == "haku.weekly.mask.dots")
+        // The badge waits for its slot, so week 3 of the rotation is followed by week 5.
+        #expect(try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-11-08 08:00") == "haku.weekly.headband.mint")
+        // Six drawn items, then it starts over.
+        #expect(try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-11-29 08:00") == "haku.weekly.headband.orange")
+        // The second character has her own rotation, counted from her own first can.
+        #expect(
+            try weeklyItem(firstCan: "2026-10-03 23:59", now: "2026-10-18 00:00", persona: .kuro)
+                == "kuro.weekly.blanket.bear")
+        #expect(
+            try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-11-08 08:00", persona: .kuro)
+                == "kuro.weekly.hair.cherry")
+    }
+
+    @Test func hakusWeeklyItemsAreDrawn() {
+        let weekly = ShopItem.catalog(for: .haku).filter { $0.week != nil }
+        #expect(weekly.count == 6)
+        #expect(weekly.allSatisfy { $0.isDrawn })
+        let hers = ShopItem.catalog(for: .kuro).filter { $0.week != nil }
+        #expect(hers.map(\.week) == Array(1...7))
+        #expect(hers.allSatisfy(\.isDrawn))
+    }
+
+    @Test func noWeeklyItemWithoutCansOrArt() throws {
+        #expect(ShopItem.weekly(for: .haku, ledger: CanLedger(), now: at) == nil)
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        store.record(.boxing, source: "old", at: at.addingTimeInterval(-60 * 86_400))
+        // Only HAKU has cans here, so only his rotation has started.
+        #expect(ShopItem.weekly(for: .haku, ledger: store.ledger, now: at) != nil)
+        #expect(ShopItem.weekly(for: .kuro, ledger: store.ledger, now: at) == nil)
+    }
+
+    @Test func weeklyItemsStayOffTheRegularShelf() {
+        let weekly = ShopItem.catalog.filter { $0.week != nil }
+        #expect(weekly.allSatisfy { (15...20).contains($0.price ?? 0) && $0.mode == nil && $0.card == nil })
+        for persona in Persona.allCases {
+            let weeks = weekly.filter { $0.persona == persona }.compactMap(\.week)
+            #expect(weeks == weeks.sorted() && Set(weeks).count == weeks.count, "\(persona)")
+            #expect(ShopItem.catalog(for: persona, card: nil).allSatisfy { $0.week == nil })
         }
     }
 

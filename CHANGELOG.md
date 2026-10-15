@@ -8,6 +8,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a
   side clip), a bear blanket and a cloud cushion on her lap, a succulent on the floor and a nightlight on the wall
   whose glow breathes slowly. The watch leaves out what is on her lap or the floor.
+- The second preset character has her own seven weekly items, in her own rotation.
+- From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
+  starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
+  Sunday items take turns now.
 - HAKU can wear six Sunday items: an orange or a mint headband, a dotted or a lightning-bolt mask, and a small
   cactus or a mini speaker in the room. The speaker's light ring glows every 3 seconds. The shop lists them once
   their catalog entries are marked drawn. The watch leaves room items out, since they stand on the floor.
@@ -47,6 +51,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
+  Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
   colour instead of her own top, and her "…" bubble moves up off a set hat.
 - The shop catalogue has a prop colour and a gold prop (earned on the card's 10th win) for the other
@@ -116,6 +122,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
   full night stay brighter and clear the headset.
 - The watch has no dark band behind the clock any more; every screen keeps its own background.
+- With Japanese on, headings and bold text use the rounded Japanese font Zen Maru Gothic. Chinese and English
+  keep the system font.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
@@ -497,6 +505,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The wardrobe preview and its head icons dress the character for the picked identity card, so the art
+  card shows the apron and sketchbook instead of the boxing kit.
 - Unboxing a top or full set shows HAKU in the mode it is worn in, not always off work.
 - The wardrobe keeps what a newer build put on (new slots or modes) instead of losing the whole wardrobe,
   and writes it back when saving.

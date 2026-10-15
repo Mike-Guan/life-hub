@@ -68,12 +68,16 @@ struct ShopView: View {
     // Card items show only with their card. Ones bought under another card stay owned and wearable.
     private var card: IdentityKind? { .picked(for: persona) }
 
+    private var weekly: ShopItem? { ShopItem.weekly(for: persona, ledger: growth.ledger, now: .now) }
+
+    // 商店完整目录 v0 §1.4: this week's item leads the shelf, and stays there marked owned once bought.
     private var forSale: [ShopItem] {
-        ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) }
+        [weekly].compactMap { $0 }
+            + ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) }
     }
 
     private var ownedFromShop: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { $0.price != nil && owned.contains($0.id) }
+        ShopItem.catalog(for: persona).filter { $0.price != nil && owned.contains($0.id) && $0.id != weekly?.id }
     }
 
     private var keepsakes: [ShopItem] {
@@ -137,7 +141,12 @@ struct ShopView: View {
                 .toyCard(fill: item.slot.tileColor(for: persona), radius: 12, shadow: 0)
             Text(item.title)
                 .font(Toy.body(14, weight: .heavy))
-            if let price = item.price {
+            if owned.contains(item.id) {
+                Label("已拥有", systemImage: "checkmark")
+                    .font(Toy.body(13, weight: .heavy))
+                    .foregroundStyle(Toy.ink)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            } else if let price = item.price {
                 if price <= balance {
                     Button {
                         buy(item)
@@ -161,8 +170,20 @@ struct ShopView: View {
         }
         .padding(10)
         .toyCard(radius: 16, shadow: 4)
+        .overlay(alignment: .topTrailing) {
+            // 商店完整目录 v0 §1.4: only this tag, no countdown and no "limited" wording.
+            if item.week != nil {
+                Text("本周")
+                    .font(Toy.body(12, weight: .heavy))
+                    .padding(.horizontal, 8)
+                    .frame(height: 24)
+                    .background(Capsule().fill(Toy.pink))
+                    .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
+                    .offset(x: 8, y: -10)
+            }
+        }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(item.title)
+        .accessibilityLabel(item.week != nil ? Text("本周 \(item.title)") : Text(verbatim: item.title))
     }
 
     private func ownedRow(_ item: ShopItem) -> some View {
@@ -271,17 +292,18 @@ struct ShopItemIcon: View {
     }
 }
 
-/// `persona` standing still in `mode`'s look, wearing `wardrobe`.
+/// `persona` standing still in `mode`'s look, dressed for `card` in the identity card mode, wearing `wardrobe`.
 struct PersonaPortrait: View {
     let persona: Persona
     let mode: Mode
+    var card: IdentityKind?
     var wardrobe = Wardrobe()
 
     var body: some View {
         if persona == .kuro {
-            KuroPortrait(look: KuroLook(mode: mode), wearing: wardrobe.worn(in: mode))
+            KuroPortrait(look: KuroLook(mode: mode, card: card), wearing: wardrobe.worn(in: mode))
         } else {
-            CompanionPortrait(mode: mode, wardrobe: wardrobe)
+            CompanionPortrait(mode: mode, card: card, wardrobe: wardrobe)
         }
     }
 }
