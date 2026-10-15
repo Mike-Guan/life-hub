@@ -637,3 +637,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - DEV / STG / PROD build configurations with separate bundle ids.
 - CI quality gates (PR title and branch, swift-format, lint, tests, coverage, warnings as errors) and
   TestFlight release workflow for STG and PROD.
+- With the rain or picnic set's hat on, the second preset character's full-energy stars sit above the brim
+  instead of on it.
