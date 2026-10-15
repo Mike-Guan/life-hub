@@ -38,6 +38,8 @@ for pair in "$se:se"; do
         -screenshot-line "拳套有点味道。不是我的问题。" -AppleLanguages "(zh-Hans)" -languages.on NO
       shot "$d" "$p-$v-$mode-ja" -screenshot-mode "$mode" \
         -screenshot-line "時計は進む。俺らは進まない。" -AppleLanguages "(ja)" -AppleLocale ja_JP -languages.on YES
+      shot "$d" "$p-$v-$mode-ja2" -screenshot-mode "$mode" \
+        -screenshot-line "サンドバッグ、殴られたそうな顔してる。" -AppleLanguages "(ja)" -AppleLocale ja_JP -languages.on YES
       shot "$d" "$p-$v-$mode-en" -screenshot-mode "$mode" \
         -screenshot-line "15 minutes. I'm nervous for you." -AppleLanguages "(en)" -AppleLocale en_US \
         -languages.on YES
