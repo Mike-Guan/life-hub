@@ -20,6 +20,12 @@
             "state" : "translated",
             "value" : "HAKU, warming up"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ハク、ウォーミングアップしている"
+          }
         }
       }
     },
