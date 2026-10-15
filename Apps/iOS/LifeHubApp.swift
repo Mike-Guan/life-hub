@@ -224,8 +224,6 @@ struct LifeHubApp: App {
         }
         .onChange(of: remindsAtBedtime) {
             BedtimeSchedule.setRemindsAtBedtime(remindsAtBedtime, in: AppGroup.defaults)
-            // UI 审核 #340: turning the reminder on keeps the prefilled time, which a picker can't set unchanged.
-            if remindsAtBedtime, !bedtime.isSet { bedtime = .standard }
             Task { await scheduleReminder() }
         }
         .onChange(of: bedtime) {

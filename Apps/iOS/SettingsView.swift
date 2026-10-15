@@ -120,8 +120,10 @@ struct SettingsView: View {
                         .font(Toy.body(12, weight: .bold))
                         .foregroundStyle(Toy.muted)
                 }
+                // UI 二组 gap #11: the prefill is only a suggestion, so the reminder waits for a picked time.
                 Toggle("到点提醒", isOn: $remindsAtBedtime)
                     .font(Toy.body(15))
+                    .disabled(!bedtime.isSet)
                 Text("\(persona.title) 从睡觉时间开始变困，一直到起床时间。打开提醒，到点发一条通知，只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
