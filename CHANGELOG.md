@@ -65,6 +65,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - With notifications denied, Settings says so under each reminder that is on, with 去设置打开. The line goes
   away on return once they are allowed.
+- Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
+  before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
   translation exists.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
