@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- HAKU makes small moves in each card look's base outfit now and then. In sport it stretches an arm across
+  the chest, then the other, or drinks from a water bottle. Out, it looks at its wrist or tugs its backpack
+  strap and shrugs. In craft, it spins its pencil and drops it, or wipes paint off its hand on the apron.
+  Whatever it holds for the card goes down out of the frame first. These moves replace the boxing idle in
+  card looks.
 - A prototype of HAKU's home, from a house button on the home screen and under Settings (家（原型）), in DEV and STG builds only. It is a small iso room in
   SpriteKit: HAKU walks to the desk, sofa, bed or bag when the mode changes, says a line when tapped, can be
   carried, and the room has a day/night switch, a wardrobe, a shelf, recolouring and a mock shop. All data is fake.
