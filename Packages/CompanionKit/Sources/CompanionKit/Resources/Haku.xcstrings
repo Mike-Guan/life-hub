@@ -110,7 +110,18 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…Don't watch me. Watch the bag."
+            "value" : "…Eyes on the bag, not me."
+          }
+        }
+      }
+    },
+    "……反射。" : {
+      "comment" : "手表戳一下，闪避勾拳",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Reflex."
           }
         }
       }
@@ -183,7 +194,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…I kind of want to kick something too."
+            "value" : "…Kinda want a kick too."
           }
         }
       }
@@ -194,7 +205,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…Showering first. Bathroom's mine."
+            "value" : "…Showering first. Dibs."
           }
         }
       }
@@ -225,7 +236,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…I warmed up so much I'm tired."
+            "value" : "…Warmed up so hard I'm tired."
           }
         }
       }
@@ -235,7 +246,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…My back is filing a complaint."
+            "value" : "…My back filed a complaint."
           }
         }
       }
@@ -306,7 +317,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…Something cracked. Feels great."
+            "value" : "…Something popped. Nice."
           }
         }
       }
@@ -358,7 +369,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You bought it? …Fine. I'll accept it."
+            "value" : "Bought it? …Fine. I'll take it."
           }
         }
       }
@@ -438,7 +449,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The code will still be there tomorrow."
+            "value" : "The code'll keep till tomorrow."
           }
         }
       }
@@ -468,7 +479,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The gym's open today. …Just saying."
+            "value" : "Gym's open today. …Just saying."
           }
         }
       }
@@ -701,7 +712,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dumbbells: heavier than advertised."
+            "value" : "Heavier than advertised."
           }
         }
       }
@@ -994,7 +1005,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "So… we're really not moving today?"
+            "value" : "So… we're really not moving?"
           }
         }
       }
@@ -1168,7 +1179,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Water in my ear. …Still, not bad."
+            "value" : "Water in my ear. …Worth it."
           }
         }
       }
@@ -1228,7 +1239,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your legs. I'm just tagging along."
+            "value" : "Your legs. I'm the tagalong."
           }
         }
       }
@@ -1280,7 +1291,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "15 minutes. I'll be nervous for you."
+            "value" : "15 minutes. I'm nervous for you."
           }
         }
       }

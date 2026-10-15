@@ -129,7 +129,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…don't watch me. watch the ball."
+            "value" : "…watch the ball. …please."
           }
         }
       }
@@ -262,7 +262,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…are we really not moving today."
+            "value" : "…not moving today, then."
           }
         }
       }
@@ -960,7 +960,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "door's right there. …just asking."
+            "value" : "door's there. …just asking."
           }
         }
       }
