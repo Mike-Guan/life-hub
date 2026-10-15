@@ -1165,6 +1165,17 @@
         }
       }
     },
+    "日文字体没装上，日文会用系统字体：%@" : {
+      "comment" : "列表请用 ListFormatter，不用“、”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Japanese font didn't install, so Japanese text uses the system font: %@"
+          }
+        }
+      }
+    },
     "昨天" : {
       "localizations" : {
         "en" : {
@@ -1691,6 +1702,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Can't read the Daily folder: %@"
+          }
+        }
+      }
+    },
+    "读不到健康 App 里的日照、睡眠或步数：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't read daylight, sleep or steps from the Health app: %@"
           }
         }
       }

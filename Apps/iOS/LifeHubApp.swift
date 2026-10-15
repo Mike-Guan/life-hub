@@ -57,7 +57,7 @@ struct LifeHubApp: App {
         }
         let missingFonts = AppFonts.register()
         if !missingFonts.isEmpty {
-            errors.append("日文字体没装上，日文会用系统字体：\(missingFonts.joined(separator: "、"))")
+            errors.append(String(format: "日文字体没装上，日文会用系统字体：%@".localized, missingFonts.joined(separator: "、")))
         }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
         let persona = Persona.stored(in: AppGroup.defaults)
@@ -684,7 +684,7 @@ struct LifeHubApp: App {
                 growth.record(earned.win, source: earned.source, at: earned.at)
             }
         } catch {
-            healthError = "读不到健康 App 里的日照、睡眠或步数：\(error.localizedDescription)"
+            healthError = String(format: "读不到健康 App 里的日照、睡眠或步数：%@".localized, error.localizedDescription)
         }
     }
 
