@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- HAKU makes small moves in each card look's base outfit now and then. In sport it stretches an arm across
+  the chest, then the other, or drinks from a water bottle. Out, it looks at its wrist or tugs its backpack
+  strap and shrugs. In craft, it spins its pencil and drops it, or wipes paint off its hand on the apron.
+  Whatever it holds for the card goes down out of the frame first. These moves replace the boxing idle in
+  card looks.
 - A prototype of HAKU's home, from a house button on the home screen and under Settings (家（原型）), in DEV and STG builds only. It is a small iso room in
   SpriteKit: HAKU walks to the desk, sofa, bed or bag when the mode changes, says a line when tapped, can be
   carried, and the room has a day/night switch, a wardrobe, a shelf, recolouring and a mock shop. All data is fake.
@@ -72,6 +77,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - On the watch app and the watch face, both characters wear the look of the identity card picked on the iPhone,
   instead of the default boxing or tennis look. On cards without a look of their own, the second preset character
   also does that card's base idles on the watch.
+- Swiping back to the character's page on the watch no longer replays its opening reaction, invite hop and line.
 - On another identity card's day, HAKU warms up without the boxing headband and gloves.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.
@@ -101,6 +107,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
   colour instead of her own top, and her "…" bubble moves up off a set hat.
+- Without Screen Time, an evening of sitting still at home shows HAKU under the blanket instead of holding a
+  phone it can't know about.
 - A mode switched from the 切换模式 widget now reaches the watch, the off-work notice and the gym countdown at
   once. Before, they waited until the app was next opened.
 - After the off-work animation, HAKU no longer stays slumped in 上班 for the rest of the evening: leaving the
@@ -108,6 +116,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The shop catalogue has a prop colour and a gold prop (earned on the card's 10th win) for the other
   first-batch identity cards of each character. They go on sale once the character art draws them; a gold prop
   earned before its art is done is granted on the card's next win after that.
+- A 模式卡 control for Control Center, the Lock Screen and the Action button: pick 副业 or the identity card
+  when adding it, tap to switch to it, tap again to go back to the mode before. It shows the card's own name.
 - The shop catalogue has clothes for identity cards. Cards without an outfit of their own share one of three
   base outfits (sport, outing, craft), each with two tops to buy that every card on that base can wear; HAKU's
   boxing card and the second character's boxing and tennis cards have a top of their own. They go on sale once
@@ -182,6 +192,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- The wardrobe opens on 下班 when the current mode has no button in the user's cards, and keepsake dates follow
+  the phone's language.
 - Leaving the office ends 上班 at any time, a lunch break too; coming back switches to 上班 again. Before, a
   leave earlier than an hour before the end of work hours kept 上班 until you got home.
 - Settings has a 上班日 row and a 身份卡 group. Each opens the same screen as the first-run setup, so work days
@@ -221,6 +233,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   keep the system font.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
+- The companion keeps lookout for phone use at work only while the mode is 上班. On a day off or a leave at home
+  on a work day it plays the current mode instead.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
   the weekly 5 cans, and its gold keepsake counts that card only. Any other watch workout of 30 minutes (not a
   walk) earns 3 cans, shared with the gym's daily 3. The shop names the card instead of "周日拳击".
@@ -268,6 +282,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.
 - The TODAY mode log on the home screen starts a new day at 05:00, not midnight. Changes after midnight
   stay in the evening's log until 05:00.
+- A failed 设为当前位置 says why in plain words, with 去设置打开 when access is off and 再点一次 otherwise,
+  instead of the system error text.
 - Arriving at the gym in Work or 副业 switches to Chill, unless you picked the mode in the last 2 hours.
   HAKU lifts only in Chill; switch to another mode at the gym and HAKU follows it. You still earn the
   gym can after 30 minutes there, whatever the mode. Leaving the gym keeps the mode.
@@ -275,12 +291,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   "下一件". Tasks past that never show.
 - Gym days follow the days you actually go: a weekday with a gym visit or strength workout in 2 of the
   last 4 weeks. Until a weekday qualifies, gym days stay Tuesday to Thursday. There is no setting for it.
+- With notifications denied, Settings says so under each reminder that is on, with 去设置打开. The line goes
+  away on return once they are allowed.
 - Widgets redraw every 15 minutes for the next 6 hours, so HAKU's idle bits on the Lock Screen change too.
 - The currency is called 能量罐 everywhere you read it: the shop, unboxing, places and VoiceOver. HAKU
   still drinks Monster. The home screen shows "你认真活过的每一天，都不该白白消失。" before any mode is set.
 - The clock no longer switches the mode. Work starts when you arrive at the office and ends when you
   leave it (or by hand); before, the app switched to 上班 at 9:30 even if you were still at home. The
   off-work notice now goes out only on days you're in 上班 mode or at the office.
+- The identity day follows the user's card: its warm-up line and invite use the card's own invite, and a user
+  without a card has no identity day. A character's own card keeps its lines.
 - HAKU's sleeping pillow is light blue, so it no longer blends into the white hair.
 - HAKU stops couch scrolling when you do: it gets up 20 minutes after Screen Time last saw you on the
   picked apps (it reports every 10 more minutes of use), as soon as you walk, or when you change mode by
@@ -708,5 +728,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   TestFlight release workflow for STG and PROD.
 - With the rain or picnic set's hat on, the second preset character's full-energy stars sit above the brim
   instead of on it.
+- The second preset character has the art for her new pose, dozing off hugging her tablet. It stays hidden
+  until it is wired to dozing.
 - When the second preset character is tapped in the middle of an idle move, what she put down slides back over
   0.2 s and notes or snow fade, instead of jumping back in one frame. A cup already at her lips stays there.
+- The second preset character's taps end more smoothly: her eyes shut for a moment instead of jumping back,
+  she turns away and back like a card flipping, her lap blanket slides away and back around a sip, and a tap
+  still playing stops when the mode changes; the off-work move waits for the switch.
