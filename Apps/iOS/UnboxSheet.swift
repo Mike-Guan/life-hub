@@ -65,6 +65,9 @@ struct UnboxSheet: View {
                     )
                 }
             }
+            // UI 二组 交付差距 v1 #8: VoiceOver read the character's mode, not the item coming out of the box.
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(String(format: "开箱：%@".localized, item.title))
             // UI 审核 R1: on small phones, at any text size, both buttons stay on the first screen,
             // so the stage gives up height.
             .containerRelativeFrame(.vertical) { [chrome] height, _ in min(380, max(240, height - chrome)) }
