@@ -9,7 +9,10 @@ import Testing
         let ids = KuroItem.allCases.map(\.rawValue)
         #expect(Set(ids).count == ids.count)
         #expect(ids.allSatisfy { $0.hasPrefix("kuro.") })
-        #expect(Set(ids) == Set(ShopItem.catalog(for: .kuro).filter(\.isDrawn).map(\.id)))
+        // Clothes are drawn before the shop offers them, so every offered item is drawn but not the other way.
+        let catalog = ShopItem.catalog(for: .kuro)
+        #expect(Set(ids).isSubset(of: catalog.map(\.id)))
+        #expect(Set(catalog.filter(\.isDrawn).map(\.id)).isSubset(of: ids))
         #expect(KuroItem.allCases.filter(\.isKeepsake) == [.spin, .sakura, .goldRacket])
         #expect(KuroItem.items(["kuro.room.flower", "gloves.gold", "nope"]) == [.flower])
     }
@@ -33,6 +36,81 @@ import Testing
         let parts = Set(KuroFigure.parts(for: .tennis, pose: pose))
         #expect(parts.isSuperset(of: [.itemSakura, .itemGoldRacket]))
         #expect(!parts.contains(.tennisHeadband) && !parts.contains(.tennisRacket))
+    }
+
+    static let clothes = KuroItem.allCases.filter { $0.clothes != nil }
+
+    @Test func herClothesAreTheCatalogsTopsAndSets() {
+        let catalog = ShopItem.catalog(for: .kuro).filter { $0.mode != nil && $0.mode != .boxing }
+        #expect(Set(Self.clothes.map(\.rawValue)) == Set(catalog.map(\.id)))
+        for item in Self.clothes {
+            #expect(item.look.mode == ShopItem.item(item.rawValue)?.mode, "\(item)")
+        }
+    }
+
+    @Test(arguments: clothes)
+    func clothesTakeThePlaceOfHerTopOnlyInTheirLook(_ item: KuroItem) throws {
+        let clothes = try #require(item.clothes)
+        var pose = KuroPose(look: item.look, energy: nil)
+        pose.items = [item]
+        let parts = Set(KuroFigure.parts(for: item.look, pose: pose))
+        #expect(parts.contains(clothes.top) && !parts.contains(KuroFigure.jacket(item.look)))
+        if let hat = clothes.hat { #expect(parts.contains(hat)) }
+        let other: KuroLook = item.look == .chill ? .work : .chill
+        pose = KuroPose(look: other, energy: nil)
+        pose.items = [item]
+        #expect(!KuroFigure.parts(for: other, pose: pose).contains(clothes.top))
+    }
+
+    @Test(arguments: clothes)
+    func herSleevesMatchHerClothes(_ item: KuroItem) throws {
+        let clothes = try #require(item.clothes)
+        var rub = KuroPose(look: item.look, energy: nil)
+        rub.items = [item]
+        rub.tap = .rub
+        rub.tapProgress = 0.3
+        let rubbing = Set(KuroFigure.parts(for: item.look, pose: rub))
+        #expect(rubbing.contains(clothes.rubSleeve) && rubbing.contains(.tapRub))
+        var invite = KuroPose(look: item.look, energy: nil)
+        invite.items = [item]
+        invite.scene = .invite(time: 1)
+        let pointing = Set(KuroFigure.parts(for: item.look, pose: invite))
+        #expect(pointing.contains(clothes.inviteSleeve) && !pointing.contains(KuroScene.sleeve(item.look)))
+    }
+
+    @Test func setHatsSitWithHerCatEars() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.picnic, .blanket]
+        let picnic = KuroFigure.parts(for: .chill, pose: pose)
+        #expect(picnic.contains(.setPicnicHat) && picnic.contains(.catEars))
+        // Her blanket still covers the top.
+        #expect((picnic.firstIndex(of: .setPicnicTop) ?? 99) < (picnic.firstIndex(of: .itemBlanket) ?? 0))
+        pose = KuroPose(look: .work, energy: nil)
+        pose.items = [.rain]
+        let rain = Set(KuroFigure.parts(for: .work, pose: pose))
+        #expect(rain.contains(.setRainHat) && !rain.contains(.catEars))
+        pose.scene = .dried(time: 1)
+        let dried = Set(KuroFigure.parts(for: .work, pose: pose))
+        #expect(dried.contains(.bathTurban) && !dried.contains(.setRainHat) && dried.contains(.setRainTop))
+    }
+
+    @Test(arguments: clothes)
+    func fromBehindSheShowsHerClothesPlainBack(_ item: KuroItem) throws {
+        let clothes = try #require(item.clothes)
+        var pose = KuroPose(look: item.look, energy: nil)
+        pose.items = [item]
+        pose.tap = .turnAway
+        pose.tapProgress = 0.5
+        let back = Set(KuroFigure.parts(for: item.look, pose: pose))
+        #expect(back.isSuperset(of: [clothes.back, .backHead]))
+        #expect(!back.contains(clothes.top) && !back.contains(KuroFigure.jacket(item.look)))
+        if let hat = clothes.hat { #expect(back.contains(hat)) }
+    }
+
+    @Test func herThoughtBubbleMovesAboveASetHat() {
+        #expect(KuroFigure.offset(.tapDots, pose: KuroPose(look: .work, energy: nil)) == .zero)
+        #expect(KuroFigure.offset(.tapDots, pose: KuroPose(look: .work, energy: nil), hatted: true).height < 0)
+        #expect(KuroFigure.offset(.backHead, pose: KuroPose(look: .work, energy: nil), hatted: true) == .zero)
     }
 
     @Test func actingCalmFlattensHerMouthButKeepsTheBlush() {
@@ -77,6 +155,7 @@ import Testing
             #expect(crop.width == crop.height && crop.width < KuroArt.bounds.height)
         }
         #expect(KuroItemIcon.parts(.lamp) == [.itemLamp])
+        #expect(KuroItemIcon.parts(.picnic) == [.setPicnicTop, .setPicnicHat])
         #expect(KuroItemIcon.parts(.spin).contains(.eyesHappy))
     }
 }

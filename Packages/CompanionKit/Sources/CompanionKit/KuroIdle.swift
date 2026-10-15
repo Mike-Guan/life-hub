@@ -36,6 +36,13 @@ enum KuroIdle: CaseIterable, Sendable {
     case highlight
     /// Art: two strokes, the pen held up to judge the distance, a tilt of the head, then back to drawing.
     case draw
+    // Deferred identity cards (顺延身份卡 预览, UI 审核 round 2 passed 2026-10-14).
+    /// Dance: two notes rise from the speaker and fade, her ponytail swings a beat behind and her eyes smile.
+    case groove
+    /// Music: eyes on the score, one finger taps four places on it and her head nods with each tap.
+    case score
+    /// Ski: the mitten pats the snow off her shoulder twice, the snow falls, then a small sneeze.
+    case snow
 
     /// KURO's idle stream; HAKU has his own, so the two never blink together.
     static let seed: UInt64 = 0x4B55
@@ -52,6 +59,7 @@ enum KuroIdle: CaseIterable, Sendable {
         case .juggle: 3
         case .twirl: 2
         case .lap: 6
+        case .groove, .score, .snow: 3
         }
     }
 
@@ -67,6 +75,9 @@ enum KuroIdle: CaseIterable, Sendable {
         case .fitness: [.ears, .ponytail, .lap]
         case .study: [.ears, .aside, .highlight]
         case .art: [.ears, .draw]
+        case .dance: [.ears, .ponytail, .groove]
+        case .music: [.ears, .score]
+        case .ski: [.ears, .snow]
         }
     }
 
@@ -114,6 +125,28 @@ enum KuroIdle: CaseIterable, Sendable {
             if (0.6..<0.85).contains(p) { Self.swapEyes(&visible, to: .eyesHappy) }
         case .draw:
             if (0.45..<0.75).contains(p) { Self.swapEyes(&visible, to: .eyesDown) }
+        case .groove:
+            if (0.05..<0.95).contains(p) { Self.swapEyes(&visible, to: .eyesHappy) }
+            for note in Self.notes where Self.rise(note.part, at: p) != nil { visible.insert(note.part) }
+        case .score:
+            if (0.05..<0.95).contains(p) { Self.swapEyes(&visible, to: .eyesDown) }
+        case .snow:
+            let t = p * length
+            if t < 1.4 { visible.insert(.snowBits) }
+            if (0.2..<1.5).contains(t) {
+                visible.formUnion([.mittenArm, .mittenHand])
+                Self.swapEyes(&visible, to: .eyesDown)
+            }
+            // Eyes shut and mouth open as the sneeze builds, then out it comes.
+            if (1.7..<2.0).contains(t) {
+                Self.eyesShut(&visible)
+                Self.swapMouth(&visible, to: .mouthO)
+            }
+            if (2.0..<2.5).contains(t) {
+                Self.eyesShut(&visible)
+                Self.swapMouth(&visible, to: .mouthCat)
+                visible.insert(.sneezePuff)
+            }
         default:
             break
         }
@@ -157,9 +190,81 @@ enum KuroIdle: CaseIterable, Sendable {
         case .draw where part == .craftPen:
             let up = CGFloat(Self.hold(p, from: 0.35, rise: 0.1, fall: 0.15, end: 0.85))
             return CGSize(width: -3 * twice * (1 - up), height: -14 * up)
+        case .groove where part == .tennisPonytail:
+            // A beat behind her sway, easing in and out so it starts and ends at rest.
+            let swing = sin((p * length - 0.9 / (2 * .pi)) * 2 * .pi) * Self.hold(p, rise: 0.15, fall: 0.15)
+            return CGSize(width: 3 * CGFloat(swing), height: 0)
+        case .groove:
+            guard let u = Self.rise(part, at: p) else { return .zero }
+            return CGSize(width: 3 * CGFloat(sin(u * 6)), height: -14 * CGFloat(u))
+        case .score where part == .scoreFinger:
+            // The finger lifts off the page, taps four places on it and comes back to rest.
+            let t = p * length
+            let place: [CGFloat] = [0, 4, -6, 2]
+            let lift = CGFloat(Self.hold(p, rise: 0.1, fall: 0.1))
+            let at = place[min(3, Int(max(0, t - 0.4) / 0.5))]
+            return CGSize(width: at * lift, height: -4 * (1 - Self.scoreTap(t)) * lift)
+        case .score where Self.head.contains(part):
+            return CGSize(width: 0, height: 0.8 * Self.scoreTap(p * length))
+        case .snow where part == .snowBits:
+            let fall = CGFloat(Self.ramp(p * length, 0.75, 1.35))
+            return CGSize(width: 2 * fall, height: 24 * fall)
+        case .snow where part == .mittenArm || part == .mittenHand:
+            let t = p * length
+            let up = CGFloat(Self.ramp(t, 0.2, 0.4) * (1 - Self.ramp(t, 1.25, 1.5)))
+            let pat = CGFloat(Self.bump(t, 0.45, 0.7) + Self.bump(t, 0.8, 1.05))
+            return CGSize(width: -14 * (1 - up), height: 30 * (1 - up) + 2.5 * pat)
+        case .snow where Self.head.contains(part):
+            let t = p * length
+            if (1.7..<2.0).contains(t) { return CGSize(width: 0, height: -2 * Self.ramp(t, 1.7, 1.95)) }
+            if (2.0..<2.5).contains(t) { return CGSize(width: 0, height: 3 * (1 - Self.ramp(t, 2.1, 2.5))) }
+            return .zero
         default: return .zero
         }
     }
+
+    /// How opaque `part` is at `progress` (0..<1) into the move.
+    func opacity(_ part: KuroPart, progress p: Double) -> Double {
+        let t = p * length
+        switch self {
+        case .groove: return Self.rise(part, at: p).map { 1 - $0 } ?? 1
+        case .snow where part == .snowBits: return 1 - Self.ramp(t, 0.75, 1.35)
+        case .snow where part == .sneezePuff: return 1 - Self.ramp(t, 2.1, 2.5)
+        default: return 1
+        }
+    }
+
+    /// The two notes and when each leaves the speaker, in seconds into the groove.
+    private static let notes: [(part: KuroPart, start: Double)] = [(.speakerNoteA, 0.2), (.speakerNoteB, 1.4)]
+
+    /// How far `note` has risen (0..<1) at `p` into the groove, or nil when it isn't showing.
+    private static func rise(_ note: KuroPart, at p: Double) -> Double? {
+        guard let start = notes.first(where: { $0.part == note })?.start else { return nil }
+        let u = (p * KuroIdle.groove.length - start) / 1.4
+        return (0..<1).contains(u) ? u : nil
+    }
+
+    /// How far down the finger is on the score (0...1) at `t` seconds: four light taps half a second apart.
+    private static func scoreTap(_ t: Double) -> CGFloat {
+        CGFloat((0..<4).map { bump(t, 0.4 + Double($0) * 0.5, 0.7 + Double($0) * 0.5) }.max() ?? 0)
+    }
+
+    /// 0 → 1 eased from `a` to `b`.
+    private static func ramp(_ t: Double, _ a: Double, _ b: Double) -> Double {
+        let x = min(max((t - a) / (b - a), 0), 1)
+        return x * x * (3 - 2 * x)
+    }
+
+    /// A half sine from `a` to `b`, 0 outside it.
+    private static func bump(_ t: Double, _ a: Double, _ b: Double) -> Double {
+        t <= a || t >= b ? 0 : sin(.pi * (t - a) / (b - a))
+    }
+
+    /// The parts of her head that nod together.
+    private static let head: Set<KuroPart> = eyes.union([
+        .hairBack, .earL, .earR, .faceBase, .blush, .hairFringe, .catEars, .tennisPonytail, .skiGoggles,
+        .mouthCat, .mouthFlat, .mouthSmile, .mouthO, .sneezePuff,
+    ])
 
     /// How high the juggled ball is above the racket at `p`, in SVG units: three bounces, each lower.
     static func ballHeight(_ p: Double) -> CGFloat {
@@ -180,6 +285,14 @@ enum KuroIdle: CaseIterable, Sendable {
 
     private static func eyesShut(_ visible: inout Set<KuroPart>) { swapEyes(&visible, to: .eyesClosed) }
 
+    /// Replaces whichever mouth is showing with `mouth`.
+    private static func swapMouth(_ visible: inout Set<KuroPart>, to mouth: KuroPart) {
+        let mouths: Set<KuroPart> = [.mouthCat, .mouthFlat, .mouthSmile, .mouthO]
+        guard !visible.isDisjoint(with: mouths) else { return }
+        visible.subtract(mouths)
+        visible.insert(mouth)
+    }
+
     /// Replaces whichever eyes are showing with `eyes`.
     private static func swapEyes(_ visible: inout Set<KuroPart>, to eyes: KuroPart) {
         guard !visible.isDisjoint(with: Self.eyes) else { return }
@@ -189,7 +302,7 @@ enum KuroIdle: CaseIterable, Sendable {
 
     /// The parts that are her eyes.
     private static let eyes: Set<KuroPart> = [
-        .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow,
+        .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow, .eyesFull,
     ]
 
     /// 0 → 1 eased in over `rise` from `start`, held, eased back to 0 over `fall` before `end`.

@@ -127,7 +127,8 @@ public enum Memory {
         let kept = changes.filter { $0.deletedAt == nil && $0.at >= since }.sorted { $0.at < $1.at }
         var list: [LongMemory] = []
         if let first = kept.first(where: { $0.mode == .boxing }) {
-            list.append(LongMemory(title: "第一次\(Mode.boxing.title(for: persona))", date: first.at))
+            let title = String(format: "第一次%@".localized, Mode.boxing.title(for: persona))
+            list.append(LongMemory(title: title, date: first.at))
         }
         let earned = ledger.since(resets.all).active.filter { $0.kind == .earned }
         for (win, title) in firstWins {

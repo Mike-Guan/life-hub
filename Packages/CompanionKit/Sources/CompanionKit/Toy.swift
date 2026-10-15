@@ -1,3 +1,5 @@
+import CoreText
+import HubCore
 import SwiftUI
 
 /// Style E tokens: thick black outline, flat bright colors, hard offset shadow.
@@ -14,11 +16,39 @@ public enum Toy {
     public static let radius: CGFloat = 18
 
     public static func display(_ size: CGFloat) -> Font {
-        .system(size: size, weight: .black, design: .rounded)
+        font(size, weight: .black)
     }
 
     public static func body(_ size: CGFloat = 15, weight: Font.Weight = .semibold) -> Font {
-        .system(size: size, weight: weight, design: .rounded)
+        font(size, weight: weight)
+    }
+
+    private static func font(_ size: CGFloat, weight: Font.Weight) -> Font {
+        if let face = japaneseFace(weight, language: Languages.locale.language), isRegistered(face) {
+            return .custom(face, fixedSize: size)
+        }
+        return .system(size: size, weight: weight, design: .rounded)
+    }
+
+    // The watch app does not register the fonts; there Japanese keeps the system font instead of a plain fallback.
+    private static func isRegistered(_ face: String) -> Bool {
+        CTFontCopyPostScriptName(CTFontCreateWithName(face as CFString, 12, nil)) as String == face
+    }
+
+    // Three-language typesetting spec §1 (UI 二组): Japanese text uses Zen Maru Gothic, Bold for semibold and bold,
+    // Black for heavy and black. Lighter weights, Chinese and English keep the rounded system font.
+    /// The bundled Japanese face for `weight` in `language`.
+    /// - Parameters:
+    ///   - weight: The weight the text asks for.
+    ///   - language: The language the text is shown in.
+    /// - Returns: The face's PostScript name, or `nil` to use the system font.
+    static func japaneseFace(_ weight: Font.Weight, language: Locale.Language) -> String? {
+        guard language.languageCode == .japanese else { return nil }
+        switch weight {
+        case .semibold, .bold: return AppFonts.japaneseBold
+        case .heavy, .black: return AppFonts.japaneseBlack
+        default: return nil
+        }
     }
 
     /// Extra space between lines of text at `size` points, for `language`.
@@ -87,6 +117,6 @@ public struct ToyButtonStyle: ButtonStyle {
             .overlay(shape.stroke(Toy.ink, lineWidth: Toy.outline))
             .offset(x: pressed ? 3 : 0, y: pressed ? 3 : 0)
             .background(shape.fill(Toy.ink).offset(x: 4, y: 4))
-            .animation(.spring(response: 0.18, dampingFraction: 0.6), value: pressed)
+            .animation(.smooth(duration: 0.18), value: pressed)
     }
 }
