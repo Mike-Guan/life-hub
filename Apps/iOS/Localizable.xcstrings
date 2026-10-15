@@ -1,7 +1,1249 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
-
+    "……随便看看，不急。" : {
+      "comment" : "第二个预设角色",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…just looking. no rush."
+          }
+        }
+      }
+    },
+    "上架" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the shop"
+          }
+        }
+      }
+    },
+    "上班" : {
+      "comment" : "同一中文要两种译法（见上一行），请工程把中文改得稍有不同",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        }
+      }
+    },
+    "上班时段" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work hours"
+          }
+        }
+      }
+    },
+    "下班" : {
+      "comment" : "同一中文要两种译法（见上一行），请工程把中文改得稍有不同",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End"
+          }
+        }
+      }
+    },
+    "不切换" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Don't switch"
+          }
+        }
+      }
+    },
+    "不切换，用来看你是不是窝在家。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doesn't switch. Used to tell if you're holed up at home."
+          }
+        }
+      }
+    },
+    "人生收藏" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Life collection"
+          }
+        }
+      }
+    },
+    "人站在这个地点时点「设为当前位置」。范围是进出算到达和离开的距离。只存在这台 iPhone 上。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stand at the place and tap “Use current location.” The radius is how far counts as arriving and leaving. Stays on this iPhone."
+          }
+        }
+      }
+    },
+    "今天还没切过 mode。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No mode switches yet today."
+          }
+        }
+      }
+    },
+    "从你去的日子学的" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learned from the days you went"
+          }
+        }
+      }
+    },
+    "从你的记录里自己记下的，只能看。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noted from your records. View only."
+          }
+        }
+      }
+    },
+    "位置" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
+          }
+        }
+      }
+    },
+    "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。到 设置 > Life Hub > 位置 选「始终」" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location isn't set to “Always,” so with the app closed it can't tell when you reach or leave the office or home. Go to Settings > Life Hub > Location and pick “Always.”"
+          }
+        }
+      }
+    },
+    "你认真活过的每一天，都不该白白消失。" : {
+      "comment" : "产品原则的英文原句",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your life should leave traces."
+          }
+        }
+      }
+    },
+    "保存" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        }
+      }
+    },
+    "做完定好的事" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finishing planned things"
+          }
+        }
+      }
+    },
+    "先不换" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not now"
+          }
+        }
+      }
+    },
+    "先放衣柜" : {
+      "comment" : "E6 按钮 ≤16",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To wardrobe"
+          }
+        }
+      }
+    },
+    "全部删" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete all"
+          }
+        }
+      }
+    },
+    "全部删除" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete everything"
+          }
+        }
+      }
+    },
+    "切到副业" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to Projects"
+          }
+        }
+      }
+    },
+    "切到副业 · vibe coding" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to Projects · vibe coding"
+          }
+        }
+      }
+    },
+    "删掉所有判断和纠正？" : {
+      "comment" : "E4",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete all decisions and corrections?"
+          }
+        }
+      }
+    },
+    "删掉所有记忆" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete all memories"
+          }
+        }
+      }
+    },
+    "删掉所有记忆？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete all memories?"
+          }
+        }
+      }
+    },
+    "删除…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete…"
+          }
+        }
+      }
+    },
+    "删除全部数据" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete all data"
+          }
+        }
+      }
+    },
+    "删除全部数据？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete all data?"
+          }
+        }
+      }
+    },
+    "删除这个地点" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this place"
+          }
+        }
+      }
+    },
+    "判断和纠正" : {
+      "comment" : "E4 判断 = decisions，和设置里 Decision log 一致",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Decisions and corrections"
+          }
+        }
+      }
+    },
+    "到你定的睡觉时间了" : {
+      "comment" : "中文改为“到你定的睡觉时间了”，只说事实",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It's the bedtime you set"
+          }
+        }
+      }
+    },
+    "到点提醒" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedtime reminder"
+          }
+        }
+      }
+    },
+    "到这里时" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When I get here"
+          }
+        }
+      }
+    },
+    "刷手机" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrolling"
+          }
+        }
+      }
+    },
+    "副业 · vibe coding" : {
+      "comment" : "“副业”跟卡名走",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projects · vibe coding"
+          }
+        }
+      }
+    },
+    "包括你说过「不对」的记录。删了不能恢复。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Includes the times you said “Not right.” This can't be undone."
+          }
+        }
+      }
+    },
+    "去健身房" : {
+      "comment" : "挣罐方式",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Going to the gym"
+          }
+        }
+      }
+    },
+    "发饰" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hair"
+          }
+        }
+      }
+    },
+    "取消" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "名字" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        }
+      }
+    },
+    "商店" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shop"
+          }
+        }
+      }
+    },
+    "地点" : {
+      "comment" : "同一中文要两种译法（见上一行），请工程把中文改得稍有不同",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Places"
+          }
+        }
+      }
+    },
+    "地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Places stay on this iPhone. Set Location to “Always” so modes switch even when the app is closed."
+          }
+        }
+      }
+    },
+    "头带" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Headband"
+          }
+        }
+      }
+    },
+    "好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        }
+      }
+    },
+    "学到的规律" : {
+      "comment" : "E2 规律 = routines（PM 10/14）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learned routines"
+          }
+        }
+      }
+    },
+    "学到的规律、长期记得的事和做过的判断。都只在这台 iPhone 上。" : {
+      "comment" : "E2 + E4",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learned routines, long-term memories, and the decisions it made. All of it stays on this iPhone."
+          }
+        }
+      }
+    },
+    "完成" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        }
+      }
+    },
+    "定位中…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locating…"
+          }
+        }
+      }
+    },
+    "导出" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export"
+          }
+        }
+      }
+    },
+    "小组件连不上共享文件夹（App Group），它们会一直是空的" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widgets can't reach the shared folder (App Group), so they'll stay empty"
+          }
+        }
+      }
+    },
+    "已拥有" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Owned"
+          }
+        }
+      }
+    },
+    "已经有了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Already yours."
+          }
+        }
+      }
+    },
+    "已设" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set"
+          }
+        }
+      }
+    },
+    "庆祝" : {
+      "comment" : "E4",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Celebrate"
+          }
+        }
+      }
+    },
+    "延长到" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Until"
+          }
+        }
+      }
+    },
+    "忘掉" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forget"
+          }
+        }
+      }
+    },
+    "忘掉后从你之后的日子重新学。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once forgotten, it learns again from the days after."
+          }
+        }
+      }
+    },
+    "快下班了" : {
+      "comment" : "通知标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almost off work"
+          }
+        }
+      }
+    },
+    "房间" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Room"
+          }
+        }
+      }
+    },
+    "打开后选一次 iCloud Drive 里的 Daily Widget 文件夹。只读不写；提前定好的事做完 +1 能量罐，一天最多 3 个。关掉就不再读，已拿的罐子保留。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on, then pick the Daily Widget folder in iCloud Drive once. Read-only. Each planned thing you finish is +1 can, up to 3 a day. Turn it off and it stops reading; cans you got stay."
+          }
+        }
+      }
+    },
+    "找不到 Daily 的文件夹了，请在设置里重新联动" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't find the Daily folder anymore. Link it again in Settings."
+          }
+        }
+      }
+    },
+    "拳套" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gloves"
+          }
+        }
+      }
+    },
+    "按时睡" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleeping on time"
+          }
+        }
+      }
+    },
+    "换" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch"
+          }
+        }
+      }
+    },
+    "无" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        }
+      }
+    },
+    "昨天" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yesterday"
+          }
+        }
+      }
+    },
+    "晒太阳" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunlight"
+          }
+        }
+      }
+    },
+    "晚间延长" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Late evenings"
+          }
+        }
+      }
+    },
+    "每个角色有自己的能量罐和东西，换过去从零开始，原来的都留着。生活记录和规则都不变。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each character has their own cans and things. A new one starts from zero; the old one keeps everything. Your life records and rules stay the same."
+          }
+        }
+      }
+    },
+    "比如：公园、工作室" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "e.g. park, studio"
+          }
+        }
+      }
+    },
+    "毯子" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blanket"
+          }
+        }
+      }
+    },
+    "没开「运动与健身」权限：通勤路上 HAKU 只会走路。可以在设置 > 隐私与安全性里打开。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motion & Fitness is off, so on the commute HAKU can only walk. You can turn it on in Settings > Privacy & Security."
+          }
+        }
+      }
+    },
+    "没设" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not set"
+          }
+        }
+      }
+    },
+    "没选" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        }
+      }
+    },
+    "添加地点" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add place"
+          }
+        }
+      }
+    },
+    "清除" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        }
+      }
+    },
+    "灵魂可以先走。" : {
+      "comment" : "HAKU 口气；中文“灵魂可以先走。”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your soul can leave early."
+          }
+        }
+      }
+    },
+    "点一下就换上。拿到的东西永远在这，不会丢。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to wear it. What you get stays here for good."
+          }
+        }
+      }
+    },
+    "现在戴上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wear it now"
+          }
+        }
+      }
+    },
+    "看上哪个了？……我只是随便问问。" : {
+      "comment" : "HAKU",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See anything you like? …Just asking."
+          }
+        }
+      }
+    },
+    "看哪个模式的样子" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which mode's look"
+          }
+        }
+      }
+    },
+    "看看" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look"
+          }
+        }
+      }
+    },
+    "睡觉" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep"
+          }
+        }
+      }
+    },
+    "睡觉时间" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedtime"
+          }
+        }
+      }
+    },
+    "穿着" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wearing"
+          }
+        }
+      }
+    },
+    "算了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Never mind"
+          }
+        }
+      }
+    },
+    "纪念品" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keepsake"
+          }
+        }
+      }
+    },
+    "纪念品 · 只能靠做到拿" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keepsakes · earned, never bought"
+          }
+        }
+      }
+    },
+    "网球" : {
+      "comment" : "句中用，小写；同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tennis"
+          }
+        }
+      }
+    },
+    "联动 Daily Widget" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link Daily Widget"
+          }
+        }
+      }
+    },
+    "能量罐、商店物品、衣柜和纪念品不算记忆，留着。删了不能恢复。" : {
+      "comment" : "前面有空格，接在 240 后",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cans, shop items, wardrobe and keepsakes aren't memories, so they stay. This can't be undone."
+          }
+        }
+      }
+    },
+    "能量罐、商店物品、衣柜和纪念品不算记忆，留着。要一起清，用设置里的「删除全部数据」。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cans, shop items, wardrobe and keepsakes aren't memories, so they stay. To clear them too, use Delete all data in Settings."
+          }
+        }
+      }
+    },
+    "能量罐还不够。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough cans yet."
+          }
+        }
+      }
+    },
+    "自动" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto"
+          }
+        }
+      }
+    },
+    "衣柜" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wardrobe"
+          }
+        }
+      }
+    },
+    "被叫起来出门" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Getting up and heading out"
+          }
+        }
+      }
+    },
+    "要不要提醒你、你说「不对」的那几次。保留 90 天。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When it decided whether to nudge you, and the times you said “Not right.” Kept for 90 days."
+          }
+        }
+      }
+    },
+    "角色" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Character"
+          }
+        }
+      }
+    },
+    "记得的事" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remembered"
+          }
+        }
+      }
+    },
+    "记忆、地点、能量罐、商店物品、衣柜和纪念品一起清空，回到刚装好的样子。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memories, places, cans, shop items, wardrobe and keepsakes are cleared together. Back to fresh-install."
+          }
+        }
+      }
+    },
+    "记忆、能量罐、商店物品、衣柜、纪念品和地点都会清空，App 回到刚装好的样子。删了不能恢复。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memories, cans, shop items, wardrobe, keepsakes and places are all cleared. The app goes back to fresh-install. This can't be undone."
+          }
+        }
+      }
+    },
+    "设为当前位置" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use current location"
+          }
+        }
+      }
+    },
+    "设置" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "调试记录" : {
+      "comment" : "调试，朋友测版可不翻",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Debug log"
+          }
+        }
+      }
+    },
+    "走" : {
+      "comment" : "通知按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go"
+          }
+        }
+      }
+    },
+    "起床" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wake"
+          }
+        }
+      }
+    },
+    "跑完 5 km" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running 5K"
+          }
+        }
+      }
+    },
+    "运动 30 分钟" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 min of exercise"
+          }
+        }
+      }
+    },
+    "还没有。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing yet."
+          }
+        }
+      }
+    },
+    "还没有判断" : {
+      "comment" : "E4",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No decisions yet"
+          }
+        }
+      }
+    },
+    "还没设。选一个时间就生效。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not set yet. Pick a time and it's on."
+          }
+        }
+      }
+    },
+    "这个不卖。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This one's not for sale."
+          }
+        }
+      }
+    },
+    "这个专注模式开着时，切到副业 · vibe coding。手动切过模式的 2 小时内不切。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "While this Focus is on, switch to Projects · vibe coding. Not within 2 hours of a manual mode change."
+          }
+        }
+      }
+    },
+    "选 App" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick apps"
+          }
+        }
+      }
+    },
+    "通知被关掉了，睡觉提醒发不出来。可以在系统设置里打开。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications are off, so the bedtime reminder can't go out. You can turn them on in Settings."
+          }
+        }
+      }
+    },
+    "锁屏上也是这样" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same on the Lock Screen"
+          }
+        }
+      }
+    },
+    "长期记得的事" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Long-term memories"
+          }
+        }
+      }
+    },
+    "面罩" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mask"
+          }
+        }
+      }
+    },
+    "默认" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default"
+          }
+        }
+      }
+    },
+    "，" : {
+      "comment" : "分隔符",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ","
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

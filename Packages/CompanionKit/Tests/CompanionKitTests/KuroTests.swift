@@ -42,6 +42,29 @@ import Testing
         #expect(chill.contains(.mouthCat))
     }
 
+    @Test func herNodDipsOnceAfterTheBlink() {
+        let start = Date(timeIntervalSinceReferenceDate: 100)
+        #expect(KuroView.nod(since: start, at: 100.05) ?? 1 < 0.1)
+        #expect(KuroView.nod(since: start, at: 100.01 + CompanionView.nodDuration) == nil)
+        #expect(KuroView.nod(since: nil, at: 100) == nil)
+        #expect(KuroView.nodDip(0.05) == 0)
+        #expect(KuroView.nodDip(0.31) > 3.5)
+        #expect(KuroView.nodDip(0.6) == 0)
+    }
+
+    @Test(arguments: KuroLook.allCases)
+    func fullEnergyReadsApartFromOkay(_ look: KuroLook) {
+        let full = KuroPose(look: look, energy: 90)
+        let parts = Set(KuroFigure.parts(for: look, pose: full))
+        #expect(parts.isSuperset(of: [.eyesFull, .cheeksFull, .sparkle]))
+        #expect(!parts.contains(.eyesBright) && !parts.contains(.blush))
+        #expect(KuroFigure.offset(.catEars, pose: full).height == -3)
+        let okay = KuroPose(look: look, energy: 50)
+        #expect(Set(KuroFigure.parts(for: look, pose: okay)).isDisjoint(with: [.eyesFull, .cheeksFull, .sparkle]))
+        #expect(KuroFigure.offset(.catEars, pose: okay) == .zero)
+        #expect(!KuroPose(look: look, energy: 90, bedtime: .on).full)
+    }
+
     @Test func energyPicksHerFace() {
         #expect(KuroPose(look: .chill, energy: nil).eyes == .open)
         #expect(KuroPose(look: .tennis, energy: 50).eyes == .bright)
