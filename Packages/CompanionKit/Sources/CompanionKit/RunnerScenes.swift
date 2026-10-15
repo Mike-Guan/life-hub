@@ -541,10 +541,11 @@ extension RunnerPose {
         let nod = still ? 0 : bump(loop(t, 9), from: 7.6, to: 8.4)
         pose.bounce = 5 + 1.2 * breath
         pose.lean = -3
-        pose.headDy = 6 + breath + 4 * nod
+        pose.headDy = 6 + breath + 3 * nod
         pose.headTilt = Double(4 + 2 * nod)
         pose.eyesShut = true
-        w.phoneDrop = 4 + 0.6 * breath
+        // UI 一组 10/15: at 4 the phone covered the chin; at 18 it rests on the chest under the chin.
+        w.phoneDrop = 18 + 0.6 * breath
         pose.welcome = w
         return pose
     }
