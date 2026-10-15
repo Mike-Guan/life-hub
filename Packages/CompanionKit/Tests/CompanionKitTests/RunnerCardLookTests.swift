@@ -15,8 +15,11 @@ import Testing
         #expect(RunnerCardLook(card: .fitness) == .fitness)
         #expect(RunnerCardLook(card: .study) == .study)
         #expect(RunnerCardLook(card: .art) == .art)
+        #expect(RunnerCardLook(card: .dance) == .dance)
+        #expect(RunnerCardLook(card: .music) == .music)
+        #expect(RunnerCardLook(card: .ski) == .ski)
         // No card, boxing, or a card without a look yet keeps the boxing kit.
-        for card: IdentityKind? in [nil, .boxing, .swimming, .ski] {
+        for card: IdentityKind? in [nil, .boxing, .swimming, .yoga] {
             #expect(RunnerCardLook(card: card) == nil)
             #expect(parts(.boxing, card: card).isSuperset(of: [.gloveL, .gloveR, .headband]))
         }
@@ -43,6 +46,9 @@ import Testing
             .fitness: [.stripeSport, .gymBag, .handWeight],
             .study: [.stripeNeon, .book, .bookPage],
             .art: [.stripeNeon, .apron, .sketchbook, .pencil],
+            .dance: [.stripeSport, .wristbandHand, .danceSpeaker],
+            .music: [.stripeNeon, .ukulele],
+            .ski: [.stripeSport, .wristbandHand, .skiGoggles],
         ]
         for (card, things) in expected {
             let shown = parts(.boxing, card: card)
@@ -59,12 +65,70 @@ import Testing
         var pose = RunnerPose(face: .mid)
         pose.dailyProp = .note
         pose.propRaise = 1
-        for card: IdentityKind in [.tennis, .fitness, .study, .art] {
+        for card: IdentityKind in [.tennis, .fitness, .study, .art, .dance, .music, .ski] {
             let dressed = pose.dressed(for: card, in: .boxing)
             let shown = Set(RunnerFigure.parts(for: .boxing, pose: dressed))
             #expect(shown.isDisjoint(with: RunnerCardLook(card: card)!.props), "\(card)")
             #expect(shown.contains(.stickyNote), "\(card)")
             #expect(dressed.bagLift < 0, "\(card)")
         }
+    }
+
+    // 顺延身份卡 (UI 审核 10/14): the watch draws no speaker and no fist with the wristband; it raises the ukulele.
+    @Test func theWatchLeavesOutTheSpeakerAndTheWristband() {
+        for card: IdentityKind in [.dance, .ski] {
+            let pose = RunnerPose().dressed(for: card, in: .boxing, watch: true)
+            let watch = Set(RunnerFigure.parts(for: .boxing, pose: pose))
+            #expect(watch.isDisjoint(with: [.danceSpeaker, .wristbandHand]), "\(card)")
+        }
+        let music = RunnerPose().dressed(for: .music, in: .boxing, watch: true)
+        #expect(music.watchFrame)
+        #expect(Set(RunnerFigure.parts(for: .boxing, pose: music)).contains(.ukulele))
+    }
+
+    private func beat(_ card: IdentityKind, at t: CGFloat) -> Set<RunnerPart> {
+        var pose = RunnerPose(face: .mid).dressed(for: card, in: .boxing)
+        pose.cardBeat = t
+        return Set(RunnerFigure.parts(for: .boxing, pose: pose))
+    }
+
+    @Test func danceNotesFloatUpUntilHakuIsCaught() {
+        #expect(beat(.dance, at: 0.5).isSuperset(of: [.speakerNoteA, .eyesChill]))
+        #expect(beat(.dance, at: 1.3).isSuperset(of: [.speakerNoteA, .speakerNoteB]))
+        // Caught: it stops and looks at you.
+        let caught = beat(.dance, at: 2.8)
+        #expect(caught.isDisjoint(with: [.speakerNoteA, .speakerNoteB, .eyesChill]))
+        #expect(caught.contains(.eyesWork))
+    }
+
+    @Test func musicPlaysAirChordsAndCountsSilently() {
+        #expect(beat(.music, at: 0.4).isSuperset(of: [.chordHandA, .countMouth]))
+        #expect(!beat(.music, at: 0.4).contains(.mouthSmile))
+        #expect(beat(.music, at: 0.95).contains(.chordHandB))
+        #expect(beat(.music, at: 0.95).isDisjoint(with: [.chordHandA, .countMouth]))
+        #expect(beat(.music, at: 2.99).isDisjoint(with: [.chordHandA, .chordHandB]))
+    }
+
+    @Test func skiGogglesComeDownWithOneRightHand() {
+        let pulling = beat(.ski, at: 1.2)
+        #expect(pulling.contains(.goggleHand))
+        #expect(!pulling.contains(.wristbandHand))
+        // The lenses cover the eyes.
+        #expect(!pulling.contains(.eyesChill))
+        let breath = beat(.ski, at: 2.5)
+        #expect(breath.isSuperset(of: [.breathPuff, .countMouth, .wristbandHand, .eyesChill]))
+        #expect(!breath.contains(.goggleHand))
+    }
+
+    @Test func theCardIdlePlaysNowAndThenOnlyWithFreeHands() {
+        let times = stride(from: 0.0, to: 120, by: 0.25)
+        let beats = times.map { RunnerPose(face: .mid).dressed(for: .dance, in: .boxing, time: $0).cardBeat }
+        #expect(beats.contains { $0 >= 0 })
+        #expect(beats.contains { $0 < 0 })
+        var busy = RunnerPose(face: .mid)
+        busy.dailyProp = .note
+        #expect(times.allSatisfy { busy.dressed(for: .dance, in: .boxing, time: $0).cardBeat < 0 })
+        // Looks without their own idle yet stay still.
+        #expect(times.allSatisfy { RunnerPose(face: .mid).dressed(for: .tennis, in: .boxing, time: $0).cardBeat < 0 })
     }
 }

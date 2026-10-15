@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- HAKU dresses for the dance, music and ski cards, each with its own idle now and then: it bobs to a small
+  speaker as notes float up and stops when caught, plays air chords by a ukulele while counting silently, or
+  pulls its ski goggles down and back and breathes out a white puff. The watch leaves out the speaker and the
+  fist, and raises the ukulele into view. The cards stay out of the picker for now.
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
   Sunday items take turns now.
