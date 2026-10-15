@@ -71,7 +71,7 @@ struct LogFile<Log: RecordLog> {
             data = try Data(contentsOf: url)
         } catch {
             readBlocked = true
-            return "暂时读不到\(name)，改动先留在内存里：\(error.localizedDescription)"
+            return String(format: "暂时读不到%1$@，改动先留在内存里：%2$@".localized, name.localized, error.localizedDescription)
         }
         readBlocked = false
         do {
@@ -82,7 +82,10 @@ struct LogFile<Log: RecordLog> {
             let backup = url.deletingPathExtension()
                 .appendingPathExtension("corrupt-\(Int(Date.now.timeIntervalSince1970)).json")
             try? FileManager.default.moveItem(at: url, to: backup)
-            return "\(name)读不出来，已备份到 \(backup.lastPathComponent)：\(error.localizedDescription)"
+            return String(
+                format: "%1$@读不出来，已备份到 %2$@：%3$@".localized, name.localized, backup.lastPathComponent,
+                error.localizedDescription
+            )
         }
     }
 
@@ -95,7 +98,7 @@ struct LogFile<Log: RecordLog> {
             try FileManager.default.removeItem(at: url)
             return nil
         } catch {
-            return "删不掉\(name)：\(error.localizedDescription)"
+            return String(format: "删不掉%1$@：%2$@".localized, name.localized, error.localizedDescription)
         }
     }
 
@@ -114,7 +117,7 @@ struct LogFile<Log: RecordLog> {
             try HubJSON.encoder().encode(log).write(to: url, options: .atomic)
             return nil
         } catch {
-            return "保存\(name)失败：\(error.localizedDescription)"
+            return String(format: "保存%1$@失败：%2$@".localized, name.localized, error.localizedDescription)
         }
     }
 }

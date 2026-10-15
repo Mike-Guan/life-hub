@@ -56,6 +56,12 @@ import Testing
         var going = home(6)
         going.departing = true
         #expect(need(going, at: date(6, 19, 45)) == nil)
+        // The Screen Time extension can't read HealthKit; it only knows the day of the last workout.
+        var trainedToday = home(6)
+        trainedToday.trainedDay = StateEngine.dayStart(for: date(6, 8), calendar: calendar)
+        #expect(need(trainedToday, at: date(6, 19, 45)) == nil)
+        trainedToday.trainedDay = StateEngine.dayStart(for: date(5, 8), calendar: calendar)
+        #expect(need(trainedToday, at: date(6, 19, 45))?.need == .gymDay)
     }
 
     @Test func gymInviteReplacesCouchScrolling() {
