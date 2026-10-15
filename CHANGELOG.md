@@ -59,12 +59,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
+  places, Daily, saving records and the bedtime notification.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
   screen edge no longer cuts them off. The iPhone is unchanged.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
   colour instead of her own top, and her "…" bubble moves up off a set hat.
+- After the off-work animation, HAKU no longer stays slumped in 上班 for the rest of the evening: leaving the
+  office or the next day puts the headset back on.
 - The shop catalogue has a prop colour and a gold prop (earned on the card's 10th win) for the other
   first-batch identity cards of each character. They go on sale once the character art draws them; a gold prop
   earned before its art is done is granted on the card's next win after that.
@@ -81,6 +85,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
 - Full energy is easier to tell apart from okay: HAKU's deadpan eyes open a notch with a glint, and KURO's eyes
   grow a size, her cheeks go pink, her ears stand up a little and sparkles show by her head.
+- The shop banner and the wardrobe preview show HAKU standing, so the clothes stay in view. Before, at home they
+  could catch HAKU asleep on the sofa or bent over the handheld.
 - The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
   gym, say the app never records your route, and say only the computed state goes to your own Apple Watch.
   They now also come in Japanese and English, following the phone's language. The 「日文和英文」 switch
@@ -517,6 +523,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- On a gym day you already trained, went to the gym or set off for it, scrolling on the phone no longer brings
+  back the evening gym invite. The same goes for the Sunday boxing invite once you have boxed.
 - The wardrobe preview and its head icons dress the character for the picked identity card, so the art
   card shows the apron and sketchbook instead of the boxing kit.
 - Unboxing a top or full set shows HAKU in the mode it is worn in, not always off work.

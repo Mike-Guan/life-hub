@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
+    "%1$@读不出来，已备份到 %2$@：%3$@" : {
+      "comment" : "多个占位符：按中文出现顺序编号，请工程核对顺序",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't read %1$@. Backed up to %2$@: %3$@"
+          }
+        }
+      }
+    },
     "%@中" : {
       "comment" : "没标语的卡；“画画手作中”的意思",
       "localizations" : {
@@ -281,6 +292,17 @@
         }
       }
     },
+    "保存%1$@失败：%2$@" : {
+      "comment" : "多个占位符：按中文出现顺序编号，请工程核对顺序",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save %1$@: %2$@"
+          }
+        }
+      }
+    },
     "做项目" : {
       "comment" : "“做项目”",
       "localizations" : {
@@ -419,6 +441,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Switch to Projects"
+          }
+        }
+      }
+    },
+    "删不掉 %1$@：%2$@" : {
+      "comment" : "多个占位符：按中文出现顺序编号，请工程核对顺序",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't delete %1$@: %2$@"
+          }
+        }
+      }
+    },
+    "删不掉%1$@：%2$@" : {
+      "comment" : "多个占位符：按中文出现顺序编号，请工程核对顺序",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't delete %1$@: %2$@"
           }
         }
       }
@@ -961,6 +1005,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ h %2$@ min of sleep last night, so “%3$@”"
+          }
+        }
+      }
+    },
+    "暂时读不到%1$@，改动先留在内存里：%2$@" : {
+      "comment" : "错误提示，界面文字；多个占位符：按中文出现顺序编号，请工程核对顺序",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't read %1$@ right now. Changes are kept in memory for now: %2$@"
           }
         }
       }
