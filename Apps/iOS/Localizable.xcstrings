@@ -747,6 +747,22 @@
         }
       }
     },
+    "只在 %@ 出现" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows only in %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ のときだけ出てくる"
+          }
+        }
+      }
+    },
     "只在手机上分辨走路 / 坐车，不上传。" : {
       "localizations" : {
         "en" : {
