@@ -645,9 +645,9 @@ public struct CompanionView: View {
     }
 
     /// Whether the off-work pose that played from `start` still holds at `date` in `mode`: in work mode, the same day.
-    nonisolated static func holdsOffWork(since start: Date?, mode: Mode, at date: Date, calendar: Calendar = .current)
-        -> Bool
-    {
+    nonisolated static func holdsOffWork(
+        since start: Date?, mode: Mode, at date: Date, calendar: Calendar = .current
+    ) -> Bool {
         guard mode == .work, let start, date >= start else { return false }
         return calendar.isDate(start, inSameDayAs: date)
     }
