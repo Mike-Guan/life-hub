@@ -383,6 +383,10 @@ public enum Slot: String, Codable, CodingKeyRepresentable, CaseIterable, Sendabl
     case top
     /// A full outfit for one mode. It replaces that mode's top.
     case fullSet = "set"
+    /// A pin on the clothes, worn in every mode.
+    case badge
+    /// Headwear, worn only in the mode it suits.
+    case hat
 }
 
 // 商店完整目录 v0 §8 and §9.1: the wardrobe groups items by where they are worn, not by slot.
@@ -407,10 +411,16 @@ extension Slot {
     public var shelf: WardrobeShelf {
         switch self {
         case .top, .fullSet: .clothes
-        case .headband, .mask, .celebration: .accessories
+        case .headband, .mask, .celebration, .badge, .hat: .accessories
         case .gloves: .props
         case .room: .room
         }
+    }
+
+    // 商店完整目录 v0 §9 and 位置规划图 §10-2: no hats at work; the beanie goes with off-work clothes.
+    /// The only mode the slot's items are worn in, `nil` for every mode.
+    public var onlyMode: Mode? {
+        self == .hat ? .chill : nil
     }
 }
 
@@ -583,16 +593,16 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(cardTop: "kuro.base.outing.trench", title: "短风衣", price: 40, base: .outing, persona: .kuro),
         ShopItem(cardTop: "kuro.top.art.smock", title: "画画罩衫", price: 30, base: .craft, persona: .kuro),
         ShopItem(cardTop: "kuro.base.craft.pinafore", title: "背带裙", price: 40, base: .craft, persona: .kuro),
-        // HAKU's weekly items (商店完整目录 v0 §1.4), drawn in #383. The star badge (week 4) and the beanie
-        // (week 8) wait for their own wear slots.
+        // HAKU's weekly items (商店完整目录 v0 §1.4), drawn in #383 except the star badge and the beanie.
         ShopItem(weekly: "haku.weekly.headband.orange", slot: .headband, title: "橙色头带", price: 15, week: 1),
         ShopItem(weekly: "haku.weekly.mask.dots", slot: .mask, title: "波点面罩", price: 18, week: 2),
         ShopItem(weekly: "haku.weekly.room.cactus", slot: .room, title: "小仙人掌", price: 15, week: 3),
+        ShopItem(weekly: "haku.weekly.top.badge", slot: .badge, title: "星星胸章", price: 18, week: 4, drawn: false),
         ShopItem(weekly: "haku.weekly.headband.mint", slot: .headband, title: "薄荷头带", price: 15, week: 5),
         ShopItem(weekly: "haku.weekly.mask.bolt", slot: .mask, title: "闪电贴纸面罩", price: 18, week: 6),
         ShopItem(weekly: "haku.weekly.room.speaker", slot: .room, title: "迷你音箱", price: 20, week: 7),
-        // The second character's (§2.4, approved 2026-10-14), off the shelf until wired into her figure. Her
-        // beanie (week 8) waits for the hat slot.
+        ShopItem(weekly: "haku.weekly.hat.beanie", slot: .hat, title: "毛线帽", price: 20, week: 8, drawn: false),
+        // The second character's (§2.4, approved 2026-10-14), off the shelf until wired into her figure.
         ShopItem(
             weekly: "kuro.weekly.hair.mint", slot: .headband, title: "薄荷发圈", price: 15, week: 1, persona: .kuro,
             drawn: false),
@@ -614,6 +624,9 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(
             weekly: "kuro.weekly.room.nightlight", slot: .room, title: "小夜灯", price: 20, week: 7, persona: .kuro,
             drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.hat.beanie", slot: .hat, title: "毛线帽", price: 20, week: 8, persona: .kuro, drawn: false
+        ),
     ]
 
     init(
@@ -677,7 +690,7 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     /// Whether the wardrobe lists it while previewing `mode` with `card` picked.
     public func shows(in mode: Mode, card: IdentityKind?) -> Bool {
         guard suits(card), WardrobeShelf.shelves(in: mode, card: card).contains(slot.shelf) else { return false }
-        return self.mode == nil || self.mode == mode
+        return (self.mode ?? slot.onlyMode ?? mode) == mode
     }
 
     /// The catalog item with `id`.
@@ -791,7 +804,7 @@ public struct Wardrobe: Codable, Equatable, Sendable {
 
     /// The ids worn in `mode`: every slot plus that mode's top or set.
     public func worn(in mode: Mode) -> Set<String> {
-        Set(equipped.values).union(clothes[mode].map { [$0] } ?? [])
+        Set(equipped.filter { ($0.key.onlyMode ?? mode) == mode }.values).union(clothes[mode].map { [$0] } ?? [])
     }
 
     // A switched-away card's items stay stored, so switching back puts them on again. Ids this build
