@@ -32,22 +32,28 @@ import Testing
         }
     }
 
-    @Test func theWatchLeavesTheGymBagOffTheFloor() {
-        #expect(RunnerPose().dressed(for: .fitness, in: .boxing).bagLift == 0)
+    // Mike 2026-10-15: a card's own backdrop holds no items, so nothing stands on the floor or in the corner.
+    @Test func cardBackdropsHoldNoItems() {
+        for card: IdentityKind in [.tennis, .fitness, .study, .art, .dance, .music, .ski] {
+            for watch in [false, true] {
+                let pose = RunnerPose().dressed(for: card, in: .boxing, watch: watch)
+                #expect(pose.bagLift < 0, "\(card)")
+                let shown = Set(RunnerFigure.parts(for: .boxing, pose: pose))
+                #expect(shown.isDisjoint(with: [.gymBag, .danceSpeaker, .ukulele, .heavyBag]), "\(card)")
+            }
+        }
         let watch = RunnerPose().dressed(for: .fitness, in: .boxing, watch: true)
-        #expect(watch.bagLift < 0)
-        #expect(Set(RunnerFigure.parts(for: .boxing, pose: watch)).isDisjoint(with: [.gymBag]))
         #expect(Set(RunnerFigure.parts(for: .boxing, pose: watch)).contains(.handWeight))
     }
 
     @Test func eachCardLookDrawsItsOwnThings() {
         let expected: [IdentityKind: Set<RunnerPart>] = [
             .tennis: [.stripeSport, .tennisVisor, .tennisRacket, .racketHand, .tennisBall],
-            .fitness: [.stripeSport, .gymBag, .handWeight],
+            .fitness: [.stripeSport, .handWeight],
             .study: [.stripeNeon, .book, .bookPage],
             .art: [.stripeNeon, .apron, .sketchbook, .pencil],
-            .dance: [.stripeSport, .wristbandHand, .danceSpeaker],
-            .music: [.stripeNeon, .ukulele],
+            .dance: [.stripeSport, .wristbandHand],
+            .music: [.stripeNeon, .eyesWork],
             .ski: [.stripeSport, .wristbandHand, .skiGoggles],
         ]
         for (card, things) in expected {
@@ -74,16 +80,13 @@ import Testing
         }
     }
 
-    // 顺延身份卡 (UI 审核 10/14): the watch draws no speaker and no fist with the wristband; it raises the ukulele.
-    @Test func theWatchLeavesOutTheSpeakerAndTheWristband() {
+    // 顺延身份卡 (UI 审核 10/14): the watch draws no fist with the wristband.
+    @Test func theWatchLeavesOutTheWristband() {
         for card: IdentityKind in [.dance, .ski] {
             let pose = RunnerPose().dressed(for: card, in: .boxing, watch: true)
-            let watch = Set(RunnerFigure.parts(for: .boxing, pose: pose))
-            #expect(watch.isDisjoint(with: [.danceSpeaker, .wristbandHand]), "\(card)")
+            #expect(pose.watchFrame)
+            #expect(!Set(RunnerFigure.parts(for: .boxing, pose: pose)).contains(.wristbandHand), "\(card)")
         }
-        let music = RunnerPose().dressed(for: .music, in: .boxing, watch: true)
-        #expect(music.watchFrame)
-        #expect(Set(RunnerFigure.parts(for: .boxing, pose: music)).contains(.ukulele))
     }
 
     private func beat(_ card: IdentityKind, at t: CGFloat) -> Set<RunnerPart> {
@@ -92,12 +95,12 @@ import Testing
         return Set(RunnerFigure.parts(for: .boxing, pose: pose))
     }
 
-    @Test func danceNotesFloatUpUntilHakuIsCaught() {
-        #expect(beat(.dance, at: 0.5).isSuperset(of: [.speakerNoteA, .eyesChill]))
-        #expect(beat(.dance, at: 1.3).isSuperset(of: [.speakerNoteA, .speakerNoteB]))
+    @Test func danceShrugsUntilHakuIsCaught() {
+        #expect(beat(.dance, at: 0.5).contains(.eyesChill))
+        #expect(beat(.dance, at: 1.3).isDisjoint(with: [.speakerNoteA, .speakerNoteB, .danceSpeaker]))
         // Caught: it stops and looks at you.
         let caught = beat(.dance, at: 2.8)
-        #expect(caught.isDisjoint(with: [.speakerNoteA, .speakerNoteB, .eyesChill]))
+        #expect(!caught.contains(.eyesChill))
         #expect(caught.contains(.eyesWork))
     }
 

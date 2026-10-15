@@ -66,6 +66,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The room bag from the shop is bigger, standing in the bottom left corner. A mode's own backdrop now holds no
+  items: no heavy bag at the boxing gym, no gym bag on the floor for the fitness card, no speaker for the dance
+  card and no ukulele for the music card. The dance idle keeps its shrug without the notes.
 - On another identity card's day, HAKU warms up without the boxing headband and gloves.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.

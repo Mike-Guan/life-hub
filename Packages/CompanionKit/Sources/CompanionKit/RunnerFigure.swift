@@ -233,8 +233,6 @@ struct RunnerPose {
     var propHidden: CGFloat = 0
     /// What HAKU does alongside Mike, which replaces the need and its own time.
     var activity: CompanionActivity?
-    /// Swing of the heavy bag in degrees after a hit.
-    var bagSwing: Double = 0
     /// Height of the dumbbell while lifting: 0 = down, 1 = curled up.
     var lift: CGFloat = 0
     /// Speed lines drifting back while running, 0...1.
@@ -443,7 +441,6 @@ struct RunnerPose {
             dash = 0.4
         case .boxingAtGym:
             gloveL = CGSize(width: -8, height: -6)
-            bagSwing = 4
         case .runDay, nil: break
         }
         if self.need == .boxingWarmup { eyesDx = -2 }
@@ -931,7 +928,6 @@ struct RunnerPose {
             gloveL = CGSize(width: -14 * jab, height: -10 * jab)
             gloveR = CGSize(width: -40 * cross, height: -12 * cross)
             gloveRScale = 1 + 0.15 * cross
-            bagSwing = Double(5 * Self.bump(phase, from: 0.15, to: 0.75) + 9 * Self.bump(phase, from: 1, to: 1.6))
             eyesDx = -2
         case .gymSession:
             // A slow curl every 2 s, the head pushing along at the top.
@@ -1519,10 +1515,8 @@ struct RunnerFigure: View {
                     } else if pose.cardBeat >= 0 {
                         look.beatParts(at: pose.cardBeat, &visible)
                     }
-                    // UI 审核 10/14: the watch's bottom edge cuts the speaker and the fist with the wristband.
-                    if pose.watchFrame { visible.subtract([.danceSpeaker, .wristbandHand]) }
-                    // One thing per corner: the gym bag by the door takes it from the speaker or the ukulele.
-                    if pose.bagLift >= 0, !pose.bedtime { visible.subtract([.danceSpeaker, .ukulele]) }
+                    // UI 审核 10/14: the watch's bottom edge cuts the fist with the wristband.
+                    if pose.watchFrame { visible.remove(.wristbandHand) }
                 } else {
                     visible.formUnion(boxingParts)
                 }
@@ -1769,7 +1763,8 @@ struct RunnerFigure: View {
 
     nonisolated private static func activityParts(_ activity: CompanionActivity) -> Set<RunnerPart> {
         switch activity {
-        case .boxingAtGym: warmupParts.union([.heavyBag])
+        // Mike 2026-10-15: no items in a mode's backdrop, so the gym shows no heavy bag.
+        case .boxingAtGym: warmupParts
         case .gymSession: [.dumbbell]
         case .running: [.speedLines]
         case .runDay: [.runShoe]
@@ -1857,9 +1852,6 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
             case .roomSpeakerRing:
                 RunnerPartView(part: part).opacity(pose.speakerGlow)
-            case .ukulele where pose.watchFrame:
-                // UI 审核 10/14: raised into the watch's frame, so it shows beside HAKU.
-                RunnerPartView(part: part).offset(y: -22 * scale)
             case .cupR where pose.cupRUp > 0:
                 // Pushed up off the ear, tilting back.
                 RunnerPartView(part: part)
@@ -1982,9 +1974,6 @@ struct RunnerFigure: View {
             case .dumbbell:
                 // Two quick reps in a celebration, or the curl at the gym.
                 RunnerPartView(part: part).offset(y: -12 * pose.dumbbellRise * scale)
-            case .heavyBag:
-                // Mike 2026-10-14 (G): the big bag hangs top left behind the hair and swings from its chain.
-                RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 17.5, y: -8))
             case .pillowHug:
                 let move = pose.hugPillow ?? .zero
                 RunnerPartView(part: part)

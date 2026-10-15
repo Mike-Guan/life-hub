@@ -6,15 +6,15 @@ import SwiftUI
 enum RunnerCardLook: CaseIterable, Sendable {
     /// Sport base, a visor, a racket in the right hand and a ball.
     case tennis
-    /// Sport base, the gym bag on the floor by the door and a small dumbbell in the right hand.
+    /// Sport base and a small dumbbell in the right hand.
     case fitness
     /// Out base and an open book in both hands.
     case study
     /// Craft base, a sketchbook and a pencil.
     case art
-    /// Sport base and a small speaker on the floor.
+    /// Sport base and the wristband.
     case dance
-    /// Out base and a ukulele leaning in the corner.
+    /// Out base.
     case music
     /// Sport base and ski goggles on the forehead.
     case ski
@@ -51,8 +51,8 @@ enum RunnerCardLook: CaseIterable, Sendable {
         case .fitness: parts.formUnion([.eyesChill, .handWeight])
         case .study: parts.formUnion([.eyesWork, .book, .bookPage])
         case .art: parts.formUnion([.eyesWork, .lidsWork, .browsWork, .apron, .sketchbook, .pencil])
-        case .dance: parts.formUnion([.eyesChill, .wristbandHand, .danceSpeaker])
-        case .music: parts.formUnion([.eyesWork, .ukulele])
+        case .dance: parts.formUnion([.eyesChill, .wristbandHand])
+        case .music: parts.insert(.eyesWork)
         case .ski: parts.formUnion([.eyesChill, .wristbandHand, .skiGoggles])
         }
         return parts
@@ -70,10 +70,10 @@ enum RunnerCardLook: CaseIterable, Sendable {
         }
     }
 
-    /// What the look puts aside while HAKU does something else: what it holds, what it wears over the base and
-    /// what stands in the corner.
+    // Mike 2026-10-15: a card's own backdrop holds no items, so nothing stands in the corner.
+    /// What the look puts aside while HAKU does something else: what it holds and what it wears over the base.
     var props: Set<RunnerPart> {
-        held.union([.tennisVisor, .apron, .danceSpeaker, .ukulele, .skiGoggles])
+        held.union([.tennisVisor, .apron, .skiGoggles])
     }
 
     /// The jacket fill: dark for sport, the green off-work jacket for out and craft.
@@ -83,7 +83,7 @@ enum RunnerCardLook: CaseIterable, Sendable {
 extension RunnerPose {
     /// The same pose dressed for `card`, which only the identity card mode wears.
     /// - Parameters:
-    ///   - watch: leaves the floor bare for the watch's frame.
+    ///   - watch: draws for the watch's frame.
     ///   - time: seconds on the idle clock; the look's own idle plays now and then. Nil for a still.
     func dressed(for card: IdentityKind?, in mode: Mode, watch: Bool = false, time: TimeInterval? = nil) -> RunnerPose {
         var pose = self
@@ -94,9 +94,6 @@ extension RunnerPose {
         {
             pose.play(look, at: CGFloat(beat.phase))
         }
-        // The gym bag shows with `bagLift`; 0 keeps it on the floor by the door. UI 审核 10/14 (位置规划图 §12):
-        // the watch draws nothing on the floor, its bottom edge would leave only a scrap of the bag.
-        if pose.cardLook == .fitness, !watch, pose.holdsCardProps, pose.bagLift < 0 { pose.bagLift = 0 }
         return pose
     }
 
@@ -128,9 +125,6 @@ extension RunnerCardLook {
             if t > Self.caught {
                 visible.remove(.eyesChill)
                 visible.insert(.eyesWork)
-            }
-            for note in [RunnerPart.speakerNoteA, .speakerNoteB] where Self.note(note, at: t) != nil {
-                visible.insert(note)
             }
         case .music:
             let up = Self.chordsUp(at: t)
@@ -167,14 +161,6 @@ extension RunnerCardLook {
             move.offset.height = 1.6 * beat.dip
             move.angle = 2.2 * beat.side * Double(beat.dip)
             move.anchor = Self.point(60, 124)
-        case (.dance, .danceSpeaker):
-            guard let beat = Self.halfBeat(at: t), beat.side < 0 else { return nil }
-            move.scale = 1 + 0.05 * beat.dip
-            move.anchor = Self.point(11.75, 137.5)
-        case (.dance, .speakerNoteA), (.dance, .speakerNoteB):
-            guard let u = Self.note(part, at: t) else { return nil }
-            move.offset = CGSize(width: 3 * sin(6 * u), height: -14 * u)
-            move.opacity = Double(1 - u)
         case (.music, .chordHandA), (.music, .chordHandB):
             move.offset.height = 26 * (1 - Self.chordsUp(at: t))
         case (.ski, .skiGoggles):
@@ -216,12 +202,6 @@ extension RunnerCardLook {
         guard t <= caught else { return nil }
         let k = Int((t / 0.5).rounded(.down))
         return (sin((t - CGFloat(k) * 0.5) / 0.5 * .pi), k % 2 == 0 ? -1 : 1)
-    }
-
-    /// How far a speaker note has floated up (0..<1), or nil when it isn't showing.
-    private static func note(_ note: RunnerPart, at t: CGFloat) -> CGFloat? {
-        let u = (t - (note == .speakerNoteA ? 0.1 : 1.1)) / 1.4
-        return u > 0 && u < 1 && t <= caught ? u : nil
     }
 
     /// 0 = the chord hand is down out of view, 1 = up at the chest.
