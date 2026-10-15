@@ -2557,7 +2557,8 @@ public struct CompanionPortrait: View {
                 peeking: peeking,
                 activity: activity,
                 moment: activity == nil ? moment : nil,
-                bedtime: bedtime
+                bedtime: bedtime,
+                card: card
             )
         )
     }

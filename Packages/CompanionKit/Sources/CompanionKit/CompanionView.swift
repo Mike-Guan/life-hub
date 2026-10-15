@@ -392,7 +392,8 @@ public struct CompanionView: View {
             life: life,
             activity: activity,
             moment: shownMoment,
-            bedtime: bedtime
+            bedtime: bedtime,
+            card: card
         )
     }
 
@@ -1180,7 +1181,8 @@ public struct CompanionView: View {
             peeking: peeking,
             life: life,
             activity: activity,
-            moment: shownMoment
+            moment: shownMoment,
+            card: card
         )
         let candidates = lines.filter { $0 != bubble }
         // Taps during a one-off animation only get HAKU's reaction.

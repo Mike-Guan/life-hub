@@ -12,6 +12,23 @@
         }
       }
     },
+    "HAKU，在热身" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAKU, warming up"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ハク、ウォーミングアップしている"
+          }
+        }
+      }
+    },
     "HAKU，戴着拳套在热身" : {
       "comment" : "VoiceOver",
       "localizations" : {
