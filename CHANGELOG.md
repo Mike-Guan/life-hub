@@ -74,6 +74,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- On the watch app and the watch face, both characters wear the look of the identity card picked on the iPhone,
+  instead of the default boxing or tennis look. On cards without a look of their own, the second preset character
+  also does that card's base idles on the watch.
 - Swiping back to the character's page on the watch no longer replays its opening reaction, invite hop and line.
 - On another identity card's day, HAKU warms up without the boxing headband and gloves.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
