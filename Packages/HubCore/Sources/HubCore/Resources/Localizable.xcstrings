@@ -1609,7 +1609,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "散歩して日なたぼっこ"
+            "value" : "日なた散歩"
           }
         }
       }
@@ -1738,6 +1738,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ボーダーヘッドギア"
+          }
+        }
+      }
+    },
+    "校队夹克" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スタジャン"
           }
         }
       }
@@ -1935,7 +1945,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ラベンダーのボクシングトップ"
+            "value" : "ラベンダーのトップ"
           }
         }
       }
@@ -2146,7 +2156,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヨガ・ストレッチ"
+            "value" : "ストレッチ"
           }
         }
       }
@@ -3047,7 +3057,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "黒金のボクシングジャケット"
+            "value" : "黒金ジャケット"
           }
         }
       }

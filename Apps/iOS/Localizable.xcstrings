@@ -6,7 +6,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@・%2$@のカード"
+            "value" : "%1$@・%2$@"
           }
         }
       }
@@ -329,7 +329,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "声かけるのは1日1回まで。朝は静かにしてる。"
+            "value" : "声かけるのは1日1回まで。\n朝は静かにしてる。"
           }
         }
       }
@@ -749,7 +749,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "歩きか乗り物か。一緒に合わせたい。"
+            "value" : "歩きか乗り物か。\n一緒に合わせたい。"
           }
         }
       }
@@ -789,7 +789,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "そっちが寝不足だと俺も眠い。運動したらわかる。睡眠と運動、見せて。"
+            "value" : "そっちが寝不足だと俺も眠い。\n運動したらわかる。\n睡眠と運動、見せて。"
           }
         }
       }
@@ -810,7 +810,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "歩きか乗り物か。俺もそれっぽくやる。"
+            "value" : "歩きか乗り物か。\n俺もそれっぽくやる。"
           }
         }
       }
@@ -3300,7 +3300,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スマホに住むのは、どっち？"
+            "value" : "どっちと暮らす？"
           }
         }
       }
@@ -3448,7 +3448,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "デフォルト・外せません"
+            "value" : "固定・外せない"
           }
         }
       }
