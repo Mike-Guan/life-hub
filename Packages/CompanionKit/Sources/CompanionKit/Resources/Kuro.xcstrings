@@ -1,6 +1,38 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
+    "KURO，托着腮等到 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, chin in hand, waiting till %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、頬杖をついて%@まで待っている"
+          }
+        }
+      }
+    },
+    "KURO，托着腮等着" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, chin in hand, waiting"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、頬杖をついて待っている"
+          }
+        }
+      }
+    },
     "……お疲れ。" : {
       "comment" : "下班提醒点开",
       "localizations" : {
@@ -104,16 +136,6 @@
         }
       }
     },
-    "……刚才很认真。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…that was focused."
-          }
-        }
-      }
-    },
     "……别吵，快好了。" : {
       "localizations" : {
         "en" : {
@@ -129,7 +151,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…don't watch me. watch the ball."
+            "value" : "…watch the ball. …please."
           }
         }
       }
@@ -262,7 +284,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…are we really not moving today."
+            "value" : "…not moving today, then."
           }
         }
       }
@@ -407,16 +429,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…blinking slower."
-          }
-        }
-      }
-    },
-    "……给你。收好。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…for you. keep it safe."
           }
         }
       }
@@ -960,7 +972,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "door's right there. …just asking."
+            "value" : "door's there. …just asking."
           }
         }
       }

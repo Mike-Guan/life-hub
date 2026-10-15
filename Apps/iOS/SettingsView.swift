@@ -179,7 +179,7 @@ struct SettingsView: View {
                 } label: {
                     Text("删除…")
                         .font(Toy.body(13, weight: .heavy))
-                        .foregroundStyle(Toy.alert)
+                        .foregroundStyle(Toy.alertText)
                         .padding(.horizontal, 12)
                         .frame(minHeight: 36)
                         .toyCard(radius: 12, shadow: 3)
@@ -203,9 +203,12 @@ struct SettingsView: View {
                 Text("记得的事")
                     .font(Toy.body(16, weight: .heavy))
                 Spacer()
-                Button("看看") { showsMemory = true }
-                    .font(Toy.body(13, weight: .heavy))
-                    .frame(minHeight: 44)
+                Button {
+                    showsMemory = true
+                } label: {
+                    Text("看看").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
             }
             Text("学到的规律、长期记得的事和做过的判断。都只在这台 iPhone 上。")
                 .font(Toy.body(12))
@@ -216,6 +219,7 @@ struct SettingsView: View {
         .sheet(isPresented: $showsMemory) {
             MemoryView(
                 persona: persona,
+                cards: cards,
                 store: store,
                 energy: energy,
                 ledger: ledger,
@@ -264,11 +268,12 @@ struct SettingsView: View {
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
-                Button("选 App") {
+                Button {
                     Task { await pickApps() }
+                } label: {
+                    Text("选 App").tapTarget()
                 }
                 .font(Toy.body(13, weight: .heavy))
-                .frame(minHeight: 44)
             }
             Text("选你最容易刷停不下来的 App。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
                 .font(Toy.body(12))
@@ -327,9 +332,11 @@ struct SettingsView: View {
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
-                ShareLink("导出", item: export)
-                    .font(Toy.body(13, weight: .heavy))
-                    .disabled(log.entries.isEmpty && decisions.kept.isEmpty)
+                ShareLink(item: export) {
+                    Text("导出").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
+                .disabled(log.entries.isEmpty && decisions.kept.isEmpty)
             }
             ForEach(Array(log.entries.suffix(5).reversed().enumerated()), id: \.offset) { _, entry in
                 Text("\(entry.at.formatted(date: .omitted, time: .shortened)) \(entry.kind)：\(entry.detail)")
@@ -382,7 +389,6 @@ struct SettingsView: View {
                 .labelsHidden()
                 .font(Toy.body(16, weight: .heavy))
                 .foregroundStyle(muted ? Toy.muted : Toy.ink)
-                .opacity(muted ? 0.6 : 1)
                 .padding(3)
                 .toyCard(fill: Toy.card, radius: 10, shadow: 2)
         }
@@ -506,19 +512,13 @@ private struct PlaceEdit: Identifiable {
 }
 
 extension SettingsView {
-    // Wording from the PM thread, 2026-10-07.
+    // Wording from the PM thread, 2026-10-07. 日语文案 2026-10-15: Japanese drops the pronouns, so each
+    // direction is one whole sentence to translate.
     /// The confirmation shown before switching from `old` to `new`.
     static func switchMessage(from old: Persona, to new: Persona) -> String {
-        "\(old.title) 会留在家里，\(old.pronoun)的罐子和东西都在。\(new.title) 用\(new.pronoun)自己的罐子，第一次从零开始。随时可以换回来。"
-    }
-}
-
-extension Persona {
-    /// How lines refer to the character: 他 or 她.
-    fileprivate var pronoun: String {
-        switch self {
-        case .haku: "他"
-        case .kuro: "她"
+        switch old {
+        case .haku: "HAKU 会留在家里，他的罐子和东西都在。KURO 用她自己的罐子，第一次从零开始。随时可以换回来。".localized
+        case .kuro: "KURO 会留在家里，她的罐子和东西都在。HAKU 用他自己的罐子，第一次从零开始。随时可以换回来。".localized
         }
     }
 }

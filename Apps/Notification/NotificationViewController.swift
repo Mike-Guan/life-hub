@@ -31,12 +31,15 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
             case .sitting: .stiff
             default: GymDeparture.moment(activity: nil, need: need, departing: false)
             }
+        let persona = Persona.stored(in: AppGroup.defaults)
+        let card = ModeCards.current(in: AppGroup.defaults, persona: persona).identity
         let runner =
-            switch Persona.stored(in: AppGroup.defaults) {
+            switch persona {
             case .haku:
                 AnyView(
                     CompanionView(
                         mode: mode,
+                        card: card,
                         need: need,
                         moment: moment,
                         invite: invite,
@@ -48,7 +51,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
             case .kuro:
                 AnyView(
                     KuroView(
-                        look: KuroLook(mode: mode ?? .chill),
+                        look: KuroLook(mode: mode ?? .chill, card: card),
                         bedtime: bedtime,
                         need: need,
                         moment: moment,
