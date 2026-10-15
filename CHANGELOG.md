@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- HAKU dresses for the dance, music and ski cards, each with its own idle now and then: it bobs to a small
+  speaker as notes float up and stops when caught, plays air chords by a ukulele while counting silently, or
+  pulls its ski goggles down and back and breathes out a white puff. The watch leaves out the speaker and the
+  fist, and raises the ukulele into view. The cards stay out of the picker for now.
+- The second preset character has her own seven weekly items, in her own rotation. They go on sale once
 - Two new wear slots for weekly items: a badge on the clothes, worn in every mode, and a hat, worn only in
   下班. HAKU's star badge and both characters' beanies use them and go on sale once their art is in.
 - The second preset character has her own eight weekly items, in her own rotation. They go on sale once
@@ -46,17 +51,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   pillow and leans back on it, and in boxing he bumps his gloves together twice and looks up.
 - Debug builds have a 「日文和英文」 switch in settings. It is off by default, so every build shows Chinese
   whatever the phone's language until all Japanese and English text is in. TestFlight builds don't show it.
+- The second preset character has two small idle moves in each base outfit: in sportswear she reaches up onto her
+  toes or wipes her forehead with a towel, in the smock she tucks her hair behind her ear or makes a viewfinder
+  with her hands, and in the lilac top she straightens her collar or smiles at her phone.
 - HAKU's eight pop clothes are in the shop: two tops for each of work, off work and 副业, plus the varsity
   and raincoat sets. Each is worn only in its mode, in place of the jacket. The hoodie strings and the
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
+  places, Daily, saving records and the bedtime notification.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
   screen edge no longer cuts them off. The iPhone is unchanged.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
   colour instead of her own top, and her "…" bubble moves up off a set hat.
+- After the off-work animation, HAKU no longer stays slumped in 上班 for the rest of the evening: leaving the
+  office or the next day puts the headset back on.
 - The shop catalogue has a prop colour and a gold prop (earned on the card's 10th win) for the other
   first-batch identity cards of each character. They go on sale once the character art draws them; a gold prop
   earned before its art is done is granted on the card's next win after that.
@@ -75,6 +87,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
 - Full energy is easier to tell apart from okay: HAKU's deadpan eyes open a notch with a glint, and KURO's eyes
   grow a size, her cheeks go pink, her ears stand up a little and sparkles show by her head.
+- The shop banner and the wardrobe preview show HAKU standing, so the clothes stay in view. Before, at home they
+  could catch HAKU asleep on the sofa or bent over the handheld.
 - The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
   gym, say the app never records your route, and say only the computed state goes to your own Apple Watch.
   They now also come in Japanese and English, following the phone's language. The 「日文和英文」 switch
@@ -104,6 +118,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- On the watch the second preset character holds her racket, books, cup and tablet higher, so the bottom of the
+  screen no longer cuts them off. The pen, stylus and badge are left off on the watch. The iPhone is unchanged.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
 - When the mode switches on its own, at a place, the character fades into the new outfit like a manual switch
@@ -509,6 +525,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- On a gym day you already trained, went to the gym or set off for it, scrolling on the phone no longer brings
+  back the evening gym invite. The same goes for the Sunday boxing invite once you have boxed.
 - The wardrobe preview and its head icons dress the character for the picked identity card, so the art
   card shows the apron and sketchbook instead of the boxing kit.
 - Unboxing a top or full set shows HAKU in the mode it is worn in, not always off work.

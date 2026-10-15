@@ -198,6 +198,10 @@ struct RunnerPose {
     var outfit = Outfit()
     /// What HAKU wears for an identity card other than boxing, or nil for the boxing kit.
     var cardLook: RunnerCardLook?
+    /// Seconds into the card look's own idle, or -1 when it isn't playing.
+    var cardBeat: CGFloat = -1
+    /// Drawn in the watch's frame, whose bottom edge would leave only a scrap of what stands on the floor.
+    var watchFrame = false
     /// -1...1 over a 2.4 s breath: the swing of hanging clothes charms.
     var charmSway: Double = 0
 
@@ -469,6 +473,7 @@ struct RunnerPose {
         life: IdleLife? = nil,
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
+        card: IdentityKind? = nil,
         react: Double
     ) {
         self.init(face: face, need: need, life: life, activity: activity, moment: moment)
@@ -545,7 +550,9 @@ struct RunnerPose {
             // Every 18-30 s, one of: shake the wrists out, then a glove up to fix the headband; bump the gloves; or
             // slip left, slip right and duck.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
-            if plain, r == 0,
+            // A card look with its own idle plays only that one; both streams together mixed the slip into its nod.
+            let ownIdle = RunnerCardLook(card: card)?.beatLength != nil
+            if plain, r == 0, !ownIdle,
                 let beat = IdleClock.beat(
                     at: t, every: 24, spread: 6, lengths: Self.boxingBeats, seed: Self.seed)
             {
@@ -1505,7 +1512,15 @@ struct RunnerFigure: View {
                     // Asleep, HAKU holds nothing (QA spec S6).
                     visible = look.parts
                     if pose.bedtime { visible.subtract(look.held) }
-                    if !pose.holdsCardProps { visible.subtract(look.props) }
+                    if !pose.holdsCardProps {
+                        visible.subtract(look.props)
+                    } else if pose.cardBeat >= 0 {
+                        look.beatParts(at: pose.cardBeat, &visible)
+                    }
+                    // UI 审核 10/14: the watch's bottom edge cuts the speaker and the fist with the wristband.
+                    if pose.watchFrame { visible.subtract([.danceSpeaker, .wristbandHand]) }
+                    // One thing per corner: the gym bag by the door takes it from the speaker or the ukulele.
+                    if pose.bagLift >= 0, !pose.bedtime { visible.subtract([.danceSpeaker, .ukulele]) }
                 } else {
                     visible.formUnion(boxingParts)
                 }
@@ -1783,6 +1798,8 @@ struct RunnerFigure: View {
                 moved(part, move, scale: scale)
             } else if let move = SceneMove.welcome(part, pose: pose) {
                 moved(part, move, scale: scale)
+            } else if pose.cardBeat >= 0, let move = pose.cardLook?.move(part, at: pose.cardBeat) {
+                moved(part, move, scale: scale)
             } else if part == .walkDust, pose.walkFrom != nil {
                 moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
             } else {
@@ -1837,6 +1854,9 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
             case .roomSpeakerRing:
                 RunnerPartView(part: part).opacity(pose.speakerGlow)
+            case .ukulele where pose.watchFrame:
+                // UI 审核 10/14: raised into the watch's frame, so it shows beside HAKU.
+                RunnerPartView(part: part).offset(y: -22 * scale)
             case .cupR where pose.cupRUp > 0:
                 // Pushed up off the ear, tilting back.
                 RunnerPartView(part: part)
@@ -2142,7 +2162,7 @@ struct RunnerFigure: View {
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .sparkleWork, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
-        .dizzyStar, .setVarsityCap, .eyesBright, .lidsBright,
+        .dizzyStar, .setVarsityCap, .eyesBright, .lidsBright, .countMouth, .skiGoggles, .goggleHand, .breathPuff,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
@@ -2461,6 +2481,7 @@ public struct CompanionPortrait: View {
     let daily: DailyCue?
     let walking: HubPlace.Kind?
     let bath: Bool
+    let idles: Bool
     let framing: Framing
 
     // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
@@ -2477,6 +2498,7 @@ public struct CompanionPortrait: View {
     ///   - daily: a planned Daily Widget task starting soon or now; HAKU holds up its prop.
     ///   - walking: the place Mike just left; HAKU walks with what it carries from there.
     ///   - bath: bath time before bed; HAKU carries shampoo and a rubber duck.
+    ///   - idles: whether a plain pose shows what HAKU does on its own at `date`; `false` keeps it standing still.
     public init(
         mode: Mode,
         card: IdentityKind? = nil,
@@ -2494,6 +2516,7 @@ public struct CompanionPortrait: View {
         daily: DailyCue? = nil,
         walking: HubPlace.Kind? = nil,
         bath: Bool = false,
+        idles: Bool = true,
         framing: Framing = .full
     ) {
         self.mode = mode
@@ -2512,6 +2535,7 @@ public struct CompanionPortrait: View {
         self.daily = daily
         self.walking = walking
         self.bath = bath
+        self.idles = idles
         self.framing = framing
     }
 
@@ -2552,7 +2576,7 @@ public struct CompanionPortrait: View {
     var pose: RunnerPose {
         guard bedtime == .off else { return RunnerPose.bedtimeStill() }
         let plain = need == nil && activity == nil && moment == nil && daily == nil && walking == nil && !bath
-        let life = plain && mode == .chill ? IdleLife.at(date, stamina: vitals.stamina) : nil
+        let life = plain && idles && mode == .chill ? IdleLife.at(date, stamina: vitals.stamina) : nil
         var pose = RunnerPose(
             face: EnergyFace(energy: energy),
             need: need,
@@ -2562,7 +2586,7 @@ public struct CompanionPortrait: View {
         )
         pose.codingCans = codingCans
         pose.headDy += vitals.slouch
-        if plain, life == nil { pose.show(PortraitStill.at(date), mode: mode) }
+        if plain, idles, life == nil { pose.show(PortraitStill.at(date), mode: mode) }
         if peeking {
             pose.bagLift = 0
             pose.eyesDx = -3

@@ -303,7 +303,8 @@ struct PersonaPortrait: View {
         if persona == .kuro {
             KuroPortrait(look: KuroLook(mode: mode, card: card), wearing: wardrobe.worn(in: mode))
         } else {
-            CompanionPortrait(mode: mode, card: card, wardrobe: wardrobe)
+            // C18 (动作展示总表): the shop and the wardrobe show the clothes, so no nap or handheld.
+            CompanionPortrait(mode: mode, card: card, wardrobe: wardrobe, idles: false)
         }
     }
 }
