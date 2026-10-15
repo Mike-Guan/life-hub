@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- HAKU makes small moves in each card look's base outfit now and then. In sport it stretches an arm across
+  the chest, then the other, or drinks from a water bottle. Out, it looks at its wrist or tugs its backpack
+  strap and shrugs. In craft, it spins its pencil and drops it, or wipes paint off its hand on the apron.
+  Whatever it holds for the card goes down out of the frame first. These moves replace the boxing idle in
+  card looks.
 - HAKU dresses for the dance, music and ski cards, each with its own idle now and then: it bobs to a small
   speaker as notes float up and stops when caught, plays air chords by a ukulele while counting silently, or
   pulls its ski goggles down and back and breathes out a white puff. The watch leaves out the speaker and the
