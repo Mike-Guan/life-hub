@@ -73,8 +73,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
   translation exists.
 - The shop no longer falls back to the character's old identity card when the saved cards can't be read.
-- Buying in the shop rolls the can count down and moves the bought item off the shelf smoothly. When the
-  purchase can't be saved, the error stays on screen and the unboxing plays after the shop closes.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
@@ -106,6 +104,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
 - Today's energy has its own line under the character, saying where it comes from. When it is a guess from
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
+- Buying in the shop rolls the can count down and moves the bought item off the shelf smoothly. When the
+  purchase can't be saved, the error stays on screen and the unboxing plays after the shop closes.
 - Full energy is easier to tell apart from okay: HAKU's deadpan eyes open a notch with a glint, and KURO's eyes
   grow a size, her cheeks go pink, her ears stand up a little and sparkles show by her head.
 - The shop banner and the wardrobe preview show HAKU standing, so the clothes stay in view. Before, at home they
