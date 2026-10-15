@@ -118,6 +118,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   too long, keeping watch at work) follows the phone's language where a translation exists.
 - Today's energy has its own line under the character, saying where it comes from. When it is a guess from
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
+- Buying in the shop rolls the can count down and moves the bought item off the shelf smoothly. When the
+  purchase can't be saved, the error stays on screen and the unboxing plays after the shop closes.
 - Full energy is easier to tell apart from okay: HAKU's deadpan eyes open a notch with a glint, and KURO's eyes
   grow a size, her cheeks go pink, her ears stand up a little and sparkles show by her head.
 - The shop banner and the wardrobe preview show HAKU standing, so the clothes stay in view. Before, at home they
