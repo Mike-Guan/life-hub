@@ -163,7 +163,7 @@ struct WardrobeView: View {
     // UI 审核 R1: a label on the card covered the gloves, so it sits under the card.
     private var preview: some View {
         VStack(alignment: .leading, spacing: 8) {
-            PersonaPortrait(persona: persona, mode: previewMode, wardrobe: wardrobe.showing(card: card))
+            PersonaPortrait(persona: persona, mode: previewMode, card: card, wardrobe: wardrobe.showing(card: card))
                 .frame(width: 210, height: 276)
                 .frame(maxWidth: .infinity, alignment: .bottom)
                 .frame(height: 300, alignment: .bottom)
@@ -244,10 +244,12 @@ struct WardrobeView: View {
                     WardrobeItemIcon(slotDefault: slot)
                         .frame(width: 56, height: 56)
                 } else if persona == .haku {
-                    CompanionPortrait(mode: previewMode, wardrobe: wardrobe.showing(card: card), framing: .head)
-                        .frame(width: 56, height: 56)
+                    CompanionPortrait(
+                        mode: previewMode, card: card, wardrobe: wardrobe.showing(card: card), framing: .head
+                    )
+                    .frame(width: 56, height: 56)
                 } else {
-                    KuroPortrait(look: KuroLook(mode: previewMode), wearing: without(slots), framing: .head)
+                    KuroPortrait(look: KuroLook(mode: previewMode, card: card), wearing: without(slots), framing: .head)
                         .frame(width: 56, height: 56)
                 }
                 Text(slot == .room ? "无" : "默认")
@@ -260,8 +262,9 @@ struct WardrobeView: View {
 
     private func without(_ slots: [Slot]) -> Set<String> {
         var plain = wardrobe.showing(card: card)
-        slots.forEach { plain.clear($0) }
-        return Set(plain.equipped.values)
+        // The clothes default tile takes off the previewed mode's top or set.
+        slots.forEach { $0.shelf == .clothes ? plain.undress(previewMode) : plain.clear($0) }
+        return plain.worn(in: previewMode)
     }
 
     private func itemTile(_ item: ShopItem) -> some View {
@@ -270,7 +273,7 @@ struct WardrobeView: View {
             wardrobe.equip(item)
             // Her items show only in their own look, so the preview switches to it.
             if let look = KuroItem(rawValue: item.id)?.look {
-                previewMode = Mode.allCases.first { KuroLook(mode: $0) == look } ?? previewMode
+                previewMode = Mode.allCases.first { KuroLook(mode: $0, card: card) == look } ?? previewMode
             }
         } label: {
             tile(isWorn: isWorn, fill: item.slot.tileColor(for: persona)) {

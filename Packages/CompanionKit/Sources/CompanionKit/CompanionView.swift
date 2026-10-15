@@ -6,6 +6,8 @@ import SwiftUI
 /// RUNNER, reacting to the current mode and energy.
 public struct CompanionView: View {
     let mode: Mode?
+    /// The identity card worn in the identity card mode, or nil for the boxing kit.
+    let card: IdentityKind?
     /// Energy 0-100, or nil when unknown. Below 30 RUNNER looks tired; from 70 it looks bright.
     let energy: Double?
     /// What RUNNER acts out on top of the mode, or nil.
@@ -147,6 +149,7 @@ public struct CompanionView: View {
 
     public init(
         mode: Mode?,
+        card: IdentityKind? = nil,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
         needSince: Date? = nil,
@@ -172,6 +175,7 @@ public struct CompanionView: View {
         onWelcomeDone: (() -> Void)? = nil
     ) {
         self.mode = mode
+        self.card = card
         self.energy = energy
         self.need = need
         self.needSince = needSince
@@ -315,17 +319,14 @@ public struct CompanionView: View {
                     let motion = idleMotion(mode, life: life, time: time)
                     // HAKU-04: a new bit at home starts with a quick squash instead of parts just swapping.
                     let turn = reduceMotion ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
-                    RunnerFigure(
-                        mode: mode,
-                        pose: glance(
-                            pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe)).leaving(traces)
-                        )
-                    )
-                    .saturation(vitals.saturation)
-                    .brightness(vitals.brightness)
-                    .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                    .offset(y: reduceMotion ? 0 : motion.dy)
-                    .scaleEffect(x: 1 + 0.07 * turn, y: 1 - 0.1 * turn, anchor: .bottom)
+                    let posed = pose(mode, life: life, time: time, react: react)
+                    let dressed = posed.dressed(for: card, in: mode, watch: style == .watch)
+                    RunnerFigure(mode: mode, pose: glance(dressed.wearing(wardrobeOutfit).leaving(traces)))
+                        .saturation(vitals.saturation)
+                        .brightness(vitals.brightness)
+                        .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
+                        .offset(y: reduceMotion ? 0 : motion.dy)
+                        .scaleEffect(x: 1 + 0.07 * turn, y: 1 - 0.1 * turn, anchor: .bottom)
                 }
             } keyframes: { _ in
                 KeyframeTrack {
@@ -431,6 +432,14 @@ public struct CompanionView: View {
 
     /// Seconds between animation frames: fewer on the watch.
     private var frameInterval: Double { style == .watch ? 1 / 15 : 1 / 30 }
+
+    // 位置规划图 §12 (UI 审核 2026-10-14): the watch's bottom edge would leave only a scrap of a floor item.
+    /// What HAKU wears; the watch leaves out the room item, which stands on the floor.
+    private var wardrobeOutfit: Outfit {
+        var outfit = Outfit(wardrobe)
+        if style == .watch { outfit.room = nil }
+        return outfit
+    }
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
         if pokeKind == .rollOver, let progress = poke(at: time) {
@@ -1264,10 +1273,11 @@ public struct CompanionView: View {
         say(reaction.line(for: mode))
     }
 
+    // A card look has no gloves for the boxing poke, so it glares until the card gets a poke of its own.
     /// Whether HAKU acts out something other than the plain mode, given its idle `life`.
     private func isBusy(_ life: IdleLife?) -> Bool {
         shownNeed != nil || activity != nil || shownMoment != nil || life != nil || daily != nil || walking != nil
-            || bath || invite != nil
+            || bath || invite != nil || (mode == .boxing && RunnerCardLook(card: card) != nil)
     }
 
     private func startInvite() {

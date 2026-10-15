@@ -185,10 +185,14 @@ struct KuroFigure: View {
     var watch = false
 
     var body: some View {
+        let parts = Self.parts(for: look, pose: pose, watch: watch)
+        let hatted = parts.contains(.setPicnicHat) || parts.contains(.setRainHat)
         ZStack {
-            ForEach(Self.parts(for: look, pose: pose, watch: watch), id: \.self) { part in
-                KuroPartView(part: part, shift: Self.offset(part, pose: pose), turn: Self.turn(part, pose: pose))
-                    .opacity(Self.opacity(part, pose: pose))
+            ForEach(parts, id: \.self) { part in
+                KuroPartView(
+                    part: part, shift: Self.offset(part, pose: pose, hatted: hatted), turn: Self.turn(part, pose: pose)
+                )
+                .opacity(Self.opacity(part, pose: pose))
             }
             if pose.overtime, let sign = pose.sign {
                 RunnerTextView(text: RunnerText(string: sign, x: 60, y: -1, size: 9, color: KuroPalette.ink))
@@ -251,18 +255,14 @@ struct KuroFigure: View {
     }
 
     // Her own top stays wherever a scene or tap leaves it, so the clothes go only where it is drawn. UI 审核
-    // 2026-10-14: from behind, no front pattern shows, so her own plain top stays until the clothes have backs;
-    // the set hats look the same from behind.
-    /// Swaps her own top, sleeves and, for the rain set, cat ears in `visible` for `clothes`; when `back`, only the
-    /// hat changes.
+    // 2026-10-14: from behind, no front pattern shows, and the set hats look the same from behind.
+    /// Swaps her own top, sleeves and, for the rain set, cat ears in `visible` for `clothes`; when `back`, the top
+    /// is the clothes' plain back.
     nonisolated private static func dress(
         _ look: KuroLook, in clothes: KuroClothes, back: Bool, _ visible: inout Set<KuroPart>
     ) {
-        if visible.contains(jacket(look)) {
-            if !back {
-                visible.remove(jacket(look))
-                visible.insert(clothes.top)
-            }
+        if visible.remove(jacket(look)) != nil {
+            visible.insert(back ? clothes.back : clothes.top)
             // A hat goes where her cat ears are; the bath towel takes both off. The rain hat draws its own ears.
             if let hat = clothes.hat, visible.contains(.catEars) {
                 visible.insert(hat)
@@ -285,11 +285,18 @@ struct KuroFigure: View {
         }
     }
 
-    /// How far `part` moves from where the SVG draws it, in SVG units; full energy raises her ears a little.
-    nonisolated static func offset(_ part: KuroPart, pose: KuroPose) -> CGSize {
+    // UI 审核 2026-10-15: with a set hat on, the "…" bubble sat on the hat. Moved up and left it clears both hats
+    // by 2 pt, and its small dots stay off her cat ears.
+    /// How far her "…" thought bubble moves when she wears a set hat, in SVG units.
+    nonisolated static let hattedDots = CGSize(width: -6, height: -16.5)
+
+    /// How far `part` moves from where the SVG draws it, in SVG units; full energy raises her ears a little, and
+    /// her thought bubble moves above a set hat when `hatted`.
+    nonisolated static func offset(_ part: KuroPart, pose: KuroPose, hatted: Bool = false) -> CGSize {
         let moved = shift(part, pose: pose)
         let lift: CGFloat = pose.full && part == .catEars ? 3 : 0
-        return CGSize(width: moved.width, height: moved.height - lift)
+        let dots = hatted && part == .tapDots ? hattedDots : .zero
+        return CGSize(width: moved.width + dots.width, height: moved.height - lift + dots.height)
     }
 
     /// The looks in her sportswear, where she smiles.

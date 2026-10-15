@@ -128,6 +128,8 @@ struct RunnerPose {
     /// Eyes looking sideways; negative is toward the door on the left.
     var eyesDx: CGFloat = 0
     var ledOpacity: Double = 1
+    /// How bright the mini speaker's light ring is, 0.45...1.
+    var speakerGlow: Double = 1
     /// Work tap: the LED shows dots instead of the line.
     var ledDots = false
     var yenDx: CGFloat = 0
@@ -192,6 +194,10 @@ struct RunnerPose {
     var welcome: Welcome?
     /// What HAKU wears from the wardrobe.
     var outfit = Outfit()
+    /// What HAKU wears for an identity card other than boxing, or nil for the boxing kit.
+    var cardLook: RunnerCardLook?
+    /// -1...1 over a 2.4 s breath: the swing of hanging clothes charms.
+    var charmSway: Double = 0
 
     /// The same pose in `outfit`.
     func wearing(_ outfit: Outfit) -> RunnerPose {
@@ -465,12 +471,17 @@ struct RunnerPose {
     ) {
         self.init(face: face, need: need, life: life, activity: activity, moment: moment)
         let t = time * face.speed
-        let open: CGFloat = tired ? 0.75 : 1
+        // UI 审核 2026-10-14: at 0.75 the eyes above the mask hardly changed, so tired reads at a glance there.
+        let open: CGFloat = tired ? (mode == .work || mode == .money ? 0.5 : 0.75) : 1
         let r = CGFloat(react)
         blink = open * Self.blink(at: t)
         squeeze = Self.blink(at: t)
+        charmSway = sin(t * 2 * .pi / 2.4)
         // Sparkles twinkle out of step with the blink, 1.6 s period.
+        // UI 审核 2026-10-14: from 0.1 the stars looked dim on the blue and red cards.
         sparkle = 0.8 + 0.2 * sin(time * 2 * .pi / 1.6)
+        // The mini speaker's ring lights up once every 3 s, as if music were playing (动态, UI 审核 R2).
+        speakerGlow = 0.725 - 0.275 * cos(time * 2 * .pi / 3)
 
         // Shooting keeps the ¥¥ look of the old money mode, motion included.
         switch self.moment == .shooting ? .money : mode {
@@ -1265,12 +1276,12 @@ struct RunnerFigure: View {
                             .offset(x: 3 * pose.sleepTalk * scale, y: (pose.headDy - 6 * pose.sleepTalk) * scale)
                             .opacity(Double(sin(pose.sleepTalk * .pi)))
                     }
-                    if pose.tired, mode == .boxing, !pose.bedtime {
+                    if pose.tired, mode == .boxing, pose.cardLook?.sporty ?? true, !pose.bedtime {
                         SweatDrop()
                             .offset(x: 0, y: pose.headDy * scale)
                     }
                     if pose.armsUp > 0 {
-                        StretchArms(raise: pose.armsUp, sleeve: Self.jacketColor(mode))
+                        StretchArms(raise: pose.armsUp, sleeve: jacket)
                     }
                 }
                 .rotationEffect(.degrees(pose.lean), anchor: Self.unit(x: 60, y: 140))
@@ -1285,7 +1296,7 @@ struct RunnerFigure: View {
                     GiftBox(progress: pose.unbox)
                 }
                 if let welcome = pose.welcome {
-                    WelcomeProps(welcome: welcome, shoulder: 82 + pose.shift, sleeve: Self.jacketColor(mode))
+                    WelcomeProps(welcome: welcome, shoulder: 82 + pose.shift, sleeve: jacket)
                 }
             }
         }
@@ -1322,7 +1333,9 @@ struct RunnerFigure: View {
         if let leg = pose.commuteLeg, !pose.bedtime { commuted(leg, pose: pose, on: &visible) }
         // Room things step aside for what stands, is carried or is tucked in their spot (Mike 2026-10-09: no two
         // things in one place). The monitor stands by the left ear, where the pillow and the headphone cup go.
-        if !visible.isDisjoint(with: cornerTakers) { visible.subtract([.roomPlant, .roomBag, .runningShoes]) }
+        if !visible.isDisjoint(with: cornerTakers) {
+            visible.subtract([.roomPlant, .roomBag, .roomCactus, .roomSpeaker, .roomSpeakerRing, .runningShoes])
+        }
         if !visible.isDisjoint(with: [.pillow, .cupL]) { visible.remove(.roomPc) }
         // The bandage sits on the cheek, so the raised mask covers it.
         if visible.contains(.maskUp) { visible.remove(.bandage) }
@@ -1337,6 +1350,10 @@ struct RunnerFigure: View {
             visible.insert(.bigNote)
             let t = pose.noteSlap * CGFloat(RunnerPose.noteSlapLength)
             if t > 0.25, t < 0.8 { visible.insert(.noteHit) }
+        }
+        // The cap gives way to any other headgear, and the hair tuft stays under it.
+        if visible.contains(.setVarsityCap) {
+            visible.remove(visible.isDisjoint(with: headgear) ? .hairTuft : .setVarsityCap)
         }
         // Issue #236 (correction preview v6): full energy opens the deadpan eyes a notch, with their own glint.
         if pose.face == .high, !pose.bedtime, visible.contains(.eyesWork) {
@@ -1356,21 +1373,32 @@ struct RunnerFigure: View {
         if pose.puff { visible.insert(.talkDots) }
         // Gloves fill both hands, so the peace sign never adds a third one (Mike 2026-10-07).
         if !visible.isDisjoint(with: [.gloveL, .gloveR]) { visible.remove(.peaceHand) }
-        if pose.turnedAway { visible = visible.intersection(backParts).union([.headBack]) }
+        if pose.turnedAway {
+            // From the back, clothes show as the jacket in their base colour; the cap and a lowered hood stay.
+            if !visible.isDisjoint(with: pose.outfit.clothes[mode] ?? []) { visible.insert(.jacket) }
+            visible = visible.intersection(backParts.union([.setVarsityCap, .setKawaiiHood])).union([.headBack])
+        }
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
 
-    /// Wardrobe items over the visible parts: striped masks and, at home, the room item.
+    /// Wardrobe items over the visible parts: mask prints and, at home, the room item.
     nonisolated private static func wear(_ pose: RunnerPose, mode: Mode, on visible: inout Set<RunnerPart>) {
         let outfit = pose.outfit
-        if outfit.stripedMask, visible.contains(.maskUp) {
-            visible.remove(.panelLines)
-            visible.insert(.maskStripes)
+        // A top or full set replaces the jacket and what is on it wherever the jacket shows.
+        if let clothes = outfit.clothes[mode], visible.contains(.jacket) {
+            visible.subtract(jacketParts)
+            visible.formUnion(clothes)
         }
-        if outfit.stripedMask, visible.contains(.maskDown) { visible.insert(.maskStripesDown) }
+        if let print = outfit.mask, visible.contains(.maskUp) {
+            // The stripes take the place of the panel lines; dots and the bolt go on top of them.
+            if print == .stripes { visible.remove(.panelLines) }
+            visible.insert(print.up)
+        }
+        if let print = outfit.mask, visible.contains(.maskDown) { visible.insert(print.down) }
         // The room item stays home: hidden while HAKU carries the gym bag, is out boxing, lifting or running, or
         // stands in the mountains.
         if mode == .chill, let room = outfit.room, visible.isDisjoint(with: awayParts) { visible.insert(room) }
+        if visible.contains(.roomSpeaker) { visible.insert(.roomSpeakerRing) }
         if outfit.peaceSign, pose.burst >= 0, !pose.bedtime { visible.insert(.peaceHand) }
         // Today's traces: the bandage goes everywhere, the monitor and the sunlight are in the room at home.
         if pose.traces.contains(.bandage) { visible.insert(.bandage) }
@@ -1471,7 +1499,14 @@ struct RunnerFigure: View {
                 if pose.scratch >= 0 { visible.insert(.scratchHand) }
                 if pose.tuft > 0 { visible.insert(.hairTuft) }
             case .boxing:
-                visible.formUnion(boxingParts)
+                if let look = pose.cardLook {
+                    // Asleep, HAKU holds nothing (QA spec S6).
+                    visible = look.parts
+                    if pose.bedtime { visible.subtract(look.held) }
+                    if !pose.holdsCardProps { visible.subtract(look.props) }
+                } else {
+                    visible.formUnion(boxingParts)
+                }
             case .money:
                 visible.formUnion(moneyParts)
             }
@@ -1501,11 +1536,6 @@ struct RunnerFigure: View {
             visible.remove(.monsterCan)
             visible.formUnion(props)
         }
-        // UI 审核 2026-10-13 (F7): a tired HAKU at home no longer smiles like a full one; he gets the half-shut eyes.
-        if pose.tired, mode == .chill, !pose.bedtime, visible.contains(.eyesChill) {
-            visible.remove(.eyesChill)
-            visible.formUnion([.eyesWork, .lidsWork, .eyebags])
-        }
         if pose.face == .high || pose.burst >= 0 {
             visible.insert(.sparkle)
             if mode != .chill, pose.need != .couchScroll { visible.insert(.eyeGlint) }
@@ -1519,6 +1549,14 @@ struct RunnerFigure: View {
             if pose.lie > 0 { visible.insert(.pillow) }
             if pose.zzz >= 0 { visible.insert(.zzz) }
         }
+        // UI 审核 2026-10-14: tired has to read at a glance in every mode. Off work the smile stays, with half-open
+        // eyes and bags; above the mask the bags move out to the eye corners, where they clear the mask by 2 pt.
+        if pose.tired, !pose.bedtime {
+            if visible.remove(.eyesChill) != nil { visible.formUnion([.eyesChillTired, .eyebagsChill]) }
+            if visible.contains(.maskUp), visible.remove(.eyebags) != nil { visible.insert(.eyebagsMask) }
+        }
+        // The headset band runs where the stars sit, so with it on they move up and out, 2 pt clear of it.
+        if visible.contains(.headset), visible.remove(.sparkle) != nil { visible.insert(.sparkleWork) }
         return visible
     }
 
@@ -1657,24 +1695,33 @@ struct RunnerFigure: View {
         .eyesMoney, .maskUp, .panelLines, .ledYen, .earringNeon, .chainGold, .coin,
     ]
     nonisolated private static let awakeFaceParts: Set<RunnerPart> = [
-        .eyesWork, .lidsWork, .browsWork, .eyesChill, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
-        .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen, .ledCode,
+        .eyesWork, .lidsWork, .browsWork, .eyesChill, .eyesChillTired, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
+        .mouthSmile, .mouthFang, .maskUp, .panelLines, .ledLine, .ledYen, .ledCode, .eyebagsMask,
+        .eyebagsChill,
     ]
     nonisolated private static let warmupParts: Set<RunnerPart> = [.headband, .gloveL, .gloveR]
+    // 商店衣服 pop: no ¥ or gold chain on any of the clothes, so the 副业 chain and coin go with the jacket.
+    nonisolated private static let jacketParts: Set<RunnerPart> = [
+        .jacket, .stripeNeon, .hoodCollar, .hoodieStrings, .chainGold, .coin,
+    ]
+    nonisolated private static let headgear: Set<RunnerPart> = [
+        .headband, .headset, .cheerGoggles, .bathTowel, .cheerHelmet,
+    ]
     /// What still shows from behind: the room, the jacket, the back of the head and the headset or headband.
     nonisolated private static let backParts: Set<RunnerPart> = [
-        .door, .sunlight, .roomPc, .deskMonitor, .pillow, .roomPlant, .roomBag, .runningShoes, .heavyBag,
-        .speedLines, .desk, .canStackOne, .canStackTwo, .canStackThree, .sofaArm,
+        .door, .sunlight, .roomPc, .deskMonitor, .pillow, .roomPlant, .roomBag, .roomCactus, .roomSpeaker,
+        .roomSpeakerRing, .runningShoes, .heavyBag, .speedLines, .desk, .canStackOne, .canStackTwo, .canStackThree,
+        .sofaArm,
         .jacket, .hoodCollar, .hairBack, .earL, .earR, .headset, .cupL, .cupR, .headband,
     ]
     nonisolated private static let openEyes: Set<RunnerPart> = [
-        .eyesWork, .lidsWork, .eyesChill, .cateyeL, .cateyeR, .eyesMoney, .eyeGlint, .eyesSleepy,
+        .eyesWork, .lidsWork, .eyesChill, .eyesChillTired, .cateyeL, .cateyeR, .eyesMoney, .eyeGlint, .eyesSleepy,
         .eyesBright, .lidsBright,
     ]
     nonisolated private static let couchParts: Set<RunnerPart> = [.eyesSleepy, .phone, .phoneFeed, .phoneHand]
     nonisolated private static let couchHiddenParts: Set<RunnerPart> = [
-        .eyesWork, .lidsWork, .browsWork, .eyesChill, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
-        .mouthSmile, .mouthFang, .monsterCan,
+        .eyesWork, .lidsWork, .browsWork, .eyesChill, .eyesChillTired, .cateyeL, .cateyeR, .browsBox, .eyesMoney,
+        .mouthSmile, .mouthFang, .monsterCan, .eyebagsChill,
     ]
     nonisolated private static let sleepyParts: Set<RunnerPart> = [.eyesSleepy, .eyebags, .maskDown]
     nonisolated private static let headsetParts: Set<RunnerPart> = [.headset, .cupL, .cupR, .mic]
@@ -1759,7 +1806,8 @@ struct RunnerFigure: View {
     @ViewBuilder private func partView(_ part: RunnerPart, scale: CGFloat, headband: Bool) -> some View {
         Group {
             switch part {
-            case .eyesWork, .lidsWork, .eyesBright, .lidsBright, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint:
+            case .eyesWork, .lidsWork, .eyesBright, .lidsBright, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint,
+                .eyesChillTired:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 1, y: pose.blink, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale, y: pose.eyesDy * scale)
@@ -1770,12 +1818,13 @@ struct RunnerFigure: View {
                     .scaleEffect(x: 1, y: 0.5 + 0.5 * pose.squeeze, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale)
             case .maskUp where pose.unmasking, .panelLines where pose.unmasking, .ledLine where pose.unmasking,
-                .maskStripes where pose.unmasking:
+                .maskStripes where pose.unmasking, .maskDots where pose.unmasking, .maskBolt where pose.unmasking:
                 // Off work or staying home: the mask slides down to the chin.
                 RunnerPartView(part: part)
                     .offset(y: 12 * pose.maskDrop * scale)
                     .opacity(Double(1 - pose.maskDrop))
-            case .maskDown where pose.unmasking, .maskStripesDown where pose.unmasking:
+            case .maskDown where pose.unmasking, .maskStripesDown where pose.unmasking,
+                .maskDotsDown where pose.unmasking, .maskBoltDown where pose.unmasking:
                 RunnerPartView(part: part).opacity(Double(pose.maskDrop))
             case .ledLine where pose.ledFlare > 0:
                 // Flares wider with a glow.
@@ -1784,6 +1833,8 @@ struct RunnerFigure: View {
                     .shadow(color: RunnerPalette.neonCyan, radius: 4 * pose.ledFlare * scale)
             case .ledLine:
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
+            case .roomSpeakerRing:
+                RunnerPartView(part: part).opacity(pose.speakerGlow)
             case .cupR where pose.cupRUp > 0:
                 // Pushed up off the ear, tilting back.
                 RunnerPartView(part: part)
@@ -1794,6 +1845,14 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .offset(y: -24 * pose.headsetOff * scale)
                     .opacity(Double(1 - pose.headsetOff))
+            case .hoodieStringsCyan:
+                // 商店衣服 pop: the string ends swing about 1.5 pt with the breath.
+                RunnerPartView(part: part)
+                    .rotationEffect(.degrees(7 * pose.charmSway), anchor: Self.unit(x: 60, y: 106))
+            case .setDuckCharm:
+                // 商店衣服 pop: the duck swings 8 degrees on its ring.
+                RunnerPartView(part: part)
+                    .rotationEffect(.degrees(8 * pose.charmSway), anchor: Self.unit(x: 61.5, y: 111))
             case .mouthYawn:
                 RunnerPartView(part: part)
                     .scaleEffect(x: 0.7 + 0.3 * pose.yawn, y: pose.yawn, anchor: Self.unit(x: 60, y: 85))
@@ -1838,12 +1897,12 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part)
                     .offset(y: -5 * pose.feed * scale)
                     .opacity(Double(1 - 0.6 * pose.feed))
-            case .sparkle where pose.burst >= 0:
+            case .sparkle where pose.burst >= 0, .sparkleWork where pose.burst >= 0:
                 // Celebration: the sparkles fly out from the head and fade.
                 RunnerPartView(part: part)
                     .scaleEffect(0.8 + 0.7 * pose.burst, anchor: Self.unit(x: 60, y: 40))
                     .opacity(Double(sin(pose.burst * .pi)))
-            case .sparkle:
+            case .sparkle, .sparkleWork:
                 // UI 审核 2026-10-13: with the headset on, the sparkles sit 2pt clear of its band on the watch.
                 RunnerPartView(part: part)
                     .scaleEffect(x: headband ? 1.16 : 1, y: 1, anchor: Self.unit(x: 60, y: 27))
@@ -1860,7 +1919,8 @@ struct RunnerFigure: View {
                     RunnerTextView(text: Self.dots)
                 }
             case .jacket:
-                RunnerPartView(part: part, fillOverride: Self.jacketColor(mode))
+                let back = pose.turnedAway ? pose.outfit.clothesBack[mode] : nil
+                RunnerPartView(part: part, fillOverride: back ?? jacket)
             case .gymBag:
                 // Lifted from the floor by the door onto the left shoulder.
                 RunnerPartView(part: part)
@@ -2072,17 +2132,25 @@ struct RunnerFigure: View {
 
     /// Parts that move with the head.
     private static let headParts: Set<RunnerPart> = [
-        .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .browsWork, .eyesChill,
+        .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .eyebagsMask, .browsWork, .eyesChill,
+        .eyesChillTired, .eyebagsChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
+        .maskDots, .maskBolt,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .headband, .headset, .cupL, .cupR, .mic,
-        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .ledCode, .bandage, .headBack, .rubHand,
+        .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .sparkleWork, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
-        .dizzyStar, .eyesBright, .lidsBright,
+        .dizzyStar, .setVarsityCap, .eyesBright, .lidsBright,
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
-    private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown]
+    private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown, .maskDotsDown, .maskBoltDown]
+
+    /// The jacket fill for the mode, or for the identity card's look.
+    private var jacket: Color {
+        guard mode == .boxing, let look = pose.cardLook else { return Self.jacketColor(mode) }
+        return look.jacket
+    }
 
     private static func jacketColor(_ mode: Mode) -> Color {
         switch mode {
@@ -2376,6 +2444,7 @@ public struct CompanionPortrait: View {
     }
 
     let mode: Mode
+    let card: IdentityKind?
     let energy: Double?
     let need: CompanionNeed?
     let needSince: Date?
@@ -2394,6 +2463,7 @@ public struct CompanionPortrait: View {
 
     // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
     /// - Parameters:
+    ///   - card: the identity card worn in the identity card mode, or nil for the boxing kit.
     ///   - needSince: when `need` started; after 30 minutes of couch scrolling HAKU eyes the gym bag.
     ///   - activity: what HAKU does alongside Mike; it replaces the need.
     ///   - moment: the state within the mode, such as vibe coding; it replaces the need.
@@ -2407,6 +2477,7 @@ public struct CompanionPortrait: View {
     ///   - bath: bath time before bed; HAKU carries shampoo and a rubber duck.
     public init(
         mode: Mode,
+        card: IdentityKind? = nil,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
         needSince: Date? = nil,
@@ -2424,6 +2495,7 @@ public struct CompanionPortrait: View {
         framing: Framing = .full
     ) {
         self.mode = mode
+        self.card = card
         self.energy = energy
         self.need = need
         self.needSince = needSince
@@ -2470,7 +2542,7 @@ public struct CompanionPortrait: View {
     }
 
     private var figure: RunnerFigure {
-        RunnerFigure(mode: mode, pose: pose.wearing(Outfit(wardrobe)).leaving(traces))
+        RunnerFigure(mode: mode, pose: pose.wearing(Outfit(wardrobe)).leaving(traces).dressed(for: card, in: mode))
     }
 
     /// The pose shown at `date`. A plain mode changes still every 15 minutes; at home HAKU does the same

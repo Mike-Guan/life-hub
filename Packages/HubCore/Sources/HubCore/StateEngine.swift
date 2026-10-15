@@ -77,11 +77,14 @@ public enum StateEngine {
         let today = inWindow.sorted { $0.at < $1.at }
 
         if let level = today.last(where: { $0.kind == .selfReport && $0.level != nil })?.level {
-            return EnergyReading(level: level, reasons: ["你自己选了「\(level.title)」"], source: .selfReport)
+            let reason = String(format: "你自己选了「%@」".localized, level.title)
+            return EnergyReading(level: level, reasons: [reason], source: .selfReport)
         }
         if let minutes = today.last(where: { $0.kind == .sleep && $0.sleepMinutes != nil })?.sleepMinutes {
             let level = thresholds.level(forSleep: minutes)
-            let reason = "昨晚睡了 \(minutes / 60) 小时 \(minutes % 60) 分，算「\(level.title)」"
+            let reason = String(
+                format: "昨晚睡了 %1$@ 小时 %2$@ 分，算「%3$@」".localized, "\(minutes / 60)", "\(minutes % 60)", level.title
+            )
             return EnergyReading(level: level, reasons: [reason], source: .sleep)
         }
         return nil

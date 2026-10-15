@@ -26,18 +26,29 @@ enum PlacementPoses {
     /// Every wardrobe look HAKU can wear, with a label.
     static var outfits: [(String, Outfit)] {
         var outfits: [(String, Outfit)] = []
-        for room: RunnerPart? in [nil, .roomPlant, .roomBag] {
-            for striped in [false, true] {
+        for room: RunnerPart? in [nil, .roomPlant, .roomBag, .roomCactus, .roomSpeaker] {
+            for mask: MaskPrint? in [nil, .stripes, .dots, .bolt] {
                 for peace in [false, true] {
                     var outfit = Outfit()
                     outfit.room = room
-                    outfit.stripedMask = striped
+                    outfit.mask = mask
                     outfit.peaceSign = peace
-                    let label = [room?.rawValue, striped ? "stripes" : nil, peace ? "peace" : nil]
+                    let label = [room?.rawValue, mask.map { "\($0)" }, peace ? "peace" : nil]
                         .compactMap(\.self).joined(separator: "+")
                     outfits.append((label.isEmpty ? "plain" : label, outfit))
                 }
             }
+        }
+        // The clothes with extra parts (hood, charm, cap, cassette, strings), then the plain tops.
+        let sets: [(String, [Mode: String])] = [
+            (
+                "sets",
+                [.work: "haku.set.work.raincoat", .chill: "haku.set.chill.varsity", .money: "haku.top.side.arcade"]
+            ),
+            ("tops", [.work: "haku.top.work.blazer", .chill: "haku.top.chill.flame", .money: "haku.top.side.sukajan"]),
+        ]
+        for (label, clothes) in sets {
+            outfits.append((label, Outfit(Wardrobe(clothes: clothes))))
         }
         return outfits
     }
@@ -175,6 +186,21 @@ enum PlacementPoses {
                             let label = [mode.rawValue, "\(face)", state, outfitLabel, traceLabel]
                                 .filter { !$0.isEmpty }.joined(separator: " ")
                             all.append(Haku(label: label, mode: mode, pose: pose.wearing(outfit).leaving(traces)))
+                        }
+                    }
+                }
+            }
+        }
+        // The identity card slot in each card look.
+        for card in IdentityKind.allCases where RunnerCardLook(card: card) != nil {
+            for face in faces {
+                for (state, pose) in hakuStates(face: face) {
+                    for (outfitLabel, outfit) in outfits {
+                        for (traceLabel, traces) in traceSets {
+                            let label = ["card.\(card.rawValue)", "\(face)", state, outfitLabel, traceLabel]
+                                .filter { !$0.isEmpty }.joined(separator: " ")
+                            let dressed = pose.dressed(for: card, in: .boxing).wearing(outfit).leaving(traces)
+                            all.append(Haku(label: label, mode: .boxing, pose: dressed))
                         }
                     }
                 }
