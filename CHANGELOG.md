@@ -51,6 +51,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- Swiping back to the character's page on the watch no longer replays its opening reaction, invite hop and line.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
   screen edge no longer cuts them off. The iPhone is unchanged.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
