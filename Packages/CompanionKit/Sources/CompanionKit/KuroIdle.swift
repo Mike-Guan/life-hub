@@ -36,6 +36,21 @@ enum KuroIdle: CaseIterable, Sendable {
     case highlight
     /// Art: two strokes, the pen held up to judge the distance, a tilt of the head, then back to drawing.
     case draw
+    // Base-outfit idles (待机动作 补齐规格 v0 K4-K7, K10-K11; UI 三组 预览, UI 审核 2026-10-13). All 动态.
+    // Whatever she holds for the card goes down out of the frame first, so her hands are free.
+    /// Sport (fitness): both arms up, a rise onto her toes, and down again.
+    case reach
+    // No towel round her neck: it would appear from nowhere when the move starts; the towel comes up in her hand.
+    /// Sport (fitness): a small towel comes up and wipes her forehead.
+    case towel
+    /// Craft (art): a lock of hair falls by her cheek and she tucks it behind her ear.
+    case tuck
+    /// Craft (art): both hands make a viewfinder and she shuts one eye.
+    case frame
+    /// Out (study): both hands straighten her collar.
+    case collar
+    /// Out (study): she looks down at her phone, smiles a little and puts it away.
+    case phone
     // Deferred identity cards (顺延身份卡 预览, UI 审核 round 2 passed 2026-10-14).
     /// Dance: two notes rise from the speaker and fade, her ponytail swings a beat behind and her eyes smile.
     case groove
@@ -53,7 +68,11 @@ enum KuroIdle: CaseIterable, Sendable {
         case .ears: 0.6
         case .stylus, .pen, .racket, .ponytail, .glasses: 1
         case .lookUp, .aside: 1.4
-        case .blow, .draw: 2
+        case .blow, .draw, .towel, .frame: 2
+        case .reach: 3
+        case .tuck: 1.2
+        case .collar: 1.5
+        case .phone: 2.5
         case .gloves: 1.2
         case .highlight: 1.6
         case .juggle: 3
@@ -72,9 +91,9 @@ enum KuroIdle: CaseIterable, Sendable {
         case .desk: [.ears, .glasses, .pen]
         // Boxing is an ordinary card for her (Mike 10/14): only the gloves tapping together.
         case .box: [.ears, .gloves, .ponytail]
-        case .fitness: [.ears, .ponytail, .lap]
-        case .study: [.ears, .aside, .highlight]
-        case .art: [.ears, .draw]
+        case .fitness: [.ears, .ponytail, .lap, .reach, .towel]
+        case .study: [.ears, .aside, .highlight, .collar, .phone]
+        case .art: [.ears, .draw, .tuck, .frame]
         case .dance: [.ears, .ponytail, .groove]
         case .music: [.ears, .score]
         case .ski: [.ears, .snow]
@@ -146,6 +165,45 @@ enum KuroIdle: CaseIterable, Sendable {
                 Self.eyesShut(&visible)
                 Self.swapMouth(&visible, to: .mouthCat)
                 visible.insert(.sneezePuff)
+            }
+        case .reach, .towel, .tuck, .frame, .collar, .phone:
+            // Once the card props are all the way down they are out of the frame.
+            if Self.hold(p, rise: 0.12, fall: 0.12) >= 1 { visible.subtract(putDown) }
+            applyBase(p * length, to: &visible)
+        default:
+            break
+        }
+    }
+
+    /// The parts a base-outfit idle shows or hides `t` seconds in.
+    private func applyBase(_ t: Double, to visible: inout Set<KuroPart>) {
+        switch self {
+        case .reach:
+            if Self.reachUp(t) > 0.02 { visible.insert(.idleReach) }
+            if (0.6..<2.2).contains(t) { Self.eyesShut(&visible) }
+        case .towel:
+            if (0.3..<1.7).contains(t) {
+                visible.insert(.idleTowelWipe)
+                Self.eyesShut(&visible)
+            }
+        case .tuck:
+            if t < 0.6 { visible.insert(.idleStrand) }
+            if (0.2..<1.1).contains(t) { visible.insert(.idleTuckHand) }
+            if (0.3..<1.1).contains(t) { Self.swapEyes(&visible, to: .eyesDown) }
+        case .frame:
+            if (0.15..<1.75).contains(t) { visible.insert(.idleFrameHands) }
+            if (0.45..<1.45).contains(t) { Self.swapEyes(&visible, to: .eyesWink) }
+        case .collar:
+            if (0.1..<1.4).contains(t) {
+                visible.insert(.idleCollarHands)
+                Self.swapEyes(&visible, to: .eyesDown)
+            }
+        case .phone:
+            if (0.1..<2.3).contains(t) { visible.insert(.idlePhone) }
+            if (0.35..<2).contains(t) { Self.swapEyes(&visible, to: .eyesDown) }
+            if (1..<1.4).contains(t), visible.contains(.mouthCat) {
+                visible.remove(.mouthCat)
+                visible.insert(.mouthSmile)
             }
         default:
             break
@@ -219,8 +277,66 @@ enum KuroIdle: CaseIterable, Sendable {
             if (1.7..<2.0).contains(t) { return CGSize(width: 0, height: -2 * Self.ramp(t, 1.7, 1.95)) }
             if (2.0..<2.5).contains(t) { return CGSize(width: 0, height: 3 * (1 - Self.ramp(t, 2.1, 2.5))) }
             return .zero
+        case .reach, .towel, .tuck, .frame, .collar, .phone:
+            return baseShift(part, at: p * length)
         default: return .zero
         }
+    }
+
+    /// The card props each base-outfit idle puts down.
+    private var putDown: Set<KuroPart> {
+        switch self {
+        case .reach, .towel: [.gymBlock]
+        case .tuck, .frame: [.workTablet, .watchTablet, .craftPen]
+        case .collar, .phone: [.studyNotebook, .studyHighlighter]
+        default: []
+        }
+    }
+
+    /// How far `part` moves `t` seconds into a base-outfit idle, in SVG units (timings from the approved preview).
+    private func baseShift(_ part: KuroPart, at t: Double) -> CGSize {
+        if putDown.contains(part) {
+            let down = Self.hold(t / length, rise: 0.12, fall: 0.12)
+            return CGSize(width: 0, height: 45 * down)
+        }
+        switch (self, part) {
+        case (.reach, .idleReach): return CGSize(width: 0, height: 34 * (1 - Self.reachUp(t)))
+        case (.reach, _) where !Self.ground.contains(part):
+            // On her toes: the whole of her rises a little; what stands on the floor stays.
+            let toe = Self.ease((t - 0.9) / 0.3) * (1 - Self.ease((t - 1.6) / 0.3))
+            return CGSize(width: 0, height: -4 * toe)
+        case (.towel, .idleTowelWipe):
+            let lift = Self.ease((t - 0.3) / 0.25) * (1 - Self.ease((t - 1.45) / 0.25))
+            return CGSize(width: sin((t - 0.3) * .pi * 3) * 4 * lift, height: 40 * (1 - lift))
+        case (.tuck, .idleTuckHand):
+            let up = Self.ease((t - 0.2) / 0.3) * (1 - Self.ease((t - 0.85) / 0.25))
+            return CGSize(width: 0, height: 30 * (1 - up))
+        case (.tuck, .idleStrand): return CGSize(width: 6 * Self.ease((t - 0.3) / 0.3), height: 0)
+        case (.frame, .idleFrameHands):
+            let up = Self.ease((t - 0.15) / 0.3) * (1 - Self.ease((t - 1.45) / 0.3))
+            return CGSize(width: 0, height: 36 * (1 - up))
+        case (.collar, .idleCollarHands):
+            let up = Self.ease((t - 0.1) / 0.25) * (1 - Self.ease((t - 1.1) / 0.3))
+            return CGSize(width: 0, height: 24 * (1 - up) + max(0, sin((t - 0.4) * .pi * 4)) * 1.2)
+        case (.phone, .idlePhone):
+            let up = Self.ease((t - 0.1) / 0.3) * (1 - Self.ease((t - 1.9) / 0.3))
+            return CGSize(width: 0, height: 30 * (1 - up))
+        default: return .zero
+        }
+    }
+
+    /// The parts that stand on the floor.
+    private static let ground: Set<KuroPart> = [.itemFlower, .itemLamp, .itemBag, .boxSandbag]
+
+    /// How far her arms are up `t` seconds into the reach, 0...1.
+    static func reachUp(_ t: Double) -> Double {
+        ease(t / 0.5) * (1 - ease((t - 2.2) / 0.6))
+    }
+
+    /// Smoothstep of `x` clamped to 0...1.
+    private static func ease(_ x: Double) -> Double {
+        let c = min(max(x, 0), 1)
+        return c * c * (3 - 2 * c)
     }
 
     /// How opaque `part` is at `progress` (0..<1) into the move.
@@ -302,7 +418,8 @@ enum KuroIdle: CaseIterable, Sendable {
 
     /// The parts that are her eyes.
     private static let eyes: Set<KuroPart> = [
-        .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow, .eyesFull,
+        .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow, .eyesWink,
+        .eyesFull,
     ]
 
     /// 0 → 1 eased in over `rise` from `start`, held, eased back to 0 over `fall` before `end`.
