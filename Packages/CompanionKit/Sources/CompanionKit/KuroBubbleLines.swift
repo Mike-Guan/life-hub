@@ -84,6 +84,9 @@ enum KuroBubbleLines {
     /// What KURO says when the off-work notice is tapped (KURO 台词表 `offWorkLine`).
     static let offWork = "……お疲れ。"
 
+    /// KURO's half-asleep mumbles when tapped at bedtime.
+    static let bedtime = ["……嗯……？", "……眼睛睁不开了。", "……晚安……吧。"]
+
     /// What KURO may say for a one-off `event` (KURO 台词表 B “一次性事件”), or none for other events.
     static func oneOff(_ event: CompanionEvent?) -> [String] {
         switch event {

@@ -77,6 +77,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - VoiceOver reads the unboxing as "开箱：" and the item's name instead of the character's mode.
+- The watch face says 还没有模式 when the iPhone has sent but no mode is set, instead of asking to open the
+  iPhone.
 - On the watch app and the watch face, both characters wear the look of the identity card picked on the iPhone,
   instead of the default boxing or tennis look. On cards without a look of their own, the second preset character
   also does that card's base idles on the watch.
@@ -733,6 +735,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   TestFlight release workflow for STG and PROD.
 - With the rain or picnic set's hat on, the second preset character's full-energy stars sit above the brim
   instead of on it.
+- Tapping the second preset character at bedtime gets a sleepy mumble instead of a daytime line, and no
+  longer switches the side-hustle card.
 - The second preset character has the art for her new pose, dozing off hugging her tablet. It stays hidden
   until it is wired to dozing.
 - When the second preset character is tapped in the middle of an idle move, what she put down slides back over
