@@ -28,12 +28,13 @@ public enum KuroItem: String, CaseIterable, Sendable {
     case starTie = "kuro.weekly.hair.star"
     case cloud = "kuro.weekly.room.cloud"
     case nightlight = "kuro.weekly.room.nightlight"
+    case beanie = "kuro.weekly.hat.beanie"
 
     /// The look she shows the item in.
     public var look: KuroLook {
         switch self {
         case .flower, .blanket, .spin, .chillCardigan, .chillHoodie, .picnic: .chill
-        case .bearBlanket, .succulent, .cloud, .nightlight: .chill
+        case .bearBlanket, .succulent, .cloud, .nightlight, .beanie: .chill
         case .scrunchie, .bag, .sakura, .goldRacket, .mintTie, .cherryClip, .starTie: .tennis
         case .lamp, .sideSmock, .sideDenim: .desk
         case .workBlouse, .workVest, .rain: .work
@@ -86,6 +87,7 @@ public enum KuroItem: String, CaseIterable, Sendable {
         case .starTie: .weeklyHairStarPony
         case .cloud: .weeklyRoomCloud
         case .nightlight: .weeklyRoomNightlight
+        case .beanie: .weeklyHatBeanie
         }
     }
 
@@ -97,6 +99,7 @@ public enum KuroItem: String, CaseIterable, Sendable {
         case .cherryClip: [ponytail ? .weeklyHairCherryPony : .weeklyHairCherrySide]
         case .starTie: [ponytail ? .weeklyHairStarPony : .weeklyHairStarSide]
         case .nightlight: [.weeklyRoomNightlightGlow, .weeklyRoomNightlight]
+        case .beanie: [.weeklyHatBeanie, .weeklyHatBeaniePom]
         default: [part]
         }
     }
@@ -192,6 +195,7 @@ public struct KuroItemIcon: View {
     nonisolated static func parts(_ item: KuroItem) -> [KuroPart] {
         if let clothes = item.clothes { return [clothes.top] + (clothes.hat.map { [$0] } ?? []) }
         if item == .nightlight { return [.weeklyRoomNightlightGlow, .weeklyRoomNightlight] }
+        if item == .beanie { return [.weeklyHatBeanie, .weeklyHatBeaniePom] }
         guard item == .spin else { return [item.part] }
         return [.hairBack, .earL, .earR, .faceBase, .blush, .eyesHappy, .mouthCat, .hairFringe, .catEars, .itemSpin]
     }

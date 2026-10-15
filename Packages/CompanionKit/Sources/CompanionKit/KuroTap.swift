@@ -111,6 +111,7 @@ extension KuroFigure {
         .itemBlanket, .jacketTennis, .itemBag, .jacketDesk, .earL, .earR, .catEars, .deskBooks, .jacketBox,
         .jacketSmock, .boxSandbag, .danceSpeaker, .weeklyHairMintPony, .weeklyHairCherryPony, .weeklyHairStarPony,
         .weeklyBlanketBear, .weeklyRoomCloud, .weeklyRoomSucculent, .weeklyRoomNightlightGlow, .weeklyRoomNightlight,
+        .weeklyHatBeanie, .weeklyHatBeaniePom,
     ]
 
     /// What lies on her lap; put away when she drinks.
@@ -194,6 +195,8 @@ extension KuroFigure {
 
     /// How `part` turns for her tap reaction or idle move, or nil when it keeps still.
     nonisolated static func turn(_ part: KuroPart, pose: KuroPose) -> KuroTurn? {
+        // About a point inside her head, so the pom swings side to side on top of the beanie.
+        if part == .weeklyHatBeaniePom, pose.pom != 0 { return KuroTurn(pivot: CGPoint(x: 60, y: 30), angle: pose.pom) }
         // The gold racket from the shop is drawn like her own one, so it turns the same way.
         guard part == .tennisRacket || part == .itemGoldRacket else { return nil }
         if pose.tap == .swing {
