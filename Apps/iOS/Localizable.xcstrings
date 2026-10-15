@@ -8,6 +8,12 @@
             "state" : "translated",
             "value" : "%@ · No mode yet"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@・モードなし"
+          }
         }
       }
     },
