@@ -81,7 +81,7 @@ extension HubPlace.Kind {
         guard self == .gym, cards.pickedIdentity(for: .boxing, persona: persona) != nil else {
             return title(for: persona)
         }
-        return "\(cards.activity(for: persona))的地方"
+        return String(format: "%@的地方".localized, cards.activity(for: persona))
     }
 }
 
@@ -94,10 +94,10 @@ extension HubPlace.Action {
     /// What the action is called for `persona` with `cards`, naming the user's cards.
     public func title(for persona: Persona, cards: ModeCards) -> String {
         switch self {
-        case .work: "切到\(cards.title(for: .work, persona: persona))"
-        case .chill: "切到\(cards.title(for: .chill, persona: persona))"
-        case .sideHustle: "切到\(cards.title(for: .money, persona: persona))"
-        case .boxing: "当\(HubPlace.Kind.gym.title(for: persona, cards: cards))"
+        case .work: String(format: "切到%@".localized, cards.title(for: .work, persona: persona))
+        case .chill: String(format: "切到%@".localized, cards.title(for: .chill, persona: persona))
+        case .sideHustle: String(format: "切到%@".localized, cards.title(for: .money, persona: persona))
+        case .boxing: String(format: "当%@".localized, HubPlace.Kind.gym.title(for: persona, cards: cards))
         case .recordOnly, .fitness: title(for: persona)
         }
     }

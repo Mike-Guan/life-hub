@@ -49,7 +49,9 @@ public struct HubContainer: Sendable {
                 try files.createDirectory(at: to.deletingLastPathComponent(), withIntermediateDirectories: true)
                 try files.moveItem(at: from, to: to)
             } catch {
-                errors.append("搬不动旧记录 \(from.lastPathComponent)：\(error.localizedDescription)")
+                errors.append(
+                    String(format: "搬不动旧记录 %1$@：%2$@".localized, from.lastPathComponent, error.localizedDescription)
+                )
             }
         }
         return errors
