@@ -64,6 +64,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - After 删除全部数据 the first-run setup opens again and the bedtime reminder switch is off, as on a fresh install.
+- With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
+  translation exists.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
