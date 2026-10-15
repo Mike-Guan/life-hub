@@ -37,6 +37,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The shop catalogue has clothes for identity cards. Cards without an outfit of their own share one of three
+  base outfits (sport, outing, craft), each with two tops to buy that every card on that base can wear; HAKU's
+  boxing card and the second character's boxing and tennis cards have a top of their own. They go on sale once
+  the character art draws them.
 - The second preset character's 6 tops and 2 full sets are on sale. She wears the one of the mode she is in,
   on the home screen, the shop, the wardrobe, unboxing, widgets and the watch.
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
