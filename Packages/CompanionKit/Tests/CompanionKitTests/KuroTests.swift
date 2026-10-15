@@ -33,6 +33,31 @@ import Testing
         #expect(parts.contains(.chillCup) == (look == .chill))
     }
 
+    // The identity-card looks from #320 keep their own props on the watch for now.
+    @Test(arguments: [KuroLook.work, .chill, .tennis, .desk])
+    func onTheWatchSheHoldsHerPropHigher(_ look: KuroLook) {
+        let pose = KuroPose(look: look, energy: nil)
+        let phone = Set(KuroFigure.parts(for: look, pose: pose))
+        let watch = Set(KuroFigure.parts(for: look, pose: pose, watch: true))
+        let props: [KuroLook: (KuroPart, KuroPart)] = [
+            .work: (.workTablet, .watchTablet), .chill: (.chillCup, .watchCup),
+            .tennis: (.tennisRacket, .watchRacket), .desk: (.deskBooks, .watchBooks),
+        ]
+        let (low, high) = props[look]!
+        #expect(phone.contains(low) && !phone.contains(high))
+        #expect(watch.contains(high) && !watch.contains(low))
+        #expect(watch.isDisjoint(with: [.deskPen, .workStylus, .workBadge]))
+    }
+
+    @Test func theWatchLeavesOutWhatSitsOnTheFloorOrHerLap() {
+        for (look, item) in [(KuroLook.chill, KuroItem.flower), (.desk, .lamp), (.chill, .blanket)] {
+            var pose = KuroPose(look: look, energy: nil)
+            pose.items = [item]
+            #expect(KuroFigure.parts(for: look, pose: pose).contains(item.part))
+            #expect(!KuroFigure.parts(for: look, pose: pose, watch: true).contains(item.part))
+        }
+    }
+
     @Test func theMaskHidesHerMouthAtWork() {
         let work = Set(KuroFigure.parts(for: .work, pose: KuroPose(look: .work, energy: nil)))
         #expect(work.isDisjoint(with: [.mouthCat, .mouthFlat, .mouthSmile, .mouthO]))

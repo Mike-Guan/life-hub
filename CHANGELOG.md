@@ -5,7 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
-- The second preset character has her own seven weekly items, in her own rotation. They go on sale once
+- Two new wear slots for weekly items: a badge on the clothes, worn in every mode, and a hat, worn only in
+  下班. HAKU's star badge and both characters' beanies use them and go on sale once their art is in.
+- The second preset character has her own eight weekly items, in her own rotation. They go on sale once
   their art is in.
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
@@ -52,6 +54,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
+  screen edge no longer cuts them off. The iPhone is unchanged.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
@@ -101,6 +105,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- On the watch the second preset character holds her racket, books, cup and tablet higher, so the bottom of the
+  screen no longer cuts them off. The pen, stylus and badge are left off on the watch. The iPhone is unchanged.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
 - When the mode switches on its own, at a place, the character fades into the new outfit like a manual switch
