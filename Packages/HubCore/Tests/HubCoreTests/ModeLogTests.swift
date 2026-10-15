@@ -18,6 +18,17 @@ import Testing
         ModeChange(mode: mode, source: source, at: at, deviceID: "test")
     }
 
+    @Test func latestOtherModeSkipsTheGivenOne() {
+        let log = ModeLog(changes: [
+            change(.work, date(2, 9)),
+            change(.chill, date(2, 18)),
+            change(.money, date(2, 20)),
+        ])
+        #expect(log.latest(other: .money) == .chill)
+        #expect(log.latest(other: .chill) == .money)
+        #expect(ModeLog(changes: [change(.money, date(2, 20))]).latest(other: .money) == nil)
+    }
+
     @Test func segmentsRunUntilNextChangeAndNow() {
         let log = ModeLog(changes: [change(.work, date(2, 9)), change(.chill, date(2, 18))])
         let segments = log.segments(on: date(2, 12), now: date(2, 20), calendar: calendar)

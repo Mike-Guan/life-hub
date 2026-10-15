@@ -101,3 +101,54 @@ struct GoToGymControl: ControlWidget {
         .description("背着包陪你走过去。")
     }
 }
+
+/// A Control Center, Lock Screen or Action button control that switches to the picked card and back.
+struct CardControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        AppIntentControlConfiguration(kind: "modeCard", provider: CardControlProvider()) { value in
+            ControlWidgetToggle(isOn: value.isOn, action: CardToggleIntent(card: value.card)) {
+                Label(value.title, systemImage: value.symbol)
+            }
+        }
+        .displayName("模式卡")
+        .description("点一下切到副业或身份卡，再点一下切回去。")
+    }
+}
+
+/// The card a `CardControl` switches, picked when the control is added.
+struct CardControlConfiguration: ControlConfigurationIntent {
+    static let title: LocalizedStringResource = "模式卡"
+
+    @Parameter(title: "模式卡", default: .money) var card: ControlCard
+}
+
+/// What a `CardControl` shows: the card's own name and symbol, on while in its mode.
+struct CardControlValue: Sendable {
+    var card: ControlCard
+    var isOn: Bool
+    var title: String
+    var symbol: String
+}
+
+struct CardControlProvider: AppIntentControlValueProvider {
+    func previewValue(configuration: CardControlConfiguration) -> CardControlValue {
+        value(for: configuration.card, current: nil)
+    }
+
+    func currentValue(configuration: CardControlConfiguration) async throws -> CardControlValue {
+        let snapshot = AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))
+        return value(for: configuration.card, current: snapshot?.mode)
+    }
+
+    private func value(for card: ControlCard, current: Mode?) -> CardControlValue {
+        let persona = Persona.stored(in: AppGroup.defaults)
+        let cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
+        let mode = card.mode
+        return CardControlValue(
+            card: card,
+            isOn: current == mode,
+            title: cards.title(for: mode, persona: persona),
+            symbol: cards.pickedIdentity(for: mode, persona: persona)?.symbol ?? mode.symbol(for: persona)
+        )
+    }
+}

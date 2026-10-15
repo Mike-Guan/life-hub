@@ -57,6 +57,8 @@ targets:
       - path: Apps/iOS
         excludes:
           - Info.plist
+      # Issue #481: the app runs the card control's intent itself.
+      - Apps/Widgets/CardToggleIntent.swift
     dependencies:
       - package: HubCore
       - package: CompanionKit

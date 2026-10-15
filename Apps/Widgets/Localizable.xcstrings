@@ -59,6 +59,22 @@
         }
       }
     },
+    "副业" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projects"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "副業"
+          }
+        }
+      }
+    },
     "占浴室中" : {
       "comment" : "中文改为“占浴室中”",
       "localizations" : {
@@ -111,12 +127,45 @@
         }
       }
     },
+    "模式卡" : {
+      "comment" : "控件名和选项标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode card"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モードカード"
+          }
+        }
+      }
+    },
     "点一下切到别的模式。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap to switch to another mode."
+          }
+        }
+      }
+    },
+    "点一下切到副业或身份卡，再点一下切回去。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to switch to Projects or your card, tap again to switch back."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タップで副業かマイカードに切り替え、もう一度タップで戻ります。"
           }
         }
       }
@@ -181,6 +230,22 @@
         }
       }
     },
+    "身份卡" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your card"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイカード"
+          }
+        }
+      }
+    },
     "还没有模式" : {
       "localizations" : {
         "en" : {
@@ -193,6 +258,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "まだモードなし"
+          }
+        }
+      }
+    },
+    "进入" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入る"
+          }
+        }
+      }
+    },
+    "进入或退出模式卡" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter or leave a mode card"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モードカードに入る・出る"
           }
         }
       }
