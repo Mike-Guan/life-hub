@@ -91,6 +91,7 @@ struct StatusView: View {
         } else {
             CompanionPortrait(
                 mode: mode,
+                card: entry.names.identity,
                 energy: entry.energy?.value,
                 need: entry.need,
                 needSince: entry.needSince,

@@ -456,7 +456,7 @@ struct OnboardingView: View {
             if draft.persona == .kuro {
                 KuroView(look: KuroLook(mode: mode, card: draft.identity), showsBubble: false)
             } else {
-                CompanionView(mode: mode, showsBubble: false)
+                CompanionView(mode: mode, card: draft.identity, showsBubble: false)
             }
         }
         .frame(width: width, height: (width * 1.32).rounded())

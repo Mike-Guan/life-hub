@@ -147,6 +147,7 @@ struct HomeView: View {
                     } else {
                         CompanionView(
                             mode: shownMode,
+                            card: shownCards.identity,
                             energy: reading?.value,
                             need: activeNeed(at: context.date)?.need,
                             needSince: activeNeed(at: context.date)?.since,
