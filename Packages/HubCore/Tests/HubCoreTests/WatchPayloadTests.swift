@@ -114,7 +114,9 @@ import Testing
         let now = date(7, 12)
         var sent = payload()
         let start = date(7, 12, 5)
-        sent.scenes = [TimedScene(from: now, scene: HomeScene()), TimedScene(from: start, scene: HomeScene(bath: true))]
+        sent.scenes = [
+            TimedScene(from: now, scene: HomeScene()), TimedScene(from: start, scene: HomeScene(bath: true)),
+        ]
         #expect(sent.timelineDates(after: now, calendar: calendar).contains(start))
     }
 
