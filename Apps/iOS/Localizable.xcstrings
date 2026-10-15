@@ -889,7 +889,7 @@
       }
     },
     "地点" : {
-      "comment" : "同一中文要两种译法（见上一行），请工程把中文改得稍有不同",
+      "comment" : "设置分组标题（多个地点）",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -988,6 +988,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Done"
+          }
+        }
+      }
+    },
+    "定位" : {
+      "comment" : "引导下班活动的感应来源：靠定位",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
+          }
+        }
+      }
+    },
+    "定位 · 手表" : {
+      "comment" : "引导下班活动的感应来源：定位和手表",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location · watch"
           }
         }
       }
@@ -1179,6 +1201,7 @@
       }
     },
     "手表" : {
+      "comment" : "引导下班活动的感应来源：只有手表",
       "localizations" : {
         "en" : {
           "stringUnit" : {
