@@ -658,3 +658,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   TestFlight release workflow for STG and PROD.
 - With the rain or picnic set's hat on, the second preset character's full-energy stars sit above the brim
   instead of on it.
+- The second preset character's boxing and dance cards no longer stand a sandbag or speaker in the room;
+  a mode's default look has no room items. The dance notes still rise.

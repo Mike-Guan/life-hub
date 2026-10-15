@@ -384,6 +384,7 @@ struct KuroFigure: View {
         ])
     }
 
+    // Mike 2026-10-15: a mode's default look has nothing standing in the room, so no sandbag or speaker.
     /// The parts only `look` wears.
     nonisolated private static func outfit(_ look: KuroLook) -> Set<KuroPart> {
         switch look {
@@ -391,11 +392,11 @@ struct KuroFigure: View {
         case .chill: [.jacketChill, .chillCup]
         case .tennis: [.tennisPonytail, .jacketTennis, .tennisHeadband, .tennisRacket]
         case .desk: [.jacketDesk, .deskGlasses, .deskBooks, .deskPen]
-        case .box: [.tennisPonytail, .jacketBox, .boxHeadband, .boxGloveL, .boxGloveR, .boxSandbag]
+        case .box: [.tennisPonytail, .jacketBox, .boxHeadband, .boxGloveL, .boxGloveR]
         case .fitness: [.tennisPonytail, .jacketTennis, .gymBlock]
         case .study: [.jacketChill, .studyNotebook, .studyHighlighter]
         case .art: [.jacketSmock, .workTablet, .craftPen]
-        case .dance: [.tennisPonytail, .jacketTennis, .danceSpeaker]
+        case .dance: [.tennisPonytail, .jacketTennis]
         case .music: [.jacketChill, .scoreSheet, .scoreFinger]
         case .ski: [.tennisPonytail, .jacketTennis, .skiGoggles]
         }
