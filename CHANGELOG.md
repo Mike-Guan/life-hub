@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The home page has a saved room per character: a furniture catalog and a layout that keeps what a newer
+  build wrote. The wardrobe's room item moves into the room once. Nothing on screen uses it yet (Issue #489).
 - A prototype of HAKU's home, from a house button on the home screen and under Settings (家（原型）), in DEV and STG builds only. It is a small iso room in
   SpriteKit: HAKU walks to the desk, sofa, bed or bag when the mode changes, says a line when tapped, can be
   carried, and the room has a day/night switch, a wardrobe, a shelf, recolouring and a mock shop. All data is fake.
