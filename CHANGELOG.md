@@ -91,6 +91,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   The second character's flower is now called 地上小粉花.
 - The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
   4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
+- A tired HAKU now shows it in every mode: off work he keeps smiling with half-open eyes and bags, at work and
+  on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
+  full night stay brighter and clear the headset.
 - The watch has no dark band behind the clock any more; every screen keeps its own background.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
