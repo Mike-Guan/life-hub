@@ -63,8 +63,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- Japanese for the second and third copy batches: home bubbles, VoiceOver lines, identity cards, first-run setup,
-  shop, wardrobe, unboxing, settings, memory, place editor, item names and reasons.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
@@ -144,6 +142,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
+- Japanese for the second and third copy batches: home bubbles, VoiceOver lines, identity cards, first-run setup,
+  shop, wardrobe, unboxing, settings, memory, place editor, item names and reasons.
 - After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
 - On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
   ponytail (unbox page and home card). The watch is unchanged.
