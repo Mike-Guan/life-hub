@@ -141,6 +141,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   44 pt tap area. The shop banner grows with longer text instead of cutting it off.
 - Opening a keepsake or going through the first-run setup no longer uses up HAKU's late-night "还不睡。" or its
   slow look up after half a day away. Both now wait for the home screen.
+- The second preset character's identity-card idle moves now show on the home screen and in notifications.
+  Before, those screens didn't pass her card, so only her base moves played.
 - Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
   The cheer hop is lower, so the hair stays inside the card.
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
