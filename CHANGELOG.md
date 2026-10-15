@@ -41,6 +41,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The shop catalogue has a prop colour and a gold prop (earned on the card's 10th win) for the other
+  first-batch identity cards of each character. They go on sale once the character art draws them; a gold prop
+  earned before its art is done is granted on the card's next win after that.
 - The shop catalogue has clothes for identity cards. Cards without an outfit of their own share one of three
   base outfits (sport, outing, craft), each with two tops to buy that every card on that base can wear; HAKU's
   boxing card and the second character's boxing and tennis cards have a top of their own. They go on sale once
