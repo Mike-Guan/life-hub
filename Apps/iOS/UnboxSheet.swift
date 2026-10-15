@@ -48,7 +48,8 @@ struct UnboxSheet: View {
                 if let kuro = KuroItem(rawValue: item.id) {
                     KuroView(
                         look: kuro.look,
-                        wearing: Set(wearing.equipped.values),
+                        wearing: wearing.worn(
+                            in: item.mode ?? Mode.allCases.first { KuroLook(mode: $0) == kuro.look } ?? .chill),
                         event: .unlock(id: entry.id.uuidString, item: item.id)
                     )
                 } else {

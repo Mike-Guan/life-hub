@@ -21,6 +21,13 @@ public enum KuroLook: String, CaseIterable, Sendable {
     case study
     /// Art card: a yellow smock, her tablet and a drawing pen.
     case art
+    // Deferred identity cards (顺延身份卡 预览, UI 审核 round 2 passed 2026-10-14).
+    /// Dance card: her sportswear and a small speaker on the floor.
+    case dance
+    /// Music card: her lilac top and a score she holds at her chest.
+    case music
+    /// Ski card: her sportswear and ski goggles up on her forehead.
+    case ski
 
     // The only place the mode-to-outfit mapping lives, like `Mode.riveValue`.
     /// The look for `mode`: the identity card slot dresses her for `card`, or as her tennis day without one or
@@ -40,6 +47,9 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .fitness: .fitness
         case .study: .study
         case .art: .art
+        case .dance: .dance
+        case .music: .music
+        case .ski: .ski
         default: .tennis
         }
     }
@@ -56,6 +66,9 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .fitness: Color(hex: 0xFFC2D6)
         case .study: Color(hex: 0x9FD3FF)
         case .art: Color(hex: 0xFFC9A8)
+        case .dance: Color(hex: 0xC9B8FF)
+        case .music: Color(hex: 0xF2E8FF)
+        case .ski: Color(hex: 0xE6E9EF)
         }
     }
 
@@ -67,6 +80,9 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .fitness: .fitness
         case .study: .study
         case .art: .art
+        case .dance: .dance
+        case .music: .music
+        case .ski: .ski
         }
     }
 
@@ -75,7 +91,7 @@ public enum KuroLook: String, CaseIterable, Sendable {
         switch self {
         case .work: .work
         case .chill: .chill
-        case .tennis, .box, .fitness, .study, .art: .boxing
+        case .tennis, .box, .fitness, .study, .art, .dance, .music, .ski: .boxing
         case .desk: .money
         }
     }
@@ -93,6 +109,8 @@ struct KuroPose: Sendable {
     var blinking = false
     /// Low energy: flat mouth and no blush.
     var tired = false
+    /// Full energy: bright eyes a size bigger, pink cheeks, ears up and sparkles by her head.
+    var full = false
     /// Waiting out a late end at the desk, chin on hand.
     var overtime = false
     /// The late end shown on a sign above her head, as HH:mm, or nil for no sign.
@@ -128,6 +146,7 @@ struct KuroPose: Sendable {
             tired = true
         case .high:
             eyes = .bright
+            full = true
         case .mid:
             eyes = look == .tennis ? .bright : look == .desk ? .down : .open
         }
@@ -162,11 +181,14 @@ struct KuroPose: Sendable {
 struct KuroFigure: View {
     let look: KuroLook
     let pose: KuroPose
+    /// Leaves off what stands on the floor, which the watch's bottom edge cuts.
+    var watch = false
 
     var body: some View {
         ZStack {
-            ForEach(Self.parts(for: look, pose: pose), id: \.self) { part in
-                KuroPartView(part: part, shift: Self.shift(part, pose: pose), turn: Self.turn(part, pose: pose))
+            ForEach(Self.parts(for: look, pose: pose, watch: watch), id: \.self) { part in
+                KuroPartView(part: part, shift: Self.offset(part, pose: pose), turn: Self.turn(part, pose: pose))
+                    .opacity(Self.opacity(part, pose: pose))
             }
             if pose.overtime, let sign = pose.sign {
                 RunnerTextView(text: RunnerText(string: sign, x: 60, y: -1, size: 9, color: KuroPalette.ink))
@@ -175,39 +197,108 @@ struct KuroFigure: View {
         .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
     }
 
-    /// Visible parts in back-to-front order.
-    nonisolated static func parts(for look: KuroLook, pose: KuroPose) -> [KuroPart] {
+    /// Visible parts in back-to-front order; `watch` leaves off what stands on the floor.
+    nonisolated static func parts(for look: KuroLook, pose: KuroPose, watch: Bool = false) -> [KuroPart] {
         var visible: Set<KuroPart> = [.hairBack, .earL, .earR, .faceBase, .hairFringe, .catEars]
         visible.formUnion(outfit(look))
         visible.insert(pose.blinking ? .eyesClosed : part(pose.eyes))
         if !pose.tired { visible.insert(.blush) }
+        // Issue #236 (correction preview v6): full reads apart from okay at a glance, even on the watch.
+        if pose.full {
+            // UI 审核 2026-10-13: the round cheeks replace the oval blush rather than smudging over it.
+            visible.remove(.blush)
+            visible.formUnion([.cheeksFull, .sparkle])
+            if visible.contains(.eyesBright) {
+                visible.remove(.eyesBright)
+                visible.insert(.eyesFull)
+            }
+        }
         if pose.overtime {
             // Her chin rests on her hand, so whatever she held in front of her is put down.
-            visible.subtract([.workTablet, .workStylus, .gymBlock, .studyNotebook])
+            visible.subtract([.workTablet, .workStylus, .gymBlock, .studyNotebook, .scoreSheet, .scoreFinger])
             visible.formUnion([.overtimeDesk, .overtimeHand])
             if pose.sign != nil { visible.insert(.overtimeSign) }
         }
         if look != .work {
             let mouth: KuroPart =
-                pose.tired || pose.calm ? .mouthFlat : look == .tennis || look == .fitness ? .mouthSmile : .mouthCat
+                pose.tired || pose.calm ? .mouthFlat : Self.smiling.contains(look) ? .mouthSmile : .mouthCat
             visible.insert(pose.mouthO ? .mouthO : mouth)
         }
-        for item in pose.items where item.look == look {
+        for item in pose.items where item.look == look && item.clothes == nil {
             visible.insert(item.part)
             if let replaced = item.replaces { visible.remove(replaced) }
         }
         pose.scene?.dress(look, items: pose.items, &visible)
         if let tap = pose.tap {
             apply(tap, progress: pose.tapProgress, to: &visible)
-            // The rubbing hand comes up on her arm, in her look's sleeve; in gloves the left one comes off.
+            // The rubbing hand comes up on her arm, in her look's sleeve; in gloves the left one comes off, and the
+            // finger on the score is that hand.
             if visible.contains(.tapRub) {
                 visible.insert(rubSleeve(look))
-                visible.remove(.boxGloveL)
+                visible.subtract([.boxGloveL, .scoreFinger])
             }
         }
         if pose.heart { visible.insert(.tapHeart) }
         if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
+        // One top or set per mode, so the first worn one in catalog order is the only one.
+        let worn = KuroItem.allCases.filter { $0.look == look && pose.items.contains($0) }
+        if let clothes = worn.lazy.compactMap(\.clothes).first {
+            dress(look, in: clothes, back: pose.tap == .turnAway, &visible)
+        }
+        // UI 审核 2026-10-14 (位置规划图 §12): the watch draws nothing on the floor.
+        if watch { visible.remove(.danceSpeaker) }
         return KuroPart.allCases.filter { visible.contains($0) }
+    }
+
+    // Her own top stays wherever a scene or tap leaves it, so the clothes go only where it is drawn. UI 审核
+    // 2026-10-14: from behind, no front pattern shows, so her own plain top stays until the clothes have backs;
+    // the set hats look the same from behind.
+    /// Swaps her own top, sleeves and, for the rain set, cat ears in `visible` for `clothes`; when `back`, only the
+    /// hat changes.
+    nonisolated private static func dress(
+        _ look: KuroLook, in clothes: KuroClothes, back: Bool, _ visible: inout Set<KuroPart>
+    ) {
+        if visible.contains(jacket(look)) {
+            if !back {
+                visible.remove(jacket(look))
+                visible.insert(clothes.top)
+            }
+            // A hat goes where her cat ears are; the bath towel takes both off. The rain hat draws its own ears.
+            if let hat = clothes.hat, visible.contains(.catEars) {
+                visible.insert(hat)
+                if hat == .setRainHat { visible.remove(.catEars) }
+            }
+        }
+        if visible.remove(rubSleeve(look)) != nil { visible.insert(clothes.rubSleeve) }
+        if visible.remove(KuroScene.sleeve(look)) != nil { visible.insert(clothes.inviteSleeve) }
+    }
+
+    /// Her own top in `look`.
+    nonisolated static func jacket(_ look: KuroLook) -> KuroPart {
+        switch look {
+        case .work: .jacketWork
+        case .chill, .study, .music: .jacketChill
+        case .tennis, .fitness, .dance, .ski: .jacketTennis
+        case .desk: .jacketDesk
+        case .box: .jacketBox
+        case .art: .jacketSmock
+        }
+    }
+
+    /// How far `part` moves from where the SVG draws it, in SVG units; full energy raises her ears a little.
+    nonisolated static func offset(_ part: KuroPart, pose: KuroPose) -> CGSize {
+        let moved = shift(part, pose: pose)
+        let lift: CGFloat = pose.full && part == .catEars ? 3 : 0
+        return CGSize(width: moved.width, height: moved.height - lift)
+    }
+
+    /// The looks in her sportswear, where she smiles.
+    nonisolated private static let smiling: Set<KuroLook> = [.tennis, .fitness, .dance, .ski]
+
+    /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out.
+    nonisolated static func opacity(_ part: KuroPart, pose: KuroPose) -> Double {
+        guard pose.tap == nil, let idle = pose.idle else { return 1 }
+        return idle.opacity(part, progress: pose.idleProgress)
     }
 
     /// The parts only `look` wears.
@@ -221,6 +312,9 @@ struct KuroFigure: View {
         case .fitness: [.tennisPonytail, .jacketTennis, .gymBlock]
         case .study: [.jacketChill, .studyNotebook, .studyHighlighter]
         case .art: [.jacketSmock, .workTablet, .craftPen]
+        case .dance: [.tennisPonytail, .jacketTennis, .danceSpeaker]
+        case .music: [.jacketChill, .scoreSheet, .scoreFinger]
+        case .ski: [.tennisPonytail, .jacketTennis, .skiGoggles]
         }
     }
 
@@ -228,10 +322,10 @@ struct KuroFigure: View {
         switch look {
         case .work: .tapRubSleeveWork
         case .chill: .tapRubSleeveChill
-        case .tennis, .fitness: .tapRubSleeveTennis
+        case .tennis, .fitness, .dance, .ski: .tapRubSleeveTennis
         case .desk: .tapRubSleeveDesk
         case .box: .tapRubSleeveBox
-        case .study: .tapRubSleeveChill
+        case .study, .music: .tapRubSleeveChill
         case .art: .tapRubSleeveSmock
         }
     }
@@ -338,6 +432,8 @@ public struct KuroView: View {
     let showsBubble: Bool
     /// Increment to play her cheer: her look's move with a hop.
     let cheer: Int
+    /// Increment to play the nod after an answer: a blink and a small dip.
+    let nods: Int
     /// Called after KURO reacts to a tap, for example to switch the 副业 state.
     let onTap: (() -> Void)?
     /// Called once she has answered a welcome back event.
@@ -362,6 +458,7 @@ public struct KuroView: View {
     @State private var bubbleTask: Task<Void, Never>?
     @State private var pop = 0
     @State private var tapStart: Date?
+    @State private var nodStart: Date?
     @State private var tapKind: KuroTap?
     @State private var tapHeart = false
     @State private var tapTimes: [Date] = []
@@ -411,6 +508,7 @@ public struct KuroView: View {
     ///     done and a welcome back each play her look's tap move once per id.
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
     ///   - cheer: increment to play her cheer.
+    ///   - nods: increment to play the nod after an answer.
     ///   - onTap: called after she reacts to a tap.
     ///   - onWelcomeDone: called once she has answered a `.welcomeBack` event, even one already played.
     ///   - onBathDone: called after she shows the towel round her head on a tap during bath time.
@@ -430,6 +528,7 @@ public struct KuroView: View {
         event: CompanionEvent? = nil,
         showsBubble: Bool = true,
         cheer: Int = 0,
+        nods: Int = 0,
         onTap: (() -> Void)? = nil,
         onWelcomeDone: (() -> Void)? = nil,
         onBathDone: (() -> Void)? = nil
@@ -450,6 +549,7 @@ public struct KuroView: View {
         self.event = event
         self.showsBubble = showsBubble
         self.cheer = cheer
+        self.nods = nods
         self.onTap = onTap
         self.onWelcomeDone = onWelcomeDone
         self.onBathDone = onBathDone
@@ -479,8 +579,10 @@ public struct KuroView: View {
                 }
                 // KURO-04 (UI 审核 2026-10-09): with the watch screen dimmed she dozes, eyes shut and body still,
                 // instead of freezing mid-hop or mid-blink.
-                let pose =
-                    dozing ? self.pose.showing(.closed) : unbox != nil ? unboxPose : reacting ?? scened(homeScene)
+                let nod = Self.nod(since: nodStart, at: time)
+                let awake = unbox != nil ? unboxPose : reacting ?? scened(homeScene)
+                // 「……嗯。」 (Issue #236): one blink at the start of the nod.
+                let pose = dozing ? self.pose.showing(.closed) : (nod ?? 1) < 0.1 ? awake.showing(.closed) : awake
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
                 let still = Self.holdsStill(reduceMotion: reduceMotion, unboxing: unbox != nil, dozing: dozing)
                 // KURO-16: her idle runs on from where it was when her pace changes, and eases back in after
@@ -496,33 +598,31 @@ public struct KuroView: View {
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
                 let fidget = busy ? nil : KuroIdle.at(idleTime, look: look)
                 ZStack {
-                    KuroFigure(look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget))
-                        .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
+                    KuroFigure(
+                        look: look, pose: still || tap != nil ? pose : pose.blink(at: time).idling(fidget),
+                        watch: style == .watch
+                    )
+                    .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
                     if let unbox {
                         GiftBox(progress: unbox.box, fill: RunnerPalette.cardboard, ribbon: KuroPalette.pink)
                     }
                 }
                 .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
                 .rotationEffect(.degrees(still ? 0 : motion.angle * ease), anchor: .bottom)
-                .offset(y: (still ? 0 : motion.dy * ease) + hop)
+                .offset(y: (still ? 0 : motion.dy * ease + Self.nodDip(nod)) + hop)
             }
             .id(look)
             .transition(.opacity)
             .keyframeAnimator(initialValue: Squash(), trigger: pop) { content, value in
                 content.scaleEffect(x: value.x, y: value.y, anchor: .bottom)
             } keyframes: { _ in
-                KeyframeTrack(\.x) {
-                    CubicKeyframe(1.07, duration: 0.08)
-                    SpringKeyframe(1, duration: 0.35, spring: .bouncy)
-                }
-                KeyframeTrack(\.y) {
-                    CubicKeyframe(0.9, duration: 0.08)
-                    SpringKeyframe(1, duration: 0.35, spring: .bouncy)
-                }
+                Squash.tap()
             }
             .modifier(WatchFigureFrame(isEnabled: style == .watch))
             .padding(.top, Self.topInset(style))
             .padding(.horizontal, 12)
+            // Every look change fades in 0.3 s, also when the mode switched on its own (HAKU-05).
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: look)
 
             if unboxStart != nil {
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
@@ -590,6 +690,7 @@ public struct KuroView: View {
             playEventIfNew()
             finishWelcomeIfNeeded()
         }
+        .onChange(of: nods) { _, _ in nodStart = .now }
         .onChange(of: cheer) { _, _ in
             guard bedtime == .off, unboxStart == nil else { return }
             play(KuroTap(look: look, sleepy: false), at: .now)
@@ -779,6 +880,19 @@ public struct KuroView: View {
         return (0..<1).contains(progress) ? (kind, progress) : nil
     }
 
+    /// Progress of the nod at `time` (0..<1), or nil when none is playing.
+    nonisolated static func nod(since start: Date?, at time: TimeInterval) -> Double? {
+        guard let start = start?.timeIntervalSinceReferenceDate else { return nil }
+        let progress = (time - start) / CompanionView.nodDuration
+        return (0..<1).contains(progress) ? progress : nil
+    }
+
+    /// How far she dips in the nod at `progress`, in points: down 4 and back, after the blink.
+    nonisolated static func nodDip(_ progress: Double?) -> CGFloat {
+        guard let progress, progress > 0.12, progress < 0.5 else { return 0 }
+        return 4 * CGFloat(sin((progress - 0.12) / 0.38 * .pi))
+    }
+
     // The tennis, boxing and gym ponytails reach the top of her bounds, where the phone bubble sits (unbox page).
     /// The space above the figure for `style`, in points.
     nonisolated static func topInset(_ style: CompanionStyle) -> CGFloat {
@@ -955,8 +1069,9 @@ public struct KuroView: View {
     }
 
     private func say(_ text: String?, for seconds: Double = 2.4) {
+        let text = text?.localized(for: .kuro)
         bubbleTask?.cancel()
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
+        withAnimation(.smooth(duration: 0.3)) { bubble = text }
         guard text != nil else { return }
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(seconds))
@@ -965,8 +1080,9 @@ public struct KuroView: View {
         }
     }
 
-    /// The idle loop for `look`: work breathes and shifts her weight, chill and fitness sway, tennis and boxing
-    /// hop, and at the desk, studying or drawing she nods slowly over the page.
+    /// The idle loop for `look`: work breathes and shifts her weight, chill, fitness and ski sway, tennis and
+    /// boxing hop, dancing she sways to the beat, and at the desk, studying, drawing or reading a score she nods
+    /// slowly over the page.
     nonisolated static func motion(_ look: KuroLook, time t: TimeInterval) -> IdleMotion {
         switch look {
         case .work: IdleMotion(dy: CGFloat(sin(t * 2 * .pi / 3.4)) * 1.5, angle: sin(t * 2 * .pi / 6.8))
@@ -974,7 +1090,11 @@ public struct KuroView: View {
         case .tennis, .box: IdleMotion(mode: .boxing, time: t)
         // Keeping someone company at the gym, she sways calmly instead of bouncing.
         case .fitness: IdleMotion(mode: .chill, time: t)
-        case .desk, .study, .art: IdleMotion(dy: 2 * IdleClock.nod(at: t, period: 1.6, seed: KuroIdle.seed), angle: 0)
+        case .desk, .study, .art, .music:
+            IdleMotion(dy: 2 * IdleClock.nod(at: t, period: 1.6, seed: KuroIdle.seed), angle: 0)
+        // Dancing, she sways about her feet once a second; on the slopes she sways calmly like at the gym.
+        case .dance: IdleMotion(dy: 0, angle: 2.6 * sin(t * 2 * .pi))
+        case .ski: IdleMotion(mode: .chill, time: t)
         }
     }
 
@@ -1001,6 +1121,9 @@ public struct KuroView: View {
         case .fitness: "KURO，抱着瑜伽砖"
         case .study: "KURO，拿着笔记本"
         case .art: "KURO，在平板上画画"
+        case .dance: "KURO，跟着音乐摆"
+        case .music: "KURO，捧着乐谱"
+        case .ski: "KURO，戴着雪镜"
         }
     }
 }

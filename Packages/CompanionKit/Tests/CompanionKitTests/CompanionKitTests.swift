@@ -56,8 +56,30 @@ import Testing
         let high = Set(RunnerFigure.parts(for: mode, pose: RunnerPose(face: .high)))
         #expect(mid.isDisjoint(with: [.sparkle, .eyeGlint]))
         #expect(high.contains(.sparkle))
+        // The deadpan eyes open a notch and carry their own glint (Issue #236).
+        let deadpan = mid.contains(.eyesWork)
+        #expect(high.contains(.eyesBright) == deadpan)
+        if deadpan { #expect(high.isDisjoint(with: [.eyesWork, .lidsWork])) }
         // Chill's eyes are closed in a smile, so there is nothing to glint.
-        #expect(high.contains(.eyeGlint) == (mode != .chill))
+        #expect(high.contains(.eyeGlint) == (mode != .chill && !deadpan))
+    }
+
+    @Test func tiredAtHomeDoesNotSmileLikeFull() {
+        let tired = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .low)))
+        #expect(!tired.contains(.eyesChill))
+        #expect(tired.isSuperset(of: [.eyesWork, .lidsWork, .eyebags]))
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .high))).contains(.eyesChill))
+    }
+
+    @Test func highEnergyEyesStillBlinkAndSleep() {
+        var pose = RunnerPose(face: .high)
+        pose.eyesShut = true
+        let shut = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(shut.contains(.eyesClosed))
+        #expect(shut.isDisjoint(with: [.eyesBright, .lidsBright]))
+        var bedtime = RunnerPose.bedtimeStill()
+        bedtime.face = .high
+        #expect(Set(RunnerFigure.parts(for: .work, pose: bedtime)).isDisjoint(with: [.eyesBright, .lidsBright]))
     }
 
     @Test(arguments: Mode.allCases)
@@ -182,11 +204,36 @@ import Testing
         #expect(RunnerFigure.baseParts.isSubset(of: parts))
     }
 
+    // Issue #236: 「哦。」 comes with one blink, then a small nod; Reduce Motion keeps only the blink.
+    @Test func theNodBlinksThenDipsTheHead() {
+        var blink = RunnerPose()
+        blink.nod(progress: 0.05, still: false)
+        #expect(blink.eyesShut)
+        var dip = RunnerPose()
+        dip.nod(progress: 0.3, still: false)
+        #expect(!dip.eyesShut && dip.headDy > RunnerPose().headDy + 2)
+        var still = RunnerPose()
+        still.nod(progress: 0.3, still: true)
+        #expect(still.headDy == RunnerPose().headDy)
+        #expect(RunnerFigure.parts(for: .work, pose: blink).contains(.eyesClosed))
+    }
+
     @Test func headsetComesOffDuringGoodnight() {
         let start = RunnerPose.bedtime(time: 0, goodnight: 0.1, liesDown: true)
         let end = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: true)
         #expect(RunnerFigure.parts(for: .work, pose: start).contains(.headset))
         #expect(!RunnerFigure.parts(for: .work, pose: end).contains(.headset))
+    }
+
+    // HAKU-18 (UI 审核 2026-10-13): over 10 s of the notification the headset shows in one stretch, at the start.
+    @Test func theNotificationTakesTheHeadsetOffOnce() {
+        let shown = stride(from: 0.0, through: 10, by: 0.1).map {
+            RunnerFigure.parts(for: .work, pose: CompanionView.notificationBedtime(time: 100 + $0, start: 100))
+                .contains(.headset)
+        }
+        #expect(shown.first == true)
+        let changes = zip(shown, shown.dropFirst()).filter { $0 != $1 }.count
+        #expect(changes == 1)
     }
 
     @Test func onlyTheHomeVersionLiesDown() {
@@ -196,6 +243,8 @@ import Testing
         #expect(RunnerFigure.parts(for: .chill, pose: home).contains(.pillow))
         #expect(notification.lie == 0)
         #expect(!RunnerFigure.parts(for: .chill, pose: notification).contains(.pillow))
+        #expect(home.zzz >= 0)
+        #expect(notification.zzz == -1)
     }
 
     @Test func sleepyLoopYawns() {
@@ -368,6 +417,21 @@ import Testing
         #expect(apart.gloveL.width < 1)
         let up = RunnerPose(mode: .boxing, time: start + 1.1, face: .mid, react: 0)
         #expect(up.eyesDy == -2.5 && up.gloveL == .zero)
+    }
+
+    @Test func boxingHakuSlipsLeftRightAndDucks() throws {
+        let start = try #require(
+            IdleClockTests.firstStart(kind: 2, lengths: RunnerPose.boxingBeats, every: 24, spread: 6))
+        let left = RunnerPose(mode: .boxing, time: start + 0.6, face: .mid, react: 0)
+        #expect(left.shift < -4.9 && left.lean < -2.9 && left.bounce < -1.4)
+        let right = RunnerPose(mode: .boxing, time: start + 1.2, face: .mid, react: 0)
+        #expect(right.shift > 4.9 && right.lean > 2.9)
+        let duck = RunnerPose(mode: .boxing, time: start + 1.8, face: .mid, react: 0)
+        #expect(duck.bounce > 5.9 && abs(duck.shift) < 0.1)
+        let puff = RunnerPose(mode: .boxing, time: start + 2.2, face: .mid, react: 0)
+        #expect(puff.puff && puff.bounce == 0 && RunnerFigure.parts(for: .boxing, pose: puff).contains(.talkDots))
+        let after = RunnerPose(mode: .boxing, time: start + 2.5, face: .mid, react: 0)
+        #expect(!after.puff && after.shift == 0 && after.lean == 0)
     }
 
     @Test func atWorkHakuLeansBackAndSpinsTheChair() throws {
@@ -1037,12 +1101,56 @@ import Testing
         #expect(Outfit(Wardrobe(equipped: [.gloves: "gloves.someday", .room: "room.someday"])) == Outfit())
     }
 
-    // Clothes join these checks once UI draws them (Issue #327).
     @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
     func everyWornItemChangesTheLook(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
         #expect(Outfit(wardrobe) != Outfit())
+    }
+
+    @Test func clothesReplaceTheJacketOnlyInTheirMode() {
+        let pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"])))
+        let chill = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(chill.isSuperset(of: [.setVarsityTop, .setVarsityCap]) && !chill.contains(.jacket))
+        let work = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(work.contains(.jacket) && !work.contains(.setVarsityTop))
+        var away = pose
+        away.turnedAway = true
+        let back = Set(RunnerFigure.parts(for: .chill, pose: away))
+        #expect(back.isSuperset(of: [.jacket, .setVarsityCap]) && !back.contains(.setVarsityTop))
+        #expect(pose.outfit.clothesBack == [.chill: RunnerPalette.varsityRed])
+    }
+
+    @Test func raincoatKeepsItsLoweredHoodFromTheBack() {
+        var pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.work: "haku.set.work.raincoat"])))
+        pose.turnedAway = true
+        let back = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(
+            back.isSuperset(of: [.jacket, .setKawaiiHood]) && back.isDisjoint(with: [.setKawaiiTop, .setDuckCharm]))
+    }
+
+    @Test func everyTopHasABackColour() {
+        #expect(Set(Outfit.clothesBackColors.keys) == Set(Outfit.clothesParts.keys))
+    }
+
+    @Test func sideHustleClothesDropTheChainAndCoin() {
+        let pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.money: "haku.top.side.arcade"])))
+        let parts = Set(RunnerFigure.parts(for: .money, pose: pose))
+        #expect(parts.contains(.topSideArcade) && parts.isDisjoint(with: [.chainGold, .coin, .jacket]))
+    }
+
+    @Test func capGivesWayToHeadgear() {
+        let varsity = Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"]))
+        var pose = RunnerPose(need: .boxingWarmup).wearing(varsity)
+        let warmup = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(warmup.contains(.headband) && !warmup.contains(.setVarsityCap))
+        pose.need = nil
+        #expect(RunnerFigure.parts(for: .chill, pose: pose).contains(.setVarsityCap))
+    }
+
+    @Test func clothesCharmsSwingWithTheBreath() {
+        #expect(abs(RunnerPose(mode: .work, time: 0.6, face: .mid, react: 0).charmSway - 1) < 0.001)
+        #expect(abs(RunnerPose(mode: .work, time: 1.8, face: .mid, react: 0).charmSway + 1) < 0.001)
     }
 
     @Test func stripedMaskShowsOnBothMasks() {
@@ -1067,7 +1175,6 @@ import Testing
         #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
     }
 
-    // Clothes join these checks once UI draws them (Issue #327).
     @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
     func everyItemIconDrawsSomething(_ item: ShopItem) {
         var wardrobe = Wardrobe()
