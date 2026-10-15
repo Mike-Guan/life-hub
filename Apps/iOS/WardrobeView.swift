@@ -324,7 +324,7 @@ extension WardrobeShelf {
     var defaultSlots: [Slot] {
         switch self {
         case .clothes: [.top]
-        case .accessories: [.headband, .mask]
+        case .accessories: [.headband, .mask, .badge, .hat]
         case .props: [.gloves]
         case .room: [.room]
         }
