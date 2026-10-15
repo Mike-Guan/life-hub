@@ -136,16 +136,6 @@
         }
       }
     },
-    "……刚才很认真。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…that was focused."
-          }
-        }
-      }
-    },
     "……别吵，快好了。" : {
       "localizations" : {
         "en" : {
@@ -439,16 +429,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…blinking slower."
-          }
-        }
-      }
-    },
-    "……给你。收好。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…for you. keep it safe."
           }
         }
       }

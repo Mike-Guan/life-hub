@@ -91,7 +91,7 @@ enum CompanionLines {
         case .cycling: "屁股……先让我缓缓。"
         case .swimming: "耳朵进水了。……不过不错。"
         case .martialArts: "……我也想踢两脚。"
-        case .racket: "那一拍……还行吧。"
+        case .racket: "打完了。……下次带上我。"
         case .ball: "球呢？……算了，打完就行。"
         case .yoga: "……骨头咔了一声。舒服。"
         case .dance: "我没跳。……我没跳。"
@@ -103,7 +103,7 @@ enum CompanionLines {
     /// What the companion says when unboxing the item with `itemID`: a keepsake it pretends it didn't pick.
     static func unlock(_ itemID: String, persona: Persona = .haku) -> String {
         if persona == .kuro { return KuroBubbleLines.unlock(itemID) }
-        return ShopItem.item(itemID)?.keepsake != nil ? "……给你的。才不是特意挑的。" : "买了？……那我就勉强收下了。"
+        return ShopItem.item(itemID)?.keepsake != nil ? "……给你的。顺手。" : "买了？……那我就勉强收下了。"
     }
 
     /// The VoiceOver label for HAKU during the welcome back: its line, each card, and the cans opened.

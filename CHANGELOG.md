@@ -77,6 +77,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   instead of staying on an old scene, such as still setting off.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
   places, Daily, saving records and the bedtime notification.
+- Six lines now say only what the characters felt or sensed: the keepsake gift, the late-night line, the second
+  preset character's boxing card line and keepsake line, the racket cheer and her focus-done line.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
   screen edge no longer cuts them off. The iPhone is unchanged.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in

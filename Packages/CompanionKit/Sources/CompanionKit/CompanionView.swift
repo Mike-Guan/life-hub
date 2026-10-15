@@ -100,7 +100,7 @@ public struct CompanionView: View {
     // Seconds since the reference date when the app was last open, shared by every CompanionView.
     @AppStorage("companion.lastSeen") private var lastSeen: Double = 0
     @State private var noticeLookUp = false
-    // Night (day of its evening) HAKU last said "还不睡。", shared by every CompanionView so it is said once a
+    // Night (day of its evening) HAKU last said "……我也还醒着。", shared by every CompanionView so it is said once a
     // night.
     @AppStorage("companion.lastLateNight") private var lastLateNight = ""
     @State private var lateNightStart: Date?
@@ -681,7 +681,7 @@ public struct CompanionView: View {
             bubbleTask = Task {
                 try? await Task.sleep(for: .seconds(noticeDuration))
                 guard !Task.isCancelled else { return }
-                say("还不睡。", for: 3)
+                say("……我也还醒着。", for: 3)
             }
         }
     }
@@ -903,7 +903,7 @@ public struct CompanionView: View {
         bedtime == .off && pestered(taps, now: now, count: count)
     }
 
-    /// The night to say "还不睡。" for when the app opens at `date`, or nil outside 0:00 to 5:00 or when it was
+    /// The night to say "……我也还醒着。" for when the app opens at `date`, or nil outside 0:00 to 5:00 or when it was
     /// already said that night. A night is named by the day of its evening, as `yyyy-MM-dd`.
     nonisolated static func newLateNight(at date: Date, last: String, calendar: Calendar = .current) -> String? {
         guard calendar.component(.hour, from: date) < 5,
