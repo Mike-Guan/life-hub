@@ -63,7 +63,11 @@ struct WatchStatusView: View {
     @ViewBuilder private var content: some View {
         switch family {
         case .accessoryCorner:
-            head.widgetLabel(title ?? "打开 iPhone")
+            if let title {
+                head.widgetLabel(title)
+            } else {
+                head.widgetLabel(placeholder)
+            }
         case .accessoryRectangular:
             HStack(spacing: 6) {
                 head.frame(width: 40)
@@ -81,9 +85,17 @@ struct WatchStatusView: View {
     @ViewBuilder private var modeAndTime: some View {
         if let title, let since = entry.payload?.snapshot.since {
             Text("\(title) · \(Text(since, style: .relative))")
+        } else if let title {
+            Text(title)
         } else {
-            Text(title ?? "打开 iPhone")
+            Text(placeholder)
         }
+    }
+
+    // UI 二组 预览 6: once the iPhone has sent, there is nothing to open; the mode just isn't set yet.
+    /// What shows instead of the mode: nothing received yet, or no mode yet.
+    private var placeholder: LocalizedStringKey {
+        entry.payload == nil ? "打开 iPhone" : "还没有模式"
     }
 
     private var title: String? {

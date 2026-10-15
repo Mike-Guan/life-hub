@@ -113,6 +113,32 @@ struct FrameSheets {
         try write("haku-6-watch", rows, size: CGSize(width: 198, height: 242))
     }
 
+    // Mike 2026-10-15: the bigger room bag, and card backdrops without items, on the phone and the watch.
+    @Test func hakuBackdrops() throws {
+        let bag = Wardrobe(equipped: [.room: "room.bag"])
+        var rows = [
+            Row(label: "chill · 房间小沙袋", start: Self.base) {
+                AnyView(CompanionView(mode: .chill, energy: 50, wardrobe: bag))
+            },
+            Row(label: "boxing · 拳馆", start: Self.base) {
+                AnyView(CompanionView(mode: .boxing, energy: 50, activity: .boxingAtGym))
+            },
+        ]
+        let cards: [IdentityKind] = [.fitness, .dance, .music]
+        rows += cards.map { card in
+            Row(label: "card \(card)", start: Self.base) {
+                AnyView(CompanionView(mode: .boxing, card: card, energy: 50))
+            }
+        }
+        try write("haku-8-backdrops", rows)
+        let watch = cards.map { card in
+            Row(label: "watch · card \(card)", start: Self.base) {
+                AnyView(CompanionView(mode: .boxing, card: card, energy: 50, style: .watch))
+            }
+        }
+        try write("haku-8-backdrops-watch", watch, size: CGSize(width: 198, height: 242))
+    }
+
     // HAKU-03 (UI 审核 2026-10-13): the last 0.5 s of the welcome back and 0.3 s of idle after it, 0.05 s apart.
     @Test func hakuWelcomeEnd() throws {
         let cases: [(WelcomeScene, Mode)] = [
