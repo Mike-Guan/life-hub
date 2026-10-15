@@ -501,7 +501,7 @@ import Testing
         #expect(weekly.allSatisfy { $0.isDrawn })
         let hers = ShopItem.catalog(for: .kuro).filter { $0.week != nil }
         #expect(hers.map(\.week) == Array(1...7))
-        #expect(hers.allSatisfy(\.isDrawn))
+        #expect(hers.allSatisfy { $0.isDrawn })
     }
 
     @Test func noWeeklyItemWithoutCansOrArt() throws {
