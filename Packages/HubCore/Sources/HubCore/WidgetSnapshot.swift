@@ -20,6 +20,8 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var needSince: Date?
     /// When `need` ends at the latest, `nil` when no time is known.
     public var needUntil: Date?
+    /// Whether `need` comes from Screen Time, so HAKU holds a phone; `nil` in older snapshots, which means yes.
+    public var needPhone: Bool?
     /// Why RUNNER looks the way it does, for the rectangular Lock Screen widget.
     public var line: String?
     /// The line to show once `need` has ended.
