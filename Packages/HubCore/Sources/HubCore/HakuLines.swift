@@ -32,7 +32,7 @@ public enum HakuLines {
             "我在。灵魂不在。",
             "摸鱼也是一种技术。",
             "今天也是打工人。",
-            "别看我，我在忙。",
+            "在忙。……装的。",
             "耳机戴上，世界关掉。",
             "今天也在假装认真。",
             "摸鱼……不是，在工作。",
@@ -45,7 +45,7 @@ public enum HakuLines {
             "终于。",
             "今天就到这吧。",
             "我先喝一罐。",
-            "瘫着呢，别叫我。",
+            "瘫着呢。化了。",
             "你看你的。我就在这。",
             "喂。",
         ],
@@ -87,7 +87,7 @@ public enum HakuLines {
         ],
         .slacking: [
             "嘘，我帮你望风。",
-            "老板没往这边看。",
+            "……被抓到我就装不认识你。",
             "我也在摸。",
             "屏幕后面有我。",
             "我什么都没看见。",
@@ -107,9 +107,9 @@ public enum HakuLines {
             "灵魂先下班了。",
             "我先趴一会。",
             "……还不走吗。",
-            "楼里就剩我们了。",
+            "感觉就剩我们了。",
             "我的电量也没了。",
-            "加班费我没有。",
+            "我的下班时间去哪了。",
             "我在桌上化了。",
         ],
         .comeHome: [
@@ -117,7 +117,7 @@ public enum HakuLines {
             "先让我趴五分钟。",
             "今天的我已经关机。",
             "鞋都懒得脱了。",
-            "八小时，够了。",
+            "回来了。我先瘫了。",
             "沙发扶手最懂我。",
             "……回来了就好。",
         ],
@@ -140,7 +140,7 @@ public enum HakuLines {
             "再给我一分钟。",
         ],
         .timeToLeave: [
-            "……该出门了吧。",
+            "……我包背好了。",
             "唉。我也不想去。",
             "表在走，我们没走。",
             "我耳机都戴好了。",
@@ -149,21 +149,21 @@ public enum HakuLines {
             "我先叹口气。",
         ],
         .bedtime: [
-            "我先睡了。你也别熬。",
-            "晚安。别和天花板开会。",
+            "我先睡了。你随意。",
+            "晚安。我不和天花板开会。",
             "手机也要睡觉。",
             "明天再说。",
             "我眼睛闭上了。",
-            "睡吧，世界不会跑。",
+            "晚安。世界不会跑。",
             "再看我就醒了。",
             "眼皮在打架。",
             "晚安。真的晚安。",
         ],
         .lowEnergy: [
-            "……别跟我说话。",
+            "……省电中。",
             "我也只睡了一点点。",
             "今天低电量模式。",
-            "能躺就别坐。",
+            "能躺我就不坐。",
             "慢慢来。",
             "今天算了也行。",
             "我先充个电。",
@@ -188,7 +188,7 @@ public enum HakuLines {
         let day = StateEngine.dayStart(for: date, calendar: calendar)
         let origin = Date(timeIntervalSinceReferenceDate: 0)
         let days = calendar.dateComponents([.day], from: origin, to: day).day ?? 0
-        return lines[((days % lines.count) + lines.count) % lines.count]
+        return lines[((days % lines.count) + lines.count) % lines.count].localized(for: persona)
     }
 
     // 台词 泛化修改 v0 §1, §3: the character's own lines stay for her default card (拳击 for HAKU, 网球 for
@@ -227,8 +227,8 @@ public enum HakuLines {
     ///   - persona: whose voice says the line.
     ///   - evening: whether the leave came after the evening extension started.
     public static func offWorkLine(for persona: Persona, evening: Bool = false) -> String {
-        guard persona == .kuro else { return offWorkLine }
-        return evening ? KuroLines.eveningOffWorkLine : KuroLines.offWorkLine
+        guard persona == .kuro else { return offWorkLine.localized(for: persona) }
+        return (evening ? KuroLines.eveningOffWorkLine : KuroLines.offWorkLine).localized(for: persona)
     }
 
     /// The off-work line in `persona`'s voice for a line that stops showing at `until`.

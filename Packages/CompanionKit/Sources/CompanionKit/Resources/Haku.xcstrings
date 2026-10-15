@@ -1,0 +1,1380 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "HAKU，困了" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAKU, sleepy"
+          }
+        }
+      }
+    },
+    "HAKU，戴着拳套在热身" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAKU, warming up in boxing gloves"
+          }
+        }
+      }
+    },
+    "HAKU，瘫着刷手机" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAKU, slumped, scrolling the phone"
+          }
+        }
+      }
+    },
+    "HAKU，瘫着刷手机，偷看门口的运动包" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAKU, slumped with the phone, peeking at the gym bag by the door"
+          }
+        }
+      }
+    },
+    "……今天在家？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Staying in today?"
+          }
+        }
+      }
+    },
+    "……代码全乱了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…The code's all scrambled."
+          }
+        }
+      }
+    },
+    "……你也想玩？不给。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…You want a turn? No."
+          }
+        }
+      }
+    },
+    "……先让我趴五分钟。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Five minutes face down first."
+          }
+        }
+      }
+    },
+    "……其实还挺爽的。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…That was actually fun."
+          }
+        }
+      }
+    },
+    "……别晃了。我要吐了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Stop shaking. I'll be sick."
+          }
+        }
+      }
+    },
+    "……别看我，看沙袋。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Don't watch me. Watch the bag."
+          }
+        }
+      }
+    },
+    "……喂喂喂。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Hey hey hey."
+          }
+        }
+      }
+    },
+    "……困了。" : {
+      "comment" : "中文改为“……困了。”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Sleepy."
+          }
+        }
+      }
+    },
+    "……在听。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Listening."
+          }
+        }
+      }
+    },
+    "……够了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…enough."
+          }
+        }
+      }
+    },
+    "……干嘛。" : {
+      "comment" : "E1",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…What."
+          }
+        }
+      }
+    },
+    "……我也在摸鱼。" : {
+      "comment" : "中文改为“……我也在摸鱼。”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…I'm slacking too."
+          }
+        }
+      }
+    },
+    "……我也想踢两脚。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…I kind of want to kick something too."
+          }
+        }
+      }
+    },
+    "……我先去洗了。浴室归我。" : {
+      "comment" : "中文改为“……我先去洗了。浴室归我。”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Showering first. Bathroom's mine."
+          }
+        }
+      }
+    },
+    "……我包背好了。" : {
+      "comment" : "中文改为“……我包背好了。”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…My bag's on."
+          }
+        }
+      }
+    },
+    "……我只是趴一下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Just resting my head."
+          }
+        }
+      }
+    },
+    "……我热身热得都快累了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…I warmed up so much I'm tired."
+          }
+        }
+      }
+    },
+    "……我腰要断了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…My back is filing a complaint."
+          }
+        }
+      }
+    },
+    "……我腰要断了。你呢？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…My back is breaking. Yours?"
+          }
+        }
+      }
+    },
+    "……收拾一下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Tidying a bit."
+          }
+        }
+      }
+    },
+    "……没吃。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Didn't eat anything."
+          }
+        }
+      }
+    },
+    "……活过来了？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Back from the dead?"
+          }
+        }
+      }
+    },
+    "……给你的。才不是特意挑的。" : {
+      "comment" : "E5",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…For you. Not like I picked it out."
+          }
+        }
+      }
+    },
+    "……腿还是你的吗。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Are those still your legs?"
+          }
+        }
+      }
+    },
+    "……骨头咔了一声。舒服。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Something cracked. Feels great."
+          }
+        }
+      }
+    },
+    "ちょっと休憩。" : {
+      "comment" : "中文这里是日语 ちょっと休憩，英语版 HAKU 不夹日语",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stretch break."
+          }
+        }
+      }
+    },
+    "下班回家，趴在沙发扶手上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "home from work, slumped over the armrest"
+          }
+        }
+      }
+    },
+    "不许看。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No peeking."
+          }
+        }
+      }
+    },
+    "不错嘛。" : {
+      "comment" : "E1（KURO 留 …not bad.）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Huh. Decent."
+          }
+        }
+      }
+    },
+    "买了？……那我就勉强收下了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You bought it? …Fine. I'll accept it."
+          }
+        }
+      }
+    },
+    "人类为什么发明周一。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who invented Mondays."
+          }
+        }
+      }
+    },
+    "什么零食，没看见。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What snacks. Never seen them."
+          }
+        }
+      }
+    },
+    "今天就这样吧。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calling it a day."
+          }
+        }
+      }
+    },
+    "今天把沙袋打哭。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today the bag cries."
+          }
+        }
+      }
+    },
+    "今天是跑步日。……我先热个身。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run day. …I'll stretch first."
+          }
+        }
+      }
+    },
+    "今天的沙袋有点欠揍。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This bag is asking for it."
+          }
+        }
+      }
+    },
+    "从电脑屏幕后面探头" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "peeking out from behind the laptop"
+          }
+        }
+      }
+    },
+    "代码明天还在。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The code will still be there tomorrow."
+          }
+        }
+      }
+    },
+    "你也在刷吗？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You scrolling too?"
+          }
+        }
+      }
+    },
+    "你也活着回来了啊。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You survived too, huh."
+          }
+        }
+      }
+    },
+    "健身房今天也开着。……我只是说说。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The gym's open today. …Just saying."
+          }
+        }
+      }
+    },
+    "先跳两下热热身。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couple of hops to warm up."
+          }
+        }
+      }
+    },
+    "先选一个 mode 吧。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a mode first."
+          }
+        }
+      }
+    },
+    "光线不错。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nice light."
+          }
+        }
+      }
+    },
+    "再一点点。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just a bit more."
+          }
+        }
+      }
+    },
+    "再一罐。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One more can."
+          }
+        }
+      }
+    },
+    "再刷五分钟。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Five more minutes."
+          }
+        }
+      }
+    },
+    "再来一组。……你先。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One more set. …You first."
+          }
+        }
+      }
+    },
+    "再来！" : {
+      "comment" : "唯一允许的感叹号：被摇得兴奋（中文也是“再来！”）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Again!"
+          }
+        }
+      }
+    },
+    "再睡五分钟。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Five more minutes of sleep."
+          }
+        }
+      }
+    },
+    "写代码写进了心流" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "deep in a coding flow"
+          }
+        }
+      }
+    },
+    "别催，在收。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Don't rush me. Packing up."
+          }
+        }
+      }
+    },
+    "别吵，在弄。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shh. In the zone."
+          }
+        }
+      }
+    },
+    "别吵，这关快过了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shh. Almost beat this level."
+          }
+        }
+      }
+    },
+    "到点了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It's time."
+          }
+        }
+      }
+    },
+    "加班，趴在桌上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "working late, head on the desk"
+          }
+        }
+      }
+    },
+    "包我背着，你走路就行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I've got the bag. You just walk."
+          }
+        }
+      }
+    },
+    "包我都背好了。你随意啊。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bag's packed. No pressure."
+          }
+        }
+      }
+    },
+    "去不去？我包都背好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Going? My bag's already on."
+          }
+        }
+      }
+    },
+    "又上班。" : {
+      "comment" : "同 key 同译",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Circling back to work."
+          }
+        }
+      }
+    },
+    "又要上班了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work again. Already."
+          }
+        }
+      }
+    },
+    "叮。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clink."
+          }
+        }
+      }
+    },
+    "呼……说不了话。" : {
+      "comment" : "中文改为“呼……说不了话。”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoo… can't talk."
+          }
+        }
+      }
+    },
+    "哑铃比我想的重。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dumbbells: heavier than advertised."
+          }
+        }
+      }
+    },
+    "哦。……不错嘛。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Huh. …Not bad."
+          }
+        }
+      }
+    },
+    "哦。弄完了？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oh. Done?"
+          }
+        }
+      }
+    },
+    "唉。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ugh."
+          }
+        }
+      }
+    },
+    "嗯，活过来了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yep. Back from the dead."
+          }
+        }
+      }
+    },
+    "嘘。" : {
+      "comment" : "E1（HAKU 改，KURO 留 …shh.）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shh. Act natural."
+          }
+        }
+      }
+    },
+    "回来了？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oh. You're back."
+          }
+        }
+      }
+    },
+    "在上班。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At work."
+          }
+        }
+      }
+    },
+    "在健身房举哑铃" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lifting dumbbells at the gym"
+          }
+        }
+      }
+    },
+    "在偷偷画画" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "secretly drawing"
+          }
+        }
+      }
+    },
+    "在偷偷练拳" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "secretly practicing punches"
+          }
+        }
+      }
+    },
+    "在偷吃零食" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sneaking a snack"
+          }
+        }
+      }
+    },
+    "在忙副业的拍摄" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "shooting photos for a side project"
+          }
+        }
+      }
+    },
+    "在打游戏" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "playing a game"
+          }
+        }
+      }
+    },
+    "在拳馆打沙袋" : {
+      "comment" : "VoiceOver 片段，小写开头接在 “HAKU, ” 后",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hitting the bag at the boxing gym"
+          }
+        }
+      }
+    },
+    "在拿抹布收拾房间" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tidying up with a cloth"
+          }
+        }
+      }
+    },
+    "在沙发角落睡着了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "asleep in the corner of the couch"
+          }
+        }
+      }
+    },
+    "在跑步" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "running"
+          }
+        }
+      }
+    },
+    "坐太久了，扭扭腰，捶捶背" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sat too long, stretching and rubbing the back"
+          }
+        }
+      }
+    },
+    "头带系紧了吗？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Headband tight?"
+          }
+        }
+      }
+    },
+    "就是活动一下手。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just loosening up my hands."
+          }
+        }
+      }
+    },
+    "屁股……先让我缓缓。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My butt needs a minute."
+          }
+        }
+      }
+    },
+    "居然真跑完了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You actually finished the run."
+          }
+        }
+      }
+    },
+    "左、左、右。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left, left, right."
+          }
+        }
+      }
+    },
+    "快下班了，收好电脑，看着手表等" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "almost off work, laptop packed, watching the clock"
+          }
+        }
+      }
+    },
+    "快了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almost."
+          }
+        }
+      }
+    },
+    "我先起来了。……你呢？" : {
+      "comment" : "中文改为“我先起来了。……你呢？”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I'm up first. …You?"
+          }
+        }
+      }
+    },
+    "我没跳。……我没跳。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I wasn't dancing. …I wasn't."
+          }
+        }
+      }
+    },
+    "戴好耳机站在门口，敲着手表" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "earbuds in, at the door, tapping the watch"
+          }
+        }
+      }
+    },
+    "所以……我们今天是真的不动了吗？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So… we're really not moving today?"
+          }
+        }
+      }
+    },
+    "拳套我都戴好了，你随意啊。" : {
+      "comment" : "同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gloves on. No rush."
+          }
+        }
+      }
+    },
+    "拿着跑鞋在热身" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "warming up with running shoes in hand"
+          }
+        }
+      }
+    },
+    "早上起来在刷牙" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brushing teeth in the morning"
+          }
+        }
+      }
+    },
+    "来一罐？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A can?"
+          }
+        }
+      }
+    },
+    "来，左右直拳。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left, right. Jab, jab."
+          }
+        }
+      }
+    },
+    "毯子分你一半。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blanket? Take half."
+          }
+        }
+      }
+    },
+    "没在练。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not practicing."
+          }
+        }
+      }
+    },
+    "没画什么。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not drawing anything."
+          }
+        }
+      }
+    },
+    "灵魂已经下班了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My soul already clocked out."
+          }
+        }
+      }
+    },
+    "熬夜写代码，很困" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "coding late, very sleepy"
+          }
+        }
+      }
+    },
+    "犯困，开了一罐能量饮料" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sleepy, opening an energy drink"
+          }
+        }
+      }
+    },
+    "球呢？……算了，打完就行。" : {
+      "comment" : "E2 新中文“打完就行”；中文“赢了就行”：只在 HAKU 自己嘴里假设，没有感知比分；如 PM 觉得是编，改 “Ball's yours now.”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The score? …Eh. You played."
+          }
+        }
+      }
+    },
+    "眼皮有点重……" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eyelids getting heavy…"
+          }
+        }
+      }
+    },
+    "穿着连帽衫在写代码" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "coding in a hoodie"
+          }
+        }
+      }
+    },
+    "第二罐……我忍住了。" : {
+      "comment" : "E2 新中文“第二罐……我忍住了。”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Second can… I resisted."
+          }
+        }
+      }
+    },
+    "终于。" : {
+      "comment" : "E1，同 key 同译",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finally. Free."
+          }
+        }
+      }
+    },
+    "耳朵进水了。……不过不错。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water in my ear. …Still, not bad."
+          }
+        }
+      }
+    },
+    "耳机……耳机去哪了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earbuds… where'd they go."
+          }
+        }
+      }
+    },
+    "背好了运动包，等着去健身房" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gym bag on, waiting to go to the gym"
+          }
+        }
+      }
+    },
+    "背着运动包出发了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "heading out with a gym bag"
+          }
+        }
+      }
+    },
+    "背着运动包站在门口" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "standing at the door with a gym bag"
+          }
+        }
+      }
+    },
+    "能跑。别问为什么。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It runs. Don't ask why."
+          }
+        }
+      }
+    },
+    "腿是你的，我只是陪跑。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your legs. I'm just tagging along."
+          }
+        }
+      }
+    },
+    "裹着毯子瘫在沙发上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "wrapped in a blanket on the couch"
+          }
+        }
+      }
+    },
+    "让一让，擦到你了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move. I'm wiping there."
+          }
+        }
+      }
+    },
+    "走了走了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Okay, okay. Going."
+          }
+        }
+      }
+    },
+    "还不睡。" : {
+      "comment" : "深夜还没睡，打开 App",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still up."
+          }
+        }
+      }
+    },
+    "还有 15 分钟。我先替你紧张一下。" : {
+      "comment" : "计划的事开始前",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 minutes. I'll be nervous for you."
+          }
+        }
+      }
+    },
+    "这个 bug 不是我写的。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not my bug."
+          }
+        }
+      }
+    },
+    "这张可以。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That one's a keeper."
+          }
+        }
+      }
+    },
+    "这条好好笑。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Okay, this one's funny."
+          }
+        }
+      }
+    },
+    "那一拍……还行吧。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That one shot… was okay."
+          }
+        }
+      }
+    },
+    "那个包……算了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That bag… never mind."
+          }
+        }
+      }
+    },
+    "门就在这。……我只是说说。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Door's right here. …Just saying."
+          }
+        }
+      }
+    },
+    "鞋带我系好了。你的呢？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My laces are tied. Yours?"
+          }
+        }
+      }
+    },
+    "风好大。……景还行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So windy. …View's okay."
+          }
+        }
+      }
+    },
+    "饭呢。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food?"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

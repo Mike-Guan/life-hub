@@ -102,6 +102,7 @@ public enum MomentEngine {
             return minute < work.workStartMinute ? .morning : .timeToLeave
         }
         let lateNight = calendar.startOfDay(for: now) > StateEngine.dayStart(for: now, calendar: calendar)
+        guard bedtime.isSet else { return lateNight ? .blanket : nil }
         let start = blanketMinute(bedtime)
         // A bedtime after 07:30 starts the blanket after midnight, so it runs only until the day starts.
         if start < StateEngine.dayStartHour * 60 { return lateNight && minute >= start ? .blanket : nil }
@@ -167,7 +168,8 @@ public enum MomentEngine {
         guard let since else { return [] }
         let midnight = calendar.startOfDay(for: now)
         let minute = { (value: Int) in calendar.date(byAdding: .minute, value: value, to: midnight) ?? midnight }
-        let minutes = [work.workStartMinute, work.workStartMinute + leaveWaitMinutes, blanketMinute(bedtime)]
+        let blanket = bedtime.isSet ? [blanketMinute(bedtime)] : []
+        let minutes = [work.workStartMinute, work.workStartMinute + leaveWaitMinutes] + blanket
         return [since.addingTimeInterval(collapsedLasts)] + minutes.map(minute)
     }
 
@@ -217,7 +219,7 @@ public enum MomentEngine {
     // One drowsy spell a day: from 3 hours after arriving or 14:00, whichever comes first.
     // PRD section 16, Mike 2026-10-05: packing up runs from 15 minutes before the end of work hours to
     // 30 minutes after, on work days only. Overtime still wins, and the evening extension counts as overtime.
-    /// Overtime, packing up or drowsy while in work mode at the office, else `nil`.
+    /// Overtime, packing up or drowsy while in work mode at the office, else `nil`. Never for irregular work.
     public static func office(
         mode: Mode?,
         since: Date?,
@@ -226,7 +228,7 @@ public enum MomentEngine {
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> CompanionMoment? {
-        guard mode == .work, let since, since <= now else { return nil }
+        guard mode == .work, let since, since <= now, !work.isIrregular else { return nil }
         let midnight = calendar.startOfDay(for: now)
         func time(_ minute: Int) -> Date {
             calendar.date(byAdding: .minute, value: minute, to: midnight) ?? midnight
@@ -249,7 +251,7 @@ public enum MomentEngine {
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> [Date] {
-        guard let since else { return [] }
+        guard let since, !work.isIrregular else { return [] }
         let midnight = calendar.startOfDay(for: now)
         let minute = { (value: Int) in calendar.date(byAdding: .minute, value: value, to: midnight) ?? midnight }
         let start = min(minute(rules.drowsyStartMinute), since.addingTimeInterval(rules.drowsyAfterArrival))

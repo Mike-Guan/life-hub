@@ -113,6 +113,19 @@ struct FrameSheets {
         try write("haku-6-watch", rows, size: CGSize(width: 198, height: 242))
     }
 
+    // HAKU-03 (UI 审核 2026-10-13): the last 0.5 s of the welcome back and 0.3 s of idle after it, 0.05 s apart.
+    @Test func hakuWelcomeEnd() throws {
+        let cases: [(WelcomeScene, Mode)] = [
+            (.sofa, .chill), (.quiet, .chill), (.glance, .chill), (.desk, .work), (.quiet, .work),
+        ]
+        let rows = cases.map { scene, mode in
+            Row(label: "welcome end · \(scene) · \(mode.rawValue)", start: Self.base) {
+                AnyView(WelcomeEndFrame(scene: scene, mode: mode, start: Self.base))
+            }
+        }
+        try write("haku-7-welcome-end", rows, frames: 16, step: 0.05)
+    }
+
     @Test func kuroLooks() throws {
         var rows: [Row] = []
         for look in KuroLook.allCases {
@@ -292,6 +305,27 @@ struct FrameSheets {
             date += IdleLife.slotLength
         }
         return date
+    }
+
+    /// HAKU at the end of the welcome back scene: frame 0 is 0.5 s before it ends; after it ends, the idle pose.
+    struct WelcomeEndFrame: View {
+        let scene: WelcomeScene
+        let mode: Mode
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            let length = scene.length(cards: 2, cans: 3)
+            let t = CGFloat((clock ?? start).timeIntervalSince(start)) + length - 0.5
+            let open = scene.open(cards: 2, cans: 3)
+            let pose =
+                t < length
+                ? RunnerPose.welcome(scene, time: t, open: open, face: .mid, mode: mode, length: length)
+                : RunnerPose(face: .mid)
+            RunnerFigure(mode: mode, pose: pose)
+                .padding(12)
+                .background(mode.color)
+        }
     }
 
     /// Renders `rows` into `<name>.png`: one row per case, `frames` frames `step` apart.

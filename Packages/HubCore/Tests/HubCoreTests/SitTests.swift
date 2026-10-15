@@ -137,7 +137,7 @@ import Testing
             calendar: calendar
         )
         #expect(at == date(13, 20))
-        #expect(NeedEngine.inviteText(for: .sitting) == "起来。我先起了。")
+        #expect(NeedEngine.inviteText(for: .sitting) == "我先起来了。……你呢？")
         // Shares the one invite a day with scrolling at work.
         let again = NeedEngine.inviteTime(
             for: reading,

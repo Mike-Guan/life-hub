@@ -1,0 +1,93 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "KURO，困了" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, sleepy"
+          }
+        }
+      }
+    },
+    "KURO，在忙" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, busy"
+          }
+        }
+      }
+    },
+    "KURO，戴着眼镜在批改" : {
+      "comment" : "VoiceOver（仓库公开：中文已写批改，英语照译）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, in glasses, marking papers"
+          }
+        }
+      }
+    },
+    "KURO，拿着网球拍" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, holding a tennis racket"
+          }
+        }
+      }
+    },
+    "KURO，捧着热饮" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, holding a warm drink"
+          }
+        }
+      }
+    },
+    "咔" : {
+      "comment" : "开罐声。RunnerArt.swift 是生成的：要改 SVG + 重跑脚本，归 UI 一组",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pssh"
+          }
+        }
+      }
+    },
+    "在 iPhone 上选个模式" : {
+      "comment" : "手表",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a mode on your iPhone"
+          }
+        }
+      }
+    },
+    "选一个 mode，HAKU 就上线" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a mode and HAKU shows up"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -43,6 +43,7 @@ struct WatchStatusWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "status", provider: WatchProvider()) { entry in
             WatchStatusView(entry: entry)
+                .environment(\.locale, Languages.locale)
         }
         .configurationDisplayName("Life Hub")
         .description("角色现在在干什么。")

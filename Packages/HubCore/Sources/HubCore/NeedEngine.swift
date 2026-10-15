@@ -161,14 +161,16 @@ public struct NeedRules: Codable, Equatable, Sendable {
     // PM, 2026-10-13 (写死作息排查 v0 #8): these follow the user's work hours. With the standard 9:30 to
     // 18:30 they are the times from Issue #23.
     /// These rules with the times that follow work hours taken from `work`: the evening and overtime from
-    /// 30 minutes after work ends, the gym invite from 1 to 2 hours after it ends, and drowsy at the latest
-    /// 4.5 hours after work starts.
-    public func following(_ work: ModeRules) -> NeedRules {
+    /// 30 minutes after the working day ends (`ModeRules.dayEndMinute`), the gym invite from 1 to 2 hours
+    /// after it ends, and drowsy at the latest 4.5 hours after work starts.
+    /// - Parameter bedtime: the bedtime, for the end of an irregular working day.
+    public func following(_ work: ModeRules, bedtime: BedtimeSchedule = .standard) -> NeedRules {
         var rules = self
-        rules.eveningStartMinute = work.workEndMinute + 30
-        rules.overtimeMinute = work.workEndMinute + 30
-        rules.gymInviteStartMinute = work.workEndMinute + 60
-        rules.gymInviteEndMinute = work.workEndMinute + 120
+        let end = work.dayEndMinute(bedtime: bedtime)
+        rules.eveningStartMinute = end + 30
+        rules.overtimeMinute = end + 30
+        rules.gymInviteStartMinute = end + 60
+        rules.gymInviteEndMinute = end + 120
         rules.drowsyStartMinute = work.workStartMinute + 4 * 60 + 30
         return rules
     }
@@ -443,15 +445,17 @@ public enum NeedEngine {
     ///   - taskSoon: whether a Daily task starts within `DailyAgenda.inviteLead`.
     ///   - persona: whose voice the text is in.
     public static func inviteText(for need: CompanionNeed, taskSoon: Bool = false, persona: Persona = .haku) -> String {
-        switch need {
-        case .boxingWarmup where persona == .kuro: "……走吗。网球包拎好了。"
-        case .couchScroll where taskSoon: "等下还有事，先起来收拾？"
-        case .couchScroll: "去健身房，或者下楼走走？"
-        case .boxingWarmup: "拳套戴好了，出发去拳馆？"
-        case .gymDay: "包背好了，走？"
-        case .slacking: "嘘，我帮你望风。"
-        case .sitting: "起来。我先起了。"
-        }
+        let text: String =
+            switch need {
+            case .boxingWarmup where persona == .kuro: "……走吗。网球包拎好了。"
+            case .couchScroll where taskSoon: "等下还有事，先起来收拾？"
+            case .couchScroll: "去健身房，或者下楼走走？"
+            case .boxingWarmup: "拳套戴好了，出发去拳馆？"
+            case .gymDay: "包背好了，走？"
+            case .slacking: "嘘，我帮你望风。"
+            case .sitting: "我先起来了。……你呢？"
+            }
+        return text.localized(for: persona)
     }
 
     /// The newest workout worth celebrating that hasn't been, or `nil`.

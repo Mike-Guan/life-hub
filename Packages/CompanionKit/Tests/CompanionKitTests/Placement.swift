@@ -67,6 +67,8 @@ enum Placement {
         .browsBox: Spot(.eyes, "眼睛"),
         .eyesMoney: Spot(.eyes, "眼睛"),
         .eyeGlint: Spot(.eyes, "眼睛"),
+        .eyesBright: Spot(.eyes, "眼睛"),
+        .lidsBright: Spot(.eyes, "眼睛"),
         .eyesSleepy: Spot(.eyes, "眼睛"),
         .eyesClosed: Spot(.eyes, "眼睛"),
         .eyeSwirlL: Spot(.eyes, "眼睛"),
@@ -158,9 +160,11 @@ enum Placement {
         .sunlight: Spot(.window, "sunlight"),
         .door: Spot(.door, "door"),
         .pillow: Spot(.pillow, "pillow"),
+        .pillowLean: Spot(.pillow, "pillow"),
+        .pillowHug: Spot(.handsFront, "抱枕"),
         .roomPlant: Spot(.corner1, "roomPlant"),
         .roomBag: Spot(.corner1, "roomBag"),
-        .heavyBag: Spot(.corner1, "heavyBag"),
+        .heavyBag: Spot(.window, "heavyBag"),
         .toteBag: Spot(.corner1, "toteBag"),
         .gymBag: Spot(.corner1, "gymBag"),
         .runningShoes: Spot(.corner2, "runningShoes"),
@@ -227,6 +231,7 @@ enum Placement {
         .eyesHappy: Spot(.eyes, "眼睛"),
         .eyesSurprised: Spot(.eyes, "眼睛"),
         .eyesLow: Spot(.eyes, "眼睛"),
+        .eyesFull: Spot(.eyes, "眼睛"),
         .deskGlasses: Spot(.eyes, "deskGlasses"),
         .maskWork: Spot(.maskFace, "maskWork"),
         .mouthCat: Spot(.mouth, "嘴"),
@@ -234,6 +239,7 @@ enum Placement {
         .mouthSmile: Spot(.mouth, "嘴"),
         .mouthO: Spot(.mouth, "嘴"),
         .blush: Spot(.cheek, "blush"),
+        .cheeksFull: Spot(.cheek, "blush"),
         .tapRub: Spot(.cheek, "tapRub"),
         .jacketWork: Spot(.torso, "外套"),
         .jacketChill: Spot(.torso, "外套"),
@@ -248,6 +254,7 @@ enum Placement {
         .deskPen: Spot(.handR, "deskPen"),
         .deskBooks: Spot(.handR, "deskBooks"),
         .tapBall: Spot(.handR, "tapBall"),
+        .juggleRacket: Spot(.handR, "tennisRacket"),
         .itemSpin: .fx,
         .workTablet: Spot(.handsFront, "workTablet"),
         .tapTablet: Spot(.handsFront, "tapTablet"),
@@ -258,6 +265,31 @@ enum Placement {
         .tapRubSleeveChill: Spot(.handsFront, "揉眼袖子"),
         .tapRubSleeveTennis: Spot(.handsFront, "揉眼袖子"),
         .tapRubSleeveDesk: Spot(.handsFront, "揉眼袖子"),
+        .tapRubSleeveBox: Spot(.handsFront, "揉眼袖子"),
+        .tapRubSleeveSmock: Spot(.handsFront, "揉眼袖子"),
+        // Identity cards, batch 1 (UI 三组 2026-10-14): the strap belongs to the left glove.
+        .boxHeadband: Spot(.headTop, "boxHeadband"),
+        .jacketBox: Spot(.torso, "外套"),
+        .jacketSmock: Spot(.torso, "外套"),
+        .boxGloveL: Spot(.handL, "拳套"),
+        .boxGloveR: Spot(.handR, "拳套"),
+        .studyHighlighter: Spot(.handR, "studyHighlighter"),
+        .craftPen: Spot(.handR, "craftPen"),
+        .gymBlock: Spot(.handsFront, "gymBlock"),
+        .studyNotebook: Spot(.handsFront, "studyNotebook"),
+        .boxSandbag: Spot(.corner1, "boxSandbag"),
+        // Deferred identity cards (顺延身份卡 预览): the finger on the score is part of holding it.
+        .danceSpeaker: Spot(.corner1, "danceSpeaker"),
+        .speakerNoteA: .fx,
+        .speakerNoteB: .fx,
+        .scoreSheet: Spot(.handsFront, "乐谱"),
+        .scoreFinger: Spot(.handsFront, "乐谱"),
+        .skiGoggles: Spot(.headTop, "skiGoggles"),
+        .mittenArm: Spot(.handL, "手套"),
+        .mittenHand: Spot(.handL, "手套"),
+        .snowBits: .fx,
+        .sneezePuff: .fx,
+        .studyMark: .fx,
         .itemFlower: Spot(.corner1, "itemFlower"),
         .itemLamp: Spot(.corner1, "itemLamp"),
         .itemBag: Spot(.corner1, "itemBag"),
@@ -265,14 +297,83 @@ enum Placement {
         .overtimeSign: .fx,
         .tapPuff: .fx,
         .tapSparkle: .fx,
+        .swingLines: .fx,
         .tapGlint: .fx,
         .tapDots: .fx,
         .tapHeart: .fx,
+        // Scenes (invite, walking, bath, map §9.2): drawn only in a scene, which puts her room and held things away.
+        .inviteSleeveWork: Spot(.handL, "指门"),
+        .inviteSleeveChill: Spot(.handL, "指门"),
+        .inviteSleeveTennis: Spot(.handL, "指门"),
+        .inviteSleeveDesk: Spot(.handL, "指门"),
+        .inviteSleeveBox: Spot(.handL, "指门"),
+        .inviteSleeveSmock: Spot(.handL, "指门"),
+        .inviteHand: Spot(.handL, "指门"),
+        // Shop clothes (kuro-v1-wardrobe.svg): tops on her torso, set hats on her head, sleeves with her own.
+        .topWorkSailor: Spot(.torso, "外套"),
+        .topWorkArgyle: Spot(.torso, "外套"),
+        .topChillStrawberry: Spot(.torso, "外套"),
+        .topChillCathoodie: Spot(.torso, "外套"),
+        .topSideGingham: Spot(.torso, "外套"),
+        .topSideDenim: Spot(.torso, "外套"),
+        .setPicnicTop: Spot(.torso, "外套"),
+        .setPicnicHat: Spot(.headTop, "帽子"),
+        .setRainTop: Spot(.torso, "外套"),
+        .setRainHat: Spot(.headTop, "帽子"),
+        .topBoxLilac: Spot(.torso, "外套"),
+        .topTennisSakura: Spot(.torso, "外套"),
+        .topFitnessTrack: Spot(.torso, "外套"),
+        .topStudySweater: Spot(.torso, "外套"),
+        .topArtSmock: Spot(.torso, "外套"),
+        .baseSportTank: Spot(.torso, "外套"),
+        .baseOutingTrench: Spot(.torso, "外套"),
+        .baseCraftPinafore: Spot(.torso, "外套"),
+        .topWorkSailorRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topWorkSailorInviteSleeve: Spot(.handL, "指门"),
+        .topWorkArgyleRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topWorkArgyleInviteSleeve: Spot(.handL, "指门"),
+        .topChillStrawberryRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topChillStrawberryInviteSleeve: Spot(.handL, "指门"),
+        .topChillCathoodieRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topChillCathoodieInviteSleeve: Spot(.handL, "指门"),
+        .topSideGinghamRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topSideGinghamInviteSleeve: Spot(.handL, "指门"),
+        .topSideDenimRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topSideDenimInviteSleeve: Spot(.handL, "指门"),
+        .setPicnicRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .setPicnicInviteSleeve: Spot(.handL, "指门"),
+        .setRainRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .setRainInviteSleeve: Spot(.handL, "指门"),
+        .topBoxLilacRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topBoxLilacInviteSleeve: Spot(.handL, "指门"),
+        .topTennisSakuraRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topTennisSakuraInviteSleeve: Spot(.handL, "指门"),
+        .topFitnessTrackRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topFitnessTrackInviteSleeve: Spot(.handL, "指门"),
+        .topStudySweaterRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topStudySweaterInviteSleeve: Spot(.handL, "指门"),
+        .topArtSmockRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .topArtSmockInviteSleeve: Spot(.handL, "指门"),
+        .baseOutingTrenchRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .baseOutingTrenchInviteSleeve: Spot(.handL, "指门"),
+        .baseCraftPinaforeRubSleeve: Spot(.handsFront, "揉眼袖子"),
+        .baseCraftPinaforeInviteSleeve: Spot(.handL, "指门"),
+        .walkPack: Spot(.torso, "背包"),
+        .walkStraps: Spot(.torso, "背包"),
+        .walkTabletHands: Spot(.handsFront, "抱平板"),
+        .bathBundle: Spot(.handsFront, "洗澡用品"),
+        .bathTurban: Spot(.headTop, "毛巾"),
+        .bathTurbanHands: Spot(.handsFront, "毛巾"),
+        .walkLines: .fx,
+        .walkDust: .fx,
+        .bathBubbles: .fx,
+        .sparkle: .fx,
     ]
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
     // the swimming cheer's ear tap over the earring. KURO's rows are UI 三组's: the rub over the blush, the pen on the
-    // books, the ball bouncing on the racket, the sleeve in front of the tablet. The spin is a cheer, not held.
+    // books, the ball bouncing on the racket, the sleeve in front of the tablet, yoga block or notebook. The spin is a
+    // cheer, not held.
     /// Things that may share a place on purpose.
     static let allowed: [Place: [Set<String>]] = [
         .eyes: [["眼睛", "deskGlasses"]],
@@ -283,9 +384,11 @@ enum Placement {
             ["deskBooks", "deskPen"], ["tapBall", "tennisRacket"],
             ["itemGoldRacket", "tapBall"],
         ],
-        .handsFront: [["workTablet", "揉眼袖子"]],
+        .handsFront: [
+            ["workTablet", "揉眼袖子"], ["gymBlock", "揉眼袖子"], ["studyNotebook", "揉眼袖子"], ["乐谱", "揉眼袖子"],
+        ],
         .earL: [["耳机", "earringNeon"], ["cheerEarTap", "earringNeon"]],
-        .torso: [["外套", "金链"], ["外套", "towel"], ["外套", "apron"]],
+        .torso: [["外套", "金链"], ["外套", "towel"], ["外套", "apron"], ["外套", "背包"]],
     ]
 
     /// Parts that fill the room corner while they show (`RunnerFigure.cornerTakers`).
@@ -362,6 +465,17 @@ enum Placement {
     /// KURO's conflicts that exist today, with where they were reported.
     static let kuroKnown: [String: String] = [:]
 
+    /// Places that hold things in HAKU's hands.
+    static let hands: Set<Place> = [.handR, .handL, .handsFront]
+
+    // QA spec S6: asleep (lying down at bedtime) HAKU holds nothing. Found on main 85b0d0f.
+    /// Things HAKU still holds asleep today, with where they were reported.
+    static let asleepKnown: [String: String] = [
+        "handL: 拳套": "新（工程二组 2026-10-14）：拳击模式睡着还戴着拳套",
+        "handR: 拳套": "新（工程二组 2026-10-14）：拳击模式睡着还戴着拳套",
+        "handR: monsterCan": "新（工程二组 2026-10-14）：睡着了手里还拿着罐子",
+    ]
+
     /// The conflicts among `parts`: a place holding two things, as "place: a+b", and a forbidden pair, as "a+b".
     static func conflicts<Part: RawRepresentable & Hashable>(
         in parts: [Part],
@@ -409,6 +523,18 @@ enum Placement {
         check(found, known: Placement.hakuKnown)
     }
 
+    @Test func hakuHoldsNothingAsleep() {
+        var found: [String: String] = [:]
+        for state in PlacementPoses.haku where state.label.contains("bedtime.lying") {
+            for part in RunnerFigure.parts(for: state.mode, pose: state.pose) {
+                guard let spot = Placement.haku[part], Placement.hands.contains(spot.place) else { continue }
+                found["\(spot.place.rawValue): \(spot.thing)"] =
+                    found["\(spot.place.rawValue): \(spot.thing)"] ?? state.label
+            }
+        }
+        check(found, known: Placement.asleepKnown, problem: "Something in HAKU's hands while asleep")
+    }
+
     @Test func kuroKeepsOneThingPerPlace() {
         var found: [String: String] = [:]
         for state in PlacementPoses.kuro {
@@ -421,10 +547,9 @@ enum Placement {
     }
 
     /// Fails on a conflict not in `known`, and on a known conflict that no longer happens.
-    func check(_ found: [String: String], known: [String: String]) {
+    func check(_ found: [String: String], known: [String: String], problem: String = "Two things in one place") {
         let new = found.filter { known[$0.key] == nil }.map { "\($0.key) (\($0.value))" }.sorted()
-        #expect(
-            new.isEmpty, "Two things in one place. Fix it, or list it in Placement with the map's §5 number: \(new)")
+        #expect(new.isEmpty, "\(problem). Fix it, or list it in Placement with the map's §5 number: \(new)")
         for (conflict, reason) in known.sorted(by: { $0.key < $1.key }) {
             withKnownIssue(Comment(rawValue: "\(conflict): \(reason)")) {
                 #expect(found[conflict] == nil, "\(conflict) in \(found[conflict] ?? "")")

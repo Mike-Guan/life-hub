@@ -25,7 +25,7 @@ public struct WatchPayload: Codable, Equatable, Sendable {
     public init(
         snapshot: WidgetSnapshot,
         wardrobe: Wardrobe = Wardrobe(),
-        bedtime: BedtimeSchedule = .standard,
+        bedtime: BedtimeSchedule = .unset,
         persona: Persona = .haku,
         scenes: [TimedScene] = [],
         event: CompanionEvent? = nil,
@@ -51,7 +51,7 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         schemaVersion = try values.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
         snapshot = try values.decode(WidgetSnapshot.self, forKey: .snapshot)
         wardrobe = (try? values.decodeIfPresent(Wardrobe.self, forKey: .wardrobe)) ?? Wardrobe()
-        bedtime = (try? values.decodeIfPresent(BedtimeSchedule.self, forKey: .bedtime)) ?? .standard
+        bedtime = (try? values.decodeIfPresent(BedtimeSchedule.self, forKey: .bedtime)) ?? .unset
         persona = (try? values.decodeIfPresent(Persona.self, forKey: .persona)) ?? .haku
         scenes = (try? values.decodeIfPresent([TimedScene].self, forKey: .scenes)) ?? []
         event = try? values.decodeIfPresent(CompanionEvent.self, forKey: .event)

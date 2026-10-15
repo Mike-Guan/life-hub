@@ -60,8 +60,31 @@ import Testing
         // With the headset on, the stars sit higher, clear of its band.
         #expect(high.contains(mode == .work ? .sparkleWork : .sparkle))
         #expect(!high.contains(mode == .work ? .sparkle : .sparkleWork))
+        // The deadpan eyes open a notch and carry their own glint (Issue #236).
+        let deadpan = mid.contains(.eyesWork)
+        #expect(high.contains(.eyesBright) == deadpan)
+        if deadpan { #expect(high.isDisjoint(with: [.eyesWork, .lidsWork])) }
         // Chill's eyes are closed in a smile, so there is nothing to glint.
-        #expect(high.contains(.eyeGlint) == (mode != .chill))
+        #expect(high.contains(.eyeGlint) == (mode != .chill && !deadpan))
+    }
+
+    @Test func tiredAtHomeDoesNotSmileLikeFull() {
+        let tired = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .low)))
+        // UI 审核 2026-10-14 replaced the deadpan eyes of F7 with half-open smiling eyes and bags.
+        #expect(!tired.contains(.eyesChill))
+        #expect(tired.isSuperset(of: [.eyesChillTired, .eyebagsChill]))
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(face: .high))).contains(.eyesChill))
+    }
+
+    @Test func highEnergyEyesStillBlinkAndSleep() {
+        var pose = RunnerPose(face: .high)
+        pose.eyesShut = true
+        let shut = Set(RunnerFigure.parts(for: .work, pose: pose))
+        #expect(shut.contains(.eyesClosed))
+        #expect(shut.isDisjoint(with: [.eyesBright, .lidsBright]))
+        var bedtime = RunnerPose.bedtimeStill()
+        bedtime.face = .high
+        #expect(Set(RunnerFigure.parts(for: .work, pose: bedtime)).isDisjoint(with: [.eyesBright, .lidsBright]))
     }
 
     @Test(arguments: Mode.allCases)
@@ -186,11 +209,36 @@ import Testing
         #expect(RunnerFigure.baseParts.isSubset(of: parts))
     }
 
+    // Issue #236: 「哦。」 comes with one blink, then a small nod; Reduce Motion keeps only the blink.
+    @Test func theNodBlinksThenDipsTheHead() {
+        var blink = RunnerPose()
+        blink.nod(progress: 0.05, still: false)
+        #expect(blink.eyesShut)
+        var dip = RunnerPose()
+        dip.nod(progress: 0.3, still: false)
+        #expect(!dip.eyesShut && dip.headDy > RunnerPose().headDy + 2)
+        var still = RunnerPose()
+        still.nod(progress: 0.3, still: true)
+        #expect(still.headDy == RunnerPose().headDy)
+        #expect(RunnerFigure.parts(for: .work, pose: blink).contains(.eyesClosed))
+    }
+
     @Test func headsetComesOffDuringGoodnight() {
         let start = RunnerPose.bedtime(time: 0, goodnight: 0.1, liesDown: true)
         let end = RunnerPose.bedtime(time: 0, goodnight: 1, liesDown: true)
         #expect(RunnerFigure.parts(for: .work, pose: start).contains(.headset))
         #expect(!RunnerFigure.parts(for: .work, pose: end).contains(.headset))
+    }
+
+    // HAKU-18 (UI 审核 2026-10-13): over 10 s of the notification the headset shows in one stretch, at the start.
+    @Test func theNotificationTakesTheHeadsetOffOnce() {
+        let shown = stride(from: 0.0, through: 10, by: 0.1).map {
+            RunnerFigure.parts(for: .work, pose: CompanionView.notificationBedtime(time: 100 + $0, start: 100))
+                .contains(.headset)
+        }
+        #expect(shown.first == true)
+        let changes = zip(shown, shown.dropFirst()).filter { $0 != $1 }.count
+        #expect(changes == 1)
     }
 
     @Test func onlyTheHomeVersionLiesDown() {
@@ -200,6 +248,8 @@ import Testing
         #expect(RunnerFigure.parts(for: .chill, pose: home).contains(.pillow))
         #expect(notification.lie == 0)
         #expect(!RunnerFigure.parts(for: .chill, pose: notification).contains(.pillow))
+        #expect(home.zzz >= 0)
+        #expect(notification.zzz == -1)
     }
 
     // UI 审核 2026-10-14: tired has to read at a glance in every mode, at home and on the watch.
@@ -372,7 +422,7 @@ import Testing
     }
 
     @Test func boxingHakuShakesOutAndFixesTheHeadband() throws {
-        let start = try #require(IdleClockTests.firstStart(lengths: [3.5], every: 24, spread: 6))
+        let start = try #require(IdleClockTests.firstStart(lengths: RunnerPose.boxingBeats, every: 24, spread: 6))
         let shaking = RunnerPose(mode: .boxing, time: start + 0.5, face: .mid, react: 0)
         #expect(shaking.gloveL.height == 8 && shaking.gloveR.height == 8)
         let fixing = RunnerPose(mode: .boxing, time: start + 2.5, face: .mid, react: 0)
@@ -381,6 +431,77 @@ import Testing
         #expect(guarding.gloveR.height > -4)
         let jab = RunnerPose(mode: .boxing, time: start + 2.5, face: .mid, react: 0.5)
         #expect(jab.gloveR.height > -69)
+    }
+
+    @Test func boxingHakuBumpsTheGlovesAndLooksUp() throws {
+        let start = try #require(
+            IdleClockTests.firstStart(kind: 1, lengths: RunnerPose.boxingBeats, every: 24, spread: 6))
+        let bump = RunnerPose(mode: .boxing, time: start + 0.275, face: .mid, react: 0)
+        #expect(bump.gloveL.width > 11 && bump.gloveR.width < -11 && bump.eyesDy == 3)
+        let apart = RunnerPose(mode: .boxing, time: start + 0.475, face: .mid, react: 0)
+        #expect(apart.gloveL.width < 1)
+        let up = RunnerPose(mode: .boxing, time: start + 1.1, face: .mid, react: 0)
+        #expect(up.eyesDy == -2.5 && up.gloveL == .zero)
+    }
+
+    @Test func boxingHakuSlipsLeftRightAndDucks() throws {
+        let start = try #require(
+            IdleClockTests.firstStart(kind: 2, lengths: RunnerPose.boxingBeats, every: 24, spread: 6))
+        let left = RunnerPose(mode: .boxing, time: start + 0.6, face: .mid, react: 0)
+        #expect(left.shift < -4.9 && left.lean < -2.9 && left.bounce < -1.4)
+        let right = RunnerPose(mode: .boxing, time: start + 1.2, face: .mid, react: 0)
+        #expect(right.shift > 4.9 && right.lean > 2.9)
+        let duck = RunnerPose(mode: .boxing, time: start + 1.8, face: .mid, react: 0)
+        #expect(duck.bounce > 5.9 && abs(duck.shift) < 0.1)
+        let puff = RunnerPose(mode: .boxing, time: start + 2.2, face: .mid, react: 0)
+        #expect(puff.puff && puff.bounce == 0 && RunnerFigure.parts(for: .boxing, pose: puff).contains(.talkDots))
+        let after = RunnerPose(mode: .boxing, time: start + 2.5, face: .mid, react: 0)
+        #expect(!after.puff && after.shift == 0 && after.lean == 0)
+    }
+
+    @Test func atWorkHakuLeansBackAndSpinsTheChair() throws {
+        let start = try #require(IdleClockTests.firstStart(kind: 2, lengths: RunnerPose.workBeats))
+        let back = RunnerPose(mode: .work, time: start + 0.4, face: .mid, react: 0)
+        #expect(back.lean < -3.5 && back.eyesShut)
+        let turning = RunnerPose(mode: .work, time: start + 0.9, face: .mid, react: 0)
+        #expect(turning.turnSqueeze < 0.7 && !turning.turnedAway)
+        let away = RunnerPose(mode: .work, time: start + 1.25, face: .mid, react: 0)
+        #expect(away.turnedAway)
+        let parts = Set(RunnerFigure.parts(for: .work, pose: away))
+        #expect(parts.contains(.headBack) && parts.contains(.headset) && !parts.contains(.eyesWork))
+        let seated = RunnerPose(mode: .work, time: start + 2.25, face: .mid, react: 0)
+        #expect(seated.bounce > 1.4 && seated.turnSqueeze == 1 && !seated.turnedAway)
+    }
+
+    @Test func offWorkHakuPatsThePillowAndLeansOnIt() throws {
+        let start = try #require(IdleClockTests.firstStart(kind: 2, lengths: RunnerPose.chillBeats))
+        // UI 审核 2026-10-14: the can fades out down to the right while the pillow comes forward, never in one frame.
+        let swap = RunnerPose(mode: .chill, time: start + 0.2, face: .mid, react: 0)
+        #expect(swap.canOpacity > 0 && swap.canOpacity < 1 && swap.pillowOpacity > 0 && swap.pillowOpacity < 1)
+        #expect(Set(RunnerFigure.parts(for: .chill, pose: swap)).isSuperset(of: [.monsterCan, .pillowHug]))
+        let pat = RunnerPose(mode: .chill, time: start + 0.625, face: .mid, react: 0)
+        let patting = Set(RunnerFigure.parts(for: .chill, pose: pat))
+        #expect(patting.isSuperset(of: [.pillowHug, .tapHand, .patLines]))
+        #expect(!patting.contains(.monsterCan) && !patting.contains(.pillowLean))
+        // UI 审核 2026-10-14: the hugged pillow ends where the leaning one is drawn, so only its layer changes.
+        // `start` can be up to 0.01 s into the beat, so step back to its first frame.
+        let first = try #require(IdleClock.beat(at: start, lengths: RunnerPose.chillBeats, seed: RunnerPose.seed))
+        let end = start - first.phase + 1.849
+        let handover = try #require(RunnerPose(mode: .chill, time: end, face: .mid, react: 0).hugPillow)
+        #expect(RunnerPose(mode: .chill, time: end - 0.1, face: .mid, react: 0).eyesShut)
+        #expect(abs(handover.width + 24) < 0.5 && abs(handover.height + 16) < 0.5)
+        let leaning = RunnerPose(mode: .chill, time: start + 2.6, face: .mid, react: 0)
+        let leant = Set(RunnerFigure.parts(for: .chill, pose: leaning))
+        #expect(leant.contains(.pillowLean) && !leant.contains(.pillowHug) && !leant.contains(.monsterCan))
+        // Comfortable: once it leans back, only the blink moves.
+        let later = RunnerPose(mode: .chill, time: start + 2.9, face: .mid, react: 0)
+        #expect(leaning.lean == -2.5 && later.lean == -2.5 && leaning.prop == later.prop)
+        // At the end the pillow fades behind the shoulder while the can comes back.
+        let ending = RunnerPose(mode: .chill, time: start + 3.2, face: .mid, react: 0)
+        #expect(ending.pillowOpacity > 0 && ending.pillowOpacity < 1 && ending.canOpacity > 0 && ending.canOpacity < 1)
+        let after = RunnerPose(mode: .chill, time: start + 3.65, face: .mid, react: 0)
+        let back = Set(RunnerFigure.parts(for: .chill, pose: after))
+        #expect(back.contains(.monsterCan) && !back.contains(.pillowLean) && after.canOpacity == 1)
     }
 
     @Test func atWorkHakuSneaksALookAtThePhone() throws {
@@ -1006,7 +1127,8 @@ import Testing
         #expect(Outfit(Wardrobe(equipped: [.gloves: "gloves.someday", .room: "room.someday"])) == Outfit())
     }
 
-    @Test(arguments: ShopItem.catalog(for: .haku))
+    // Clothes join these checks once UI draws them (Issue #327).
+    @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
     func everyWornItemChangesTheLook(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
@@ -1035,7 +1157,8 @@ import Testing
         #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
     }
 
-    @Test(arguments: ShopItem.catalog(for: .haku))
+    // Clothes join these checks once UI draws them (Issue #327).
+    @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
     func everyItemIconDrawsSomething(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
@@ -1050,9 +1173,11 @@ import Testing
         #expect(ItemPicture(slot: .room, outfit: Outfit(), itemID: nil).parts.isEmpty)
     }
 
+    // Clothes tiles get their colors with the clothes art, so only the slots on the shelf today are checked.
     @Test(arguments: Persona.allCases)
     func slotsHaveTheirOwnTileColors(_ persona: Persona) {
-        #expect(Set(Slot.allCases.map { $0.tileColor(for: persona) }).count == Slot.allCases.count)
+        let shelf = Slot.allCases.filter { $0 != .top && $0 != .fullSet }
+        #expect(Set(shelf.map { $0.tileColor(for: persona) }).count == shelf.count)
     }
 
     // UI-01 (UI 审核 2026-10-08, regression of 10-07): KURO's shop and wardrobe tiles used HAKU's mode colors.
@@ -1237,6 +1362,6 @@ import Testing
         #expect(brushing.contains(.toothbrush))
         let leaving = Set(RunnerFigure.parts(for: .chill, pose: RunnerPose(moment: .timeToLeave)))
         #expect(leaving.isSuperset(of: [.headset, .door, .watchWrist, .tapHand]))
-        #expect(CompanionLines.lines(for: .chill, moment: .timeToLeave).contains("……该出门了吧。"))
+        #expect(CompanionLines.lines(for: .chill, moment: .timeToLeave).contains("……我包背好了。"))
     }
 }

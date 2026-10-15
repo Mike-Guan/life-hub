@@ -1,0 +1,180 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "今天电量" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's energy"
+          }
+        }
+      }
+    },
+    "出发了，包我背着" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heading out. I've got the bag"
+          }
+        }
+      }
+    },
+    "出发去健身" : {
+      "comment" : "同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Head to the Gym"
+          }
+        }
+      }
+    },
+    "切换模式" : {
+      "comment" : "同一 key 只能一种译法，已统一（锁屏 ≤22）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch Mode"
+          }
+        }
+      }
+    },
+    "占浴室中" : {
+      "comment" : "中文改为“占浴室中”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hogging the bathroom"
+          }
+        }
+      }
+    },
+    "已开始" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Started"
+          }
+        }
+      }
+    },
+    "打开一次 Life Hub" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Life Hub once"
+          }
+        }
+      }
+    },
+    "拳击" : {
+      "comment" : "默认卡名。整句 “\\(title) \\(time) 开始” → “\\(title) starts at \\(time)”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boxing"
+          }
+        }
+      }
+    },
+    "模式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode"
+          }
+        }
+      }
+    },
+    "点一下切到别的模式。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to switch to another mode."
+          }
+        }
+      }
+    },
+    "现在的模式和今天的电量。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your mode now and today's energy."
+          }
+        }
+      }
+    },
+    "电量" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Energy"
+          }
+        }
+      }
+    },
+    "背着包陪你走过去。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walks you over, bag on its back."
+          }
+        }
+      }
+    },
+    "背着包陪你走过去，最多一小时，到健身房为止。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walks you over with the bag, up to an hour, until you reach the gym."
+          }
+        }
+      }
+    },
+    "觉得和睡眠算的不一样时，点一下自己选。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If it feels different from what sleep says, tap and pick it yourself."
+          }
+        }
+      }
+    },
+    "记录今天电量" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log Today's Energy"
+          }
+        }
+      }
+    },
+    "还没有模式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No mode yet"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

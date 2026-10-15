@@ -34,6 +34,31 @@ import Testing
         #expect(Win.daylight(40 * 60, now: date(15, 9), calendar: calendar)?.source != noon?.source)
     }
 
+    @Test func sixThousandStepsEarnOneCanADay() {
+        #expect(Win.steps(5999, on: date(13, 0), now: date(13, 20), calendar: calendar) == nil)
+        let win = Win.steps(6000, on: date(13, 0), now: date(13, 20), calendar: calendar)
+        #expect(win?.win == .steps)
+        #expect(Win.steps.cans == 1)
+        // Dated now while the day lasts, at its end once it is over.
+        #expect(win?.at == date(13, 20))
+        #expect(Win.steps(8000, on: date(13, 0), now: date(15, 9), calendar: calendar)?.at == date(14, 0))
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        for now in [date(13, 20), date(13, 23), date(15, 9)] {
+            if let win = Win.steps(7000, on: date(13, 0), now: now, calendar: calendar) {
+                store.record(win.win, source: win.source, at: win.at)
+            }
+        }
+        #expect(store.ledger.balance == 1)
+    }
+
+    @Test func stepDaysAreCalendarDaysNotHubDays() {
+        // 02:00 belongs to the 14th here, while the hub day still counts it as the 13th.
+        let late = Win.steps(6000, on: date(14, 2), now: date(14, 3), calendar: calendar)
+        let evening = Win.steps(6000, on: date(13, 21), now: date(13, 22), calendar: calendar)
+        #expect(late?.source != evening?.source)
+        #expect(late?.source == Win.steps(6000, on: date(14, 23), now: date(14, 23), calendar: calendar)?.source)
+    }
+
     @Test func fallingAsleepByHalfAnHourAfterBedtimeEarns() {
         let night = [sleep(date(13, 23, 55), date(14, 7))]
         let win = Win.earlySleep(night, schedule: schedule, now: date(14, 9), calendar: calendar)
@@ -49,6 +74,21 @@ import Testing
         let late = [sleep(date(14, 0, 1), date(14, 8))]
         #expect(Win.earlySleep(late, schedule: schedule, now: date(14, 9), calendar: calendar) == nil)
         #expect(Win.earlySleep([], schedule: schedule, now: date(14, 9), calendar: calendar) == nil)
+    }
+
+    @Test func noBedtimeSetEarnsNothing() {
+        let night = [sleep(date(13, 22), date(14, 6))]
+        #expect(Win.earlySleep(night, schedule: .unset, now: date(14, 9), calendar: calendar) == nil)
+    }
+
+    @Test func aBedtimeWithTheReminderOffStillEarns() throws {
+        let defaults = try #require(UserDefaults(suiteName: "HealthWinsTests.reminderOff"))
+        defaults.removePersistentDomain(forName: "HealthWinsTests.reminderOff")
+        schedule.store(in: defaults)
+        BedtimeSchedule.setRemindsAtBedtime(false, in: defaults)
+        let stored = BedtimeSchedule.stored(in: defaults)
+        let night = [sleep(date(13, 23), date(14, 7))]
+        #expect(Win.earlySleep(night, schedule: stored, now: date(14, 9), calendar: calendar) != nil)
     }
 
     @Test func anEveningNapDoesNotCountAsGoingToBed() {
