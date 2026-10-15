@@ -66,8 +66,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- While HAKU has paused an invite you kept ignoring, it only slumps on the couch with you and no longer peeks
-  at the gym bag.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
@@ -197,6 +195,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   between home and the office. Nothing shows it yet.
 - The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
   lifting, running, morning, overtime, just home, the bath and the vibe-coding cans.
+- While HAKU has paused an invite you kept ignoring, it only slumps on the couch with you and no longer peeks
+  at the gym bag.
 - Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat
   shape.
 - Workouts from the Health app are sorted into about ten groups (walking, cycling, swimming, racket, ball,
