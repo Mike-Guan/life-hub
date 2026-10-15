@@ -85,10 +85,11 @@ struct ItemPicture: Equatable {
             red = outfit.headband
             crop = CGRect(x: 23, y: -0.5, width: 86, height: 86)
         case .mask:
-            parts = [.maskUp, outfit.stripedMask ? .maskStripes : .panelLines, .ledLine]
+            parts = [.maskUp, outfit.mask == .stripes ? .maskStripes : .panelLines, .ledLine]
+            if let print = outfit.mask, print != .stripes { parts.append(print.up) }
             crop = CGRect(x: 29, y: 51, width: 62, height: 62)
         case .room:
-            parts = outfit.room.map { [$0] } ?? []
+            parts = outfit.room.map { $0 == .roomSpeaker ? [$0, .roomSpeakerRing] : [$0] } ?? []
             crop = CGRect(x: -8, y: 94, width: 48, height: 48)
         case .celebration:
             // The first get-up keepsake adds a sneaky peace sign; the default is the sparkle burst.

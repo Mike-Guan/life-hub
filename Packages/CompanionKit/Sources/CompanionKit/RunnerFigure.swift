@@ -128,6 +128,8 @@ struct RunnerPose {
     /// Eyes looking sideways; negative is toward the door on the left.
     var eyesDx: CGFloat = 0
     var ledOpacity: Double = 1
+    /// How bright the mini speaker's light ring is, 0.45...1.
+    var speakerGlow: Double = 1
     /// Work tap: the LED shows dots instead of the line.
     var ledDots = false
     var yenDx: CGFloat = 0
@@ -453,6 +455,8 @@ struct RunnerPose {
         // Sparkles twinkle out of step with the blink, 1.6 s period.
         // UI 审核 2026-10-14: from 0.1 the stars looked dim on the blue and red cards.
         sparkle = 0.8 + 0.2 * sin(time * 2 * .pi / 1.6)
+        // The mini speaker's ring lights up once every 3 s, as if music were playing (动态, UI 审核 R2).
+        speakerGlow = 0.725 - 0.275 * cos(time * 2 * .pi / 3)
 
         // Shooting keeps the ¥¥ look of the old money mode, motion included.
         switch self.moment == .shooting ? .money : mode {
@@ -1304,7 +1308,9 @@ struct RunnerFigure: View {
         if let leg = pose.commuteLeg, !pose.bedtime { commuted(leg, pose: pose, on: &visible) }
         // Room things step aside for what stands, is carried or is tucked in their spot (Mike 2026-10-09: no two
         // things in one place). The monitor stands by the left ear, where the pillow and the headphone cup go.
-        if !visible.isDisjoint(with: cornerTakers) { visible.subtract([.roomPlant, .roomBag, .runningShoes]) }
+        if !visible.isDisjoint(with: cornerTakers) {
+            visible.subtract([.roomPlant, .roomBag, .roomCactus, .roomSpeaker, .roomSpeakerRing, .runningShoes])
+        }
         if !visible.isDisjoint(with: [.pillow, .cupL]) { visible.remove(.roomPc) }
         // The bandage sits on the cheek, so the raised mask covers it.
         if visible.contains(.maskUp) { visible.remove(.bandage) }
@@ -1350,7 +1356,7 @@ struct RunnerFigure: View {
         return RunnerPart.allCases.filter { visible.contains($0) }
     }
 
-    /// Wardrobe items over the visible parts: striped masks and, at home, the room item.
+    /// Wardrobe items over the visible parts: mask prints and, at home, the room item.
     nonisolated private static func wear(_ pose: RunnerPose, mode: Mode, on visible: inout Set<RunnerPart>) {
         let outfit = pose.outfit
         // A top or full set replaces the jacket and what is on it wherever the jacket shows.
@@ -1358,14 +1364,16 @@ struct RunnerFigure: View {
             visible.subtract(jacketParts)
             visible.formUnion(clothes)
         }
-        if outfit.stripedMask, visible.contains(.maskUp) {
-            visible.remove(.panelLines)
-            visible.insert(.maskStripes)
+        if let print = outfit.mask, visible.contains(.maskUp) {
+            // The stripes take the place of the panel lines; dots and the bolt go on top of them.
+            if print == .stripes { visible.remove(.panelLines) }
+            visible.insert(print.up)
         }
-        if outfit.stripedMask, visible.contains(.maskDown) { visible.insert(.maskStripesDown) }
+        if let print = outfit.mask, visible.contains(.maskDown) { visible.insert(print.down) }
         // The room item stays home: hidden while HAKU carries the gym bag, is out boxing, lifting or running, or
         // stands in the mountains.
         if mode == .chill, let room = outfit.room, visible.isDisjoint(with: awayParts) { visible.insert(room) }
+        if visible.contains(.roomSpeaker) { visible.insert(.roomSpeakerRing) }
         if outfit.peaceSign, pose.burst >= 0, !pose.bedtime { visible.insert(.peaceHand) }
         // Today's traces: the bandage goes everywhere, the monitor and the sunlight are in the room at home.
         if pose.traces.contains(.bandage) { visible.insert(.bandage) }
@@ -1676,8 +1684,9 @@ struct RunnerFigure: View {
     ]
     /// What still shows from behind: the room, the jacket, the back of the head and the headset or headband.
     nonisolated private static let backParts: Set<RunnerPart> = [
-        .door, .sunlight, .roomPc, .deskMonitor, .pillow, .roomPlant, .roomBag, .runningShoes, .heavyBag,
-        .speedLines, .desk, .canStackOne, .canStackTwo, .canStackThree, .sofaArm,
+        .door, .sunlight, .roomPc, .deskMonitor, .pillow, .roomPlant, .roomBag, .roomCactus, .roomSpeaker,
+        .roomSpeakerRing, .runningShoes, .heavyBag, .speedLines, .desk, .canStackOne, .canStackTwo, .canStackThree,
+        .sofaArm,
         .jacket, .hoodCollar, .hairBack, .earL, .earR, .headset, .cupL, .cupR, .headband,
     ]
     nonisolated private static let openEyes: Set<RunnerPart> = [
@@ -1784,12 +1793,13 @@ struct RunnerFigure: View {
                     .scaleEffect(x: 1, y: 0.5 + 0.5 * pose.squeeze, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale)
             case .maskUp where pose.unmasking, .panelLines where pose.unmasking, .ledLine where pose.unmasking,
-                .maskStripes where pose.unmasking:
+                .maskStripes where pose.unmasking, .maskDots where pose.unmasking, .maskBolt where pose.unmasking:
                 // Off work or staying home: the mask slides down to the chin.
                 RunnerPartView(part: part)
                     .offset(y: 12 * pose.maskDrop * scale)
                     .opacity(Double(1 - pose.maskDrop))
-            case .maskDown where pose.unmasking, .maskStripesDown where pose.unmasking:
+            case .maskDown where pose.unmasking, .maskStripesDown where pose.unmasking,
+                .maskDotsDown where pose.unmasking, .maskBoltDown where pose.unmasking:
                 RunnerPartView(part: part).opacity(Double(pose.maskDrop))
             case .ledLine where pose.ledFlare > 0:
                 // Flares wider with a glow.
@@ -1798,6 +1808,8 @@ struct RunnerFigure: View {
                     .shadow(color: RunnerPalette.neonCyan, radius: 4 * pose.ledFlare * scale)
             case .ledLine:
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
+            case .roomSpeakerRing:
+                RunnerPartView(part: part).opacity(pose.speakerGlow)
             case .cupR where pose.cupRUp > 0:
                 // Pushed up off the ear, tilting back.
                 RunnerPartView(part: part)
@@ -2098,6 +2110,7 @@ struct RunnerFigure: View {
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .eyebagsMask, .browsWork, .eyesChill,
         .eyesChillTired, .eyebagsChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
+        .maskDots, .maskBolt,
         .ledLine, .ledYen, .hairFringe, .earringNeon, .headband, .headset, .cupL, .cupR, .mic,
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .sparkleWork, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
@@ -2106,7 +2119,7 @@ struct RunnerFigure: View {
     ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
-    private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown]
+    private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown, .maskDotsDown, .maskBoltDown]
 
     /// The jacket fill for the mode, or for the identity card's look.
     private var jacket: Color {

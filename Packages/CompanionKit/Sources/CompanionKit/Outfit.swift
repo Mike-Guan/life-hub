@@ -9,8 +9,8 @@ struct Outfit: Equatable, Sendable {
     var gloves: Color?
     /// Replaces the boxing red of the headband, or `nil` for red.
     var headband: Color?
-    /// Pink stripes on the mask instead of its panel lines.
-    var stripedMask = false
+    /// The print on the mask, or `nil` for the plain mask.
+    var mask: MaskPrint?
     /// The room item next to HAKU at home, or `nil` for none.
     var room: RunnerPart?
     /// A sneaky peace sign in every celebration and unboxing.
@@ -36,13 +36,23 @@ struct Outfit: Equatable, Sendable {
             switch worn[.headband] {
             case "headband.cyan": RunnerPalette.neonCyan
             case "keepsake.headband.runner": RunnerPalette.white
+            case "haku.weekly.headband.orange": RunnerPalette.catOrange
+            case "haku.weekly.headband.mint": RunnerPalette.mint
             default: nil
             }
-        stripedMask = worn[.mask] == "mask.stripes"
+        mask =
+            switch worn[.mask] {
+            case "mask.stripes": .stripes
+            case "haku.weekly.mask.dots": .dots
+            case "haku.weekly.mask.bolt": .bolt
+            default: nil
+            }
         room =
             switch worn[.room] {
             case "room.plant": .roomPlant
             case "room.bag": .roomBag
+            case "haku.weekly.room.cactus": .roomCactus
+            case "haku.weekly.room.speaker": .roomSpeaker
             default: nil
             }
         peaceSign = worn[.celebration] == "celebrate.up"
@@ -73,4 +83,38 @@ struct Outfit: Equatable, Sendable {
         "haku.set.chill.varsity": RunnerPalette.varsityRed,
         "haku.set.work.raincoat": RunnerPalette.lilac,
     ]
+}
+
+/// A print on HAKU's mask.
+enum MaskPrint: CaseIterable, Sendable {
+    /// Pink stripes instead of the panel lines.
+    case stripes
+    /// White dots on both sides.
+    case dots
+    /// A yellow lightning bolt sticker.
+    case bolt
+
+    /// The print on the raised mask.
+    var up: RunnerPart {
+        switch self {
+        case .stripes: .maskStripes
+        case .dots: .maskDots
+        case .bolt: .maskBolt
+        }
+    }
+
+    /// The print on the mask pulled down to the chin.
+    var down: RunnerPart {
+        switch self {
+        case .stripes: .maskStripesDown
+        case .dots: .maskDotsDown
+        case .bolt: .maskBoltDown
+        }
+    }
+}
+
+extension RunnerPalette {
+    // Only the Sunday headband uses it, at runtime, so it is not in the SVG.
+    /// Mint, for the mint headband.
+    static let mint = Color(hex: 0x7EEBC6)
 }
