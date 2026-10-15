@@ -63,7 +63,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- HAKU's warm-up taps and VoiceOver follow the user's identity card; only the boxing card keeps the gloves.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
@@ -228,6 +227,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   bus, and the moment of arriving. Life Hub asks for Motion & Fitness once; motion stays on the iPhone.
 - After a workout the watch cheers for it as soon as the Health app saves it, without opening the iPhone app.
   The iPhone home still cheers the next time it opens.
+- HAKU's warm-up taps and VoiceOver follow the user's identity card; only the boxing card keeps the gloves.
 - At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
   chain when he hits it.
 - When HAKU puts the pillow behind his shoulder to lean on it, it now lands exactly where it rests, so it no
