@@ -24,6 +24,20 @@ extension FrameSheets {
                 }
             ),
             ("副业 · 书桌", true, { $0.switchMode(.money) }),
+            (
+                "预览摆满 · 拳击日", false,
+                {
+                    $0.togglePreviewItems()
+                    $0.switchMode(.boxing)
+                }
+            ),
+            (
+                "预览摆满 · 窗边", true,
+                {
+                    $0.togglePreviewItems()
+                    $0.tap(.window)
+                }
+            ),
             ("床上休息", true, { $0.tap(.bed) }),
             ("衣柜前", false, { $0.tap(.wardrobe) }),
             (
