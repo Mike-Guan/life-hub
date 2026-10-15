@@ -131,6 +131,8 @@ public struct CompanionView: View {
     // Id of the last time HAKU got up from the sofa, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastRevived") private var lastRevived = ""
     @State private var welcomeStart: Date?
+    /// Seconds into the welcome back scene when a tap skipped it.
+    @State private var welcomeSkip: CGFloat?
     @State private var welcomeReplay: ReturnReplay?
     @State private var welcomeTask: Task<Void, Never>?
     // Id of the last welcome back, shared by every CompanionView so each plays once.
@@ -471,8 +473,12 @@ public struct CompanionView: View {
             let scene = WelcomeScene(replay, mode: mode)
             let open = scene.open(cards: replay.cards.count, cans: replay.cans)
             // Reduced motion holds the last frame.
-            let shown = reduceMotion ? scene.length(cards: replay.cards.count, cans: replay.cans) - 0.2 : t
-            return RunnerPose.welcome(scene, time: shown, open: open, face: face, mode: mode)
+            let length = scene.length(cards: replay.cards.count, cans: replay.cans)
+            if reduceMotion {
+                return RunnerPose.welcome(scene, time: length - 1.3, open: open, face: face, mode: mode)
+            }
+            return RunnerPose.welcome(
+                scene, time: t, open: open, face: face, mode: mode, length: length, skippedAt: welcomeSkip)
         }
         let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
         if reduceMotion {
@@ -716,8 +722,12 @@ public struct CompanionView: View {
         guard let start = welcomeStart?.timeIntervalSinceReferenceDate, let replay = welcomeReplay else { return nil }
         let length = WelcomeScene(replay, mode: mode ?? .chill).length(cards: replay.cards.count, cans: replay.cans)
         let t = CGFloat(time - start)
-        return t >= 0 && t < length ? t : nil
+        let end = min(length, welcomeSkip.map { $0 + Self.welcomeSkipLength } ?? length)
+        return t >= 0 && t < end ? t : nil
     }
+
+    /// How long the welcome back scene takes to put itself away after a tap skips it.
+    nonisolated static let welcomeSkipLength: CGFloat = 0.3
 
     /// The card flipped over at the top, or at the bottom when there is no crate, then the cans chip.
     @ViewBuilder private func welcomeChips(_ replay: ReturnReplay, at time: TimeInterval) -> some View {
@@ -1014,6 +1024,7 @@ public struct CompanionView: View {
         let scene = WelcomeScene(replay, mode: mode ?? .chill)
         welcomeReplay = replay
         welcomeStart = .now
+        welcomeSkip = nil
         say(nil)
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(scene.line.at))
@@ -1033,6 +1044,7 @@ public struct CompanionView: View {
         guard welcomeStart != nil else { return }
         welcomeTask?.cancel()
         welcomeStart = nil
+        welcomeSkip = nil
         welcomeReplay = nil
         say(nil)
         onWelcomeDone?()
@@ -1063,9 +1075,20 @@ public struct CompanionView: View {
             reactToPoke()
             return
         }
-        if welcome(at: Date.now.timeIntervalSinceReferenceDate) != nil {
-            // A tap skips the welcome back.
-            endWelcome()
+        if let t = welcome(at: Date.now.timeIntervalSinceReferenceDate) {
+            // A tap skips the welcome back: it puts itself away over 0.3 s instead of cutting.
+            guard welcomeSkip == nil else { return }
+            if reduceMotion {
+                endWelcome()
+                return
+            }
+            welcomeSkip = t
+            welcomeTask?.cancel()
+            welcomeTask = Task {
+                try? await Task.sleep(for: .seconds(Double(Self.welcomeSkipLength)))
+                guard !Task.isCancelled else { return }
+                endWelcome()
+            }
             return
         }
         if bath, dryStart == nil {
