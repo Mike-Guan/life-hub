@@ -533,6 +533,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- When the second preset character is tapped in the middle of an idle move, what she put down slides back over
+  0.2 s and notes or snow fade, instead of jumping back in one frame. A cup already at her lips stays there.
 - After a workout cheer or the off-work move, HAKU can again stretch after a long sit, get up from the sofa,
   wonder if you're staying home and cheer a finished task. Before, these waited until the app was restarted.
 - On a gym day you already trained, went to the gym or set off for it, scrolling on the phone no longer brings

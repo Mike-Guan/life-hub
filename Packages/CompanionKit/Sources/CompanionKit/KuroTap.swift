@@ -49,6 +49,10 @@ enum KuroTap: Equatable, Sendable {
     /// How long the reaction plays, in seconds.
     var duration: TimeInterval { self == .turnAway ? 3 : 1.1 }
 
+    // 动作展示总表 C9: an idle cut short used to drop in one frame, so a prop put down jumped back into her hand.
+    /// How long what a tap cuts short takes to go back, in seconds.
+    static let cutBack: TimeInterval = 0.2
+
     /// How many taps within `CompanionView.pesterWindow` turn her away.
     static let tooMany = 5
 
@@ -102,6 +106,13 @@ extension KuroPose {
         }
         return pose
     }
+
+    /// The same pose with `move`, which a tap cut short, gone `back` (0...1) to where the move starts.
+    func cutting(_ move: (KuroIdle, Double)?, back: Double) -> KuroPose {
+        var pose = idling(move)
+        pose.idleBack = move == nil ? 0 : back
+        return pose
+    }
 }
 
 extension KuroFigure {
@@ -113,6 +124,26 @@ extension KuroFigure {
         .weeklyBlanketBear, .weeklyRoomCloud, .weeklyRoomSucculent, .weeklyRoomNightlightGlow, .weeklyRoomNightlight,
         .weeklyHatBeanie, .weeklyHatBeaniePom,
     ]
+
+    /// Her eyes and mouths, which the tap sets even while an idle it cut short goes back.
+    nonisolated private static let face: Set<KuroPart> = [
+        .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow, .eyesWink,
+        .eyesFull, .mouthCat, .mouthFlat, .mouthSmile, .mouthO,
+    ]
+
+    /// What an idle cut short by a tap fades out as it goes back: notes, snow, puffs, marks and sparkles.
+    nonisolated static let fades: Set<KuroPart> = [
+        .speakerNoteA, .speakerNoteB, .snowBits, .sneezePuff, .tapPuff, .studyMark, .tapSparkle, .tapGlint,
+    ]
+
+    /// Shows in `visible` what `idle` shows at `progress`, except her face; what it moved out of the frame stays,
+    /// to come back.
+    nonisolated static func cut(_ idle: KuroIdle, progress p: Double, _ visible: inout Set<KuroPart>) {
+        var moved = visible
+        idle.apply(p, to: &moved)
+        let away = visible.subtracting(moved).filter { idle.shift($0, progress: p) != .zero }
+        visible = moved.subtracting(face).union(visible.intersection(face)).union(away)
+    }
 
     /// What lies on her lap; put away when she drinks.
     nonisolated static let lap: Set<KuroPart> = [.itemBlanket, .weeklyBlanketBear, .weeklyRoomCloud]
@@ -153,8 +184,26 @@ extension KuroFigure {
     /// How far `part` moves from where the SVG draws it, in SVG units.
     nonisolated static func shift(_ part: KuroPart, pose: KuroPose) -> CGSize {
         let move = moveShift(part, pose: pose)
-        guard let scene = pose.scene?.shift(part) else { return move }
-        return CGSize(width: move.width + scene.width, height: move.height + scene.height)
+        let cut = cutShift(part, pose: pose, tapShift: move)
+        let scene = pose.scene?.shift(part) ?? .zero
+        return CGSize(width: move.width + cut.width + scene.width, height: move.height + cut.height + scene.height)
+    }
+
+    /// How far `part` moves for an idle that her tap cut short, on its way back to where the move starts, on top
+    /// of `tapShift`.
+    nonisolated private static func cutShift(_ part: KuroPart, pose: KuroPose, tapShift: CGSize) -> CGSize {
+        guard pose.tap != nil, let idle = pose.idle else { return .zero }
+        let now = idle.shift(part, progress: pose.idleProgress)
+        // The cup she blows on is already at her lips, so it stays there until her sip has lifted it as high.
+        if part == .tapCup, pose.tap == .sip, idle == .blow {
+            guard now.height < tapShift.height else { return .zero }
+            return CGSize(width: now.width - tapShift.width, height: now.height - tapShift.height)
+        }
+        let start = idle.shift(part, progress: 0)
+        let back = CGFloat(ease(pose.idleBack))
+        return CGSize(
+            width: now.width + (start.width - now.width) * back, height: now.height + (start.height - now.height) * back
+        )
     }
 
     /// How far `part` moves for her tap reaction or idle move, in SVG units.
@@ -199,13 +248,15 @@ extension KuroFigure {
         if part == .weeklyHatBeaniePom, pose.pom != 0 { return KuroTurn(pivot: CGPoint(x: 60, y: 30), angle: pose.pom) }
         // The gold racket from the shop is drawn like her own one, so it turns the same way.
         guard part == .tennisRacket || part == .itemGoldRacket else { return nil }
-        if pose.tap == .swing {
+        // A twirl cut short turns back to the front before the swing starts.
+        if pose.tap == .swing, pose.idle != .twirl || pose.tapProgress >= 0.15 {
             return KuroTurn(pivot: CGPoint(x: 91.8, y: 128.9), angle: swingAngle(pose.tapProgress))
         }
-        guard pose.tap == nil, pose.idle == .twirl else { return nil }
+        guard pose.idle == .twirl else { return nil }
         // One full spin about the handle over the first 70%; never quite edge-on, so the frame stays drawn.
         let width = cos(min(pose.idleProgress / 0.7, 1) * 2 * .pi)
-        let scale = width < 0 ? min(width, -0.1) : max(width, 0.1)
+        let spun = width < 0 ? min(width, -0.1) : max(width, 0.1)
+        let scale = pose.tap == nil ? spun : spun + (1 - spun) * ease(pose.idleBack)
         return KuroTurn(pivot: CGPoint(x: 98, y: 112), axis: 20, scale: CGFloat(scale))
     }
 
