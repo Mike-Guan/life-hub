@@ -50,8 +50,12 @@ struct PlaceEditor: View {
                     Text(place.kind == .custom ? "地点".localized : shownTitle)
                         .font(Toy.display(24))
                     Spacer()
-                    Button("取消") { dismiss() }
-                        .font(Toy.body(15, weight: .heavy))
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text("取消").tapTarget()
+                    }
+                    .font(Toy.body(15, weight: .heavy))
                 }
                 if place.kind == .custom {
                     nameCard
@@ -143,8 +147,10 @@ struct PlaceEditor: View {
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
-                Button(locating ? "定位中…" : "设为当前位置") {
+                Button {
                     Task { await setHere() }
+                } label: {
+                    (locating ? Text("定位中…") : Text("设为当前位置")).tapTarget()
                 }
                 .font(Toy.body(13, weight: .heavy))
                 .disabled(locating)
