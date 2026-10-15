@@ -539,7 +539,7 @@ private struct Header: View {
         VStack(alignment: .leading, spacing: 6) {
             // The badges and buttons share a row with the date, so the greeting keeps the full width.
             HStack(alignment: .center) {
-                Text(subtitle)
+                subtitle
                     .font(Toy.body(13, weight: .bold))
                     .foregroundStyle(Toy.muted)
                     .lineLimit(1)
@@ -588,9 +588,11 @@ private struct Header: View {
         Greeting.text(hour: Calendar.current.component(.hour, from: .now), name: name)
     }
 
-    private var subtitle: String {
+    // UI 二组 preview 6: a new user has no mode yet, and says so in words, not in a code.
+    private var subtitle: Text {
         let date = Date.now.formatted(.dateTime.month().day().weekday(.wide))
-        return "\(date) · \(mode.map { "\(cards.code(for: $0, persona: persona)) MODE" } ?? "NO MODE")"
+        guard let mode else { return Text("\(date) · 还没有模式") }
+        return Text(verbatim: "\(date) · \(cards.code(for: mode, persona: persona)) MODE")
     }
 }
 

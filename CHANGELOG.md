@@ -63,9 +63,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- Both characters now dress for the picked identity card on the home screen, in widgets, in the notification
-  and in onboarding, not only in the shop and wardrobe. On the home screen the second preset character also
-  points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
+- Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
+  before it ever got a snapshot; after that it says 到常去的地方会自己换.
+- With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
+  translation exists.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
@@ -147,6 +148,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
   card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
   The second character's flower is now called 地上小粉花.
+- The confirmation before switching characters is one whole sentence per direction and looks up the String
+  Catalog, so it can be translated.
 - The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
   4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
 - A tired HAKU now shows it in every mode: off work he keeps smiling with half-open eyes and bags, at work and
@@ -167,6 +170,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   for time in daylight in Health. Only the win is kept, never the daylight or sleep times.
 - With the fitness card picked, a visit to the fitness gym earns the card's weekly cans, the same as a
   strength workout, so one session no longer pays twice.
+- 删掉所有记忆 is greyed out and can't be tapped when there is nothing to forget.
 - On the smallest watch, a long mode name in the clock row shrinks to fit instead of running into the clock.
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
@@ -230,6 +234,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   chain when he hits it.
 - When HAKU puts the pillow behind his shoulder to lean on it, it now lands exactly where it rests, so it no
   longer jumps from his chest to behind his shoulder.
+- Both characters now dress for the picked identity card on the home screen, in widgets, in the notification
+  and in onboarding, not only in the shop and wardrobe. On the home screen the second preset character also
+  points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
@@ -536,6 +543,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- With languages on (Debug and STG), VoiceOver reads the second preset character's overtime lines from her
+  string table, so they can show in Japanese and English.
 - After a workout cheer or the off-work move, HAKU can again stretch after a long sit, get up from the sofa,
   wonder if you're staying home and cheer a finished task. Before, these waited until the app was restarted.
 - On a gym day you already trained, went to the gym or set off for it, scrolling on the phone no longer brings
