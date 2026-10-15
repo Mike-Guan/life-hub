@@ -133,6 +133,7 @@ struct HomeView: View {
                         // Issue #164: her look per mode, energy face and bedtime; a tap shows a line for now.
                         KuroView(
                             look: KuroLook(mode: shownMode ?? .chill, card: shownCards.identity),
+                            card: shownCards.identity,
                             energy: reading?.value,
                             bedtime: bedtime.state(at: context.date),
                             need: activeNeed(at: context.date)?.need,
