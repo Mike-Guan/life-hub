@@ -1260,6 +1260,16 @@
         }
       }
     },
+    "裹着毯子，抱着手机打瞌睡" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dozing in a blanket, hugging the phone"
+          }
+        }
+      }
+    },
     "让一让，擦到你了。" : {
       "localizations" : {
         "en" : {

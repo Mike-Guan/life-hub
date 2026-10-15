@@ -67,6 +67,8 @@ enum CompanionLines {
         case .shooting: ["光线不错。", "这张可以。"]
         case .collapsed: ["你也活着回来了啊。", "……先让我趴五分钟。"]
         case .blanket: ["今天就这样吧。", "毯子分你一半。"]
+        // Dozing off HAKU doesn't talk.
+        case .dozing: ["……"]
         case .morning: ["又要上班了。", "耳机……耳机去哪了。"]
         case .timeToLeave: ["……我包背好了。", "唉。"]
         case .stiff: ["……我腰要断了。", "我先起来了。……你呢？", "ちょっと休憩。"]
@@ -169,6 +171,7 @@ enum CompanionLines {
         case .shooting: "在忙副业的拍摄"
         case .collapsed: "下班回家，趴在沙发扶手上"
         case .blanket: "裹着毯子瘫在沙发上"
+        case .dozing: "裹着毯子，抱着手机打瞌睡"
         case .morning: "早上起来在刷牙"
         case .timeToLeave: "戴好耳机站在门口，敲着手表"
         case .stiff: "坐太久了，扭扭腰，捶捶背"

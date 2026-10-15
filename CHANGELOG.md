@@ -66,6 +66,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- Couch scrolling in the hours before bedtime (from 2.5 hours before it, and after midnight) no longer has HAKU
+  peek at the gym bag or send the couch invite. HAKU dozes off in the blanket instead, drawn like the blanket
+  until its own pose is approved.
 - On another identity card's day, HAKU warms up without the boxing headband and gloves.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.

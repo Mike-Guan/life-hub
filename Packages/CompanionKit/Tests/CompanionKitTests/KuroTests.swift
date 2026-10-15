@@ -175,8 +175,8 @@ import Testing
     }
 
     @Test func herMomentLinesDifferFromHakus() {
-        // Flow and blanket lines are the same for both.
-        for moment in CompanionMoment.allCases where ![.flow, .blanket].contains(moment) {
+        // Flow, blanket and dozing lines are the same for both.
+        for moment in CompanionMoment.allCases where ![.flow, .blanket, .dozing].contains(moment) {
             let hers = CompanionLines.lines(for: .chill, moment: moment, persona: .kuro)
             #expect(!hers.isEmpty && hers != CompanionLines.lines(for: .chill, moment: moment))
         }
