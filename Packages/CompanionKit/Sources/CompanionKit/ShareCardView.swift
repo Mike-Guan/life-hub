@@ -164,7 +164,6 @@ public struct ShareCardView: View {
             .font(font(size, .black))
             .lineLimit(2)
             .minimumScaleFactor(0.85)
-            .fixedSize(horizontal: false, vertical: true)
     }
 
     @ViewBuilder private func subtitle(_ size: CGFloat) -> some View {
