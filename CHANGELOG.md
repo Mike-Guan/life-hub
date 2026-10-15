@@ -86,6 +86,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   base outfits (sport, outing, craft), each with two tops to buy that every card on that base can wear; HAKU's
   boxing card and the second character's boxing and tennis cards have a top of their own. They go on sale once
   the character art draws them.
+- With languages on, the work-day buttons in first-time setup show the phone language's weekday letters and
+  start the week where the phone's calendar does. In Chinese they still run Monday to Sunday. They also fit
+  narrow phones.
 - The second preset character's 6 tops and 2 full sets are on sale. She wears the one of the mode she is in,
   on the home screen, the shop, the wardrobe, unboxing, widgets and the watch.
 - When HAKU switches between idle scenes, only the sparkles show. The peace sign, the dumbbell reps and the
