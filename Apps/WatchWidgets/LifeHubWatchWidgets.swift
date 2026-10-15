@@ -131,16 +131,23 @@ struct WatchStatusView: View {
             )
         } else if let payload = entry.payload, let mode = entry.mode {
             let snapshot = payload.snapshot
+            // The same scene the watch app plays, like the iPhone Lock Screen (PM 动作展示总表 C9).
+            let scene = payload.scene(at: entry.date)
             CompanionPortrait(
                 mode: mode,
                 energy: snapshot.energy(at: entry.date)?.value,
                 need: snapshot.need(at: entry.date),
                 needSince: snapshot.needSince(at: entry.date),
+                activity: scene?.activity,
+                moment: scene?.moment,
                 traces: snapshot.traces(at: entry.date),
                 vitals: snapshot.vitals ?? HakuVitals(),
                 date: entry.date,
                 bedtime: payload.bedtime.state(at: entry.date),
                 wardrobe: payload.wardrobe,
+                daily: scene?.daily,
+                walking: scene?.walking,
+                bath: scene?.bath ?? false,
                 framing: .head
             )
         } else {

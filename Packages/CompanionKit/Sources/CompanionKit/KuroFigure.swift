@@ -131,6 +131,8 @@ struct KuroPose: Sendable {
     var idle: KuroIdle?
     /// How far into `idle` she is, 0..<1.
     var idleProgress = 0.0
+    /// With `tap`, how far (0...1) what `idle` moved has gone back to where the move starts.
+    var idleBack = 0.0
     /// The home scene she is playing, if any: the invite, a walk or the bath.
     var scene: KuroScene?
     /// How bright the nightlight's glow is, 0...1.
@@ -264,6 +266,7 @@ struct KuroFigure: View {
         for item in shown { visible.formUnion(item.parts(ponytail: ponytail)) }
         for item in shown { visible.subtract(item.replaces) }
         pose.scene?.dress(look, items: pose.items, &visible)
+        if pose.tap != nil, let idle = pose.idle { cut(idle, progress: pose.idleProgress, &visible) }
         if let tap = pose.tap {
             apply(tap, progress: pose.tapProgress, to: &visible)
             // The rubbing hand comes up on her arm, in her look's sleeve; in gloves the left one comes off, and the
@@ -357,12 +360,16 @@ struct KuroFigure: View {
     /// The looks in her sportswear, where she smiles.
     nonisolated private static let smiling: Set<KuroLook> = [.tennis, .fitness, .dance, .ski]
 
-    /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out. The nightlight's glow is
-    /// `pose.glow`.
+    /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out, and what a tap cut short
+    /// fades as it goes back. The nightlight's glow is `pose.glow`.
     nonisolated static func opacity(_ part: KuroPart, pose: KuroPose) -> Double {
         if part == .weeklyRoomNightlightGlow { return pose.glow }
-        guard pose.tap == nil, let idle = pose.idle else { return 1 }
-        return idle.opacity(part, progress: pose.idleProgress)
+        guard let idle = pose.idle else { return 1 }
+        let shown = idle.opacity(part, progress: pose.idleProgress)
+        guard pose.tap != nil else { return shown }
+        // Her idle hand is gone once it is back, before the prop comes up.
+        if idleHands.contains(part) { return cutPhase(part, back: pose.idleBack) < 1 ? 1 : 0 }
+        return fades.contains(part) ? shown * (1 - pose.idleBack) : 1
     }
 
     // UI 审核 2026-10-14 (direction 2): the watch crop cuts her low props, so on the watch she holds each one
@@ -500,6 +507,8 @@ struct KuroPartView: View {
 /// KURO with an idle loop for her look; energy picks her face and a tap gets a line.
 public struct KuroView: View {
     let look: KuroLook
+    /// The identity card she wears `look` for, if any; a card without a look of its own still adds its base moves.
+    let card: IdentityKind?
     let energy: Double?
     let bedtime: Bedtime
     let need: CompanionNeed?
@@ -573,6 +582,7 @@ public struct KuroView: View {
 
     /// - Parameters:
     ///   - look: what she wears.
+    ///   - card: the identity card she wears `look` for, if any.
     ///   - energy: energy 0-100, or nil when unknown. Below 30 she looks tired; from 70 she looks bright.
     ///   - bedtime: `.on` makes her sleepy and slows her to a breath.
     ///   - need: what the user needs, which picks her lines.
@@ -597,6 +607,7 @@ public struct KuroView: View {
     ///   - onBathDone: called after she shows the towel round her head on a tap during bath time.
     public init(
         look: KuroLook,
+        card: IdentityKind? = nil,
         energy: Double? = nil,
         bedtime: Bedtime = .off,
         need: CompanionNeed? = nil,
@@ -617,6 +628,7 @@ public struct KuroView: View {
         onBathDone: (() -> Void)? = nil
     ) {
         self.look = look
+        self.card = card
         self.energy = energy
         self.bedtime = bedtime
         self.need = need
@@ -679,8 +691,12 @@ public struct KuroView: View {
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 // Her small idle moves play only in the plain idle.
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
-                let fidget = busy ? nil : KuroIdle.at(idleTime, look: look)
-                let shown = still || tap != nil ? pose : pose.blink(at: time).idling(fidget)
+                let fidget = busy ? nil : KuroIdle.at(idleTime, look: look, card: card)
+                // 动作展示总表 C9: what an idle she was in the middle of moved goes back as the tap starts.
+                let cutShort = tap.flatMap { cut(tap: $0, sleepy: sleepy) }
+                let back = (tap.map { $0.1 * $0.0.duration } ?? 0) / KuroTap.cutBack
+                let shown =
+                    still ? pose : tap != nil ? pose.cutting(cutShort, back: back) : pose.blink(at: time).idling(fidget)
                 ZStack {
                     KuroFigure(
                         look: look,
@@ -965,6 +981,14 @@ public struct KuroView: View {
         guard let kind = tapKind, let start = tapStart?.timeIntervalSinceReferenceDate else { return nil }
         let progress = (time - start) / kind.duration
         return (0..<1).contains(progress) ? (kind, progress) : nil
+    }
+
+    /// The idle move `tap` cut short and how far into it she was, while what it moved is still going back.
+    private func cut(tap: (KuroTap, Double), sleepy: Bool) -> (KuroIdle, Double)? {
+        guard tap.1 * tap.0.duration < KuroTap.cutBack, slot == nil, !sleepy,
+            let start = tapStart?.timeIntervalSinceReferenceDate, scene(at: start) == nil
+        else { return nil }
+        return KuroIdle.at(idlePace?.phase(at: start) ?? start * pace, look: look, card: card)
     }
 
     /// Progress of the nod at `time` (0..<1), or nil when none is playing.
