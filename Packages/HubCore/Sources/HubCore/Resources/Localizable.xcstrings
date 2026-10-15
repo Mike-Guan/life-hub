@@ -960,7 +960,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Slept %1$@h %2$@m last night. Calling it “%3$@”"
+            "value" : "%1$@ h %2$@ min of sleep last night, so “%3$@”"
           }
         }
       }
@@ -1001,6 +1001,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Striped mask"
+          }
+        }
+      }
+    },
+    "校队夹克" : {
+      "comment" : "商品名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsity jacket"
           }
         }
       }
@@ -1548,6 +1559,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Once this week, you actually got up. I noticed."
+          }
+        }
+      }
+    },
+    "那天的样子记录" : {
+      "comment" : "出错时显示的文件名，和 can records 并列",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "daily look records"
           }
         }
       }

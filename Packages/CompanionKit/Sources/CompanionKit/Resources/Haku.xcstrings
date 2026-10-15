@@ -115,6 +115,17 @@
         }
       }
     },
+    "……反射。" : {
+      "comment" : "手表戳一下，闪避勾拳",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Reflex."
+          }
+        }
+      }
+    },
     "……喂喂喂。" : {
       "localizations" : {
         "en" : {
