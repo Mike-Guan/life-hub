@@ -271,17 +271,18 @@ struct ShopItemIcon: View {
     }
 }
 
-/// `persona` standing still in `mode`'s look, wearing `wardrobe`.
+/// `persona` standing still in `mode`'s look, dressed for `card` in the identity card mode, wearing `wardrobe`.
 struct PersonaPortrait: View {
     let persona: Persona
     let mode: Mode
+    var card: IdentityKind?
     var wardrobe = Wardrobe()
 
     var body: some View {
         if persona == .kuro {
-            KuroPortrait(look: KuroLook(mode: mode), wearing: wardrobe.worn(in: mode))
+            KuroPortrait(look: KuroLook(mode: mode, card: card), wearing: wardrobe.worn(in: mode))
         } else {
-            CompanionPortrait(mode: mode, wardrobe: wardrobe)
+            CompanionPortrait(mode: mode, card: card, wardrobe: wardrobe)
         }
     }
 }
