@@ -209,7 +209,7 @@ public struct CompanionView: View {
             // once. Every mode change now fades in 0.3 s, whoever made it.
             character
                 .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: mode)
-                .padding(.top, UserDefaults.standard.string(forKey: "bubble-variant") == "b" ? 36 : 24)
+                .padding(.top, ["b": 36, "e": 44][UserDefaults.standard.string(forKey: "bubble-variant") ?? ""] ?? 24)
                 .padding(.horizontal, 12)
                 .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
                 .animation(.smooth(duration: 0.35), value: closeUp)
@@ -227,7 +227,7 @@ public struct CompanionView: View {
                     .frame(
                         maxWidth: .infinity,
                         maxHeight: .infinity,
-                        alignment: style == .watch ? .bottom : .topLeading
+                        alignment: style == .watch || UserDefaults.standard.string(forKey: "bubble-variant") == "d" ? .bottom : .topLeading
                     )
                     .transition(.scale(scale: 0.6, anchor: .bottomTrailing).combined(with: .opacity))
             }

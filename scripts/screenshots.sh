@@ -32,7 +32,7 @@ for pair in "$se:se" "$pro:promax"; do
   xcrun simctl install "$d" "$app"
   xcrun simctl launch "$d" "$bundle" -screenshot-mode chill
   sleep 12
-  for v in a b c; do
+  for v in d e; do
     for mode in chill work; do
       shot "$d" "$p-$v-$mode-zh" -screenshot-mode "$mode" -bubble-variant "$v" \
         -screenshot-line "拳套有点味道。不是我的问题。" -AppleLanguages "(zh-Hans)" -languages.on NO
