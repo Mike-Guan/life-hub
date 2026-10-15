@@ -306,6 +306,8 @@ public struct NeedReading: Equatable, Sendable {
     public var reasons: [String]
     /// When the need ends at the latest, `nil` when only a new signal can end it.
     public var until: Date?
+    /// Whether Mike is on the phone, from Screen Time; `false` for couch scrolling guessed from stillness.
+    public var phone = true
 
     /// True until `until`, or always when there is no end time.
     public func isActive(at date: Date) -> Bool {
@@ -340,11 +342,11 @@ public enum NeedEngine {
     public static let couchPeekAfter: TimeInterval = 30 * 60
 
     /// The need at `now`, or `nil` when there is none. A gym-day evening at home comes first, then scrolling
-    /// in work hours, then sitting too long in work hours, then couch scrolling, except on a boxing morning,
+    /// in 上班, then sitting too long in work hours, then couch scrolling, except on a boxing morning,
     /// when scrolling at home is exactly what boxing warm-up is about.
     /// - Parameters:
     ///   - days: which days are gym days.
-    ///   - work: the work days and hours, for scrolling at work.
+    ///   - work: the work days and hours, for sitting at work.
     public static func need(
         _ signals: NeedSignals,
         now: Date,
@@ -354,9 +356,7 @@ public enum NeedEngine {
         calendar: Calendar = .current
     ) -> NeedReading? {
         if let gym = gymDay(signals, now: now, rules: rules, days: days, calendar: calendar) { return gym }
-        if let slacking = slacking(signals, now: now, rules: rules, work: work, calendar: calendar) {
-            return slacking
-        }
+        if let slacking = slacking(signals, now: now, rules: rules) { return slacking }
         if let sitting = sitting(signals, now: now, rules: rules, work: work, calendar: calendar) { return sitting }
         let boxing = boxingWarmup(signals, now: now, rules: rules, calendar: calendar)
         if boxing != nil, now < time(rules.boxingFirstUntilMinute, on: now, calendar: calendar) {
@@ -545,7 +545,7 @@ public enum NeedEngine {
         guard since <= now else { return nil }
         let minutes = Int(now.timeIntervalSince(start) / 60)
         let reason = String(format: "在家 %@ 分钟没怎么动了，我也瘫着".localized(for: rules.persona), "\(minutes)")
-        return NeedReading(need: .couchScroll, since: since, reasons: [reason])
+        return NeedReading(need: .couchScroll, since: since, reasons: [reason], phone: false)
     }
 
     private static func boxingWarmup(
@@ -610,15 +610,10 @@ public enum NeedEngine {
     }
 
     // Separate Screen Time reports, limited to work hours, so they never count toward the couch.
-    private static func slacking(
-        _ signals: NeedSignals,
-        now: Date,
-        rules: NeedRules,
-        work: ModeRules,
-        calendar: Calendar
-    ) -> NeedReading? {
-        guard let reached = signals.slackThresholdAt else { return nil }
-        guard ModeEngine.scheduledMode(at: reached, rules: work, calendar: calendar) == .work else { return nil }
+    // PM 动作总表 U1 (Mike 10/15): only while the mode is 上班, so a day off or leave at home on a work day
+    // plays the current mode instead.
+    private static func slacking(_ signals: NeedSignals, now: Date, rules: NeedRules) -> NeedReading? {
+        guard let reached = signals.slackThresholdAt, signals.mode == .work else { return nil }
         let reason = "上班时间，我帮你望风".localized(for: rules.persona)
         let reading = NeedReading(need: .slacking, since: reached, reasons: [reason])
         return ongoing(reading, seen: signals.slackSeenAt, signals: signals, now: now, rules: rules)
