@@ -166,6 +166,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
   names two apps and says only this iPhone knows how long you scrolled.
+- In the wardrobe, changing an outfit, the previewed mode or the shelf fades over 0.25 s instead of cutting.
 - The small buttons in Settings (看看, 选 App, 导出) and the place editor (取消, 设为当前位置) now have the full
   44 pt tap area. The shop banner grows with longer text instead of cutting it off.
 - Opening a keepsake or going through the first-run setup no longer uses up HAKU's late-night "还不睡。" or its
