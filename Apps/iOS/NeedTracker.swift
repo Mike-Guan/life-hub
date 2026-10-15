@@ -15,7 +15,8 @@ final class NeedTracker {
     /// Today's invite text while its need lasts, `nil` when none went out for it.
     private(set) var invite: String?
     /// The celebration or off-work animation RUNNER should play, `nil` when there is none.
-    private(set) var event: CompanionEvent?
+    var event: CompanionEvent? { slot.event }
+    private var slot = EventSlot()
     /// Whether Mike sat too long or just stood up, from the last stand hours; `nil` before the first reading.
     private(set) var sit: SitState?
     /// The last Screen Time report of couch scrolling, `nil` when there was none.
@@ -135,21 +136,17 @@ final class NeedTracker {
         play(.offWork(id: date.formatted(Self.day)))
     }
 
-    // The home shows one event at a time and this one comes first, so a kept event would hide later stand-ups,
-    // revivals and finished tasks until the app restarts. RUNNER remembers what it played, so clearing is safe.
     /// Shows `event`, then clears it once its animation is over.
     private func play(_ event: CompanionEvent) {
-        self.event = event
+        slot.raise(event, at: .now)
         eventClear?.cancel()
         eventClear = Task {
-            try? await Task.sleep(for: Self.eventHold)
+            try? await Task.sleep(for: .seconds(EventSlot.hold))
             guard !Task.isCancelled else { return }
-            self.event = nil
+            slot.expire(at: .now)
         }
     }
 
-    // Longer than the longest one-off animation (the 6 s stretch), so nothing is cut short.
-    private static let eventHold = Duration.seconds(30)
     private static let celebratedKey = "celebratedWorkouts"
     // "yyyy-MM-dd" in local time, the id format of `CompanionEvent.offWork`.
     private static let day = Date.ISO8601FormatStyle(timeZone: .current).year().month().day()
