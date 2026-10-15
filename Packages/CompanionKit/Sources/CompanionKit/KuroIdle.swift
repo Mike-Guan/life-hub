@@ -301,13 +301,16 @@ enum KuroIdle: CaseIterable, Sendable {
     /// The card props each base-outfit idle puts down.
     private var putDown: Set<KuroPart> {
         switch self {
-        // In the tennis look the racket goes down instead.
-        case .reach, .towel: [.gymBlock, .tennisRacket, .watchRacket]
-        case .tuck, .frame: [.workTablet, .watchTablet, .craftPen]
-        case .collar, .phone: [.studyNotebook, .studyHighlighter, .tennisRacket, .watchRacket]
+        case .reach, .towel: Self.racket.union([.gymBlock])
+        case .tuck, .frame: Self.racket.union([.workTablet, .watchTablet, .craftPen])
+        case .collar, .phone: Self.racket.union([.studyNotebook, .studyHighlighter])
         default: []
         }
     }
+
+    // In the tennis look, worn for a card without a look of its own, the racket goes down instead.
+    /// The rackets she may hold in the tennis look.
+    private static let racket: Set<KuroPart> = [.tennisRacket, .watchRacket, .itemGoldRacket]
 
     /// How far `part` moves `t` seconds into a base-outfit idle, in SVG units (timings from the approved preview).
     private func baseShift(_ part: KuroPart, at t: Double) -> CGSize {
