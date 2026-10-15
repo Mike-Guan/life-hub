@@ -64,6 +64,19 @@ extension FrameSheets {
         scene.pose(at: 2.2)
         let carried = try #require(Self.composite(scene, scale: 2))
         cells.append(("被拎起来", carried))
+        // Dropped on the bed: he lies down on the pillow, not where the finger let go.
+        let bed = HomeGrid.scene(HomeGrid.plan(8.2, 6.2, 0.9))
+        scene.drag(to: CGPoint(x: bed.x, y: bed.y + 64))
+        scene.endDrag(at: CGPoint(x: bed.x, y: bed.y + 64))
+        scene.pose(at: 2.6)
+        let dropped = try #require(Self.composite(scene, scale: 2))
+        cells.append(("丢到床上", dropped))
+        // Off the bed and over to the desk, the short way round.
+        model.switchMode(.work)
+        scene.sync(animated: false)
+        scene.step(1.4)
+        let crossing = try #require(Self.composite(scene, scale: 2))
+        cells.append(("床 → 书桌 路上", crossing))
 
         let sheet = VStack(alignment: .leading, spacing: 12) {
             Text(verbatim: "家（原型）· Issue #485").font(.system(size: 20, weight: .bold))

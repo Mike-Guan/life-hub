@@ -158,6 +158,8 @@ final class HomeModel {
     private(set) var spot: HomeSpot = .idle
     /// Where HAKU was dropped after being carried, until he walks somewhere.
     private(set) var dropPoint: GridPoint?
+    /// Seconds until HAKU leaves a place he was sent to or dropped at and goes back to the mode's spot.
+    private(set) var visitLeft: Double?
     private(set) var energy: Double = 62
     private(set) var cans = 46
     private(set) var outfit: HomeOutfit = .jacket
@@ -207,7 +209,7 @@ final class HomeModel {
         mode = new
         timeline.append(HomeTimelineEntry(time: time, mode: new, title: title(new)))
         energy = max(5, min(100, energy + Self.energyCost(new)))
-        go(Self.spot(for: new, card: card, hasBag: items.contains(.bag)))
+        go(modeSpot)
         line = Self.modeLine(new, card: card, hasBag: items.contains(.bag))
     }
 
@@ -216,25 +218,25 @@ final class HomeModel {
         switch hotspot {
         case .haku: tapHaku(at: date)
         case .desk:
-            go(mode == .money ? .side : .work)
+            visit(mode == .money ? .side : .work)
             line = "坐一会儿。不一定干活。"
         case .sofa:
-            go(.sofa)
+            visit(.sofa)
             line = energy < 35 ? "沙发是我的。今天电量不够。" : "沙发是我的。"
         case .bed:
-            go(.rest)
+            visit(.rest)
             line = "……再五分钟。"
         case .bag:
-            go(.box)
+            visit(.box)
             line = "左、右、左。"
         case .window:
-            go(.window)
+            visit(.window)
             line = isNight ? "楼下的灯还亮着。" : "今天天气还行。"
         case .wardrobe:
-            go(.wardrobe)
+            visit(.wardrobe)
             line = "穿什么都一样帅。"
         case .shop:
-            go(.shop)
+            visit(.shop)
             line = "罐子要花在刀刃上。"
         case .shelf:
             line = "这些都是真的发生过的。"
@@ -295,14 +297,15 @@ final class HomeModel {
     /// HAKU was carried and let go over `hotspot`, or over the floor at `point`.
     func drop(on hotspot: HomeHotspot?, at point: GridPoint) {
         switch hotspot {
-        case .sofa: go(.sofa)
-        case .bed: go(.rest)
-        case .desk: go(mode == .money ? .side : .work)
-        case .bag: go(.box)
+        case .sofa: visit(.sofa)
+        case .bed: visit(.rest)
+        case .desk: visit(mode == .money ? .side : .work)
+        case .bag: visit(.box)
         default:
-            let inside = GridPoint(x: min(max(point.x, 2.4), 6.2), y: min(max(point.y, 3.2), 9.4))
-            dropPoint = inside
+            // Dropped on something HAKU can't stand on: he lands on the nearest open floor.
+            dropPoint = HomeNav.room(items: items).nearestOpen(to: point)
             spot = .idle
+            visitLeft = Self.landingPause
             cues.append(.bounce)
         }
         line = "……放我下来就行。"
@@ -317,6 +320,14 @@ final class HomeModel {
 
     /// Advances resting: energy climbs slowly while HAKU lies in bed.
     func tick(_ seconds: Double) {
+        if let left = visitLeft {
+            if left > seconds {
+                visitLeft = left - seconds
+            } else {
+                go(modeSpot)
+                changed()
+            }
+        }
         guard spot == .rest, energy < 100 else { return }
         let before = Int(energy)
         energy = min(100, energy + seconds * 0.8)
@@ -345,10 +356,27 @@ final class HomeModel {
         cues.append(.bounce)
     }
 
+    // PM 家 功能范围 v0: tapping furniture or dropping HAKU somewhere is a short visit, not a mode change.
+    private func visit(_ next: HomeSpot) {
+        go(next)
+        if next != modeSpot { visitLeft = Self.visitLength }
+    }
+
     private func go(_ next: HomeSpot) {
         dropPoint = nil
+        visitLeft = nil
         spot = next
     }
+
+    /// Where the current mode puts HAKU.
+    var modeSpot: HomeSpot {
+        Self.spot(for: mode, card: card, hasBag: items.contains(.bag))
+    }
+
+    /// How long a visit lasts, in seconds.
+    static let visitLength = 30.0
+    /// How long HAKU stands where he was dropped before walking back.
+    static let landingPause = 1.5
 
     private func changed() {
         revision += 1

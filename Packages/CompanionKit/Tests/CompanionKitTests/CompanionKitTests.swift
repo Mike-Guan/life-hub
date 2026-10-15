@@ -1120,8 +1120,7 @@ import Testing
     }
 
     @Test(arguments: [
-        (CompanionActivity.boxingAtGym, RunnerPart.heavyBag),
-        (.gymSession, .dumbbell),
+        (CompanionActivity.gymSession, RunnerPart.dumbbell),
         (.running, .speedLines),
         (.gymDay, .gymBag),
         (.runDay, .runShoe),
@@ -1134,9 +1133,11 @@ import Testing
         #expect(CompanionLines.accessibilityLabel(mode: .chill, need: nil, activity: activity, bedtime: .off) != "HAKU")
     }
 
+    // Mike 2026-10-15: no items in a mode's backdrop, so the gym shows the gloves and no heavy bag.
     @Test func heavyBagWorkWearsTheGloves() {
         let parts = Set(RunnerFigure.parts(for: .boxing, pose: RunnerPose(activity: .boxingAtGym)))
-        #expect(parts.isSuperset(of: [.gloveL, .gloveR, .headband, .heavyBag]))
+        #expect(parts.isSuperset(of: [.gloveL, .gloveR, .headband]))
+        #expect(!parts.contains(.heavyBag) && !parts.contains(.monsterCan))
     }
 
     @Test func bedtimeHidesTheActivity() {

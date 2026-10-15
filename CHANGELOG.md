@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- In the home prototype HAKU walks the shortest way around the furniture instead of back through the middle of
+  the rug, steps on and off seats from the side, and lands on open floor when dropped on something he can't use.
 - The home page has a saved room per character: a furniture catalog and a layout that keeps what a newer
   build wrote. The wardrobe's room item moves into the room once. Nothing on screen uses it yet (Issue #489).
 - HAKU makes small moves in each card look's base outfit now and then. In sport it stretches an arm across
@@ -80,6 +82,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   line, a planned task, bath time and the stretch. A mode change no longer clears it. A tap during a one-off
   animation only makes HAKU blink. At bedtime a tap gets a sleepy mumble instead of switching the side-hustle
   state, and a shake makes HAKU roll over half asleep.
+- The watch face says 还没有模式 when the iPhone has sent but no mode is set, instead of asking to open the
+  iPhone.
 - On the watch app and the watch face, both characters wear the look of the identity card picked on the iPhone,
   instead of the default boxing or tennis look. On cards without a look of their own, the second preset character
   also does that card's base idles on the watch.
@@ -259,6 +263,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
 - With no mode yet, the watch tells you to pick one on the iPhone, in smaller type, instead of the iPhone's line.
+- The room bag from the shop is bigger, standing in the bottom left corner. A mode's own backdrop now holds no
+  items: no heavy bag at the boxing gym, no gym bag on the floor for the fitness card, no speaker for the dance
+  card and no ukulele for the music card. The dance idle keeps its shrug without the notes.
 - With VoiceOver, the confirmation sheets keep focus inside and the escape gesture cancels.
 - HAKU's room no longer stacks two things in one spot: the glowing monitor is smaller and stands clear of
   HAKU's ear, and steps aside for the pillow and the headphones; the room item and the running shoes step
@@ -736,6 +743,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   TestFlight release workflow for STG and PROD.
 - With the rain or picnic set's hat on, the second preset character's full-energy stars sit above the brim
   instead of on it.
+- Tapping the second preset character at bedtime gets a sleepy mumble instead of a daytime line, and no
+  longer switches the side-hustle card.
 - The second preset character has the art for her new pose, dozing off hugging her tablet. It stays hidden
   until it is wired to dozing.
 - When the second preset character is tapped in the middle of an idle move, what she put down slides back over
