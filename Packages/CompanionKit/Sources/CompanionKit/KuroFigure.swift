@@ -199,7 +199,8 @@ struct KuroPose: Sendable {
 struct KuroFigure: View {
     let look: KuroLook
     let pose: KuroPose
-    /// Leaves off what stands on the floor, which the watch's bottom edge cuts.
+    /// Holds her props higher and leaves off what sits on the floor or her lap, so the watch's bottom edge cuts
+    /// nothing.
     var watch = false
 
     var body: some View {
@@ -219,7 +220,8 @@ struct KuroFigure: View {
         .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
     }
 
-    /// Visible parts in back-to-front order; `watch` leaves off what stands on the floor.
+    /// Visible parts in back-to-front order; `watch` swaps her low props for the raised watch ones and leaves off
+    /// what sits on the floor or her lap.
     nonisolated static func parts(for look: KuroLook, pose: KuroPose, watch: Bool = false) -> [KuroPart] {
         var visible: Set<KuroPart> = [.hairBack, .earL, .earR, .faceBase, .hairFringe, .catEars]
         visible.formUnion(outfit(look))
@@ -267,8 +269,7 @@ struct KuroFigure: View {
         if let clothes = worn.lazy.compactMap(\.clothes).first {
             dress(look, in: clothes, back: pose.tap == .turnAway, &visible)
         }
-        // UI 审核 2026-10-14 (位置规划图 §12): the watch draws nothing on the floor.
-        if watch { visible.subtract([.danceSpeaker, .weeklyRoomSucculent, .weeklyBlanketBear, .weeklyRoomCloud]) }
+        if watch { raise(&visible) }
         return KuroPart.allCases.filter { visible.contains($0) }
     }
 
@@ -334,6 +335,25 @@ struct KuroFigure: View {
         if part == .weeklyRoomNightlightGlow { return pose.glow }
         guard pose.tap == nil, let idle = pose.idle else { return 1 }
         return idle.opacity(part, progress: pose.idleProgress)
+    }
+
+    // UI 审核 2026-10-14 (direction 2): the watch crop cuts her low props, so on the watch she holds each one
+    // higher instead of the face getting smaller. The pen, stylus and badge have no room there and stay off.
+    // UI 审核 2026-10-14 (位置规划图 §12): the watch draws nothing on the floor or on her lap; its bottom edge
+    // leaves only a scrap of them.
+    /// Swaps each low prop in `visible` for its raised watch version and hides what sits on the floor or her lap.
+    nonisolated private static func raise(_ visible: inout Set<KuroPart>) {
+        let raised: [KuroPart: KuroPart] = [
+            .tennisRacket: .watchRacket, .deskBooks: .watchBooks, .chillCup: .watchCup, .workTablet: .watchTablet,
+        ]
+        for (low, high) in raised where visible.contains(low) {
+            visible.remove(low)
+            visible.insert(high)
+        }
+        visible.subtract([
+            .deskPen, .workStylus, .workBadge, .itemFlower, .itemLamp, .itemBlanket, .danceSpeaker,
+            .weeklyRoomSucculent, .weeklyBlanketBear, .weeklyRoomCloud,
+        ])
     }
 
     /// The parts only `look` wears.
