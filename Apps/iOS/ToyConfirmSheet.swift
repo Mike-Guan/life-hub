@@ -24,6 +24,7 @@ struct ToyConfirmSheet: View {
             Toy.ink.opacity(0.25)
                 .ignoresSafeArea()
                 .onTapGesture(perform: onCancel)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 12) {
                 Text(question.localized)
                     .font(Toy.body(17, weight: .heavy))
@@ -40,6 +41,10 @@ struct ToyConfirmSheet: View {
             .padding(18)
             .toyCard(radius: 22, shadow: 5)
             .padding(12)
+            // 交付差距 v1 工程 #16: VoiceOver stays inside the sheet, and the two-finger scrub cancels.
+            .accessibilityElement(children: .contain)
+            .accessibilityAddTraits(.isModal)
+            .accessibilityAction(.escape, onCancel)
         }
     }
 

@@ -8,6 +8,8 @@ import SwiftUI
 /// What the companion remembers: learned habits, long-term memories and her judgements.
 struct MemoryView: View {
     let persona: Persona
+    /// The user's cards, for the identity card's name.
+    let cards: ModeCards
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
@@ -146,18 +148,27 @@ struct MemoryView: View {
             } label: {
                 Text("删掉所有记忆")
                     .font(Toy.body(15, weight: .heavy))
-                    .foregroundStyle(Toy.alert)
+                    .foregroundStyle(hasMemories ? Toy.alert : Toy.muted)
                     .frame(maxWidth: .infinity, minHeight: 48)
             }
             .buttonStyle(ToyButtonStyle(fill: Toy.card))
+            .disabled(!hasMemories)
             note("能量罐、商店物品、衣柜和纪念品不算记忆，留着。要一起清，用设置里的「删除全部数据」。")
         }
         .padding(20)
     }
 
+    // 交付差距 v1 工程 #15: with nothing left to forget, the button would only ask about nothing.
+    private var hasMemories: Bool {
+        !habits.isEmpty || !longTerm.isEmpty || !decisions.kept.isEmpty
+            || store.log.changes.contains { $0.deletedAt == nil }
+            || energy.log.events.contains { $0.deletedAt == nil }
+    }
+
     private var habits: [LearnedHabit] {
         Memory.habits(
             persona: persona,
+            cards: cards,
             days: ActivityDays.stored(in: AppGroup.defaults),
             ledger: ledger,
             resets: resets,
@@ -166,7 +177,14 @@ struct MemoryView: View {
     }
 
     private var longTerm: [LongMemory] {
-        Memory.longTerm(persona: persona, changes: store.log.changes, ledger: ledger, places: places, resets: resets)
+        Memory.longTerm(
+            persona: persona,
+            cards: cards,
+            changes: store.log.changes,
+            ledger: ledger,
+            places: places,
+            resets: resets
+        )
     }
 
     private var judgements: String {
@@ -213,7 +231,7 @@ struct MemoryView: View {
         Button(action: action) {
             Text(title)
                 .font(Toy.body(13, weight: .heavy))
-                .foregroundStyle(Toy.alert)
+                .foregroundStyle(Toy.alertText)
                 .padding(.horizontal, 12)
                 .frame(minHeight: 36)
                 .toyCard(radius: 12, shadow: 3)

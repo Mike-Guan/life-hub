@@ -27,6 +27,40 @@
         }
       }
     },
+    "HAKU 会留在家里，他的罐子和东西都在。KURO 用她自己的罐子，第一次从零开始。随时可以换回来。" : {
+      "comment" : "设置：换角色前的确认",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAKU stays home with his cans and things. KURO uses her own cans, starting from zero the first time. You can switch back anytime."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAKUは家に残ります。缶も持ち物もそのまま。KUROは自分の缶を使い、最初はゼロから。いつでも戻せます。"
+          }
+        }
+      }
+    },
+    "KURO 会留在家里，她的罐子和东西都在。HAKU 用他自己的罐子，第一次从零开始。随时可以换回来。" : {
+      "comment" : "设置：换角色前的确认",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO stays home with her cans and things. HAKU uses his own cans, starting from zero the first time. You can switch back anytime."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KUROは家に残ります。缶も持ち物もそのまま。HAKUは自分の缶を使い、最初はゼロから。いつでも戻せます。"
+          }
+        }
+      }
+    },
     "Screen Time 监测没停：%@" : {
       "localizations" : {
         "en" : {
@@ -54,6 +88,49 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…just looking. no rush."
+          }
+        }
+      }
+    },
+    "「健身」从下班里拿出来，放进这张卡了。一件事只放一张卡。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Gym” moved from Chill to this card. Each thing lives on one card only."
+          }
+        }
+      }
+    },
+    "一天最多找你一次。早上不吵你。" : {
+      "comment" : "onboarding",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once a day, max. No noise in the mornings."
+          }
+        }
+      }
+    },
+    "一天最多跟你说一次话，早上不打扰。" : {
+      "comment" : "onboarding，正常大小写",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I'll talk to you once a day at most. Never in the mornings."
+          }
+        }
+      }
+    },
+    "上一步" : {
+      "comment" : "按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
           }
         }
       }
@@ -100,6 +177,16 @@
         }
       }
     },
+    "下班前 15 分钟提醒一次，只在你上班的日子。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One reminder 15 minutes before work ends, only on days you work."
+          }
+        }
+      }
+    },
     "不切换" : {
       "localizations" : {
         "en" : {
@@ -120,6 +207,58 @@
         }
       }
     },
+    "不固定的话，上班只靠到了上班的地方来切，也不发下班提醒。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If it varies, Work only switches on when you get to your workplace, and there's no end-of-work reminder."
+          }
+        }
+      }
+    },
+    "不对" : {
+      "comment" : "和后面的“？”拼成 Not right?",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not right"
+          }
+        }
+      }
+    },
+    "不对？" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not right?"
+          }
+        }
+      }
+    },
+    "之后都能在设置里改。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can change all of it later in Settings."
+          }
+        }
+      }
+    },
+    "人在哪儿就点哪儿。没有地图，位置只存在这台手机上。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a place while you're there. No map. Locations stay on this phone."
+          }
+        }
+      }
+    },
     "人生收藏" : {
       "localizations" : {
         "en" : {
@@ -136,6 +275,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stand at the place and tap “Use current location.” The radius is how far counts as arriving and leaving. Stays on this iPhone."
+          }
+        }
+      }
+    },
+    "今天没有睡眠数据" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No sleep data today"
           }
         }
       }
@@ -166,6 +315,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Noted from your records. View only."
+          }
+        }
+      }
+    },
+    "以后可以换，各自的东西分开存。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can switch later. Each keeps their own stuff."
           }
         }
       }
@@ -248,6 +407,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "To wardrobe"
+          }
+        }
+      }
+    },
+    "先用默认的？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use the defaults?"
+          }
+        }
+      }
+    },
+    "先选一个" : {
+      "comment" : "按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick one"
           }
         }
       }
@@ -374,6 +554,38 @@
         }
       }
     },
+    "到" : {
+      "comment" : "两个时间选择器中间",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "to"
+          }
+        }
+      }
+    },
+    "到了、犯困、加班，它看得出来，不用勾。" : {
+      "comment" : "不写 they 指角色",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arriving, getting drowsy, working late: those get picked up on their own. No need to check them."
+          }
+        }
+      }
+    },
+    "到了再说。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When I get there."
+          }
+        }
+      }
+    },
     "到你定的睡觉时间了" : {
       "comment" : "中文改为“到你定的睡觉时间了”，只说事实",
       "localizations" : {
@@ -426,12 +638,42 @@
         }
       }
     },
+    "副业的地方 · 可选" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where you do projects · optional"
+          }
+        }
+      }
+    },
+    "勾常做的，不勾也行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check what you usually do. Or don't."
+          }
+        }
+      }
+    },
     "包括你说过「不对」的记录。删了不能恢复。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Includes the times you said “Not right.” This can't be undone."
+          }
+        }
+      }
+    },
+    "卡名会显示在锁屏、小组件和手表上。最多 4 个汉字或 8 个字母。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card names show on the Lock Screen, widgets and watch. Up to 8 letters."
           }
         }
       }
@@ -443,6 +685,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Going to the gym"
+          }
+        }
+      }
+    },
+    "去设置" : {
+      "comment" : "按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "去设置打开" : {
+      "comment" : "按钮 ≤16",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
           }
         }
       }
@@ -467,6 +731,46 @@
         }
       }
     },
+    "只在手机上分辨走路 / 坐车，不上传。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only tells walking from riding, on the phone. Nothing is uploaded."
+          }
+        }
+      }
+    },
+    "只在打开 App 时认得出。要自动换，去设置改成「始终」。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This only works while the app is open. To switch automatically, change it to “Always” in Settings."
+          }
+        }
+      }
+    },
+    "只用来定提醒，不记你几点睡着。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only used to time the reminder. It doesn't log when you fall asleep."
+          }
+        }
+      }
+    },
+    "只读睡眠和运动记录，不上传。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only reads sleep and workouts. Nothing is uploaded."
+          }
+        }
+      }
+    },
     "名字" : {
       "localizations" : {
         "en" : {
@@ -487,6 +791,59 @@
         }
       }
     },
+    "嘴硬的室友，其实什么都记得" : {
+      "comment" : "角色卡下的一句",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The deadpan roommate who remembers everything"
+          }
+        }
+      }
+    },
+    "回去说说" : {
+      "comment" : "按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go back"
+          }
+        }
+      }
+    },
+    "回家 · 从上班的地方离开 · 手动" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Come home · leave work · manual"
+          }
+        }
+      }
+    },
+    "图书馆" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Library"
+          }
+        }
+      }
+    },
+    "在家休息" : {
+      "comment" : "UI 二组实测：选项一行 ≤12 字母（SE 93pt）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staying in"
+          }
+        }
+      }
+    },
     "地点" : {
       "comment" : "同一中文要两种译法（见上一行），请工程把中文改得稍有不同",
       "localizations" : {
@@ -494,6 +851,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Places"
+          }
+        }
+      }
+    },
+    "地点 · 手表" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Place · watch"
           }
         }
       }
@@ -560,6 +927,17 @@
         }
       }
     },
+    "安静，会在旁边陪着" : {
+      "comment" : "角色卡下的一句",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quiet. Stays close."
+          }
+        }
+      }
+    },
     "完成" : {
       "localizations" : {
         "en" : {
@@ -600,6 +978,17 @@
         }
       }
     },
+    "就它了" : {
+      "comment" : "按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This one"
+          }
+        }
+      }
+    },
     "已拥有" : {
       "localizations" : {
         "en" : {
@@ -626,6 +1015,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Set"
+          }
+        }
+      }
+    },
+    "常去哪儿？" : {
+      "comment" : "onboarding",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where do you hang out?"
+          }
+        }
+      }
+    },
+    "常去哪里？" : {
+      "comment" : "onboarding，正常大小写",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where do you usually go?"
           }
         }
       }
@@ -693,12 +1104,64 @@
         }
       }
     },
+    "戴着手表做的运动它会自己知道。" : {
+      "comment" : "不写 they 指角色",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workouts you do with your watch on get noticed on their own."
+          }
+        }
+      }
+    },
     "房间" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Room"
+          }
+        }
+      }
+    },
+    "房间里一次摆一件。拿到的东西永远在这，不会丢。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One thing in the room at a time. What you get stays here for good."
+          }
+        }
+      }
+    },
+    "手动 · 地点可选" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual · place optional"
+          }
+        }
+      }
+    },
+    "手表" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch"
+          }
+        }
+      }
+    },
+    "打开后跟手机的系统语言走；还没翻译的地方仍是中文。关着时一律中文。只在开发版里有。" : {
+      "comment" : "开发版设置",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When on, the app follows your phone's language. Anything not translated yet stays in Chinese. When off, everything is in Chinese. Dev builds only."
           }
         }
       }
@@ -763,6 +1226,28 @@
         }
       }
     },
+    "日文和英文" : {
+      "comment" : "开发版设置",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Japanese and English"
+          }
+        }
+      }
+    },
+    "日文字体没装上，日文会用系统字体：%@" : {
+      "comment" : "列表请用 ListFormatter，不用“、”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Japanese font didn't install, so Japanese text uses the system font: %@"
+          }
+        }
+      }
+    },
     "昨天" : {
       "localizations" : {
         "en" : {
@@ -789,6 +1274,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Late evenings"
+          }
+        }
+      }
+    },
+    "有了位置权限才能设。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs location access first."
+          }
+        }
+      }
+    },
+    "有没有一件事，做的时候觉得「这就是我」？没有也行。" : {
+      "comment" : "onboarding；代码用「」，和第 1 批 ‘’ 那条是不同的 key",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got a thing that feels like “yeah, that's me”? None is fine too."
+          }
+        }
+      }
+    },
+    "本周" : {
+      "comment" : "商店角标；不写 limited",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This week"
           }
         }
       }
@@ -829,6 +1346,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Motion & Fitness is off, so on the commute HAKU can only walk. You can turn it on in Settings > Privacy & Security."
+          }
+        }
+      }
+    },
+    "没有位置权限，到了地方不会自动换。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without location access, nothing switches when you arrive."
           }
         }
       }
@@ -904,6 +1431,48 @@
         }
       }
     },
+    "球场" : {
+      "comment" : "网球卡的地方",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Court"
+          }
+        }
+      }
+    },
+    "用了多久只有这台 iPhone 知道，我们看不到。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only this iPhone knows how long you used them. We can't see it."
+          }
+        }
+      }
+    },
+    "用默认" : {
+      "comment" : "按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use defaults"
+          }
+        }
+      }
+    },
+    "画室" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Studio"
+          }
+        }
+      }
+    },
     "看上哪个了？……我只是随便问问。" : {
       "comment" : "HAKU",
       "localizations" : {
@@ -971,6 +1540,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wearing"
+          }
+        }
+      }
+    },
+    "第一次到一个新地方时，也可以在首页点一下「设为……」。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At a new place for the first time? You can also tap “Set as…” on the home screen."
           }
         }
       }
@@ -1107,6 +1686,17 @@
         }
       }
     },
+    "规律、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。" : {
+      "comment" : "中文已改“规律”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Routines, long-term memories, daily records and decisions are all deleted. Every character will meet you like it's the first time."
+          }
+        }
+      }
+    },
     "规律、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。能量罐、商店物品、衣柜和纪念品不算记忆，留着。删了不能恢复。" : {
       "comment" : "记忆页：删掉所有记忆前的确认说明",
       "localizations" : {
@@ -1168,6 +1758,17 @@
         }
       }
     },
+    "设好了" : {
+      "comment" : "按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set"
+          }
+        }
+      }
+    },
     "设置" : {
       "localizations" : {
         "en" : {
@@ -1184,6 +1785,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Can't read the Daily folder: %@"
+          }
+        }
+      }
+    },
+    "读不到健康 App 里的日照、睡眠或步数：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't read daylight, sleep or steps from the Health app: %@"
           }
         }
       }
@@ -1236,6 +1847,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Go"
+          }
+        }
+      }
+    },
+    "走了不少路" : {
+      "comment" : "得罐理由，和 Sunlight / Sleeping on time 并列",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lots of walking"
           }
         }
       }
@@ -1321,6 +1943,26 @@
         }
       }
     },
+    "这张卡本身就是活动。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This card is the activity."
+          }
+        }
+      }
+    },
+    "进了副业以后，点它就能换成另一件。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Projects, tap the outfit to switch to another one."
+          }
+        }
+      }
+    },
     "选 App" : {
       "localizations" : {
         "en" : {
@@ -1331,12 +1973,54 @@
         }
       }
     },
+    "选「始终允许」，它才能在你没打开 App 时也跟着换。位置只留在这台手机里。" : {
+      "comment" : "审核第 2 批",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose “Always Allow” so your mode can switch even when the app is closed. Your location stays on this phone."
+          }
+        }
+      }
+    },
+    "选一张，或者「现在没有」。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick one, or “Not right now.”"
+          }
+        }
+      }
+    },
     "通知被关掉了，睡觉提醒发不出来。可以在系统设置里打开。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notifications are off, so the bedtime reminder can't go out. You can turn them on in Settings."
+          }
+        }
+      }
+    },
+    "道具只在这张卡的模式里拿着。拿到的东西永远在这，不会丢。" : {
+      "comment" : "审核：和衣柜分类 Gear 一致",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gear only shows in this card's mode. What you get stays here for good."
+          }
+        }
+      }
+    },
+    "配饰每个模式都戴。拿到的东西永远在这，不会丢。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessories are worn in every mode. What you get stays here for good."
           }
         }
       }
@@ -1381,6 +2065,17 @@
         }
       }
     },
+    "默认，不能取消" : {
+      "comment" : "审核第 2 批",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Always on"
+          }
+        }
+      }
+    },
     "，" : {
       "comment" : "分隔符",
       "localizations" : {
@@ -1388,6 +2083,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ","
+          }
+        }
+      }
+    },
+    "？" : {
+      "comment" : "半角问号",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "?"
           }
         }
       }
