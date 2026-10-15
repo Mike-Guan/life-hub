@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- In the home prototype HAKU walks the shortest way around the furniture instead of back through the middle of
+  the rug, steps on and off seats from the side, and lands on open floor when dropped on something he can't use.
 - The home page has a saved room per character: a furniture catalog and a layout that keeps what a newer
   build wrote. The wardrobe's room item moves into the room once. Nothing on screen uses it yet (Issue #489).
 - HAKU makes small moves in each card look's base outfit now and then. In sport it stretches an arm across
