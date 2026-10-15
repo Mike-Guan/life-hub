@@ -24,7 +24,7 @@ struct ShopPreviewSheet: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text(item.title)
                     .font(Toy.body(17, weight: .heavy))
-                PersonaPortrait(persona: persona, mode: shownMode, card: card, wardrobe: wearing)
+                figure
                     .frame(maxWidth: .infinity)
                     .frame(height: 260)
                     .toyCard(fill: item.slot.tileColor(for: persona), radius: 16, shadow: 0)
@@ -56,6 +56,19 @@ struct ShopPreviewSheet: View {
         }
     }
 
+    // UI 审核 (#476): in the app the character always moves, so the preview breathes and blinks like the unboxing.
+    @ViewBuilder private var figure: some View {
+        if persona == .kuro {
+            KuroView(
+                look: KuroLook(mode: shownMode, card: card),
+                wearing: wearing.worn(in: shownMode),
+                showsBubble: false
+            )
+        } else {
+            CompanionView(mode: shownMode, card: card, wardrobe: wearing, showsBubble: false, notices: false)
+        }
+    }
+
     private var cards: ModeCards { ModeCards.current(in: AppGroup.defaults, persona: persona) }
     private var card: IdentityKind? { cards.identity }
 
@@ -67,7 +80,16 @@ struct ShopPreviewSheet: View {
             return item.shows(in: mode, card: card)
         }
         guard !modes.isEmpty, modes.count < Mode.allCases.count else { return nil }
-        let names = modes.map { "「\(cards.title(for: $0, persona: persona))」" }.joined(separator: "")
+        // UI 审核 (#476): 「」 are Chinese and Japanese quotes; English lists the names with "and".
+        let titles = modes.map { cards.title(for: $0, persona: persona) }
+        let names: String
+        if Languages.locale.language.languageCode == .english {
+            let list = ListFormatter()
+            list.locale = Languages.locale
+            names = list.string(from: titles.map { "“\($0)”" }) ?? titles.joined(separator: ", ")
+        } else {
+            names = titles.map { "「\($0)」" }.joined()
+        }
         return String(format: "只在 %@ 出现".localized, names)
     }
 
