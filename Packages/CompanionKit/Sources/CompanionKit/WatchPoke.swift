@@ -144,7 +144,7 @@ extension RunnerFigure {
     }
 
     nonisolated private static let glareHides: Set<RunnerPart> = [
-        .eyesChill, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint, .browsBox, .mouthSmile,
-        .eyesBright, .lidsBright,
+        .eyesChill, .eyesChillTired, .eyebagsChill, .cateyeL, .cateyeR, .eyesMoney, .eyesSleepy, .eyeGlint, .browsBox,
+        .mouthSmile, .eyesBright, .lidsBright,
     ]
 }
