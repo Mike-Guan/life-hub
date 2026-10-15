@@ -90,12 +90,20 @@ enum HomeProduct: Hashable, Sendable {
     case outfit(HomeOutfit)
 
     static let all: [HomeProduct] = [
-        .item(.plant), .item(.bag), .item(.cactus), .item(.speaker), .outfit(.flame), .outfit(.varsity),
+        .item(.plant), .item(.bag), .item(.cactus), .item(.speaker), .item(.bench), .item(.snowboard),
+        .outfit(.flame), .outfit(.varsity),
     ]
 
-    /// What the shop offers with `card` as the identity card: the bag is a boxing card item.
+    /// What the shop offers with `card` as the identity card: the bag is a boxing card item, the snowboard a ski
+    /// card item.
     static func offered(card: IdentityKind) -> [HomeProduct] {
-        all.filter { $0 != .item(.bag) || card == .boxing }
+        all.filter { product in
+            switch product {
+            case .item(.bag): card == .boxing
+            case .item(.snowboard): card == .ski
+            default: true
+            }
+        }
     }
 
     var name: String {
@@ -104,6 +112,10 @@ enum HomeProduct: Hashable, Sendable {
         case .item(.bag): "小沙袋"
         case .item(.cactus): "小仙人掌"
         case .item(.speaker): "迷你音箱"
+        case .item(.gloves): "墙上的拳套"
+        case .item(.racket): "网球拍"
+        case .item(.snowboard): "滑雪板"
+        case .item(.bench): "卧推架"
         case .outfit(let o): o.name
         }
     }
@@ -114,6 +126,10 @@ enum HomeProduct: Hashable, Sendable {
         case .item(.bag): 15
         case .item(.cactus): 15
         case .item(.speaker): 20
+        case .item(.bench): 25
+        case .item(.snowboard): 20
+        // The gear on the wall is what the user already owns, hung up while not worn; it is never sold.
+        case .item(.gloves), .item(.racket): 0
         case .outfit(let o): o.price ?? 0
         }
     }
@@ -122,9 +138,12 @@ enum HomeProduct: Hashable, Sendable {
     var place: String {
         switch self {
         case .item(.plant): "门口角落"
-        case .item(.bag): "窗边，拳击日打它"
+        case .item(.bag): "运动角，拳击日打它"
         case .item(.cactus): "书桌上"
         case .item(.speaker): "沙发旁边，下班时放歌"
+        case .item(.gloves), .item(.racket): "运动角的墙上"
+        case .item(.snowboard): "靠在运动角的墙上"
+        case .item(.bench): "运动角，健身日他会用"
         case .outfit: "衣柜里，随时能换"
         }
     }
@@ -164,7 +183,11 @@ final class HomeModel {
     private(set) var cans = 46
     private(set) var outfit: HomeOutfit = .jacket
     private(set) var ownedOutfits: Set<HomeOutfit> = [.jacket, .blazer, .aloha]
-    private(set) var items: Set<HomeItem> = []
+    /// The items standing in the room: the bought ones, or all of them while previewing.
+    var items: Set<HomeItem> { previewsAllItems ? Set(HomeItem.allCases) : bought }
+    private(set) var bought: Set<HomeItem> = []
+    /// Whether the room shows every item, bought or not, to see where each one goes.
+    private(set) var previewsAllItems = false
     private(set) var colors: [HomePaintable: Int] = [:]
     var isNight: Bool
     /// What HAKU says on the card.
@@ -253,7 +276,7 @@ final class HomeModel {
         cans -= product.price
         switch product {
         case .item(let item):
-            items.insert(item)
+            bought.insert(item)
             cues.append(.placed(item))
             line = "……行吧，放这儿挺好。"
         case .outfit(let o):
@@ -267,7 +290,7 @@ final class HomeModel {
     /// Whether `product` is already bought.
     func owns(_ product: HomeProduct) -> Bool {
         switch product {
-        case .item(let item): items.contains(item)
+        case .item(let item): bought.contains(item)
         case .outfit(let o): ownedOutfits.contains(o)
         }
     }
@@ -285,6 +308,12 @@ final class HomeModel {
     func paint(_ piece: HomePaintable, _ index: Int) {
         guard piece.swatches.indices.contains(index) else { return }
         colors[piece] = index
+        changed()
+    }
+
+    /// Shows or hides every item, bought or not.
+    func togglePreviewItems() {
+        previewsAllItems.toggle()
         changed()
     }
 
