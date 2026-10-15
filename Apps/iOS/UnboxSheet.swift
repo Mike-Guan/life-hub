@@ -34,7 +34,7 @@ struct UnboxSheet: View {
 
     // The item arrived just now, so her look now is that day's look.
     private var shareCard: ShareCard? {
-        ShareCard(persona: persona, look: Look(mode: nil, wardrobe: wardrobe, card: .picked(for: persona)), item: item)
+        ShareCard(persona: persona, look: Look(mode: nil, wardrobe: wardrobe, card: card), item: item)
     }
 
     private var content: some View {
