@@ -54,8 +54,7 @@ struct UnboxSheet: View {
                     )
                 } else {
                     CompanionView(
-                        mode: stageMode,
-                        card: card,
+                        mode: item.mode ?? item.slot.showcaseMode,
                         event: .unlock(id: entry.id.uuidString, item: item.id),
                         wardrobe: wearing,
                         showsBubble: true,
@@ -95,16 +94,6 @@ struct UnboxSheet: View {
     // Grows with the text size, so large type still leaves both buttons on the first screen.
     /// Height of everything on the sheet but the stage.
     @ScaledMetric(relativeTo: .body) private var chrome: CGFloat = 360
-
-    // A card's own item shows with that card; anything else with the card the user picked.
-    private var card: IdentityKind? { item.card ?? IdentityKind.picked(for: persona) }
-
-    // The identity card slot without a card would show the character's old default card, so its items show
-    // off work instead.
-    private var stageMode: Mode {
-        let mode = item.mode ?? item.slot.showcaseMode
-        return mode == .boxing && card == nil ? .chill : mode
-    }
 
     private var wearing: Wardrobe {
         var copy = wardrobe
