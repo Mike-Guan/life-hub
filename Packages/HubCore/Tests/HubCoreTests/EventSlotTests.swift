@@ -9,13 +9,16 @@ import Testing
     @Test func anEventStaysForItsHoldThenClears() {
         var slot = EventSlot()
         slot.raise(.offWork(id: "2026-10-15"), at: start)
-        #expect(!slot.expire(at: start.addingTimeInterval(EventSlot.hold - 1)))
+        var cleared = slot.expire(at: start.addingTimeInterval(EventSlot.hold - 1))
+        #expect(!cleared)
         #expect(slot.event == .offWork(id: "2026-10-15"))
-        #expect(slot.expire(at: start.addingTimeInterval(EventSlot.hold)))
+        cleared = slot.expire(at: start.addingTimeInterval(EventSlot.hold))
+        #expect(cleared)
         #expect(slot.event == nil)
         #expect(slot.raisedAt == nil)
         // An empty slot has nothing to clear.
-        #expect(!slot.expire(at: start.addingTimeInterval(EventSlot.hold * 2)))
+        cleared = slot.expire(at: start.addingTimeInterval(EventSlot.hold * 2))
+        #expect(!cleared)
     }
 
     @Test func aNewEventStartsItsOwnHold() {
@@ -24,9 +27,11 @@ import Testing
         let later = start.addingTimeInterval(20)
         slot.raise(.celebrate(id: "run", kind: .running), at: later)
         // The first event's hold is over, but the second one's isn't.
-        #expect(!slot.expire(at: start.addingTimeInterval(EventSlot.hold)))
+        var cleared = slot.expire(at: start.addingTimeInterval(EventSlot.hold))
+        #expect(!cleared)
         #expect(slot.event == .celebrate(id: "run", kind: .running))
-        #expect(slot.expire(at: later.addingTimeInterval(EventSlot.hold)))
+        cleared = slot.expire(at: later.addingTimeInterval(EventSlot.hold))
+        #expect(cleared)
     }
 
     @Test func holdOutlastsTheLongestOneOffAnimation() {
