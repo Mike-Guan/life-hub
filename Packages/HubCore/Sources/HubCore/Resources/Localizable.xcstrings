@@ -328,6 +328,12 @@
     },
     "云朵靠垫" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloud cushion"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -536,6 +542,12 @@
     },
     "像素开衫" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pixel cardigan"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -758,7 +770,14 @@
       }
     },
     "刺绣夹克" : {
+      "comment" : "souvenir jacket 的意思；格子里放得下就用 Souvenir jacket",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Embroidered jacket"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -802,6 +821,12 @@
     },
     "原宿雨衣" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Harajuku raincoat"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1021,6 +1046,12 @@
     },
     "圆领毛衣" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crewneck sweater"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1097,6 +1128,12 @@
     },
     "多肉盆栽" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Succulent"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1138,7 +1175,14 @@
       }
     },
     "学院西装" : {
+      "comment" : "id 以 #329 为准；名字按中文对",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prep-school blazer"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1165,6 +1209,12 @@
     },
     "小仙人掌" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiny cactus"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1175,6 +1225,12 @@
     },
     "小夜灯" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Night-light"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1185,6 +1241,12 @@
     },
     "小熊毯" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teddy blanket"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1210,7 +1272,14 @@
       }
     },
     "工装背带" : {
+      "comment" : "名字是占位",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work overalls"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1221,6 +1290,12 @@
     },
     "帆布围裙" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canvas apron"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1279,6 +1354,12 @@
     },
     "开衫" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cardigan"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1616,6 +1697,12 @@
     },
     "星星发圈" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Star scrunchie"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1626,6 +1713,12 @@
     },
     "星星胸章" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Star pin"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1754,6 +1847,12 @@
     },
     "格子罩衫" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plaid smock"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1780,6 +1879,12 @@
     },
     "樱桃发夹" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cherry hair clip"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1789,7 +1894,14 @@
       }
     },
     "樱色网球服" : {
+      "comment" : "她的网球服是裙装就用 dress，不是改 outfit",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakura tennis dress"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1817,6 +1929,12 @@
     },
     "橙色哑铃" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orange dumbbells"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1827,6 +1945,12 @@
     },
     "橙色头带" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orange headband"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1853,6 +1977,12 @@
     },
     "毛线帽" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beanie"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1863,6 +1993,12 @@
     },
     "毛绒开衫" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fuzzy cardigan"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1906,6 +2042,12 @@
     },
     "波点面罩" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Polka-dot mask"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1932,6 +2074,12 @@
     },
     "浪花夏威夷衫" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wave Hawaiian shirt"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1942,6 +2090,12 @@
     },
     "淡紫拳击上衣" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lilac boxing top"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2002,6 +2156,12 @@
     },
     "火焰连帽卫衣" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flame hoodie"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2028,6 +2188,12 @@
     },
     "牛仔外套" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denim jacket"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2038,6 +2204,12 @@
     },
     "猫耳卫衣" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cat-ear hoodie"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2180,6 +2352,12 @@
     },
     "画画罩衫" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Art smock"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2190,6 +2368,12 @@
     },
     "白色运动服" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "White sportswear"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2215,7 +2399,14 @@
       }
     },
     "短风衣" : {
+      "comment" : "名字是占位",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Short trench"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2324,6 +2515,12 @@
     },
     "粉色拳套" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pink gloves"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2366,6 +2563,12 @@
     },
     "红框眼镜" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Red-frame glasses"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2460,7 +2663,14 @@
       }
     },
     "背带裙" : {
+      "comment" : "§5 美式说法；名字是占位",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jumper dress"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2521,6 +2731,12 @@
     },
     "蓝色触控笔" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blue stylus"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2531,6 +2747,12 @@
     },
     "薄荷发圈" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mint scrunchie"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2541,6 +2763,12 @@
     },
     "薄荷头带" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mint headband"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2551,6 +2779,12 @@
     },
     "薄荷瑜伽砖" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mint yoga block"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2561,6 +2795,12 @@
     },
     "薄荷色球拍" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mint racket"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2588,6 +2828,12 @@
     },
     "藏青书皮" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navy book cover"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2598,6 +2844,12 @@
     },
     "蝴蝶结衬衫" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bow blouse"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2625,6 +2877,12 @@
     },
     "街机 T" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arcade tee"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2718,6 +2976,12 @@
     },
     "运动外套" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Track jacket"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2728,6 +2992,12 @@
     },
     "运动背心" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gym tank"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2819,6 +3089,12 @@
     },
     "迷你音箱" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mini speaker"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2828,7 +3104,14 @@
       }
     },
     "野餐" : {
+      "comment" : "整套",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Picnic set"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2838,7 +3121,14 @@
       }
     },
     "金书签" : {
+      "comment" : "纪念品",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold bookmark"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2848,7 +3138,14 @@
       }
     },
     "金哑铃" : {
+      "comment" : "纪念品",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold dumbbells"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2875,7 +3172,14 @@
       }
     },
     "金瑜伽砖" : {
+      "comment" : "纪念品",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold yoga block"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2885,7 +3189,14 @@
       }
     },
     "金画笔" : {
+      "comment" : "纪念品",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold brush"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2912,7 +3223,14 @@
       }
     },
     "金铅笔" : {
+      "comment" : "纪念品",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold pencil"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2923,6 +3241,12 @@
     },
     "针织马甲" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knit vest"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2949,6 +3273,12 @@
     },
     "闪电贴纸面罩" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lightning-sticker mask"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2958,7 +3288,14 @@
       }
     },
     "防风夹克" : {
+      "comment" : "名字是占位",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windbreaker"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2968,7 +3305,14 @@
       }
     },
     "雨天" : {
+      "comment" : "整套",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rainy-day set"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3044,6 +3388,12 @@
     },
     "黄色速写本" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yellow sketchbook"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3054,6 +3404,12 @@
     },
     "黑金拳击外套" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Black-and-gold boxing jacket"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
