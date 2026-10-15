@@ -79,7 +79,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
   places, Daily, saving records and the bedtime notification.
 - Test builds can try a character together with her default mode cards (Settings, under the characters). The
-  user's own cards are put aside and come back when the switch is turned off; places and learned days stay.
+  user's own cards are put aside and come back when the switch is turned off or the user switches back to
+  their own character; places and learned days stay.
 - Six lines now say only what the characters felt or sensed: the keepsake gift, the late-night line, the second
   preset character's boxing card line and keepsake line, the racket cheer and her focus-done line.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the

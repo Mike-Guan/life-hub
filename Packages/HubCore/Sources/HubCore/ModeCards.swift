@@ -441,6 +441,7 @@ public struct ModeCards: Codable, Equatable, Sendable {
     // 角色切换 正式版 v0 §3 (Mike 2026-10-15): test builds can try a character with her default cards. The
     // user's own cards wait under their own key; places and learned days live elsewhere and stay as they are.
     static let ownKey = "modeCardsOwn"
+    static let ownPersonaKey = "modeCardsOwnPersona"
 
     /// `persona`'s default cards: the common cards with their default names and her default identity card.
     public static func characterDefaults(for persona: Persona) -> ModeCards {
@@ -453,18 +454,35 @@ public struct ModeCards: Codable, Equatable, Sendable {
     }
 
     /// Puts the user's own cards aside, unless they already are, and saves `persona`'s default cards.
-    public static func tryDefaults(of persona: Persona, in defaults: UserDefaults) {
+    /// - Parameters:
+    ///   - persona: The character whose default cards are tried.
+    ///   - own: The character picked when the own cards are put aside.
+    ///   - defaults: The store holding the cards.
+    public static func tryDefaults(of persona: Persona, from own: Persona, in defaults: UserDefaults) {
         if !isTrying(in: defaults) {
-            let own = defaults.data(forKey: defaultsKey) ?? (try? JSONEncoder().encode(ModeCards()))
-            defaults.set(own, forKey: ownKey)
+            let cards = defaults.data(forKey: defaultsKey) ?? (try? JSONEncoder().encode(ModeCards()))
+            defaults.set(cards, forKey: ownKey)
+            defaults.set(own.rawValue, forKey: ownPersonaKey)
         }
         characterDefaults(for: persona).store(in: defaults)
     }
 
-    /// Saves the user's own cards back after `tryDefaults(of:in:)`; does nothing when none were put aside.
+    /// Saves the user's own cards back after `tryDefaults(of:from:in:)`; does nothing when none were put aside.
     public static func restoreOwn(in defaults: UserDefaults) {
         guard let own = defaults.data(forKey: ownKey) else { return }
         defaults.set(own, forKey: defaultsKey)
         defaults.removeObject(forKey: ownKey)
+        defaults.removeObject(forKey: ownPersonaKey)
+    }
+
+    /// Applies a character switch while trying: back to the character picked when trying started restores the
+    /// own cards, any other character gets her default cards. Does nothing when not trying.
+    public static func switchWhileTrying(to persona: Persona, in defaults: UserDefaults) {
+        guard isTrying(in: defaults) else { return }
+        if defaults.string(forKey: ownPersonaKey) == persona.rawValue {
+            restoreOwn(in: defaults)
+        } else {
+            characterDefaults(for: persona).store(in: defaults)
+        }
     }
 }

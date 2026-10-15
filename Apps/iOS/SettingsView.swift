@@ -103,9 +103,7 @@ struct SettingsView: View {
                 ) { next in
                     Button("换") {
                         #if DEBUG || ENV_STG
-                        if ModeCards.isTrying(in: AppGroup.defaults) {
-                            ModeCards.tryDefaults(of: next, in: AppGroup.defaults)
-                        }
+                        ModeCards.switchWhileTrying(to: next, in: AppGroup.defaults)
                         #endif
                         persona = next
                     }
@@ -349,7 +347,7 @@ struct SettingsView: View {
             get: { ModeCards.isTrying(in: AppGroup.defaults) },
             set: { on in
                 if on {
-                    ModeCards.tryDefaults(of: persona, in: AppGroup.defaults)
+                    ModeCards.tryDefaults(of: persona, from: persona, in: AppGroup.defaults)
                 } else {
                     ModeCards.restoreOwn(in: AppGroup.defaults)
                 }
