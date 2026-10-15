@@ -141,7 +141,9 @@ public struct ShareCardView: View {
                             .tracking(13 * 0.06)
                             .padding(.bottom, 4)
                     }
+                    // The column's height comes from the sticker, so the title asks for its own three lines.
                     title(37, lines: 3)
+                        .fixedSize(horizontal: false, vertical: true)
                     subtitle(16)
                     bubble(13)
                         .padding(.top, 12)
