@@ -181,6 +181,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
   the weekly 5 cans, and its gold keepsake counts that card only. Any other watch workout of 30 minutes (not a
   walk) earns 3 cans, shared with the gym's daily 3. The shop names the card instead of "周日拳击".
+- After 删除全部数据 the first-run setup opens again and the bedtime reminder switch is off, as on a fresh install.
 - In boxing, HAKU now and then slips left, slips right and ducks. Tapping him in boxing makes him duck, throw a
   left hook that stops at his chest and say 「……反射。」 instead of punching at the screen.
 - Daylight and going to bed on time now earn their can: 15 minutes in daylight (Apple Watch) earns 1 a day,
