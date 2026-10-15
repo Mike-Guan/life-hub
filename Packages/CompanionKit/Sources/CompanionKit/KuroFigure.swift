@@ -190,8 +190,9 @@ struct KuroFigure: View {
         ZStack {
             ForEach(parts, id: \.self) { part in
                 KuroPartView(
-                    part: part, shift: Self.offset(part, pose: pose, hatted: hatted), turn: Self.turn(part, pose: pose))
-                    .opacity(Self.opacity(part, pose: pose))
+                    part: part, shift: Self.offset(part, pose: pose, hatted: hatted), turn: Self.turn(part, pose: pose)
+                )
+                .opacity(Self.opacity(part, pose: pose))
             }
             if pose.overtime, let sign = pose.sign {
                 RunnerTextView(text: RunnerText(string: sign, x: 60, y: -1, size: 9, color: KuroPalette.ink))
