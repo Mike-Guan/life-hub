@@ -1082,6 +1082,13 @@ struct RunnerPose {
         return pose
     }
 
+    /// The nod after an answer to the energy check, at `progress` (0..<1): one blink, then the head dips 3 units
+    /// and comes back. With `still` only the blink plays.
+    mutating func nod(progress p: CGFloat, still: Bool) {
+        if p < 0.1 { eyesShut = true }
+        if !still { headDy += 3 * Self.bump(p, from: 0.12, to: 0.5) }
+    }
+
     /// Staying-home pose at `progress` (0...1): a last look at the door, headset and mask off, then back on the
     /// sofa with a sigh.
     static func stayHome(time: TimeInterval, progress: Double, face: EnergyFace) -> RunnerPose {
