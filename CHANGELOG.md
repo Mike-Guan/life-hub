@@ -76,6 +76,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The watch face says 还没有模式 when the iPhone has sent but no mode is set, instead of asking to open the
+  iPhone.
 - On the watch app and the watch face, both characters wear the look of the identity card picked on the iPhone,
   instead of the default boxing or tennis look. On cards without a look of their own, the second preset character
   also does that card's base idles on the watch.
