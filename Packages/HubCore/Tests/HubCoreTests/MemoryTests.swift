@@ -108,6 +108,31 @@ import Testing
         )
     }
 
+    @Test func theIdentityMemoriesUseTheUsersCard() {
+        let cards = ModeCards(identity: .tennis)
+        let ledger = CanLedger(entries: wins(.boxing, [3, 10]))
+        let learned = Memory.habits(
+            persona: .haku,
+            cards: cards,
+            days: .standard,
+            ledger: ledger,
+            resets: MemoryResets(),
+            now: date(20),
+            calendar: calendar
+        )
+        #expect(learned.map(\.title) == ["网球日"])
+        let changes = [ModeChange(mode: .boxing, source: .manual, at: date(4, 10), deviceID: "t")]
+        let list = Memory.longTerm(
+            persona: .haku,
+            cards: cards,
+            changes: changes,
+            ledger: CanLedger(),
+            places: [],
+            resets: MemoryResets()
+        )
+        #expect(list == [LongMemory(title: "第一次网球日", date: date(4, 10))])
+    }
+
     @Test func deletedChangesAreNotRemembered() {
         var boxing = ModeChange(mode: .boxing, at: date(4, 10), deviceID: "t")
         boxing.deletedAt = date(5)

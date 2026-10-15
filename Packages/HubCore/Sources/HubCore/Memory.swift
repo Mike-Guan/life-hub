@@ -75,8 +75,11 @@ public struct LongMemory: Equatable, Sendable {
 public enum Memory {
     // PM, 2026-10-13 (写死作息排查 v0 #21): the memory page only lists what was really learned.
     /// The habits `persona` learned from `ledger` after the resets. Habits not learned yet are left out.
+    /// - Parameter cards: the user's cards, for the identity card's name; `nil` for `persona`'s cards from
+    ///   before Issue #273.
     public static func habits(
         persona: Persona,
+        cards: ModeCards? = nil,
         days: ActivityDays,
         ledger: CanLedger,
         resets: MemoryResets,
@@ -100,13 +103,18 @@ public enum Memory {
             list.append(
                 LearnedHabit(
                     habit: .identityDay,
-                    title: Mode.boxing.title(for: persona),
+                    title: identityName(cards, persona: persona),
                     days: weekdays([learned]),
                     isLearned: true
                 )
             )
         }
         return list.filter(\.isLearned)
+    }
+
+    // 交付差距 v1 工程 #1: the identity slot is named after the user's card, not the boxing default.
+    private static func identityName(_ cards: ModeCards?, persona: Persona) -> String {
+        (cards ?? .legacy(for: persona)).title(for: .boxing, persona: persona)
     }
 
     /// Wins that are a sport done for the first time, with what the memory is called.
@@ -116,8 +124,11 @@ public enum Memory {
 
     /// The first identity-card day, the first of each sport and the places the user spends most time at,
     /// counting only records after everything was last forgotten.
+    /// - Parameter cards: the user's cards, for the identity card's name; `nil` for `persona`'s cards from
+    ///   before Issue #273.
     public static func longTerm(
         persona: Persona,
+        cards: ModeCards? = nil,
         changes: [ModeChange],
         ledger: CanLedger,
         places: [HubPlace],
@@ -127,7 +138,7 @@ public enum Memory {
         let kept = changes.filter { $0.deletedAt == nil && $0.at >= since }.sorted { $0.at < $1.at }
         var list: [LongMemory] = []
         if let first = kept.first(where: { $0.mode == .boxing }) {
-            let title = String(format: "第一次%@".localized, Mode.boxing.title(for: persona))
+            let title = String(format: "第一次%@".localized, identityName(cards, persona: persona))
             list.append(LongMemory(title: title, date: first.at))
         }
         let earned = ledger.since(resets.all).active.filter { $0.kind == .earned }
