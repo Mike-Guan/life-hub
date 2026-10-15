@@ -544,7 +544,8 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     init(clothes id: String, slot: Slot, title: String, price: Int, mode: Mode, persona: Persona = .haku) {
         self.init(id: id, slot: slot, title: title, price: price, persona: persona)
         self.mode = mode
-        isDrawn = false
+        // HAKU's pop clothes are drawn (UI 一组, 2026-10-14); the second character's are not yet.
+        isDrawn = persona == .haku
     }
 
     /// Whether the shop offers it to someone who picked `card`.
