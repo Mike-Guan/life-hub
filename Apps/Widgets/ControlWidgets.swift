@@ -1,3 +1,4 @@
+import AppIntents
 import CompanionKit
 import HubCore
 import SwiftUI
