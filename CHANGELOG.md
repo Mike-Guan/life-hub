@@ -257,6 +257,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
 - With no mode yet, the watch tells you to pick one on the iPhone, in smaller type, instead of the iPhone's line.
+- The room bag from the shop is bigger, standing in the bottom left corner. A mode's own backdrop now holds no
+  items: no heavy bag at the boxing gym, no gym bag on the floor for the fitness card, no speaker for the dance
+  card and no ukulele for the music card. The dance idle keeps its shrug without the notes.
 - With VoiceOver, the confirmation sheets keep focus inside and the escape gesture cancels.
 - HAKU's room no longer stacks two things in one spot: the glowing monitor is smaller and stands clear of
   HAKU's ear, and steps aside for the pillow and the headphones; the room item and the running shoes step
