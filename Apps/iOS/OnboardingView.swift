@@ -489,7 +489,7 @@ struct OnboardingView: View {
             if draft.persona == .kuro {
                 KuroView(look: KuroLook(mode: mode), showsBubble: false)
             } else {
-                CompanionView(mode: mode, showsBubble: false)
+                CompanionView(mode: mode, showsBubble: false, notices: false)
             }
         }
         .frame(width: width, height: (width * 1.32).rounded())
@@ -508,7 +508,7 @@ struct OnboardingView: View {
                     if persona == .kuro {
                         KuroView(look: .chill, showsBubble: false)
                     } else {
-                        CompanionView(mode: .chill, showsBubble: false)
+                        CompanionView(mode: .chill, showsBubble: false, notices: false)
                     }
                 }
                 .frame(height: 180)

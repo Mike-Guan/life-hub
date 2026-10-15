@@ -53,6 +53,10 @@ public struct CompanionView: View {
     let wardrobe: Wardrobe
     let style: CompanionStyle
     let showsBubble: Bool
+    // C19 (动作展示总表): a second HAKU, in a sheet or the first-run setup, would use up the home screen's
+    // once-a-night "还不睡。" and the look up after half a day away.
+    /// Whether HAKU plays the app-open notice turn and keeps the shared record of when the app was last seen.
+    let notices: Bool
     /// Called after HAKU reacts to a tap, for example to switch the 副业 state.
     let onTap: (() -> Void)?
     /// Called once the welcome back scene ends or is skipped with a tap.
@@ -170,6 +174,7 @@ public struct CompanionView: View {
         wardrobe: Wardrobe = Wardrobe(),
         style: CompanionStyle = .standard,
         showsBubble: Bool = true,
+        notices: Bool = true,
         onTap: (() -> Void)? = nil,
         onBathDone: (() -> Void)? = nil,
         onWelcomeDone: (() -> Void)? = nil
@@ -196,6 +201,7 @@ public struct CompanionView: View {
         self.wardrobe = wardrobe
         self.style = style
         self.showsBubble = showsBubble
+        self.notices = notices
         self.onTap = onTap
         self.onBathDone = onBathDone
         self.onWelcomeDone = onWelcomeDone
@@ -250,7 +256,7 @@ public struct CompanionView: View {
             if welcomeStart == nil { say(nil) }
         }
         .onAppear {
-            startNotice()
+            if notices { startNotice() }
             startStretchUp()
             startPackUp()
             startCue()
@@ -272,12 +278,12 @@ public struct CompanionView: View {
         .onChange(of: daily) { _, _ in startCue() }
         .onChange(of: scenePhase) { _, new in
             if new == .active {
-                startNotice()
+                if notices { startNotice() }
                 startStretchUp()
                 startPackUp()
                 startCue()
             }
-            if new == .background { lastSeen = Date.now.timeIntervalSinceReferenceDate }
+            if new == .background, notices { lastSeen = Date.now.timeIntervalSinceReferenceDate }
         }
         .onChange(of: moment) { _, _ in
             startPackUp()

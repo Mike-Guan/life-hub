@@ -7,6 +7,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - Settings has a 上班日 row and a 身份卡 group. Each opens the same screen as the first-run setup, so work days
   and the identity card can be set, changed or cleared later.
+- The second preset character can wear her Sunday beanie in 下班, between her cat ears, with its pom swaying a
+  little. A set hat or the bath towel takes it off; it stays on when she turns away and on the watch.
 - The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a
   side clip), a bear blanket and a cloud cushion on her lap, a succulent on the floor and a nightlight on the wall
   whose glow breathes slowly. The watch leaves out what is on her lap or the floor.
@@ -105,6 +107,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
   names two apps and says only this iPhone knows how long you scrolled.
+- Opening a keepsake or going through the first-run setup no longer uses up HAKU's late-night "还不睡。" or its
+  slow look up after half a day away. Both now wait for the home screen.
 - Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
   The cheer hop is lower, so the hair stays inside the card.
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
