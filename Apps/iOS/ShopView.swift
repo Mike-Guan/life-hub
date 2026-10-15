@@ -233,12 +233,12 @@ struct ShopView: View {
 
     private func buy(_ item: ShopItem) {
         // 动态: the can count rolls down and the bought tile leaves smoothly, without a bounce.
-        let failure: GrowthStore.BuyError? = withAnimation(reduceMotion ? nil : .smooth) {
+        var failure: GrowthStore.BuyError?
+        withAnimation(reduceMotion ? nil : .smooth) {
             do {
                 try growth.buy(item)
-                return nil
             } catch {
-                return error
+                failure = error
             }
         }
         if let failure {
