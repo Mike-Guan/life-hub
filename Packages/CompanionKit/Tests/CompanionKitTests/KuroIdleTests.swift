@@ -33,7 +33,11 @@ import Testing
         var pose = KuroPose(look: .desk, energy: 50).idling((.pen, 0.25))
         #expect(KuroFigure.shift(.deskPen, pose: pose) != .zero)
         pose = pose.reacting(.glasses, progress: 0.1)
+        // 动作展示总表 C9: the pen starts where the idle left it and is back in place once the cut has gone back.
+        #expect(KuroFigure.shift(.deskPen, pose: pose) != .zero)
+        pose.idleBack = 1
         #expect(KuroFigure.shift(.deskPen, pose: pose) == .zero)
+        #expect(KuroFigure.shift(.deskPen, pose: pose.cutting(nil, back: 0)) == .zero)
     }
 
     @Test func herLooksNoLongerBorrowHakusLoops() {
