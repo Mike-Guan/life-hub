@@ -158,6 +158,8 @@ struct RunnerPose {
     var swapping = false
     /// How far the sparkles beside the headset sit below their place, in figure units.
     var starDrop: CGFloat = 0
+    /// How far the sunlit window sits below its place, in figure units.
+    var sunDrop: CGFloat = 0
     /// The workout being celebrated, which picks the move and the props, such as gloves up or a helmet.
     var cheerKind: WorkoutSummary.Kind?
     /// Scroll position of the feed on the phone screen while couch scrolling, 0...1.
@@ -1933,6 +1935,9 @@ struct RunnerFigure: View {
                     .offset(y: headband ? (pose.starDrop - 14) * scale : 0)
                     .scaleEffect(0.8 + 0.2 * pose.sparkle, anchor: Self.unit(x: 60, y: 27))
                     .opacity(pose.sparkle)
+            case .sunlight:
+                RunnerPartView(part: part)
+                    .offset(y: pose.sunDrop * scale)
             case .ledYen:
                 RunnerPartView(part: part)
                     .offset(x: pose.yenDx * scale)
