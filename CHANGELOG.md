@@ -63,7 +63,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- 删掉所有记忆 is greyed out and can't be tapped when there is nothing to forget.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
@@ -169,6 +168,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   for time in daylight in Health. Only the win is kept, never the daylight or sleep times.
 - With the fitness card picked, a visit to the fitness gym earns the card's weekly cans, the same as a
   strength workout, so one session no longer pays twice.
+- 删掉所有记忆 is greyed out and can't be tapped when there is nothing to forget.
 - On the smallest watch, a long mode name in the clock row shrinks to fit instead of running into the clock.
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
