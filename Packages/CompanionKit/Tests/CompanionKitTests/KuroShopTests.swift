@@ -38,6 +38,77 @@ import Testing
         #expect(!parts.contains(.tennisHeadband) && !parts.contains(.tennisRacket))
     }
 
+    @Test func sundayHairPiecesGoOnHerPonytailElseOnTheSideClip() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.mintTie]
+        #expect(KuroFigure.parts(for: .tennis, pose: pose).contains(.weeklyHairMintPony))
+        #expect(KuroFigure.parts(for: .box, pose: pose).contains(.weeklyHairMintPony))
+        for look in [KuroLook.chill, .work, .desk, .study] {
+            let parts = KuroFigure.parts(for: look, pose: pose)
+            #expect(parts.contains(.weeklyHairMintSide) && !parts.contains(.weeklyHairMintPony), "\(look)")
+        }
+        // Static on her: each piece moves with the hair it is worn on.
+        pose.idle = .ponytail
+        pose.idleProgress = 0.1
+        let ponytail = KuroFigure.offset(.tennisPonytail, pose: pose)
+        #expect(ponytail != .zero && KuroFigure.offset(.weeklyHairStarPony, pose: pose) == ponytail)
+        #expect(KuroFigure.offset(.itemScrunchie, pose: pose) == ponytail)
+        #expect(KuroFigure.offset(.weeklyHairStarSide, pose: pose) == KuroFigure.offset(.hairFringe, pose: pose))
+    }
+
+    @Test func oneThingOnHerLapAndOneOnTheFloor() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.flower, .blanket, .cloud, .succulent]
+        let chill = Set(KuroFigure.parts(for: .chill, pose: pose))
+        #expect(chill.isSuperset(of: [.weeklyRoomCloud, .weeklyRoomSucculent]))
+        #expect(chill.isDisjoint(with: [.itemBlanket, .itemFlower]))
+        pose.items = [.bag, .succulent]
+        let tennis = Set(KuroFigure.parts(for: .tennis, pose: pose))
+        #expect(tennis.contains(.weeklyRoomSucculent) && !tennis.contains(.itemBag))
+        pose.items = [.bearBlanket]
+        #expect(KuroFigure.parts(for: .chill, pose: pose).contains(.weeklyBlanketBear))
+        #expect(!KuroFigure.parts(for: .work, pose: pose).contains(.weeklyBlanketBear))
+    }
+
+    @Test func theNightlightHangsOverHerSofaAndHerDesk() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.nightlight]
+        for look in KuroLook.allCases {
+            let parts = Set(KuroFigure.parts(for: look, pose: pose))
+            let shown = look == .chill || look == .desk
+            #expect(parts.isSuperset(of: [.weeklyRoomNightlightGlow, .weeklyRoomNightlight]) == shown, "\(look)")
+        }
+        // The glow breathes from 0.2 to 0.65 and back every 3 s, and rests at 0.4.
+        #expect(abs(KuroPose.glow(at: 0) - 0.2) < 0.001 && abs(KuroPose.glow(at: 1.5) - 0.65) < 0.001)
+        #expect(abs(KuroPose.glow(at: 3) - 0.2) < 0.001 && KuroPose.restingGlow == 0.4)
+        #expect(KuroFigure.opacity(.weeklyRoomNightlightGlow, pose: pose) == KuroPose.restingGlow)
+        #expect(KuroFigure.opacity(.weeklyRoomNightlightGlow, pose: pose.glowing(0.6)) == 0.6)
+        #expect(KuroItemIcon.parts(.nightlight) == [.weeklyRoomNightlightGlow, .weeklyRoomNightlight])
+    }
+
+    @Test func herLapIsClearWhileSheDrinks() {
+        for item in [KuroItem.blanket, .bearBlanket, .cloud] {
+            var pose = KuroPose(look: .chill, energy: nil)
+            pose.items = [item]
+            pose.tap = .sip
+            pose.tapProgress = 0.4
+            #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isDisjoint(with: KuroFigure.lap), "\(item)")
+            pose.tap = nil
+            pose.idle = .blow
+            #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isDisjoint(with: KuroFigure.lap), "\(item)")
+        }
+    }
+
+    @Test func theWatchLeavesOutWhatIsOnHerLapOrTheFloor() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.bearBlanket, .succulent, .starTie, .nightlight]
+        let watch = Set(KuroFigure.parts(for: .chill, pose: pose, watch: true))
+        #expect(watch.isDisjoint(with: [.weeklyBlanketBear, .weeklyRoomSucculent]))
+        #expect(watch.isSuperset(of: [.weeklyHairStarSide, .weeklyRoomNightlight]))
+        pose.items = [.cloud]
+        #expect(!KuroFigure.parts(for: .chill, pose: pose, watch: true).contains(.weeklyRoomCloud))
+    }
+
     static let clothes = KuroItem.allCases.filter { $0.clothes != nil }
 
     @Test func herClothesAreTheCatalogsTopsAndSets() {

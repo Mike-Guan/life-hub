@@ -82,10 +82,16 @@ public struct WatchPayload: Codable, Equatable, Sendable {
     }
 
     // The first scene starts at the iPhone's clock when it sent them, and the watch draws at the start of
-    // the minute, so a fresh payload is often read a few seconds before its first scene.
-    /// The scene the watch plays at `date`: the one started by then, else the first; `nil` with no scenes.
+    // the minute, so a fresh payload is often read a few seconds before its first scene. The iPhone works
+    // scenes out only `HomeSceneInputs.timelineHours` ahead; after that the last one is stale, and a stale
+    // scene is worse than the plain mode (PM 动作展示总表 C8).
+    /// The scene the watch plays at `date`: the one started by then, else the first; `nil` with no scenes
+    /// or once they run out.
     public func scene(at date: Date) -> HomeScene? {
-        scenes.scene(at: date) ?? scenes.first?.scene
+        guard let first = scenes.first,
+            date <= first.from.addingTimeInterval(HomeSceneInputs.timelineHours * 60 * 60)
+        else { return nil }
+        return scenes.scene(at: date) ?? first.scene
     }
 
     /// When the watch widgets redraw: the iPhone widgets' times for this snapshot.
