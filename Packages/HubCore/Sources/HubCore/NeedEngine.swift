@@ -543,7 +543,9 @@ public enum NeedEngine {
         guard now >= start, now < end else { return nil }
         let midnight = calendar.startOfDay(for: now)
         let boxedToday = signals.workouts.contains { $0.kind == .boxing && $0.end >= midnight }
-        guard !boxedToday else { return nil }
+        // The Screen Time extension only knows the day of the last workout, so any workout today counts there.
+        let trainedToday = (signals.trainedDay ?? .distantPast) >= StateEngine.dayStart(for: now, calendar: calendar)
+        guard !boxedToday, !trainedToday else { return nil }
         return NeedReading(need: .boxingWarmup, since: start, reasons: [boxingReason(rules.persona)], until: end)
     }
 
