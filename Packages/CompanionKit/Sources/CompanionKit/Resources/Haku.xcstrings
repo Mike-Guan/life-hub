@@ -225,6 +225,23 @@
         }
       }
     },
+    "……嗯。" : {
+      "comment" : "C15 睡前嘟囔",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Hm."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……ん。"
+          }
+        }
+      }
+    },
     "……困了。" : {
       "comment" : "中文改为“……困了。”",
       "localizations" : {
@@ -432,6 +449,23 @@
         }
       }
     },
+    "……明天再说。" : {
+      "comment" : "C15 睡前嘟囔",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Ask me tomorrow."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……明日にする。"
+          }
+        }
+      }
+    },
     "……没吃。" : {
       "localizations" : {
         "en" : {
@@ -476,6 +510,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……脚、まだついてる？"
+          }
+        }
+      }
+    },
+    "……还没睡。快了。" : {
+      "comment" : "C15 睡前嘟囔",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Not asleep. Almost."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……まだ起きてる。もうすぐ。"
           }
         }
       }

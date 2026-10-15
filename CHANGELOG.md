@@ -82,6 +82,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- Opening the app, HAKU says one line at most: a celebration first, then an invite, good night, the late-night
+  line, a planned task, bath time and the stretch. A mode change no longer clears it. A tap during a one-off
+  animation only makes HAKU blink. At bedtime a tap gets a sleepy mumble instead of switching the side-hustle
+  state, and a shake makes HAKU roll over half asleep.
 - The Lock Screen and Dynamic Island countdown draws the character in the identity card's look picked on the
   iPhone, such as HAKU in tennis kit, instead of always the boxing look.
 - The watch face says 还没有模式 when the iPhone has sent but no mode is set, instead of asking to open the
