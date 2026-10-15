@@ -573,6 +573,8 @@ extension SceneMove {
             move.opacity *= Double(1 - w.exit)
         case .phoneHand:
             move.offset.height = w.phoneDrop + 22 * w.phoneFlip + 8 * w.exit
+            // UI 审核 10/15: hugging, the hand presses the phone to the chest from the blanket's top edge.
+            if w.hugsPhone { move.offset.height -= 20 }
             move.opacity = Double((1 - w.phoneFlip) * (1 - w.exit))
         case .sofaArm, .desk:
             // The furniture stays put while HAKU leans and scoots.
