@@ -287,7 +287,7 @@ enum KuroIdle: CaseIterable, Sendable {
     private var putDown: Set<KuroPart> {
         switch self {
         case .reach, .towel: [.gymBlock]
-        case .tuck, .frame: [.workTablet, .craftPen]
+        case .tuck, .frame: [.workTablet, .watchTablet, .craftPen]
         case .collar, .phone: [.studyNotebook, .studyHighlighter]
         default: []
         }
