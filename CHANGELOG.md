@@ -527,6 +527,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The small buttons in Settings (看看, 选 App, 导出) and the place editor (取消, 设为当前位置) now have the full
+  44 pt tap area. The shop banner grows with longer text instead of cutting it off.
 - On a gym day you already trained, went to the gym or set off for it, scrolling on the phone no longer brings
   back the evening gym invite. The same goes for the Sunday boxing invite once you have boxed.
 - The wardrobe preview and its head icons dress the character for the picked identity card, so the art

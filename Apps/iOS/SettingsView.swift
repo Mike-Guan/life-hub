@@ -203,9 +203,12 @@ struct SettingsView: View {
                 Text("记得的事")
                     .font(Toy.body(16, weight: .heavy))
                 Spacer()
-                Button("看看") { showsMemory = true }
-                    .font(Toy.body(13, weight: .heavy))
-                    .frame(minHeight: 44)
+                Button {
+                    showsMemory = true
+                } label: {
+                    Text("看看").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
             }
             Text("学到的规律、长期记得的事和做过的判断。都只在这台 iPhone 上。")
                 .font(Toy.body(12))
@@ -264,11 +267,12 @@ struct SettingsView: View {
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
-                Button("选 App") {
+                Button {
                     Task { await pickApps() }
+                } label: {
+                    Text("选 App").tapTarget()
                 }
                 .font(Toy.body(13, weight: .heavy))
-                .frame(minHeight: 44)
             }
             Text("选你最容易刷停不下来的 App。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
                 .font(Toy.body(12))
@@ -327,8 +331,10 @@ struct SettingsView: View {
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
-                ShareLink("导出", item: export)
-                    .font(Toy.body(13, weight: .heavy))
+                ShareLink(item: export) {
+                    Text("导出").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
                     .disabled(log.entries.isEmpty && decisions.kept.isEmpty)
             }
             ForEach(Array(log.entries.suffix(5).reversed().enumerated()), id: \.offset) { _, entry in
