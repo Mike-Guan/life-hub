@@ -63,8 +63,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- Leaving the office ends 上班 at any time, a lunch break too; coming back switches to 上班 again. Before, a
-  leave earlier than an hour before the end of work hours kept 上班 until you got home.
 - A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
   and of the user's own identity card, unless the item only shows in another mode.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
@@ -139,6 +137,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- Leaving the office ends 上班 at any time, a lunch break too; coming back switches to 上班 again. Before, a
+  leave earlier than an hour before the end of work hours kept 上班 until you got home.
 - On the watch the second preset character holds her racket, books, cup and tablet higher, so the bottom of the
   screen no longer cuts them off. The pen, stylus and badge are left off on the watch. The iPhone is unchanged.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
