@@ -63,7 +63,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- The memory page names the identity day and its first time after the card the user picked, not always 拳击日.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
@@ -155,6 +154,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
   full night stay brighter and clear the headset.
 - The watch has no dark band behind the clock any more; every screen keeps its own background.
+- The memory page names the identity day and its first time after the card the user picked, not always 拳击日.
 - With Japanese on, headings and bold text use the rounded Japanese font Zen Maru Gothic. Chinese and English
   keep the system font.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
