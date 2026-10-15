@@ -63,8 +63,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- Deleting an added place or clearing a preset one asks first, in a Toy sheet with 留着 on the left. The place
-  editor names the identity card's place after the user's card, as Settings does.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
@@ -187,6 +185,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   shape.
 - Workouts from the Health app are sorted into about ten groups (walking, cycling, swimming, racket, ball,
   yoga, dance, outdoor and more). Cans are unchanged: only boxing, 5 km runs and the gym earn.
+- Deleting an added place or clearing a preset one asks first, in a Toy sheet with 留着 on the left. The place
+  editor names the identity card's place after the user's card, as Settings does.
 - Settings: the character choice and the times use outlined Toy controls, so they no longer show as pale grey.
 - Each character has her own cans, items, keepsake progress, room traces and hidden stats. Cans go to the
   character picked when they are earned; switching asks first. Everything earned before stays HAKU's. Life
