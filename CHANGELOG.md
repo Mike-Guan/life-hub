@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character can wear her Sunday beanie in 下班, between her cat ears, with its pom swaying a
+  little. A set hat or the bath towel takes it off; it stays on when she turns away and on the watch.
 - The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a
   side clip), a bear blanket and a cloud cushion on her lap, a succulent on the floor and a nightlight on the wall
   whose glow breathes slowly. The watch leaves out what is on her lap or the floor.
@@ -82,6 +84,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   the character art draws them.
 - The second preset character's 6 tops and 2 full sets are on sale. She wears the one of the mode she is in,
   on the home screen, the shop, the wardrobe, unboxing, widgets and the watch.
+- When HAKU switches between idle scenes, only the sparkles show. The peace sign, the dumbbell reps and the
+  identity card's props no longer pop in and out on every switch.
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
   over the hair while sitting up. After the off-work
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
@@ -101,6 +105,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
   names two apps and says only this iPhone knows how long you scrolled.
+- Opening a keepsake or going through the first-run setup no longer uses up HAKU's late-night "还不睡。" or its
+  slow look up after half a day away. Both now wait for the home screen.
 - Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
   The cheer hop is lower, so the hair stays inside the card.
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
@@ -529,6 +535,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Fixed
 - The small buttons in Settings (看看, 选 App, 导出) and the place editor (取消, 设为当前位置) now have the full
   44 pt tap area. The shop banner grows with longer text instead of cutting it off.
+- After a workout cheer or the off-work move, HAKU can again stretch after a long sit, get up from the sofa,
+  wonder if you're staying home and cheer a finished task. Before, these waited until the app was restarted.
 - On a gym day you already trained, went to the gym or set off for it, scrolling on the phone no longer brings
   back the evening gym invite. The same goes for the Sunday boxing invite once you have boxed.
 - The wardrobe preview and its head icons dress the character for the picked identity card, so the art
