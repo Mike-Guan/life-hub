@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   speaker as notes float up and stops when caught, plays air chords by a ukulele while counting silently, or
   pulls its ski goggles down and back and breathes out a white puff. The watch leaves out the speaker and the
   fist, and raises the ukulele into view. The cards stay out of the picker for now.
+- The second preset character has her own seven weekly items, in her own rotation. They go on sale once
+  their art is in.
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
   Sunday items take turns now.
@@ -51,6 +53,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
+  Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
   colour instead of her own top, and her "…" bubble moves up off a set hat.
 - The shop catalogue has a prop colour and a gold prop (earned on the card's 10th win) for the other

@@ -4,6 +4,7 @@ import HubCore
 import SwiftUI
 import WidgetKit
 
+// Lock Screen surfaces keep the system font in every language (Japanese font plan C), so no Toy fonts here.
 /// The Sunday boxing countdown on the Lock Screen and in the Dynamic Island.
 struct BoxingCountdownWidget: Widget {
     var body: some WidgetConfiguration {
@@ -12,8 +13,9 @@ struct BoxingCountdownWidget: Widget {
                 head.frame(width: 52, height: 52)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(context.attributes.title ?? "拳击") \(context.state.start, style: .time) 开始")
-                        .font(Toy.body(14, weight: .bold))
-                    countdown(to: context.state.start, started: context.isStale).font(Toy.display(28))
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                    countdown(to: context.state.start, started: context.isStale)
+                        .font(.system(size: 28, weight: .black, design: .rounded))
                 }
                 Spacer()
             }
@@ -29,11 +31,12 @@ struct BoxingCountdownWidget: Widget {
                     head.frame(width: 44, height: 44)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    countdown(to: context.state.start, started: context.isStale).font(Toy.display(22))
+                    countdown(to: context.state.start, started: context.isStale)
+                        .font(.system(size: 22, weight: .black, design: .rounded))
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     Text("\(context.attributes.title ?? "拳击") \(context.state.start, style: .time) 开始")
-                        .font(Toy.body(13, weight: .bold))
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
                         .environment(\.locale, Languages.locale)
                 }
             } compactLeading: {
