@@ -78,7 +78,7 @@ public struct HubContainer: Sendable {
             do {
                 try files.removeItem(at: folder.appending(path: name))
             } catch {
-                errors.append("删不掉 \(name)：\(error.localizedDescription)")
+                errors.append(String(format: "删不掉 %1$@：%2$@".localized, name, error.localizedDescription))
             }
         }
         return errors
