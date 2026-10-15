@@ -64,8 +64,8 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         return snapshot.updatedAt >= stored.snapshot.updatedAt
     }
 
-    /// Whether `other` draws the same watch face: equal apart from the write time, the work time, the
-    /// scenes and the event, which only the watch app plays.
+    /// Whether `other` draws the same watch face: equal apart from the write time, the work time and the
+    /// event, which only the watch app plays, with the same scenes starting within a few minutes.
     public func drawsLike(_ other: WatchPayload) -> Bool {
         var mine = self
         var theirs = other
@@ -78,7 +78,37 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         theirs.scenes = []
         mine.event = nil
         theirs.event = nil
-        return mine == theirs
+        return mine == theirs && Self.sameFaces(faceScenes, other.faceScenes)
+    }
+
+    // The face draws only these parts of a scene; the rest (cans, events, invites) plays in the watch app.
+    // The first scene starts when the iPhone sends, so what plays from then on counts as already playing.
+    /// The changes in what the watch face draws, each with when it starts; a start of `distantPast` is
+    /// already playing when the iPhone sent.
+    var faceScenes: [TimedScene] {
+        var faces: [TimedScene] = []
+        for timed in scenes {
+            let scene = timed.scene
+            let face = HomeScene(
+                activity: scene.activity,
+                moment: scene.moment,
+                walking: scene.walking,
+                bath: scene.bath,
+                daily: scene.daily
+            )
+            guard face != (faces.last?.scene ?? HomeScene()) else { continue }
+            faces.append(TimedScene(from: timed.from == scenes.first?.from ? .distantPast : timed.from, scene: face))
+        }
+        return faces
+    }
+
+    // The iPhone samples scenes every 5 minutes from when it sends, so the same change lands up to a step
+    // apart in two sends. Redrawing for that alone would spend the watch face's daily reloads and
+    // complication transfers.
+    /// Whether `a` and `b` draw the same faces, each starting within `HomeSceneInputs.timelineStep`.
+    static func sameFaces(_ a: [TimedScene], _ b: [TimedScene]) -> Bool {
+        guard a.map(\.scene) == b.map(\.scene) else { return false }
+        return zip(a, b).allSatisfy { abs($0.from.timeIntervalSince($1.from)) <= HomeSceneInputs.timelineStep }
     }
 
     // The first scene starts at the iPhone's clock when it sent them, and the watch draws at the start of
@@ -94,9 +124,13 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         return scenes.scene(at: date) ?? first.scene
     }
 
-    /// When the watch widgets redraw: the iPhone widgets' times for this snapshot.
+    /// When the watch widgets redraw: the iPhone widgets' times for this snapshot, when each scene starts, when
+    /// the scenes run out and every 15 minutes, when the portrait changes its pose.
     public func timelineDates(after date: Date, calendar: Calendar = .current) -> [Date] {
-        WidgetSnapshot.timelineDates(after: date, bedtime: bedtime, needTimes: snapshot.needTimes, calendar: calendar)
+        let end = scenes.first.map { $0.from.addingTimeInterval(HomeSceneInputs.timelineHours * 60 * 60) }
+        let sceneTimes = scenes.map(\.from) + [end].compactMap { $0 }
+        let times = snapshot.needTimes + sceneTimes + WidgetSnapshot.slotDates(after: date)
+        return WidgetSnapshot.timelineDates(after: date, bedtime: bedtime, needTimes: times, calendar: calendar)
     }
 
     // An older iPhone build may send a name that doesn't fit the watch's clock row.
