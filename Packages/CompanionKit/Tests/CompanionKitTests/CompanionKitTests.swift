@@ -327,6 +327,9 @@ import Testing
         #expect(CompanionView.bubbleRoom(style: .standard, showsBubble: false) == 0)
         #expect(CompanionView.bubbleRoom(style: .watch, showsBubble: true) == 0)
         #expect(CompanionView.bubbleRoom(style: .notification, showsBubble: true) == 0)
+        #expect(CompanionView.starDrop(style: .standard, showsBubble: true) == 8)
+        #expect(CompanionView.starDrop(style: .standard, showsBubble: false) == 0)
+        #expect(CompanionView.starDrop(style: .watch, showsBubble: true) == 0)
     }
 
     @Test func offWorkPlaysOncePerDay() {
@@ -1324,6 +1327,18 @@ import Testing
         #expect(RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
         pose.bedtime = true
         #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
+    }
+
+    @Test func aStateSwapShowsOnlyTheSparkles() {
+        var pose = RunnerPose().wearing(Outfit(Wardrobe(equipped: [.celebration: "celebrate.up"])))
+        pose.burst = 0.5
+        pose.swapping = true
+        pose.lift = 0
+        let parts = RunnerFigure.parts(for: .work, pose: pose)
+        #expect(parts.contains(.sparkleWork))
+        #expect(!parts.contains(.peaceHand))
+        #expect(pose.dumbbellRise == 0)
+        #expect(pose.holdsCardProps)
     }
 
     @Test @MainActor func aStillPortraitStandsWhateverTheHour() {
