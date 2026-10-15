@@ -43,16 +43,18 @@ struct UnboxSheet: View {
                 .foregroundStyle(Toy.paper.opacity(0.75))
 
             // The character keeps wearing the item after the animation, so the preview has it equipped.
+            // Clothes show in the mode they are worn in.
             Group {
                 if let kuro = KuroItem(rawValue: item.id) {
                     KuroView(
                         look: kuro.look,
-                        wearing: Set(wearing.equipped.values),
+                        wearing: wearing.worn(
+                            in: item.mode ?? Mode.allCases.first { KuroLook(mode: $0) == kuro.look } ?? .chill),
                         event: .unlock(id: entry.id.uuidString, item: item.id)
                     )
                 } else {
                     CompanionView(
-                        mode: item.slot.showcaseMode,
+                        mode: item.mode ?? item.slot.showcaseMode,
                         event: .unlock(id: entry.id.uuidString, item: item.id),
                         wardrobe: wearing,
                         showsBubble: true

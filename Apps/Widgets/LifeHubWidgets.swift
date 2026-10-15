@@ -1,3 +1,4 @@
+import CompanionKit
 import HubCore
 import SwiftUI
 import WidgetKit
@@ -6,6 +7,8 @@ import WidgetKit
 struct LifeHubWidgets: WidgetBundle {
     init() {
         Languages.load(from: AppGroup.defaults)
+        // A font that fails to register falls back to the system font; the app reports it in its error list.
+        AppFonts.register()
     }
 
     var body: some Widget {

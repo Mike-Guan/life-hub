@@ -414,6 +414,29 @@ extension Slot {
     }
 }
 
+// 商店完整目录 v0 §1.5 and §2.5: cards without an outfit of their own share one of three base outfits.
+/// Clothes several identity cards share.
+public enum BaseOutfit: String, CaseIterable, Sendable {
+    case sport
+    case outing
+    case craft
+}
+
+extension IdentityKind {
+    // HAKU's boxing and the second character's tennis have outfits of their own. Her boxing keeps its own top
+    // and also wears the sport base when that top isn't bought.
+    /// The base outfit `persona` wears with this card, `nil` when the card has an outfit of its own.
+    public func baseOutfit(for persona: Persona) -> BaseOutfit? {
+        switch self {
+        case .boxing: persona == .kuro ? .sport : nil
+        case .tennis: persona == .kuro ? nil : .sport
+        case .fitness, .swimming, .yoga, .ball, .dance, .ski: .sport
+        case .study, .outdoor, .music: .outing
+        case .art: .craft
+        }
+    }
+}
+
 /// Something a character can own: bought in the shop, or granted as a keepsake.
 public struct ShopItem: Identifiable, Equatable, Sendable {
     /// A milestone that grants an item for free.
@@ -442,8 +465,12 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     public var card: IdentityKind?
     /// The mode a top or full set is worn in, `nil` for items shown in every mode.
     public var mode: Mode?
+    /// The base outfit whose cards can wear it, `nil` for clothes that aren't base clothes.
+    public var base: BaseOutfit?
     /// Whether the character art draws it. The shop leaves it off the shelf until then.
     public var isDrawn: Bool
+    /// Its place in the weekly rotation, `nil` for items always on the shelf.
+    public var week: Int?
 
     // The first catalog (PRD v4.2 section 13), then KURO's (奖励数值表 section 7, approved 2026-10-07).
     // Ids are stored in the ledger, so never reuse one. KURO's items reuse HAKU's slots: her hair ties are
@@ -500,7 +527,26 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             title: "金色网球拍",
             keepsake: Keepsake(win: .boxing, count: 10, card: .tennis),
             persona: .kuro
-        ),  // Clothes (商店完整目录 v0 §1.1 and §2.1, prices of 2026-10-14), off the shelf until drawn.
+        ),
+        // The other first-batch cards' lines (商店完整目录 v0 §1.2 and §2.2), off the shelf until drawn: a prop
+        // colour, and a gold prop on the card's 10th win.
+        ShopItem(prop: "haku.racket.tennis.mint", title: "薄荷色球拍", price: 15, card: .tennis),
+        ShopItem(prop: "haku.racket.tennis.gold", title: "金色网球拍", card: .tennis),
+        ShopItem(prop: "haku.dumbbell.gym.orange", title: "橙色哑铃", price: 15, card: .fitness),
+        ShopItem(prop: "haku.dumbbell.gym.gold", title: "金哑铃", card: .fitness),
+        ShopItem(prop: "haku.book.study.navy", title: "藏青书皮", price: 15, card: .study),
+        ShopItem(prop: "haku.bookmark.study.gold", title: "金书签", card: .study),
+        ShopItem(prop: "haku.sketch.art.yellow", title: "黄色速写本", price: 15, card: .art),
+        ShopItem(prop: "haku.pencil.art.gold", title: "金铅笔", card: .art),
+        ShopItem(prop: "kuro.gloves.boxing.pink", title: "粉色拳套", price: 15, card: .boxing, persona: .kuro),
+        ShopItem(prop: "kuro.gloves.boxing.gold", title: "金拳套", card: .boxing, persona: .kuro),
+        ShopItem(prop: "kuro.block.gym.mint", title: "薄荷瑜伽砖", price: 15, card: .fitness, persona: .kuro),
+        ShopItem(prop: "kuro.block.gym.gold", title: "金瑜伽砖", card: .fitness, persona: .kuro),
+        ShopItem(prop: "kuro.glasses.study.red", title: "红框眼镜", price: 15, card: .study, persona: .kuro),
+        ShopItem(prop: "kuro.bookmark.study.gold", title: "金书签", card: .study, persona: .kuro),
+        ShopItem(prop: "kuro.stylus.art.blue", title: "蓝色触控笔", price: 15, card: .art, persona: .kuro),
+        ShopItem(prop: "kuro.brush.art.gold", title: "金画笔", card: .art, persona: .kuro),
+        // Clothes (商店完整目录 v0 §1.1 and §2.1, prices of 2026-10-14), off the shelf until drawn.
         // HAKU's eight are the pop set Mike approved 2026-10-14; the second character's are still placeholders.
         ShopItem(clothes: "haku.top.work.blazer", slot: .top, title: "学院西装", price: 30, mode: .work),
         ShopItem(clothes: "haku.top.work.cardigan", slot: .top, title: "像素开衫", price: 35, mode: .work),
@@ -520,6 +566,54 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(
             clothes: "kuro.set.chill.picnic", slot: .fullSet, title: "野餐", price: 80, mode: .chill, persona: .kuro),
         ShopItem(clothes: "kuro.set.work.rain", slot: .fullSet, title: "雨天", price: 90, mode: .work, persona: .kuro),
+        // Identity card clothes (商店完整目录 v0 §1.2, §1.5, §2.2, §2.5), off the shelf until drawn. Base clothes
+        // are bought once and worn with every card on their base outfit.
+        ShopItem(cardTop: "haku.top.boxing.blackgold", title: "黑金拳击外套", price: 40, card: .boxing),
+        ShopItem(cardTop: "haku.top.gym.tank", title: "运动背心", price: 30, base: .sport),
+        ShopItem(cardTop: "haku.top.tennis.white", title: "白色运动服", price: 40, base: .sport),
+        ShopItem(cardTop: "haku.top.study.cardigan", title: "开衫", price: 30, base: .outing),
+        ShopItem(cardTop: "haku.base.outing.windbreaker", title: "防风夹克", price: 40, base: .outing),
+        ShopItem(cardTop: "haku.top.art.apron", title: "帆布围裙", price: 30, base: .craft),
+        ShopItem(cardTop: "haku.base.craft.overalls", title: "工装背带", price: 40, base: .craft),
+        ShopItem(cardTop: "kuro.top.boxing.lilac", title: "淡紫拳击上衣", price: 40, card: .boxing, persona: .kuro),
+        ShopItem(cardTop: "kuro.top.tennis.sakura", title: "樱色网球服", price: 40, card: .tennis, persona: .kuro),
+        ShopItem(cardTop: "kuro.top.gym.track", title: "运动外套", price: 30, base: .sport, persona: .kuro),
+        ShopItem(cardTop: "kuro.base.sport.tank", title: "运动背心", price: 40, base: .sport, persona: .kuro),
+        ShopItem(cardTop: "kuro.top.study.sweater", title: "圆领毛衣", price: 30, base: .outing, persona: .kuro),
+        ShopItem(cardTop: "kuro.base.outing.trench", title: "短风衣", price: 40, base: .outing, persona: .kuro),
+        ShopItem(cardTop: "kuro.top.art.smock", title: "画画罩衫", price: 30, base: .craft, persona: .kuro),
+        ShopItem(cardTop: "kuro.base.craft.pinafore", title: "背带裙", price: 40, base: .craft, persona: .kuro),
+        // HAKU's weekly items (商店完整目录 v0 §1.4), drawn in #383. The star badge (week 4) and the beanie
+        // (week 8) wait for their own wear slots.
+        ShopItem(weekly: "haku.weekly.headband.orange", slot: .headband, title: "橙色头带", price: 15, week: 1),
+        ShopItem(weekly: "haku.weekly.mask.dots", slot: .mask, title: "波点面罩", price: 18, week: 2),
+        ShopItem(weekly: "haku.weekly.room.cactus", slot: .room, title: "小仙人掌", price: 15, week: 3),
+        ShopItem(weekly: "haku.weekly.headband.mint", slot: .headband, title: "薄荷头带", price: 15, week: 5),
+        ShopItem(weekly: "haku.weekly.mask.bolt", slot: .mask, title: "闪电贴纸面罩", price: 18, week: 6),
+        ShopItem(weekly: "haku.weekly.room.speaker", slot: .room, title: "迷你音箱", price: 20, week: 7),
+        // The second character's (§2.4, approved 2026-10-14), off the shelf until wired into her figure. Her
+        // beanie (week 8) waits for the hat slot.
+        ShopItem(
+            weekly: "kuro.weekly.hair.mint", slot: .headband, title: "薄荷发圈", price: 15, week: 1, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.blanket.bear", slot: .mask, title: "小熊毯", price: 18, week: 2, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.room.succulent", slot: .room, title: "多肉盆栽", price: 15, week: 3, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.hair.cherry", slot: .headband, title: "樱桃发夹", price: 18, week: 4, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.hair.star", slot: .headband, title: "星星发圈", price: 15, week: 5, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.room.cloud", slot: .room, title: "云朵靠垫", price: 20, week: 6, persona: .kuro,
+            drawn: false),
+        ShopItem(
+            weekly: "kuro.weekly.room.nightlight", slot: .room, title: "小夜灯", price: 20, week: 7, persona: .kuro,
+            drawn: false),
     ]
 
     init(
@@ -541,15 +635,42 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         self.isDrawn = true
     }
 
+    // A prop without a price is the card's gold keepsake. The identity card's win carries the card.
+    init(prop id: String, title: String, price: Int? = nil, card: IdentityKind, persona: Persona = .haku) {
+        let keepsake = price == nil ? Keepsake(win: .boxing, count: 10, card: card) : nil
+        self.init(id: id, slot: .gloves, title: title, price: price, keepsake: keepsake, persona: persona, card: card)
+        isDrawn = false
+    }
+
     init(clothes id: String, slot: Slot, title: String, price: Int, mode: Mode, persona: Persona = .haku) {
         self.init(id: id, slot: slot, title: title, price: price, persona: persona)
         self.mode = mode
+    }
+
+    init(
+        weekly id: String, slot: Slot, title: String, price: Int, week: Int, persona: Persona = .haku,
+        drawn: Bool = true
+    ) {
+        self.init(id: id, slot: slot, title: title, price: price, persona: persona)
+        self.week = week
+        isDrawn = drawn
+    }
+
+    // The identity card lives in the boxing mode slot (ModeCards), so its clothes are worn there.
+    init(
+        cardTop id: String, title: String, price: Int, card: IdentityKind? = nil, base: BaseOutfit? = nil,
+        persona: Persona = .haku
+    ) {
+        self.init(id: id, slot: .top, title: title, price: price, persona: persona, card: card)
+        mode = .boxing
+        self.base = base
         isDrawn = false
     }
 
     /// Whether the shop offers it to someone who picked `card`.
     public func suits(_ card: IdentityKind?) -> Bool {
-        self.card == nil || self.card == card
+        if let base { return card?.baseOutfit(for: persona) == base }
+        return self.card == nil || self.card == card
     }
 
     // The identity card lives in the boxing mode slot (ModeCards), so its props show only there.
@@ -569,9 +690,35 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         catalog.filter { $0.persona == persona }
     }
 
-    /// The items `persona` can buy or earn that suit `card` and are drawn, in catalog order.
+    /// The items `persona` can buy or earn that suit `card` and are drawn, in catalog order, without weekly items.
     public static func catalog(for persona: Persona, card: IdentityKind?) -> [ShopItem] {
-        catalog(for: persona).filter { $0.isDrawn && $0.suits(card) }
+        catalog(for: persona).filter { $0.isDrawn && $0.week == nil && $0.suits(card) }
+    }
+
+    // 商店完整目录 v0 §1.4: weeks run Sunday to Saturday and count from the week of the character's first can
+    // entry. Weeks 0 and 1 have none, then the drawn weekly items take turns and start over, so none is gone for good.
+    /// `persona`'s weekly item on sale at `now`, or `nil` before her third week or when none is drawn.
+    public static func weekly(
+        for persona: Persona, ledger: CanLedger, now: Date, calendar: Calendar = .current
+    ) -> ShopItem? {
+        weekly(for: persona, from: catalog, ledger: ledger, now: now, calendar: calendar)
+    }
+
+    static func weekly(
+        for persona: Persona, from items: [ShopItem], ledger: CanLedger, now: Date, calendar: Calendar
+    ) -> ShopItem? {
+        let rotation = items.filter { $0.persona == persona && $0.isDrawn && $0.week != nil }
+            .sorted { ($0.week ?? 0) < ($1.week ?? 0) }
+        var sundays = calendar
+        sundays.firstWeekday = 1
+        guard !rotation.isEmpty, let first = ledger.only(persona).active.first?.at,
+            let start = sundays.dateInterval(of: .weekOfYear, for: first)?.start,
+            let current = sundays.dateInterval(of: .weekOfYear, for: now)?.start,
+            let days = sundays.dateComponents([.day], from: start, to: current).day
+        else { return nil }
+        let week = days / 7
+        guard week >= 2 else { return nil }
+        return rotation[(week - 2) % rotation.count]
     }
 }
 
@@ -640,6 +787,11 @@ public struct Wardrobe: Codable, Equatable, Sendable {
     public func isWearing(_ item: ShopItem) -> Bool {
         if let mode = item.mode { return clothes[mode] == item.id }
         return equipped[item.slot] == item.id
+    }
+
+    /// The ids worn in `mode`: every slot plus that mode's top or set.
+    public func worn(in mode: Mode) -> Set<String> {
+        Set(equipped.values).union(clothes[mode].map { [$0] } ?? [])
     }
 
     // A switched-away card's items stay stored, so switching back puts them on again. Ids this build

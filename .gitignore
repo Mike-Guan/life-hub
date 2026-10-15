@@ -6,3 +6,5 @@ DerivedData/
 .build/
 .swiftpm/
 *.xcresult
+__pycache__/
+*.pyc
