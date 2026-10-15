@@ -202,7 +202,7 @@ public struct CompanionView: View {
                 .padding(.top, 24)
                 .padding(.horizontal, 12)
                 .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
-                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: closeUp)
+                .animation(.smooth(duration: 0.35), value: closeUp)
 
             if welcomeStart != nil, let replay = welcomeReplay {
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
@@ -328,23 +328,12 @@ public struct CompanionView: View {
             .keyframeAnimator(initialValue: Squash(), trigger: pop) { content, value in
                 content.scaleEffect(x: value.x, y: value.y, anchor: .bottom)
             } keyframes: { _ in
-                KeyframeTrack(\.x) {
-                    CubicKeyframe(1.07, duration: 0.08)
-                    SpringKeyframe(1, duration: 0.35, spring: .bouncy)
-                }
-                KeyframeTrack(\.y) {
-                    CubicKeyframe(0.9, duration: 0.08)
-                    SpringKeyframe(1, duration: 0.35, spring: .bouncy)
-                }
+                Squash.tap()
             }
             .keyframeAnimator(initialValue: 0.0, trigger: cheer + inviteJumps) { content, lift in
                 content.offset(y: -lift)
             } keyframes: { _ in
-                KeyframeTrack {
-                    CubicKeyframe(0, duration: 0.05)
-                    SpringKeyframe(36, duration: 0.18)
-                    SpringKeyframe(0, duration: 0.45, spring: .bouncy)
-                }
+                Squash.jump()
             }
             .modifier(WatchFigureFrame(isEnabled: style == .watch))
         } else {
@@ -1120,13 +1109,19 @@ public struct CompanionView: View {
             moment: shownMoment
         )
         let candidates = lines.filter { $0 != bubble }
-        say((candidates.isEmpty ? lines : candidates).randomElement())
         // Taps during a one-off animation only get HAKU's reaction.
         let time = Date.now.timeIntervalSinceReferenceDate
-        guard celebration(at: time) == nil, taskDone(at: time) == nil, !stillOneOff(at: time) else { return }
+        let plays = celebration(at: time) == nil && taskDone(at: time) == nil && !stillOneOff(at: time)
         // The same body move as a poke on the watch (Mike 2026-10-07: one action library for phone and watch).
-        if let mode {
-            pokeKind = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on, busy: isBusy(life))
+        var poke: WatchPoke?
+        if plays, let mode {
+            poke = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on, busy: isBusy(life))
+        }
+        // The boxing duck and hook ends on its own line (身份卡第 3 轮 B2).
+        say(poke == .duckHook ? poke?.line : (candidates.isEmpty ? lines : candidates).randomElement())
+        guard plays else { return }
+        if let poke {
+            pokeKind = poke
             pokeStart = .now
         }
         onTap?()
@@ -1154,7 +1149,7 @@ public struct CompanionView: View {
         pokeKind = kind
         pokeStart = now
         if kind != .rollOver { pop += 1 }
-        say(kind.line)
+        say(kind.line, after: kind.lineDelay)
     }
 
     // QA §5.1: a shake drops the wrist and dims the watch screen, so the watch listens for up to 5 s more after
@@ -1243,12 +1238,17 @@ public struct CompanionView: View {
         say(invite, for: 5)
     }
 
-    private func say(_ text: String?, for seconds: Double = 2.4) {
+    private func say(_ text: String?, for seconds: Double = 2.4, after delay: Double = 0) {
         let text = text?.localized(for: .haku)
         bubbleTask?.cancel()
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
+        withAnimation(.smooth(duration: 0.3)) { bubble = delay > 0 ? nil : text }
         guard text != nil else { return }
         bubbleTask = Task {
+            if delay > 0 {
+                try? await Task.sleep(for: .seconds(delay))
+                guard !Task.isCancelled else { return }
+                withAnimation(.smooth(duration: 0.3)) { bubble = text }
+            }
             try? await Task.sleep(for: .seconds(seconds))
             guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: 0.2)) { bubble = nil }
@@ -1277,6 +1277,29 @@ private let previewWelcomes: [(String, Mode, ReturnReplay)] = {
 struct Squash {
     var x: CGFloat = 1
     var y: CGFloat = 1
+
+    // UI 审核 2026-10-13 (视觉现状 §2): every move eases back once and never springs past where it rests.
+    /// The squash on a tap: wide and low for 0.08 s, then back to 1 with an ease-out, no overshoot.
+    @KeyframesBuilder<Squash> static func tap() -> some Keyframes<Squash> {
+        KeyframeTrack(\.x) {
+            CubicKeyframe(1.07, duration: 0.08)
+            LinearKeyframe(1, duration: 0.3, timingCurve: .easeOut)
+        }
+        KeyframeTrack(\.y) {
+            CubicKeyframe(0.9, duration: 0.08)
+            LinearKeyframe(1, duration: 0.3, timingCurve: .easeOut)
+        }
+    }
+
+    // UI 审核 2026-10-13: at 36 the hair tips were cut flat by the top of the card at the peak; at 20 they kept 1 pt.
+    /// The hop on a cheer or an invite, in points up: a 1.5 pt dip, up to 18, back down to 0 with no bounce.
+    @KeyframesBuilder<Double> static func jump() -> some Keyframes<Double> {
+        KeyframeTrack {
+            LinearKeyframe(-1.5, duration: 0.1, timingCurve: .easeOut)
+            LinearKeyframe(18, duration: 0.18, timingCurve: .easeOut)
+            LinearKeyframe(0, duration: 0.32, timingCurve: .easeIn)
+        }
+    }
 }
 
 /// Lays the figure out for the watch's full-screen page: full width, 30 pt from the top, running off the bottom.

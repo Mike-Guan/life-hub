@@ -21,6 +21,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
     }
 
     private func show(invite: String?, need: CompanionNeed?, bedtime: Bedtime, offWork: Bool) {
+        AppFonts.register()
         // The app writes the snapshot; the notification only reads the current mode from it.
         // Off work shows the chill outfit the schedule is about to switch to.
         let mode = offWork ? .chill : AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))?.mode
