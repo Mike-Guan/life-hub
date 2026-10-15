@@ -8,10 +8,13 @@ app=$1
 out=build/watch-launch
 mkdir -p "$out"
 
-# The smallest screen first (40 mm, then 41 mm), where page 2 is tightest; else the newest watch.
+# The newest watchOS runtime (older ones can't run the app), smallest screen first, where page 2 is tightest.
 udid=$(xcrun simctl list devices available -j |
-  jq -r '[.devices | to_entries[] | select(.key | test("watchOS")) | .value[]] as $all
-    | ([$all[] | select(.name | test("40mm"))] + [$all[] | select(.name | test("41mm"))] + [$all | last])
+  jq -r '[.devices | to_entries[] | select(.key | test("watchOS"))
+      | {v: (.key | [scan("[0-9]+")] | map(tonumber)), d: .value}
+      | select(.d | length > 0)] | sort_by(.v) | last | .d // []
+    | ([.[] | select(.name | test("40mm"))] + [.[] | select(.name | test("41mm"))]
+      + [.[] | select(.name | test("42mm"))] + [last])
     | first | .udid')
 echo "::notice::Watch simulator: $(xcrun simctl list devices | grep "$udid" | sed 's/^ *//')"
 if [[ -z "$udid" || "$udid" == "null" ]]; then
