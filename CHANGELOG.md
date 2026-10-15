@@ -658,3 +658,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   TestFlight release workflow for STG and PROD.
 - With the rain or picnic set's hat on, the second preset character's full-energy stars sit above the brim
   instead of on it.
+- The second preset character has the art for her new pose, dozing off hugging her tablet. It stays hidden
+  until it is wired to dozing.
