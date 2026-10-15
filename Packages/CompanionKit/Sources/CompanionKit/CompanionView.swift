@@ -320,7 +320,9 @@ public struct CompanionView: View {
                     // HAKU-04: a new bit at home starts with a quick squash instead of parts just swapping.
                     let turn = reduceMotion ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
                     let posed = pose(mode, life: life, time: time, react: react)
-                    let dressed = posed.dressed(for: card, in: mode, watch: style == .watch)
+                    let dressed = posed.dressed(
+                        for: card, in: mode, watch: style == .watch, time: reduceMotion ? nil : time
+                    )
                     RunnerFigure(mode: mode, pose: glance(dressed.wearing(wardrobeOutfit).leaving(traces)))
                         .saturation(vitals.saturation)
                         .brightness(vitals.brightness)
@@ -523,6 +525,7 @@ public struct CompanionView: View {
             life: life,
             activity: activity,
             moment: shownMoment,
+            card: card,
             react: react
         )
         pose.codingCans = codingCans

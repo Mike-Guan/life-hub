@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- HAKU dresses for the dance, music and ski cards, each with its own idle now and then: it bobs to a small
+  speaker as notes float up and stops when caught, plays air chords by a ukulele while counting silently, or
+  pulls its ski goggles down and back and breathes out a white puff. The watch leaves out the speaker and the
+  fist, and raises the ukulele into view. The cards stay out of the picker for now.
+- The second preset character has her own seven weekly items, in her own rotation. They go on sale once
 - Two new wear slots for weekly items: a badge on the clothes, worn in every mode, and a hat, worn only in
   下班. HAKU's star badge and both characters' beanies use them and go on sale once their art is in.
 - The second preset character has her own eight weekly items, in her own rotation. They go on sale once

@@ -205,6 +205,13 @@ enum PlacementPoses {
                     }
                 }
             }
+            // The look's own idle, every 0.1 s.
+            guard let length = RunnerCardLook(card: card)?.beatLength else { continue }
+            for step in 0..<Int(length * 10) {
+                var pose = RunnerPose(face: .mid).dressed(for: card, in: .boxing)
+                pose.cardBeat = CGFloat(step) / 10
+                all.append(Haku(label: "card.\(card.rawValue) beat \(pose.cardBeat)", mode: .boxing, pose: pose))
+            }
         }
         return all
     }
