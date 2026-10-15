@@ -354,7 +354,7 @@ public enum NeedEngine {
         if let slacking = slacking(signals, now: now, rules: rules, work: work, calendar: calendar) {
             return slacking
         }
-        if let sitting = sitting(signals, now: now, work: work, calendar: calendar) { return sitting }
+        if let sitting = sitting(signals, now: now, rules: rules, work: work, calendar: calendar) { return sitting }
         let boxing = boxingWarmup(signals, now: now, rules: rules, calendar: calendar)
         if boxing != nil, now < time(rules.boxingFirstUntilMinute, on: now, calendar: calendar) {
             return boxing
@@ -527,7 +527,8 @@ public enum NeedEngine {
         let evening = time(rules.eveningStartMinute, on: now, calendar: calendar)
         let since = max(start.addingTimeInterval(rules.stillFor), evening)
         guard since <= now else { return nil }
-        let reason = "在家 \(Int(now.timeIntervalSince(start) / 60)) 分钟没怎么动了，我也瘫着"
+        let minutes = Int(now.timeIntervalSince(start) / 60)
+        let reason = String(format: "在家 %@ 分钟没怎么动了，我也瘫着".localized(for: rules.persona), "\(minutes)")
         return NeedReading(need: .couchScroll, since: since, reasons: [reason])
     }
 
@@ -550,10 +551,12 @@ public enum NeedEngine {
     }
 
     private static func boxingReason(_ persona: Persona) -> String {
-        switch persona {
-        case .haku: "今天打拳，拳套我戴好了"
-        case .kuro: "今天网球。……拍子带好了。"
-        }
+        let text =
+            switch persona {
+            case .haku: "今天打拳，拳套我戴好了"
+            case .kuro: "今天网球。……拍子带好了。"
+            }
+        return text.localized(for: persona)
     }
 
     // Needs a known home: the invite is for still being at home, so an unknown place says nothing.
@@ -574,13 +577,15 @@ public enum NeedEngine {
         let trained = signals.workouts.contains { $0.kind != .running && $0.end >= midnight }
         let trainedToday = (signals.trainedDay ?? .distantPast) >= StateEngine.dayStart(for: now, calendar: calendar)
         guard !trained, !trainedToday else { return nil }
-        return NeedReading(need: .gymDay, since: start, reasons: ["健身日，包我背好了"], until: end)
+        let reason = "健身日，包我背好了".localized(for: rules.persona)
+        return NeedReading(need: .gymDay, since: start, reasons: [reason], until: end)
     }
 
     private static func screenTimeCouch(_ signals: NeedSignals, now: Date, rules: NeedRules) -> NeedReading? {
         guard let reached = signals.scrollThresholdAt else { return nil }
         // The Lock Screen shows this, so it doesn't name the apps.
-        let reading = NeedReading(need: .couchScroll, since: reached, reasons: ["手机刷够久了，我也瘫着"])
+        let reason = "手机刷够久了，我也瘫着".localized(for: rules.persona)
+        let reading = NeedReading(need: .couchScroll, since: reached, reasons: [reason])
         return ongoing(reading, seen: signals.scrollSeenAt, signals: signals, now: now, rules: rules)
     }
 
@@ -594,7 +599,8 @@ public enum NeedEngine {
     ) -> NeedReading? {
         guard let reached = signals.slackThresholdAt else { return nil }
         guard ModeEngine.scheduledMode(at: reached, rules: work, calendar: calendar) == .work else { return nil }
-        let reading = NeedReading(need: .slacking, since: reached, reasons: ["上班时间，我帮你望风"])
+        let reason = "上班时间，我帮你望风".localized(for: rules.persona)
+        let reading = NeedReading(need: .slacking, since: reached, reasons: [reason])
         return ongoing(reading, seen: signals.slackSeenAt, signals: signals, now: now, rules: rules)
     }
 
@@ -602,6 +608,7 @@ public enum NeedEngine {
     private static func sitting(
         _ signals: NeedSignals,
         now: Date,
+        rules: NeedRules,
         work: ModeRules,
         calendar: Calendar
     ) -> NeedReading? {
@@ -611,7 +618,8 @@ public enum NeedEngine {
         guard ModeEngine.scheduledMode(at: now, rules: work, calendar: calendar) == .work else { return nil }
         let since = stiff.addingTimeInterval(TimeInterval(SitEngine.idleHours) * 60 * 60)
         let until = sit.checkedAt.addingTimeInterval(SitEngine.freshFor)
-        return NeedReading(need: .sitting, since: since, reasons: ["坐了好久，我腰先不行了"], until: until)
+        let reason = "坐了好久，我腰先不行了".localized(for: rules.persona)
+        return NeedReading(need: .sitting, since: since, reasons: [reason], until: until)
     }
 
     // Screen Time reports every few minutes of use, never when use stops. The need lasts while reports

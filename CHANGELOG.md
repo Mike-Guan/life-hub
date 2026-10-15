@@ -110,6 +110,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
   over the hair while sitting up. After the off-work
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
+- With languages on, the small line under the character that says why it looks that way (gym day, couch, sitting
+  too long, keeping watch at work) follows the phone's language where a translation exists.
 - Today's energy has its own line under the character, saying where it comes from. When it is a guess from
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
 - Full energy is easier to tell apart from okay: HAKU's deadpan eyes open a notch with a glint, and KURO's eyes
