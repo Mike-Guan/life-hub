@@ -63,7 +63,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- An unset bedtime's times in Settings are grey without the extra fade, so they stay readable.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
@@ -215,6 +214,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   picked apps (it reports every 10 more minutes of use), as soon as you walk, or when you change mode by
   hand. Before, it lay on the couch for 3 hours after the daily 30 minutes.
 - Cans have caps: Sunday boxing earns once a week; runs, the gym and other wins once a day.
+- An unset bedtime's times in Settings are grey without the extra fade, so they stay readable.
 - The companion is called HAKU everywhere you see it: the widget name, notifications, Settings and
   VoiceOver. Code names stay RUNNER.
 - Tapping HAKU on the phone plays the same body move as on the watch (pushes up a headset cup, clinks the can,
