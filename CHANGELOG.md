@@ -5,7 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
-- The second preset character has her own seven weekly items, in her own rotation. They go on sale once
+- Two new wear slots for weekly items: a badge on the clothes, worn in every mode, and a hat, worn only in
+  下班. HAKU's star badge and both characters' beanies use them and go on sale once their art is in.
+- The second preset character has her own eight weekly items, in her own rotation. They go on sale once
   their art is in.
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
