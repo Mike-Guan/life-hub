@@ -3,6 +3,7 @@ import SwiftUI
 
 // Preview v3 (Issue #237): a Toy sheet at the bottom over a dim layer, 算了 on the left and the red answer on
 // the right. Used in place of the system confirmation dialog, which can't take the Toy style.
+// The texts come in as String, which Text shows as is, so each is looked up in the catalog here.
 /// Asks before something is deleted or a step is skipped. Tapping the dim layer cancels.
 struct ToyConfirmSheet: View {
     let question: String
@@ -23,10 +24,11 @@ struct ToyConfirmSheet: View {
             Toy.ink.opacity(0.25)
                 .ignoresSafeArea()
                 .onTapGesture(perform: onCancel)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 12) {
-                Text(question)
+                Text(question.localized)
                     .font(Toy.body(17, weight: .heavy))
-                Text(warning)
+                Text(warning.localized)
                     .font(Toy.body(13))
                     .foregroundStyle(Toy.muted)
                 HStack(spacing: 12) {
@@ -39,12 +41,16 @@ struct ToyConfirmSheet: View {
             .padding(18)
             .toyCard(radius: 22, shadow: 5)
             .padding(12)
+            // 交付差距 v1 工程 #16: VoiceOver stays inside the sheet, and the two-finger scrub cancels.
+            .accessibilityElement(children: .contain)
+            .accessibilityAddTraits(.isModal)
+            .accessibilityAction(.escape, onCancel)
         }
     }
 
     private func button(_ title: String, fill: Color, text: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
+            Text(title.localized)
                 .font(Toy.body(15, weight: .heavy))
                 .foregroundStyle(text)
                 .frame(maxWidth: .infinity, minHeight: 48)

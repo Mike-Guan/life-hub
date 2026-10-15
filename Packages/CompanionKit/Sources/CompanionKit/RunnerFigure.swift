@@ -198,6 +198,8 @@ struct RunnerPose {
     var outfit = Outfit()
     /// What HAKU wears for an identity card other than boxing, or nil for the boxing kit.
     var cardLook: RunnerCardLook?
+    /// Whether the user's identity card is one other than boxing, in any mode.
+    var otherCard = false
     /// Seconds into the card look's own idle, or -1 when it isn't playing.
     var cardBeat: CGFloat = -1
     /// Drawn in the watch's frame, whose bottom edge would leave only a scrap of what stands on the floor.
@@ -410,7 +412,8 @@ struct RunnerPose {
         case .collapsed:
             slump = Self.collapse
             blink = 0.15
-        case .blanket:
+        // Until the dozing pose is approved, dozing looks like the blanket.
+        case .blanket, .dozing:
             blink = 0.4
             headDy = 2
         case .morning:
@@ -742,7 +745,7 @@ struct RunnerPose {
             slump = Self.collapse
             blink = 0.15
             headDy = CGFloat(sin(t * 2 * .pi / 4))
-        case .blanket:
+        case .blanket, .dozing:
             // Wrapped up, eyes half shut, sinking a little.
             blink = max(0.15, 0.4 * Self.blink(at: t * 0.5))
             headDy = 2 + CGFloat(sin(t * 2 * .pi / 5))
@@ -1534,7 +1537,8 @@ struct RunnerFigure: View {
             visible.formUnion(couchParts)
         }
         if pose.need == .boxingWarmup, !pose.bedtime {
-            visible.formUnion(warmupParts)
+            // 写死作息 #5 (PM 10/15): another card's warm-up keeps the boxing kit off; its lines carry it.
+            if !pose.otherCard { visible.formUnion(warmupParts) }
             visible.remove(.monsterCan)
         }
         if pose.bagLift >= 0, !pose.bedtime { visible.insert(.gymBag) }
@@ -1610,7 +1614,7 @@ struct RunnerFigure: View {
             visible.formUnion(moneyParts)
         case .collapsed:
             visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .sofaArm])
-        case .blanket:
+        case .blanket, .dozing:
             visible.formUnion([.blanket, .eyesSleepy, .maskDown, .earringNeon])
         case .morning:
             visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .toothbrush])
@@ -2557,7 +2561,8 @@ public struct CompanionPortrait: View {
                 peeking: peeking,
                 activity: activity,
                 moment: activity == nil ? moment : nil,
-                bedtime: bedtime
+                bedtime: bedtime,
+                card: card
             )
         )
     }
