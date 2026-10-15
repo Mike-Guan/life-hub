@@ -405,6 +405,10 @@ private struct HomeSheetView: View {
         case .item(.bag): "figure.boxing"
         case .item(.cactus): "camera.macro"
         case .item(.speaker): "hifispeaker.fill"
+        case .item(.gloves): "figure.boxing"
+        case .item(.racket): "tennis.racket"
+        case .item(.snowboard): "figure.snowboarding"
+        case .item(.bench): "dumbbell.fill"
         case .outfit: "tshirt.fill"
         }
     }
