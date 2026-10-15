@@ -288,6 +288,10 @@ public struct CompanionView: View {
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
         }
+        // C13 (动作展示总表): leaving the office lets go of the held off-work pose, also before the mode changes.
+        .onChange(of: walking) { _, new in
+            if new == .office, offWork(at: Date.now.timeIntervalSinceReferenceDate) == nil { offWorkStart = nil }
+        }
         .onChange(of: nods) { _, _ in nodStart = .now }
         .onChange(of: asleep) { _, new in
             guard style == .watch else { return }
@@ -473,7 +477,7 @@ public struct CompanionView: View {
         }
         // HAKU-02 (UI 审核 2026-10-13): once it has played, the off-work pose holds until the mode really changes,
         // instead of putting the headset back on.
-        if mode == .work, let start = offWorkStart?.timeIntervalSinceReferenceDate, time >= start {
+        if Self.holdsOffWork(since: offWorkStart, mode: mode, at: Date(timeIntervalSinceReferenceDate: time)) {
             return RunnerPose.offWork(time: time, progress: 1, face: face)
         }
         if let progress = stayHome(at: time) {
@@ -638,6 +642,14 @@ public struct CompanionView: View {
                     closeUp = false
                 }
             }
+    }
+
+    /// Whether the off-work pose that played from `start` still holds at `date` in `mode`: in work mode, the same day.
+    nonisolated static func holdsOffWork(since start: Date?, mode: Mode, at date: Date, calendar: Calendar = .current)
+        -> Bool
+    {
+        guard mode == .work, let start, date >= start else { return false }
+        return calendar.isDate(start, inSameDayAs: date)
     }
 
     /// Starts the notice turn as the app opens, as a slow look up when the app was closed for half a day.

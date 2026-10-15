@@ -57,6 +57,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
   colour instead of her own top, and her "…" bubble moves up off a set hat.
+- After the off-work animation, HAKU no longer stays slumped in 上班 for the rest of the evening: leaving the
+  office or the next day puts the headset back on.
 - The shop catalogue has a prop colour and a gold prop (earned on the card's 10th win) for the other
   first-batch identity cards of each character. They go on sale once the character art draws them; a gold prop
   earned before its art is done is granted on the card's next win after that.
