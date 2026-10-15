@@ -1312,7 +1312,7 @@ import Testing
         pose.swapping = true
         pose.lift = 0
         let parts = RunnerFigure.parts(for: .work, pose: pose)
-        #expect(parts.contains(.sparkle))
+        #expect(parts.contains(.sparkleWork))
         #expect(!parts.contains(.peaceHand))
         #expect(pose.dumbbellRise == 0)
         #expect(pose.holdsCardProps)
