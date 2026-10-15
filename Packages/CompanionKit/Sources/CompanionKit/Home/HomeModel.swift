@@ -90,12 +90,20 @@ enum HomeProduct: Hashable, Sendable {
     case outfit(HomeOutfit)
 
     static let all: [HomeProduct] = [
-        .item(.plant), .item(.bag), .item(.cactus), .item(.speaker), .outfit(.flame), .outfit(.varsity),
+        .item(.plant), .item(.bag), .item(.cactus), .item(.speaker), .item(.bench), .item(.snowboard),
+        .outfit(.flame), .outfit(.varsity),
     ]
 
-    /// What the shop offers with `card` as the identity card: the bag is a boxing card item.
+    /// What the shop offers with `card` as the identity card: the bag is a boxing card item, the snowboard a ski
+    /// card item.
     static func offered(card: IdentityKind) -> [HomeProduct] {
-        all.filter { $0 != .item(.bag) || card == .boxing }
+        all.filter { product in
+            switch product {
+            case .item(.bag): card == .boxing
+            case .item(.snowboard): card == .ski
+            default: true
+            }
+        }
     }
 
     var name: String {
@@ -104,6 +112,10 @@ enum HomeProduct: Hashable, Sendable {
         case .item(.bag): "小沙袋"
         case .item(.cactus): "小仙人掌"
         case .item(.speaker): "迷你音箱"
+        case .item(.gloves): "墙上的拳套"
+        case .item(.racket): "网球拍"
+        case .item(.snowboard): "滑雪板"
+        case .item(.bench): "卧推架"
         case .outfit(let o): o.name
         }
     }
@@ -114,6 +126,10 @@ enum HomeProduct: Hashable, Sendable {
         case .item(.bag): 15
         case .item(.cactus): 15
         case .item(.speaker): 20
+        case .item(.bench): 25
+        case .item(.snowboard): 20
+        // The gear on the wall is what the user already owns, hung up while not worn; it is never sold.
+        case .item(.gloves), .item(.racket): 0
         case .outfit(let o): o.price ?? 0
         }
     }
@@ -122,9 +138,12 @@ enum HomeProduct: Hashable, Sendable {
     var place: String {
         switch self {
         case .item(.plant): "门口角落"
-        case .item(.bag): "窗边，拳击日打它"
+        case .item(.bag): "运动角，拳击日打它"
         case .item(.cactus): "书桌上"
         case .item(.speaker): "沙发旁边，下班时放歌"
+        case .item(.gloves), .item(.racket): "运动角的墙上"
+        case .item(.snowboard): "靠在运动角的墙上"
+        case .item(.bench): "运动角，健身日他会用"
         case .outfit: "衣柜里，随时能换"
         }
     }
@@ -158,11 +177,17 @@ final class HomeModel {
     private(set) var spot: HomeSpot = .idle
     /// Where HAKU was dropped after being carried, until he walks somewhere.
     private(set) var dropPoint: GridPoint?
+    /// Seconds until HAKU leaves a place he was sent to or dropped at and goes back to the mode's spot.
+    private(set) var visitLeft: Double?
     private(set) var energy: Double = 62
     private(set) var cans = 46
     private(set) var outfit: HomeOutfit = .jacket
     private(set) var ownedOutfits: Set<HomeOutfit> = [.jacket, .blazer, .aloha]
-    private(set) var items: Set<HomeItem> = []
+    /// The items standing in the room: the bought ones, or all of them while previewing.
+    var items: Set<HomeItem> { previewsAllItems ? Set(HomeItem.allCases) : bought }
+    private(set) var bought: Set<HomeItem> = []
+    /// Whether the room shows every item, bought or not, to see where each one goes.
+    private(set) var previewsAllItems = false
     private(set) var colors: [HomePaintable: Int] = [:]
     var isNight: Bool
     /// What HAKU says on the card.
@@ -207,7 +232,7 @@ final class HomeModel {
         mode = new
         timeline.append(HomeTimelineEntry(time: time, mode: new, title: title(new)))
         energy = max(5, min(100, energy + Self.energyCost(new)))
-        go(Self.spot(for: new, card: card, hasBag: items.contains(.bag)))
+        go(modeSpot)
         line = Self.modeLine(new, card: card, hasBag: items.contains(.bag))
     }
 
@@ -216,25 +241,25 @@ final class HomeModel {
         switch hotspot {
         case .haku: tapHaku(at: date)
         case .desk:
-            go(mode == .money ? .side : .work)
+            visit(mode == .money ? .side : .work)
             line = "坐一会儿。不一定干活。"
         case .sofa:
-            go(.sofa)
+            visit(.sofa)
             line = energy < 35 ? "沙发是我的。今天电量不够。" : "沙发是我的。"
         case .bed:
-            go(.rest)
+            visit(.rest)
             line = "……再五分钟。"
         case .bag:
-            go(.box)
+            visit(.box)
             line = "左、右、左。"
         case .window:
-            go(.window)
+            visit(.window)
             line = isNight ? "楼下的灯还亮着。" : "今天天气还行。"
         case .wardrobe:
-            go(.wardrobe)
+            visit(.wardrobe)
             line = "穿什么都一样帅。"
         case .shop:
-            go(.shop)
+            visit(.shop)
             line = "罐子要花在刀刃上。"
         case .shelf:
             line = "这些都是真的发生过的。"
@@ -251,7 +276,7 @@ final class HomeModel {
         cans -= product.price
         switch product {
         case .item(let item):
-            items.insert(item)
+            bought.insert(item)
             cues.append(.placed(item))
             line = "……行吧，放这儿挺好。"
         case .outfit(let o):
@@ -265,7 +290,7 @@ final class HomeModel {
     /// Whether `product` is already bought.
     func owns(_ product: HomeProduct) -> Bool {
         switch product {
-        case .item(let item): items.contains(item)
+        case .item(let item): bought.contains(item)
         case .outfit(let o): ownedOutfits.contains(o)
         }
     }
@@ -286,6 +311,12 @@ final class HomeModel {
         changed()
     }
 
+    /// Shows or hides every item, bought or not.
+    func togglePreviewItems() {
+        previewsAllItems.toggle()
+        changed()
+    }
+
     func toggleNight() {
         isNight.toggle()
         line = isNight ? "天黑了。灯开着就行。" : "天亮了。"
@@ -295,14 +326,15 @@ final class HomeModel {
     /// HAKU was carried and let go over `hotspot`, or over the floor at `point`.
     func drop(on hotspot: HomeHotspot?, at point: GridPoint) {
         switch hotspot {
-        case .sofa: go(.sofa)
-        case .bed: go(.rest)
-        case .desk: go(mode == .money ? .side : .work)
-        case .bag: go(.box)
+        case .sofa: visit(.sofa)
+        case .bed: visit(.rest)
+        case .desk: visit(mode == .money ? .side : .work)
+        case .bag: visit(.box)
         default:
-            let inside = GridPoint(x: min(max(point.x, 2.4), 6.2), y: min(max(point.y, 3.2), 9.4))
-            dropPoint = inside
+            // Dropped on something HAKU can't stand on: he lands on the nearest open floor.
+            dropPoint = HomeNav.room(items: items).nearestOpen(to: point)
             spot = .idle
+            visitLeft = Self.landingPause
             cues.append(.bounce)
         }
         line = "……放我下来就行。"
@@ -317,6 +349,14 @@ final class HomeModel {
 
     /// Advances resting: energy climbs slowly while HAKU lies in bed.
     func tick(_ seconds: Double) {
+        if let left = visitLeft {
+            if left > seconds {
+                visitLeft = left - seconds
+            } else {
+                go(modeSpot)
+                changed()
+            }
+        }
         guard spot == .rest, energy < 100 else { return }
         let before = Int(energy)
         energy = min(100, energy + seconds * 0.8)
@@ -345,10 +385,27 @@ final class HomeModel {
         cues.append(.bounce)
     }
 
+    // PM 家 功能范围 v0: tapping furniture or dropping HAKU somewhere is a short visit, not a mode change.
+    private func visit(_ next: HomeSpot) {
+        go(next)
+        if next != modeSpot { visitLeft = Self.visitLength }
+    }
+
     private func go(_ next: HomeSpot) {
         dropPoint = nil
+        visitLeft = nil
         spot = next
     }
+
+    /// Where the current mode puts HAKU.
+    var modeSpot: HomeSpot {
+        Self.spot(for: mode, card: card, hasBag: items.contains(.bag))
+    }
+
+    /// How long a visit lasts, in seconds.
+    static let visitLength = 30.0
+    /// How long HAKU stands where he was dropped before walking back.
+    static let landingPause = 1.5
 
     private func changed() {
         revision += 1

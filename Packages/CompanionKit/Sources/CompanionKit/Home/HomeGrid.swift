@@ -131,7 +131,7 @@ enum HomeHotspot: String, CaseIterable, Sendable {
 enum HomePiece: String, CaseIterable, Sendable {
     case desk, chairSeat, chairBack, shelf, posters
     case sofaBack, sofaFarArm, sofaSeat, sofaNearArm, table, rug
-    case partition, wardrobe, shop, bed, blanket, nightstand, floorLamp, windowPlant, doormat
+    case wardrobe, shop, bed, blanket, nightstand, floorLamp, doormat
 
     /// The boxes the piece's drawing fills.
     var boxes: [GridBox] {
@@ -147,14 +147,12 @@ enum HomePiece: String, CaseIterable, Sendable {
         case .sofaNearArm: [GridBox(x0: 0.7, y0: 7.0, x1: 2.2, y1: 7.6, z1: 1.0)]
         case .table: [GridBox(x0: 3.0, y0: 5.1, x1: 4.4, y1: 6.3, z1: 1.0)]
         case .rug: [GridBox(x0: 2.6, y0: 3.8, x1: 6.0, y1: 8.2, z1: 0)]
-        case .partition: [GridBox(x0: 6.4, y0: 0, x1: 6.6, y1: 2.2, z1: 6.2)]
         case .wardrobe: [GridBox(x0: 6.8, y0: 0, x1: 8.9, y1: 1.3, z1: 4.9)]
         case .shop: [GridBox(x0: 9.0, y0: 0.1, x1: 10, y1: 1.2, z1: 3.8)]
         case .bed: [GridBox(x0: 6.6, y0: 4.8, x1: 9.6, y1: 8.8, z1: 1.7)]
         case .blanket: [GridBox(x0: 6.55, y0: 6.0, x1: 9.65, y1: 8.85, z1: 1.0)]
         case .nightstand: [GridBox(x0: 9.0, y0: 3.6, x1: 9.9, y1: 4.5, z1: 2.0)]
         case .floorLamp: [GridBox(x0: 0.2, y0: 8.1, x1: 0.8, y1: 8.7, z1: 3.0)]
-        case .windowPlant: [GridBox(x0: 5.2, y0: 0.3, x1: 6.2, y1: 1.3, z1: 3.2)]
         case .doormat: [GridBox(x0: 3.6, y0: 9.0, x1: 5.6, y1: 10, z1: 0.05)]
         }
     }
@@ -172,14 +170,20 @@ enum HomePiece: String, CaseIterable, Sendable {
         case .sofaSeat: 7.3
         case .sofaNearArm: 9.0
         case .table: 9.4
-        case .partition: 7.6
-        case .windowPlant: 6.4
         case .wardrobe: 8.5
         case .shop: 10.1
         case .bed: 13.2
         case .blanket: 15.0
         case .nightstand: 13.4
         case .floorLamp: 8.9
+        }
+    }
+
+    /// Whether HAKU walks around the piece.
+    var blocksWalking: Bool {
+        switch self {
+        case .shelf, .posters, .rug, .doormat, .blanket: false
+        default: true
         }
     }
 
@@ -201,32 +205,52 @@ enum HomePiece: String, CaseIterable, Sendable {
 /// An item from the shop that stands in the room.
 enum HomeItem: String, CaseIterable, Sendable {
     case plant, bag, cactus, speaker
+    // The sports corner: gloves, racket and snowboard hang on the back wall, the bench stands under them.
+    case gloves, racket, snowboard, bench
 
-    /// Where the item stands.
+    /// Where the item stands, or hangs.
     var spot: GridPoint {
         switch self {
-        case .plant: GridPoint(x: 0.8, y: 9.2)
-        case .bag: GridPoint(x: 5.7, y: 2.3)
-        case .cactus: GridPoint(x: 0.6, y: 3.0, z: 1.35)
-        case .speaker: GridPoint(x: 2.7, y: 8.7)
+        case .plant: GridPoint(x: 1.5, y: 9.3)
+        case .bag: GridPoint(x: 5.9, y: 3.1)
+        case .cactus: GridPoint(x: 0.6, y: 3.0, z: 1.36)
+        case .speaker: GridPoint(x: 2.6, y: 8.5)
+        case .gloves: GridPoint(x: 4.9, y: 0.15, z: 3.4)
+        case .racket: GridPoint(x: 5.45, y: 0.1, z: 3.3)
+        case .snowboard: GridPoint(x: 6.0, y: 0.1)
+        case .bench: GridPoint(x: 4.55, y: 2.0)
         }
     }
 
+    /// The floor the item takes up, or `nil` when it hangs on the wall or stands on furniture.
+    var footprint: GridBox? {
+        let s = spot
+        switch self {
+        case .cactus, .gloves, .racket, .snowboard: return nil
+        case .bench: return GridBox(x0: 3.9, y0: 1.0, x1: 5.2, y1: 3.0, z1: 1.9)
+        case .bag: return GridBox(x0: s.x - 0.4, y0: s.y - 0.4, x1: s.x + 0.4, y1: s.y + 0.4, z1: 2.5)
+        case .plant, .speaker: return GridBox(x0: s.x - 0.3, y0: s.y - 0.3, x1: s.x + 0.3, y1: s.y + 0.3, z1: 1)
+        }
+    }
+
+    /// Back to front, as `HomePiece.depth`.
     var depth: Double {
         switch self {
-        case .plant: 10.0
-        case .bag: 8.0
+        case .plant: 10.8
+        case .bag: 9.0
         case .cactus: 3.7
-        case .speaker: 11.4
+        case .speaker: 11.1
+        case .gloves, .racket, .snowboard: 0.6
+        case .bench: 6.55
         }
     }
 }
 
-/// A place HAKU goes to, with the way there from the middle of the rug.
+/// A place HAKU goes to, and the floor point he steps on or off it from.
 enum HomeSpot: String, CaseIterable, Sendable {
     case idle, work, side, sofa, rest, box, shadowbox, wardrobe, shop, window
 
-    /// The middle of the rug, where every walk passes through.
+    /// The middle of the rug, where HAKU waits.
     static let hub = GridPoint(x: 5.2, y: 6.6)
 
     /// Where HAKU's feet, seat or hips are.
@@ -235,25 +259,21 @@ enum HomeSpot: String, CaseIterable, Sendable {
         case .idle, .shadowbox: Self.hub
         case .work, .side: GridPoint(x: 2.05, y: 1.85, z: 0.75)
         case .sofa: GridPoint(x: 1.9, y: 6.0, z: 0.6)
-        case .rest: GridPoint(x: 8.1, y: 7.7, z: 0.65)
-        case .box: GridPoint(x: 4.6, y: 3.0)
+        case .rest: GridPoint(x: 8.0, y: 8.1, z: 0.65)
+        case .box: GridPoint(x: 5.2, y: 4.1)
         case .wardrobe: GridPoint(x: 7.85, y: 2.0)
-        case .shop: GridPoint(x: 9.5, y: 2.3)
-        case .window: GridPoint(x: 3.6, y: 1.1)
+        case .shop: GridPoint(x: 9.3, y: 2.0)
+        case .window: GridPoint(x: 2.3, y: 0.75)
         }
     }
 
-    /// Stops between the hub and the spot, in walking order.
-    var route: [GridPoint] {
+    /// The open floor next to a seat that HAKU walks to before getting on; the point itself elsewhere.
+    var approach: GridPoint {
         switch self {
-        case .idle, .shadowbox: []
-        case .work, .side: [GridPoint(x: 4.8, y: 4.4), GridPoint(x: 3.2, y: 2.4)]
-        case .sofa: [GridPoint(x: 2.6, y: 7.4)]
-        case .rest: [GridPoint(x: 6.0, y: 9.3)]
-        case .box: [GridPoint(x: 4.8, y: 4.4)]
-        case .wardrobe: [GridPoint(x: 6.0, y: 4.0), GridPoint(x: 7.4, y: 3.0)]
-        case .shop: [GridPoint(x: 6.0, y: 4.0), GridPoint(x: 8.4, y: 3.2)]
-        case .window: [GridPoint(x: 4.8, y: 4.4)]
+        case .work, .side: GridPoint(x: 3.1, y: 1.9)
+        case .sofa: GridPoint(x: 2.6, y: 6.9)
+        case .rest: GridPoint(x: 6.1, y: 7.6)
+        default: point
         }
     }
 
@@ -288,13 +308,16 @@ enum HomeSpot: String, CaseIterable, Sendable {
         }
     }
 
-    /// The walk from `start` to this spot: back out of where HAKU was, through the hub, then in.
-    func path(from start: GridPoint, leaving previous: HomeSpot?) -> [GridPoint] {
+    /// The walk from `start` to this spot: off the seat HAKU was on, the shortest way across the floor, then on.
+    func path(from start: GridPoint, leaving previous: HomeSpot?, nav: HomeNav) -> [GridPoint] {
         var points = [start]
-        if let previous, previous != self { points += previous.route.reversed() }
-        if previous != self { points.append(Self.hub) }
-        points += route
-        points.append(point)
+        var from = start
+        if let previous, previous != self, start.distance(to: previous.point) < 0.05 {
+            from = previous.approach
+            points.append(from)
+        }
+        points += nav.path(from: from, to: approach).dropFirst()
+        if approach != point { points.append(point) }
         // Drop stops that repeat the one before.
         return points.enumerated().compactMap { i, p in
             i > 0 && points[i - 1].distance(to: p) < 0.01 ? nil : p

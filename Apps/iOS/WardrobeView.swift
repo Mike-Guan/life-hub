@@ -11,6 +11,7 @@ struct WardrobeView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var previewMode: Mode
     @State private var shelf: WardrobeShelf = .clothes
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// - Parameters:
     ///   - persona: the character whose wardrobe it is.
@@ -57,6 +58,10 @@ struct WardrobeView: View {
             .padding(20)
             .frame(maxWidth: 560)
             .frame(maxWidth: .infinity)
+            // 动态: changing clothes, mode or shelf fades in over 0.25 s instead of cutting.
+            .animation(fade, value: wardrobe)
+            .animation(fade, value: previewMode)
+            .animation(fade, value: shelf)
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
@@ -178,17 +183,29 @@ struct WardrobeView: View {
     // UI 审核 R1: a label on the card covered the gloves, so it sits under the card.
     private var preview: some View {
         VStack(alignment: .leading, spacing: 8) {
-            PersonaPortrait(persona: persona, mode: previewMode, card: card, wardrobe: wardrobe.showing(card: card))
-                .frame(width: 210, height: 276)
-                .frame(maxWidth: .infinity, alignment: .bottom)
-                .frame(height: 300, alignment: .bottom)
-                .toyCard(fill: previewMode.color(for: persona))
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(previewDescription)
+            // The look's id changes with each outfit, so the old one fades out as the new one fades in.
+            ZStack {
+                PersonaPortrait(persona: persona, mode: previewMode, card: card, wardrobe: wardrobe.showing(card: card))
+                    .id(PreviewLook(mode: previewMode, worn: wardrobe.showing(card: card).worn(in: previewMode)))
+                    .transition(.opacity)
+            }
+            .frame(width: 210, height: 276)
+            .frame(maxWidth: .infinity, alignment: .bottom)
+            .frame(height: 300, alignment: .bottom)
+            .toyCard(fill: previewMode.color(for: persona))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(previewDescription)
             Text("锁屏上也是这样")
                 .font(Toy.body(13, weight: .heavy))
                 .foregroundStyle(Toy.muted)
         }
+    }
+
+    private var fade: Animation? { reduceMotion ? nil : .easeInOut(duration: 0.25) }
+
+    private struct PreviewLook: Hashable {
+        let mode: Mode
+        let worn: Set<String>
     }
 
     /// What VoiceOver reads for the preview: the mode's own name and what is worn in it.

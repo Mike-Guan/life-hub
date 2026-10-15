@@ -23,7 +23,7 @@ import Testing
         let solid = HomePiece.allCases.filter { $0.depth > 1 && $0 != .blanket }
         for from in HomeSpot.allCases {
             for to in HomeSpot.allCases {
-                let stops = to.path(from: from.point, leaving: from)
+                let stops = to.path(from: from.point, leaving: from, nav: .room())
                 for (a, b) in zip(stops, stops.dropFirst()) {
                     // Getting off or onto a seat crosses its own furniture; everything else stays clear.
                     if seats.contains(from), a == from.point { continue }
@@ -49,10 +49,40 @@ import Testing
     }
 
     @Test func aWalkEndsAtItsLastStop() {
-        let walk = HomeWalk(stops: HomeSpot.box.path(from: HomeSpot.hub, leaving: .idle))
+        let walk = HomeWalk(stops: HomeSpot.box.path(from: HomeSpot.hub, leaving: .idle, nav: .room()))
         #expect(walk.position(after: 0).point == HomeSpot.hub)
         #expect(walk.position(after: walk.length + 1).point == HomeSpot.box.point)
-        #expect(walk.length > 3)
+        #expect(walk.length > 2)
+    }
+
+    @Test func everySpotIsReachedFromOpenFloor() {
+        let nav = HomeNav.room(items: Set(HomeItem.allCases))
+        for spot in HomeSpot.allCases {
+            #expect(nav.isOpen(spot.approach), "\(spot) steps on from blocked floor")
+        }
+    }
+
+    @Test func walksGoStraightThereInsteadOfThroughTheRug() {
+        let stops = HomeSpot.window.path(from: HomeSpot.box.point, leaving: .box, nav: .room())
+        let walk = HomeWalk(stops: stops)
+        #expect(!stops.contains(HomeSpot.hub))
+        #expect(walk.length < HomeSpot.box.point.distance(to: HomeSpot.window.point) + 0.5)
+    }
+
+    @Test func walksBetweenSeatsStepOffAndOn() {
+        let stops = HomeSpot.rest.path(from: HomeSpot.sofa.point, leaving: .sofa, nav: .room())
+        #expect(stops[1] == HomeSpot.sofa.approach)
+        #expect(stops[stops.count - 2] == HomeSpot.rest.approach)
+        #expect(stops.last == HomeSpot.rest.point)
+    }
+
+    @Test func aBlockedPointMovesToTheNearestOpenFloor() {
+        let nav = HomeNav.room()
+        let inWardrobe = GridPoint(x: 7.8, y: 0.6)
+        #expect(!nav.isOpen(inWardrobe))
+        let landed = nav.nearestOpen(to: inWardrobe)
+        #expect(nav.isOpen(landed))
+        #expect(landed.distance(to: inWardrobe) < 1.6)
     }
 
     @Test func aPolygonHoldsItsMiddle() {
@@ -124,13 +154,15 @@ import Testing
         #expect(model.takeCues().last == .annoyed)
     }
 
-    @Test func droppedOnTheSofaHeSitsAndOnTheFloorHeStaysOnTheRug() {
+    @Test func droppedOnASeatHeUsesItAndElsewhereHeLandsOnOpenFloor() throws {
         let model = HomeModel(night: false)
         model.drop(on: .sofa, at: GridPoint(x: 1, y: 6))
         #expect(model.spot == .sofa)
-        model.drop(on: nil, at: GridPoint(x: 9.5, y: 0.5))
-        let p = model.dropPoint
-        #expect(p == GridPoint(x: 6.2, y: 3.2))
+        model.drop(on: .bed, at: GridPoint(x: 9, y: 5))
+        #expect(model.spot == .rest)
+        model.drop(on: .shop, at: GridPoint(x: 9.5, y: 0.5))
+        let p = try #require(model.dropPoint)
+        #expect(HomeNav.room().isOpen(p))
     }
 
     @Test func energyComesBackOnlyInBed() {
@@ -143,12 +175,51 @@ import Testing
         #expect(model.energy > start)
     }
 
+    @Test func aVisitEndsBackAtTheModesSpot() {
+        let model = HomeModel(night: true)
+        model.switchMode(.work)
+        model.tap(.bed)
+        #expect(model.spot == .rest)
+        model.tick(HomeModel.visitLength - 1)
+        #expect(model.spot == .rest)
+        model.tick(2)
+        #expect(model.spot == .work)
+    }
+
+    @Test func droppedOnTheFloorHeWalksBackAfterAMoment() {
+        let model = HomeModel(night: true)
+        model.switchMode(.chill)
+        model.drop(on: nil, at: GridPoint(x: 5, y: 8))
+        #expect(model.dropPoint != nil)
+        model.tick(HomeModel.landingPause + 0.1)
+        #expect(model.dropPoint == nil)
+        #expect(model.spot == .sofa)
+    }
+
     @Test func paintingPicksASwatch() {
         let model = HomeModel(night: false)
         model.paint(.sofa, 2)
         #expect(model.color(.sofa) == HomePaintable.sofa.swatches[2])
         model.paint(.sofa, 9)
         #expect(model.color(.sofa) == HomePaintable.sofa.swatches[2])
+    }
+
+    @Test func thePreviewShowsEveryItemWithoutBuyingIt() {
+        let model = HomeModel(night: false, cans: 10)
+        model.togglePreviewItems()
+        #expect(model.items == Set(HomeItem.allCases))
+        #expect(model.cans == 10)
+        #expect(!model.owns(.item(.bench)))
+        model.togglePreviewItems()
+        #expect(model.items.isEmpty)
+    }
+
+    @Test func wallGearIsNeverSoldAndTheSnowboardOnlyOnTheSkiCard() {
+        #expect(!HomeProduct.all.contains(.item(.gloves)))
+        #expect(!HomeProduct.all.contains(.item(.racket)))
+        #expect(HomeProduct.offered(card: .tennis).contains(.item(.bench)))
+        #expect(!HomeProduct.offered(card: .boxing).contains(.item(.snowboard)))
+        #expect(HomeProduct.offered(card: .ski).contains(.item(.snowboard)))
     }
 }
 
@@ -164,6 +235,26 @@ import Testing
         for _ in 0..<400 { scene.step(0.05) }
         #expect(!scene.isWalking)
         #expect(scene.spotReached == .work)
+    }
+
+    @Test func everyPieceItemAndColourHasADayAndNightRender() {
+        var layers = ["shell", "blanketCover"] + HomePiece.allCases.map(\.rawValue)
+        layers += HomeItem.allCases.map { "item-\($0.rawValue)" }
+        let painted: [HomePaintable: [String]] = [
+            .walls: ["shell"], .sofa: ["sofaBack", "sofaFarArm", "sofaSeat", "sofaNearArm"], .rug: ["rug"],
+            .bed: ["blanket", "blanketCover"],
+        ]
+        for (paintable, names) in painted {
+            for index in paintable.swatches.indices.dropFirst() {
+                layers += names.map { HomeRenders.layer($0, swatch: index) }
+            }
+        }
+        for layer in layers {
+            for night in [false, true] {
+                #expect(HomeRenders.rect(layer, night: night) != nil, "\(layer) has no place")
+                #expect(HomeRenders.texture(layer, night: night) != nil, "\(layer) has no image")
+            }
+        }
     }
 
     @Test func tapsFindTheFurniture() {

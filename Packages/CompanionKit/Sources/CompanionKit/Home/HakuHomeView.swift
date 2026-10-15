@@ -405,6 +405,10 @@ private struct HomeSheetView: View {
         case .item(.bag): "figure.boxing"
         case .item(.cactus): "camera.macro"
         case .item(.speaker): "hifispeaker.fill"
+        case .item(.gloves): "figure.boxing"
+        case .item(.racket): "tennis.racket"
+        case .item(.snowboard): "figure.snowboarding"
+        case .item(.bench): "dumbbell.fill"
         case .outfit: "tshirt.fill"
         }
     }
@@ -459,6 +463,10 @@ private struct HomeSheetView: View {
         VStack(alignment: .leading, spacing: 14) {
             Toggle(isOn: Binding(get: { model.isNight }, set: { _ in model.toggleNight() })) {
                 Text("夜晚").font(Toy.body(16, weight: .bold))
+            }
+            .tint(Color(hex: 0x58C25A))
+            Toggle(isOn: Binding(get: { model.previewsAllItems }, set: { _ in model.togglePreviewItems() })) {
+                Text("预览：摆满所有物品").font(Toy.body(16, weight: .bold))
             }
             .tint(Color(hex: 0x58C25A))
             Button {
