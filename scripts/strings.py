@@ -17,7 +17,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PACKAGES = ["HubCore", "CompanionKit"]
-TABLES = ["Localizable", "Haku", "Kuro"]
+TABLES = ["Localizable", "Haku", "Kuro", "Short"]
 # A one-line string literal with no interpolation.
 LITERAL = re.compile(r'"((?:[^"\\\n]|\\[^(])*)"')
 # A format placeholder such as %@, %1$@ or %lld; %% is a literal percent sign.
@@ -47,6 +47,8 @@ def main() -> int:
         known = literals(sources)
         for table in TABLES:
             path = sources / "Resources" / f"{table}.xcstrings"
+            if not path.exists():
+                continue
             catalog = json.loads(path.read_text(encoding="utf-8"))
             if catalog.get("sourceLanguage") != "zh-Hans":
                 stale.append(f"{path.relative_to(ROOT)}: sourceLanguage must be zh-Hans")

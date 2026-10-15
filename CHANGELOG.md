@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - HAKU can wear six Sunday items: an orange or a mint headband, a dotted or a lightning-bolt mask, and a small
   cactus or a mini speaker in the room. The speaker's light ring glows every 3 seconds. The shop lists them once
   their catalog entries are marked drawn. The watch leaves room items out, since they stand on the floor.
+- The second preset character's eight Sunday items and a plain back view of every top, for when she turns
+  away, in her clothes layer file. Nothing in the app shows them yet.
 - A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
   and her identity card. Nothing shows it yet; the keepsake page and share cards will. Wins filled in from
   an earlier day keep no look, because the wardrobe has no history.
