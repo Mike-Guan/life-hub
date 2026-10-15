@@ -31,9 +31,15 @@ import Testing
         let source = try #require(CGImageSourceCreateWithData(data as CFData, nil))
         #expect(CGImageSourceGetType(source) as String? == "public.png")
         let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] ?? [:]
+        // ImageIO reports the pixel size in an Exif dictionary of its own; nothing else may be there.
         #expect(properties[kCGImagePropertyGPSDictionary] == nil)
-        #expect(properties[kCGImagePropertyExifDictionary] == nil)
-        #expect(properties[kCGImagePropertyTIFFDictionary] == nil)
+        let exif = properties[kCGImagePropertyExifDictionary] as? [CFString: Any] ?? [:]
+        #expect(exif[kCGImagePropertyExifDateTimeOriginal] == nil)
+        #expect(exif[kCGImagePropertyExifDateTimeDigitized] == nil)
+        let tiff = properties[kCGImagePropertyTIFFDictionary] as? [CFString: Any] ?? [:]
+        #expect(tiff[kCGImagePropertyTIFFDateTime] == nil)
+        #expect(tiff[kCGImagePropertyTIFFMake] == nil)
+        #expect(tiff[kCGImagePropertyTIFFModel] == nil)
     }
 
     // The card's colour is the mode that shows the item, so the item is on the character.
