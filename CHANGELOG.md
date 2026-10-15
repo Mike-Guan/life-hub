@@ -59,6 +59,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- With languages on, the small line under the character that says why it looks that way (gym day, couch, sitting
+  too long, keeping watch at work) follows the phone's language where a translation exists.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
   places, Daily, saving records and the bedtime notification.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the

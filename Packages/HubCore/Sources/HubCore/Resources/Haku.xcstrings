@@ -1114,6 +1114,17 @@
         }
       }
     },
+    "在家 %@ 分钟没怎么动了，我也瘫着" : {
+      "comment" : "D5 气泡一行 ≤32（29）；UI 一组补报",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ min barely moving. Me too."
+          }
+        }
+      }
+    },
     "在忙。……装的。" : {
       "comment" : "中文改为“在忙。……装的。”",
       "localizations" : {
