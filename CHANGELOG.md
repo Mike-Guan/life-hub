@@ -63,6 +63,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The shop says when everything on the shelf is owned, and with no cans yet it shows how to earn them right
+  under the banner. The identity card's line uses the user's own name for it (「… 那天 +5（每周一次）」) and is
+  left out without a card. Clothes in the shop carry a tag naming the mode they are worn in.
+- The wardrobe shows a dashed placeholder on an empty shelf and an empty 人生收藏 instead of hiding it.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
