@@ -326,6 +326,11 @@ struct KuroFigure: View {
     // The beanie's pom stands where the set hats' bubble goes, so the bubble moves right of it instead.
     /// How far her "…" thought bubble moves when she wears the beanie, in SVG units.
     nonisolated static let beanieDots = CGSize(width: 16, height: -9)
+    // UI 一组 位置规划图 F11 (after UI 审核 2026-10-15): both set hats' brims ran under her two full-energy stars.
+    // Both stars share one part and the left one has no room further out, so they go up: 14 clears both brims and
+    // her raised cat ears by 2 pt.
+    /// How far her full-energy stars move when she wears a set hat, in SVG units.
+    nonisolated static let hattedStars = CGSize(width: 0, height: -14)
 
     // UI 五组 Sunday items r1: hair pieces are static and move with her head.
     /// The hair a hair piece is worn on, which it moves with.
@@ -336,15 +341,17 @@ struct KuroFigure: View {
     ]
 
     /// How far `part` moves from where the SVG draws it, in SVG units; a hair piece moves with its hair, full
-    /// energy raises her ears a little, and her thought bubble moves clear of a set hat when `hatted` or of the
-    /// beanie when `beanie`.
+    /// energy raises her ears a little, and her thought bubble and stars move clear of a set hat when `hatted`, the
+    /// bubble also of the beanie when `beanie`.
     nonisolated static func offset(
         _ part: KuroPart, pose: KuroPose, hatted: Bool = false, beanie: Bool = false
     ) -> CGSize {
         let moved = shift(wornOn[part] ?? part, pose: pose)
         let lift: CGFloat = pose.full && part == .catEars ? 3 : 0
-        let dots = part != .tapDots ? .zero : beanie ? beanieDots : hatted ? hattedDots : .zero
-        return CGSize(width: moved.width + dots.width, height: moved.height - lift + dots.height)
+        var clear = CGSize.zero
+        if part == .tapDots { clear = beanie ? beanieDots : hatted ? hattedDots : .zero }
+        if part == .sparkle, hatted { clear = hattedStars }
+        return CGSize(width: moved.width + clear.width, height: moved.height - lift + clear.height)
     }
 
     /// The looks in her sportswear, where she smiles.
@@ -1191,7 +1198,10 @@ public struct KuroView: View {
 
     nonisolated static func accessibilityLabel(_ look: KuroLook, bedtime: Bedtime, pose: KuroPose? = nil) -> String {
         if bedtime == .on { return "KURO，困了" }
-        if let pose, pose.overtime { return pose.sign.map { "KURO，托着腮等到 \($0)" } ?? "KURO，托着腮等着" }
+        if let pose, pose.overtime {
+            return pose.sign.map { String(format: "KURO，托着腮等到 %@".localized(for: .kuro), $0) }
+                ?? "KURO，托着腮等着".localized(for: .kuro)
+        }
         return switch look {
         case .work: "KURO，在忙"
         case .chill: "KURO，捧着热饮"
