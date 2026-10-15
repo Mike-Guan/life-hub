@@ -8,6 +8,12 @@
             "state" : "translated",
             "value" : "Open iPhone"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhoneを開いて"
+          }
         }
       }
     },
@@ -17,6 +23,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "What your character is up to."
+          }
+        }
+      }
+    },
+    "还没有模式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No mode yet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだモードなし"
           }
         }
       }

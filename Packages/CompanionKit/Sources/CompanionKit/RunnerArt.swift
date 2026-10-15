@@ -993,63 +993,58 @@ enum RunnerArt {
         [
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 15.5, y: 130))
-                    p.addLine(to: .init(x: 15.5, y: 135))
-                },
-                stroke: RunnerPalette.ink,
-                lineWidth: 3
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 14, y: 104))
-                    p.addLine(to: .init(x: 17, y: 104))
-                    p.addCurve(
-                        to: .init(x: 22, y: 109),
-                        control1: .init(x: 19.76, y: 104),
-                        control2: .init(x: 22, y: 106.24)
-                    )
-                    p.addLine(to: .init(x: 22, y: 125))
-                    p.addCurve(
-                        to: .init(x: 17, y: 130),
-                        control1: .init(x: 22, y: 127.76),
-                        control2: .init(x: 19.76, y: 130)
-                    )
-                    p.addLine(to: .init(x: 14, y: 130))
-                    p.addCurve(
-                        to: .init(x: 9, y: 125),
-                        control1: .init(x: 11.24, y: 130),
-                        control2: .init(x: 9, y: 127.76)
-                    )
-                    p.addLine(to: .init(x: 9, y: 109))
-                    p.addCurve(
-                        to: .init(x: 14, y: 104),
-                        control1: .init(x: 9, y: 106.24),
-                        control2: .init(x: 11.24, y: 104)
-                    )
-                    p.closeSubpath()
-                },
-                fill: RunnerPalette.boxingRed,
-                stroke: RunnerPalette.ink,
-                lineWidth: 3
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 10.5, y: 112))
-                    p.addLine(to: .init(x: 20.5, y: 112))
-                },
-                stroke: RunnerPalette.white,
-                lineWidth: 2.5
-            ),
-            RunnerInk(
-                path: Path { p in
-                    p.move(to: .init(x: 8, y: 138))
-                    p.addQuadCurve(to: .init(x: 23, y: 138), control: .init(x: 15.5, y: 132))
+                    p.move(to: .init(x: 6, y: 138.5))
+                    p.addQuadCurve(to: .init(x: 15.5, y: 127.5), control: .init(x: 6, y: 127.5))
+                    p.addQuadCurve(to: .init(x: 25, y: 138.5), control: .init(x: 25, y: 127.5))
                     p.closeSubpath()
                 },
                 fill: RunnerPalette.hood,
                 stroke: RunnerPalette.ink,
                 lineWidth: 3,
                 join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 9.5, y: 128))
+                    p.addLine(to: .init(x: 9.5, y: 97))
+                    p.addQuadCurve(to: .init(x: 15.5, y: 88.5), control: .init(x: 9.5, y: 88.5))
+                    p.addQuadCurve(to: .init(x: 21.5, y: 97), control: .init(x: 21.5, y: 88.5))
+                    p.addLine(to: .init(x: 21.5, y: 128))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.boxingRed,
+                stroke: RunnerPalette.ink,
+                lineWidth: 3,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 10, y: 103))
+                    p.addQuadCurve(to: .init(x: 21, y: 103), control: .init(x: 15.5, y: 105))
+                    p.move(to: .init(x: 10, y: 118))
+                    p.addQuadCurve(to: .init(x: 21, y: 118), control: .init(x: 15.5, y: 120))
+                },
+                stroke: RunnerPalette.hood,
+                lineWidth: 3.5
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 15.5, y: 105.5))
+                    p.addLine(to: .init(x: 15.5, y: 116.5))
+                },
+                stroke: RunnerPalette.ink,
+                lineWidth: 1.6,
+                dash: [2, 2]
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 12, y: 95))
+                    p.addQuadCurve(to: .init(x: 16, y: 91), control: .init(x: 13.2, y: 91.5))
+                },
+                stroke: RunnerPalette.white,
+                lineWidth: 2,
+                cap: .round,
+                opacity: 0.7
             ),
         ]
     }
