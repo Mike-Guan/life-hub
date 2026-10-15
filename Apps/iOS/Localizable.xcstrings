@@ -452,6 +452,22 @@
         }
       }
     },
+    "再想想" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maybe later"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "また今度"
+          }
+        }
+      }
+    },
     "切到副业" : {
       "localizations" : {
         "en" : {

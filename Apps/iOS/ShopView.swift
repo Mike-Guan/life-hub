@@ -12,6 +12,8 @@ struct ShopView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var buyError: String?
     @State private var unboxing: CanEntry?
+    @State private var previewing: ShopItem?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
     // promises a reward the app can't give yet. Add a win here when its source is wired.
@@ -58,6 +60,24 @@ struct ShopView: View {
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
+        .overlay {
+            if let item = previewing {
+                ShopPreviewSheet(
+                    item: item,
+                    persona: persona,
+                    wardrobe: wardrobe,
+                    balance: balance,
+                    mode: mode,
+                    onCancel: { previewing = nil },
+                    onBuy: {
+                        previewing = nil
+                        buy(item)
+                    }
+                )
+                .transition(reduceMotion ? .identity : .opacity)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: previewing?.id)
         .fullScreenCover(item: $unboxing) { entry in
             UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona, mode: mode)
         }
@@ -151,7 +171,7 @@ struct ShopView: View {
             } else if let price = item.price {
                 if price <= balance {
                     Button {
-                        buy(item)
+                        previewing = item
                     } label: {
                         Text("\(price) 能量罐 换")
                             .font(Toy.body(15, weight: .heavy))
