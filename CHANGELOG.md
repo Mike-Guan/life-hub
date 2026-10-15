@@ -5,7 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
-- A prototype of HAKU's home, under Settings in DEV and STG builds only (家（原型）). It is a small iso room in
+- A prototype of HAKU's home, from a house button on the home screen and under Settings (家（原型）), in DEV and STG builds only. It is a small iso room in
   SpriteKit: HAKU walks to the desk, sofa, bed or bag when the mode changes, says a line when tapped, can be
   carried, and the room has a day/night switch, a wardrobe, a shelf, recolouring and a mock shop. All data is fake.
 - The second preset character's swimming, yoga, ball and outdoor cards, which still wear her tennis look, now
