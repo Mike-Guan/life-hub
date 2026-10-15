@@ -11,8 +11,13 @@ enum CompanionLines {
         life: IdleLife? = nil,
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
-        persona: Persona = .haku
+        persona: Persona = .haku,
+        card: IdentityKind? = nil
     ) -> [String] {
+        // PM 写死作息 scan 10-15 #5: another card's warm-up uses that card's lines, not the character's sport.
+        if activity == nil, moment == nil, need == .boxingWarmup, let card, isOtherCard(card, persona: persona) {
+            return HakuLines.pool(.boxingWarmup, persona: persona, cards: ModeCards(identity: card))
+        }
         if persona == .kuro {
             return KuroBubbleLines.lines(
                 for: mode,
@@ -62,6 +67,8 @@ enum CompanionLines {
         case .shooting: ["光线不错。", "这张可以。"]
         case .collapsed: ["你也活着回来了啊。", "……先让我趴五分钟。"]
         case .blanket: ["今天就这样吧。", "毯子分你一半。"]
+        // Dozing off, HAKU doesn't talk.
+        case .dozing: []
         case .morning: ["又要上班了。", "耳机……耳机去哪了。"]
         case .timeToLeave: ["……我包背好了。", "唉。"]
         case .stiff: ["……我腰要断了。", "我先起来了。……你呢？", "ちょっと休憩。"]
@@ -91,7 +98,7 @@ enum CompanionLines {
         case .cycling: "屁股……先让我缓缓。"
         case .swimming: "耳朵进水了。……不过不错。"
         case .martialArts: "……我也想踢两脚。"
-        case .racket: "那一拍……还行吧。"
+        case .racket: "打完了。……下次带上我。"
         case .ball: "球呢？……算了，打完就行。"
         case .yoga: "……骨头咔了一声。舒服。"
         case .dance: "我没跳。……我没跳。"
@@ -103,7 +110,12 @@ enum CompanionLines {
     /// What the companion says when unboxing the item with `itemID`: a keepsake it pretends it didn't pick.
     static func unlock(_ itemID: String, persona: Persona = .haku) -> String {
         if persona == .kuro { return KuroBubbleLines.unlock(itemID) }
-        return ShopItem.item(itemID)?.keepsake != nil ? "……给你的。才不是特意挑的。" : "买了？……那我就勉强收下了。"
+        return ShopItem.item(itemID)?.keepsake != nil ? "……给你的。顺手。" : "买了？……那我就勉强收下了。"
+    }
+
+    /// Whether `card` is not `persona`'s own identity card.
+    private static func isOtherCard(_ card: IdentityKind, persona: Persona) -> Bool {
+        card != ModeCards.legacy(for: persona).identity
     }
 
     /// The VoiceOver label for HAKU during the welcome back: its line, each card, and the cans opened.
@@ -121,13 +133,16 @@ enum CompanionLines {
         life: IdleLife? = nil,
         activity: CompanionActivity? = nil,
         moment: CompanionMoment? = nil,
-        bedtime: Bedtime
+        bedtime: Bedtime,
+        card: IdentityKind? = nil
     ) -> String {
         if bedtime == .on { return "HAKU，困了" }
         if let activity { return "HAKU，\(doing(activity))" }
         if let moment { return "HAKU，\(state(moment))" }
         if need == .couchScroll, peeking { return "HAKU，瘫着刷手机，偷看门口的运动包" }
-        if need == .boxingWarmup { return "HAKU，戴着拳套在热身" }
+        if need == .boxingWarmup {
+            return card.map { isOtherCard($0, persona: .haku) } == true ? "HAKU，在热身" : "HAKU，戴着拳套在热身"
+        }
         if need == .couchScroll { return "HAKU，瘫着刷手机" }
         if let life { return "HAKU，\(pastime(life))" }
         return mode.map { "HAKU，\($0.title)" } ?? "HAKU"
@@ -156,6 +171,7 @@ enum CompanionLines {
         case .shooting: "在忙副业的拍摄"
         case .collapsed: "下班回家，趴在沙发扶手上"
         case .blanket: "裹着毯子瘫在沙发上"
+        case .dozing: "裹着毯子打瞌睡"
         case .morning: "早上起来在刷牙"
         case .timeToLeave: "戴好耳机站在门口，敲着手表"
         case .stiff: "坐太久了，扭扭腰，捶捶背"
