@@ -73,6 +73,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
 - Full energy is easier to tell apart from okay: HAKU's deadpan eyes open a notch with a glint, and KURO's eyes
   grow a size, her cheeks go pink, her ears stand up a little and sparkles show by her head.
+- The shop banner and the wardrobe preview show HAKU standing, so the clothes stay in view. Before, at home they
+  could catch HAKU asleep on the sofa or bent over the handheld.
 - The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
   gym, say the app never records your route, and say only the computed state goes to your own Apple Watch.
   They now also come in Japanese and English, following the phone's language. The 「日文和英文」 switch
