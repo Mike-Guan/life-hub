@@ -102,11 +102,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   on the home screen, the shop, the wardrobe, unboxing, widgets and the watch.
 - When HAKU switches between idle scenes, only the sparkles show. The peace sign, the dumbbell reps and the
   identity card's props no longer pop in and out on every switch.
-<<<<<<< HEAD
 - HAKU gets up from the sofa only on a real signal: vibe coding, or getting up and walking after couch
   scrolling. Its own bath time no longer counts.
-=======
->>>>>>> origin/main
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
   over the hair while sitting up. After the off-work
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
