@@ -167,6 +167,16 @@ struct SettingsView: View {
             .toyCard()
 
             VStack(alignment: .leading, spacing: 8) {
+                Text("模式卡名字")
+                    .font(Toy.body(16, weight: .heavy))
+                placeRow(title: commonCardNames, detail: "") {
+                    answering = StepEdit(step: .cards)
+                }
+            }
+            .padding(16)
+            .toyCard()
+
+            VStack(alignment: .leading, spacing: 8) {
                 Text("身份卡")
                     .font(Toy.body(16, weight: .heavy))
                 placeRow(title: cards.identity?.title ?? "没有".localized, detail: "") {
@@ -210,6 +220,10 @@ struct SettingsView: View {
                 answering = nil
             }
         }
+    }
+
+    private var commonCardNames: String {
+        cards.modes.filter { $0 != .boxing }.map { cards.title(for: $0, persona: persona) }.joined(separator: " · ")
     }
 
     // Issue #416: 周一到周五 as one phrase, else the days in order, Monday first.

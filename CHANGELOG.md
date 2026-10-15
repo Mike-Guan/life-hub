@@ -92,6 +92,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   preset character's boxing card line and keepsake line, the racket cheer and her focus-done line.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
   screen edge no longer cuts them off. The iPhone is unchanged.
+- Settings can rename the three common mode cards (上班, 下班, 副业), with the same card screen and length limit
+  as the first setup. Before, only the first setup could name them.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain

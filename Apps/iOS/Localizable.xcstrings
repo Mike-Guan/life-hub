@@ -1457,6 +1457,23 @@
         }
       }
     },
+    "模式卡名字" : {
+      "comment" : "设置：改三张通用模式卡名字的分组标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode names"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モードの名前"
+          }
+        }
+      }
+    },
     "每个角色有自己的能量罐和东西，换过去从零开始，原来的都留着。生活记录和规则都不变。" : {
       "localizations" : {
         "en" : {
