@@ -106,14 +106,17 @@ jobs:
       - name: Generate project
         run: xcodegen generate
 
+      # Compiler errors are repeated as annotations, so they show on the PR without opening the log.
       - name: Build iOS app (simulator, warnings as errors)
-        run: >
-          xcodebuild build -quiet
-          -project LifeHub.xcodeproj -scheme LifeHub-iOS
-          -destination 'generic/platform=iOS Simulator'
-          -derivedDataPath build
-          CODE_SIGNING_ALLOWED=NO
-          SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES
+        run: |
+          set -o pipefail
+          xcodebuild build -quiet \
+            -project LifeHub.xcodeproj -scheme LifeHub-iOS \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES 2>&1 |
+            awk '{ print } /: (error|warning): / { print "::error::" $0 }'
 
       - name: Build watch app (simulator, warnings as errors)
         run: >

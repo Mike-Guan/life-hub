@@ -1,25 +1,26 @@
 import Foundation
 
-// PRD section 16 addendum (Mike approved 2026-10-06): when Mike leaves couch scrolling for the bath or
-// vibe coding, HAKU gets up from the sofa once a day. Couch scrolling here is the couch need itself, which
-// starts after 30 minutes of Screen Time on the chosen apps, so a short look at the phone doesn't count.
+// PRD section 16 addendum (Mike approved 2026-10-06): when Mike leaves couch scrolling, HAKU gets up from the
+// sofa once a day. Couch scrolling here is the couch need itself, which starts after 30 minutes of Screen Time
+// on the chosen apps, so a short look at the phone doesn't count. PM action table U5 (2026-10-15): only a real
+// signal counts, vibe coding or walking, never the bath clock, which is HAKU's own bath.
 /// When HAKU gets up from the sofa. T0, no models.
 public enum ReviveEngine {
     /// How long after the switch HAKU still gets up when the app opens.
     public static let lasts: TimeInterval = 30 * 60
 
-    /// When Mike started the bath or vibe coding, the later of the two, or `nil` for neither.
+    /// When Mike started vibe coding or last stopped walking, the later of the two, or `nil` for neither.
     /// - Parameters:
     ///   - change: the current mode change; counts when it is 副业 with vibe coding.
-    ///   - bath: the bath window, when HAKU is taking its bath now.
-    public static func switchedAt(change: ModeChange?, bath: DateInterval?) -> Date? {
+    ///   - stillSince: the start of the current stretch without walking, `nil` when unknown.
+    public static func switchedAt(change: ModeChange?, stillSince: Date?) -> Date? {
         let coding = change.flatMap { $0.mode == .money && SideHustle(tag: $0.tag) == .vibeCoding ? $0.at : nil }
-        return [coding, bath?.start].compactMap { $0 }.max()
+        return [coding, stillSince].compactMap { $0 }.max()
     }
 
     /// HAKU getting up from the sofa at `now`, or `nil`. The id is the hub day, so it plays once a day.
     /// - Parameters:
-    ///   - switchedAt: when Mike started the bath or vibe coding.
+    ///   - switchedAt: when Mike started vibe coding or walked.
     ///   - scrollSeenAt: the last Screen Time report of couch scrolling, `nil` when there was none.
     ///   - atHome: whether Mike is at home.
     public static func revived(
