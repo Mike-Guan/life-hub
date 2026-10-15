@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Japanese for the first batch of lock-screen lines (both characters) and English for 842 strings
+  are in the String Catalogs, behind the Debug-only 「日文和英文」 switch. `scripts/import-strings.py` adds a
+  writers' delivery to the right catalogs.
 - The app ships the Japanese font Zen Maru Gothic (Bold and Black, SIL Open Font License in `Apps/iOS/Fonts`)
   and registers it in the app, the widgets and the notification. Nothing uses it yet; Japanese text switches
   to it in a separate change. If the font fails to load, the app says so in its error list.
@@ -13,6 +16,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   and sneezes. The cards stay out of the picker until HAKU's looks are in too.
 - Shop clothes art for the second preset character: eight pop tops and sets, two identity-card tops and six
   base outfits, each with matching sleeves, in their own layer file. Nothing in the app shows them yet.
+- The second preset character can wear her eight shop clothes: two tops each for work, off work and side
+  hustle, plus the picnic and rain sets with their hats. Her sleeves match when she rubs her eye or points
+  at the door. From behind she keeps the hat and shows her own plain top for now. The shop starts offering
+  them in a later change.
 - Walking 6,000 steps in a day earns 1 can, from Health (iPhone and Apple Watch together, steps typed in by
   hand left out) or the iPhone's own count. Days you didn't open the app count too, up to a week back. Steps
   are never shown and never leave the iPhone.
@@ -42,6 +49,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
   names two apps and says only this iPhone knows how long you scrolled.
+- Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
+  The cheer hop is lower, so the hair stays inside the card.
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
   room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
   back puts them on again. The wardrobe screen moves to these groups in a separate change.
@@ -52,6 +61,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
   fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
   own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- The welcome back scene no longer ends with a cut: HAKU settles back over the last second and the sofa,
+  blanket, phone and crate drop a little and fade out. A tap that skips it does the same over 0.3 s.
 - Tennis is her main card: she bounces the ball on a flat racket and spins the racket while idle, and a tap
   makes her swing. Boxing keeps only the gloves tapping together.
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
@@ -59,12 +70,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
+- When the mode switches on its own, at a place, the character fades into the new outfit like a manual switch
+  instead of cutting over.
 - The Screen Time watch (pick apps in settings) now works in TestFlight (STG) builds too, not only in
   Debug. The App Store build still leaves it out.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
   turned off it is still given.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
+- After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
 - On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
   ponytail (unbox page and home card). The watch is unchanged.
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing

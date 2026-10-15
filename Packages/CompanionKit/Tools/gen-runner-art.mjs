@@ -1,5 +1,5 @@
 // Generates Sources/CompanionKit/RunnerArt.swift from the layered RUNNER SVG, or KuroArt.swift from the
-// KURO SVG with `--kuro`.
+// KURO SVG and her shop clothes SVG with `--kuro`.
 //
 //   node Packages/CompanionKit/Tools/gen-runner-art.mjs [--kuro] [--preview out.svg]
 //
@@ -45,11 +45,14 @@ const KURO_PALETTE = {
   '#8B5A3C': 'iris', '#FF3EA5': 'neonPink',
   // Shop items.
   '#2E9E5B': 'leaf', '#FFE14D': 'yellow', '#FFC2D6': 'blanket', '#FFF6C8': 'goldStrings', '#C9F23A': 'tennisBall',
-  '#FFB7C5': 'sakura', '#FFD1DC': 'petal', '#B8860B': 'goldShade',
+  '#FFB7C5': 'sakura', '#FFD1DC': 'petal', '#B8860B': 'goldShade', '#9EE6C8': 'mint',
 };
 const PALETTE = kuro ? KURO_PALETTE : RUNNER_PALETTE;
 
-const raw = fs.readFileSync(SRC, 'utf8').replace(/<metadata>[\s\S]*?<\/metadata>/g, '');
+const read = file => fs.readFileSync(file, 'utf8').replace(/<metadata>[\s\S]*?<\/metadata>/g, '');
+const raw = read(SRC);
+// KURO's shop clothes live in their own file, drawn in the same frame as her figure.
+const WARDROBE = 'kuro-v1-wardrobe.svg';
 
 // ---------- tiny XML walk ----------
 const tagRe = /<(\/?)([a-zA-Z][\w:-]*)((?:\s+[\w:-]+="[^"]*")*)\s*(\/?)>|([^<]+)/g;
@@ -130,44 +133,72 @@ const stack = [{ id: null, m: I, style: {} }];
 let pendingText = null;
 const gradients = {}; // id → {x1, y1, x2, y2, stops: [[offset, color]]}
 const clips = {}; // id → [cmds]
+const anchors = {}; // wardrobe part id → [part it is drawn next to, 0 before / 1 after]
 let gradient = null, clip = null;
 const STYLE_KEYS = ['fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'opacity', 'fill-opacity', 'clip-path', 'font-size', 'font-weight'];
 function partFor(id) { let p = parts.find(q => q.id === id); if (!p) { p = { id, inks: [] }; parts.push(p); } return p; }
-for (const mt of raw.matchAll(tagRe)) {
-  const [, close, tag, attrStr, selfClose, text] = mt;
-  const top = stack[stack.length - 1];
-  if (text !== undefined) { if (pendingText && text.trim()) pendingText.text += text.trim(); continue; }
-  if (close) {
-    if (tag === 'text') { texts.push(pendingText); pendingText = null; }
-    if (tag === 'g' || tag === 'svg' || tag === 'defs') stack.pop();
-    if (tag === 'linearGradient') gradient = null;
-    if (tag === 'clipPath') clip = null;
-    continue;
+function walk(src) {
+  for (const mt of src.matchAll(tagRe)) {
+    const [, close, tag, attrStr, selfClose, text] = mt;
+    const top = stack[stack.length - 1];
+    if (text !== undefined) { if (pendingText && text.trim()) pendingText.text += text.trim(); continue; }
+    if (close) {
+      if (tag === 'text') { texts.push(pendingText); pendingText = null; }
+      if (tag === 'g' || tag === 'svg' || tag === 'defs') stack.pop();
+      if (tag === 'linearGradient') gradient = null;
+      if (tag === 'clipPath') clip = null;
+      continue;
+    }
+    const a = attrs(attrStr || '');
+    const style = { ...top.style }; for (const k of STYLE_KEYS) if (a[k] !== undefined) style[k] = a[k];
+    const m = mul(top.m, parseTransform(a.transform));
+    if (tag === 'svg') { stack.push({ id: null, m, style }); continue; }
+    if (tag === 'defs') { if (!selfClose) stack.push({ ...top, m, style }); continue; }
+    if (tag === 'linearGradient') {
+      gradient = gradients[a.id] = { x1: +(a.x1 ?? 0), y1: +(a.y1 ?? 0), x2: +(a.x2 ?? 1), y2: +(a.y2 ?? 0), stops: [] };
+      if (selfClose) gradient = null;
+      continue;
+    }
+    if (tag === 'stop') { gradient.stops.push([Number(a.offset), a['stop-color']]); continue; }
+    if (tag === 'clipPath') { clip = clips[a.id] = []; if (selfClose) clip = null; continue; }
+    if (tag === 'g') {
+      const g = { id: a.id || top.id, m, style };
+      if (a['data-before'] || a['data-after']) anchors[a.id] = a['data-before'] ? [a['data-before'], 0] : [a['data-after'], 1];
+      if (!selfClose) stack.push(g);
+      continue;
+    }
+    if (tag === 'text') { const [x, y] = ap(m, Number(a.x || 0), Number(a.y || 0)); partFor(top.id); pendingText = { part: top.id, x, y, size: Number(style['font-size']), fill: style.fill, text: '' }; continue; }
+    let cmds;
+    if (tag === 'path') cmds = parseD(a.d);
+    else if (tag === 'circle') cmds = ellipse(+(a.cx || 0), +(a.cy || 0), +a.r, +a.r);
+    else if (tag === 'ellipse') cmds = ellipse(+(a.cx || 0), +(a.cy || 0), +a.rx, +a.ry);
+    else if (tag === 'rect') cmds = rect(+(a.x || 0), +(a.y || 0), +a.width, +a.height, +(a.rx || 0));
+    else if (tag === 'line') cmds = [['M', +a.x1, +a.y1], ['L', +a.x2, +a.y2]];
+    else throw new Error('unsupported tag ' + tag);
+    if (clip) { clip.push(...xform(cmds, m)); continue; }
+    if (!top.id) throw new Error(tag + ' outside a named group');
+    partFor(top.id).inks.push({ cmds: xform(cmds, m), style });
   }
-  const a = attrs(attrStr || '');
-  const style = { ...top.style }; for (const k of STYLE_KEYS) if (a[k] !== undefined) style[k] = a[k];
-  const m = mul(top.m, parseTransform(a.transform));
-  if (tag === 'svg') { stack.push({ id: null, m, style }); continue; }
-  if (tag === 'defs') { if (!selfClose) stack.push({ ...top, m, style }); continue; }
-  if (tag === 'linearGradient') {
-    gradient = gradients[a.id] = { x1: +(a.x1 ?? 0), y1: +(a.y1 ?? 0), x2: +(a.x2 ?? 1), y2: +(a.y2 ?? 0), stops: [] };
-    if (selfClose) gradient = null;
-    continue;
-  }
-  if (tag === 'stop') { gradient.stops.push([Number(a.offset), a['stop-color']]); continue; }
-  if (tag === 'clipPath') { clip = clips[a.id] = []; if (selfClose) clip = null; continue; }
-  if (tag === 'g') { const g = { id: a.id || top.id, m, style }; if (!selfClose) stack.push(g); continue; }
-  if (tag === 'text') { const [x, y] = ap(m, Number(a.x || 0), Number(a.y || 0)); partFor(top.id); pendingText = { part: top.id, x, y, size: Number(style['font-size']), fill: style.fill, text: '' }; continue; }
-  let cmds;
-  if (tag === 'path') cmds = parseD(a.d);
-  else if (tag === 'circle') cmds = ellipse(+(a.cx || 0), +(a.cy || 0), +a.r, +a.r);
-  else if (tag === 'ellipse') cmds = ellipse(+(a.cx || 0), +(a.cy || 0), +a.rx, +a.ry);
-  else if (tag === 'rect') cmds = rect(+(a.x || 0), +(a.y || 0), +a.width, +a.height, +(a.rx || 0));
-  else if (tag === 'line') cmds = [['M', +a.x1, +a.y1], ['L', +a.x2, +a.y2]];
-  else throw new Error('unsupported tag ' + tag);
-  if (clip) { clip.push(...xform(cmds, m)); continue; }
-  if (!top.id) throw new Error(tag + ' outside a named group');
-  partFor(top.id).inks.push({ cmds: xform(cmds, m), style });
+}
+walk(raw);
+if (kuro) {
+  // Each piece of clothing is drawn where the part it replaces is: tops with her jackets (under her blanket,
+  // bag strap and props), hats just under her cat ears, sleeves with her eye-rub and invite sleeves.
+  const own = parts.length;
+  walk(read(path.join(path.dirname(SRC), WARDROBE)));
+  const clothes = parts.splice(own);
+  const put = (anchor, offset, pick) => {
+    const i = parts.findIndex(p => p.id === anchor);
+    if (i < 0) throw new Error('missing anchor ' + anchor);
+    parts.splice(i + offset, 0, ...clothes.filter(pick));
+  };
+  // Anything else says where it goes with data-before or data-after on its group.
+  for (const p of clothes.filter(p => anchors[p.id])) put(anchors[p.id][0], anchors[p.id][1], q => q === p);
+  const placed = p => !anchors[p.id];
+  put('jacket_work', 1, p => placed(p) && !/_(hat|rub_sleeve|invite_sleeve)$/.test(p.id));
+  put('cat_ears', 0, p => placed(p) && p.id.endsWith('_hat'));
+  put('tap_rub_sleeve_smock', 1, p => placed(p) && p.id.endsWith('_rub_sleeve'));
+  put('invite_sleeve_smock', 1, p => placed(p) && p.id.endsWith('_invite_sleeve'));
 }
 if (pendingText) throw new Error('unclosed text');
 
@@ -188,7 +219,7 @@ minX = Math.floor(minX) - 2; minY = Math.floor(minY) - 2; maxX = Math.ceil(maxX)
 const usedColors = [...new Set(Object.values(PALETTE))];
 const hexOf = n => Object.entries(PALETTE).find(([h, v]) => v === n && h.length === 7)[0].slice(1).toUpperCase();
 const lines = [];
-lines.push(`// Generated by Tools/gen-runner-art.mjs from docs/03 Product/companion/${SVG}.`);
+lines.push(`// Generated by Tools/gen-runner-art.mjs from docs/03 Product/companion/${kuro ? `${SVG} and ${WARDROBE}` : SVG}.`);
 lines.push('// Do not edit by hand: change the SVG (or the generator) and run the script again.');
 lines.push('import SwiftUI', '');
 lines.push(kuro ? '/// KURO colors, named after what they paint.' : '/// RUNNER v5 colors, named after what they paint.');
