@@ -63,8 +63,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
-- A failed 设为当前位置 says why in plain words, with 去设置打开 when access is off and 再点一次 otherwise,
-  instead of the system error text.
 - Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
   before it ever got a snapshot; after that it says 到常去的地方会自己换.
 - With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
@@ -198,6 +196,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.
 - The TODAY mode log on the home screen starts a new day at 05:00, not midnight. Changes after midnight
   stay in the evening's log until 05:00.
+- A failed 设为当前位置 says why in plain words, with 去设置打开 when access is off and 再点一次 otherwise,
+  instead of the system error text.
 - Arriving at the gym in Work or 副业 switches to Chill, unless you picked the mode in the last 2 hours.
   HAKU lifts only in Chill; switch to another mode at the gym and HAKU follows it. You still earn the
   gym can after 30 minutes there, whatever the mode. Leaving the gym keeps the mode.
