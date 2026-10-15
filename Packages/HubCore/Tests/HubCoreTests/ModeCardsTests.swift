@@ -134,6 +134,36 @@ import Testing
         #expect(ModeCards.stored(in: defaults) == cards)
     }
 
+    @Test func tryingACharacterPutsTheOwnCardsAsideAndBack() throws {
+        let suite = "ModeCardsTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        ModeCards.restoreOwn(in: defaults)
+        #expect(ModeCards.stored(in: defaults) == nil)
+        let own = ModeCards(identity: .art)
+        own.store(in: defaults)
+        #expect(!ModeCards.isTrying(in: defaults))
+
+        ModeCards.tryDefaults(of: .kuro, in: defaults)
+        #expect(ModeCards.isTrying(in: defaults))
+        #expect(ModeCards.stored(in: defaults) == ModeCards(identity: .tennis))
+        ModeCards.tryDefaults(of: .haku, in: defaults)
+        #expect(ModeCards.stored(in: defaults) == ModeCards(identity: .boxing))
+
+        ModeCards.restoreOwn(in: defaults)
+        #expect(!ModeCards.isTrying(in: defaults))
+        #expect(ModeCards.stored(in: defaults) == own)
+    }
+
+    @Test func tryingWithNoSavedCardsRestoresTheDefaults() throws {
+        let suite = "ModeCardsTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        ModeCards.tryDefaults(of: .kuro, in: defaults)
+        ModeCards.restoreOwn(in: defaults)
+        #expect(ModeCards.stored(in: defaults) == ModeCards())
+    }
+
     @Test func aPickedCardBringsItsOwnCodeLineAndSymbol() {
         let cards = ModeCards(identity: .swimming)
         #expect(cards.pickedIdentity(for: .boxing, persona: .haku) == .swimming)

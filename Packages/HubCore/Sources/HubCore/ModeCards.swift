@@ -437,4 +437,34 @@ public struct ModeCards: Codable, Equatable, Sendable {
     public func store(in defaults: UserDefaults) {
         defaults.set(try? JSONEncoder().encode(self), forKey: Self.defaultsKey)
     }
+
+    // 角色切换 正式版 v0 §3 (Mike 2026-10-15): test builds can try a character with her default cards. The
+    // user's own cards wait under their own key; places and learned days live elsewhere and stay as they are.
+    static let ownKey = "modeCardsOwn"
+
+    /// `persona`'s default cards: the common cards with their default names and her default identity card.
+    public static func characterDefaults(for persona: Persona) -> ModeCards {
+        ModeCards(identity: persona == .kuro ? .tennis : .boxing)
+    }
+
+    /// Whether the saved cards are a character's defaults being tried, with the user's own put aside.
+    public static func isTrying(in defaults: UserDefaults) -> Bool {
+        defaults.data(forKey: ownKey) != nil
+    }
+
+    /// Puts the user's own cards aside, unless they already are, and saves `persona`'s default cards.
+    public static func tryDefaults(of persona: Persona, in defaults: UserDefaults) {
+        if !isTrying(in: defaults) {
+            let own = defaults.data(forKey: defaultsKey) ?? (try? JSONEncoder().encode(ModeCards()))
+            defaults.set(own, forKey: ownKey)
+        }
+        characterDefaults(for: persona).store(in: defaults)
+    }
+
+    /// Saves the user's own cards back after `tryDefaults(of:in:)`; does nothing when none were put aside.
+    public static func restoreOwn(in defaults: UserDefaults) {
+        guard let own = defaults.data(forKey: ownKey) else { return }
+        defaults.set(own, forKey: defaultsKey)
+        defaults.removeObject(forKey: ownKey)
+    }
 }
