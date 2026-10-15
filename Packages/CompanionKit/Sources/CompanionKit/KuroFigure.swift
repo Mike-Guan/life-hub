@@ -539,6 +539,7 @@ public struct KuroView: View {
     @Environment(\.frameReduceMotion) private var frameReduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
+    @Environment(\.companionOffscreen) private var offscreen
     /// True for a moment after the watch screen comes back on, while the figure stays still.
     @State private var settling = false
     /// Set when the watch screen has been dimmed too long to keep listening for shakes.
@@ -660,7 +661,8 @@ public struct KuroView: View {
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
 
             let paused = CompanionView.paused(
-                reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling
+                reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling,
+                offscreen: offscreen
             )
             TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                 let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate

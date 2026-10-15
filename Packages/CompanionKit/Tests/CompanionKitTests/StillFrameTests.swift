@@ -16,6 +16,11 @@ import Testing
         #expect(CompanionView.paused(reduceMotion: false, scenePhase: .active, dozing: true, settling: false))
         #expect(CompanionView.paused(reduceMotion: false, scenePhase: .active, dozing: false, settling: true))
         #expect(CompanionView.paused(reduceMotion: true, scenePhase: .active, dozing: false, settling: false))
+        // UI 审核 on #407: the watch keeps page 1 off screen while page 2 shows.
+        let offscreen = CompanionView.paused(
+            reduceMotion: false, scenePhase: .active, dozing: false, settling: false, offscreen: true
+        )
+        #expect(offscreen)
     }
 
     // UI HAKU-07/35: with Reduce Motion the character still shows in the mode's look, only without moving.
