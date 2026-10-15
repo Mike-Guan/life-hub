@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
 - The home prototype's room is now rendered in Blender: soft sofa and bed, wood floor, real light and shadows,
   a night version lit by the lamps and the vending machine, and the room floats on the page with a hard shadow.
   A sports corner holds the standing bag, a bench (25 cans, any card) and a snowboard (20 cans, ski card). Gloves
@@ -83,6 +84,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Changed
 - VoiceOver reads the unboxing as "开箱：" and the item's name instead of the character's mode.
+- Opening the app, HAKU says one line at most: a celebration first, then an invite, good night, the late-night
+  line, a planned task, bath time and the stretch. A mode change no longer clears it. A tap during a one-off
+  animation only makes HAKU blink. At bedtime a tap gets a sleepy mumble instead of switching the side-hustle
+  state, and a shake makes HAKU roll over half asleep.
 - The Lock Screen and Dynamic Island countdown draws the character in the identity card's look picked on the
   iPhone, such as HAKU in tennis kit, instead of always the boxing look.
 - The watch face says 还没有模式 when the iPhone has sent but no mode is set, instead of asking to open the

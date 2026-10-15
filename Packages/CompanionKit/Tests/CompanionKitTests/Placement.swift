@@ -326,6 +326,7 @@ enum Placement {
         // Identity cards, batch 1 (UI 三组 2026-10-14): the strap belongs to the left glove.
         .boxHeadband: Spot(.headTop, "boxHeadband"),
         .jacketBox: Spot(.torso, "外套"),
+        .boxShoulderTowel: Spot(.torso, "towel"),
         .jacketSmock: Spot(.torso, "外套"),
         .boxGloveL: Spot(.handL, "拳套"),
         .boxGloveR: Spot(.handR, "拳套"),

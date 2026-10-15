@@ -93,6 +93,7 @@ enum KuroPart: String, CaseIterable, Sendable {
     case itemBag = "item_bag"
     case jacketDesk = "jacket_desk"
     case jacketBox = "jacket_box"
+    case boxShoulderTowel = "box_shoulder_towel"
     case jacketSmock = "jacket_smock"
     case workTablet = "work_tablet"
     case workStylus = "work_stylus"
@@ -298,6 +299,7 @@ enum KuroArt {
         case .itemBag: itemBag()
         case .jacketDesk: jacketDesk()
         case .jacketBox: jacketBox()
+        case .boxShoulderTowel: boxShoulderTowel()
         case .jacketSmock: jacketSmock()
         case .workTablet: workTablet()
         case .workStylus: workStylus()
@@ -12037,6 +12039,33 @@ enum KuroArt {
                 },
                 stroke: KuroPalette.neonPink,
                 lineWidth: 4.5,
+                cap: .round
+            ),
+        ]
+    }
+
+    private static func boxShoulderTowel() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 79, y: 97))
+                    p.addQuadCurve(to: .init(x: 97, y: 98), control: .init(x: 88, y: 90))
+                    p.addLine(to: .init(x: 98, y: 117))
+                    p.addQuadCurve(to: .init(x: 86, y: 118), control: .init(x: 92, y: 120))
+                    p.closeSubpath()
+                },
+                fill: KuroPalette.white,
+                stroke: KuroPalette.ink,
+                lineWidth: 2.6,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 86.5, y: 113))
+                    p.addQuadCurve(to: .init(x: 97.5, y: 112.5), control: .init(x: 92, y: 114.5))
+                },
+                stroke: KuroPalette.pink,
+                lineWidth: 2,
                 cap: .round
             ),
         ]
