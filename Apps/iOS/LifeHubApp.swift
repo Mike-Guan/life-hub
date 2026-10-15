@@ -22,6 +22,7 @@ struct LifeHubApp: App {
     @State private var showsSettings = false
     @State private var showsShop = false
     @State private var showsWardrobe = false
+    @State private var showsHome = false
     @State private var showsOnboarding: Bool
     @State private var unboxing: CanEntry?
     @State private var welcomeBack: CompanionEvent?
@@ -179,6 +180,7 @@ struct LifeHubApp: App {
             onSettings: { showsSettings = true },
             cans: growth.ledger.only(persona).balance,
             onShop: { showsShop = true },
+            onHome: homeEntry,
             wardrobe: wardrobe,
             persona: persona,
             greetingName: Greeting.name(in: AppGroup.defaults),
@@ -278,6 +280,9 @@ struct LifeHubApp: App {
         }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
             ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
+        }
+        .fullScreenCover(isPresented: $showsHome) {
+            HakuHomeView { showsHome = false }
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
             WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, cards: cards)
@@ -477,9 +482,18 @@ struct LifeHubApp: App {
         }
     }
 
+    // Issue #485: the home prototype opens from the home screen in DEV and STG builds only.
+    private var homeEntry: (() -> Void)? {
+        #if DEBUG || ENV_STG
+        return { showsHome = true }
+        #else
+        return nil
+        #endif
+    }
+
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.
     private func showNextUnboxing() {
-        guard !showsShop, !showsWardrobe, !showsSettings else { return }
+        guard !showsShop, !showsWardrobe, !showsSettings, !showsHome else { return }
         unboxing = UnboxLog.next(in: growth.ledger, persona: persona)
     }
 

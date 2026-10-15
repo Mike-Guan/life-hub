@@ -43,6 +43,8 @@ struct HomeView: View {
     var cans: Int?
     /// Opens the shop, when set.
     var onShop: (() -> Void)?
+    /// Shows a house button that calls this, when set.
+    var onHome: (() -> Void)?
     /// What the character wears.
     var wardrobe = Wardrobe()
     /// Which character the card draws.
@@ -97,6 +99,7 @@ struct HomeView: View {
                     error: store.lastError ?? energy.lastError ?? extraError,
                     cans: cans,
                     onShop: onShop,
+                    onHome: onHome,
                     onSettings: onSettings,
                     persona: persona,
                     name: greetingName,
@@ -530,6 +533,7 @@ private struct Header: View {
     let error: String?
     let cans: Int?
     let onShop: (() -> Void)?
+    let onHome: (() -> Void)?
     let onSettings: (() -> Void)?
     let persona: Persona
     let name: String?
@@ -560,6 +564,17 @@ private struct Header: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("商店，\(cans) 个能量罐")
+                }
+                if let onHome {
+                    Button(action: onHome) {
+                        Image(systemName: "house.fill")
+                            .font(Toy.body(18, weight: .heavy))
+                            .foregroundStyle(Toy.ink)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("家")
                 }
                 if let onSettings {
                     Button(action: onSettings) {
