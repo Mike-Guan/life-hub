@@ -110,7 +110,7 @@ struct WatchStatusView: View {
     @ViewBuilder private var portrait: some View {
         if let payload = entry.payload, let mode = entry.mode, payload.persona == .kuro {
             KuroPortrait(
-                look: KuroLook(mode: mode),
+                look: KuroLook(mode: mode, card: payload.card(for: mode)),
                 energy: payload.snapshot.energy(at: entry.date)?.value,
                 bedtime: payload.bedtime.state(at: entry.date),
                 wearing: payload.wardrobe.worn(in: mode),
@@ -123,6 +123,7 @@ struct WatchStatusView: View {
             let scene = payload.scene(at: entry.date)
             CompanionPortrait(
                 mode: mode,
+                card: payload.card(for: mode),
                 energy: snapshot.energy(at: entry.date)?.value,
                 need: snapshot.need(at: entry.date),
                 needSince: snapshot.needSince(at: entry.date),

@@ -9,6 +9,12 @@
             "state" : "translated",
             "value" : "Couldn't read %1$@. Backed up to %2$@: %3$@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@を読めなかったので、%2$@に退避しました：%3$@"
+          }
         }
       }
     },
@@ -19,6 +25,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ time"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@中"
           }
         }
       }
@@ -31,6 +43,12 @@
             "state" : "translated",
             "value" : "%@ spot"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の場所"
+          }
         }
       }
     },
@@ -40,6 +58,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "energy records"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エナジー記録"
           }
         }
       }
@@ -51,6 +75,12 @@
             "state" : "translated",
             "value" : "mode records"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モード記録"
+          }
         }
       }
     },
@@ -60,6 +90,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…short on sleep, maybe."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……今日、寝不足っぽい。"
           }
         }
       }
@@ -71,6 +107,12 @@
             "state" : "translated",
             "value" : "…good day, looks like."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……今日、調子よさそう。"
+          }
         }
       }
     },
@@ -80,6 +122,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…okay today, I think."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……今日は、まあまあ？"
           }
         }
       }
@@ -91,6 +139,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…Not like I was waiting."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……別に待ってたわけじゃない。"
           }
         }
       }
@@ -112,6 +166,12 @@
             "state" : "translated",
             "value" : "…Sit."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……座れば。"
+          }
         }
       }
     },
@@ -122,6 +182,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…here we go"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……始まった"
           }
         }
       }
@@ -134,6 +200,12 @@
             "state" : "translated",
             "value" : ","
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "、"
+          }
         }
       }
     },
@@ -143,6 +215,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "one thing at a time"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ひとつずつ"
           }
         }
       }
@@ -171,6 +249,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Next"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次"
           }
         }
       }
@@ -216,6 +300,12 @@
             "state" : "translated",
             "value" : "Book open"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本、広げた"
+          }
         }
       }
     },
@@ -227,6 +317,12 @@
             "state" : "translated",
             "value" : "Errands"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "買い物"
+          }
         }
       }
     },
@@ -236,6 +332,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cloud cushion"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雲のクッション"
           }
         }
       }
@@ -248,6 +350,12 @@
             "state" : "translated",
             "value" : "Low"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低め"
+          }
         }
       }
     },
@@ -257,6 +365,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "You're at the gym"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジムにいる"
           }
         }
       }
@@ -269,6 +383,12 @@
             "state" : "translated",
             "value" : "You're at the boxing gym"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボクシングジムにいる"
+          }
         }
       }
     },
@@ -278,6 +398,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "You're at the tennis court"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テニスコートにいる"
           }
         }
       }
@@ -289,6 +415,12 @@
             "state" : "translated",
             "value" : "You're on a run"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "走ってる"
+          }
         }
       }
     },
@@ -298,6 +430,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "You picked “%@” yourself"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分で「%@」にした"
           }
         }
       }
@@ -310,6 +448,12 @@
             "state" : "translated",
             "value" : "Couldn't save %1$@: %2$@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@を保存できませんでした：%2$@"
+          }
         }
       }
     },
@@ -320,6 +464,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Building"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロジェクト"
           }
         }
       }
@@ -348,6 +498,12 @@
             "state" : "translated",
             "value" : "Gym"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジム"
+          }
         }
       }
     },
@@ -359,6 +515,12 @@
             "state" : "translated",
             "value" : "Gym days"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジムの日"
+          }
         }
       }
     },
@@ -368,6 +530,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gym day, and work's over"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジムの日、仕事終わり"
           }
         }
       }
@@ -379,6 +547,12 @@
             "state" : "translated",
             "value" : "Pixel cardigan"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ドット絵カーデ"
+          }
         }
       }
     },
@@ -388,6 +562,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Office"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会社"
           }
         }
       }
@@ -399,6 +579,12 @@
             "state" : "translated",
             "value" : "Actually wiped"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ほんとは疲れてる"
+          }
         }
       }
     },
@@ -408,6 +594,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Writing"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書きもの"
           }
         }
       }
@@ -420,6 +612,12 @@
             "state" : "translated",
             "value" : "decision log"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "判断の記録"
+          }
         }
       }
     },
@@ -431,6 +629,12 @@
             "state" : "translated",
             "value" : "Switch to %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@に切り替え"
+          }
         }
       }
     },
@@ -440,6 +644,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Switch to Work"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仕事に切り替え"
           }
         }
       }
@@ -452,6 +662,12 @@
             "state" : "translated",
             "value" : "Switch to Chill"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オフに切り替え"
+          }
         }
       }
     },
@@ -461,6 +677,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Switch to Projects"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "副業に切り替え"
           }
         }
       }
@@ -473,6 +695,12 @@
             "state" : "translated",
             "value" : "Couldn't delete %1$@: %2$@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@を削除できません：%2$@"
+          }
         }
       }
     },
@@ -484,6 +712,12 @@
             "state" : "translated",
             "value" : "Couldn't delete %1$@: %2$@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@を削除できません：%2$@"
+          }
         }
       }
     },
@@ -493,6 +727,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Got to the gym"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジムに着いた"
           }
         }
       }
@@ -504,6 +744,12 @@
             "state" : "translated",
             "value" : "Got to the office"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会社に着いた"
+          }
         }
       }
     },
@@ -513,6 +759,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Got home"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家に着いた"
           }
         }
       }
@@ -524,6 +776,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Embroidered jacket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刺しゅうジャケット"
           }
         }
       }
@@ -552,6 +810,12 @@
             "state" : "translated",
             "value" : "Bag on"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッグ、背負った"
+          }
         }
       }
     },
@@ -561,6 +825,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Harajuku raincoat"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原宿レインコート"
           }
         }
       }
@@ -572,6 +842,12 @@
             "state" : "translated",
             "value" : "Just passing by"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通りすがり"
+          }
         }
       }
     },
@@ -581,6 +857,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Just note it, don't switch"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録だけ（切り替えない）"
           }
         }
       }
@@ -592,6 +874,12 @@
             "state" : "translated",
             "value" : "Mon"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月曜日"
+          }
         }
       }
     },
@@ -601,6 +889,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wed"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "水曜日"
           }
         }
       }
@@ -612,6 +906,12 @@
             "state" : "translated",
             "value" : "Tue"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "火曜日"
+          }
         }
       }
     },
@@ -621,6 +921,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fri"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金曜日"
           }
         }
       }
@@ -632,6 +938,12 @@
             "state" : "translated",
             "value" : "Sat"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "土曜日"
+          }
         }
       }
     },
@@ -641,6 +953,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Thu"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "木曜日"
           }
         }
       }
@@ -652,6 +970,12 @@
             "state" : "translated",
             "value" : "Sun"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日曜日"
+          }
         }
       }
     },
@@ -661,6 +985,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "in… and out"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すー、はー"
           }
         }
       }
@@ -673,6 +1003,12 @@
             "state" : "translated",
             "value" : "Oh."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ふーん。"
+          }
         }
       }
     },
@@ -682,6 +1018,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oh. You're back."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お、帰ってきた。"
           }
         }
       }
@@ -693,6 +1035,12 @@
             "state" : "translated",
             "value" : "Mm."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ん。"
+          }
         }
       }
     },
@@ -703,6 +1051,12 @@
             "state" : "translated",
             "value" : "Crewneck sweater"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クルーネックニット"
+          }
         }
       }
     },
@@ -712,6 +1066,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Little pink flowers"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "足もとのピンクの花"
           }
         }
       }
@@ -724,6 +1084,12 @@
             "state" : "translated",
             "value" : "Place"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "場所"
+          }
         }
       }
     },
@@ -733,6 +1099,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mat rolled"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マット、丸めた"
           }
         }
       }
@@ -761,6 +1133,12 @@
             "state" : "translated",
             "value" : "Succulent"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "多肉の鉢"
+          }
         }
       }
     },
@@ -771,6 +1149,12 @@
             "state" : "translated",
             "value" : "Headband tight"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘッドバンド、きゅっと"
+          }
         }
       }
     },
@@ -780,6 +1164,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Studying"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "勉強"
           }
         }
       }
@@ -792,6 +1182,12 @@
             "state" : "translated",
             "value" : "Prep-school blazer"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "制服風ブレザー"
+          }
         }
       }
     },
@@ -801,6 +1197,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Home"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家"
           }
         }
       }
@@ -812,6 +1214,12 @@
             "state" : "translated",
             "value" : "Tiny cactus"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミニサボテン"
+          }
         }
       }
     },
@@ -821,6 +1229,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Night-light"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ナイトライト"
           }
         }
       }
@@ -832,6 +1246,12 @@
             "state" : "translated",
             "value" : "Teddy blanket"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クマの毛布"
+          }
         }
       }
     },
@@ -841,6 +1261,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Widget data didn't save: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウィジェットのデータを書き込めませんでした：%@"
           }
         }
       }
@@ -853,6 +1279,12 @@
             "state" : "translated",
             "value" : "Work overalls"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ワークサロペット"
+          }
         }
       }
     },
@@ -862,6 +1294,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Canvas apron"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "帆布エプロン"
           }
         }
       }
@@ -873,6 +1311,12 @@
             "state" : "translated",
             "value" : "on the sidelines"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見張っとく"
+          }
         }
       }
     },
@@ -882,6 +1326,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Places you're often at"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よくいる場所"
           }
         }
       }
@@ -893,6 +1343,12 @@
             "state" : "translated",
             "value" : "Cracking open a can"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エナジー缶をあける"
+          }
         }
       }
     },
@@ -902,6 +1358,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cardigan"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カーディガン"
           }
         }
       }
@@ -914,6 +1376,12 @@
             "state" : "translated",
             "value" : "Count as %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@として使う"
+          }
         }
       }
     },
@@ -923,6 +1391,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Count as gym"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジムとして使う"
           }
         }
       }
@@ -934,6 +1408,12 @@
             "state" : "translated",
             "value" : "Count as boxing gym"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボクシングジムとして使う"
+          }
         }
       }
     },
@@ -943,6 +1423,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Count as tennis court"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テニスコートとして使う"
           }
         }
       }
@@ -954,6 +1440,12 @@
             "state" : "translated",
             "value" : "slow and steady"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゆっくり歩く"
+          }
         }
       }
     },
@@ -963,6 +1455,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "I think you didn't get enough sleep."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日は寝不足な気がする。"
           }
         }
       }
@@ -974,6 +1472,12 @@
             "state" : "translated",
             "value" : "I think you're fully charged today."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日はフル充電な気がする。"
+          }
         }
       }
     },
@@ -983,6 +1487,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "I think you're doing okay today."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日はまあまあな気がする。"
           }
         }
       }
@@ -1011,6 +1521,12 @@
             "state" : "translated",
             "value" : "Mini punching bag"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミニサンドバッグ"
+          }
         }
       }
     },
@@ -1020,6 +1536,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Room plant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "観葉植物"
           }
         }
       }
@@ -1032,6 +1554,12 @@
             "state" : "translated",
             "value" : "Shooting"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "撮影"
+          }
         }
       }
     },
@@ -1041,6 +1569,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "fresh strings"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ガット、張りたて"
           }
         }
       }
@@ -1086,6 +1620,12 @@
             "state" : "translated",
             "value" : "The gloves wore in."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グローブがくたびれてきた。"
+          }
         }
       }
     },
@@ -1097,6 +1637,12 @@
             "state" : "translated",
             "value" : "gloves on"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グローブ、締めた"
+          }
         }
       }
     },
@@ -1106,6 +1652,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Boxing gym"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボクシングジム"
           }
         }
       }
@@ -1118,6 +1670,12 @@
             "state" : "translated",
             "value" : "Couldn't move old records %1$@: %2$@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "古い記録%1$@を移行できませんでした：%2$@"
+          }
         }
       }
     },
@@ -1127,6 +1685,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Walk in the sun"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日なた散歩"
           }
         }
       }
@@ -1138,6 +1702,12 @@
             "state" : "translated",
             "value" : "Star scrunchie"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "星のヘアゴム"
+          }
         }
       }
     },
@@ -1147,6 +1717,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Star pin"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "星のバッジ"
           }
         }
       }
@@ -1159,6 +1735,22 @@
             "state" : "translated",
             "value" : "%1$@ h %2$@ min of sleep last night, so “%3$@”"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "昨夜は%1$@時間%2$@分、「%3$@」"
+          }
+        }
+      }
+    },
+    "晒太阳" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日なたに出た"
+          }
         }
       }
     },
@@ -1170,6 +1762,12 @@
             "state" : "translated",
             "value" : "Can't read %1$@ right now. Changes are kept in memory for now: %2$@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま%1$@を読めないため、変更はメモリに残しています：%2$@"
+          }
         }
       }
     },
@@ -1179,6 +1777,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "One night of decent sleep."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よく眠れた日が1日。"
           }
         }
       }
@@ -1190,6 +1794,12 @@
             "state" : "translated",
             "value" : "A few nights of decent sleep."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よく眠れた日が何日か。"
+          }
         }
       }
     },
@@ -1200,6 +1810,12 @@
             "state" : "translated",
             "value" : "Sketchbook open"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ノート、開いた"
+          }
         }
       }
     },
@@ -1209,6 +1825,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Striped mask"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボーダーヘッドギア"
+          }
+        }
+      }
+    },
+    "校队夹克" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スタジャン"
           }
         }
       }
@@ -1231,6 +1863,12 @@
             "state" : "translated",
             "value" : "Plaid smock"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チェックのスモック"
+          }
         }
       }
     },
@@ -1241,6 +1879,12 @@
             "state" : "translated",
             "value" : "A monitor showed up on the desk."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "机にモニターが増えた。"
+          }
         }
       }
     },
@@ -1250,6 +1894,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cherry hair clip"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "さくらんぼのヘアピン"
           }
         }
       }
@@ -1262,6 +1912,12 @@
             "state" : "translated",
             "value" : "Sakura tennis dress"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "さくら色テニスウェア"
+          }
         }
       }
     },
@@ -1273,6 +1929,12 @@
             "state" : "translated",
             "value" : "Sakura sweatband"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "さくら色のヘアバンド"
+          }
         }
       }
     },
@@ -1282,6 +1944,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Orange dumbbells"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オレンジのダンベル"
           }
         }
       }
@@ -1293,6 +1961,12 @@
             "state" : "translated",
             "value" : "Orange headband"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オレンジのヘッドバンド"
+          }
         }
       }
     },
@@ -1302,6 +1976,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "towel packed"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タオル、持った"
           }
         }
       }
@@ -1313,6 +1993,12 @@
             "state" : "translated",
             "value" : "Beanie"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ニット帽"
+          }
         }
       }
     },
@@ -1323,6 +2009,12 @@
             "state" : "translated",
             "value" : "Fuzzy cardigan"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もこもこカーデ"
+          }
         }
       }
     },
@@ -1332,6 +2024,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "bottle's full"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボトル、満タン"
           }
         }
       }
@@ -1344,6 +2042,12 @@
             "state" : "translated",
             "value" : "Not that tired"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "そこまで疲れてない"
+          }
         }
       }
     },
@@ -1353,6 +2057,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Polka-dot mask"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "水玉ヘッドギア"
           }
         }
       }
@@ -1364,6 +2074,12 @@
             "state" : "translated",
             "value" : "Cap on, hair in"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャップ、かぶった"
+          }
         }
       }
     },
@@ -1374,6 +2090,12 @@
             "state" : "translated",
             "value" : "Wave Hawaiian shirt"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "波柄アロハ"
+          }
         }
       }
     },
@@ -1383,6 +2105,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lilac boxing top"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ラベンダーのトップ"
           }
         }
       }
@@ -1428,6 +2156,12 @@
             "state" : "translated",
             "value" : "Full"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "満タン"
+          }
         }
       }
     },
@@ -1437,6 +2171,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Flame hoodie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ファイヤーパーカー"
           }
         }
       }
@@ -1448,6 +2188,12 @@
             "state" : "translated",
             "value" : "warm drink, curled up"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あったかいの、まるくなる"
+          }
         }
       }
     },
@@ -1457,6 +2203,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Denim jacket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デニムジャケット"
           }
         }
       }
@@ -1468,6 +2220,12 @@
             "state" : "translated",
             "value" : "Cat-ear hoodie"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネコ耳パーカー"
+          }
         }
       }
     },
@@ -1477,6 +2235,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cat-ear lamp"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネコ耳ランプ"
           }
         }
       }
@@ -1489,6 +2253,12 @@
             "state" : "translated",
             "value" : "Now"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま"
+          }
         }
       }
     },
@@ -1499,6 +2269,12 @@
             "state" : "translated",
             "value" : "Ball pumped up"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボール、空気満タン"
+          }
         }
       }
     },
@@ -1508,6 +2284,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Racket in hand"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ラケット、持った"
           }
         }
       }
@@ -1553,6 +2335,12 @@
             "state" : "translated",
             "value" : "Yoga"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ストレッチ"
+          }
         }
       }
     },
@@ -1580,6 +2368,12 @@
             "state" : "translated",
             "value" : "Art smock"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お絵かきスモック"
+          }
         }
       }
     },
@@ -1590,6 +2384,12 @@
             "state" : "translated",
             "value" : "White sportswear"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "白ジャージ"
+          }
         }
       }
     },
@@ -1599,6 +2399,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "glasses on"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メガネ、オン"
           }
         }
       }
@@ -1611,6 +2417,12 @@
             "state" : "translated",
             "value" : "Short trench"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ショートトレンチ"
+          }
         }
       }
     },
@@ -1621,6 +2433,12 @@
             "state" : "translated",
             "value" : "Left the office"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会社を出た"
+          }
         }
       }
     },
@@ -1630,6 +2448,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "pen in hand"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ペン、持った"
           }
         }
       }
@@ -1642,6 +2466,12 @@
             "state" : "translated",
             "value" : "First %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "はじめての%@"
+          }
         }
       }
     },
@@ -1653,6 +2483,12 @@
             "state" : "translated",
             "value" : "First time at the gym"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "はじめてのジム"
+          }
         }
       }
     },
@@ -1662,6 +2498,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "First 5K"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "はじめての5km完走"
           }
         }
       }
@@ -1673,6 +2515,12 @@
             "state" : "translated",
             "value" : "Pink scrunchie"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ピンクのヘアゴム"
+          }
         }
       }
     },
@@ -1682,6 +2530,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pink gloves"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ピンクのグローブ"
           }
         }
       }
@@ -1693,6 +2547,12 @@
             "state" : "translated",
             "value" : "Pink cat blanket"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ピンクのネコ毛布"
+          }
         }
       }
     },
@@ -1702,6 +2562,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pink tennis bag"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ピンクのテニスバッグ"
           }
         }
       }
@@ -1713,6 +2579,12 @@
             "state" : "translated",
             "value" : "Red-frame glasses"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "赤ぶちメガネ"
+          }
         }
       }
     },
@@ -1723,6 +2595,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Coding Focus turned on"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コーディング集中モードがオン"
           }
         }
       }
@@ -1752,6 +2630,12 @@
             "state" : "translated",
             "value" : "Tennis court"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テニスコート"
+          }
         }
       }
     },
@@ -1780,6 +2664,12 @@
             "state" : "translated",
             "value" : "Earbuds in. Clocking in."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イヤホンして、開始"
+          }
         }
       }
     },
@@ -1791,6 +2681,12 @@
             "state" : "translated",
             "value" : "Jumper dress"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジャンパースカート"
+          }
         }
       }
     },
@@ -1801,6 +2697,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "can records"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缶の記録"
           }
         }
       }
@@ -1817,7 +2719,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "勉強"
+            "value" : "自習"
           }
         }
       }
@@ -1829,6 +2731,12 @@
             "state" : "translated",
             "value" : "Own stuff. Starting"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分のこと、開始"
+          }
         }
       }
     },
@@ -1838,6 +2746,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Blue stylus"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "青いタッチペン"
           }
         }
       }
@@ -1849,6 +2763,12 @@
             "state" : "translated",
             "value" : "Mint scrunchie"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミントのヘアゴム"
+          }
         }
       }
     },
@@ -1858,6 +2778,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mint headband"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミントのヘッドバンド"
           }
         }
       }
@@ -1869,6 +2795,12 @@
             "state" : "translated",
             "value" : "Mint yoga block"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミントのヨガブロック"
+          }
         }
       }
     },
@@ -1878,6 +2810,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mint racket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミントのラケット"
           }
         }
       }
@@ -1890,6 +2828,12 @@
             "state" : "translated",
             "value" : "Happy little spin"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "思わずくるっと一回転"
+          }
         }
       }
     },
@@ -1900,6 +2844,12 @@
             "state" : "translated",
             "value" : "Navy book cover"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "紺のブックカバー"
+          }
         }
       }
     },
@@ -1909,6 +2859,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bow blouse"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リボンブラウス"
           }
         }
       }
@@ -1921,6 +2877,12 @@
             "state" : "translated",
             "value" : "Fine. I'll drop it."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "わかった、もう言わない。"
+          }
         }
       }
     },
@@ -1930,6 +2892,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arcade tee"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゲーセンT"
           }
         }
       }
@@ -1942,6 +2910,12 @@
             "state" : "translated",
             "value" : "Stand-up cheer"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立ち上がってお祝い"
+          }
         }
       }
     },
@@ -1951,6 +2925,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Running"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ランニング"
           }
         }
       }
@@ -1962,6 +2942,12 @@
             "state" : "translated",
             "value" : "Run day, and it's evening"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ランの日、夕方"
+          }
         }
       }
     },
@@ -1972,6 +2958,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Runner's headband"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ランナーのヘッドバンド"
           }
         }
       }
@@ -2000,6 +2992,12 @@
             "state" : "translated",
             "value" : "Track jacket"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トラックジャケット"
+          }
         }
       }
     },
@@ -2009,6 +3007,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gym tank"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タンクトップ"
           }
         }
       }
@@ -2021,6 +3025,12 @@
             "state" : "translated",
             "value" : "Content"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "運営"
+          }
         }
       }
     },
@@ -2030,6 +3040,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Okay"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まあまあ"
           }
         }
       }
@@ -2041,6 +3057,12 @@
             "state" : "translated",
             "value" : "Twice this week I got you up. Not bad."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今週、声かけて2回起きた。まあまあ。"
+          }
         }
       }
     },
@@ -2050,6 +3072,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "You got up %@ times this week. …Not that I'm counting."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今週、%@回起きた。……たまたま覚えてただけ。"
           }
         }
       }
@@ -2061,6 +3089,12 @@
             "state" : "translated",
             "value" : "Once this week, you actually got up. I noticed."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今週一回、ほんとに起きた。覚えとく。"
+          }
         }
       }
     },
@@ -2070,6 +3104,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mini speaker"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミニスピーカー"
           }
         }
       }
@@ -2093,6 +3133,12 @@
             "state" : "translated",
             "value" : "Picnic set"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ピクニック"
+          }
         }
       }
     },
@@ -2103,6 +3149,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gold bookmark"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のしおり"
           }
         }
       }
@@ -2115,6 +3167,12 @@
             "state" : "translated",
             "value" : "Gold dumbbells"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のダンベル"
+          }
         }
       }
     },
@@ -2125,6 +3183,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gold gloves"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のグローブ"
           }
         }
       }
@@ -2137,6 +3201,12 @@
             "state" : "translated",
             "value" : "Gold yoga block"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のヨガブロック"
+          }
         }
       }
     },
@@ -2147,6 +3217,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gold brush"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金の絵筆"
           }
         }
       }
@@ -2159,6 +3235,12 @@
             "state" : "translated",
             "value" : "Gold racket"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のラケット"
+          }
         }
       }
     },
@@ -2170,6 +3252,12 @@
             "state" : "translated",
             "value" : "Gold pencil"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のえんぴつ"
+          }
         }
       }
     },
@@ -2179,6 +3267,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Knit vest"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ニットベスト"
           }
         }
       }
@@ -2190,6 +3284,12 @@
             "state" : "translated",
             "value" : "New running shoes by the door."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "玄関にランニングシューズが増えた。"
+          }
         }
       }
     },
@@ -2199,6 +3299,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lightning-sticker mask"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イナズマのヘッドギア"
           }
         }
       }
@@ -2211,6 +3317,12 @@
             "state" : "translated",
             "value" : "Windbreaker"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウインドブレーカー"
+          }
         }
       }
     },
@@ -2222,6 +3334,12 @@
             "state" : "translated",
             "value" : "Rainy-day set"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雨の日"
+          }
         }
       }
     },
@@ -2231,6 +3349,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Neon pink gloves"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネオンピンクのグローブ"
           }
         }
       }
@@ -2243,6 +3367,12 @@
             "state" : "translated",
             "value" : "Cyan headband"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "水色のヘッドバンド"
+          }
         }
       }
     },
@@ -2252,6 +3382,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laces tight"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "靴ひも、きゅっと"
           }
         }
       }
@@ -2263,6 +3399,12 @@
             "state" : "translated",
             "value" : "Cycling"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自転車"
+          }
         }
       }
     },
@@ -2273,6 +3415,12 @@
             "state" : "translated",
             "value" : "Yellow sketchbook"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "黄色のスケッチブック"
+          }
         }
       }
     },
@@ -2282,6 +3430,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Black-and-gold boxing jacket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "黒金ブルゾン"
           }
         }
       }
