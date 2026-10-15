@@ -162,6 +162,7 @@ public struct HomeSceneInputs {
             officeSince: presence?.since(.office),
             home: home(at: date),
             stiff: sit?.isStiff(mode: mode, at: date) ?? false,
+            phone: activeNeed(at: date)?.phone ?? true,
             now: date,
             work: rules,
             rules: NeedRules.standard.following(rules, bedtime: bedtime),

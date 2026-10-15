@@ -96,6 +96,9 @@ import Testing
         #expect(reading.need == .couchScroll)
         #expect(reading.since == date(5, 20, 10))
         #expect(reading.reasons == ["在家 60 分钟没怎么动了，我也瘫着"])
+        // Guessed from stillness, so HAKU holds no phone.
+        #expect(!reading.phone)
+        #expect(try #require(need(NeedSignals(scrollThresholdAt: date(5, 20)), at: date(5, 20, 10))).phone)
     }
 
     @Test func stillBeforeTheEveningStartsCountingAtTheEvening() throws {

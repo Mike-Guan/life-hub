@@ -303,6 +303,8 @@ public struct NeedReading: Equatable, Sendable {
     public var reasons: [String]
     /// When the need ends at the latest, `nil` when only a new signal can end it.
     public var until: Date?
+    /// Whether Mike is on the phone, from Screen Time; `false` for couch scrolling guessed from stillness.
+    public var phone = true
 
     /// True until `until`, or always when there is no end time.
     public func isActive(at date: Date) -> Bool {
@@ -528,7 +530,7 @@ public enum NeedEngine {
         let since = max(start.addingTimeInterval(rules.stillFor), evening)
         guard since <= now else { return nil }
         let reason = "在家 \(Int(now.timeIntervalSince(start) / 60)) 分钟没怎么动了，我也瘫着"
-        return NeedReading(need: .couchScroll, since: since, reasons: [reason])
+        return NeedReading(need: .couchScroll, since: since, reasons: [reason], phone: false)
     }
 
     private static func boxingWarmup(
