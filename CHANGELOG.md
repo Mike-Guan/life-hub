@@ -486,6 +486,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The wardrobe preview and its head icons dress the character for the picked identity card, so the art
+  card shows the apron and sketchbook instead of the boxing kit.
 - Unboxing a top or full set shows HAKU in the mode it is worn in, not always off work.
 - The wardrobe keeps what a newer build put on (new slots or modes) instead of losing the whole wardrobe,
   and writes it back when saving.
