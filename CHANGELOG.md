@@ -67,6 +67,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
+- When the mode switches on its own, at a place, the character fades into the new outfit like a manual switch
+  instead of cutting over.
 - The Screen Time watch (pick apps in settings) now works in TestFlight (STG) builds too, not only in
   Debug. The App Store build still leaves it out.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder

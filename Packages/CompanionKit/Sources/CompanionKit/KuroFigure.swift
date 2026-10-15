@@ -613,6 +613,8 @@ public struct KuroView: View {
             .modifier(WatchFigureFrame(isEnabled: style == .watch))
             .padding(.top, Self.topInset(style))
             .padding(.horizontal, 12)
+            // Every look change fades in 0.3 s, also when the mode switched on its own (HAKU-05).
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: look)
 
             if unboxStart != nil {
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
