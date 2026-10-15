@@ -136,6 +136,9 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var overtimeMinute: Int
     /// Whose lines the needs and invites use.
     public var persona: Persona
+    /// The user's identity card, whose lines the identity day uses; `nil` without one, which has no
+    /// identity day.
+    public var identity: IdentityKind?
 
     // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses. PM 2026-10-13
     // (写死作息排查 v0 #7): no identity day until one is learned; the warm-up times move with it.
@@ -374,7 +377,7 @@ public enum NeedEngine {
             let start = time(rules.boxingWarmupStartMinute, on: day, calendar: calendar)
             let end = time(rules.boxingWarmupEndMinute, on: day, calendar: calendar)
             if start > now {
-                return ScheduledNeed(need: .boxingWarmup, from: start, until: end, line: boxingReason(rules.persona))
+                return ScheduledNeed(need: .boxingWarmup, from: start, until: end, line: boxingReason(rules))
             }
         }
         return nil
@@ -414,7 +417,7 @@ public enum NeedEngine {
 
     /// When the invite for `reading` should go out, at `now` or later, or `nil` when it shouldn't:
     /// the need ends first, today's invite went out, it would land at bedtime, or it's a couch invite
-    /// after a short night.
+    /// after a short night or in the hours before bedtime.
     /// - Parameters:
     ///   - lastInviteAt: when the last invite went out, `nil` if never.
     ///   - bedtime: the bedtime window, checked at the time the invite would go out.
@@ -432,6 +435,10 @@ public enum NeedEngine {
         guard let reading else { return nil }
         let at = max(reading.since.addingTimeInterval(inviteWait(reading.need, rules: rules)), now)
         guard reading.isActive(at: at) else { return nil }
+        // PM action table C2: no couch invite in the hours before bedtime, when HAKU dozes off instead.
+        if reading.need == .couchScroll, MomentEngine.isWindingDown(at, bedtime: bedtime, calendar: calendar) {
+            return nil
+        }
         let state = bedtime.state(at: at, calendar: calendar)
         let invite = shouldInvite(
             reading,
@@ -448,7 +455,16 @@ public enum NeedEngine {
     /// - Parameters:
     ///   - taskSoon: whether a Daily task starts within `DailyAgenda.inviteLead`.
     ///   - persona: whose voice the text is in.
-    public static func inviteText(for need: CompanionNeed, taskSoon: Bool = false, persona: Persona = .haku) -> String {
+    ///   - identity: the user's identity card, for the identity day's invite; `nil` for `persona`'s own.
+    public static func inviteText(
+        for need: CompanionNeed,
+        taskSoon: Bool = false,
+        persona: Persona = .haku,
+        identity: IdentityKind? = nil
+    ) -> String {
+        if need == .boxingWarmup, let identity, identity != ModeCards.legacy(for: persona).identity {
+            return identity.invite(for: persona)
+        }
         let text: String =
             switch need {
             case .boxingWarmup where persona == .kuro: "……走吗。网球包拎好了。"
@@ -547,16 +563,20 @@ public enum NeedEngine {
         // The Screen Time extension only knows the day of the last workout, so any workout today counts there.
         let trainedToday = (signals.trainedDay ?? .distantPast) >= StateEngine.dayStart(for: now, calendar: calendar)
         guard !boxedToday, !trainedToday else { return nil }
-        return NeedReading(need: .boxingWarmup, since: start, reasons: [boxingReason(rules.persona)], until: end)
+        return NeedReading(need: .boxingWarmup, since: start, reasons: [boxingReason(rules)], until: end)
     }
 
-    private static func boxingReason(_ persona: Persona) -> String {
+    // PM 写死作息 scan 10-15 #5: the day follows the user's card. The character's own card keeps its line.
+    private static func boxingReason(_ rules: NeedRules) -> String {
+        if let identity = rules.identity, identity != ModeCards.legacy(for: rules.persona).identity {
+            return identity.invite(for: rules.persona)
+        }
         let text =
-            switch persona {
+            switch rules.persona {
             case .haku: "今天打拳，拳套我戴好了"
             case .kuro: "今天网球。……拍子带好了。"
             }
-        return text.localized(for: persona)
+        return text.localized(for: rules.persona)
     }
 
     // Needs a known home: the invite is for still being at home, so an unknown place says nothing.

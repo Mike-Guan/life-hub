@@ -349,10 +349,12 @@ struct OnboardingView: View {
             ForEach(cards.modes, id: \.self) { mode in
                 modeCard(mode, cards: cards)
             }
-            fine("之后都能在设置里改。")
+            if !isEditing {
+                fine("之后都能在设置里改。")
+            }
         } foot: {
             if naming == nil {
-                primary("下一步") { next() }
+                primary(isEditing ? "保存" : "下一步") { next() }
             }
         }
     }
@@ -868,7 +870,7 @@ struct OnboardingView: View {
             places.save(row.place(coordinate.latitude, coordinate.longitude))
             error = nil
         } catch {
-            self.error = "拿不到当前位置：\(error.localizedDescription)"
+            self.error = LocationFailure(error).message
         }
     }
 

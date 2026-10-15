@@ -247,6 +247,18 @@ enum Placement {
         .speakerNoteA: .fx,
         .speakerNoteB: .fx,
         .breathPuff: .fx,
+        .crossArm: Spot(.handsFront, "拉伸手臂"),
+        .crossArmL: Spot(.handsFront, "拉伸手臂"),
+        .wristbandPull: Spot(.handsFront, "拉伸手臂"),
+        .waterBottle: Spot(.handR, "水瓶"),
+        .bottleCap: Spot(.handR, "水瓶"),
+        .bottleFist: Spot(.handR, "水瓶"),
+        .chinHand: Spot(.handL, "chinHand"),
+        .wristArm: Spot(.handL, "wristArm"),
+        .outPack: Spot(.torso, "背包"),
+        .outStraps: Spot(.torso, "背包"),
+        .pencilLoose: Spot(.handR, "pencil"),
+        .paintHand: Spot(.handR, "paintHand"),
     ]
 
     static let kuro: [KuroPart: Spot] = [

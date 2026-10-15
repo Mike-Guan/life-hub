@@ -88,4 +88,33 @@ extension NeedRules {
         #expect(next?.from == date(31, 9))
         #expect(next?.line == "今天网球。……拍子带好了。")
     }
+
+    @Test func theIdentityDayFollowsTheUsersCard() {
+        let ledger = sessions([date(18, 11, 40), date(25, 11, 40)])
+        // No card, no identity day, even with old boxing records.
+        let none = NeedRules.standard(
+            for: .haku,
+            ledger: ledger,
+            cards: ModeCards(),
+            now: date(31, 12),
+            calendar: calendar
+        )
+        #expect(none.identity == nil)
+        #expect(none.boxingWeekday == nil)
+        // HAKU with the tennis card warms up for tennis.
+        let tennis = NeedRules.standard(
+            for: .haku,
+            ledger: ledger,
+            cards: ModeCards(identity: .tennis),
+            now: date(31, 12),
+            calendar: calendar
+        )
+        #expect(tennis.identity == .tennis)
+        let reading = NeedEngine.need(NeedSignals(), now: date(25, 10), rules: tennis, calendar: calendar)
+        #expect(reading?.reasons == ["球拍在门口。去不去随你。"])
+        #expect(NeedEngine.inviteText(for: .boxingWarmup, persona: .haku, identity: .tennis) == "球拍在门口。去不去随你。")
+        // The character's own card keeps its own lines.
+        #expect(NeedEngine.inviteText(for: .boxingWarmup, persona: .haku, identity: .boxing) == "拳套戴好了，出发去拳馆？")
+        #expect(NeedEngine.inviteText(for: .boxingWarmup, persona: .kuro, identity: .tennis) == "……走吗。网球包拎好了。")
+    }
 }

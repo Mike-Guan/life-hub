@@ -67,6 +67,7 @@ public struct CompanionView: View {
     @Environment(\.frameReduceMotion) private var frameReduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
+    @Environment(\.companionOffscreen) private var offscreen
     @Environment(\.companionHold) private var hold
     /// True for a moment after the watch screen comes back on, while the figure stays still.
     @State private var settling = false
@@ -431,13 +432,18 @@ public struct CompanionView: View {
     }
 
     private var paused: Bool {
-        Self.paused(reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling)
+        Self.paused(
+            reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling,
+            offscreen: offscreen
+        )
     }
 
     /// Whether the figure's frame clock stops: with Reduce Motion, outside the active scene, with the watch screen
-    /// dimmed, or while settling after it comes back on.
-    nonisolated static func paused(reduceMotion: Bool, scenePhase: ScenePhase, dozing: Bool, settling: Bool) -> Bool {
-        reduceMotion || scenePhase != .active || dozing || settling
+    /// dimmed, while settling after it comes back on, or while kept off screen.
+    nonisolated static func paused(
+        reduceMotion: Bool, scenePhase: ScenePhase, dozing: Bool, settling: Bool, offscreen: Bool = false
+    ) -> Bool {
+        reduceMotion || scenePhase != .active || dozing || settling || offscreen
     }
 
     /// The app is in the background or the watch screen is dimmed.
@@ -1469,7 +1475,7 @@ struct IdleMotion {
             self.init(mode: .work, time: t)
         case .shooting:
             self.init(mode: .money, time: t)
-        case .collapsed, .blanket:
+        case .collapsed, .blanket, .dozing:
             let breath = IdleMotion.sleeping(time: t)
             self.init(dy: breath.dy, angle: breath.angle)
         case .morning:

@@ -89,10 +89,13 @@ extension RunnerPose {
         var pose = self
         pose.cardLook = mode == .boxing ? RunnerCardLook(card: card) : nil
         pose.watchFrame = watch
-        if let time, let look = pose.cardLook, pose.holdsCardProps, !pose.bedtime, let length = look.beatLength,
-            let beat = IdleClock.beat(at: time, every: 24, spread: 6, lengths: [length], seed: Self.seed &+ 0x30)
-        {
-            pose.play(look, at: CGFloat(beat.phase))
+        if let time, let look = pose.cardLook, pose.holdsCardProps, !pose.bedtime {
+            // The look's own idle, if it has one, and its base outfit's moves share one stream.
+            let pool: [RunnerBaseIdle?] = (look.beatLength == nil ? [] : [nil]) + RunnerBaseIdle.pool(look)
+            let lengths = pool.map { $0.map { Double($0.length) } ?? look.beatLength ?? 0 }
+            if let beat = IdleClock.beat(at: time, every: 24, spread: 6, lengths: lengths, seed: Self.seed &+ 0x30) {
+                pose.play(look, pool[beat.kind], at: CGFloat(beat.phase))
+            }
         }
         return pose
     }
@@ -243,9 +246,18 @@ extension RunnerCardLook {
 }
 
 extension RunnerPose {
-    /// The pose `t` seconds into `look`'s own idle.
-    fileprivate mutating func play(_ look: RunnerCardLook, at t: CGFloat) {
+    /// The pose `t` seconds into `look`'s own idle, or into `idle` when given.
+    fileprivate mutating func play(_ look: RunnerCardLook, _ idle: RunnerBaseIdle?, at t: CGFloat) {
         cardBeat = t
+        baseIdle = idle
+        if let idle {
+            let eyes = idle.eyes(look, at: t)
+            eyesDx += eyes.width
+            eyesDy += eyes.height
+            headTilt += idle.tilt(look, at: t)
+            shrug = idle.shrug(look, at: t)
+            return
+        }
         let head = look.head(at: t)
         headDy += head.dy
         headTilt += head.tilt

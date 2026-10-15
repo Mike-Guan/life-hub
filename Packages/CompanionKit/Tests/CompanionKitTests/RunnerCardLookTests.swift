@@ -131,25 +131,92 @@ import Testing
         var busy = RunnerPose(face: .mid)
         busy.dailyProp = .note
         #expect(times.allSatisfy { busy.dressed(for: .dance, in: .boxing, time: $0).cardBeat < 0 })
-        // Looks without their own idle yet stay still.
-        #expect(times.allSatisfy { RunnerPose(face: .mid).dressed(for: .tennis, in: .boxing, time: $0).cardBeat < 0 })
+        // A look without its own idle still plays its base outfit's moves.
+        #expect(times.contains { RunnerPose(face: .mid).dressed(for: .tennis, in: .boxing, time: $0).baseIdle != nil })
     }
 
-    // 动作展示总表 C12: the boxing idle's slip and glove bump never play over a card look's own idle.
-    @Test func aCardWithItsOwnIdleSkipsTheBoxingIdle() {
+    // 动作展示总表 C12: the boxing idle's slip and glove bump never play over a card look's idles.
+    @Test func aCardLookSkipsTheBoxingIdle() {
         let times = Array(stride(from: 0.0, to: 600, by: 0.05))
         func boxing(_ pose: RunnerPose) -> Bool {
-            pose.shift != 0 || pose.lean != 0 || pose.puff || pose.eyesDy != 0 || pose.gloveL.width != 0
+            pose.shift != 0 || pose.lean != 0 || pose.puff || pose.gloveL.width != 0
         }
         func pose(_ card: IdentityKind?, at t: Double) -> RunnerPose {
             RunnerPose(mode: .boxing, time: t, face: .mid, card: card, react: 0)
                 .dressed(for: card, in: .boxing, time: t)
         }
         #expect(times.contains { boxing(pose(nil, at: $0)) })
-        #expect(times.contains { boxing(pose(.tennis, at: $0)) })
-        for card in [IdentityKind.dance, .music, .ski] {
+        #expect(times.contains { boxing(pose(.swimming, at: $0)) })
+        for card in IdentityKind.allCases where RunnerCardLook(card: card) != nil {
             #expect(times.contains { pose(card, at: $0).cardBeat >= 0 })
             #expect(!times.contains { boxing(pose(card, at: $0)) })
         }
+    }
+
+    private func base(_ card: IdentityKind, _ idle: RunnerBaseIdle, at t: CGFloat) -> Set<RunnerPart> {
+        var pose = RunnerPose(face: .mid).dressed(for: card, in: .boxing)
+        pose.cardBeat = t
+        pose.baseIdle = idle
+        return Set(RunnerFigure.parts(for: .boxing, pose: pose))
+    }
+
+    // 待机动作 补齐规格 v0 H6-H11: each base outfit has its two moves.
+    @Test func eachBaseOutfitHasItsTwoMoves() {
+        #expect(RunnerBaseIdle.pool(.fitness) == [.stretch, .drink])
+        #expect(RunnerBaseIdle.pool(.study) == [.checkWrist, .hitchPack])
+        #expect(RunnerBaseIdle.pool(.art) == [.twirlPencil, .wipeHands])
+        // They share the stream with the look's own idle.
+        let moves = Set(
+            stride(from: 0.0, to: 2400, by: 0.5).compactMap {
+                RunnerPose(face: .mid).dressed(for: .dance, in: .boxing, time: $0).baseIdle
+            })
+        #expect(moves == [.stretch, .drink])
+    }
+
+    @Test func heldThingsGoDownBeforeTheHandsMove() {
+        // At the start the dumbbell is still in hand and nothing new shows.
+        let start = base(.fitness, .stretch, at: 0)
+        #expect(start.contains(.handWeight))
+        #expect(start.isDisjoint(with: [.crossArm, .crossArmL]))
+        // Then it is down out of the frame while the arm crosses.
+        let crossing = (0..<30).map { base(.fitness, .stretch, at: CGFloat($0) / 10) }
+        #expect(crossing.contains { $0.contains(.crossArm) && !$0.contains(.handWeight) })
+        #expect(crossing.contains { $0.isSuperset(of: [.crossArmL, .wristbandPull]) })
+        // The fist with the wristband is the hand itself, so it stays until the arm crosses.
+        #expect(base(.dance, .stretch, at: 0).contains(.wristbandHand))
+    }
+
+    @Test func drinkingTakesTheCapOffAndShutsTheEyes() {
+        let frames = (0...25).map { base(.ski, .drink, at: CGFloat($0) / 10) }
+        // A hand always shows, and the bottle only in the fist.
+        #expect(frames.allSatisfy { $0.contains(.wristbandHand) != $0.contains(.bottleFist) })
+        #expect(frames.allSatisfy { $0.contains(.waterBottle) == $0.contains(.bottleFist) })
+        #expect(frames.first?.contains(.wristbandHand) == true)
+        #expect(frames.last?.contains(.wristbandHand) == true)
+        #expect(frames.contains { $0.contains(.eyesClosed) && !$0.contains(.bottleCap) })
+        #expect(frames.contains { $0.isSuperset(of: [.waterBottle, .bottleCap]) })
+    }
+
+    @Test func outMovesLookAtTheWristAndShrugTheBackpack() {
+        let wrist = (0..<15).map { base(.study, .checkWrist, at: CGFloat($0) / 10) }
+        #expect(wrist.contains { $0.contains(.wristArm) && !$0.contains(.book) })
+        let pack = (0..<12).map { base(.music, .hitchPack, at: CGFloat($0) / 10) }
+        #expect(pack.allSatisfy { $0.isSuperset(of: [.outPack, .outStraps]) })
+        #expect(pack.contains { $0.contains(.eyesClosed) })
+        let shrug = stride(from: 0.0, to: 1.2, by: 0.05).map { RunnerBaseIdle.hitchPack.shrug(.music, at: $0) }
+        #expect((shrug.min() ?? 0) < -3.5)
+        #expect(shrug.first == 0)
+    }
+
+    @Test func thePencilDropsAndComesBackAtTheEnd() {
+        let twirl = RunnerBaseIdle.twirlPencil
+        #expect(base(.art, twirl, at: 0.5).contains(.pencil))
+        let dropped = base(.art, twirl, at: 1.6)
+        #expect(dropped.isSuperset(of: [.pencilLoose, .chinHand]) && !dropped.contains(.pencil))
+        // The sketchbook stays in the other hand.
+        #expect(dropped.contains(.sketchbook))
+        #expect(base(.art, twirl, at: 1.95).contains(.pencil))
+        let wipe = (0..<15).map { base(.art, .wipeHands, at: CGFloat($0) / 10) }
+        #expect(wipe.contains { $0.contains(.paintHand) && $0.isDisjoint(with: [.sketchbook, .pencil]) })
     }
 }

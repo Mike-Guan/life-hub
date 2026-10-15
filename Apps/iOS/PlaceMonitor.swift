@@ -125,3 +125,29 @@ final class PlaceMonitor {
         return samePoint && condition.radius == place.radius
     }
 }
+
+// UI 二组 preview 5 (空状态与报错 v1.1): the system text ("kCLErrorDomain error 1") said nothing to the user.
+/// Why the current location couldn't be found, in words, and the step that fixes it.
+struct LocationFailure: Equatable {
+    /// The line to show.
+    let message: String
+    /// `true` when only Settings can fix it, else trying again may.
+    let opensSettings: Bool
+
+    init(_ error: Error) {
+        switch (error as? CLError)?.code {
+        case .denied?:
+            message = "位置权限关着，定不了位。".localized
+            opensSettings = true
+        case .locationUnknown?:
+            message = "现在定不到位置，到窗边或室外再点一次。".localized
+            opensSettings = false
+        case .network?:
+            message = "定位要用网络，联网后再点一次。".localized
+            opensSettings = false
+        default:
+            message = "没定到位置，再点一次试试。".localized
+            opensSettings = false
+        }
+    }
+}
