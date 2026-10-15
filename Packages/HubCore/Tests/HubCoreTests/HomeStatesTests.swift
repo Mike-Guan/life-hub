@@ -86,6 +86,28 @@ import Testing
         #expect(home(since: arrived, at: date(5, 0, 30)) == .blanket)
     }
 
+    // PM action table U6: couch scrolling guessed from stillness shows the blanket, with no phone.
+    @Test func couchWithoutScreenTimeIsTheBlanket() {
+        let signals = HomeSignals(since: date(4, 18), workedToday: 0, manualAt: nil)
+        func moment(phone: Bool, mode: Mode? = .chill) -> CompanionMoment? {
+            MomentEngine.moment(
+                mode: mode,
+                sideHustle: nil,
+                activity: nil,
+                need: .couchScroll,
+                departing: false,
+                officeSince: nil,
+                home: signals,
+                phone: phone,
+                now: date(4, 20),
+                calendar: calendar
+            )
+        }
+        #expect(moment(phone: false) == .blanket)
+        #expect(moment(phone: true) == nil)
+        #expect(moment(phone: false, mode: .money) == nil)
+    }
+
     // PM action table C2: couch scrolling in the blanket hours dozes off instead of peeking at the bag.
     @Test func scrollingBeforeBedtimeDozesOff() {
         let signals = HomeSignals(since: date(4, 18), workedToday: 0, manualAt: nil)

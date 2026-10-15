@@ -281,7 +281,7 @@ struct KuroFigure: View {
         // One top or set per mode, so the first worn one in catalog order is the only one.
         let worn = KuroItem.allCases.filter { $0.look == look && pose.items.contains($0) }
         if let clothes = worn.lazy.compactMap(\.clothes).first {
-            dress(look, in: clothes, back: pose.tap == .turnAway, &visible)
+            dress(look, in: clothes, back: pose.tap == .turnAway && KuroTap.facesAway(pose.tapProgress), &visible)
         }
         // 位置规划图 §10-2: the beanie needs her cat ears to sit between, so a set hat or the bath towel takes it off.
         if visible.contains(.setPicnicHat) || visible.contains(.setRainHat) || !visible.contains(.catEars) {
@@ -364,6 +364,7 @@ struct KuroFigure: View {
     /// fades as it goes back. The nightlight's glow is `pose.glow`.
     nonisolated static func opacity(_ part: KuroPart, pose: KuroPose) -> Double {
         if part == .weeklyRoomNightlightGlow { return pose.glow }
+        if part == .tapDots, pose.tap == .turnAway { return KuroTap.dotsOpacity(pose.tapProgress) }
         guard let idle = pose.idle else { return 1 }
         let shown = idle.opacity(part, progress: pose.idleProgress)
         guard pose.tap != nil else { return shown }
@@ -707,7 +708,11 @@ public struct KuroView: View {
                             : shown.glowing(KuroPose.glow(at: time), pom: KuroPose.pom(at: time)),
                         watch: style == .watch
                     )
-                    .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
+                    .scaleEffect(
+                        x: (unbox?.spin ?? 1) * (still ? 1 : Self.width(tap)),
+                        y: max(unbox?.popOut ?? 1, 0.001),
+                        anchor: .bottom
+                    )
                     if let unbox {
                         GiftBox(progress: unbox.box, fill: RunnerPalette.cardboard, ribbon: KuroPalette.pink)
                     }
@@ -727,7 +732,7 @@ public struct KuroView: View {
             .padding(.top, Self.topInset(style))
             .padding(.horizontal, 12)
             // Every look change fades in 0.3 s, also when the mode switched on its own (HAKU-05).
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: look)
+            .animation(reduceMotion ? nil : .easeInOut(duration: Self.lookFade), value: look)
 
             if unboxStart != nil {
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
@@ -769,7 +774,17 @@ public struct KuroView: View {
             let now = Date.now.timeIntervalSinceReferenceDate
             idlePace = (idlePace ?? IdlePace(time: 0, phase: 0, pace: old)).changing(to: new, at: now)
         }
-        .onChange(of: look) { _, _ in
+        .onChange(of: look) { _, new in
+            // 动作展示总表 G3: a tap still playing ends with the old look instead of finishing in the new one. A move
+            // waiting for the switch to fade (off work) plays the new look's.
+            if let start = tapStart {
+                if start > .now {
+                    tapKind = KuroTap(look: new, sleepy: false)
+                } else {
+                    tapKind = nil
+                    tapStart = nil
+                }
+            }
             pop += 1
             if unboxStart == nil { say(nil) }
         }
@@ -915,8 +930,9 @@ public struct KuroView: View {
         }
         if let day = Self.newOffWork(event, last: lastOffWork) {
             lastOffWork = day
-            // KURO-03: until she has her own off-work animation (新角色清单), she plays her tap move.
-            play(KuroTap(look: look, sleepy: false), at: .now)
+            // KURO-03: until she has her own off-work animation (新角色清单), she plays her tap move. 动作展示总表 G3:
+            // it waits for a mode switch coming with it to fade.
+            play(KuroTap(look: look, sleepy: false), at: .now.addingTimeInterval(Self.lookFade))
             if style == .watch { pokes += 1 }
             if showsBubble { say(KuroBubbleLines.offWork, for: 4) }
         }
@@ -976,6 +992,15 @@ public struct KuroView: View {
         tapStart = now
         tapHeart = KuroTap.heart()
         pop += 1
+    }
+
+    /// How long a look change fades, in seconds.
+    nonisolated static let lookFade: TimeInterval = 0.3
+
+    /// Her width for `tap`: squashed edge-on as she turns away or back, else 1.
+    nonisolated static func width(_ tap: (KuroTap, Double)?) -> CGFloat {
+        guard let tap, tap.0 == .turnAway else { return 1 }
+        return CGFloat(KuroTap.turnWidth(tap.1))
     }
 
     /// The tap reaction and its progress (0..<1) at `time`, or nil when none is playing.
