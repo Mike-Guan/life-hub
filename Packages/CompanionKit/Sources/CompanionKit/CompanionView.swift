@@ -599,9 +599,11 @@ public struct CompanionView: View {
         return pose
     }
 
-    /// `pose` with the eyes following a press, and dozing while the screen is dimmed (Always On).
+    /// `pose` with the eyes following a press, dozing while the screen is dimmed (Always On), and the props
+    /// lifted on the watch.
     private func glance(_ pose: RunnerPose) -> RunnerPose {
         var pose = pose
+        if style == .watch { pose.propLift = 1 }
         pose.eyesDx += 4 * look
         pose.headTilt += 4 * Double(look)
         if closeUp { pose.eyesDy -= 1 }
