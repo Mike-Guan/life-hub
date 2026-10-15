@@ -48,7 +48,10 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
             case .kuro:
                 AnyView(
                     KuroView(
-                        look: KuroLook(mode: mode ?? .chill),
+                        look: KuroLook(
+                            mode: mode ?? .chill,
+                            card: ModeCards.current(in: AppGroup.defaults, persona: .kuro).identity
+                        ),
                         bedtime: bedtime,
                         need: need,
                         moment: moment,

@@ -49,6 +49,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The second preset character now dresses for the picked identity card on the home screen, in widgets,
+  in the notification and in onboarding, not only in the shop and wardrobe. On the home screen she also
+  points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain

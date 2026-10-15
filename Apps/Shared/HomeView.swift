@@ -125,20 +125,24 @@ struct HomeView: View {
                     if persona == .kuro {
                         // Issue #164: her look per mode, energy face and bedtime; a tap shows a line for now.
                         KuroView(
-                            look: KuroLook(mode: shownMode ?? .chill),
+                            look: KuroLook(mode: shownMode ?? .chill, card: shownCards.identity),
                             energy: reading?.value,
                             bedtime: bedtime.state(at: context.date),
                             need: activeNeed(at: context.date)?.need,
                             activity: shownActivity(at: context.date),
                             moment: moment(at: context.date),
                             overtimeUntil: rules.eveningUntil(at: context.date),
+                            invite: activeNeed(at: context.date) == nil ? nil : invite,
+                            walking: walking(at: context.date),
+                            bath: bath(at: context.date),
                             wearing: wardrobe.worn(in: shownMode ?? .chill),
                             event: welcomeBack ?? event ?? revived(at: context.date)
                                 ?? sit?.stretched(at: context.date)
                                 ?? stayHome(at: context.date) ?? dailyDone,
                             cheer: cheer,
                             nods: nods,
-                            onWelcomeDone: onWelcomeDone
+                            onWelcomeDone: onWelcomeDone,
+                            onBathDone: onBathDone
                         )
                     } else {
                         CompanionView(
