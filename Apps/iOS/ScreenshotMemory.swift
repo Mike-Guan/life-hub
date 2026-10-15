@@ -19,6 +19,7 @@ struct ScreenshotMemory: View {
     var body: some View {
         MemoryView(
             persona: ScreenshotMode.persona,
+            cards: .current(in: AppGroup.defaults, persona: ScreenshotMode.persona),
             store: store,
             energy: energy,
             ledger: ledger,

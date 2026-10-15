@@ -218,6 +218,15 @@ import Testing
         #expect(KuroFigure.offset(.backHead, pose: KuroPose(look: .work, energy: nil), hatted: true) == .zero)
     }
 
+    @Test func herStarsMoveAboveASetHatsBrim() {
+        // 位置规划图 F11: full energy with a set hat on; the stars stay put without one.
+        let full = KuroPose(look: .work, energy: 95)
+        #expect(full.full)
+        #expect(KuroFigure.offset(.sparkle, pose: full) == .zero)
+        #expect(KuroFigure.offset(.sparkle, pose: full, hatted: true) == KuroFigure.hattedStars)
+        #expect(KuroFigure.offset(.sparkle, pose: full, beanie: true) == .zero)
+    }
+
     @Test func actingCalmFlattensHerMouthButKeepsTheBlush() {
         var pose = KuroPose(look: .chill, energy: nil).showing(.low)
         pose.calm = true
@@ -251,7 +260,7 @@ import Testing
 
     @Test func sheActsCalmAboutItemsAndShyAboutKeepsakes() {
         #expect(KuroBubbleLines.unlock(KuroItem.bag.rawValue) == "……还行吧。")
-        #expect(KuroBubbleLines.unlock(KuroItem.goldRacket.rawValue) == "……给你。收好。")
+        #expect(KuroBubbleLines.unlock(KuroItem.goldRacket.rawValue) == "……给你。有点不好意思。")
     }
 
     @Test func iconsAreSquareCropsOfTheItem() {
