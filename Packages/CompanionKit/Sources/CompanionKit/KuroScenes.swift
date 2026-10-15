@@ -43,7 +43,10 @@ enum KuroScene: Equatable, Sendable {
     static let driedLine = "……洗好了。"
 
     /// The room items she leaves behind when she walks off.
-    static let room: Set<KuroPart> = [.itemFlower, .itemLamp, .itemBlanket, .itemBag, .boxSandbag, .danceSpeaker]
+    static let room: Set<KuroPart> = [
+        .itemFlower, .itemLamp, .itemBlanket, .itemBag, .boxSandbag, .danceSpeaker, .weeklyBlanketBear,
+        .weeklyRoomCloud, .weeklyRoomSucculent, .weeklyRoomNightlightGlow, .weeklyRoomNightlight,
+    ]
 
     /// Shows and hides the scene's parts in `look`; `items` are the shop items she owns and wears.
     func dress(_ look: KuroLook, items: Set<KuroItem>, _ visible: inout Set<KuroPart>) {
