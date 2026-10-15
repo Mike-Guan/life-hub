@@ -165,7 +165,7 @@ struct FrameSheets {
     // conflicts in red under each cell. One page per mode and room item for HAKU, per look for KURO.
     @Test func allItemsOn() throws {
         let traces = Set(CompanionTrace.allCases)
-        let outfits = PlacementPoses.outfits.filter { $0.1.room != nil && $0.1.stripedMask && $0.1.peaceSign }
+        let outfits = PlacementPoses.outfits.filter { $0.1.room != nil && $0.1.mask == .stripes && $0.1.peaceSign }
         for mode in Mode.allCases {
             for (outfitLabel, outfit) in outfits {
                 let cells = PlacementPoses.hakuStates(face: .mid).map { label, pose in
