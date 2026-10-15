@@ -7,11 +7,10 @@ enum ControlCard: String, AppEnum {
     case money
     case identity
 
-    static let typeDisplayRepresentation: TypeDisplayRepresentation = "模式卡"
-    static let caseDisplayRepresentations: [ControlCard: DisplayRepresentation] = [
-        .money: "副业",
-        .identity: "身份卡",
-    ]
+    static var typeDisplayRepresentation: TypeDisplayRepresentation { "模式卡" }
+    static var caseDisplayRepresentations: [ControlCard: DisplayRepresentation] {
+        [.money: "副业", .identity: "身份卡"]
+    }
 
     /// The mode the card switches to.
     var mode: Mode { self == .money ? .money : .boxing }

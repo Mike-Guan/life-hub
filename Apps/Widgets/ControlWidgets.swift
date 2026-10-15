@@ -106,8 +106,8 @@ struct GoToGymControl: ControlWidget {
 struct CardControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         AppIntentControlConfiguration(kind: "modeCard", provider: CardControlProvider()) { value in
-            ControlWidgetToggle(isOn: value.isOn, action: CardToggleIntent(card: value.card)) {
-                Label(value.title, systemImage: value.symbol)
+            ControlWidgetToggle(value.title, isOn: value.isOn, action: CardToggleIntent(card: value.card)) { isOn in
+                Label(isOn ? "在这张卡" : "点一下切过去", systemImage: value.symbol)
             }
         }
         .displayName("模式卡")
