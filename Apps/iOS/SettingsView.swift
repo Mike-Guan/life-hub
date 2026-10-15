@@ -121,9 +121,10 @@ struct SettingsView: View {
                         .foregroundStyle(Toy.muted)
                 }
                 // UI 二组 gap #11: the prefill is only a suggestion, so the reminder waits for a picked time.
-                Toggle("到点提醒", isOn: $remindsAtBedtime)
+                // UI 审核: an old install can have it on with no time, so turning it off always works.
+                Toggle("到点提醒", isOn: reminderToggle)
                     .font(Toy.body(15))
-                    .disabled(!bedtime.isSet)
+                    .disabled(!bedtime.isSet && !remindsAtBedtime)
                 Text("\(persona.title) 从睡觉时间开始变困，一直到起床时间。打开提醒，到点发一条通知，只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
@@ -460,6 +461,15 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    /// The bedtime reminder switch: it turns on only once a bedtime is set.
+    private var reminderToggle: Binding<Bool> {
+        Binding {
+            remindsAtBedtime
+        } set: { on in
+            remindsAtBedtime = on && bedtime.isSet
+        }
     }
 
     // PM 2026-10-13: an unset bedtime shows the prefill; picking a time sets the whole schedule.
