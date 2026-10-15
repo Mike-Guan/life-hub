@@ -4,6 +4,12 @@
     "……一起躺会儿？" : {
       "comment" : "锁屏两行：一緒に / 溶けとく？",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Couch for two?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -87,7 +93,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "…Don't touch. Fresh hand wraps."
+            "value" : "…Don't touch. Fresh wraps."
           }
         }
       }
@@ -2084,7 +2090,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Racket's heavier than I thought. Still."
+            "value" : "Racket's heavy. Still heavy."
           }
         }
       }
@@ -2398,6 +2404,12 @@
     "门口那个包，在看你。" : {
       "comment" : "锁屏两行：玄関のバッグが / こっち見てる。",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That bag? Staring."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
