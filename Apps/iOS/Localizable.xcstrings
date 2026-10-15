@@ -2537,13 +2537,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While on, her default mode cards replace yours, which are kept aside; turn it off to get them back. Places and learned routines stay. Test builds only."
+            "value" : "While on, the character's default mode cards replace yours, which are kept aside; turn it off to get them back. Places and learned routines stay. Test builds only."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オンの間は彼女のデフォルトのモードカードを使い、あなたのカードは取っておきます。オフで元に戻ります。場所と覚えた生活リズムはそのまま。テスト版だけの機能です。"
+            "value" : "オンの間はキャラのデフォルトのモードカードを使い、あなたのカードは取っておきます。オフで元に戻ります。場所と覚えた生活リズムはそのまま。テスト版だけの機能です。"
           }
         }
       }
