@@ -68,8 +68,8 @@ enum HomeTextures {
 /// The full-body HAKU used in the home: the companion's head and tops, with arms and legs.
 @MainActor
 final class HakuNode: SKNode {
-    /// Scene points per art unit; HAKU stands about 78 points tall.
-    static let scale: CGFloat = 0.45
+    /// Scene points per art unit; HAKU stands about 95 points tall.
+    static let scale: CGFloat = 0.55
 
     let shadow = SKSpriteNode()
     private let flip = SKNode()
@@ -270,7 +270,7 @@ final class HakuNode: SKNode {
     static let torsoRect = CGRect(x: 18, y: 84, width: 84, height: 60)
     static let armRect = CGRect(x: -14, y: -8, width: 28, height: 48)
     static let legRect = CGRect(x: -12, y: -4, width: 24, height: 42)
-    static let sitRect = CGRect(x: -20, y: -4, width: 40, height: 52)
+    static let sitRect = CGRect(x: -20, y: -4, width: 40, height: 60)
     static let shadowRect = CGRect(x: -30, y: -9, width: 60, height: 18)
 
     private static var heads: [HakuFace: SKTexture] = [:]
@@ -351,20 +351,21 @@ final class HakuNode: SKNode {
         context.stroke(shoe, with: .color(RunnerPalette.ink), style: StrokeStyle(lineWidth: 3, lineJoin: .round))
     }
 
+    // Seated legs seen from the front: short foreshortened thighs, then shins down to the floor.
     static let sitTexture = HomeTextures.texture(sitRect) { context in
         let ink = RunnerPalette.ink
-        for x: CGFloat in [-14, 3] {
-            let shin = Path(roundedRect: CGRect(x: x, y: 8, width: 11, height: 30), cornerRadius: 2)
+        for x: CGFloat in [-13.5, 2.5] {
+            let shin = Path(roundedRect: CGRect(x: x, y: 10, width: 11, height: 36), cornerRadius: 2)
             context.fill(shin, with: .color(RunnerPalette.hood))
             context.stroke(shin, with: .color(ink), style: StrokeStyle(lineWidth: 3, lineJoin: .round))
         }
-        for x: CGFloat in [-8.5, 8.5] {
-            let shoe = Path(ellipseIn: CGRect(x: x - 8, y: 36, width: 16, height: 10))
+        for x: CGFloat in [-8, 8] {
+            let shoe = Path(ellipseIn: CGRect(x: x - 8.5, y: 43, width: 17, height: 11))
             context.fill(shoe, with: .color(RunnerPalette.white))
             context.stroke(shoe, with: .color(ink), lineWidth: 3)
         }
-        for x: CGFloat in [-15, 2] {
-            let thigh = Path(roundedRect: CGRect(x: x, y: -2, width: 13, height: 13), cornerRadius: 4)
+        for x: CGFloat in [-16, 1] {
+            let thigh = Path(roundedRect: CGRect(x: x, y: -2, width: 15, height: 14), cornerRadius: 5)
             context.fill(thigh, with: .color(RunnerPalette.hood))
             context.stroke(thigh, with: .color(ink), style: StrokeStyle(lineWidth: 3, lineJoin: .round))
         }

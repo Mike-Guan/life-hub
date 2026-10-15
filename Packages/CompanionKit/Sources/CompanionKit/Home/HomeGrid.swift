@@ -234,7 +234,7 @@ enum HomeSpot: String, CaseIterable, Sendable {
         switch self {
         case .idle, .shadowbox: Self.hub
         case .work, .side: GridPoint(x: 2.05, y: 1.85, z: 0.75)
-        case .sofa: GridPoint(x: 1.45, y: 6.0, z: 0.6)
+        case .sofa: GridPoint(x: 1.9, y: 6.0, z: 0.6)
         case .rest: GridPoint(x: 8.1, y: 7.7, z: 0.65)
         case .box: GridPoint(x: 4.6, y: 3.0)
         case .wardrobe: GridPoint(x: 7.85, y: 2.0)
