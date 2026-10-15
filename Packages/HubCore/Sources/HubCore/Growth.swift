@@ -602,31 +602,15 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(weekly: "haku.weekly.mask.bolt", slot: .mask, title: "闪电贴纸面罩", price: 18, week: 6),
         ShopItem(weekly: "haku.weekly.room.speaker", slot: .room, title: "迷你音箱", price: 20, week: 7),
         ShopItem(weekly: "haku.weekly.hat.beanie", slot: .hat, title: "毛线帽", price: 20, week: 8, drawn: false),
-        // The second character's (§2.4, approved 2026-10-14), off the shelf until wired into her figure.
-        ShopItem(
-            weekly: "kuro.weekly.hair.mint", slot: .headband, title: "薄荷发圈", price: 15, week: 1, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.blanket.bear", slot: .mask, title: "小熊毯", price: 18, week: 2, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.room.succulent", slot: .room, title: "多肉盆栽", price: 15, week: 3, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.hair.cherry", slot: .headband, title: "樱桃发夹", price: 18, week: 4, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.hair.star", slot: .headband, title: "星星发圈", price: 15, week: 5, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.room.cloud", slot: .room, title: "云朵靠垫", price: 20, week: 6, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.room.nightlight", slot: .room, title: "小夜灯", price: 20, week: 7, persona: .kuro,
-            drawn: false),
-        ShopItem(
-            weekly: "kuro.weekly.hat.beanie", slot: .hat, title: "毛线帽", price: 20, week: 8, persona: .kuro, drawn: false
-        ),
+        // The second character's (§2.4, approved 2026-10-14).
+        ShopItem(weekly: "kuro.weekly.hair.mint", slot: .headband, title: "薄荷发圈", price: 15, week: 1, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.blanket.bear", slot: .mask, title: "小熊毯", price: 18, week: 2, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.room.succulent", slot: .room, title: "多肉盆栽", price: 15, week: 3, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.hair.cherry", slot: .headband, title: "樱桃发夹", price: 18, week: 4, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.hair.star", slot: .headband, title: "星星发圈", price: 15, week: 5, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.room.cloud", slot: .room, title: "云朵靠垫", price: 20, week: 6, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.room.nightlight", slot: .room, title: "小夜灯", price: 20, week: 7, persona: .kuro),
+        ShopItem(weekly: "kuro.weekly.hat.beanie", slot: .hat, title: "毛线帽", price: 20, week: 8, persona: .kuro),
     ]
 
     init(
