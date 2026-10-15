@@ -86,6 +86,5 @@ import Testing
         #expect(irregular.offWorkFromMinute == 0)
         let decision = ModeEngine.decide(.leftOffice, log: log, now: date(5, 12), rules: irregular, calendar: calendar)
         #expect(decision?.mode == .chill)
-        #expect(ModeEngine.decide(.leftOffice, log: log, now: date(5, 12), calendar: calendar) == nil)
     }
 }

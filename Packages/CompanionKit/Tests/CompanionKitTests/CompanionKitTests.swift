@@ -1358,7 +1358,8 @@ import Testing
     func everyMomentHasALookLinesAndALabel(_ moment: CompanionMoment) {
         let parts = Set(RunnerFigure.parts(for: .money, pose: RunnerPose(moment: moment)))
         #expect(parts != Set(RunnerFigure.parts(for: .money, pose: RunnerPose())) || moment == .shooting)
-        #expect(!CompanionLines.lines(for: .money, moment: moment).isEmpty)
+        // Dozing off is silent.
+        #expect(CompanionLines.lines(for: .money, moment: moment).isEmpty == (moment == .dozing))
         let label = CompanionLines.accessibilityLabel(mode: .money, need: nil, moment: moment, bedtime: .off)
         #expect(label != "HAKU，\(Mode.money.title)")
     }

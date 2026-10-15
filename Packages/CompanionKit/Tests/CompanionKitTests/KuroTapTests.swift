@@ -113,4 +113,46 @@ import Testing
         #expect(parts.isSuperset(of: [.tapHeart, .tapGlint, .mouthFlat]))
         #expect(KuroFigure.shift(.deskGlasses, pose: pose).height < 0)
     }
+
+    @Test func aTapBringsBackWhatAnIdlePutDownInsteadOfJumping() {
+        // 动作展示总表 C9: the pen she put down for the tuck comes back up over the tap's first 0.2 s.
+        let tap = KuroPose(look: .art, energy: nil).reacting(.sketch, progress: 0.01)
+        let down = tap.cutting((.tuck, 0.5), back: 0)
+        #expect(KuroFigure.parts(for: .art, pose: down).contains(.craftPen))
+        #expect(KuroFigure.shift(.craftPen, pose: down).height > 40)
+        // UI 审核 C9 round 1: never two right hands. Her tucking hand goes down and away, then the pen comes up.
+        let handDown = tap.cutting((.tuck, 0.5), back: 0.25)
+        #expect(KuroFigure.shift(.idleTuckHand, pose: handDown).height > 1)
+        #expect(KuroFigure.opacity(.idleTuckHand, pose: handDown) == 1)
+        #expect(KuroFigure.shift(.craftPen, pose: handDown).height > 40)
+        let penUp = tap.cutting((.tuck, 0.5), back: 0.75)
+        #expect(KuroFigure.opacity(.idleTuckHand, pose: penUp) == 0)
+        let halfway = KuroFigure.shift(.craftPen, pose: penUp).height
+        #expect(halfway > 1 && halfway < 40)
+        #expect(abs(KuroFigure.shift(.craftPen, pose: tap.cutting((.tuck, 0.5), back: 1)).height) < 1)
+        #expect(KuroTap.cutBack == 0.2)
+    }
+
+    @Test func notesCutShortFadeAndTheTapKeepsHerFace() {
+        let tap = KuroPose(look: .dance, energy: nil).reacting(.hug, progress: 0.01)
+        let parts = Set(KuroFigure.parts(for: .dance, pose: tap.cutting((.groove, 0.2), back: 0.5)))
+        #expect(parts.contains(.speakerNoteA) && parts.contains(.eyesClosed) && !parts.contains(.eyesHappy))
+        let shown = KuroIdle.groove.opacity(.speakerNoteA, progress: 0.2)
+        let fading = KuroFigure.opacity(.speakerNoteA, pose: tap.cutting((.groove, 0.2), back: 0.5))
+        #expect(fading > 0 && fading < shown)
+        #expect(KuroFigure.opacity(.speakerNoteA, pose: tap.cutting((.groove, 0.2), back: 1)) == 0)
+    }
+
+    @Test func aCupAtHerLipsStaysThereForTheSip() {
+        let tap = KuroPose(look: .chill, energy: nil).reacting(.sip, progress: 0.01)
+        #expect(KuroFigure.shift(.tapCup, pose: tap.cutting((.blow, 0.5), back: 0.5)) == .zero)
+        #expect(KuroFigure.shift(.tapCup, pose: tap).height > 30)
+    }
+
+    @Test func aTwirlCutShortTurnsBackToTheFront() {
+        let tap = KuroPose(look: .tennis, energy: nil).reacting(.swing, progress: 0.05)
+        let scale = { KuroFigure.turn(.tennisRacket, pose: tap.cutting((.twirl, 0.35), back: $0))?.scale ?? 0 }
+        #expect(scale(0) < -0.9 && abs(scale(1) - 1) < 0.001)
+        #expect(KuroFigure.turn(.tennisRacket, pose: tap)?.angle == 0)
+    }
 }

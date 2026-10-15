@@ -28,6 +28,9 @@ final class NeedTracker {
     @ObservationIgnored private var motion: HealthMotion.Reading?
     @ObservationIgnored private var eventClear: Task<Void, Never>?
 
+    /// Start of the current stretch without walking, from the last HealthKit reading.
+    var stillSince: Date? { motion?.stillSince }
+
     /// Workouts from the last HealthKit reading; empty before the first one.
     var workouts: [WorkoutSummary] { motion?.workouts ?? [] }
 
