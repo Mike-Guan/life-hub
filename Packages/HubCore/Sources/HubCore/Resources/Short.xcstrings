@@ -1,0 +1,50 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "户外" : {
+      "comment" : "short；宽 6",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ハイク"
+          }
+        }
+      }
+    },
+    "拳击日" : {
+      "comment" : "short；手表用，宽 3",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BOX"
+          }
+        }
+      }
+    },
+    "滑雪" : {
+      "comment" : "short；宽 4",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雪山"
+          }
+        }
+      }
+    },
+    "画画手作" : {
+      "comment" : "short；宽 6",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "つくる"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
