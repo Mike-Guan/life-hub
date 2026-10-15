@@ -1319,6 +1319,17 @@ import Testing
         #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.peaceHand))
     }
 
+    @Test @MainActor func aStillPortraitStandsWhateverTheHour() {
+        let slots = (0..<96).map { Date(timeIntervalSince1970: 1_760_000_000 + Double($0) * IdleLife.slotLength) }
+        #expect(slots.contains { CompanionPortrait(mode: .chill, date: $0).pose.life != nil })
+        for date in slots {
+            let still = CompanionPortrait(mode: .chill, date: date, idles: false).pose
+            #expect(still.life == nil)
+            #expect(still.eyesDx == 0)
+            #expect(RunnerFigure.parts(for: .chill, pose: still) == RunnerFigure.parts(for: .chill, pose: RunnerPose()))
+        }
+    }
+
     @Test func everySlotHasAShowcaseMode() {
         #expect(Slot.gloves.showcaseMode == .boxing)
         #expect(Slot.room.showcaseMode == .chill)

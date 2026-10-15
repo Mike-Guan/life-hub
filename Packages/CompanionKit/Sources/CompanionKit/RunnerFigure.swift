@@ -2479,6 +2479,7 @@ public struct CompanionPortrait: View {
     let daily: DailyCue?
     let walking: HubPlace.Kind?
     let bath: Bool
+    let idles: Bool
     let framing: Framing
 
     // WidgetKit renders future entries ahead of time, so `.now` would show the wrong couch stage.
@@ -2495,6 +2496,7 @@ public struct CompanionPortrait: View {
     ///   - daily: a planned Daily Widget task starting soon or now; HAKU holds up its prop.
     ///   - walking: the place Mike just left; HAKU walks with what it carries from there.
     ///   - bath: bath time before bed; HAKU carries shampoo and a rubber duck.
+    ///   - idles: whether a plain pose shows what HAKU does on its own at `date`; `false` keeps it standing still.
     public init(
         mode: Mode,
         card: IdentityKind? = nil,
@@ -2512,6 +2514,7 @@ public struct CompanionPortrait: View {
         daily: DailyCue? = nil,
         walking: HubPlace.Kind? = nil,
         bath: Bool = false,
+        idles: Bool = true,
         framing: Framing = .full
     ) {
         self.mode = mode
@@ -2530,6 +2533,7 @@ public struct CompanionPortrait: View {
         self.daily = daily
         self.walking = walking
         self.bath = bath
+        self.idles = idles
         self.framing = framing
     }
 
@@ -2570,7 +2574,7 @@ public struct CompanionPortrait: View {
     var pose: RunnerPose {
         guard bedtime == .off else { return RunnerPose.bedtimeStill() }
         let plain = need == nil && activity == nil && moment == nil && daily == nil && walking == nil && !bath
-        let life = plain && mode == .chill ? IdleLife.at(date, stamina: vitals.stamina) : nil
+        let life = plain && idles && mode == .chill ? IdleLife.at(date, stamina: vitals.stamina) : nil
         var pose = RunnerPose(
             face: EnergyFace(energy: energy),
             need: need,
@@ -2580,7 +2584,7 @@ public struct CompanionPortrait: View {
         )
         pose.codingCans = codingCans
         pose.headDy += vitals.slouch
-        if plain, life == nil { pose.show(PortraitStill.at(date), mode: mode) }
+        if plain, idles, life == nil { pose.show(PortraitStill.at(date), mode: mode) }
         if peeking {
             pose.bagLift = 0
             pose.eyesDx = -3
