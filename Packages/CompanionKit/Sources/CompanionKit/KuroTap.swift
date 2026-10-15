@@ -53,6 +53,59 @@ enum KuroTap: Equatable, Sendable {
     /// How long what a tap cuts short takes to go back, in seconds.
     static let cutBack: TimeInterval = 0.2
 
+    // 动作展示总表 G1: her eyes jumped from the tap's last ones back to her own in one frame.
+    /// How long her eyes stay shut at the end of a tap that leaves them different from her own, in seconds.
+    static let closing: TimeInterval = 0.07
+
+    // 动作展示总表 G2: she turned around in one frame. Now she squashes edge-on and swaps sides there, like a card.
+    /// How long each flip (squash, swap sides, unsquash) of turning away takes, in seconds.
+    static let flip: TimeInterval = 0.24
+
+    /// How thin she gets edge-on in a flip, as a share of her width.
+    static let edgeOn = 0.12
+
+    /// How long her "…" bubble takes to fade, in seconds; it shows only while she is fully turned.
+    static let dotsFade: TimeInterval = 0.1
+
+    /// Her width (`edgeOn`...1) `p` (0..<1) into turning away: edge-on halfway through each flip.
+    static func turnWidth(_ p: Double) -> Double {
+        let length = KuroTap.turnAway.duration
+        let t = p * length
+        let half = flip / 2
+        let fromEdge = min(abs(t - half), abs(t - (length - half)))
+        guard fromEdge < half else { return 1 }
+        return edgeOn + (1 - edgeOn) * ease(fromEdge / half)
+    }
+
+    /// Whether her back shows `p` (0..<1) into turning away: between the edge-on moments of the two flips.
+    static func facesAway(_ p: Double) -> Bool {
+        let length = KuroTap.turnAway.duration
+        let t = p * length
+        return t >= flip / 2 && t < length - flip / 2
+    }
+
+    /// How opaque her "…" bubble is `p` (0..<1) into turning away: in after the first flip, out before the second.
+    static func dotsOpacity(_ p: Double) -> Double {
+        let length = KuroTap.turnAway.duration
+        let t = p * length
+        return min(max(min((t - flip) / dotsFade, (length - flip - t) / dotsFade), 0), 1)
+    }
+
+    // 动作展示总表 G4: what lay on her lap vanished and came back in one frame around the sip.
+    /// How long her lap things take to slide down or back up around a sip, in seconds.
+    static let lapSlide: TimeInterval = 0.2
+
+    /// How far down her lap things slide, in SVG units: out of the frame.
+    static let lapDrop: CGFloat = 44
+
+    /// How far down (0...1) her lap things are `p` (0..<1) into a sip: down in the first `lapSlide`, out of sight
+    /// while she drinks, back up in the `lapSlide` after the cup is down (at 75%).
+    static func lapDown(_ p: Double) -> Double {
+        let t = p * KuroTap.sip.duration
+        if t < lapSlide { return ease(t / lapSlide) }
+        return 1 - ease((t - 0.75 * KuroTap.sip.duration) / lapSlide)
+    }
+
     /// How many taps within `CompanionView.pesterWindow` turn her away.
     static let tooMany = 5
 
@@ -104,6 +157,7 @@ extension KuroPose {
         case .turnAway:
             break
         }
+        if tap != .turnAway, (1 - p) * tap.duration < KuroTap.closing, pose.eyes != eyes { pose.eyes = .closed }
         return pose
     }
 
@@ -155,9 +209,9 @@ extension KuroFigure {
             visible.remove(.workTablet)
             visible.insert(.tapTablet)
         case .sip:
+            if KuroTap.lapDown(p) >= 1 { visible.subtract(lap) }
             guard p < 0.75 else { return }
             visible.remove(.chillCup)
-            visible.subtract(lap)
             visible.insert(.tapCup)
             if (0.2..<0.55).contains(p) { visible.insert(.tapPuff) }
         case .swing:
@@ -176,8 +230,10 @@ extension KuroFigure {
         case .chinTap, .bump, .hug, .sketch:
             break
         case .turnAway:
+            guard KuroTap.facesAway(p) else { return }
             visible.formIntersection(backView)
-            visible.formUnion([.backHead, .tapDots])
+            visible.insert(.backHead)
+            if KuroTap.dotsOpacity(p) > 0 { visible.insert(.tapDots) }
         }
     }
 
@@ -233,6 +289,8 @@ extension KuroFigure {
             // The cup travels from the table to her lips and back instead of jumping (UI 审核 2026-10-08).
             let lift = p < 0.2 ? ease(p / 0.2) : p < 0.55 ? 1 : ease(1 - (p - 0.55) / 0.2)
             return CGSize(width: 26 * (1 - lift), height: 36 * (1 - lift))
+        case (.sip, _) where lap.contains(part):
+            return CGSize(width: 0, height: KuroTap.lapDrop * CGFloat(KuroTap.lapDown(p)))
         case (.glasses, .deskGlasses):
             return CGSize(width: 0, height: p >= 0.2 ? -2 : 0)
         case (.bump, .boxGloveL), (.bump, .boxGloveR):

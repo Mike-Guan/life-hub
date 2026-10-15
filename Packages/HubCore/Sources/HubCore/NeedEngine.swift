@@ -136,6 +136,9 @@ public struct NeedRules: Codable, Equatable, Sendable {
     public var overtimeMinute: Int
     /// Whose lines the needs and invites use.
     public var persona: Persona
+    /// The user's identity card, whose lines the identity day uses; `nil` without one, which has no
+    /// identity day.
+    public var identity: IdentityKind?
 
     // Defaults from Issue #23 (Mike's smaller first version, 2026-10-03). Starting guesses. PM 2026-10-13
     // (写死作息排查 v0 #7): no identity day until one is learned; the warm-up times move with it.
@@ -303,6 +306,8 @@ public struct NeedReading: Equatable, Sendable {
     public var reasons: [String]
     /// When the need ends at the latest, `nil` when only a new signal can end it.
     public var until: Date?
+    /// Whether Mike is on the phone, from Screen Time; `false` for couch scrolling guessed from stillness.
+    public var phone = true
 
     /// True until `until`, or always when there is no end time.
     public func isActive(at date: Date) -> Bool {
@@ -337,11 +342,11 @@ public enum NeedEngine {
     public static let couchPeekAfter: TimeInterval = 30 * 60
 
     /// The need at `now`, or `nil` when there is none. A gym-day evening at home comes first, then scrolling
-    /// in work hours, then sitting too long in work hours, then couch scrolling, except on a boxing morning,
+    /// in 上班, then sitting too long in work hours, then couch scrolling, except on a boxing morning,
     /// when scrolling at home is exactly what boxing warm-up is about.
     /// - Parameters:
     ///   - days: which days are gym days.
-    ///   - work: the work days and hours, for scrolling at work.
+    ///   - work: the work days and hours, for sitting at work.
     public static func need(
         _ signals: NeedSignals,
         now: Date,
@@ -351,9 +356,7 @@ public enum NeedEngine {
         calendar: Calendar = .current
     ) -> NeedReading? {
         if let gym = gymDay(signals, now: now, rules: rules, days: days, calendar: calendar) { return gym }
-        if let slacking = slacking(signals, now: now, rules: rules, work: work, calendar: calendar) {
-            return slacking
-        }
+        if let slacking = slacking(signals, now: now, rules: rules) { return slacking }
         if let sitting = sitting(signals, now: now, rules: rules, work: work, calendar: calendar) { return sitting }
         let boxing = boxingWarmup(signals, now: now, rules: rules, calendar: calendar)
         if boxing != nil, now < time(rules.boxingFirstUntilMinute, on: now, calendar: calendar) {
@@ -374,7 +377,7 @@ public enum NeedEngine {
             let start = time(rules.boxingWarmupStartMinute, on: day, calendar: calendar)
             let end = time(rules.boxingWarmupEndMinute, on: day, calendar: calendar)
             if start > now {
-                return ScheduledNeed(need: .boxingWarmup, from: start, until: end, line: boxingReason(rules.persona))
+                return ScheduledNeed(need: .boxingWarmup, from: start, until: end, line: boxingReason(rules))
             }
         }
         return nil
@@ -452,7 +455,16 @@ public enum NeedEngine {
     /// - Parameters:
     ///   - taskSoon: whether a Daily task starts within `DailyAgenda.inviteLead`.
     ///   - persona: whose voice the text is in.
-    public static func inviteText(for need: CompanionNeed, taskSoon: Bool = false, persona: Persona = .haku) -> String {
+    ///   - identity: the user's identity card, for the identity day's invite; `nil` for `persona`'s own.
+    public static func inviteText(
+        for need: CompanionNeed,
+        taskSoon: Bool = false,
+        persona: Persona = .haku,
+        identity: IdentityKind? = nil
+    ) -> String {
+        if need == .boxingWarmup, let identity, identity != ModeCards.legacy(for: persona).identity {
+            return identity.invite(for: persona)
+        }
         let text: String =
             switch need {
             case .boxingWarmup where persona == .kuro: "……走吗。网球包拎好了。"
@@ -533,7 +545,7 @@ public enum NeedEngine {
         guard since <= now else { return nil }
         let minutes = Int(now.timeIntervalSince(start) / 60)
         let reason = String(format: "在家 %@ 分钟没怎么动了，我也瘫着".localized(for: rules.persona), "\(minutes)")
-        return NeedReading(need: .couchScroll, since: since, reasons: [reason])
+        return NeedReading(need: .couchScroll, since: since, reasons: [reason], phone: false)
     }
 
     private static func boxingWarmup(
@@ -551,16 +563,20 @@ public enum NeedEngine {
         // The Screen Time extension only knows the day of the last workout, so any workout today counts there.
         let trainedToday = (signals.trainedDay ?? .distantPast) >= StateEngine.dayStart(for: now, calendar: calendar)
         guard !boxedToday, !trainedToday else { return nil }
-        return NeedReading(need: .boxingWarmup, since: start, reasons: [boxingReason(rules.persona)], until: end)
+        return NeedReading(need: .boxingWarmup, since: start, reasons: [boxingReason(rules)], until: end)
     }
 
-    private static func boxingReason(_ persona: Persona) -> String {
+    // PM 写死作息 scan 10-15 #5: the day follows the user's card. The character's own card keeps its line.
+    private static func boxingReason(_ rules: NeedRules) -> String {
+        if let identity = rules.identity, identity != ModeCards.legacy(for: rules.persona).identity {
+            return identity.invite(for: rules.persona)
+        }
         let text =
-            switch persona {
+            switch rules.persona {
             case .haku: "今天打拳，拳套我戴好了"
             case .kuro: "今天网球。……拍子带好了。"
             }
-        return text.localized(for: persona)
+        return text.localized(for: rules.persona)
     }
 
     // Needs a known home: the invite is for still being at home, so an unknown place says nothing.
@@ -594,15 +610,10 @@ public enum NeedEngine {
     }
 
     // Separate Screen Time reports, limited to work hours, so they never count toward the couch.
-    private static func slacking(
-        _ signals: NeedSignals,
-        now: Date,
-        rules: NeedRules,
-        work: ModeRules,
-        calendar: Calendar
-    ) -> NeedReading? {
-        guard let reached = signals.slackThresholdAt else { return nil }
-        guard ModeEngine.scheduledMode(at: reached, rules: work, calendar: calendar) == .work else { return nil }
+    // PM 动作总表 U1 (Mike 10/15): only while the mode is 上班, so a day off or leave at home on a work day
+    // plays the current mode instead.
+    private static func slacking(_ signals: NeedSignals, now: Date, rules: NeedRules) -> NeedReading? {
+        guard let reached = signals.slackThresholdAt, signals.mode == .work else { return nil }
         let reason = "上班时间，我帮你望风".localized(for: rules.persona)
         let reading = NeedReading(need: .slacking, since: reached, reasons: [reason])
         return ongoing(reading, seen: signals.slackSeenAt, signals: signals, now: now, rules: rules)
