@@ -129,7 +129,7 @@ enum KuroIdle: CaseIterable, Sendable {
         case .blow:
             // The same cup and puff as her sip tap (UI 审核 2026-10-09: the puff must leave the lips).
             guard p < 0.9 else { return }
-            visible.subtract([.chillCup, .itemBlanket])
+            visible.subtract(KuroFigure.lap.union([.chillCup]))
             visible.insert(.tapCup)
             if (0.3..<0.65).contains(p) {
                 visible.subtract([.mouthCat, .mouthFlat])
