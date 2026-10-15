@@ -128,7 +128,14 @@ struct OnboardingView: View {
         page(dot: 1) {
             hero(line(.chill), sub: "勾常做的，不勾也行。")
             LazyVGrid(columns: Self.columns, spacing: 12) {
-                chip("在家休息", detail: "默认，不能取消", symbol: "sofa.fill", isOn: true, fill: chillColor, locked: true) {}
+                chip(
+                    "在家休息".localized,
+                    detail: "默认，不能取消".localized,
+                    symbol: "sofa.fill",
+                    isOn: true,
+                    fill: chillColor,
+                    locked: true
+                ) {}
                 ForEach(ChillActivity.allCases, id: \.self) { activity in
                     let isOn = draft.chill?.contains(activity) ?? false
                     chip(activity.title, detail: activity.source, symbol: activity.symbol, isOn: isOn, fill: chillColor)
@@ -1054,9 +1061,9 @@ extension ChillActivity {
     /// What tells the app the activity happened.
     fileprivate var source: String {
         switch self {
-        case .fitness: "地点 · 手表"
-        case .shopping: "地点"
-        default: "手表"
+        case .fitness: "定位 · 手表".localized
+        case .shopping: "定位".localized
+        default: "手表".localized
         }
     }
 }
