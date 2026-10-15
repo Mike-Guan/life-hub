@@ -241,11 +241,14 @@ public struct HomeSceneInputs {
     /// How many hours of scenes the iPhone works out for the watch.
     public static let timelineHours: Double = 3
 
+    /// How often the iPhone checks the scene for the watch, in seconds.
+    public static let timelineStep: TimeInterval = 5 * 60
+
     /// The scenes from `now` for `hours`, checked every `step`, each kept only where it changes.
     public func timeline(
         from now: Date,
         hours: Double = timelineHours,
-        step: TimeInterval = 5 * 60
+        step: TimeInterval = timelineStep
     ) -> [TimedScene] {
         var scenes: [TimedScene] = []
         var date = now

@@ -272,6 +272,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Both characters now dress for the picked identity card on the home screen, in widgets, in the notification
   and in onboarding, not only in the shop and wardrobe. On the home screen the second preset character also
   points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
+- The character on the watch face shows the same scene as the watch app and the iPhone Lock Screen (the gym
+  bag, setting off, the bath) and changes its pose every 15 minutes, instead of only the plain mode look.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
