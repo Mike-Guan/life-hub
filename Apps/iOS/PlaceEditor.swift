@@ -47,7 +47,7 @@ struct PlaceEditor: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text(place.kind == .custom ? "地点" : place.title)
+                    Text(place.kind == .custom ? "地点".localized : shownTitle)
                         .font(Toy.display(24))
                     Spacer()
                     Button("取消") { dismiss() }
@@ -93,12 +93,17 @@ struct PlaceEditor: View {
         .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: asksDelete)
     }
 
+    // A preset is named the way Settings lists it, so the identity card's place carries the user's card.
+    private var shownTitle: String {
+        place.kind == .custom ? place.title : place.kind.title(for: persona, cards: cards).localized
+    }
+
     // UI 二组 gap #14: a place switches modes on arrival, so losing it is asked first. Nothing is lost
     // for good, so the answer takes the pink, not the red.
     private func deleteSheet(_ onDelete: @escaping () -> Void) -> some View {
         let custom = place.kind == .custom
         return ToyConfirmSheet(
-            question: String(format: (custom ? "删掉「%@」？" : "清除「%@」的位置？").localized, place.title.localized),
+            question: String(format: (custom ? "删掉「%@」？" : "清除「%@」的位置？").localized, shownTitle),
             warning: custom
                 ? "删掉以后，到这里不会再自动换模式。以前的记录还在。".localized
                 : "清除以后，到这里不会再自动换模式。随时可以再设。".localized,
