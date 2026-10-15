@@ -12,6 +12,17 @@
         }
       }
     },
+    "KURO，在平板上画画" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, drawing on a tablet"
+          }
+        }
+      }
+    },
     "KURO，在忙" : {
       "comment" : "VoiceOver",
       "localizations" : {
@@ -19,6 +30,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KURO, busy"
+          }
+        }
+      }
+    },
+    "KURO，戴着拳套" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, in boxing gloves"
           }
         }
       }
@@ -34,6 +56,39 @@
         }
       }
     },
+    "KURO，戴着雪镜" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, in ski goggles"
+          }
+        }
+      }
+    },
+    "KURO，抱着瑜伽砖" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, holding a yoga block"
+          }
+        }
+      }
+    },
+    "KURO，拿着笔记本" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, holding a notebook"
+          }
+        }
+      }
+    },
     "KURO，拿着网球拍" : {
       "comment" : "VoiceOver",
       "localizations" : {
@@ -45,6 +100,17 @@
         }
       }
     },
+    "KURO，捧着乐谱" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, holding sheet music"
+          }
+        }
+      }
+    },
     "KURO，捧着热饮" : {
       "comment" : "VoiceOver",
       "localizations" : {
@@ -52,6 +118,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KURO, holding a warm drink"
+          }
+        }
+      }
+    },
+    "KURO，跟着音乐摆" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KURO, swaying to the music"
           }
         }
       }
