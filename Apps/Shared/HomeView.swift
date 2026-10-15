@@ -35,6 +35,8 @@ struct HomeView: View {
     var dailyDone: CompanionEvent?
     /// HAKU's line on a day it stopped an invite Mike kept ignoring, from the iOS app.
     var notice: String?
+    /// Which invites are paused, from the iOS app; RUNNER doesn't peek at the bag for a paused one.
+    var backoff = NudgeBackoff()
     /// When each change moment happened, for HAKU's Sunday line.
     var changes: [Date] = []
     /// Shows a settings button that calls this, when set.
@@ -153,7 +155,7 @@ struct HomeView: View {
                             card: shownCards.identity,
                             energy: reading?.value,
                             need: activeNeed(at: context.date)?.need,
-                            needSince: activeNeed(at: context.date)?.since,
+                            needSince: backoff.peekSince(activeNeed(at: context.date), at: context.date),
                             activity: shownActivity(at: context.date),
                             moment: moment(at: context.date),
                             codingCans: codingCans(at: context.date),

@@ -176,6 +176,7 @@ struct LifeHubApp: App {
             daily: daily.plan,
             dailyDone: daily.done,
             notice: NudgeBackoff.stored(in: AppGroup.defaults).notice(at: .now, persona: persona),
+            backoff: NudgeBackoff.stored(in: AppGroup.defaults),
             changes: ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: growth.ledger),
             onSettings: { showsSettings = true },
             cans: growth.ledger.only(persona).balance,
