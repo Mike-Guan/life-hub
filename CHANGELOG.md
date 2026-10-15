@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character's eight Sunday items and a plain back view of every top, for when she turns
+  away, in her clothes layer file. Nothing in the app shows them yet.
 - A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
   and her identity card. Nothing shows it yet; the keepsake page and share cards will. Wins filled in from
   an earlier day keep no look, because the wardrobe has no history.
