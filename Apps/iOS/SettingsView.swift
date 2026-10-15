@@ -179,7 +179,7 @@ struct SettingsView: View {
                 } label: {
                     Text("删除…")
                         .font(Toy.body(13, weight: .heavy))
-                        .foregroundStyle(Toy.alert)
+                        .foregroundStyle(Toy.alertText)
                         .padding(.horizontal, 12)
                         .frame(minHeight: 36)
                         .toyCard(radius: 12, shadow: 3)

@@ -213,7 +213,7 @@ struct MemoryView: View {
         Button(action: action) {
             Text(title)
                 .font(Toy.body(13, weight: .heavy))
-                .foregroundStyle(Toy.alert)
+                .foregroundStyle(Toy.alertText)
                 .padding(.horizontal, 12)
                 .frame(minHeight: 36)
                 .toyCard(radius: 12, shadow: 3)
