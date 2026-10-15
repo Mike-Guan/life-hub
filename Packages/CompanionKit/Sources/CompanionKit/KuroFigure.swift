@@ -360,6 +360,8 @@ struct KuroFigure: View {
         guard let idle = pose.idle else { return 1 }
         let shown = idle.opacity(part, progress: pose.idleProgress)
         guard pose.tap != nil else { return shown }
+        // Her idle hand is gone once it is back, before the prop comes up.
+        if idleHands.contains(part) { return cutPhase(part, back: pose.idleBack) < 1 ? 1 : 0 }
         return fades.contains(part) ? shown * (1 - pose.idleBack) : 1
     }
 

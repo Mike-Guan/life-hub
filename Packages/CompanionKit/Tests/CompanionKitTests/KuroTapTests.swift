@@ -120,7 +120,14 @@ import Testing
         let down = tap.cutting((.tuck, 0.5), back: 0)
         #expect(KuroFigure.parts(for: .art, pose: down).contains(.craftPen))
         #expect(KuroFigure.shift(.craftPen, pose: down).height > 40)
-        let halfway = KuroFigure.shift(.craftPen, pose: tap.cutting((.tuck, 0.5), back: 0.5)).height
+        // UI 审核 C9 round 1: never two right hands. Her tucking hand goes down and away, then the pen comes up.
+        let handDown = tap.cutting((.tuck, 0.5), back: 0.25)
+        #expect(KuroFigure.shift(.idleTuckHand, pose: handDown).height > 1)
+        #expect(KuroFigure.opacity(.idleTuckHand, pose: handDown) == 1)
+        #expect(KuroFigure.shift(.craftPen, pose: handDown).height > 40)
+        let penUp = tap.cutting((.tuck, 0.5), back: 0.75)
+        #expect(KuroFigure.opacity(.idleTuckHand, pose: penUp) == 0)
+        let halfway = KuroFigure.shift(.craftPen, pose: penUp).height
         #expect(halfway > 1 && halfway < 40)
         #expect(abs(KuroFigure.shift(.craftPen, pose: tap.cutting((.tuck, 0.5), back: 1)).height) < 1)
         #expect(KuroTap.cutBack == 0.2)

@@ -200,11 +200,25 @@ extension KuroFigure {
             return CGSize(width: now.width - tapShift.width, height: now.height - tapShift.height)
         }
         let start = idle.shift(part, progress: 0)
-        let back = CGFloat(ease(pose.idleBack))
+        let back = CGFloat(ease(cutPhase(part, back: pose.idleBack)))
         return CGSize(
             width: now.width + (start.width - now.width) * back, height: now.height + (start.height - now.height) * back
         )
     }
+
+    // UI 审核 2026-10-15 (C9 round 1): a hand the idle brought up and the prop it put down showed together, as two
+    // right hands. As in the idle, one goes before the other: the hand first, then the prop.
+    /// How far (0...1) `part` has gone back when the cut idle is `back` (0...1) back: her idle hands in the first
+    /// half, everything else in the second.
+    nonisolated static func cutPhase(_ part: KuroPart, back: Double) -> Double {
+        idleHands.contains(part) ? back * 2 : back * 2 - 1
+    }
+
+    /// The hands and arms her idles bring up from out of sight.
+    nonisolated static let idleHands: Set<KuroPart> = [
+        .idleReach, .idleTowelWipe, .idleTuckHand, .idleFrameHands, .idleCollarHands, .idlePhone, .mittenArm,
+        .mittenHand,
+    ]
 
     /// How far `part` moves for her tap reaction or idle move, in SVG units.
     nonisolated private static func moveShift(_ part: KuroPart, pose: KuroPose) -> CGSize {
