@@ -113,6 +113,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
   full night stay brighter and clear the headset.
 - The watch has no dark band behind the clock any more; every screen keeps its own background.
+- With Japanese on, headings and bold text use the rounded Japanese font Zen Maru Gothic. Chinese and English
+  keep the system font.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
