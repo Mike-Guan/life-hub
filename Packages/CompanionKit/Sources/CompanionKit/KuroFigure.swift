@@ -1210,7 +1210,10 @@ public struct KuroView: View {
 
     nonisolated static func accessibilityLabel(_ look: KuroLook, bedtime: Bedtime, pose: KuroPose? = nil) -> String {
         if bedtime == .on { return "KURO，困了" }
-        if let pose, pose.overtime { return pose.sign.map { "KURO，托着腮等到 \($0)" } ?? "KURO，托着腮等着" }
+        if let pose, pose.overtime {
+            return pose.sign.map { String(format: "KURO，托着腮等到 %@".localized(for: .kuro), $0) }
+                ?? "KURO，托着腮等着".localized(for: .kuro)
+        }
         return switch look {
         case .work: "KURO，在忙"
         case .chill: "KURO，捧着热饮"
