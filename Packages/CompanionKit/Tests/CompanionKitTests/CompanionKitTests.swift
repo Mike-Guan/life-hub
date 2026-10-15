@@ -1252,10 +1252,10 @@ import Testing
         #expect(ItemPicture(slot: .room, outfit: Outfit(), itemID: nil).parts.isEmpty)
     }
 
-    // Clothes tiles get their colors with the clothes art, so only the slots on the shelf today are checked.
+    // Clothes, badge and hat tiles get their colors with their art, so only the slots on the shelf today are checked.
     @Test(arguments: Persona.allCases)
     func slotsHaveTheirOwnTileColors(_ persona: Persona) {
-        let shelf = Slot.allCases.filter { $0 != .top && $0 != .fullSet }
+        let shelf = Slot.allCases.filter { ![.top, .fullSet, .badge, .hat].contains($0) }
         #expect(Set(shelf.map { $0.tileColor(for: persona) }).count == shelf.count)
     }
 

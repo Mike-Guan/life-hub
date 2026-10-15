@@ -5,7 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
-- The second preset character has her own seven weekly items, in her own rotation. They go on sale once
+- Two new wear slots for weekly items: a badge on the clothes, worn in every mode, and a hat, worn only in
+  下班. HAKU's star badge and both characters' beanies use them and go on sale once their art is in.
+- The second preset character has her own eight weekly items, in her own rotation. They go on sale once
   their art is in.
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
@@ -51,6 +53,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
+- On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
+  screen edge no longer cuts them off. The iPhone is unchanged.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
