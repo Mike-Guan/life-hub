@@ -698,6 +698,17 @@
         }
       }
     },
+    "手表" : {
+      "comment" : "引导下班活动的感应来源：只有手表",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch"
+          }
+        }
+      }
+    },
     "打开后选一次 iCloud Drive 里的 Daily Widget 文件夹。只读不写；提前定好的事做完 +1 能量罐，一天最多 3 个。关掉就不再读，已拿的罐子保留。" : {
       "localizations" : {
         "en" : {
