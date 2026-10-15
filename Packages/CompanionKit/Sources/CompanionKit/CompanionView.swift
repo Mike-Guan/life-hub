@@ -627,7 +627,10 @@ public struct CompanionView: View {
     private func glance(_ pose: RunnerPose) -> RunnerPose {
         var pose = pose
         if style == .watch { pose.propLift = 1 }
-        if !closeUp { pose.starDrop = Self.starDrop(style: style, showsBubble: showsBubble) }
+        if !closeUp {
+            pose.starDrop = Self.starDrop(style: style, showsBubble: showsBubble)
+            pose.sunDrop = Self.sunDrop(style: style, showsBubble: showsBubble)
+        }
         pose.eyesDx += 4 * look
         pose.headTilt += 4 * Double(look)
         if closeUp { pose.eyesDy -= 1 }
@@ -679,6 +682,13 @@ public struct CompanionView: View {
     /// How far the sparkles beside the headset sit lower to clear the bubble, in figure units.
     nonisolated static func starDrop(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
         bubbleRoom(style: style, showsBubble: showsBubble) > 0 ? 8 : 0
+    }
+
+    // D5 round 3 (UI 审核 10/15): under a Japanese line the window's top edge met the bubble's, so the two black
+    // outlines ran together. It drops to leave a clear gap.
+    /// How far the sunlit window sits lower to clear the bubble, in figure units.
+    nonisolated static func sunDrop(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
+        bubbleRoom(style: style, showsBubble: showsBubble) > 0 ? 3 : 0
     }
 
     /// Whether the off-work pose that played from `start` still holds at `date` in `mode`: in work mode, the same day.
