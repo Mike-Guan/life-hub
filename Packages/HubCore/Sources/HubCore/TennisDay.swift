@@ -1,22 +1,28 @@
 import Foundation
 
 // Issue #164 gave the second character a learned identity day. PM 2026-10-13 (写死作息排查 v0 #7): every
-// character learns it from the identity wins, and there is none until one is learned.
+// character learns it from the identity wins, and there is none until one is learned. PM 写死作息 scan 10-15
+// #5: a user without an identity card has no identity day.
 extension NeedRules {
     /// The rules for `persona`, with the identity day learned from the identity wins in `ledger`. On that
     /// day the warm-up runs from an hour before the usual arrival to two hours after, and the countdown
     /// runs to the arrival.
-    /// - Parameter arrivals: when the user switched to the identity card.
+    /// - Parameters:
+    ///   - arrivals: when the user switched to the identity card.
+    ///   - cards: the user's cards; `nil` for `persona`'s cards from before Issue #273.
     public static func standard(
         for persona: Persona,
         ledger: CanLedger,
         arrivals: [Date] = [],
+        cards: ModeCards? = nil,
         now: Date,
         calendar: Calendar = .current
     ) -> NeedRules {
         var rules = NeedRules.standard
         rules.persona = persona
-        guard let weekday = learnedWeekday(of: .boxing, in: ledger, now: now, calendar: calendar),
+        rules.identity = (cards ?? .legacy(for: persona)).identity
+        guard rules.identity != nil,
+            let weekday = learnedWeekday(of: .boxing, in: ledger, now: now, calendar: calendar),
             let arrival = usualArrival(on: weekday, arrivals: arrivals, ledger: ledger, now: now, calendar: calendar)
         else { return rules }
         rules.boxingWeekday = weekday
