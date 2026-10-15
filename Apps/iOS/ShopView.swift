@@ -158,6 +158,7 @@ struct ShopView: View {
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(ToyButtonStyle(fill: Toy.pink, isSelected: true))
+                    .accessibilityLabel("用 \(price) 个能量罐换\(item.title)")
                 } else {
                     Text("\(price) 能量罐 · 还差 \(price - balance)")
                         .font(Toy.body(14, weight: .bold))
@@ -219,6 +220,9 @@ struct ShopView: View {
                     Spacer()
                     Text(isOwned ? "已拥有" : "\(keepsake?.title(for: persona) ?? "") \(count)/\(goal)")
                         .foregroundStyle(Toy.muted)
+                        .accessibilityLabel(
+                            isOwned ? "已拥有" : "\(keepsake?.title(for: persona) ?? "")，\(goal) 次里做到了 \(count) 次"
+                        )
                 }
                 .font(Toy.body(14, weight: .heavy))
                 if !isOwned {

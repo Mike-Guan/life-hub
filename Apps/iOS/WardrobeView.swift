@@ -168,10 +168,19 @@ struct WardrobeView: View {
                 .frame(maxWidth: .infinity, alignment: .bottom)
                 .frame(height: 300, alignment: .bottom)
                 .toyCard(fill: previewMode.color(for: persona))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(previewDescription)
             Text("锁屏上也是这样")
                 .font(Toy.body(13, weight: .heavy))
                 .foregroundStyle(Toy.muted)
         }
+    }
+
+    /// What VoiceOver reads for the preview: the mode's own name and what is worn in it.
+    private var previewDescription: String {
+        let mode = cards.title(for: previewMode, persona: persona)
+        let worn = wardrobe.showing(card: card).worn(in: previewMode).compactMap { ShopItem.item($0)?.title }.sorted()
+        return worn.isEmpty ? "\(mode)的样子，没穿换来的东西" : "\(mode)的样子，穿着\(worn.joined(separator: "、"))"
     }
 
     // Only changes the preview, never the real mode.
