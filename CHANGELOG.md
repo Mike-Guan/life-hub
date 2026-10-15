@@ -172,6 +172,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   watch and its widgets never turn sleepy.
 - When the mode switches on its own, at a place, the character fades into the new outfit like a manual switch
   instead of cutting over.
+- The confirmation sheets (删除全部数据, 先用默认, forgetting memories) look up their text in the String Catalog,
+  so translations show.
 - The Screen Time watch (pick apps in settings) now works in TestFlight (STG) builds too, not only in
   Debug. The App Store build still leaves it out.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
