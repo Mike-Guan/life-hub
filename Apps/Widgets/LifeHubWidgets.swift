@@ -17,6 +17,7 @@ struct LifeHubWidgets: WidgetBundle {
         EnergyWidget()
         BoxingCountdownWidget()
         GoToGymControl()
+        CardControl()
     }
 }
 
