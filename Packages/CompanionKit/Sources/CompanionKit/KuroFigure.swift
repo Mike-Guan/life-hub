@@ -310,7 +310,7 @@ struct KuroFigure: View {
 
     // UI 五组 Sunday items r1: hair pieces are static and move with her head.
     /// The hair a hair piece is worn on, which it moves with.
-    nonisolated private static let worn: [KuroPart: KuroPart] = [
+    nonisolated private static let wornOn: [KuroPart: KuroPart] = [
         .itemScrunchie: .tennisPonytail, .weeklyHairMintPony: .tennisPonytail, .weeklyHairCherryPony: .tennisPonytail,
         .weeklyHairStarPony: .tennisPonytail, .weeklyHairMintSide: .hairFringe, .weeklyHairCherrySide: .hairFringe,
         .weeklyHairStarSide: .hairFringe,
@@ -319,7 +319,7 @@ struct KuroFigure: View {
     /// How far `part` moves from where the SVG draws it, in SVG units; a hair piece moves with its hair, full
     /// energy raises her ears a little, and her thought bubble moves above a set hat when `hatted`.
     nonisolated static func offset(_ part: KuroPart, pose: KuroPose, hatted: Bool = false) -> CGSize {
-        let moved = shift(worn[part] ?? part, pose: pose)
+        let moved = shift(wornOn[part] ?? part, pose: pose)
         let lift: CGFloat = pose.full && part == .catEars ? 3 : 0
         let dots = hatted && part == .tapDots ? hattedDots : .zero
         return CGSize(width: moved.width + dots.width, height: moved.height - lift + dots.height)

@@ -32,9 +32,8 @@ public enum KuroItem: String, CaseIterable, Sendable {
     /// The look she shows the item in.
     public var look: KuroLook {
         switch self {
-        case .flower, .blanket, .spin, .chillCardigan, .chillHoodie, .picnic, .bearBlanket, .succulent, .cloud,
-            .nightlight:
-            .chill
+        case .flower, .blanket, .spin, .chillCardigan, .chillHoodie, .picnic: .chill
+        case .bearBlanket, .succulent, .cloud, .nightlight: .chill
         case .scrunchie, .bag, .sakura, .goldRacket, .mintTie, .cherryClip, .starTie: .tennis
         case .lamp, .sideSmock, .sideDenim: .desk
         case .workBlouse, .workVest, .rain: .work
