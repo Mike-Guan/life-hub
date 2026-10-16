@@ -326,6 +326,25 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
         updatedBy = deviceID
     }
 
+    // 商店与家 同步方案 v0 §4 (Mike 2026-10-16): a room item bought anywhere goes to its own spot in the room.
+    /// Places each of `items` not yet in the room at its catalog spot, or in storage when it has none.
+    /// - Returns: `true` when something was added.
+    @discardableResult
+    public mutating func place(
+        _ items: some Sequence<String>, catalog: RoomCatalog, now: Date = Date(), deviceID: String
+    ) -> Bool {
+        var placed = Set(placements.map(\.piece))
+        var added = false
+        for item in items where !placed.contains(item) {
+            let id = UUID.derived(from: "room.\(persona).\(item)")
+            placements.append(RoomPlacement(id: id, piece: item, at: catalog.piece(item)?.defaultSpot))
+            placed.insert(item)
+            added = true
+        }
+        if added { touch(now: now, deviceID: deviceID) }
+        return added
+    }
+
     static func defaultsKey(for persona: Persona) -> String { "roomLayout.\(persona.rawValue)" }
     static func migratedKey(for persona: Persona) -> String { "roomLayout.\(persona.rawValue).wardrobeMoved" }
 
@@ -358,13 +377,8 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
             stored(in: defaults, persona: persona) ?? RoomLayout(persona: persona, now: now, deviceID: deviceID)
         let migrated = migratedKey(for: persona)
         guard !defaults.bool(forKey: migrated) else { return layout }
-        if let item = Wardrobe.stored(in: defaults, persona: persona).equipped[.room],
-            !layout.placements.contains(where: { $0.piece == item })
-        {
-            let spot = catalog.piece(item)?.defaultSpot
-            layout.placements.append(
-                RoomPlacement(id: UUID.derived(from: "room.\(persona.rawValue).\(item)"), piece: item, at: spot))
-            layout.touch(now: now, deviceID: deviceID)
+        if let item = Wardrobe.stored(in: defaults, persona: persona).equipped[.room] {
+            layout.place([item], catalog: catalog, now: now, deviceID: deviceID)
         }
         layout.store(in: defaults)
         defaults.set(true, forKey: migrated)
