@@ -228,7 +228,7 @@ enum HomeItem: String, CaseIterable, Sendable {
         let s = spot
         switch self {
         case .cactus, .gloves, .racket, .snowboard: return nil
-        case .bench: return GridBox(x0: 3.9, y0: 1.0, x1: 5.2, y1: 3.0, z1: 1.9)
+        case .bench: return GridBox(x0: 3.9, y0: 0.3, x1: 5.2, y1: 3.4, z1: 1.9)
         case .bag: return GridBox(x0: s.x - 0.4, y0: s.y - 0.4, x1: s.x + 0.4, y1: s.y + 0.4, z1: 2.5)
         case .plant, .speaker: return GridBox(x0: s.x - 0.3, y0: s.y - 0.3, x1: s.x + 0.3, y1: s.y + 0.3, z1: 1)
         }
@@ -262,8 +262,8 @@ enum HomeSpot: String, CaseIterable, Sendable {
         case .sofa: GridPoint(x: 1.9, y: 6.0, z: 0.6)
         case .rest: GridPoint(x: 8.0, y: 8.1, z: 0.65)
         case .box: GridPoint(x: 5.2, y: 4.1)
-        // Lying on the pad, feet at its near end, head towards the rack.
-        case .bench: GridPoint(x: 4.575, y: 2.85, z: 0.9)
+        // Lying on the pad, head in front of the rack, feet just past the near end.
+        case .bench: GridPoint(x: 4.575, y: 3.55, z: 0.9)
         case .wardrobe: GridPoint(x: 7.85, y: 2.0)
         case .shop: GridPoint(x: 9.3, y: 2.0)
         case .window: GridPoint(x: 2.3, y: 0.75)
@@ -276,7 +276,7 @@ enum HomeSpot: String, CaseIterable, Sendable {
         case .work, .side: GridPoint(x: 3.1, y: 1.9)
         case .sofa: GridPoint(x: 2.6, y: 6.9)
         case .rest: GridPoint(x: 6.1, y: 7.6)
-        case .bench: GridPoint(x: 4.6, y: 3.6)
+        case .bench: GridPoint(x: 4.6, y: 4.1)
         default: point
         }
     }

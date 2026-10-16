@@ -419,8 +419,9 @@ final class HomeScene: SKScene {
         // The bar rests on the rack, or rides in HAKU's hands while he presses.
         if let barbell {
             let pressing = pose == .press
-            barbell.position = pressing ? haku.hands : Self.rackedBar
-            barbell.zPosition = CGFloat(pressing ? depth + 0.1 : HomeItem.bench.depth + 0.01)
+            barbell.position = pressing ? haku.barCenter : Self.rackedBar
+            // While pressing, over his body and under his arms and head (`HakuNode` parts sit 0.004 to 0.006 up).
+            barbell.zPosition = CGFloat(pressing ? depth + 0.0045 : HomeItem.bench.depth + 0.01)
         }
 
         // The bag swings after each punch.

@@ -271,7 +271,7 @@ import Testing
 
     @Test func theBarIsPressedAllTheWayUpAndBackDown() {
         let reaches = stride(from: 0.0, to: 2.6, by: 0.1).map(HakuNode.pressReach)
-        #expect(abs((reaches.min() ?? 0) - 0.45) < 0.01)
+        #expect((reaches.min() ?? 1) < 0.01)
         #expect(abs((reaches.max() ?? 0) - 1) < 0.01)
     }
 
@@ -286,10 +286,10 @@ import Testing
         for _ in 0..<400 { scene.step(0.05) }
         #expect(scene.spotReached == .bench)
         scene.pose(at: 1.3)
-        let up = scene.haku.hands
+        let up = scene.haku.barCenter
         scene.pose(at: 0.05)
-        let down = scene.haku.hands
-        #expect(up.y > down.y + 4)
+        let down = scene.haku.barCenter
+        #expect(up.y > down.y + 5)
         #expect(up != HomeScene.rackedBar)
     }
 

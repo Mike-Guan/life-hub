@@ -52,7 +52,7 @@ final class HomeLayerNode: SKNode {
     init(pivot: CGPoint = .zero) {
         super.init()
         position = pivot
-        night.zPosition = 0.001
+        night.zPosition = 0.0001
         addChild(day)
         addChild(night)
     }

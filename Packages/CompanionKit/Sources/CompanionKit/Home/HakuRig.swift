@@ -86,6 +86,7 @@ final class HakuNode: SKNode {
     private var shownOutfit: HomeOutfit?
     private var shownBack: Bool?
     private var shownGloves: Bool?
+    private var bar = CGPoint.zero
 
     // Rig points in art units (SVG space, y down, feet at 172).
     private static func node(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
@@ -225,14 +226,14 @@ final class HakuNode: SKNode {
             head.zRotation = 0.05 * CGFloat(sin(t * tau / 6))
             shadow.isHidden = true
         case .press:
-            // On his back along the bench, arms straight up to the bar, pressing it up and lowering it.
+            // On his back along the bench. The bar rests over his chest, below the chin, and goes straight up
+            // to lockout; the hands hold it a little apart and the arms stretch to reach them.
             body.zRotation = -.pi / 3
-            let reach = CGFloat(Self.pressReach(t))
-            armL.zRotation = -2 * .pi / 3 - 0.08
-            armR.zRotation = -2 * .pi / 3 + 0.08
-            armL.yScale = reach
-            armR.yScale = reach
-            head.zRotation = 0.04 * (1 - reach)
+            let lift = Self.barRest + Self.barStroke * CGFloat(Self.pressReach(t))
+            bar = CGPoint(x: Self.chest.x + Self.up.x * lift, y: Self.chest.y + Self.up.y * lift)
+            let grip = CGPoint(x: Self.along.x * Self.gripHalf, y: Self.along.y * Self.gripHalf)
+            reach(armL, from: Self.shoulderL, to: CGPoint(x: bar.x - grip.x, y: bar.y - grip.y))
+            reach(armR, from: Self.shoulderR, to: CGPoint(x: bar.x + grip.x, y: bar.y + grip.y))
             shadow.isHidden = true
         case .lie:
             body.zRotation = -.pi / 3
@@ -252,19 +253,34 @@ final class HakuNode: SKNode {
         }
     }
 
-    /// The middle of the two hands, in the coordinates of HAKU's parent.
-    var hands: CGPoint {
-        // The hand sits at the end of the arm drawing, 29 art units below the shoulder.
-        let tip = CGPoint(x: -3, y: -29)
-        let l = convert(tip, from: armL)
-        let r = convert(tip, from: armR)
-        return CGPoint(x: position.x + (l.x + r.x) / 2, y: position.y + (l.y + r.y) / 2)
+    /// The middle of the bar HAKU presses, in the coordinates of HAKU's parent.
+    var barCenter: CGPoint {
+        let p = convert(bar, from: body)
+        return CGPoint(x: position.x + p.x, y: position.y + p.y)
     }
 
-    /// How far the arms reach during a press at time `t`: short with the bar on the chest, 1 at lockout.
+    /// How high the bar is during a press at time `t`: 0 resting on the chest, 1 at lockout.
     nonisolated static func pressReach(_ t: TimeInterval) -> Double {
         let phase = t.truncatingRemainder(dividingBy: 2.6) / 2.6
-        return 0.45 + 0.55 * (0.5 - 0.5 * cos(phase * 2 * .pi))
+        return 0.5 - 0.5 * cos(phase * 2 * .pi)
+    }
+
+    // The press in the lying body's own art units. Straight up on screen, and the bar's direction (the room's
+    // x axis), seen from a body turned a third of a turn clockwise.
+    private static let up = CGPoint(x: -0.866, y: 0.5)
+    private static let along = CGPoint(x: 0.866, y: 0.5)
+    // Low on the chest: higher up, the big head would sit on the bar.
+    private static let chest = CGPoint(x: 0, y: 40)
+    private static let barRest: CGFloat = 31
+    private static let barStroke: CGFloat = 13
+    private static let gripHalf: CGFloat = 14
+
+    /// Points `arm` from `shoulder` at `hand`, stretching it to get there.
+    private func reach(_ arm: SKSpriteNode, from shoulder: CGPoint, to hand: CGPoint) {
+        let v = CGPoint(x: hand.x - shoulder.x, y: hand.y - shoulder.y)
+        arm.zRotation = atan2(v.x, -v.y)
+        // The hand is drawn 29 art units down the arm.
+        arm.yScale = hypot(v.x, v.y) / 29
     }
 
     private func dress(_ outfit: HomeOutfit, back: Bool, gloves: Bool) {
