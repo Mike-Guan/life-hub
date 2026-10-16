@@ -16,6 +16,8 @@ final class HomeScene: SKScene {
     private let clothes = SKSpriteNode()
     private let screen = SKSpriteNode()
     private var monitorLight = SKSpriteNode()
+    private var nightLights: [SKSpriteNode] = []
+    private var daylight = SKSpriteNode()
 
     // Where HAKU is and where he is going.
     private var point = HomeSpot.hub
@@ -71,7 +73,7 @@ final class HomeScene: SKScene {
         addChild(islandShadow())
         shell.zPosition = -10
         addChild(shell)
-        // The sky shows through the window hole in the rendered wall.
+        // The sky shows through the window cut out of the wall.
         for sprite in [skyDay, skyNight] {
             sprite.zPosition = -10.5
             addChild(sprite)
@@ -96,6 +98,16 @@ final class HomeScene: SKScene {
             screen, screenRect, HomeTextures.texture(screenRect) { HomeArt.screen(IsoPen(context: $0), content: .off) })
         addChild(screen)
         monitorLight = glow(GridPoint(x: 0.6, y: 2.0, z: 2.1), 0x3EF0FF, 120)
+        // The lamps, the vending machine and the moon at night; the sun through the window by day.
+        let lights: [(GridPoint, UInt32, CGFloat)] = [
+            (GridPoint(x: 0.66, y: 1.0, z: 2.0), 0xFFC66B, 170),
+            (GridPoint(x: 0.5, y: 8.4, z: 2.0), 0xFF5A7A, 190),
+            (GridPoint(x: 9.45, y: 4.05, z: 1.4), 0xFFC66B, 160),
+            (GridPoint(x: 9.5, y: 1.4, z: 2.4), 0x7CFF4F, 120),
+            (GridPoint(x: 2.3, y: 0.4, z: 3.4), 0x9AA8FF, 170),
+        ]
+        nightLights = lights.map { glow($0.0, $0.1, $0.2) }
+        daylight = glow(GridPoint(x: 2.3, y: 1.0, z: 2.6), 0xFFF1C2, 300)
 
         addChild(haku)
     }
@@ -142,17 +154,16 @@ final class HomeScene: SKScene {
         sprite.position = HomeGrid.scene(p)
     }
 
-    /// The render that shows `piece` with the colours picked now.
-    private func layer(_ piece: HomePiece, covering: Bool) -> String {
-        func painted(_ name: String, _ paintable: HomePaintable) -> String {
-            HomeRenders.layer(name, swatch: model.colors[paintable] ?? 0)
-        }
-        switch piece {
-        case .sofaBack, .sofaFarArm, .sofaSeat, .sofaNearArm: return painted(piece.rawValue, .sofa)
-        case .rug: return painted(piece.rawValue, .rug)
-        case .blanket: return painted(covering ? "blanketCover" : "blanket", .bed)
-        default: return piece.rawValue
-        }
+    /// The layer that shows `piece` with the colours picked now.
+    private func layer(_ piece: HomePiece, covering: Bool) -> HomeLayer {
+        let color: UInt32 =
+            switch piece {
+            case .sofaBack, .sofaFarArm, .sofaSeat, .sofaNearArm: model.color(.sofa)
+            case .rug: model.color(.rug)
+            case .blanket: model.color(.bed)
+            default: 0
+            }
+        return .piece(piece, color: color, covering: piece == .blanket && covering)
     }
 
     // MARK: Syncing with the model
@@ -191,7 +202,7 @@ final class HomeScene: SKScene {
 
     private func redraw(flashing: Bool) {
         let night = model.isNight
-        shell.show(HomeRenders.layer("shell", swatch: model.colors[.walls] ?? 0), night: night)
+        shell.show(.shell(walls: model.color(.walls)), night: night)
         for (piece, node) in pieces {
             node.show(layer(piece, covering: shownCovering == true), night: night)
         }
@@ -207,7 +218,7 @@ final class HomeScene: SKScene {
     private func addItem(_ item: HomeItem) {
         let s = item.spot
         let node = HomeLayerNode(pivot: HomeGrid.scene(HomeGrid.plan(s.x, s.y, s.z)))
-        node.show("item-\(item.rawValue)", night: model.isNight)
+        node.show(.item(item), night: model.isNight)
         node.zPosition = CGFloat(item.depth)
         itemNodes[item] = node
         addChild(node)
@@ -225,6 +236,8 @@ final class HomeScene: SKScene {
         fade(skyNight, night ? 1 : 0)
         fade(skyDay, night ? 0 : 1)
         fade(clothes, night ? 0.6 : 1)
+        fade(daylight, night ? 0 : 0.35)
+        for light in nightLights { fade(light, night ? 0.85 : 0) }
         for node in [shell] + Array(pieces.values) + Array(itemNodes.values) {
             node.setNight(night, duration: duration)
         }
