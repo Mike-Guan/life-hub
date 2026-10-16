@@ -104,18 +104,18 @@ struct ShopView: View {
 
     // 商店完整目录 v0 §1.4: this week's item leads the shelf, and stays there marked owned once bought.
     private var forSale: [ShopItem] {
-        ([weekly].compactMap { $0 }
-            + ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) })
-            .filter(Self.isShown)
+        var items = [weekly].compactMap { $0 }
+        items += ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) }
+        return items.filter(Self.isShown)
     }
 
     // Room items show only in the home page, which only DEV and STG open so far.
     // Until release builds open it too, they don't sell room items, so nothing bought stays out of sight.
     private static func isShown(_ item: ShopItem) -> Bool {
         #if DEBUG || ENV_STG
-            true
+        return true
         #else
-            item.slot != .room
+        return item.slot != .room
         #endif
     }
 
