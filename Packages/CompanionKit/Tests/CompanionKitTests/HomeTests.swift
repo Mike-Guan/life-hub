@@ -279,6 +279,7 @@ import Testing
         let model = HomeModel(night: false, cans: 60)
         let scene = HomeScene(model: model)
         model.buy(.item(.bench))
+        scene.sync(animated: false)
         let bench = HomeGrid.scene(HomeGrid.plan(4.6, 2.2, 0.5))
         #expect(scene.hotspot(at: bench, includingHaku: false) == .bench)
         model.tap(.bench)
