@@ -1251,26 +1251,22 @@ import Testing
     }
 
     @Test func theSpeakerRingGlowsEveryThreeSeconds() {
-        var outfit = Outfit()
-        outfit.room = .roomSpeaker
-        let pose = RunnerPose().wearing(outfit)
-        #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).isSuperset(of: [.roomSpeaker, .roomSpeakerRing]))
         let glow = { (t: TimeInterval) in RunnerPose(mode: .chill, time: t, face: .mid, react: 0).speakerGlow }
         #expect(abs(glow(0) - 0.45) < 0.01)
         #expect(abs(glow(1.5) - 1) < 0.01)
         #expect(abs(glow(3) - 0.45) < 0.01)
     }
 
-    @Test func roomItemShowsOnlyAtHome() {
-        var wardrobe = Wardrobe()
-        wardrobe.equipped[.room] = "room.plant"
-        var pose = RunnerPose().wearing(Outfit(wardrobe))
-        #expect(RunnerFigure.parts(for: .chill, pose: pose).contains(.roomPlant))
-        #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.roomPlant))
-        pose.bagLift = 0
-        #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.roomPlant))
-        let running = RunnerPose(activity: .running).wearing(Outfit(wardrobe))
-        #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
+    @Test func roomItemsStayOutOfTheModeBackdrops() {
+        let rooms: [RunnerPart] = [.roomPlant, .roomBag, .roomCactus, .roomSpeaker, .roomSpeakerRing]
+        for item in ["room.plant", "room.bag", "haku.weekly.room.cactus", "haku.weekly.room.speaker"] {
+            var wardrobe = Wardrobe()
+            wardrobe.equipped[.room] = item
+            let pose = RunnerPose().wearing(Outfit(wardrobe))
+            for mode in Mode.allCases {
+                #expect(Set(RunnerFigure.parts(for: mode, pose: pose)).isDisjoint(with: rooms), "\(item) in \(mode)")
+            }
+        }
     }
 
     @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
@@ -1460,18 +1456,16 @@ import Testing
         #expect(RunnerFigure.parts(for: .chill, pose: RunnerPose()).contains(.roomPc) == false)
     }
 
-    // The room item and the running shoes stand in the bottom left corner; what fills it takes their spot.
+    // The running shoes stand in the bottom left corner; what fills it takes their spot.
     @Test func theRoomCornerStepsAsideForWhatFillsIt() {
-        var outfit = Outfit()
-        outfit.room = .roomPlant
-        let home = RunnerPose().wearing(outfit).leaving([.runningShoes])
-        #expect(Set(RunnerFigure.parts(for: .chill, pose: home)).isSuperset(of: [.roomPlant, .runningShoes]))
+        let home = RunnerPose().leaving([.runningShoes])
+        #expect(RunnerFigure.parts(for: .chill, pose: home).contains(.runningShoes))
         var carrying = home
         carrying.dailyProp = .gymBag
-        let wrapped = RunnerPose(moment: .blanket).wearing(outfit).leaving([.runningShoes])
-        let leaving = RunnerPose(moment: .timeToLeave).wearing(outfit).leaving([.runningShoes])
+        let wrapped = RunnerPose(moment: .blanket).leaving([.runningShoes])
+        let leaving = RunnerPose(moment: .timeToLeave).leaving([.runningShoes])
         for pose in [carrying, wrapped, leaving] {
-            #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).isDisjoint(with: [.roomPlant, .runningShoes]))
+            #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.runningShoes))
         }
     }
 

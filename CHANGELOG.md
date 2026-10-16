@@ -85,6 +85,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- A room item from the shop no longer stands in HAKU's 下班 backdrop. Bought room items live in HAKU's home.
 - VoiceOver reads the unboxing as "开箱：" and the item's name instead of the character's mode.
 - Opening the app, HAKU says one line at most: a celebration first, then an invite, good night, the late-night
   line, a planned task, bath time and the stretch. A mode change no longer clears it. A tap during a one-off
