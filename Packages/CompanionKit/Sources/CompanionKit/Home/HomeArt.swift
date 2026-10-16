@@ -816,9 +816,9 @@ enum HomeArt {
         case .bench:
             // Rack uprights with their feet and the padded bench; the bar is its own layer, `barbell`.
             // The rack stands against the wall so HAKU's head fits on the pad in front of it.
-            pen.contact(3.7, 0.25, 5.45, 3.4)
-            for x in [3.95, 5.2] {
-                pen.box(x - 0.25, 0.25, 0, x + 0.25, 0.55, 0.06, 0x2A2C34)
+            pen.contact(3.85, 0.25, 5.3, 3.4)
+            for x in [4.1, 5.05] {
+                pen.box(x - 0.2, 0.25, 0, x + 0.2, 0.55, 0.06, 0x2A2C34)
                 pen.box(x - 0.06, 0.35, 0, x + 0.06, 0.47, 1.9, 0x2A2C34)
             }
             pen.box(4.5, 1.1, 0, 4.65, 3.3, 0.45, 0x2A2C34)
@@ -834,15 +834,16 @@ enum HomeArt {
     static func barbell(_ pen: IsoPen) {
         let (y, z) = (racked.y, racked.z)
         let p = { (x: Double) in HomeGrid.plan(x, y, z) }
-        pen.discAcross(x: 3.75, y, z, r: 0.24, Color(hex: 0x1B1C26))
-        pen.line([p(3.6), p(5.55)], Color(hex: 0xC3C8D2), width: 3)
-        pen.line([p(3.6), p(5.55)], Color.white.opacity(0.6), width: 1)
-        pen.discAcross(x: 5.4, y, z, r: 0.24, Color(hex: 0x1B1C26))
-        pen.discAcross(x: 5.42, y, z, r: 0.08, Color(hex: 0xC3C8D2), line: 1)
+        // Short enough that both plates stay clear of the desk chair while HAKU presses.
+        pen.discAcross(x: 3.97, y, z, r: 0.22, Color(hex: 0x1B1C26))
+        pen.line([p(3.85), p(5.3)], Color(hex: 0xC3C8D2), width: 3)
+        pen.line([p(3.85), p(5.3)], Color.white.opacity(0.6), width: 1)
+        pen.discAcross(x: 5.18, y, z, r: 0.22, Color(hex: 0x1B1C26))
+        pen.discAcross(x: 5.2, y, z, r: 0.07, Color(hex: 0xC3C8D2), line: 1)
     }
 
     /// The box the bar and its plates fill on the rack.
-    static let barbellBox = GridBox(x0: 3.55, y0: 0.1, x1: 5.6, y1: 0.7, z0: 1.45, z1: 2.05)
+    static let barbellBox = GridBox(x0: 3.8, y0: 0.1, x1: 5.35, y1: 0.7, z0: 1.45, z1: 2.05)
 }
 
 /// What the desk monitor shows.
