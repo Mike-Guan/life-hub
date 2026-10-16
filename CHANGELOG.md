@@ -117,6 +117,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   until its own pose is approved.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
+- Release builds don't sell room items yet. They show only in the home page, which release builds don't open so far.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
   places, Daily, saving records and the bedtime notification.
 - Test builds can try a character together with her default mode cards (Settings, under the characters). The
