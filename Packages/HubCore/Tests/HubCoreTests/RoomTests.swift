@@ -170,7 +170,8 @@ extension RoomTests {
     @Test func boughtRoomItemsGoToTheirSpotOnce() throws {
         let catalog = try makeCatalog()
         var layout = RoomLayout(persona: .haku, now: now, deviceID: "a")
-        #expect(layout.place(["room.plant", "room.bag"], catalog: catalog, now: now, deviceID: "b"))
+        let added = layout.place(["room.plant", "room.bag"], catalog: catalog, now: now, deviceID: "b")
+        #expect(added)
         #expect(layout.placements.map(\.piece) == ["room.plant", "room.bag"])
         #expect(layout.placements[0].cell == RoomCell(x: 1, y: 8))
         #expect(layout.placements[1].isStored)
@@ -178,7 +179,8 @@ extension RoomTests {
 
         layout.placements[0].x = 3
         let before = layout
-        #expect(!layout.place(["room.plant"], catalog: catalog, now: now, deviceID: "c"))
+        let again = layout.place(["room.plant"], catalog: catalog, now: now, deviceID: "c")
+        #expect(!again)
         #expect(layout == before)
     }
 }
