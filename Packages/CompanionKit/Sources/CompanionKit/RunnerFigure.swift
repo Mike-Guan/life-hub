@@ -1407,10 +1407,7 @@ struct RunnerFigure: View {
             visible.insert(print.up)
         }
         if let print = outfit.mask, visible.contains(.maskDown) { visible.insert(print.down) }
-        // The room item stays home: hidden while HAKU carries the gym bag, is out boxing, lifting or running, or
-        // stands in the mountains.
-        if mode == .chill, let room = outfit.room, visible.isDisjoint(with: awayParts) { visible.insert(room) }
-        if visible.contains(.roomSpeaker) { visible.insert(.roomSpeakerRing) }
+        // Mike 2026-10-16: bought room items stand in HAKU's home, not in a mode's backdrop.
         if outfit.peaceSign, pose.burst >= 0, !pose.swapping, !pose.bedtime { visible.insert(.peaceHand) }
         // Today's traces: the bandage goes everywhere, the monitor and the sunlight are in the room at home.
         if pose.traces.contains(.bandage) { visible.insert(.bandage) }
