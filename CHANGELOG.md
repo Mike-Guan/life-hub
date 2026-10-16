@@ -6,10 +6,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Added
 - Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
-- The home prototype's room is now rendered in Blender: soft sofa and bed, wood floor, real light and shadows,
-  a night version lit by the lamps and the vending machine, and the room floats on the page with a hard shadow.
-  A sports corner holds the standing bag, a bench (25 cans, any card) and a snowboard (20 cans, ski card). Gloves
-  and a racket on its wall only show in a preview from the room's settings for now. The window moved left.
+- The home prototype's room keeps its code-drawn ink look, refined: thinner lines, more small detail (drawer
+  handles, keyboard keys, book spines, a throw on the sofa, rug fringe, wood grain), soft shadows under the
+  furniture and a light edge on top faces. At night the lamps, the vending machine and the moon glow, and the room
+  floats on the page with a hard shadow. A sports corner holds the standing bag, a bench (25 cans, any card) and a
+  snowboard (20 cans, ski card). Gloves and a racket on its wall only show in a preview from the room's settings
+  for now. The window moved left.
 - In the home prototype HAKU walks the shortest way around the furniture instead of back through the middle of
   the rug, steps on and off seats from the side, and lands on open floor when dropped on something he can't use.
 - The home page has a saved room per character: a furniture catalog and a layout that keeps what a newer

@@ -226,6 +226,7 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-15: Mike: 「离开公司就应该下班」. Leaving the office ends work at any time, not only from an hour before
   the end of work hours. A lunch break ends work and coming back starts it again. The off-work line still
   plays only from an hour before the end of work hours.
-- 2026-10-15: Mike: the home room keeps semi-realistic furniture, rendered in Blender
-  (`Packages/CompanionKit/Tools/home-room/render_room.py`; CI does not run Blender). Style E stays for the UI
-  around it. Never edit the rendered PNGs by hand; change the script and render again.
+- 2026-10-15: Mike: the home room keeps semi-realistic furniture, rendered in Blender. Reversed 2026-10-16.
+- 2026-10-16: Mike: the home room is drawn in code (`HomeArt.swift`), the first prototype's ink-line look refined
+  (thinner lines, more detail, contact shadows). The Blender renders are gone: no 3D game, and code keeps colours
+  and new shop items cheap.

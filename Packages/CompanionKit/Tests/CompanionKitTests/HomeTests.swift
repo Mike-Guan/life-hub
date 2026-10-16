@@ -237,23 +237,16 @@ import Testing
         #expect(scene.spotReached == .work)
     }
 
-    @Test func everyPieceItemAndColourHasADayAndNightRender() {
-        var layers = ["shell", "blanketCover"] + HomePiece.allCases.map(\.rawValue)
-        layers += HomeItem.allCases.map { "item-\($0.rawValue)" }
-        let painted: [HomePaintable: [String]] = [
-            .walls: ["shell"], .sofa: ["sofaBack", "sofaFarArm", "sofaSeat", "sofaNearArm"], .rug: ["rug"],
-            .bed: ["blanket", "blanketCover"],
-        ]
-        for (paintable, names) in painted {
-            for index in paintable.swatches.indices.dropFirst() {
-                layers += names.map { HomeRenders.layer($0, swatch: index) }
-            }
+    @Test func everyLayerIsDrawnInsideTheRoom() {
+        var layers: [HomeLayer] = HomePaintable.walls.swatches.map { .shell(walls: $0) }
+        for piece in HomePiece.allCases {
+            layers.append(.piece(piece, color: HomePaintable.sofa.swatches[0], covering: false))
         }
+        layers.append(.piece(.blanket, color: HomePaintable.bed.swatches[0], covering: true))
+        layers += HomeItem.allCases.map { .item($0) }
         for layer in layers {
-            for night in [false, true] {
-                #expect(HomeRenders.rect(layer, night: night) != nil, "\(layer) has no place")
-                #expect(HomeRenders.texture(layer, night: night) != nil, "\(layer) has no image")
-            }
+            #expect(!layer.rect.isEmpty, "\(layer) has no place")
+            #expect(HomeGrid.canvas.insetBy(dx: -40, dy: -40).contains(layer.rect), "\(layer) leaves the room")
         }
     }
 
