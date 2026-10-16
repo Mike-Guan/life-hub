@@ -65,6 +65,17 @@ extension FrameSheets {
             let image = try #require(Self.composite(scene, scale: 2))
             cells.append((label, image))
         }
+        // Fitness day with the bench: the bar up at lockout, then down on the chest.
+        for (label, t) in [("健身日 · 卧推 推起", 1.3), ("健身日 · 卧推 放下", 0.05)] {
+            let model = HomeModel(night: false, cans: 120, card: .fitness)
+            let scene = HomeScene(model: model)
+            model.buy(.item(.bench))
+            model.switchMode(.boxing)
+            scene.sync(animated: false)
+            scene.settle()
+            scene.pose(at: t)
+            cells.append((label, try #require(Self.composite(scene, scale: 2))))
+        }
         // Mid-walk and carried, from the first room.
         let model = HomeModel(night: true, cans: 120)
         let scene = HomeScene(model: model)

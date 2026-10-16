@@ -9,6 +9,8 @@ enum HomeLayer: Hashable, Sendable {
     /// A piece in its colour; the blanket is pulled up when `covering`.
     case piece(HomePiece, color: UInt32, covering: Bool)
     case item(HomeItem)
+    /// The bench's bar, which HAKU lifts off the rack.
+    case barbell
 
     /// The plan rectangle the layer is drawn in.
     var rect: CGRect {
@@ -16,6 +18,7 @@ enum HomeLayer: Hashable, Sendable {
         case .shell: HomeGrid.canvas
         case .piece(let piece, _, _): HomeGrid.bounds(piece.boxes, margin: 10)
         case .item(let item): HomeGrid.bounds(HomeArt.boxes(item), margin: 10)
+        case .barbell: HomeGrid.bounds([HomeArt.barbellBox], margin: 10)
         }
     }
 
@@ -28,6 +31,7 @@ enum HomeLayer: Hashable, Sendable {
             case .piece(let piece, let color, let covering):
                 HomeArt.piece(pen, piece, color: color, covering: covering)
             case .item(let item): HomeArt.item(pen, item)
+            case .barbell: HomeArt.barbell(pen)
             }
             if night {
                 layer.blendMode = .sourceAtop
@@ -48,7 +52,7 @@ final class HomeLayerNode: SKNode {
     init(pivot: CGPoint = .zero) {
         super.init()
         position = pivot
-        night.zPosition = 0.001
+        night.zPosition = 0.0001
         addChild(day)
         addChild(night)
     }

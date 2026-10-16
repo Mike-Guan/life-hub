@@ -10,6 +10,7 @@ final class HomeScene: SKScene {
 
     private var pieces: [HomePiece: HomeLayerNode] = [:]
     private var itemNodes: [HomeItem: HomeLayerNode] = [:]
+    private var barbell: HomeLayerNode?
     private let shell = HomeLayerNode()
     private let skyDay = SKSpriteNode()
     private let skyNight = SKSpriteNode()
@@ -47,6 +48,8 @@ final class HomeScene: SKScene {
     private var shownCovering: Bool?
 
     static let walkSpeed = 2.6
+    /// Where the middle of the bar sits on the rack, in scene coordinates.
+    static let rackedBar = HomeGrid.scene(HomeGrid.plan(HomeArt.racked))
 
     /// The spot HAKU has reached, or `nil` while walking, carried or dropped on the floor.
     var spotReached: HomeSpot? { reached }
@@ -189,6 +192,15 @@ final class HomeScene: SKScene {
             node.removeFromParent()
             itemNodes[item] = nil
         }
+        if items.contains(.bench), barbell == nil {
+            let bar = HomeLayerNode(pivot: Self.rackedBar)
+            bar.show(.barbell, night: model.isNight)
+            barbell = bar
+            addChild(bar)
+        } else if !items.contains(.bench) {
+            barbell?.removeFromParent()
+            barbell = nil
+        }
         if model.isNight != shownNight {
             setNight(model.isNight, animated: animated && shownNight != nil)
             shownNight = model.isNight
@@ -238,7 +250,7 @@ final class HomeScene: SKScene {
         fade(clothes, night ? 0.6 : 1)
         fade(daylight, night ? 0 : 0.35)
         for light in nightLights { fade(light, night ? 0.85 : 0) }
-        for node in [shell] + Array(pieces.values) + Array(itemNodes.values) {
+        for node in [shell] + Array(pieces.values) + Array(itemNodes.values) + [barbell].compactMap({ $0 }) {
             node.setNight(night, duration: duration)
         }
     }
@@ -361,6 +373,7 @@ final class HomeScene: SKScene {
             case .sofa: face = tired ? .tired : .chill
             case .rest: face = .closed
             case .box, .shadowbox: face = .box
+            case .bench: face = .focus
             case .idle:
                 // Now and then he stretches, or glances the other way.
                 let cycle = clock.truncatingRemainder(dividingBy: 16)
@@ -402,6 +415,14 @@ final class HomeScene: SKScene {
         }
         haku.position = position
         haku.zPosition = CGFloat(depth)
+
+        // The bar rests on the rack, or rides in HAKU's hands while he presses.
+        if let barbell {
+            let pressing = pose == .press
+            barbell.position = pressing ? haku.barCenter : Self.rackedBar
+            // While pressing, over his body and under his arms and head (`HakuNode` parts sit 0.004 to 0.006 up).
+            barbell.zPosition = CGFloat(pressing ? depth + 0.0045 : HomeItem.bench.depth + 0.01)
+        }
 
         // The bag swings after each punch.
         if pose == .box, reached == .box {
@@ -509,6 +530,11 @@ final class HomeScene: SKScene {
             let s = HomeItem.bag.spot
             let bag = GridBox(x0: s.x - 0.4, y0: s.y - 0.4, x1: s.x + 0.4, y1: s.y + 0.4, z1: 2.6)
             if HomeGrid.contains(HomeGrid.silhouette(bag), plan) { return .bag }
+        }
+        if itemNodes[.bench] != nil, let bench = HomeItem.bench.footprint,
+            HomeGrid.contains(HomeGrid.silhouette(bench), plan)
+        {
+            return .bench
         }
         let tappable = HomePiece.allCases.filter { $0.hotspot != nil }.sorted { $0.depth > $1.depth }
         for piece in tappable where piece.boxes.contains(where: { HomeGrid.contains(HomeGrid.silhouette($0), plan) }) {

@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- In the home prototype HAKU uses the bench: tapping it, dropping him on it, or a fitness card day with the
+  bench bought sends him to lie on it and press the bar off the rack, up and down.
 - Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
 - The home prototype's room keeps its code-drawn ink look, refined: thinner lines, more small detail (drawer
   handles, keyboard keys, book spines, a throw on the sofa, rug fringe, wood grain), soft shadows under the
