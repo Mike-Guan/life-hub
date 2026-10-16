@@ -124,6 +124,7 @@ enum HomeHotspot: String, CaseIterable, Sendable {
     case shelf
     case window
     case bag
+    case bench
     case exit
 }
 
@@ -248,7 +249,7 @@ enum HomeItem: String, CaseIterable, Sendable {
 
 /// A place HAKU goes to, and the floor point he steps on or off it from.
 enum HomeSpot: String, CaseIterable, Sendable {
-    case idle, work, side, sofa, rest, box, shadowbox, wardrobe, shop, window
+    case idle, work, side, sofa, rest, box, shadowbox, bench, wardrobe, shop, window
 
     /// The middle of the rug, where HAKU waits.
     static let hub = GridPoint(x: 5.2, y: 6.6)
@@ -261,6 +262,8 @@ enum HomeSpot: String, CaseIterable, Sendable {
         case .sofa: GridPoint(x: 1.9, y: 6.0, z: 0.6)
         case .rest: GridPoint(x: 8.0, y: 8.1, z: 0.65)
         case .box: GridPoint(x: 5.2, y: 4.1)
+        // Lying on the pad, feet at its near end, head towards the rack.
+        case .bench: GridPoint(x: 4.575, y: 2.85, z: 0.9)
         case .wardrobe: GridPoint(x: 7.85, y: 2.0)
         case .shop: GridPoint(x: 9.3, y: 2.0)
         case .window: GridPoint(x: 2.3, y: 0.75)
@@ -273,6 +276,7 @@ enum HomeSpot: String, CaseIterable, Sendable {
         case .work, .side: GridPoint(x: 3.1, y: 1.9)
         case .sofa: GridPoint(x: 2.6, y: 6.9)
         case .rest: GridPoint(x: 6.1, y: 7.6)
+        case .bench: GridPoint(x: 4.6, y: 3.6)
         default: point
         }
     }
@@ -285,6 +289,7 @@ enum HomeSpot: String, CaseIterable, Sendable {
         case .sofa: .sit
         case .rest: .lie
         case .box, .shadowbox: .box
+        case .bench: .press
         case .wardrobe, .shop, .window: .backStand
         }
     }
@@ -295,6 +300,7 @@ enum HomeSpot: String, CaseIterable, Sendable {
         case .work, .side: 4.2
         case .sofa: 7.6
         case .rest: 14.0
+        case .bench: HomeItem.bench.depth + 0.05
         default: nil
         }
     }
@@ -302,7 +308,7 @@ enum HomeSpot: String, CaseIterable, Sendable {
     /// Whether HAKU faces right (towards larger plan x) once there, or `nil` to keep the last facing.
     var facesRight: Bool? {
         switch self {
-        case .box: true
+        case .box, .bench: true
         case .work, .side: false
         default: nil
         }
@@ -327,7 +333,7 @@ enum HomeSpot: String, CaseIterable, Sendable {
 
 /// How HAKU's body is posed.
 enum HakuPose: Sendable, Equatable {
-    case stand, walk, sit, lie, back, backStand, box, dangle, happy, stretch, tired
+    case stand, walk, sit, lie, back, backStand, box, press, dangle, happy, stretch, tired
 }
 
 /// A walk along stops on the floor.

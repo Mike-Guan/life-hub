@@ -233,7 +233,7 @@ final class HomeModel {
         timeline.append(HomeTimelineEntry(time: time, mode: new, title: title(new)))
         energy = max(5, min(100, energy + Self.energyCost(new)))
         go(modeSpot)
-        line = Self.modeLine(new, card: card, hasBag: items.contains(.bag))
+        line = Self.modeLine(new, card: card, items: items)
     }
 
     /// Reacts to a tap in the room.
@@ -252,6 +252,9 @@ final class HomeModel {
         case .bag:
             visit(.box)
             line = "左、右、左。"
+        case .bench:
+            visit(.bench)
+            line = "推几下。不数。"
         case .window:
             visit(.window)
             line = isNight ? "楼下的灯还亮着。" : "今天天气还行。"
@@ -330,6 +333,7 @@ final class HomeModel {
         case .bed: visit(.rest)
         case .desk: visit(mode == .money ? .side : .work)
         case .bag: visit(.box)
+        case .bench: visit(.bench)
         default:
             // Dropped on something HAKU can't stand on: he lands on the nearest open floor.
             dropPoint = HomeNav.room(items: items).nearestOpen(to: point)
@@ -399,7 +403,7 @@ final class HomeModel {
 
     /// Where the current mode puts HAKU.
     var modeSpot: HomeSpot {
-        Self.spot(for: mode, card: card, hasBag: items.contains(.bag))
+        Self.spot(for: mode, card: card, items: items)
     }
 
     /// How long a visit lasts, in seconds.
@@ -417,29 +421,31 @@ final class HomeModel {
     }
 
     // PM 2026-10-15: the fourth mode follows the user's identity card, so its spot and line branch on the card.
-    static func spot(for mode: Mode, card: IdentityKind, hasBag: Bool) -> HomeSpot {
+    static func spot(for mode: Mode, card: IdentityKind, items: Set<HomeItem>) -> HomeSpot {
         switch mode {
         case .work: .work
         case .chill: .sofa
-        case .boxing: cardSpot(card, hasBag: hasBag)
+        case .boxing: cardSpot(card, items: items)
         case .money: .side
         }
     }
 
-    static func cardSpot(_ card: IdentityKind, hasBag: Bool) -> HomeSpot {
+    static func cardSpot(_ card: IdentityKind, items: Set<HomeItem>) -> HomeSpot {
         switch card {
-        case .boxing: hasBag ? .box : .shadowbox
+        case .boxing: items.contains(.bag) ? .box : .shadowbox
+        case .fitness: items.contains(.bench) ? .bench : .idle
         default: .idle
         }
     }
 
-    static func modeLine(_ mode: Mode, card: IdentityKind, hasBag: Bool) -> String {
+    static func modeLine(_ mode: Mode, card: IdentityKind, items: Set<HomeItem>) -> String {
         switch mode {
         case .work: "上班。脑子开机中。"
         case .chill: "下班。今天到此为止。"
         case .boxing:
             switch card {
-            case .boxing: hasBag ? "拳击日。沙袋先挨几下。" : "拳击日。没沙袋，打空气也行。"
+            case .boxing: items.contains(.bag) ? "拳击日。沙袋先挨几下。" : "拳击日。没沙袋，打空气也行。"
+            case .fitness where items.contains(.bench): "\(card.title)。今天练胸。"
             default: "\(card.title)。准备出门。"
             }
         case .money: "副业时间。别打扰，也别走。"
@@ -462,6 +468,7 @@ final class HomeModel {
         case .sofa: ["什么也不想做，这也算一种状态。", "遥控器在你那边。"]
         case .rest: ["……再五分钟。", "zzz"]
         case .box, .shadowbox: ["左、右、左。", "沙袋没惹我，是我今天比较硬。"]
+        case .bench: ["推起来，放下去。就这样。", "重量？不告诉你。"]
         default:
             energy < 35 ? ["电量不太够。", "……干嘛。"] : ["……干嘛。", "看我也不会多一罐。", "嗯。", "今天也没什么特别的。挺好。"]
         }

@@ -124,6 +124,25 @@ import Testing
         #expect(model.spot == .box)
     }
 
+    @Test func fitnessDayPressesOnTheBenchOnceThereIsOne() {
+        let model = HomeModel(night: false, cans: 60, card: .fitness)
+        model.switchMode(.boxing)
+        #expect(model.spot == .idle)
+        #expect(model.buy(.item(.bench)))
+        model.switchMode(.boxing)
+        #expect(model.spot == .bench)
+        #expect(HomeSpot.bench.pose == .press)
+    }
+
+    @Test func tappingTheBenchIsAShortVisit() {
+        let model = HomeModel(night: false, cans: 60)
+        model.switchMode(.chill)
+        model.tap(.bench)
+        #expect(model.spot == .bench)
+        model.tick(HomeModel.visitLength + 1)
+        #expect(model.spot == .sofa)
+    }
+
     @Test func buyingSpendsCansOnceAndPlacesTheItem() {
         let model = HomeModel(night: false, cans: 30)
         #expect(model.buy(.item(.plant)))
@@ -243,11 +262,35 @@ import Testing
             layers.append(.piece(piece, color: HomePaintable.sofa.swatches[0], covering: false))
         }
         layers.append(.piece(.blanket, color: HomePaintable.bed.swatches[0], covering: true))
-        layers += HomeItem.allCases.map { .item($0) }
+        layers += HomeItem.allCases.map { .item($0) } + [.barbell]
         for layer in layers {
             #expect(!layer.rect.isEmpty, "\(layer) has no place")
             #expect(HomeGrid.canvas.insetBy(dx: -40, dy: -40).contains(layer.rect), "\(layer) leaves the room")
         }
+    }
+
+    @Test func theBarIsPressedAllTheWayUpAndBackDown() {
+        let reaches = stride(from: 0.0, to: 2.6, by: 0.1).map(HakuNode.pressReach)
+        #expect(abs((reaches.min() ?? 0) - 0.45) < 0.01)
+        #expect(abs((reaches.max() ?? 0) - 1) < 0.01)
+    }
+
+    @Test func pressingHakuTakesTheBarOffTheRack() {
+        let model = HomeModel(night: false, cans: 60)
+        let scene = HomeScene(model: model)
+        model.buy(.item(.bench))
+        let bench = HomeGrid.scene(HomeGrid.plan(4.6, 2.2, 0.5))
+        #expect(scene.hotspot(at: bench, includingHaku: false) == .bench)
+        model.tap(.bench)
+        scene.sync(animated: false)
+        for _ in 0..<400 { scene.step(0.05) }
+        #expect(scene.spotReached == .bench)
+        scene.pose(at: 1.3)
+        let up = scene.haku.hands
+        scene.pose(at: 0.05)
+        let down = scene.haku.hands
+        #expect(up.y > down.y + 4)
+        #expect(up != HomeScene.rackedBar)
     }
 
     @Test func tapsFindTheFurniture() {

@@ -814,7 +814,7 @@ enum HomeArt {
             pen.onBackWall(y: 0.17, s.x - 0.12, 0.8, s.x + 0.12, 1.1, Color(hex: 0x1B1C26), line: 1)
             pen.onBackWall(y: 0.17, s.x - 0.12, 1.7, s.x + 0.12, 2.0, Color(hex: 0x1B1C26), line: 1)
         case .bench:
-            // Rack uprights with their feet, the padded bench, the bar across the hooks and its plates.
+            // Rack uprights with their feet and the padded bench; the bar is its own layer, `barbell`.
             pen.contact(3.7, 0.95, 5.45, 3.0)
             for x in [3.95, 5.2] {
                 pen.box(x - 0.25, 1.0, 0, x + 0.25, 1.3, 0.06, 0x2A2C34)
@@ -823,13 +823,25 @@ enum HomeArt {
             pen.box(4.5, 1.6, 0, 4.65, 2.9, 0.45, 0x2A2C34)
             pen.box(4.3, 1.5, 0.45, 4.85, 3.0, 0.62, HomeColors.navy, top: tone(HomeColors.navy, 0.2))
             pen.line([p(4.85, 1.55, 0.55), p(4.85, 2.95, 0.55)], tone(HomeColors.navy, 0.25), width: 1)
-            pen.discAcross(x: 3.75, 1.2, 1.75, r: 0.24, Color(hex: 0x1B1C26))
-            pen.line([p(3.6, 1.2, 1.75), p(5.55, 1.2, 1.75)], Color(hex: 0xC3C8D2), width: 3)
-            pen.line([p(3.6, 1.2, 1.75), p(5.55, 1.2, 1.75)], Color.white.opacity(0.6), width: 1)
-            pen.discAcross(x: 5.4, 1.2, 1.75, r: 0.24, Color(hex: 0x1B1C26))
-            pen.discAcross(x: 5.42, 1.2, 1.75, r: 0.08, Color(hex: 0xC3C8D2), line: 1)
         }
     }
+
+    /// The middle of the bar resting on the rack's hooks.
+    static let racked = GridPoint(x: 4.575, y: 1.2, z: 1.75)
+
+    /// The bench's bar with its plates, on the hooks; the scene moves it into HAKU's hands while he presses.
+    static func barbell(_ pen: IsoPen) {
+        let (y, z) = (racked.y, racked.z)
+        let p = { (x: Double) in HomeGrid.plan(x, y, z) }
+        pen.discAcross(x: 3.75, y, z, r: 0.24, Color(hex: 0x1B1C26))
+        pen.line([p(3.6), p(5.55)], Color(hex: 0xC3C8D2), width: 3)
+        pen.line([p(3.6), p(5.55)], Color.white.opacity(0.6), width: 1)
+        pen.discAcross(x: 5.4, y, z, r: 0.24, Color(hex: 0x1B1C26))
+        pen.discAcross(x: 5.42, y, z, r: 0.08, Color(hex: 0xC3C8D2), line: 1)
+    }
+
+    /// The box the bar and its plates fill on the rack.
+    static let barbellBox = GridBox(x0: 3.55, y0: 0.9, x1: 5.6, y1: 1.5, z0: 1.45, z1: 2.05)
 }
 
 /// What the desk monitor shows.

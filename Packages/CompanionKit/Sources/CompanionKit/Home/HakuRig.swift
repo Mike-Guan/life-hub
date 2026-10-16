@@ -224,6 +224,16 @@ final class HakuNode: SKNode {
             armR.zRotation = -0.55 + 0.06 * typing
             head.zRotation = 0.05 * CGFloat(sin(t * tau / 6))
             shadow.isHidden = true
+        case .press:
+            // On his back along the bench, arms straight up to the bar, pressing it up and lowering it.
+            body.zRotation = -.pi / 3
+            let reach = CGFloat(Self.pressReach(t))
+            armL.zRotation = -2 * .pi / 3 - 0.08
+            armR.zRotation = -2 * .pi / 3 + 0.08
+            armL.yScale = reach
+            armR.yScale = reach
+            head.zRotation = 0.04 * (1 - reach)
+            shadow.isHidden = true
         case .lie:
             body.zRotation = -.pi / 3
             torso.yScale = 1 + 0.03 * CGFloat(sin(t * tau / 4))
@@ -240,6 +250,21 @@ final class HakuNode: SKNode {
             armR.zRotation = 2.8
             shadow.isHidden = true
         }
+    }
+
+    /// The middle of the two hands, in the coordinates of HAKU's parent.
+    var hands: CGPoint {
+        // The hand sits at the end of the arm drawing, 29 art units below the shoulder.
+        let tip = CGPoint(x: -3, y: -29)
+        let l = convert(tip, from: armL)
+        let r = convert(tip, from: armR)
+        return CGPoint(x: position.x + (l.x + r.x) / 2, y: position.y + (l.y + r.y) / 2)
+    }
+
+    /// How far the arms reach during a press at time `t`: short with the bar on the chest, 1 at lockout.
+    nonisolated static func pressReach(_ t: TimeInterval) -> Double {
+        let phase = t.truncatingRemainder(dividingBy: 2.6) / 2.6
+        return 0.45 + 0.55 * (0.5 - 0.5 * cos(phase * 2 * .pi))
     }
 
     private func dress(_ outfit: HomeOutfit, back: Bool, gloves: Bool) {
