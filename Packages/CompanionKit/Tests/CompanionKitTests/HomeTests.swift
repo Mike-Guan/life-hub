@@ -290,6 +290,13 @@ import Testing
         }
     }
 
+    @Test func wallHooksAreNotHiddenByTheWardrobe() {
+        // The wardrobe's front-left corner, (6.8, 1.3), hides the back wall from x - y = 5.5 on.
+        for hook in HomeZone.sportWall.slots + [HomeItem.racket.spot, HomeItem.snowboard.spot] {
+            #expect(hook.x - hook.y + 0.25 < 5.5, "\(hook)")
+        }
+    }
+
     @Test func zonesHoldAsManyItemsAsPlanned() {
         #expect(HomeZone.sportFloor.slots.count == 1)
         #expect(HomeZone.sportWall.slots.count == 2)
