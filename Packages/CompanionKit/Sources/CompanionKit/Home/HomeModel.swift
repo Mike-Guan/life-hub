@@ -177,10 +177,9 @@ final class HomeModel {
     var items: Set<HomeItem> {
         previewsAllItems ? Set(HomeItem.allCases) : Set(snapshot.owned.compactMap(HomeItem.init(shopID:)))
     }
-    /// The keepsakes on the reward shelf, by name.
+    /// The keepsakes on the reward shelf, by name, oldest first.
     var keepsakes: [HomeKeepsake] {
-        snapshot.owned.filter { ShopItem.item($0)?.keepsake != nil }.sorted()
-            .map { HomeKeepsake(id: $0, name: ShopItem.item($0)?.title ?? $0) }
+        snapshot.keepsakes.map { HomeKeepsake(id: $0.id, name: ShopItem.item($0.id)?.title ?? $0.id) }
     }
     /// Today's modes, oldest first.
     var timeline: [HomeTimelineEntry] {

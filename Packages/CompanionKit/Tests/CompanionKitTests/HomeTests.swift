@@ -258,13 +258,17 @@ import Testing
         #expect(model.color(.walls) == HomePaintable.walls.swatches[0])
     }
 
-    @Test func keepsakesComeFromWhatIsOwned() {
+    @Test func keepsakesComeFromWhatWasEarnedOldestFirst() {
         let model = HomeModel(night: false)
         #expect(model.keepsakes.isEmpty)
         var next = model.snapshot
-        next.owned = ["keepsake.headband.runner", "room.plant"]
+        next.keepsakes = [
+            EarnedKeepsake(id: "keepsake.headband.runner", at: Date(timeIntervalSince1970: 100)),
+            EarnedKeepsake(id: "keepsake.unknown", at: Date(timeIntervalSince1970: 200)),
+        ]
         model.apply(next)
-        #expect(model.keepsakes.map(\.id) == ["keepsake.headband.runner"])
+        #expect(model.keepsakes.map(\.id) == ["keepsake.headband.runner", "keepsake.unknown"])
+        #expect(model.keepsakes[0].name == ShopItem.item("keepsake.headband.runner")?.title)
     }
 
     @Test func thePreviewShowsEveryItemWithoutOwningIt() {
