@@ -25,6 +25,8 @@ enum KuroTap: Equatable, Sendable {
     case turnAway
     /// Chin on her hand at the desk (overtime): she looks up and taps her cheek twice.
     case chinTap
+    /// Asleep at bedtime: eyes shut, she leans over and back as if rolling over.
+    case rollOver
 
     /// The reaction to a tap in `look`; when `sleepy` she rubs her eyes instead.
     init(look: KuroLook, sleepy: Bool) {
@@ -47,7 +49,13 @@ enum KuroTap: Equatable, Sendable {
     }
 
     /// How long the reaction plays, in seconds.
-    var duration: TimeInterval { self == .turnAway ? 3 : 1.1 }
+    var duration: TimeInterval {
+        switch self {
+        case .turnAway: 3
+        case .rollOver: 1.4
+        default: 1.1
+        }
+    }
 
     // 动作展示总表 C9: an idle cut short used to drop in one frame, so a prop put down jumped back into her hand.
     /// How long what a tap cuts short takes to go back, in seconds.
@@ -101,10 +109,29 @@ enum KuroTap: Equatable, Sendable {
     /// How far down (0...1) her lap things are `p` (0..<1) into a sip: down in the first `lapSlide`, out of sight
     /// while she drinks, back up in the `lapSlide` after the cup is down (at 75%).
     static func lapDown(_ p: Double) -> Double {
-        let t = p * KuroTap.sip.duration
-        if t < lapSlide { return ease(t / lapSlide) }
-        return 1 - ease((t - 0.75 * KuroTap.sip.duration) / lapSlide)
+        lapDown(at: p * KuroTap.sip.duration, cupDown: 0.75 * KuroTap.sip.duration)
     }
+
+    /// How far down (0...1) her lap things are `t` seconds into a drink whose cup is back down at `cupDown`
+    /// seconds: down in the first `lapSlide`, back up in the `lapSlide` after `cupDown`.
+    static func lapDown(at t: TimeInterval, cupDown: TimeInterval) -> Double {
+        if t < lapSlide { return ease(t / lapSlide) }
+        return 1 - ease((t - cupDown) / lapSlide)
+    }
+
+    // 动作展示总表 G15: the tablet dropped from her face back to her lap in one frame as the tap ended.
+    /// How long the tablet takes to go back to her lap at the end of the tablet tap, in seconds.
+    static let tabletReturn: TimeInterval = 0.2
+
+    /// How far (0...1) the tablet has gone back to her lap `p` (0..<1) into the tablet tap: the one over her face
+    /// slides down and fades as the one on her lap fades in, over the last `tabletReturn`.
+    static func tabletDown(_ p: Double) -> Double {
+        let length = KuroTap.tablet.duration
+        return ease((p * length - (length - tabletReturn)) / tabletReturn)
+    }
+
+    /// How far the tablet over her face slides down on its way back to her lap, in SVG units.
+    static let tabletDrop: CGFloat = 20
 
     /// How many taps within `CompanionView.pesterWindow` turn her away.
     static let tooMany = 5
@@ -141,6 +168,8 @@ extension KuroPose {
             pose.calm = p >= 0.65
         case .chinTap:
             pose.eyes = p < 0.75 ? .open : .drowsy
+        case .rollOver:
+            pose.eyes = .closed
         case .bump:
             pose.eyes = p < 0.15 ? .surprised : KuroIdle.together((p - 0.15) / 0.85) > 0.85 ? .closed : .open
             pose.mouthO = p < 0.15
@@ -206,8 +235,8 @@ extension KuroFigure {
     nonisolated static func apply(_ tap: KuroTap, progress p: Double, to visible: inout Set<KuroPart>) {
         switch tap {
         case .tablet:
-            visible.remove(.workTablet)
             visible.insert(.tapTablet)
+            if visible.remove(.workTablet) != nil, KuroTap.tabletDown(p) > 0 { visible.insert(.workTablet) }
         case .sip:
             if KuroTap.lapDown(p) >= 1 { visible.subtract(lap) }
             guard p < 0.75 else { return }
@@ -227,7 +256,7 @@ extension KuroFigure {
             if p < 0.65 { visible.insert(.tapRub) }
         case .mark:
             if p >= 0.5 { visible.insert(.studyMark) }
-        case .chinTap, .bump, .hug, .sketch:
+        case .chinTap, .bump, .hug, .sketch, .rollOver:
             break
         case .turnAway:
             guard KuroTap.facesAway(p) else { return }
@@ -284,7 +313,7 @@ extension KuroFigure {
         case (.tablet, .tapTablet):
             // Up fast, held over her face, then lowered for a peek.
             let dy = p < 0.15 ? 14 * (1 - p / 0.15) : p < 0.6 ? 0 : 12 * (p - 0.6) / 0.4
-            return CGSize(width: 0, height: dy)
+            return CGSize(width: 0, height: dy + KuroTap.tabletDrop * CGFloat(KuroTap.tabletDown(p)))
         case (.sip, .tapCup):
             // The cup travels from the table to her lips and back instead of jumping (UI 审核 2026-10-08).
             let lift = p < 0.2 ? ease(p / 0.2) : p < 0.55 ? 1 : ease(1 - (p - 0.55) / 0.2)
@@ -318,18 +347,33 @@ extension KuroFigure {
     nonisolated static func turn(_ part: KuroPart, pose: KuroPose) -> KuroTurn? {
         // About a point inside her head, so the pom swings side to side on top of the beanie.
         if part == .weeklyHatBeaniePom, pose.pom != 0 { return KuroTurn(pivot: CGPoint(x: 60, y: 30), angle: pose.pom) }
-        // The gold racket from the shop is drawn like her own one, so it turns the same way.
-        guard part == .tennisRacket || part == .itemGoldRacket else { return nil }
+        // 动作展示总表 C7: at the end of the juggle the flat racket flips edge-on about her grip.
+        if part == .juggleRacket {
+            guard pose.tap == nil, pose.idle == .juggle else { return nil }
+            let width = KuroIdle.flatRacketWidth(pose.idleProgress)
+            return KuroTurn(pivot: CGPoint(x: 94, y: 120), axis: 90, scale: CGFloat(width))
+        }
+        // The gold racket from the shop is drawn like her own one, so it turns the same way. 动作展示总表 G6: the
+        // watch's raised racket stands upright in her hand, so it turns about that hand along its own handle.
+        let raised = part == .watchRacket
+        guard part == .tennisRacket || part == .itemGoldRacket || raised else { return nil }
+        let grip = raised ? CGPoint(x: 111, y: 108) : CGPoint(x: 98, y: 112)
+        let handle: Double = raised ? 0 : 20
         // A twirl cut short turns back to the front before the swing starts.
         if pose.tap == .swing, pose.idle != .twirl || pose.tapProgress >= 0.15 {
-            return KuroTurn(pivot: CGPoint(x: 91.8, y: 128.9), angle: swingAngle(pose.tapProgress))
+            let pivot = raised ? grip : CGPoint(x: 91.8, y: 128.9)
+            return KuroTurn(pivot: pivot, angle: swingAngle(pose.tapProgress))
+        }
+        // The gold racket is never juggled on, so it has nothing to open out from.
+        if part != .itemGoldRacket, pose.tap == nil, pose.idle == .juggle, pose.idleProgress >= KuroIdle.racketSwap {
+            return KuroTurn(pivot: grip, axis: handle, scale: CGFloat(KuroIdle.uprightRacketWidth(pose.idleProgress)))
         }
         guard pose.idle == .twirl else { return nil }
         // One full spin about the handle over the first 70%; never quite edge-on, so the frame stays drawn.
         let width = cos(min(pose.idleProgress / 0.7, 1) * 2 * .pi)
         let spun = width < 0 ? min(width, -0.1) : max(width, 0.1)
         let scale = pose.tap == nil ? spun : spun + (1 - spun) * ease(pose.idleBack)
-        return KuroTurn(pivot: CGPoint(x: 98, y: 112), axis: 20, scale: CGFloat(scale))
+        return KuroTurn(pivot: grip, axis: handle, scale: CGFloat(scale))
     }
 
     /// The racket's turn about her hand at `p` into the swing, in degrees: back 4°, across her body to -75°,
