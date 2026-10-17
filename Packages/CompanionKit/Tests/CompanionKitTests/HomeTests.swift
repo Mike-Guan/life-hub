@@ -301,6 +301,30 @@ import Testing
         #expect(scene.hotspot(at: HomeGrid.scene(HomeGrid.plan(1.4, 6.0, 0.5)), includingHaku: false) == .sofa)
     }
 
+    @Test func everyTapTargetIsAtLeast44PointsOnTheSmallestPhone() {
+        // iPhone SE: 375 pt wide, 16 pt margins each side.
+        let side = HomeGrid.minTap / (343 / HomeGrid.canvas.width)
+        let model = HomeModel(night: false, cans: 120, card: .fitness)
+        let scene = HomeScene(model: model)
+        model.buy(.item(.bag))
+        model.buy(.item(.bench))
+        scene.sync(animated: false)
+        scene.settle()
+        let haku = scene.haku.calculateAccumulatedFrame()
+        // Just right of his drawing, still within a finger's width of him.
+        let beside = CGPoint(x: haku.maxX + 2, y: haku.midY)
+        #expect(scene.hotspot(at: beside) != .haku)
+        #expect(scene.hotspot(at: beside, minSide: side) == .haku)
+        for hotspot in Set(scene.tapTargets().map(\.hotspot)) {
+            let outlines = scene.tapTargets().filter { $0.hotspot == hotspot }.map(\.outline)
+            let box = outlines.map { HomeScene.grown($0, to: side) }.reduce(CGRect.null) { $0.union($1) }
+            #expect(box.width >= side - 0.01 && box.height >= side - 0.01, "\(hotspot)")
+        }
+        // Open floor on the rug, away from anything small, stays empty.
+        #expect(
+            scene.hotspot(at: HomeGrid.scene(HomeGrid.plan(4.8, 7.2, 0)), includingHaku: false, minSide: side) == nil)
+    }
+
     @Test func shopIDsNameTheRoomItems() {
         #expect(HomeItem(shopID: "room.bench") == .bench)
         #expect(HomeItem(shopID: "room.snowboard") == .snowboard)

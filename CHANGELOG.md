@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   wearing it, with its name and her line. Rows in 人生收藏 open the keepsake's page, which shows how she looked the
   day it arrived; its 「分享」 and a quiet 「分享」 link on the unboxing open the choice. Cards carry no date,
   place or health number, and sharing gives nothing.
+- Every tap target on the home page is at least 44 pt, also on iPhone SE: HAKU, the standing bag, the bench, the
+  floating labels and the header buttons. A tap just beside a small target still lands on it.
 - Second polish batch for the second preset character: the tablet slides back to her lap after the tap, her
   lap things slide away and back while she blows on her drink, the flat racket flips upright after juggling,
   the watch's raised racket swings, twirls and juggles, a tap during a move gets a blink, and at bedtime a tap
