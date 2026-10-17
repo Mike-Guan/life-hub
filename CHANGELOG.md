@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Second polish batch for the second preset character: the tablet slides back to her lap after the tap, her
+  lap things slide away and back while she blows on her drink, the flat racket flips upright after juggling,
+  the watch's raised racket swings, twirls and juggles, a tap during a move gets a blink, and at bedtime a tap
+  rolls her over instead of rubbing an eye.
 - In the home prototype HAKU uses the bench: tapping it, dropping him on it, or a fitness card day with the
   bench bought sends him to lie on it and press the bar off the rack, up and down.
 - Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
