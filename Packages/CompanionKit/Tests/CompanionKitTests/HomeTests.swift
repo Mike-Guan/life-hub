@@ -175,7 +175,8 @@ import Testing
         next.owned = ["room.plant", "haku.weekly.room.cactus", "headband.cyan"]
         model.apply(next)
         #expect(model.items == [.plant, .cactus])
-        #expect(Set(model.takeCues()) == [.placed(.plant), .placed(.cactus)])
+        let cues = model.takeCues()
+        #expect(cues.count == 2 && cues.contains(.placed(.plant)) && cues.contains(.placed(.cactus)))
         model.apply(next)
         #expect(model.takeCues().isEmpty)
     }
