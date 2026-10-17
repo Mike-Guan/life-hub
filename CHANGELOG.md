@@ -9,6 +9,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   wearing it, with its name and her line. Rows in 人生收藏 open the keepsake's page, which shows how she looked the
   day it arrived; its 「分享」 and a quiet 「分享」 link on the unboxing open the choice. Cards carry no date,
   place or health number, and sharing gives nothing.
+- Second polish batch for the second preset character: the tablet slides back to her lap after the tap, her
+  lap things slide away and back while she blows on her drink, the flat racket flips upright after juggling,
+  the watch's raised racket swings, twirls and juggles, a tap during a move gets a blink, and at bedtime a tap
+  rolls her over instead of rubbing an eye.
+- CompanionKit draws the shop's room items for the app: `HomeItemIcon` (small icon, drawn as in the home) and
+  `HomeItemPreview` (the real room around the item where it stands, circled, HAKU next to it). The home's shop
+  button now opens the app's shop through `onShop` and reads 商店; the prototype's own shop panel is gone.
 - The second preset character naps over her tablet when dozing off on the couch: a slow breath and the odd
   nod, and a still frame on widgets and the watch face. Tapping her doesn't wake her.
 - In the home prototype HAKU uses the bench: tapping it, dropping him on it, or a fitness card day with the
