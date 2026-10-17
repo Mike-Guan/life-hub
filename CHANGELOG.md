@@ -5,6 +5,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- In the home prototype HAKU uses the bench: tapping it, dropping him on it, or a fitness card day with the
+  bench bought sends him to lie on it and press the bar off the rack, up and down.
+- Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
+- The home prototype's room keeps its code-drawn ink look, refined: thinner lines, more small detail (drawer
+  handles, keyboard keys, book spines, a throw on the sofa, rug fringe, wood grain), soft shadows under the
+  furniture and a light edge on top faces. At night the lamps, the vending machine and the moon glow, and the room
+  floats on the page with a hard shadow. A sports corner holds the standing bag, a bench (25 cans, any card) and a
+  snowboard (20 cans, ski card). Gloves and a racket on its wall only show in a preview from the room's settings
+  for now. The window moved left.
+- In the home prototype HAKU walks the shortest way around the furniture instead of back through the middle of
+  the rug, steps on and off seats from the side, and lands on open floor when dropped on something he can't use.
+- The home page has a saved room per character: a furniture catalog and a layout that keeps what a newer
+  build wrote. The wardrobe's room item moves into the room once. Nothing on screen uses it yet (Issue #489).
+- HAKU makes small moves in each card look's base outfit now and then. In sport it stretches an arm across
+  the chest, then the other, or drinks from a water bottle. Out, it looks at its wrist or tugs its backpack
+  strap and shrugs. In craft, it spins its pencil and drops it, or wipes paint off its hand on the apron.
+  Whatever it holds for the card goes down out of the frame first. These moves replace the boxing idle in
+  card looks.
+- A prototype of HAKU's home, from a house button on the home screen and under Settings (家（原型）), in DEV and STG builds only. It is a small iso room in
+  SpriteKit: HAKU walks to the desk, sofa, bed or bag when the mode changes, says a line when tapped, can be
+  carried, and the room has a day/night switch, a wardrobe, a shelf, recolouring and a mock shop. All data is fake.
+- The second preset character's swimming, yoga, ball and outdoor cards, which still wear her tennis look, now
+  get their base outfit's idle moves too: a stretch on her toes and a towel for the sport cards, the collar and
+  a look at her phone for outdoor. The racket goes down out of the frame first.
 - The second preset character can wear her Sunday beanie in 下班, between her cat ears, with its pom swaying a
   little. A set hat or the bath towel takes it off; it stays on when she turns away and on the watch.
 - The second preset character wears her first 7 Sunday items: three hair pieces (on her ponytail, else as a
@@ -21,13 +45,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - From HAKU's third week, the shop puts one weekly item on sale with a 「本周」 tag, in a fixed rotation that
   starts over, so no item is gone for good. Once bought it stays in its place that week, marked owned. His six drawn
   Sunday items take turns now.
+- `HomeSnapshot`: what the home page shows, built from the app's own data (mode, cards, cans, items, face,
+  room) instead of the prototype's fake data (Issue #489). The page switches to it in its own change.
 - HAKU can wear six Sunday items: an orange or a mint headband, a dotted or a lightning-bolt mask, and a small
   cactus or a mini speaker in the room. The speaker's light ring glows every 3 seconds. The shop lists them once
   their catalog entries are marked drawn. The watch leaves room items out, since they stand on the floor.
 - HAKU can dress for four more identity cards: tennis (visor, racket and ball), fitness (gym bag and a small
   dumbbell), study (green jacket and an open book) and art (green jacket, apron, sketchbook and pencil).
   The watch leaves the gym bag off the floor.
-  Boxing and the other cards keep the boxing kit. The home screen doesn't pass the picked card yet.
+  Boxing and the other cards keep the boxing kit.
 - The second preset character's eight Sunday items and a plain back view of every top, for when she turns
   away, in her clothes layer file. Nothing in the app shows them yet.
 - A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
@@ -63,38 +89,93 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- A room item from the shop no longer stands in HAKU's 下班 backdrop. Bought room items live in HAKU's home.
+- VoiceOver reads the unboxing as "开箱：" and the item's name instead of the character's mode.
+- Opening the app, HAKU says one line at most: a celebration first, then an invite, good night, the late-night
+  line, a planned task, bath time and the stretch. A mode change no longer clears it. A tap during a one-off
+  animation only makes HAKU blink. At bedtime a tap gets a sleepy mumble instead of switching the side-hustle
+  state, and a shake makes HAKU roll over half asleep.
+- The Lock Screen and Dynamic Island countdown draws the character in the identity card's look picked on the
+  iPhone, such as HAKU in tennis kit, instead of always the boxing look.
+- The watch face says 还没有模式 when the iPhone has sent but no mode is set, instead of asking to open the
+  iPhone.
+- On the watch app and the watch face, both characters wear the look of the identity card picked on the iPhone,
+  instead of the default boxing or tennis look. On cards without a look of their own, the second preset character
+  also does that card's base idles on the watch.
+- Swiping back to the character's page on the watch no longer replays its opening reaction, invite hop and line.
+- On another identity card's day, HAKU warms up without the boxing headband and gloves.
+- A new item no longer makes HAKU pop out of the gift box in boxing gloves. It wears the look of the mode it is in
+  and of the user's own identity card, unless the item only shows in another mode.
+- Without a mode, home and the phone widgets say 还没有模式 instead of NO MODE. A widget asks to open the app only
+  before it ever got a snapshot; after that it says 到常去的地方会自己换.
+- Tapping an item's price in the shop shows the character wearing it first. Cans are spent only on the confirm
+  button, not on the first tap.
+- With languages on, item names in the shop, wardrobe and unboxing follow the phone's language where a
+  translation exists.
+- Settings shows the Daily Widget link only in DEV builds. Test builds don't offer it.
+- The shop no longer falls back to the character's old identity card when the saved cards can't be read.
+- Couch scrolling in the hours before bedtime (from 2.5 hours before it, and after midnight) no longer has HAKU
+  peek at the gym bag or send the couch invite. HAKU dozes off in the blanket instead, drawn like the blanket
+  until its own pose is approved.
 - When the iPhone hasn't sent anything for three hours, the watch shows the character's plain mode look
   instead of staying on an old scene, such as still setting off.
+- Release builds don't sell room items yet. They show only in the home page, which release builds don't open so far.
 - With languages on (Debug and STG), 16 more error and reminder lines show in English: Health, Screen Time,
   places, Daily, saving records and the bedtime notification.
+- Test builds can try a character together with her default mode cards (Settings, under the characters). The
+  user's own cards are put aside and come back when the switch is turned off or the user switches back to
+  their own character; places and learned days stay.
+- Six lines now say only what the characters felt or sensed: the keepsake gift, the late-night line, the second
+  preset character's boxing card line and keepsake line, the racket cheer and her focus-done line.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
   screen edge no longer cuts them off. The iPhone is unchanged.
+- Settings can rename the three common mode cards (上班, 下班, 副业), with the same card screen and length limit
+  as the first setup. Before, only the first setup could name them.
 - The boxing countdown on the Lock Screen and in the Dynamic Island keeps the system font when the app is in
   Japanese, like notifications. Home Screen widgets keep the rounded Japanese font.
 - When the second preset character turns away in one of her shop clothes, her back shows that top's plain
   colour instead of her own top, and her "…" bubble moves up off a set hat.
+- Without Screen Time, an evening of sitting still at home shows HAKU under the blanket instead of holding a
+  phone it can't know about.
+- A mode switched from the 切换模式 widget now reaches the watch, the off-work notice and the gym countdown at
+  once. Before, they waited until the app was next opened.
 - After the off-work animation, HAKU no longer stays slumped in 上班 for the rest of the evening: leaving the
   office or the next day puts the headset back on.
 - The shop catalogue has a prop colour and a gold prop (earned on the card's 10th win) for the other
   first-batch identity cards of each character. They go on sale once the character art draws them; a gold prop
   earned before its art is done is granted on the card's next win after that.
+- A 模式卡 control for Control Center, the Lock Screen and the Action button: pick 副业 or the identity card
+  when adding it, tap to switch to it, tap again to go back to the mode before. It shows the card's own name.
 - The shop catalogue has clothes for identity cards. Cards without an outfit of their own share one of three
   base outfits (sport, outing, craft), each with two tops to buy that every card on that base can wear; HAKU's
   boxing card and the second character's boxing and tennis cards have a top of their own. They go on sale once
   the character art draws them.
+- A wardrobe saved by a newer build keeps the outfits this build can't read, and an unreadable wardrobe is
+  copied aside before the next save replaces it.
+- With languages on, the work-day buttons in first-time setup show the phone language's weekday letters and
+  start the week where the phone's calendar does. In Chinese they still run Monday to Sunday. They also fit
+  narrow phones.
 - The second preset character's 6 tops and 2 full sets are on sale. She wears the one of the mode she is in,
   on the home screen, the shop, the wardrobe, unboxing, widgets and the watch.
 - When HAKU switches between idle scenes, only the sparkles show. The peace sign, the dumbbell reps and the
   identity card's props no longer pop in and out on every switch.
+- HAKU gets up from the sofa only on a real signal: vibe coding, or getting up and walking after couch
+  scrolling. Its own bath time no longer counts.
 - In the good-night notification HAKU takes the headset off once instead of every 2.4 s, with no Z z z
   over the hair while sitting up. After the off-work
   animation HAKU stays relaxed until the mode changes, and "终于。" fades as the animation ends.
+- With languages on, the small line under the character that says why it looks that way (gym day, couch, sitting
+  too long, keeping watch at work) follows the phone's language where a translation exists.
 - Today's energy has its own line under the character, saying where it comes from. When it is a guess from
   sleep, a 不对？ button opens the correction card; a long press on the character only zooms in again.
+- Buying in the shop rolls the can count down and moves the bought item off the shelf smoothly. When the
+  purchase can't be saved, the error stays on screen and the unboxing plays after the shop closes.
 - Full energy is easier to tell apart from okay: HAKU's deadpan eyes open a notch with a glint, and KURO's eyes
   grow a size, her cheeks go pink, her ears stand up a little and sparkles show by her head.
 - The shop banner and the wardrobe preview show HAKU standing, so the clothes stay in view. Before, at home they
   could catch HAKU asleep on the sofa or bent over the handheld.
+- With languages on, the default card names (上班, 下班, 副业 and the character's own card) show in the phone's
+  language in the wardrobe, settings and everywhere else they appear. Names you gave a card stay as you wrote them.
 - The permission prompts for location, Health and Motion say "places you set" instead of naming the boxing
   gym, say the app never records your route, and say only the computed state goes to your own Apple Watch.
   They now also come in Japanese and English, following the phone's language. The 「日文和英文」 switch
@@ -108,20 +189,34 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - On the iPhone home screen HAKU stands 24 pt lower, so a one-line speech bubble no longer covers the tips of
   its hair, the headset band, the stars beside the headset, the gift box on its head or the sunlit window, also on
   the smallest iPhone and in Japanese. The watch is unchanged.
+- In the wardrobe, changing an outfit, the previewed mode or the shelf fades over 0.25 s instead of cutting.
+- The small buttons in Settings (看看, 选 App, 导出) and the place editor (取消, 设为当前位置) now have the full
+  44 pt tap area. The shop banner grows with longer text instead of cutting it off.
 - Opening a keepsake or going through the first-run setup no longer uses up HAKU's late-night "还不睡。" or its
   slow look up after half a day away. Both now wait for the home screen.
+- The second preset character's identity-card idle moves now show on the home screen and in notifications.
+  Before, those screens didn't pass her card, so only her base moves played.
 - Taps, hops, speech bubbles and buttons no longer spring back and forth. Each move eases back once and stops.
   The cheer hop is lower, so the hair stays inside the card.
 - The wardrobe data groups items by where they are worn: clothes, accessories, the identity card's props and
   room. Props show only in the identity card's mode, and items of another card are hidden but kept, so switching
   back puts them on again. The wardrobe screen moves to these groups in a separate change.
+- In the wardrobe, item names can take two lines, and a long shelf name (Accessories) shrinks to fit its tab
+  instead of breaking inside the word.
 - The wardrobe screen picks a mode first, then shows four tabs: clothes, accessories, props (only in the identity
   card's mode) and room. Celebrations are the last group of accessories. Keepsakes not yet earned no longer show.
+- The shop says when everything on the shelf is owned, and with no cans yet it shows how to earn them right
+  under the banner. The identity card's line uses the user's own name for it (「… 那天 +5（每周一次）」) and is
+  left out without a card. Clothes in the shop carry a tag naming the mode they are worn in.
+- The wardrobe shows a dashed placeholder on an empty shelf and an empty 人生收藏 instead of hiding it.
 - The shop catalogue has tops and full sets for both characters, each worn in one mode (work, off work, side
   hustle); a full set replaces that mode's top. They go on sale once the character art draws them.
 - The second preset character can dress for four identity cards: boxing (gloves and a big bag hung top left),
   fitness (a yoga block), study (a notebook and highlighter) and art (a smock and a drawing pen), each with its
   own tap move and idle moves. The app shows them once it passes the picked card; other cards keep her tennis look.
+- In first-time setup, the Chill activities say how the app senses them as 定位 (location) instead of 地点, which
+  also named the places list. With languages on, those labels, the place names and the place editor title follow
+  the phone's language.
 - The welcome back scene no longer ends with a cut: HAKU settles back over the last second and the sofa,
   blanket, phone and crate drop a little and fade out. A tap that skips it does the same over 0.3 s.
 - Tennis is her main card: she bounces the ball on a flat racket and spins the racket while idle, and a tap
@@ -129,37 +224,57 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Shop prices are lower so the first full set is about 3 to 4 weeks away: the plant 8, the cyan headband 10,
   the striped mask 12, the sandbag 15, the pink gloves 20; the second character's flower 8, scrunchie 10,
   blanket 12, lamp 15, tennis bag 20. Items already bought stay owned.
+- The wardrobe opens on 下班 when the current mode has no button in the user's cards, and keepsake dates follow
+  the phone's language.
+- Leaving the office ends 上班 at any time, a lunch break too; coming back switches to 上班 again. Before, a
+  leave earlier than an hour before the end of work hours kept 上班 until you got home.
+- Settings has a 上班日 row and a 身份卡 group. Each opens the same screen as the first-run setup, so work days
+  and the identity card can be set, changed or cleared later.
 - On the watch the second preset character holds her racket, books, cup and tablet higher, so the bottom of the
   screen no longer cuts them off. The pen, stylus and badge are left off on the watch. The iPhone is unchanged.
 - The watch no longer assumes a 23:30 bedtime when the iPhone sent none: with no bedtime set, HAKU on the
   watch and its widgets never turn sleepy.
 - When the mode switches on its own, at a place, the character fades into the new outfit like a manual switch
   instead of cutting over.
+- The confirmation sheets (删除全部数据, 先用默认, forgetting memories) look up their text in the String Catalog,
+  so translations show.
 - The Screen Time watch (pick apps in settings) now works in TestFlight (STG) builds too, not only in
   Debug. The App Store build still leaves it out.
 - The on-time sleep can needs a bedtime you set. With no bedtime it is never given; with the bedtime reminder
   turned off it is still given.
+- VoiceOver in the shop and wardrobe says what a buy button gets, how far a keepsake has come, and what the
+  preview is wearing in the user's own mode name.
 - The second preset character's keepsake unbox line is now 「……给你。收好。」, so it no longer echoes the
   first character's line.
+- The home page room has walkable cells and a shortest walk from where the character stands, around furniture
+  and never cutting a corner (Issue #489). The scene switches to it in its own change.
+- Japanese for the second and third copy batches: home bubbles, VoiceOver lines, identity cards, first-run setup,
+  shop, wardrobe, unboxing, settings, memory, place editor, item names and reasons.
 - After you answer the energy check, HAKU and KURO blink once and nod while saying 「哦。」 / 「嗯。」.
 - On the iPhone the second preset character stands a little lower, so her speech bubble no longer covers her
   ponytail (unbox page and home card). The watch is unchanged.
 - The shop follows the identity card: the boxing gloves, sandbag and gold gloves show only with the boxing
   card, the second character's tennis bag and gold racket only with the tennis card. Items already owned stay.
   The second character's flower is now called 地上小粉花.
+- The confirmation before switching characters is one whole sentence per direction and looks up the String
+  Catalog, so it can be translated.
 - The watch shows your own card names in the clock row, on the second page and in the watch widgets, cut to
   4 Chinese characters or 8 letters. Until you rename a card, nothing changes.
 - A tired HAKU now shows it in every mode: off work he keeps smiling with half-open eyes and bags, at work and
   on the side job his eyes close further and the bags sit by the eye corners above the mask. The stars of a
   full night stay brighter and clear the headset.
 - The watch has no dark band behind the clock any more; every screen keeps its own background.
+- The memory page names the identity day and its first time after the card the user picked, not always 拳击日.
 - With Japanese on, headings and bold text use the rounded Japanese font Zen Maru Gothic. Chinese and English
   keep the system font.
 - On the watch, the second preset character says a line when tapped, from the same lines as on the iPhone.
   At bedtime, tapping five times in a row no longer turns either character away.
+- The companion keeps lookout for phone use at work only while the mode is 上班. On a day off or a leave at home
+  on a work day it plays the current mode instead.
 - Cans follow the identity card: a 30-minute session of the picked card (its watch workout or its place) earns
   the weekly 5 cans, and its gold keepsake counts that card only. Any other watch workout of 30 minutes (not a
   walk) earns 3 cans, shared with the gym's daily 3. The shop names the card instead of "周日拳击".
+- After 删除全部数据 the first-run setup opens again and the bedtime reminder switch is off, as on a fresh install.
 - In boxing, HAKU now and then slips left, slips right and ducks. Tapping him in boxing makes him duck, throw a
   left hook that stops at his chest and say 「……反射。」 instead of punching at the screen.
 - Daylight and going to bed on time now earn their can: 15 minutes in daylight (Apple Watch) earns 1 a day,
@@ -167,10 +282,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   for time in daylight in Health. Only the win is kept, never the daylight or sleep times.
 - With the fitness card picked, a visit to the fitness gym earns the card's weekly cans, the same as a
   strength workout, so one session no longer pays twice.
+- 删掉所有记忆 is greyed out and can't be tapped when there is nothing to forget.
 - On the smallest watch, a long mode name in the clock row shrinks to fit instead of running into the clock.
 - The home greeting stays on one line: the date, environment badge, can count and settings button moved to
   the row above it. The red error dot is gone; the error line under the greeting already says what is wrong.
 - With no mode yet, the watch tells you to pick one on the iPhone, in smaller type, instead of the iPhone's line.
+- The room bag from the shop is bigger, standing in the bottom left corner. A mode's own backdrop now holds no
+  items: no heavy bag at the boxing gym, no gym bag on the floor for the fitness card, no speaker for the dance
+  card and no ukulele for the music card. The dance idle keeps its shrug without the notes.
+- With VoiceOver, the confirmation sheets keep focus inside and the escape gesture cancels.
 - HAKU's room no longer stacks two things in one spot: the glowing monitor is smaller and stands clear of
   HAKU's ear, and steps aside for the pillow and the headphones; the room item and the running shoes step
   aside while the door, a bag or the blanket fills their corner; the bandage sits clear of the mouth and hides under the raised mask.
@@ -178,23 +298,31 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   opening of coming back), the Daily task cue and the invite, and KURO's need and overtime sign, like the phone.
 - Groundwork for the watch commute: Life Hub can tell walking to work, riding the train and walking home
   between home and the office. Nothing shows it yet.
+- The bedtime reminder can be turned on only after a bedtime is picked. It no longer saves the prefilled time.
 - The Apple Watch plays what the iPhone home card plays: walking after leaving a place, boxing at the gym,
   lifting, running, morning, overtime, just home, the bath and the vibe-coding cans.
+- While HAKU has paused an invite you kept ignoring, it only slumps on the couch with you and no longer peeks
+  at the gym bag.
 - Watch face widgets: on tinted faces the character is drawn as line art in the face colour instead of a flat
   shape.
 - Workouts from the Health app are sorted into about ten groups (walking, cycling, swimming, racket, ball,
   yoga, dance, outdoor and more). Cans are unchanged: only boxing, 5 km runs and the gym earn.
+- Deleting an added place or clearing a preset one asks first, in a Toy sheet with 留着 on the left. The place
+  editor names the identity card's place after the user's card, as Settings does.
 - Settings: the character choice and the times use outlined Toy controls, so they no longer show as pale grey.
 - Each character has her own cans, items, keepsake progress, room traces and hidden stats. Cans go to the
   character picked when they are earned; switching asks first. Everything earned before stays HAKU's. Life
   records, sleep and the weekly changes are shared.
 - KURO has her own shop, wardrobe and unboxing: her 5 items and 3 keepsakes, at the same can prices. Each
   character keeps what she wears; the home card, widgets and watch show it.
+- The unboxing buttons fit the item: 现在摆上 / 先收起来 for room items, 现在用上 / 先放衣柜 for celebrations.
 - HAKU's blanket is now cream with a white folded hem, two small orange-and-white cats and faint paw prints,
   everywhere it shows.
 - After a night under 6 hours, HAKU sends no "出去走走" invite while you scroll on the couch that day.
 - The TODAY mode log on the home screen starts a new day at 05:00, not midnight. Changes after midnight
   stay in the evening's log until 05:00.
+- A failed 设为当前位置 says why in plain words, with 去设置打开 when access is off and 再点一次 otherwise,
+  instead of the system error text.
 - Arriving at the gym in Work or 副业 switches to Chill, unless you picked the mode in the last 2 hours.
   HAKU lifts only in Chill; switch to another mode at the gym and HAKU follows it. You still earn the
   gym can after 30 minutes there, whatever the mode. Leaving the gym keeps the mode.
@@ -202,17 +330,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   "下一件". Tasks past that never show.
 - Gym days follow the days you actually go: a weekday with a gym visit or strength workout in 2 of the
   last 4 weeks. Until a weekday qualifies, gym days stay Tuesday to Thursday. There is no setting for it.
+- With notifications denied, Settings says so under each reminder that is on, with 去设置打开. The line goes
+  away on return once they are allowed.
 - Widgets redraw every 15 minutes for the next 6 hours, so HAKU's idle bits on the Lock Screen change too.
 - The currency is called 能量罐 everywhere you read it: the shop, unboxing, places and VoiceOver. HAKU
   still drinks Monster. The home screen shows "你认真活过的每一天，都不该白白消失。" before any mode is set.
 - The clock no longer switches the mode. Work starts when you arrive at the office and ends when you
   leave it (or by hand); before, the app switched to 上班 at 9:30 even if you were still at home. The
   off-work notice now goes out only on days you're in 上班 mode or at the office.
+- The identity day follows the user's card: its warm-up line and invite use the card's own invite, and a user
+  without a card has no identity day. A character's own card keeps its lines.
 - HAKU's sleeping pillow is light blue, so it no longer blends into the white hair.
 - HAKU stops couch scrolling when you do: it gets up 20 minutes after Screen Time last saw you on the
   picked apps (it reports every 10 more minutes of use), as soon as you walk, or when you change mode by
   hand. Before, it lay on the couch for 3 hours after the daily 30 minutes.
 - Cans have caps: Sunday boxing earns once a week; runs, the gym and other wins once a day.
+- An unset bedtime's times in Settings are grey without the extra fade, so they stay readable.
 - The companion is called HAKU everywhere you see it: the widget name, notifications, Settings and
   VoiceOver. Code names stay RUNNER.
 - Tapping HAKU on the phone plays the same body move as on the watch (pushes up a headset cup, clinks the can,
@@ -220,16 +353,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   "……够了。" on both.
 - HAKU wears only the blue earring everywhere. The white earbud in chill, at night under the blanket and on
   walks is gone.
+- Red button text uses a darker red that is readable on white and paper (`Toy.alertText`).
 - HAKU and KURO cheer after every kind of workout of 20 minutes or more (tennis, swimming, yoga and the
   rest), not only boxing, runs and the gym. Cans are unchanged.
 - The home card and the watch know the commute: walking from home to the office or back, riding the train or
   bus, and the moment of arriving. Life Hub asks for Motion & Fitness once; motion stays on the iPhone.
 - After a workout the watch cheers for it as soon as the Health app saves it, without opening the iPhone app.
   The iPhone home still cheers the next time it opens.
+- HAKU's warm-up taps and VoiceOver follow the user's identity card; only the boxing card keeps the gloves.
 - At the boxing gym HAKU's heavy bag is bigger and hangs top left behind his hair, swinging from its
   chain when he hits it.
 - When HAKU puts the pillow behind his shoulder to lean on it, it now lands exactly where it rests, so it no
   longer jumps from his chest to behind his shoulder.
+- On small watches (40 and 41 mm) the second page fits its mode, energy and the character's line, and the
+  page dots no longer sit on the card's outline. VoiceOver reads each row as one item.
+- Both characters now dress for the picked identity card on the home screen, in widgets, in the notification
+  and in onboarding, not only in the shop and wardrobe. On the home screen the second preset character also
+  points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
+- The character on the watch face shows the same scene as the watch app and the iPhone Lock Screen (the gym
+  bag, setting off, the bath) and changes its pose every 15 minutes, instead of only the plain mode look.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
@@ -536,6 +678,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- With languages on (Debug and STG), VoiceOver reads the second preset character's overtime lines from her
+  string table, so they can show in Japanese and English.
 - After a workout cheer or the off-work move, HAKU can again stretch after a long sit, get up from the sofa,
   wonder if you're staying home and cheer a finished task. Before, these waited until the app was restarted.
 - On a gym day you already trained, went to the gym or set off for it, scrolling on the phone no longer brings
@@ -621,3 +765,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - DEV / STG / PROD build configurations with separate bundle ids.
 - CI quality gates (PR title and branch, swift-format, lint, tests, coverage, warnings as errors) and
   TestFlight release workflow for STG and PROD.
+- With the rain or picnic set's hat on, the second preset character's full-energy stars sit above the brim
+  instead of on it.
+- The second preset character's boxing and dance cards no longer stand a sandbag or speaker in the room;
+  a mode's default look has no room items. The dance notes still rise.
+- Tapping the second preset character at bedtime gets a sleepy mumble instead of a daytime line, and no
+  longer switches the side-hustle card.
+- The second preset character has the art for her new pose, dozing off hugging her tablet. It stays hidden
+  until it is wired to dozing.
+- When the second preset character is tapped in the middle of an idle move, what she put down slides back over
+  0.2 s and notes or snow fade, instead of jumping back in one frame. A cup already at her lips stays there.
+- The second preset character's taps end more smoothly: her eyes shut for a moment instead of jumping back,
+  she turns away and back like a card flipping, her lap blanket slides away and back around a sip, and a tap
+  still playing stops when the mode changes; the off-work move waits for the switch.

@@ -22,6 +22,7 @@ struct LifeHubApp: App {
     @State private var showsSettings = false
     @State private var showsShop = false
     @State private var showsWardrobe = false
+    @State private var showsHome = false
     @State private var showsOnboarding: Bool
     @State private var unboxing: CanEntry?
     @State private var welcomeBack: CompanionEvent?
@@ -57,7 +58,7 @@ struct LifeHubApp: App {
         }
         let missingFonts = AppFonts.register()
         if !missingFonts.isEmpty {
-            errors.append("日文字体没装上，日文会用系统字体：\(missingFonts.joined(separator: "、"))")
+            errors.append(String(format: "日文字体没装上，日文会用系统字体：%@".localized, missingFonts.joined(separator: "、")))
         }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
         let persona = Persona.stored(in: AppGroup.defaults)
@@ -104,8 +105,7 @@ struct LifeHubApp: App {
         // Only a changed mode reloads, since background widget reloads have a daily budget. The watch gets
         // the current scenes either way, since it asked because it just opened.
         WatchSync.shared.onWatchCheck {
-            let work = ModeRules.stored(in: AppGroup.defaults)
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults), rules: work) {
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
                 Dogfood.note("settle", "手表打开，\(settled.reason)，切到\(settled.mode.title)")
                 widgets.sync(mode: store, energy: energy)
                 WidgetCenter.shared.reloadAllTimelines()
@@ -122,6 +122,27 @@ struct LifeHubApp: App {
         )
         UNUserNotificationCenter.current().delegate = taps
         _taps = State(initialValue: taps)
+        // Issue #481: a widget mode button runs in the app's process, so the watch, the off-work notice and the
+        // countdown follow at once instead of on the next open.
+        WidgetTaps.apply = {
+            widgets.sync(mode: store, energy: energy)
+            needs.refresh(
+                places: PlaceSettings.stored(in: AppGroup.defaults),
+                manualSince: store.log.active.last(where: \.source.isManual)?.at,
+                mode: store.current
+            )
+            widgets.need = needs.reading
+            widgets.rules = AppGroup.needRules()
+            widgets.writeSnapshot(mode: store, energy: energy)
+            WidgetCenter.shared.reloadAllTimelines()
+            Self.sendToWatch(store: store, needs: needs, growth: growth)
+            let rules = ModeRules.stored(in: AppGroup.defaults)
+            let atOffice = PlacePresence.stored(in: AppGroup.defaults).since(.office) != nil
+            Task {
+                _ = await OffWorkReminder.schedule(rules, mode: store.current, atOffice: atOffice)
+                _ = await BoxingCountdown.update(for: needs.reading)
+            }
+        }
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
         guard !ScreenshotMode.isOn else { return }
         _screenTimeError = State(initialValue: Self.restartScrollWatch())
@@ -175,10 +196,12 @@ struct LifeHubApp: App {
             daily: daily.plan,
             dailyDone: daily.done,
             notice: NudgeBackoff.stored(in: AppGroup.defaults).notice(at: .now, persona: persona),
+            backoff: NudgeBackoff.stored(in: AppGroup.defaults),
             changes: ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: growth.ledger),
             onSettings: { showsSettings = true },
             cans: growth.ledger.only(persona).balance,
             onShop: { showsShop = true },
+            onHome: homeEntry,
             wardrobe: wardrobe,
             persona: persona,
             greetingName: Greeting.name(in: AppGroup.defaults),
@@ -188,6 +211,7 @@ struct LifeHubApp: App {
             bathDoneAt: bathDoneAt,
             scrollSeenAt: needs.scrollSeenAt,
             commuteMotion: needs.commuteMotion,
+            stillSince: needs.stillSince,
             onBathDone: {
                 BathTime.markDone(at: .now, in: AppGroup.defaults)
                 bathDoneAt = .now
@@ -212,9 +236,8 @@ struct LifeHubApp: App {
             replayFrom = OpenReplay.switchFrom(log: store.log, lastSeen: away, now: .now)
             // Mike may have changed location access in Settings while away.
             placeMonitor.checkAccess(places)
-            // A missed or held leave still ends work when Mike opens the app in the evening.
-            let work = ModeRules.stored(in: AppGroup.defaults)
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults), rules: work) {
+            // A missed or held leave still ends work when Mike opens the app.
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
                 Dogfood.note("settle", "\(settled.reason)，切到\(settled.mode.title)")
             }
             syncWidgets()
@@ -224,8 +247,6 @@ struct LifeHubApp: App {
         }
         .onChange(of: remindsAtBedtime) {
             BedtimeSchedule.setRemindsAtBedtime(remindsAtBedtime, in: AppGroup.defaults)
-            // UI 审核 #340: turning the reminder on keeps the prefilled time, which a picker can't set unchanged.
-            if remindsAtBedtime, !bedtime.isSet { bedtime = .standard }
             Task { await scheduleReminder() }
         }
         .onChange(of: bedtime) {
@@ -256,7 +277,7 @@ struct LifeHubApp: App {
             )
             refreshNeeds()
         }
-        .sheet(isPresented: $showsSettings, onDismiss: showNextUnboxing) {
+        .sheet(isPresented: $showsSettings, onDismiss: afterSettings) {
             SettingsView(
                 bedtime: $bedtime,
                 remindsAtBedtime: $remindsAtBedtime,
@@ -268,7 +289,7 @@ struct LifeHubApp: App {
                 store: store,
                 energy: energy,
                 ledger: growth.ledger,
-                cards: cards,
+                cards: $cards,
                 onEraseAll: eraseAll
             )
         }
@@ -277,13 +298,16 @@ struct LifeHubApp: App {
                 .interactiveDismissDisabled()
         }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
-            ShopView(growth: growth, wardrobe: $wardrobe, persona: persona)
+            ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
+        }
+        .fullScreenCover(isPresented: $showsHome) {
+            HakuHomeView { showsHome = false }
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
             WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, cards: cards)
         }
         .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in
-            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
+            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona, mode: store.current)
         }
         .onChange(of: persona) {
             persona.store(in: AppGroup.defaults)
@@ -376,6 +400,7 @@ struct LifeHubApp: App {
         wardrobe = .stored(in: AppGroup.defaults, persona: persona)
         cards = .current(in: AppGroup.defaults, persona: persona)
         bedtime = .stored(in: AppGroup.defaults)
+        remindsAtBedtime = BedtimeSchedule.remindsAtBedtime(in: AppGroup.defaults)
         rules = .stored(in: AppGroup.defaults)
         places = .stored(in: AppGroup.defaults)
         bathDoneAt = nil
@@ -466,9 +491,28 @@ struct LifeHubApp: App {
         }
     }
 
+    // 交付差距 v1 工程 #7: after 删除全部数据 the app is as freshly installed, so the setup shows again.
+    // It opens once Settings has closed, since one view can't present two covers at once.
+    private func afterSettings() {
+        if OnboardingDraft.isNeeded(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty) {
+            showsOnboarding = true
+        } else {
+            showNextUnboxing()
+        }
+    }
+
+    // Issue #485: the home prototype opens from the home screen in DEV and STG builds only.
+    private var homeEntry: (() -> Void)? {
+        #if DEBUG || ENV_STG
+        return { showsHome = true }
+        #else
+        return nil
+        #endif
+    }
+
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.
     private func showNextUnboxing() {
-        guard !showsShop, !showsWardrobe, !showsSettings else { return }
+        guard !showsShop, !showsWardrobe, !showsSettings, !showsHome else { return }
         unboxing = UnboxLog.next(in: growth.ledger, persona: persona)
     }
 
@@ -520,8 +564,8 @@ struct LifeHubApp: App {
             } else {
                 decision = nil
             }
-            // Place comes first: a leave that was held or came early still ends work once it's evening.
-            let made = decision ?? store.settle(presence: presence, rules: rules)
+            // Place comes first: a leave that was held still ends work at the next place event.
+            let made = decision ?? store.settle(presence: presence)
             let outcome = made.map { "切到\($0.mode.title)" } ?? "不切（\(Self.keptBecause(store: store, rules: rules))）"
             Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
             needs.refresh(
@@ -657,7 +701,8 @@ struct LifeHubApp: App {
             scrollSeenAt: needs.scrollSeenAt,
             daily: DailyPlan.stored(in: AppGroup.defaults),
             invite: needs.invite,
-            motion: needs.commuteMotion
+            motion: needs.commuteMotion,
+            stillSince: needs.stillSince
         )
         WatchSync.shared.send(WatchPlay(scenes: inputs.timeline(from: .now), event: event ?? needs.event))
     }
@@ -684,7 +729,7 @@ struct LifeHubApp: App {
                 growth.record(earned.win, source: earned.source, at: earned.at)
             }
         } catch {
-            healthError = "读不到健康 App 里的日照、睡眠或步数：\(error.localizedDescription)"
+            healthError = String(format: "读不到健康 App 里的日照、睡眠或步数：%@".localized, error.localizedDescription)
         }
     }
 

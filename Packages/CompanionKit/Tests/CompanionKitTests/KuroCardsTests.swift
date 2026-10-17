@@ -23,11 +23,11 @@ import Testing
 
     @Test func eachCardLookDrawsItsOwnThings() {
         let expected: [KuroLook: Set<KuroPart>] = [
-            .box: [.jacketBox, .boxHeadband, .boxGloveL, .boxGloveR, .boxSandbag],
+            .box: [.jacketBox, .boxHeadband, .boxGloveL, .boxGloveR],
             .fitness: [.jacketTennis, .gymBlock, .tennisPonytail],
             .study: [.jacketChill, .studyNotebook, .studyHighlighter],
             .art: [.jacketSmock, .workTablet, .craftPen],
-            .dance: [.jacketTennis, .danceSpeaker, .tennisPonytail],
+            .dance: [.jacketTennis, .tennisPonytail],
             .music: [.jacketChill, .scoreSheet, .scoreFinger],
             .ski: [.jacketTennis, .skiGoggles, .tennisPonytail],
         ]
@@ -36,6 +36,8 @@ import Testing
             #expect(parts.isSuperset(of: things), "\(look)")
             // Her tennis racket, cup and glasses stay with their own looks.
             #expect(parts.isDisjoint(with: [.tennisRacket, .chillCup, .deskGlasses, .tennisHeadband]), "\(look)")
+            // Mike 2026-10-15: nothing stands in the room by default.
+            #expect(parts.isDisjoint(with: [.boxSandbag, .danceSpeaker]), "\(look)")
         }
     }
 
@@ -65,11 +67,12 @@ import Testing
         #expect(KuroIdle.pool(.ski) == [.ears, .snow])
     }
 
-    @Test func theWatchLeavesTheSpeakerOffTheFloor() {
+    @Test func theNotesRiseWithoutASpeaker() {
         let pose = KuroPose(look: .dance, energy: 50).idling((.groove, 0.3))
-        #expect(KuroFigure.parts(for: .dance, pose: pose).contains(.danceSpeaker))
-        let watch = KuroFigure.parts(for: .dance, pose: pose, watch: true)
-        #expect(!watch.contains(.danceSpeaker) && watch.contains(.speakerNoteA))
+        for watch in [false, true] {
+            let parts = KuroFigure.parts(for: .dance, pose: pose, watch: watch)
+            #expect(!parts.contains(.danceSpeaker) && parts.contains(.speakerNoteA))
+        }
     }
 
     @Test func dancingTheNotesRiseAndFade() {

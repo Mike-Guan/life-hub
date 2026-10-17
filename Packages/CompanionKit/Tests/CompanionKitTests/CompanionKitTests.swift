@@ -95,6 +95,13 @@ import Testing
         #expect(RunnerFigure.baseParts.isSubset(of: parts))
     }
 
+    @Test func anotherCardWarmsUpWithoutTheBoxingKit() {
+        var pose = RunnerPose(need: .boxingWarmup)
+        pose.otherCard = true
+        let parts = Set(RunnerFigure.parts(for: .chill, pose: pose))
+        #expect(parts.isDisjoint(with: [.headband, .gloveL, .gloveR]))
+    }
+
     @Test func warmupLooksAtTheDoorNowAndThen() {
         let glances = (0..<80).map {
             RunnerPose(mode: .chill, time: Double($0) * 0.05, face: .mid, need: .boxingWarmup, react: 0).eyesDx
@@ -332,6 +339,21 @@ import Testing
         #expect(CompanionView.starDrop(style: .watch, showsBubble: true) == 0)
         #expect(CompanionView.sunDrop(style: .standard, showsBubble: true) == 3)
         #expect(CompanionView.sunDrop(style: .notification, showsBubble: true) == 0)
+    }
+
+    @Test func theAppOpensWithItsMostImportantLineOnly() {
+        #expect(CompanionView.speaks(.stretch, over: nil))
+        #expect(CompanionView.speaks(.celebration, over: .invite))
+        #expect(!CompanionView.speaks(.invite, over: .celebration))
+        #expect(!CompanionView.speaks(.bath, over: .goodnight))
+        #expect(CompanionView.speaks(.daily, over: .daily))
+        let order: [OpeningLine] = [.celebration, .invite, .goodnight, .lateNight, .daily, .bath, .stretch]
+        #expect(order.shuffled().sorted() == order)
+    }
+
+    @Test func bedtimeTapsOnlyMumble() {
+        #expect(CompanionView.bedtimeMumbles.count == 3)
+        #expect(CompanionView.bedtimeMumbles.allSatisfy { $0.hasPrefix("……") })
     }
 
     @Test func offWorkPlaysOncePerDay() {
@@ -1110,8 +1132,7 @@ import Testing
     }
 
     @Test(arguments: [
-        (CompanionActivity.boxingAtGym, RunnerPart.heavyBag),
-        (.gymSession, .dumbbell),
+        (CompanionActivity.gymSession, RunnerPart.dumbbell),
         (.running, .speedLines),
         (.gymDay, .gymBag),
         (.runDay, .runShoe),
@@ -1124,9 +1145,11 @@ import Testing
         #expect(CompanionLines.accessibilityLabel(mode: .chill, need: nil, activity: activity, bedtime: .off) != "HAKU")
     }
 
+    // Mike 2026-10-15: no items in a mode's backdrop, so the gym shows the gloves and no heavy bag.
     @Test func heavyBagWorkWearsTheGloves() {
         let parts = Set(RunnerFigure.parts(for: .boxing, pose: RunnerPose(activity: .boxingAtGym)))
-        #expect(parts.isSuperset(of: [.gloveL, .gloveR, .headband, .heavyBag]))
+        #expect(parts.isSuperset(of: [.gloveL, .gloveR, .headband]))
+        #expect(!parts.contains(.heavyBag) && !parts.contains(.monsterCan))
     }
 
     @Test func bedtimeHidesTheActivity() {
@@ -1240,26 +1263,22 @@ import Testing
     }
 
     @Test func theSpeakerRingGlowsEveryThreeSeconds() {
-        var outfit = Outfit()
-        outfit.room = .roomSpeaker
-        let pose = RunnerPose().wearing(outfit)
-        #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).isSuperset(of: [.roomSpeaker, .roomSpeakerRing]))
         let glow = { (t: TimeInterval) in RunnerPose(mode: .chill, time: t, face: .mid, react: 0).speakerGlow }
         #expect(abs(glow(0) - 0.45) < 0.01)
         #expect(abs(glow(1.5) - 1) < 0.01)
         #expect(abs(glow(3) - 0.45) < 0.01)
     }
 
-    @Test func roomItemShowsOnlyAtHome() {
-        var wardrobe = Wardrobe()
-        wardrobe.equipped[.room] = "room.plant"
-        var pose = RunnerPose().wearing(Outfit(wardrobe))
-        #expect(RunnerFigure.parts(for: .chill, pose: pose).contains(.roomPlant))
-        #expect(!RunnerFigure.parts(for: .work, pose: pose).contains(.roomPlant))
-        pose.bagLift = 0
-        #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.roomPlant))
-        let running = RunnerPose(activity: .running).wearing(Outfit(wardrobe))
-        #expect(!RunnerFigure.parts(for: .chill, pose: running).contains(.roomPlant))
+    @Test func roomItemsStayOutOfTheModeBackdrops() {
+        let rooms: [RunnerPart] = [.roomPlant, .roomBag, .roomCactus, .roomSpeaker, .roomSpeakerRing]
+        for item in ["room.plant", "room.bag", "haku.weekly.room.cactus", "haku.weekly.room.speaker"] {
+            var wardrobe = Wardrobe()
+            wardrobe.equipped[.room] = item
+            let pose = RunnerPose().wearing(Outfit(wardrobe))
+            for mode in Mode.allCases {
+                #expect(Set(RunnerFigure.parts(for: mode, pose: pose)).isDisjoint(with: rooms), "\(item) in \(mode)")
+            }
+        }
     }
 
     @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
@@ -1303,7 +1322,7 @@ import Testing
     }
 
     @Test func keepsakesAndPurchasesGetTheirOwnLine() {
-        #expect(CompanionLines.unlock("gloves.gold") == "……给你的。才不是特意挑的。")
+        #expect(CompanionLines.unlock("gloves.gold") == "……给你的。顺手。")
         #expect(CompanionLines.unlock("room.plant") != CompanionLines.unlock("gloves.gold"))
     }
 
@@ -1363,7 +1382,8 @@ import Testing
     func everyMomentHasALookLinesAndALabel(_ moment: CompanionMoment) {
         let parts = Set(RunnerFigure.parts(for: .money, pose: RunnerPose(moment: moment)))
         #expect(parts != Set(RunnerFigure.parts(for: .money, pose: RunnerPose())) || moment == .shooting)
-        #expect(!CompanionLines.lines(for: .money, moment: moment).isEmpty)
+        // Dozing off is silent.
+        #expect(CompanionLines.lines(for: .money, moment: moment).isEmpty == (moment == .dozing))
         let label = CompanionLines.accessibilityLabel(mode: .money, need: nil, moment: moment, bedtime: .off)
         #expect(label != "HAKU，\(Mode.money.title)")
     }
@@ -1448,18 +1468,16 @@ import Testing
         #expect(RunnerFigure.parts(for: .chill, pose: RunnerPose()).contains(.roomPc) == false)
     }
 
-    // The room item and the running shoes stand in the bottom left corner; what fills it takes their spot.
+    // The running shoes stand in the bottom left corner; what fills it takes their spot.
     @Test func theRoomCornerStepsAsideForWhatFillsIt() {
-        var outfit = Outfit()
-        outfit.room = .roomPlant
-        let home = RunnerPose().wearing(outfit).leaving([.runningShoes])
-        #expect(Set(RunnerFigure.parts(for: .chill, pose: home)).isSuperset(of: [.roomPlant, .runningShoes]))
+        let home = RunnerPose().leaving([.runningShoes])
+        #expect(RunnerFigure.parts(for: .chill, pose: home).contains(.runningShoes))
         var carrying = home
         carrying.dailyProp = .gymBag
-        let wrapped = RunnerPose(moment: .blanket).wearing(outfit).leaving([.runningShoes])
-        let leaving = RunnerPose(moment: .timeToLeave).wearing(outfit).leaving([.runningShoes])
+        let wrapped = RunnerPose(moment: .blanket).leaving([.runningShoes])
+        let leaving = RunnerPose(moment: .timeToLeave).leaving([.runningShoes])
         for pose in [carrying, wrapped, leaving] {
-            #expect(Set(RunnerFigure.parts(for: .chill, pose: pose)).isDisjoint(with: [.roomPlant, .runningShoes]))
+            #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(.runningShoes))
         }
     }
 

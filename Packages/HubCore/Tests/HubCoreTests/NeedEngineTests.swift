@@ -96,6 +96,9 @@ import Testing
         #expect(reading.need == .couchScroll)
         #expect(reading.since == date(5, 20, 10))
         #expect(reading.reasons == ["在家 60 分钟没怎么动了，我也瘫着"])
+        // Guessed from stillness, so HAKU holds no phone.
+        #expect(!reading.phone)
+        #expect(try #require(need(NeedSignals(scrollThresholdAt: date(5, 20)), at: date(5, 20, 10))).phone)
     }
 
     @Test func stillBeforeTheEveningStartsCountingAtTheEvening() throws {
@@ -167,18 +170,18 @@ import Testing
     }
 
     @Test func noCouchInviteAfterAShortNight() {
-        let couch = NeedReading(need: .couchScroll, since: date(5, 20), reasons: [])
+        let couch = NeedReading(need: .couchScroll, since: date(5, 19), reasons: [])
         let time = { (sleptShort: Bool) in
             NeedEngine.inviteTime(
                 for: couch,
-                now: date(5, 20),
+                now: date(5, 19),
                 lastInviteAt: nil,
                 bedtime: .standard,
                 sleptShort: sleptShort,
                 calendar: self.calendar
             )
         }
-        #expect(time(false) == date(5, 21))
+        #expect(time(false) == date(5, 20))
         #expect(time(true) == nil)
     }
 
@@ -187,10 +190,10 @@ import Testing
     }
 
     @Test func inviteIsScheduledWhenTheNeedHasLasted() {
-        let couch = NeedReading(need: .couchScroll, since: date(5, 20), reasons: [], until: date(5, 23))
-        #expect(time(couch, date(5, 20, 10), nil) == date(5, 21))
-        #expect(time(couch, date(5, 21, 30), nil) == date(5, 21, 30))
-        #expect(time(couch, date(5, 21), date(5, 9)) == nil)
+        let couch = NeedReading(need: .couchScroll, since: date(5, 19), reasons: [], until: date(5, 23))
+        #expect(time(couch, date(5, 19, 10), nil) == date(5, 20))
+        #expect(time(couch, date(5, 20, 30), nil) == date(5, 20, 30))
+        #expect(time(couch, date(5, 20), date(5, 9)) == nil)
         #expect(time(nil, date(5, 21), nil) == nil)
 
         let late = NeedReading(need: .couchScroll, since: date(5, 22, 45), reasons: [])
@@ -199,6 +202,17 @@ import Testing
         #expect(time(ending, date(5, 20, 10), nil) == nil)
         let boxing = NeedReading(need: .boxingWarmup, since: date(4, 9), reasons: [], until: date(4, 12))
         #expect(time(boxing, date(4, 9), nil) == date(4, 9, 30))
+    }
+
+    // PM action table C2: from 21:00 for a 23:30 bedtime, HAKU dozes off instead of inviting.
+    @Test func noCouchInviteInTheHoursBeforeBedtime() {
+        let couch = NeedReading(need: .couchScroll, since: date(5, 20), reasons: [], until: date(5, 23))
+        #expect(time(couch, date(5, 20, 10), nil) == nil)
+        #expect(time(couch, date(5, 20, 59), nil) == nil)
+        let early = NeedReading(need: .couchScroll, since: date(5, 19, 30), reasons: [], until: date(5, 23))
+        #expect(time(early, date(5, 19, 40), nil) == date(5, 20, 30))
+        let slacking = NeedReading(need: .slacking, since: date(5, 21), reasons: [], until: date(5, 23))
+        #expect(time(slacking, date(5, 21), nil) != nil)
     }
 
     @Test func boxingCountdownRunsUntilClass() {

@@ -95,25 +95,34 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
+      # Compiler errors and failed expectations are repeated as annotations, like the iOS build below.
       - name: HubCore tests and coverage gate
         run: |
-          swift test --package-path Packages/HubCore --enable-code-coverage -Xswiftc -warnings-as-errors
+          set -o pipefail
+          swift test --package-path Packages/HubCore --enable-code-coverage -Xswiftc -warnings-as-errors 2>&1 |
+            awk '{ print } /: (error|warning): |recorded an issue|failed after/ { print "::error::" $0 }'
           scripts/coverage-gate.py Packages/HubCore 80
 
       - name: CompanionKit tests
-        run: swift test --package-path Packages/CompanionKit -Xswiftc -warnings-as-errors
+        run: |
+          set -o pipefail
+          swift test --package-path Packages/CompanionKit -Xswiftc -warnings-as-errors 2>&1 |
+            awk '{ print } /: (error|warning): |recorded an issue|failed after/ { print "::error::" $0 }'
 
       - name: Generate project
         run: xcodegen generate
 
+      # Compiler errors are repeated as annotations, so they show on the PR without opening the log.
       - name: Build iOS app (simulator, warnings as errors)
-        run: >
-          xcodebuild build -quiet
-          -project LifeHub.xcodeproj -scheme LifeHub-iOS
-          -destination 'generic/platform=iOS Simulator'
-          -derivedDataPath build
-          CODE_SIGNING_ALLOWED=NO
-          SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES
+        run: |
+          set -o pipefail
+          xcodebuild build -quiet \
+            -project LifeHub.xcodeproj -scheme LifeHub-iOS \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES 2>&1 |
+            awk '{ print } /: (error|warning): / { print "::error::" $0 }'
 
       - name: Build watch app (simulator, warnings as errors)
         run: >
