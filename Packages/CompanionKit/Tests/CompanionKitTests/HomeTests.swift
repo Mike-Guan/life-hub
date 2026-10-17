@@ -394,5 +394,12 @@ import Testing
             #expect(crop.contains(HomeGrid.plan(at)), "\(item)")
         }
     }
+
+    @Test func hakuStandsBesideTheBenchAndTheCactusNotInFrontOfThem() throws {
+        for item in [HomeItem.bench, .cactus] {
+            let at = HomeModel.previewSpot(item)
+            #expect(HomeGrid.plan(at).x < HomeItemPreview.ring(item).minX + 8, "\(item)")
+        }
+    }
 }
 #endif

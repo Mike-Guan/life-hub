@@ -314,8 +314,14 @@ final class HomeModel {
 
     /// The open floor next to `item`, a step towards the middle of the room.
     static func previewSpot(_ item: HomeItem, items: Set<HomeItem>? = nil) -> GridPoint {
-        // On the desk HAKU would stand in front of the cactus; by the chair he is beside it.
-        let s = item == .cactus ? GridPoint(x: 1.2, y: 1.6) : item.spot
+        // In front of the cactus or the bench HAKU would hide it; by the chair, or left of the bench, he stands
+        // beside it.
+        let s: GridPoint
+        switch item {
+        case .cactus: s = GridPoint(x: 1.2, y: 1.6)
+        case .bench: s = GridPoint(x: 2.5, y: 3.2)
+        default: s = item.spot
+        }
         let hub = HomeSpot.hub
         let d = max(0.01, s.distance(to: hub))
         let toward = GridPoint(x: s.x + (hub.x - s.x) / d * 1.3, y: s.y + (hub.y - s.y) / d * 1.3)
