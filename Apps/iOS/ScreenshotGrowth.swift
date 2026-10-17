@@ -33,6 +33,17 @@ struct ScreenshotGrowth: View {
                     startsAtBottom: screen == "unbox-bottom"
                 )
             }
+        case "shop-room":
+            ShopView(growth: growth, wardrobe: $wardrobe, persona: ScreenshotMode.persona, shelf: .room)
+        case "shop-room-preview":
+            if let item = ShopItem.catalog(for: ScreenshotMode.persona).first(where: { $0.id == "room.bench" }) ?? ShopItem.catalog(for: ScreenshotMode.persona).first(where: { $0.slot == .room && $0.price != nil }) {
+                ZStack {
+                    ShopView(growth: growth, wardrobe: $wardrobe, persona: ScreenshotMode.persona, shelf: .room)
+                    ShopPreviewSheet(
+                        item: item, persona: ScreenshotMode.persona, wardrobe: wardrobe, balance: 99,
+                        onCancel: {}, onBuy: {})
+                }
+            }
         default:
             ShopView(growth: growth, wardrobe: $wardrobe, persona: ScreenshotMode.persona)
         }
