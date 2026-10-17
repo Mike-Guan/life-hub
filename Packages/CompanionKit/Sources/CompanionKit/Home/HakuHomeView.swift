@@ -98,6 +98,8 @@ public struct HakuHomeView: View {
                     .padding(.vertical, 5)
                     .background(Capsule().fill(Color(hex: 0x1B1C26)))
                     .foregroundStyle(.white)
+                    .frame(minHeight: HomeGrid.minTap)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 Button {
@@ -106,12 +108,16 @@ public struct HakuHomeView: View {
                     Image(systemName: model.isNight ? "moon.fill" : "sun.max.fill")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(Toy.ink)
+                        .frame(minWidth: HomeGrid.minTap, minHeight: HomeGrid.minTap)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 Button {
                     sheet = .settings
                 } label: {
                     Image(systemName: "gearshape.fill").font(.system(size: 18, weight: .bold)).foregroundStyle(Toy.ink)
+                        .frame(minWidth: HomeGrid.minTap, minHeight: HomeGrid.minTap)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
@@ -163,7 +169,7 @@ public struct HakuHomeView: View {
                             stage.scene.endDrag(at: p)
                             carrying = false
                         } else if hypot(value.translation.width, value.translation.height) < 10 {
-                            open(stage.scene.hotspot(at: p))
+                            open(stage.scene.hotspot(at: p, minSide: HomeGrid.minTap / scale))
                         }
                     }
             )
@@ -189,6 +195,8 @@ public struct HakuHomeView: View {
                     .overlay(Circle().stroke(Toy.ink, lineWidth: 1.2))
                     .offset(x: 2, y: -2)
             }
+            .frame(minWidth: HomeGrid.minTap, minHeight: HomeGrid.minTap)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

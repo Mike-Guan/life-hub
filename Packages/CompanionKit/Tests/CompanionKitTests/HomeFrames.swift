@@ -124,6 +124,69 @@ extension FrameSheets {
         try save(Image(decorative: cells[0].1, scale: 1).background(Toy.paper), as: "home-2-night-big", scale: 1)
     }
 
+    // The room at iPhone SE width (343 pt), each tap target's area drawn over it with its size in points.
+    @Test func hakuHomeTapsOnSE() throws {
+        let width: CGFloat = 343
+        let s = width / HomeGrid.canvas.width
+        let side = HomeGrid.minTap / s
+        let model = HomeModel(night: false, cans: 120, card: .fitness)
+        let scene = HomeScene(model: model)
+        model.buy(.item(.bag))
+        model.buy(.item(.bench))
+        scene.sync(animated: false)
+        scene.settle()
+        scene.pose(at: 1.3)
+        let image = try #require(Self.composite(scene, scale: 3))
+        let height = HomeGrid.canvas.height * s
+        func view(_ p: CGPoint) -> CGPoint { CGPoint(x: p.x * s, y: height - p.y * s) }
+        var boxes: [(String, CGRect)] = []
+        for hotspot in HomeHotspot.allCases {
+            let outlines = scene.tapTargets().filter { $0.hotspot == hotspot }.map(\.outline)
+            guard !outlines.isEmpty else { continue }
+            let box = outlines.map { HomeScene.grown($0, to: side) }.reduce(CGRect.null) { $0.union($1) }
+            let a = view(CGPoint(x: box.minX, y: box.maxY))
+            boxes.append((hotspot.rawValue, CGRect(x: a.x, y: a.y, width: box.width * s, height: box.height * s)))
+        }
+        let haku = scene.haku.calculateAccumulatedFrame()
+        let chips = HomeChip.all.map { chip in
+            let p = HomeGrid.plan(chip.at)
+            return (chip.title, CGPoint(x: (p.x - HomeGrid.canvas.minX) * s, y: (p.y - HomeGrid.canvas.minY) * s))
+        }
+        let room = ZStack(alignment: .topLeading) {
+            Image(decorative: image, scale: 3).resizable().frame(width: width, height: height)
+            ForEach(boxes.indices, id: \.self) { i in
+                let (name, r) = boxes[i]
+                Rectangle().stroke(Color.red, style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
+                    .frame(width: r.width, height: r.height)
+                    .overlay(alignment: .topLeading) {
+                        Text(verbatim: "\(name) \(Int(r.width))×\(Int(r.height))")
+                            .font(.system(size: 7, weight: .bold)).foregroundStyle(.red)
+                            .background(Color.white.opacity(0.7))
+                    }
+                    .offset(x: r.minX, y: r.minY)
+            }
+            ForEach(chips.indices, id: \.self) { i in
+                Rectangle().stroke(Color.blue, lineWidth: 1)
+                    .frame(width: HomeGrid.minTap, height: HomeGrid.minTap)
+                    .offset(x: chips[i].1.x - HomeGrid.minTap / 2, y: chips[i].1.y - HomeGrid.minTap / 2)
+            }
+        }
+        .frame(width: width, height: height, alignment: .topLeading)
+        .background(Toy.paper)
+        let sheet = VStack(alignment: .leading, spacing: 8) {
+            Text(verbatim: "家 · iPhone SE（343 pt 宽）点按热区").font(.system(size: 15, weight: .bold))
+            room
+            Text(
+                verbatim:
+                    "HAKU 画面 \(Int(haku.width * s))×\(Int(haku.height * s)) pt。红框 = 场景热区（不足 44 pt 的向四周补齐），蓝框 = 标签按钮 44×44 pt。"
+            )
+            .font(.system(size: 10)).frame(width: width, alignment: .leading)
+        }
+        .padding(12)
+        .background(Color.white)
+        try save(sheet, as: "home-3-se-taps", scale: 3)
+    }
+
     /// Draws the scene's sprites back to front with Core Graphics.
     static func composite(_ scene: SKScene, scale: CGFloat) -> CGImage? {
         let width = Int(scene.size.width * scale)

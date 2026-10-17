@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Every tap target on the home page is at least 44 pt, also on iPhone SE: HAKU, the standing bag, the bench, the
+  floating labels and the header buttons. A tap just beside a small target still lands on it.
 - In the home prototype HAKU uses the bench: tapping it, dropping him on it, or a fitness card day with the
   bench bought sends him to lie on it and press the bar off the rack, up and down.
 - Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
