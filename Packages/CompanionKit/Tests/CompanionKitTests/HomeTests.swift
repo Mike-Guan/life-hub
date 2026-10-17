@@ -277,6 +277,30 @@ import Testing
     }
 }
 
+@Suite struct HomeZoneTests {
+    @Test func everyItemStandsInsideItsZone() throws {
+        for item in HomeItem.allCases {
+            let box = try #require(item.zone.box, "\(item)")
+            let s = item.spot
+            #expect(s.x >= box.x0 && s.x <= box.x1 && s.y >= box.y0 && s.y <= box.y1, "\(item)")
+        }
+    }
+
+    @Test func zonesHoldAsManyItemsAsPlanned() {
+        #expect(HomeZone.sportFloor.slots.count == 1)
+        #expect(HomeZone.sportWall.slots.count == 2)
+        #expect(HomeZone.desk.slots.count == 2)
+        #expect(HomeZone.sofaSide.slots.count == 1)
+        #expect(HomeZone.corner.slots.count == 1)
+        for zone in HomeZone.allCases {
+            guard let box = zone.box else { continue }
+            for slot in zone.slots {
+                #expect(slot.x >= box.x0 && slot.x <= box.x1 && slot.y >= box.y0 && slot.y <= box.y1, "\(zone)")
+            }
+        }
+    }
+}
+
 #if os(macOS)
 @MainActor
 @Suite struct HomeSceneTests {

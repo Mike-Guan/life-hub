@@ -203,6 +203,37 @@ enum HomePiece: String, CaseIterable, Sendable {
     }
 }
 
+// PM 家 区域规划 v0 (Mike 2026-10-17: the room is split into zones, each holding items the user picks).
+/// An area of the room that holds items.
+enum HomeZone: String, CaseIterable, Sendable {
+    case furniture, sportFloor, sportWall, shelf, desk, sofaSide, corner
+
+    /// The floor or wall the zone takes up; furniture has none of its own.
+    var box: GridBox? {
+        switch self {
+        case .furniture: nil
+        case .sportFloor: GridBox(x0: 3.4, y0: 0.1, x1: 6.4, y1: 3.6, z1: 2.1)
+        case .sportWall: GridBox(x0: 3.8, y0: 0, x1: 6.6, y1: 0.4, z0: 2.4, z1: 4.8)
+        case .shelf: GridBox(x0: 0, y0: 4.2, x1: 0.6, y1: 7.4, z0: 3.2, z1: 5.3)
+        case .desk: GridBox(x0: 0, y0: 0.4, x1: 1.5, y1: 3.4, z0: 1.36, z1: 2.4)
+        case .sofaSide: GridBox(x0: 2.3, y0: 8.2, x1: 2.9, y1: 8.8, z1: 1)
+        case .corner: GridBox(x0: 0.9, y0: 8.7, x1: 2.1, y1: 9.9, z1: 2.6)
+        }
+    }
+
+    /// Where the zone's items stand or hang, one per slot; the shelf fills itself with keepsakes.
+    var slots: [GridPoint] {
+        switch self {
+        case .furniture, .shelf: []
+        case .sportFloor: [GridPoint(x: 4.55, y: 2.0)]
+        case .sportWall: [GridPoint(x: 4.4, y: 0.15, z: 3.4), GridPoint(x: 5.9, y: 0.15, z: 3.4)]
+        case .desk: [GridPoint(x: 0.6, y: 3.0, z: 1.36), GridPoint(x: 0.6, y: 0.9, z: 1.36)]
+        case .sofaSide: [GridPoint(x: 2.6, y: 8.5)]
+        case .corner: [GridPoint(x: 1.5, y: 9.3)]
+        }
+    }
+}
+
 /// An item from the shop that stands in the room.
 enum HomeItem: String, CaseIterable, Sendable {
     case plant, bag, cactus, speaker
@@ -213,6 +244,17 @@ enum HomeItem: String, CaseIterable, Sendable {
     init?(shopID: String) {
         guard let range = shopID.range(of: "room."), range.upperBound < shopID.endIndex else { return nil }
         self.init(rawValue: String(shopID[range.upperBound...]))
+    }
+
+    /// The zone the item goes in.
+    var zone: HomeZone {
+        switch self {
+        case .plant: .corner
+        case .bag, .bench: .sportFloor
+        case .cactus: .desk
+        case .speaker: .sofaSide
+        case .gloves, .racket, .snowboard: .sportWall
+        }
     }
 
     /// Where the item stands, or hangs.
