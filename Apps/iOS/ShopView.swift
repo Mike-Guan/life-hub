@@ -32,7 +32,6 @@ struct ShopView: View {
     @State private var putAway: [String] = []
     @State private var previewing: ShopItem?
     @State private var shelf: ShopShelf
-    @Namespace private var tabs
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // 商店与家 同步方案 §1: the home screen's door opens the clothes, the home page's door the room.
@@ -231,7 +230,8 @@ struct ShopView: View {
         }
     }
 
-    // UI 二组 商店两栏 v1.1: the wardrobe's tabs, with the selected fill sliding to the tapped one.
+    // UI 二组 商店两栏 v1.1: the wardrobe's tabs. Mike 2026-10-17: the sliding fill felt slow, so the tapped tab
+    // turns black at once (静态: a tab is a switch, not a move) while the shelf below still fades.
     private var shelfTabs: some View {
         HStack(spacing: 6) {
             ForEach(ShopShelf.allCases, id: \.self) { tab in
@@ -247,7 +247,7 @@ struct ShopView: View {
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .background {
                             if shelf == tab {
-                                Capsule().fill(Toy.ink).matchedGeometryEffect(id: "selected", in: tabs)
+                                Capsule().fill(Toy.ink)
                             } else {
                                 Capsule().fill(Toy.card)
                             }
@@ -259,6 +259,7 @@ struct ShopView: View {
                 .accessibilityAddTraits(shelf == tab ? .isSelected : [])
             }
         }
+        .transaction { $0.animation = nil }
     }
 
     private var banner: some View {
