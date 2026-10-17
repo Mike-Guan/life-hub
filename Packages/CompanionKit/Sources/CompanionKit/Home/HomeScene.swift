@@ -394,8 +394,8 @@ final class HomeScene: SKScene {
                 }
             case .box, .shadowbox: face = .box
             case .bench: face = .focus
-            case .idle:
-                // Now and then he stretches, or glances the other way.
+            case .idle, .practice:
+                // Now and then he stretches, or glances the other way; in the sports corner that is warming up.
                 let cycle = clock.truncatingRemainder(dividingBy: 16)
                 if !tired, cycle > 12, cycle < 13.6 {
                     pose = .stretch
