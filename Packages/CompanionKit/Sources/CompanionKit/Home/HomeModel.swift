@@ -451,8 +451,9 @@ final class HomeModel {
     static func cardSpot(_ card: IdentityKind?, items: Set<HomeItem>) -> HomeSpot {
         switch card {
         case .boxing: items.contains(.bag) ? .box : .shadowbox
-        case .fitness: items.contains(.bench) ? .bench : .idle
-        default: .idle
+        case .fitness: items.contains(.bench) ? .bench : .practice
+        case nil: .idle
+        default: .practice
         }
     }
 

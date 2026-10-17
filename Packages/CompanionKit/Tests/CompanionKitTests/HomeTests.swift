@@ -139,7 +139,8 @@ import Testing
     @Test func otherCardsDoNotBox() {
         let model = HomeModel(night: false, card: .tennis)
         model.switchMode(.boxing)
-        #expect(model.spot == .idle)
+        // Tennis has no gear in the room yet: the card's day warms up in the sports corner.
+        #expect(model.spot == .practice)
     }
 
     @Test func withTheBagBoxingDayHitsIt() {
@@ -152,7 +153,7 @@ import Testing
     @Test func fitnessDayPressesOnTheBenchOnceThereIsOne() {
         let model = HomeModel(night: false, card: .fitness)
         model.switchMode(.boxing)
-        #expect(model.spot == .idle)
+        #expect(model.spot == .practice)
         model.own(.bench)
         model.switchMode(.boxing)
         #expect(model.spot == .bench)
