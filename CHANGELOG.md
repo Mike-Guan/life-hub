@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   wearing it, with its name and her line. Rows in 人生收藏 open the keepsake's page, which shows how she looked the
   day it arrived; its 「分享」 and a quiet 「分享」 link on the unboxing open the choice. Cards carry no date,
   place or health number, and sharing gives nothing.
+- Every tap target on the home page is at least 44 pt, also on iPhone SE: HAKU, the standing bag, the bench, the
+  floating labels and the header buttons. A tap just beside a small target still lands on it.
 - Second polish batch for the second preset character: the tablet slides back to her lap after the tap, her
   lap things slide away and back while she blows on her drink, the flat racket flips upright after juggling,
   the watch's raised racket swings, twirls and juggles, a tap during a move gets a blink, and at bedtime a tap
@@ -66,6 +68,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - HAKU can wear six Sunday items: an orange or a mint headband, a dotted or a lightning-bolt mask, and a small
   cactus or a mini speaker in the room. The speaker's light ring glows every 3 seconds. The shop lists them once
   their catalog entries are marked drawn. The watch leaves room items out, since they stand on the floor.
+- In DEV and STG builds the shop has two tabs, 衣服 and 房间, with this week's item first on its tab. A room item's
+  preview shows it standing in the real home page, says where, and sports gear adds that having it earns no cans.
+  The bench (any card) and the snowboard (ski card) join the room tab. The home's shop button opens the shop on
+  房间. Keepsakes left the shop there, since they live in the home page. Release builds keep one shelf and the
+  keepsakes as before.
 - HAKU can dress for four more identity cards: tennis (visor, racket and ball), fitness (gym bag and a small
   dumbbell), study (green jacket and an open book) and art (green jacket, apron, sketchbook and pencil).
   The watch leaves the gym bag off the floor.

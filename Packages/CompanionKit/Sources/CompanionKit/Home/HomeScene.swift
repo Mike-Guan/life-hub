@@ -523,26 +523,59 @@ final class HomeScene: SKScene {
     // MARK: Touch
 
     /// What sits under a scene point, the front-most first.
-    func hotspot(at p: CGPoint, includingHaku: Bool = true) -> HomeHotspot? {
-        if includingHaku, haku.calculateAccumulatedFrame().insetBy(dx: 4, dy: 2).contains(p) { return .haku }
-        let plan = HomeGrid.plan(scene: p)
+    /// - Parameters:
+    ///   - p: The point in scene units.
+    ///   - includingHaku: Whether HAKU himself counts.
+    ///   - minSide: The smallest tap target in scene units. A miss still lands on the nearest target
+    ///     narrower or shorter than this whose box, grown to this size around its centre, holds the point.
+    func hotspot(at p: CGPoint, includingHaku: Bool = true, minSide: CGFloat = 0) -> HomeHotspot? {
+        let targets = tapTargets(includingHaku: includingHaku)
+        if let hit = targets.first(where: { HomeGrid.contains($0.outline, p) }) { return hit.hotspot }
+        let grown = targets.compactMap { target -> (HomeHotspot, CGFloat)? in
+            let box = Self.grown(target.outline, to: minSide)
+            let small = Self.grown(target.outline, to: 0).size
+            guard small.width < minSide || small.height < minSide, box.contains(p) else { return nil }
+            return (target.hotspot, hypot(p.x - box.midX, p.y - box.midY))
+        }
+        return grown.min { $0.1 < $1.1 }?.0
+    }
+
+    /// Everything that answers a tap, front-most first, each outlined in scene units.
+    func tapTargets(includingHaku: Bool = true) -> [(hotspot: HomeHotspot, outline: [CGPoint])] {
+        func outline(_ box: GridBox) -> [CGPoint] { HomeGrid.silhouette(box).map(HomeGrid.scene) }
+        var targets: [(hotspot: HomeHotspot, outline: [CGPoint])] = []
+        if includingHaku {
+            let r = haku.calculateAccumulatedFrame().insetBy(dx: 4, dy: 2)
+            targets.append(
+                (
+                    .haku,
+                    [
+                        r.origin, CGPoint(x: r.maxX, y: r.minY), CGPoint(x: r.maxX, y: r.maxY),
+                        CGPoint(x: r.minX, y: r.maxY),
+                    ]
+                ))
+        }
         if itemNodes[.bag] != nil {
             let s = HomeItem.bag.spot
-            let bag = GridBox(x0: s.x - 0.4, y0: s.y - 0.4, x1: s.x + 0.4, y1: s.y + 0.4, z1: 2.6)
-            if HomeGrid.contains(HomeGrid.silhouette(bag), plan) { return .bag }
+            targets.append(
+                (.bag, outline(GridBox(x0: s.x - 0.4, y0: s.y - 0.4, x1: s.x + 0.4, y1: s.y + 0.4, z1: 2.6))))
         }
-        if itemNodes[.bench] != nil, let bench = HomeItem.bench.footprint,
-            HomeGrid.contains(HomeGrid.silhouette(bench), plan)
-        {
-            return .bench
+        if itemNodes[.bench] != nil, let bench = HomeItem.bench.footprint {
+            targets.append((.bench, outline(bench)))
         }
         let tappable = HomePiece.allCases.filter { $0.hotspot != nil }.sorted { $0.depth > $1.depth }
-        for piece in tappable where piece.boxes.contains(where: { HomeGrid.contains(HomeGrid.silhouette($0), plan) }) {
-            if piece == .blanket, shownCovering != true { continue }
-            return piece.hotspot
+        for piece in tappable {
+            guard let hotspot = piece.hotspot, piece != .blanket || shownCovering == true else { continue }
+            targets += piece.boxes.map { (hotspot, outline($0)) }
         }
-        if HomeGrid.contains(HomeArt.windowQuad(), plan) { return .window }
-        return nil
+        targets.append((.window, HomeArt.windowQuad().map(HomeGrid.scene)))
+        return targets
+    }
+
+    /// The outline's bounding box, grown around its centre to at least `side` each way.
+    static func grown(_ outline: [CGPoint], to side: CGFloat) -> CGRect {
+        let box = outline.reduce(CGRect.null) { $0.union(CGRect(origin: $1, size: .zero)) }
+        return box.insetBy(dx: -max(0, side - box.width) / 2, dy: -max(0, side - box.height) / 2)
     }
 
     /// Starts carrying HAKU when the touch lands on him.
