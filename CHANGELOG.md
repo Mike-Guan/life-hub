@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character naps over her tablet when dozing off on the couch: a slow breath and the odd
+  nod, and a still frame on widgets and the watch face. Tapping her doesn't wake her.
 - In the home prototype HAKU uses the bench: tapping it, dropping him on it, or a fitness card day with the
   bench bought sends him to lie on it and press the bar off the rack, up and down.
 - Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
