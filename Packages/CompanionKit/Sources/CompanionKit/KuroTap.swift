@@ -146,7 +146,7 @@ extension KuroPose {
         var pose = self
         pose.tap = tap
         pose.tapProgress = p
-        pose.heart = heart && tap != .turnAway
+        pose.heart = heart && tap != .turnAway && tap != .rollOver
         pose.blinking = false
         switch tap {
         case .tablet:

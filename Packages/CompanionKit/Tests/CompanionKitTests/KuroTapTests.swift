@@ -269,4 +269,13 @@ import Testing
         #expect(KuroView.rollOver((.rub, 0.5), time: 0) == nil && KuroView.rollOver(nil, time: 0) == nil)
         #expect(KuroView.wink == 0.15)
     }
+
+    @Test func asleepOrNappingSheRollsOverWithoutAHeart() {
+        var napping = KuroPose(look: .chill, energy: nil)
+        napping.napping = true
+        let rolled = napping.reacting(.rollOver, progress: 0.5, heart: true)
+        #expect(!rolled.heart && rolled.eyes == .closed)
+        #expect(KuroFigure.parts(for: .chill, pose: rolled).contains(.napTablet))
+        #expect(KuroPose(look: .chill, energy: nil).reacting(.sip, progress: 0.5, heart: true).heart)
+    }
 }
