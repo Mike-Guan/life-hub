@@ -216,6 +216,7 @@ enum HomeItem: String, CaseIterable, Sendable {
     }
 
     /// Where the item stands, or hangs.
+    // Wall items stay left of x 5.5: further right the wardrobe's side hides them.
     var spot: GridPoint {
         switch self {
         case .plant: GridPoint(x: 1.5, y: 9.3)
@@ -223,8 +224,8 @@ enum HomeItem: String, CaseIterable, Sendable {
         case .cactus: GridPoint(x: 0.6, y: 3.0, z: 1.36)
         case .speaker: GridPoint(x: 2.6, y: 8.5)
         case .gloves: GridPoint(x: 4.9, y: 0.15, z: 3.4)
-        case .racket: GridPoint(x: 5.45, y: 0.1, z: 3.3)
-        case .snowboard: GridPoint(x: 6.0, y: 0.1)
+        case .racket: GridPoint(x: 5.25, y: 0.1, z: 3.3)
+        case .snowboard: GridPoint(x: 5.3, y: 0.1)
         case .bench: GridPoint(x: 4.55, y: 2.0)
         }
     }
