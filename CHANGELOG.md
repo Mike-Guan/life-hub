@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- At night in the home HAKU dozes in bed over his phone: he holds it up under his chin, its screen
+  lights his face, and every 10 s he nods off with it on his chest, then jerks back awake. By day he sleeps
+  under the blanket.
 - Share cards: a keepsake or a new top or full set can be shared as a 9:16 or 1:1 picture of the character
   wearing it, with its name and her line. Rows in 人生收藏 open the keepsake's page, which shows how she looked the
   day it arrived; its 「分享」 and a quiet 「分享」 link on the unboxing open the choice. Cards carry no date,

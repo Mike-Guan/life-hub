@@ -11,6 +11,7 @@ final class HomeScene: SKScene {
     private var pieces: [HomePiece: HomeLayerNode] = [:]
     private var itemNodes: [HomeItem: HomeLayerNode] = [:]
     private var barbell: HomeLayerNode?
+    private let phoneGlow = SKSpriteNode(texture: HomeEffects.glow)
     private let shell = HomeLayerNode()
     private let skyDay = SKSpriteNode()
     private let skyNight = SKSpriteNode()
@@ -371,7 +372,17 @@ final class HomeScene: SKScene {
             switch spot {
             case .work, .side: face = .focus
             case .sofa: face = tired ? .tired : .chill
-            case .rest: face = .closed
+            case .rest:
+                // At night he dozes over the phone on top of the blanket, nodding off now and then; by day he
+                // sleeps under it.
+                if model.isNight {
+                    pose = .doze
+                    face = HakuNode.dozeNod(clock) < 0.5 ? .idle : .closed
+                    // On top of the blanket: drawn over its folded end, which would hide his body and the phone.
+                    depth = max(depth, HomePiece.blanket.depth + 0.05)
+                } else {
+                    face = .closed
+                }
             case .box, .shadowbox: face = .box
             case .bench: face = .focus
             case .idle:
@@ -434,7 +445,25 @@ final class HomeScene: SKScene {
             let since = bagHit.map { clock - $0 } ?? 99
             bag.zRotation = since < 1.5 ? CGFloat(-0.09 * exp(-since * 3) * cos(since * 12)) : 0
         }
-        drawBlanket(covering: reached == .rest && walk == nil)
+        drawBlanket(covering: reached == .rest && walk == nil && pose != .doze)
+        lightFace(pose == .doze)
+    }
+
+    /// Lights HAKU's face with the phone's screen while he dozes over it, dimming as it sinks.
+    private func lightFace(_ dozing: Bool) {
+        if phoneGlow.parent == nil {
+            phoneGlow.size = CGSize(width: 50, height: 50)
+            phoneGlow.color = UIColorBridge.color(0xBFE4FF)
+            phoneGlow.colorBlendFactor = 1
+            phoneGlow.blendMode = .add
+            phoneGlow.zPosition = 51
+            addChild(phoneGlow)
+        }
+        phoneGlow.isHidden = !dozing
+        guard dozing else { return }
+        phoneGlow.position = haku.faceCenter
+        // Faint, so his skin stays skin-coloured and his eyes don't wash into his hair.
+        phoneGlow.alpha = 0.22 * CGFloat(1 - HakuNode.dozeNod(clock))
     }
 
     private func spawnEffects() {

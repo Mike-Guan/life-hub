@@ -38,7 +38,8 @@ extension FrameSheets {
                     $0.tap(.window)
                 }
             ),
-            ("床上休息", true, { $0.tap(.bed) }),
+            ("床上 · 白天 睡觉", false, { $0.tap(.bed) }),
+            ("床上 · 夜 抱手机", true, { $0.tap(.bed) }),
             ("衣柜前", false, { $0.tap(.wardrobe) }),
             (
                 "买齐 + 换色 + 西装", false,
@@ -75,6 +76,16 @@ extension FrameSheets {
             scene.settle()
             scene.pose(at: t)
             cells.append((label, try #require(Self.composite(scene, scale: 2))))
+        }
+        // At night in bed: nodded off, the phone down on his chest.
+        do {
+            let model = HomeModel(night: true)
+            let scene = HomeScene(model: model)
+            model.tap(.bed)
+            scene.sync(animated: false)
+            scene.settle()
+            scene.pose(at: 8.5)
+            cells.append(("床上 · 夜 点头睡着", try #require(Self.composite(scene, scale: 2))))
         }
         // Mid-walk and carried, from the first room.
         let model = HomeModel(night: true)
@@ -237,6 +248,45 @@ extension FrameSheets {
         .padding(16)
         .background(Color.white)
         try save(sheet, as: "home-4-shop-items", scale: 2)
+    }
+
+    // HAKU dozing over the phone, close up, awake and nodded off: the room sheet is too small to judge the phone.
+    @Test func hakuHomeDozeBig() throws {
+        // 343 pt of room on the smallest phone, at 3 pixels a point.
+        let onPhone = 343 / HomeGrid.canvas.width * 3
+        var crops: [(String, CGImage, CGFloat)] = []
+        for (label, night, t, scale) in [
+            ("夜 · 抱手机", true, 1.0, 4), ("夜 · 点头睡着", true, 8.5, 4),
+            ("夜 · 抱手机 · 手机上实际大小", true, 1.0, onPhone), ("白天 · 盖被子睡", false, 1.0, 4),
+        ] {
+            let model = HomeModel(night: night)
+            let scene = HomeScene(model: model)
+            model.tap(.bed)
+            scene.sync(animated: false)
+            scene.settle()
+            scene.pose(at: t)
+            let image = try #require(Self.composite(scene, scale: scale))
+            let haku = scene.haku.calculateAccumulatedFrame().insetBy(dx: -50, dy: -40)
+            let rect = CGRect(
+                x: haku.minX * scale, y: (scene.size.height - haku.maxY) * scale,
+                width: haku.width * scale, height: haku.height * scale)
+            crops.append((label, try #require(image.cropping(to: rect)), scale == onPhone ? 1 : 2))
+        }
+        let sheet = Grid(alignment: .topLeading, horizontalSpacing: 12, verticalSpacing: 12) {
+            ForEach([0, 2], id: \.self) { row in
+                GridRow {
+                    ForEach(row..<row + 2, id: \.self) { i in
+                        VStack(spacing: 6) {
+                            Image(decorative: crops[i].1, scale: crops[i].2)
+                            Text(verbatim: crops[i].0).font(.system(size: 14, weight: .bold))
+                        }
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.white)
+        try save(sheet, as: "home-5-doze-big", scale: 1)
     }
 
     /// Draws the scene's sprites back to front with Core Graphics.
