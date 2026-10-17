@@ -6,8 +6,8 @@ import Testing
 
 @testable import CompanionKit
 
-// 第二个预设角色 in the home (Mike 2026-10-17): the same room and spots as HAKU, drawn with her own figure, for the
-// UI review.
+// 第二个预设角色 in the home (Mike 2026-10-17): the same room and spots as HAKU, drawn with her own figure,
+// for the UI review.
 extension FrameSheets {
     @Test func kuroHome() throws {
         let states: [(String, Bool, IdentityKind, EnergyLevel?, Double, (HomeModel) -> Void)] = [
@@ -49,7 +49,8 @@ extension FrameSheets {
         cells.append(("被拎起来", try #require(Self.closeUp(scene))))
 
         let sheet = VStack(alignment: .leading, spacing: 8) {
-            Text(verbatim: "家 · 第二个预设角色（接进家页面，每格 120×120 pt）").font(.system(size: 16, weight: .bold))
+            Text(verbatim: "家 · 第二个预设角色（接进家页面，每格 120×120 pt）")
+                .font(.system(size: 16, weight: .bold))
             LazyVGrid(columns: Array(repeating: GridItem(.fixed(240)), count: 4), spacing: 10) {
                 ForEach(cells.indices, id: \.self) { i in
                     VStack(spacing: 2) {
