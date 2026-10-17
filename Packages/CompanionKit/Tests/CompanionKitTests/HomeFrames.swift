@@ -129,10 +129,10 @@ extension FrameSheets {
         let width: CGFloat = 343
         let s = width / HomeGrid.canvas.width
         let side = HomeGrid.minTap / s
-        let model = HomeModel(night: false, cans: 120, card: .fitness)
+        let model = HomeModel(night: false, card: .fitness)
         let scene = HomeScene(model: model)
-        model.buy(.item(.bag))
-        model.buy(.item(.bench))
+        model.own(.bag)
+        model.own(.bench)
         scene.sync(animated: false)
         scene.settle()
         scene.pose(at: 1.3)

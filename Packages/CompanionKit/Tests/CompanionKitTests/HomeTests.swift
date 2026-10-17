@@ -375,10 +375,10 @@ import Testing
     @Test func everyTapTargetIsAtLeast44PointsOnTheSmallestPhone() {
         // iPhone SE: 375 pt wide, 16 pt margins each side.
         let side = HomeGrid.minTap / (343 / HomeGrid.canvas.width)
-        let model = HomeModel(night: false, cans: 120, card: .fitness)
+        let model = HomeModel(night: false, card: .fitness)
         let scene = HomeScene(model: model)
-        model.buy(.item(.bag))
-        model.buy(.item(.bench))
+        model.own(.bag)
+        model.own(.bench)
         scene.sync(animated: false)
         scene.settle()
         let haku = scene.haku.calculateAccumulatedFrame()
