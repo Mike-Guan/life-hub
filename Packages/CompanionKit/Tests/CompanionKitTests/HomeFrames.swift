@@ -256,8 +256,8 @@ extension FrameSheets {
         let onPhone = 343 / HomeGrid.canvas.width * 3
         var crops: [(String, CGImage, CGFloat)] = []
         for (label, night, t, scale) in [
-            ("夜 · 抱手机", true, 1.0, 4), ("夜 · 点头睡着", true, 8.5, 4),
-            ("夜 · 抱手机 · 手机上实际大小", true, 1.0, onPhone), ("白天 · 盖被子睡", false, 1.0, 4),
+            ("夜 · 上床先抱手机", true, 1.0, 4), ("夜 · 点头", true, 8.5, 4),
+            ("夜 · 抱手机 · 手机上实际大小", true, 1.0, onPhone), ("夜 · 睡着，盖被子", true, HomeScene.dozeLength + 3, 4),
         ] {
             let model = HomeModel(night: night)
             let scene = HomeScene(model: model)

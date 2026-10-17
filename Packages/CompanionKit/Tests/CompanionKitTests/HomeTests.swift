@@ -488,7 +488,7 @@ import Testing
         #expect(HakuNode.dozeNod(9.8) == 0)
     }
 
-    @Test func atNightHakuHoldsThePhoneInBedAndByDayHeDoesNot() {
+    @Test func atNightHakuDozesOverThePhoneInBedThenSleeps() {
         for night in [true, false] {
             let model = HomeModel(night: night)
             let scene = HomeScene(model: model)
@@ -497,14 +497,17 @@ import Testing
             scene.settle()
             scene.pose(at: 2)
             #expect((scene.haku.heldPhone != nil) == night)
-            // At night he lies on the blanket, so he is drawn over it; by day he is under it.
-            #expect((scene.haku.zPosition > CGFloat(HomePiece.blanket.depth)) == night)
+            // He is tucked in, night or day.
+            #expect(scene.haku.zPosition < CGFloat(HomePiece.blanket.depth))
             if night {
                 let up = scene.haku.heldPhone
                 scene.pose(at: 8.5)
                 let down = scene.haku.heldPhone
                 #expect(up != nil && down != nil && up != down)
             }
+            // Then he falls asleep under the blanket.
+            scene.pose(at: HomeScene.dozeLength + 1)
+            #expect(scene.haku.heldPhone == nil)
         }
     }
 }
