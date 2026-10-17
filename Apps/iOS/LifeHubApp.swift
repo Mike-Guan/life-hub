@@ -202,7 +202,7 @@ struct LifeHubApp: App {
             onSettings: { showsSettings = true },
             cans: growth.ledger.only(persona).balance,
             onShop: { showsShop = true },
-            onHome: homeEntry,
+            onHome: { showsHome = true },
             wardrobe: wardrobe,
             persona: persona,
             greetingName: Greeting.name(in: AppGroup.defaults),
@@ -525,11 +525,6 @@ struct LifeHubApp: App {
             bedtime: bedtime.state(at: .now),
             defaults: AppGroup.defaults
         )
-    }
-
-    // Mike 2026-10-17: the home page runs on real data in every build.
-    private var homeEntry: (() -> Void)? {
-        ShopView.homeIsOpen(for: persona) ? { showsHome = true } : nil
     }
 
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.

@@ -135,6 +135,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - A room item from the shop no longer stands in HAKU's 下班 backdrop. Bought room items live in HAKU's home.
 - VoiceOver reads the unboxing as "开箱：" and the item's name instead of the character's mode.
 - The shop's 衣服 / 房间 tabs switch at once: the black fill no longer slides across to the tapped tab.
+- The second preset character has the home page too: her home button, the shop's 衣服 / 房间 tabs, and her
+  keepsakes on the home page's shelf instead of in the shop.
 - The home page is in every build, not only DEV and STG: HAKU's home button on the home screen opens it, and his
   shop always has the 衣服 and 房间 tabs with keepsakes in the home page. The second preset character keeps one
   shelf and her keepsakes in the shop until her room version is ready.
