@@ -78,7 +78,7 @@ extension FrameSheets {
 
     /// The scene with her in HAKU's place and pose.
     private static func kuro(
-        in scene: HomeScene, _ model: HomeModel, t: Double, carried: Bool = false, scale: CGFloat = 2
+        in scene: CompanionKit.HomeScene, _ model: HomeModel, t: Double, carried: Bool = false, scale: CGFloat = 2
     ) -> CGImage? {
         let (pose, face) = kuroPose(scene, model, t: t, carried: carried)
         let kuro = KuroHomeNode()
@@ -98,7 +98,7 @@ extension FrameSheets {
     }
 
     // The pose `HomeScene` gives HAKU for the same moment, without his one-offs.
-    private static func kuroPose(_ scene: HomeScene, _ model: HomeModel, t: Double, carried: Bool)
+    private static func kuroPose(_ scene: CompanionKit.HomeScene, _ model: HomeModel, t: Double, carried: Bool)
         -> (HakuPose, HakuFace)
     {
         if carried { return (.dangle, .yawn) }
