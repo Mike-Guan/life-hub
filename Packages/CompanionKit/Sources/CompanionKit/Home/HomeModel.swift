@@ -345,6 +345,23 @@ final class HomeModel {
         changed()
     }
 
+    /// Puts HAKU on the open floor next to `item`, where he stays.
+    func standBeside(_ item: HomeItem) {
+        go(.idle)
+        dropPoint = Self.previewSpot(item, items: items.union([item]))
+        changed()
+    }
+
+    /// The open floor next to `item`, a step towards the middle of the room.
+    static func previewSpot(_ item: HomeItem, items: Set<HomeItem>? = nil) -> GridPoint {
+        // On the desk HAKU would stand in front of the cactus; by the chair he is beside it.
+        let s = item == .cactus ? GridPoint(x: 1.2, y: 1.6) : item.spot
+        let hub = HomeSpot.hub
+        let d = max(0.01, s.distance(to: hub))
+        let toward = GridPoint(x: s.x + (hub.x - s.x) / d * 1.3, y: s.y + (hub.y - s.y) / d * 1.3)
+        return HomeNav.room(items: items ?? [item]).nearestOpen(to: toward)
+    }
+
     /// HAKU was picked up.
     func lift() {
         line = "喂。"
