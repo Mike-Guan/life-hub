@@ -119,10 +119,11 @@ final class HomeScene: SKScene {
         addChild(haku)
     }
 
-    /// The figure for `persona`; HAKU's stands in until the second preset character's is drawn.
+    /// The figure for `persona`.
     static func figure(for persona: Persona) -> any HomeFigure {
         switch persona {
-        case .haku, .kuro: HakuNode()
+        case .haku: HakuNode()
+        case .kuro: KuroHomeNode()
         }
     }
 
@@ -418,6 +419,9 @@ final class HomeScene: SKScene {
         if face.blinks, clock.truncatingRemainder(dividingBy: 3.7) < 0.13 { face = .closed }
 
         if let node = haku as? HakuNode { node.dress(model.outfit) }
+        if let node = haku as? KuroHomeNode {
+            node.dress(KuroLook(mode: model.mode ?? .chill, card: model.card), worn: model.snapshot.worn)
+        }
         haku.apply(
             pose, face: face, facingRight: facing,
             gloves: model.mode == .boxing && model.card == .boxing, t: clock)
