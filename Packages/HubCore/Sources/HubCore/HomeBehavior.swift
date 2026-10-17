@@ -112,11 +112,10 @@ public enum HomeBehavior {
         }
     }
 
-    // P5: sports gear is never used on her own, since that would hint the user should train. Gear is the items
-    // tied to a card; generic gear such as the bench needs its own exclusion when it joins the shop.
+    // P5: sports gear is never used on her own, since that would hint the user should train.
     /// The home item to look at now, if this slot has a walk and it is under way.
     private static func wander(in home: HomeSnapshot, now: Date, seed: UInt64) -> String? {
-        let items = placed(in: home).filter { ShopItem.item($0)?.card == nil }
+        let items = placed(in: home).filter { ShopItem.item($0)?.zone?.isSports == false }
         guard !items.isEmpty else { return nil }
         let time = now.timeIntervalSinceReferenceDate
         let slot = (time / wanderSlot).rounded(.down)

@@ -88,7 +88,7 @@ import Testing
             #expect(seconds.count == Int(HomeBehavior.wanderLength))
             #expect(seconds[seconds.count - 1] - seconds[0] == seconds.count - 1)
             let time = Date(timeIntervalSinceReferenceDate: slotStart + Double(seconds[0]))
-            // The plant is her only home item: the bag belongs to the card, and the bench isn't sold yet.
+            // The plant is her only home item: the bag and the bench are sports gear.
             #expect(beat(room, at: time) == HomeBeat(spot: .item("room.plant"), action: .look, priority: .wander))
         }
         #expect(walkedSlots > 0)

@@ -137,6 +137,23 @@
         }
       }
     },
+    "%@穿" : {
+      "comment" : "商店衣服上的模式签，%@ 是模式名（上班、下班……）。",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "For %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@用"
+          }
+        }
+      }
+    },
     "%lld 次判断" : {
       "localizations" : {
         "ja" : {
@@ -149,6 +166,12 @@
     },
     "%lld 能量罐 换" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Trade %lld cans"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1062,6 +1085,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "いまは選ばない"
+          }
+        }
+      }
+    },
+    "先收起来" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it away"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "しまっておく"
           }
         }
       }
@@ -2467,6 +2506,22 @@
         }
       }
     },
+    "房间里一次摆一件。拿到的东西永远在这，不会丢。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One thing in the room at a time. What you get stays here for good."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "部屋に飾れるのは一度にひとつ。手に入れたものはずっとここにあって、なくなりません。"
+          }
+        }
+      }
+    },
     "房间里的东西都摆在家里。拿到的东西永远在这，不会丢。" : {
       "localizations" : {
         "en" : {
@@ -2653,6 +2708,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "許可できませんでした：%@"
+          }
+        }
+      }
+    },
+    "摆在家里的书桌上。哪个模式都在。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Goes on the desk in your home. There in every mode."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "家の机の上に置く。どのモードでもある。"
+          }
+        }
+      }
+    },
+    "摆在家里的左前角。哪个模式都在。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Goes in the front left corner of your home. There in every mode."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "家の左手前のすみに置く。どのモードでもある。"
+          }
+        }
+      }
+    },
+    "摆在家里的沙发旁边。哪个模式都在。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Goes next to the sofa in your home. There in every mode."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "家のソファの横に置く。どのモードでもある。"
+          }
+        }
+      }
+    },
+    "摆在家里的运动角，靠墙。哪个模式都在。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Goes in your home, in the workout corner by the wall. There in every mode."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "家の運動コーナーに、壁ぎわで置く。どのモードでもある。"
+          }
+        }
+      }
+    },
+    "摆着不算练过，不给罐子。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Having it doesn't count as a workout. No cans for it."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "置くだけじゃ運動にならない。缶も出ない。"
           }
         }
       }
@@ -3170,6 +3305,22 @@
         }
       }
     },
+    "现在摆上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it out now"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま飾る"
+          }
+        }
+      }
+    },
     "现在没有" : {
       "localizations" : {
         "ja" : {
@@ -3308,7 +3459,7 @@
         }
       }
     },
-    "看上哪个了？……我只是随便问问。" : {
+    "看上哪个了？\n……我只是随便问问。" : {
       "comment" : "HAKU",
       "localizations" : {
         "en" : {
@@ -3607,6 +3758,12 @@
     },
     "衣服" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Clothes"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4277,6 +4434,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ずっと覚えてること"
+          }
+        }
+      }
+    },
+    "靠在家里的运动墙上。哪个模式都在。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Leans on the workout wall in your home. There in every mode."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "家の運動用の壁に立てかける。どのモードでもある。"
           }
         }
       }

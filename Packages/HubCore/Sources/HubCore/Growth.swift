@@ -495,6 +495,9 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(id: "gloves.pink", slot: .gloves, title: "霓虹粉拳套", price: 20, card: .boxing),
         ShopItem(id: "room.plant", slot: .room, title: "房间绿植", price: 8),
         ShopItem(id: "room.bag", slot: .room, title: "房间小沙袋", price: 15, card: .boxing),
+        // 商店完整目录 §10.2: the bench is for every card, the snowboard only for the ski card.
+        ShopItem(id: "room.bench", slot: .room, title: "房间卧推架", price: 25),
+        ShopItem(id: "room.snowboard", slot: .room, title: "房间单板", price: 20, card: .ski),
         ShopItem(
             id: "gloves.gold",
             slot: .gloves,
@@ -519,6 +522,17 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             price: 20,
             persona: .kuro,
             card: .tennis
+        ),
+        // 第二个预设角色's room is not open yet, so her bench and snowboard wait undrawn.
+        ShopItem(id: "kuro.room.bench", slot: .room, title: "房间卧推架", price: 25, persona: .kuro, drawn: false),
+        ShopItem(
+            id: "kuro.room.snowboard",
+            slot: .room,
+            title: "房间单板",
+            price: 20,
+            persona: .kuro,
+            card: .ski,
+            drawn: false
         ),
         ShopItem(
             id: "kuro.celebrate.spin",
@@ -623,7 +637,8 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         price: Int? = nil,
         keepsake: Keepsake? = nil,
         persona: Persona = .haku,
-        card: IdentityKind? = nil
+        card: IdentityKind? = nil,
+        drawn: Bool = true
     ) {
         self.id = id
         self.slot = slot
@@ -632,7 +647,7 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         self.keepsake = keepsake
         self.persona = persona
         self.card = card ?? keepsake?.card
-        self.isDrawn = true
+        self.isDrawn = drawn
     }
 
     // A prop without a price is the card's gold keepsake. The identity card's win carries the card.

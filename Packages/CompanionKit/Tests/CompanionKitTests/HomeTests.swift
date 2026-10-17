@@ -335,6 +335,12 @@ import Testing
         #expect(HomeItemPreview(itemID: "headband.red") == nil)
     }
 
+    @Test func everyDrawnRoomItemHasAHomePicture() {
+        for item in ShopItem.catalog(for: .haku) where item.isDrawn && item.slot == .room {
+            #expect(HomeItemIcon(itemID: item.id) != nil, "\(item.id)")
+        }
+    }
+
     @Test func thePreviewShowsHakuStandingNextToTheItem() throws {
         for item in [HomeItem.plant, .bag, .speaker, .bench, .snowboard, .cactus] {
             let model = HomeModel(night: false, cans: 999)
