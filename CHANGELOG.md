@@ -100,6 +100,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The home page shows only real data: the mode, today's timeline, the cans, what HAKU owns and wears, the earned
+  keepsakes with their order, and the room colours all come from the app's stores (`HakuHomeView(snapshot:…)`).
+  Mode buttons switch the real mode; colour changes are saved. The fake shop, wardrobe, keepsakes and timeline
+  are gone, and day/night and "fill the room" are DEBUG only. The room has named zones and slots for later
+  rearranging; the right wall hook moved left so the wardrobe no longer hides it.
 - A room item from the shop no longer stands in HAKU's 下班 backdrop. Bought room items live in HAKU's home.
 - VoiceOver reads the unboxing as "开箱：" and the item's name instead of the character's mode.
 - Opening the app, HAKU says one line at most: a celebration first, then an invite, good night, the late-night
