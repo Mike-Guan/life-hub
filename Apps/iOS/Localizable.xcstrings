@@ -1066,22 +1066,6 @@
         }
       }
     },
-    "先收起来" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Put it away"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "しまっておく"
-          }
-        }
-      }
-    },
     "先放衣柜" : {
       "comment" : "E6 按钮 ≤16",
       "localizations" : {
@@ -2483,18 +2467,18 @@
         }
       }
     },
-    "房间里一次摆一件。拿到的东西永远在这，不会丢。" : {
+    "房间里的东西都摆在家里。拿到的东西永远在这，不会丢。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "One thing in the room at a time. What you get stays here for good."
+            "value" : "Room things all go in your home. What you get stays here for good."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "部屋に飾れるのは一度にひとつ。手に入れたものはずっとここにあって、なくなりません。"
+            "value" : "部屋のものはぜんぶ家に飾られます。手に入れたものはずっとここにあって、なくなりません。"
           }
         }
       }
@@ -2669,6 +2653,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "許可できませんでした：%@"
+          }
+        }
+      }
+    },
+    "摆进家里" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it in your home"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家に飾る"
           }
         }
       }
@@ -3166,22 +3166,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "いまつける"
-          }
-        }
-      }
-    },
-    "现在摆上" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Put it out now"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "いま飾る"
           }
         }
       }

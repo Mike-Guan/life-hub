@@ -73,7 +73,10 @@ struct UnboxSheet: View {
             .toyCard()
 
             Button {
-                wardrobe = wearing
+                // Room items live in the home page, which places every owned one, so nothing is equipped.
+                if item.slot != .room {
+                    wardrobe = wearing
+                }
                 dismiss()
             } label: {
                 Text(buttons.use)
@@ -82,14 +85,16 @@ struct UnboxSheet: View {
                     .frame(maxWidth: .infinity, minHeight: 56)
             }
             .buttonStyle(UnboxButtonStyle(fill: Mode.money.color(for: persona), shadow: Toy.pink))
-            Button {
-                dismiss()
-            } label: {
-                Text(buttons.keep)
-                    .font(Toy.body(16, weight: .black))
-                    .frame(maxWidth: .infinity, minHeight: 48)
+            if let keep = buttons.keep {
+                Button {
+                    dismiss()
+                } label: {
+                    Text(keep)
+                        .font(Toy.body(16, weight: .black))
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                }
+                .buttonStyle(UnboxButtonStyle(fill: Toy.ink, shadow: Toy.ink))
             }
-            .buttonStyle(UnboxButtonStyle(fill: Toy.ink, shadow: Toy.ink))
         }
         .padding(.horizontal, 24)
         .padding(.top, 32)
@@ -112,10 +117,11 @@ struct UnboxSheet: View {
     }
 
     // PM 10-15: a room item isn't worn and a celebration is played, so the buttons say what happens to each.
-    /// The two button titles for the item's kind.
-    private var buttons: (use: LocalizedStringKey, keep: LocalizedStringKey) {
+    // A room item goes into the home page by itself (商店与家 同步方案 §4), so it has no second button.
+    /// The two button titles for the item's kind; `keep` is `nil` when there is nothing to choose.
+    private var buttons: (use: LocalizedStringKey, keep: LocalizedStringKey?) {
         switch item.slot {
-        case .room: ("现在摆上", "先收起来")
+        case .room: ("摆进家里", nil)
         case .celebration: ("现在用上", "先放衣柜")
         default: ("现在戴上", "先放衣柜")
         }

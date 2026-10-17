@@ -24,6 +24,11 @@ import Testing
                 #expect(KuroFigure.parts(for: look, pose: overtime) != rest)
                 continue
             }
+            if look == .chill, moment == .dozing {
+                let nap = KuroView.pose(look, energy: 50, bedtime: .off, moment: moment, overtimeUntil: nil)
+                #expect(KuroFigure.parts(for: look, pose: nap) != rest)
+                continue
+            }
             let slot = try #require(KuroSlot(need: need, activity: activity, moment: moment, look: look))
             let dressed = slot.dressing(base)
             let (tap, progress) = try #require(slot.move(in: look, at: slot.period * 3 + 0.5))
@@ -45,6 +50,42 @@ import Testing
         #expect(KuroSlot(need: nil, activity: nil, moment: .packingUp, look: .work) == .packingUp)
         #expect(KuroSlot.tired.move(in: .tennis) == .rub && KuroSlot.focus.move(in: .desk) == .glasses)
         #expect(KuroSlot.invite.hops && KuroSlot.active.hops && !KuroSlot.focus.hops && !KuroSlot.tired.hops)
+    }
+
+    // 抱平板睡着 v2 (Mike 2026-10-15).
+    @Test func dozingOnTheCouchSheNapsOverHerTablet() {
+        let nap = KuroView.pose(.chill, energy: 50, bedtime: .off, moment: .dozing, overtimeUntil: nil)
+        let parts = KuroFigure.parts(for: .chill, pose: nap)
+        #expect(parts.contains(.napTablet) && parts.contains(.napHands) && parts.contains(.napMouth))
+        #expect(parts.contains(.eyesClosed) && !parts.contains(.chillCup) && !parts.contains(.mouthFlat))
+        // With something on her lap her hands rest on top of it; the watch leaves her lap empty.
+        var covered = nap
+        covered.items = [.blanket]
+        #expect(KuroFigure.parts(for: .chill, pose: covered).contains(.napHandsUp))
+        let watch = KuroFigure.parts(for: .chill, pose: covered, watch: true)
+        #expect(watch.contains(.napHands) && !watch.contains(.napHandsUp) && !watch.contains(.itemBlanket))
+        // Only on the couch, and never at bedtime.
+        #expect(!KuroView.pose(.chill, energy: 50, bedtime: .on, moment: .dozing, overtimeUntil: nil).napping)
+        for look in KuroLook.allCases where look != .chill {
+            #expect(!KuroView.pose(look, energy: 50, bedtime: .off, moment: .dozing, overtimeUntil: nil).napping)
+        }
+    }
+
+    @Test func nappingSheBreathesAndNodsNowAndThen() {
+        var starts: [TimeInterval] = []
+        // A nod already under way at the start is not counted.
+        var nodding = true
+        for step in 0..<6000 {
+            let t = Double(step) * 0.05
+            let motion = KuroView.nap(time: t)
+            #expect(abs(motion.dy) <= 4.2 + 1e-9 && motion.angle >= 0 && motion.angle <= 3 + 1e-9)
+            let now = motion.angle > 0
+            if now, !nodding { starts.append(t) }
+            nodding = now
+        }
+        let gaps = zip(starts.dropFirst(), starts).map { $0 - $1 }
+        #expect(gaps.count >= 15)
+        #expect(gaps.allSatisfy { $0 > 7.9 && $0 < 15.1 })
     }
 
     @Test func lowEnergyKeepsHerLowEyesWhenInvited() {
