@@ -711,6 +711,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The shop's room item preview keeps a still of the room under the live one, so it shows where SpriteKit can't
+  draw, such as the CI simulator.
 - With languages on (Debug and STG), VoiceOver reads the second preset character's overtime lines from her
   string table, so they can show in Japanese and English.
 - After a workout cheer or the off-work move, HAKU can again stretch after a long sit, get up from the sofa,
