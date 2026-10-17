@@ -159,6 +159,40 @@ import Testing
         #expect(HomeSpot.bench.pose == .press)
     }
 
+    @Test func atBedtimeHakuGoesToBed() {
+        let model = HomeModel(night: true, mode: .chill)
+        #expect(model.spot == .sofa)
+        var next = model.snapshot
+        next.bedtime = .on
+        model.apply(next)
+        model.tick(1)
+        #expect(model.spot == .rest)
+    }
+
+    @Test func nowAndThenHakuWandersOverToAHomeItemAndBack() {
+        let model = HomeModel(night: false, mode: .work)
+        model.own(.plant)
+        model.tick(1)
+        #expect(model.spot == .work)
+        // The day's third slot has a walk from 2666 s to 2696 s.
+        model.tick(2670)
+        #expect(model.spot == .idle)
+        #expect(model.dropPoint == HomeModel.previewSpot(.plant, items: [.plant]))
+        model.tick(30)
+        #expect(model.spot == .work)
+        #expect(model.dropPoint == nil)
+    }
+
+    @Test func hakuNeverWandersToTheSportsGear() {
+        let model = HomeModel(night: false, mode: .work)
+        model.own(.bag)
+        model.own(.bench)
+        for _ in 0..<(86_400 / 10) {
+            model.tick(10)
+            #expect(model.spot == .work)
+        }
+    }
+
     @Test func tappingTheBenchIsAShortVisit() {
         let model = HomeModel(night: false)
         model.switchMode(.chill)

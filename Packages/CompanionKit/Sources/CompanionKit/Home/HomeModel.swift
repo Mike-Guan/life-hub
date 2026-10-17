@@ -132,8 +132,10 @@ final class HomeModel {
     private(set) var spot: HomeSpot = .idle
     /// Where HAKU was dropped after being carried, until he walks somewhere.
     private(set) var dropPoint: GridPoint?
-    /// Seconds until HAKU leaves a place he was sent to or dropped at and goes back to the mode's spot.
+    /// Seconds until HAKU leaves a place he was sent to or dropped at and goes back to where the rules put him.
     private(set) var visitLeft: Double?
+    /// The time in the room, advanced by the scene.
+    private(set) var now: Date
     /// The room with the colours picked here, saved through the page.
     private(set) var layout: RoomLayout
     /// Whether the room shows every item, owned or not, to see where each one goes. DEBUG builds only.
@@ -148,6 +150,8 @@ final class HomeModel {
 
     private var taps: [Date] = []
     private var lineIndex = 0
+    /// What the behavior rules last said, `nil` when they couldn't tell.
+    private var beat: HomeBeat?
 
     /// - Parameters:
     ///   - snapshot: what the app shows.
@@ -159,7 +163,8 @@ final class HomeModel {
         layout = snapshot.room
         let hour = Calendar.current.component(.hour, from: now)
         isNight = night ?? (hour >= 18 || hour < 6)
-        spot = modeSpot
+        self.now = now
+        goHome()
     }
 
     /// The user's identity card, the fourth mode.
@@ -206,7 +211,7 @@ final class HomeModel {
         for item in items.subtracting(before) { cues.append(.placed(item)) }
         if modeChanged, new.mode != mode {
             mode = new.mode
-            go(modeSpot)
+            goHome()
             if let mode = new.mode { line = Self.modeLine(mode, title: title(mode), card: card, items: items) }
         }
         changed()
@@ -215,7 +220,7 @@ final class HomeModel {
     /// Switches the mode here at once and sends HAKU to act it out; the page also tells the app.
     func switchMode(_ new: Mode) {
         mode = new
-        go(modeSpot)
+        goHome()
         line = Self.modeLine(new, title: title(new), card: card, items: items)
         changed()
     }
@@ -334,15 +339,20 @@ final class HomeModel {
         changed()
     }
 
-    /// Counts down a visit; when it ends HAKU goes back to the mode's spot.
+    /// Advances the room's time: a visit counts down and then HAKU goes back; otherwise he follows the rules when
+    /// what they say changes.
     func tick(_ seconds: Double) {
-        guard let left = visitLeft else { return }
-        if left > seconds {
-            visitLeft = left - seconds
-        } else {
-            go(modeSpot)
-            changed()
+        now += seconds
+        if let left = visitLeft {
+            guard left <= seconds else {
+                visitLeft = left - seconds
+                return
+            }
+        } else if currentBeat() == beat {
+            return
         }
+        goHome()
+        changed()
     }
 
     /// Takes the cues the scene has not played yet.
@@ -370,7 +380,7 @@ final class HomeModel {
     // PM 家 功能范围 v0: tapping furniture or dropping HAKU somewhere is a short visit, not a mode change.
     private func visit(_ next: HomeSpot) {
         go(next)
-        if next != modeSpot { visitLeft = Self.visitLength }
+        if next != Self.place(beat, card: card, items: items).spot { visitLeft = Self.visitLength }
     }
 
     private func go(_ next: HomeSpot) {
@@ -379,9 +389,42 @@ final class HomeModel {
         spot = next
     }
 
-    /// Where the current mode puts HAKU.
-    var modeSpot: HomeSpot {
-        mode.map { Self.spot(for: $0, card: card, items: items) } ?? .idle
+    /// Sends HAKU where the behavior rules put him now.
+    private func goHome() {
+        beat = currentBeat()
+        let place = Self.place(beat, card: card, items: items)
+        go(place.spot)
+        dropPoint = place.drop
+    }
+
+    // 家 执行计划 v0 §3: the rules decide; the mode switched here counts before the app has caught up.
+    private func currentBeat() -> HomeBeat? {
+        var home = snapshot
+        home.mode = mode
+        // The same day wanders the same way. Days start at midnight UTC.
+        let day = UInt64(bitPattern: Int64((now.timeIntervalSinceReferenceDate / 86_400).rounded(.down)))
+        return HomeBehavior.beat(for: home, now: now, seed: day)
+    }
+
+    /// Where HAKU goes for `beat`: a spot, or the floor next to an item; the middle of the rug when the rules can't
+    /// tell.
+    static func place(
+        _ beat: HomeBeat?, card: IdentityKind?, items: Set<HomeItem>
+    ) -> (spot: HomeSpot, drop: GridPoint?) {
+        guard let beat else { return (.idle, nil) }
+        switch beat.spot {
+        case .desk: return (beat.action == .sideHustle ? .side : .work, nil)
+        case .sofa: return (.sofa, nil)
+        case .bed: return (.rest, nil)
+        // The bench has no card, so the rules send a fitness day here; the bench is its gear.
+        case .sportsCorner: return (cardSpot(card, items: items), nil)
+        // No shelf spot yet: keepsake moments aren't played.
+        case .shelf: return (.idle, nil)
+        case .item(let id):
+            guard let item = HomeItem(shopID: id) else { return (.idle, nil) }
+            if beat.action == .use(id), item == .bag { return (.box, nil) }
+            return (.idle, previewSpot(item, items: items))
+        }
     }
 
     /// How long a visit lasts, in seconds.
@@ -399,15 +442,6 @@ final class HomeModel {
     }
 
     // PM 2026-10-15: the fourth mode follows the user's identity card, so its spot and line branch on the card.
-    static func spot(for mode: Mode, card: IdentityKind?, items: Set<HomeItem>) -> HomeSpot {
-        switch mode {
-        case .work: .work
-        case .chill: .sofa
-        case .boxing: cardSpot(card, items: items)
-        case .money: .side
-        }
-    }
-
     static func cardSpot(_ card: IdentityKind?, items: Set<HomeItem>) -> HomeSpot {
         switch card {
         case .boxing: items.contains(.bag) ? .box : .shadowbox

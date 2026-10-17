@@ -6,18 +6,24 @@ import HubCore
 
 // Fabricated data for the home tests: a snapshot the way the app would send one.
 extension HomeModel {
+    /// The room's clock starts here: the first two wander slots of this day have no walk.
+    static let start = Date(timeIntervalSinceReferenceDate: 0)
+
     convenience init(night: Bool, card: IdentityKind = .boxing, mode: Mode? = nil, energy: EnergyLevel? = nil) {
         var snapshot = HomeSnapshot.preview()
         snapshot.cards = ModeCards(identity: card)
         snapshot.mode = mode
         snapshot.energy = energy
-        self.init(snapshot: snapshot, night: night)
+        self.init(snapshot: snapshot, night: night, now: Self.start)
     }
 
-    /// Hands the model a snapshot in which the character owns `item`, as after a purchase in the shop.
+    /// Hands the model a snapshot in which the character owns `item` and it stands in the room, as after a purchase
+    /// in the shop.
     func own(_ item: HomeItem) {
         var next = snapshot
-        next.owned.insert("room.\(item.rawValue)")
+        let id = "room.\(item.rawValue)"
+        next.owned.insert(id)
+        next.room.place([id], catalog: .shipped, now: now, deviceID: "test")
         apply(next)
     }
 
