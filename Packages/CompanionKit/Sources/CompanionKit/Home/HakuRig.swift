@@ -302,9 +302,9 @@ final class HakuNode: SKNode {
 
     // How far up from the chest the phone is held, and where it sinks to when he nods off.
     private static let phoneLift: CGFloat = 18
+    private static let phoneRest: CGFloat = 8
     // Lifts the phone from HAKU's bed depth (14) over the blanket's (15).
     private static let phoneOverBlanket: CGFloat = 1.1
-    private static let phoneRest: CGFloat = 8
     // A little below the chest, so his big head doesn't hide the phone and his arms don't stretch.
     private static let phoneHold = CGPoint(x: 0, y: 30)
 
