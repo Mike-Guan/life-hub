@@ -10,7 +10,7 @@ final class HomeStage {
     let model: HomeModel
     let scene: HomeScene
 
-    init(model: HomeModel = HomeModel()) {
+    init(model: HomeModel) {
         self.model = model
         scene = HomeScene(model: model)
     }
@@ -18,7 +18,7 @@ final class HomeStage {
 
 /// A panel opened from the room.
 enum HomeSheet: String, Identifiable {
-    case wardrobe, shelf, decorate, settings
+    case shelf, decorate, settings
 
     var id: String { rawValue }
 }
@@ -42,21 +42,41 @@ struct HomeChip: Identifiable {
     ]
 }
 
-/// HAKU's home: the room in SpriteKit, the rest of the screen in SwiftUI. A prototype on mock data.
+/// HAKU's home: the room in SpriteKit, the rest of the screen in SwiftUI, on the app's real data.
 public struct HakuHomeView: View {
-    private let onShop: (() -> Void)?
+    private let snapshot: HomeSnapshot
+    private let onSwitch: (Mode) -> Void
+    private let onShop: () -> Void
+    private let onWardrobe: () -> Void
+    private let onSave: (RoomLayout) -> Void
     private let onExit: () -> Void
-    @State private var stage = HomeStage()
+    @State private var stage: HomeStage
     @State private var sheet: HomeSheet?
     @State private var carrying = false
     @Environment(\.scenePhase) private var scenePhase
 
     /// - Parameters:
-    ///   - onShop: Opens the shop. Without it the home shows no way into the shop.
+    ///   - snapshot: What the page shows; pass a new one whenever the data changes.
+    ///   - onSwitch: Switches the mode by hand, as the home screen's mode cards do.
+    ///   - onShop: Opens the shop.
+    ///   - onWardrobe: Opens the wardrobe.
+    ///   - onSave: Saves the room after a colour change.
     ///   - onExit: Called when the user leaves the home for the dashboard.
-    public init(onShop: (() -> Void)? = nil, onExit: @escaping () -> Void) {
+    public init(
+        snapshot: HomeSnapshot,
+        onSwitch: @escaping (Mode) -> Void,
+        onShop: @escaping () -> Void,
+        onWardrobe: @escaping () -> Void,
+        onSave: @escaping (RoomLayout) -> Void,
+        onExit: @escaping () -> Void
+    ) {
+        self.snapshot = snapshot
+        self.onSwitch = onSwitch
         self.onShop = onShop
+        self.onWardrobe = onWardrobe
+        self.onSave = onSave
         self.onExit = onExit
+        _stage = State(initialValue: HomeStage(model: HomeModel(snapshot: snapshot)))
     }
 
     public var body: some View {
@@ -74,11 +94,14 @@ public struct HakuHomeView: View {
         }
         .background(Toy.paper.ignoresSafeArea())
         .sheet(item: $sheet) { which in
-            HomeSheetView(which: which, model: model, onExit: onExit)
+            HomeSheetView(which: which, model: model, onSave: onSave, onExit: onExit)
                 .presentationDetents([.medium, .large])
         }
         .onChange(of: model.revision) {
             stage.scene.sync()
+        }
+        .onChange(of: snapshot) {
+            model.apply(snapshot)
         }
     }
 
@@ -92,7 +115,7 @@ public struct HakuHomeView: View {
                     .foregroundStyle(Toy.muted)
                 Spacer()
                 Button {
-                    onShop?()
+                    onShop()
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "bolt.fill").foregroundStyle(Color(hex: 0x7CFF4F))
@@ -104,7 +127,7 @@ public struct HakuHomeView: View {
                     .foregroundStyle(.white)
                 }
                 .buttonStyle(.plain)
-                .disabled(onShop == nil)
+                #if DEBUG
                 Button {
                     model.toggleNight()
                 } label: {
@@ -113,6 +136,7 @@ public struct HakuHomeView: View {
                         .foregroundStyle(Toy.ink)
                 }
                 .buttonStyle(.plain)
+                #endif
                 Button {
                     sheet = .settings
                 } label: {
@@ -144,7 +168,7 @@ public struct HakuHomeView: View {
                 )
                 .frame(width: geo.size.width, height: geo.size.height)
                 if !carrying {
-                    ForEach(HomeChip.all.filter { $0.hotspot != .shop || onShop != nil }) { chip in
+                    ForEach(HomeChip.all) { chip in
                         let p = HomeGrid.plan(chip.at)
                         chipButton(chip)
                             .position(x: (p.x - canvas.minX) * scale, y: (p.y - canvas.minY) * scale)
@@ -204,8 +228,8 @@ public struct HakuHomeView: View {
         case .exit:
             onExit()
             return
-        case .wardrobe: sheet = .wardrobe
-        case .shop: onShop?()
+        case .wardrobe: onWardrobe()
+        case .shop: onShop()
         case .shelf: sheet = .shelf
         default: break
         }
@@ -219,8 +243,11 @@ public struct HakuHomeView: View {
             model.tap(.haku)
         } label: {
             HStack(spacing: 12) {
-                CompanionPortrait(mode: model.mode, energy: model.energy, idles: false, framing: .head)
-                    .frame(width: 54, height: 54)
+                CompanionPortrait(
+                    mode: model.mode ?? .chill, card: model.card, energy: model.snapshot.energy?.value,
+                    wardrobe: model.snapshot.wardrobe, idles: false, framing: .head
+                )
+                .frame(width: 54, height: 54)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(verbatim: "HAKU").font(Toy.body(12, weight: .heavy)).foregroundStyle(Toy.muted)
                     Text(model.line)
@@ -248,14 +275,17 @@ public struct HakuHomeView: View {
             ForEach(Mode.allCases) { mode in
                 Button {
                     model.switchMode(mode)
+                    onSwitch(mode)
                 } label: {
                     HStack(spacing: 10) {
-                        Image(systemName: mode == .boxing ? model.card.symbol : mode.symbol).font(
+                        Image(systemName: mode == .boxing ? (model.card?.symbol ?? mode.symbol) : mode.symbol).font(
                             .system(size: 20, weight: .bold)
                         ).frame(width: 26)
                         VStack(alignment: .leading, spacing: 1) {
                             Text(model.title(mode)).font(Toy.body(17, weight: .heavy))
-                            Text(verbatim: mode.code).font(Toy.body(11, weight: .bold)).foregroundStyle(Toy.muted)
+                            Text(verbatim: model.snapshot.cards.code(for: mode, persona: model.snapshot.persona)).font(
+                                Toy.body(11, weight: .bold)
+                            ).foregroundStyle(Toy.muted)
                         }
                         Spacer(minLength: 0)
                     }
@@ -288,10 +318,11 @@ public struct HakuHomeView: View {
     }
 }
 
-/// The panels: wardrobe, shop, reward shelf, decorating and settings.
+/// The panels: reward shelf, decorating and settings.
 private struct HomeSheetView: View {
     let which: HomeSheet
     let model: HomeModel
+    let onSave: (RoomLayout) -> Void
     let onExit: () -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -309,7 +340,6 @@ private struct HomeSheetView: View {
 
     private var title: String {
         switch which {
-        case .wardrobe: "衣柜"
         case .shelf: "奖励架"
         case .decorate: "家具换颜色"
         case .settings: "设置"
@@ -318,33 +348,9 @@ private struct HomeSheetView: View {
 
     @ViewBuilder private var content: some View {
         switch which {
-        case .wardrobe: wardrobe
         case .shelf: shelf
         case .decorate: decorate
         case .settings: settings
-        }
-    }
-
-    private var wardrobe: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 12)], spacing: 12) {
-            ForEach(HomeOutfit.allCases, id: \.self) { outfit in
-                let owned = model.ownedOutfits.contains(outfit)
-                Button {
-                    model.wear(outfit)
-                    dismiss()
-                } label: {
-                    VStack(spacing: 6) {
-                        OutfitPreview(outfit: outfit).frame(height: 56).opacity(owned ? 1 : 0.35)
-                        Text(outfit.name).font(Toy.body(12, weight: .bold)).lineLimit(1).minimumScaleFactor(0.8)
-                        Text(owned ? (model.outfit == outfit ? "穿着" : "换上") : "商店有")
-                            .font(Toy.body(11)).foregroundStyle(Toy.muted)
-                    }
-                    .padding(10)
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(ToyButtonStyle(fill: Color(hex: 0xE4F5E1), isSelected: model.outfit == outfit))
-                .disabled(!owned)
-            }
         }
     }
 
@@ -353,17 +359,10 @@ private struct HomeSheetView: View {
             Text("每一件都是真的发生过的事换来的。").font(Toy.body(13)).foregroundStyle(Toy.muted)
                 .frame(maxWidth: .infinity, alignment: .leading)
             ForEach(model.keepsakes) { keepsake in
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(keepsake.name).font(Toy.body(16, weight: .heavy))
-                        Spacer()
-                        Text(keepsake.date).font(Toy.body(12)).foregroundStyle(Toy.muted)
-                    }
-                    Text(keepsake.earned).font(Toy.body(13)).foregroundStyle(Toy.muted)
-                }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .toyCard()
+                Text(keepsake.name).font(Toy.body(16, weight: .heavy))
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .toyCard()
             }
         }
     }
@@ -376,7 +375,7 @@ private struct HomeSheetView: View {
                     ForEach(Array(piece.swatches.enumerated()), id: \.offset) { index, hex in
                         let picked = model.color(piece) == hex
                         Button {
-                            model.paint(piece, index)
+                            onSave(model.paint(piece, index))
                         } label: {
                             Circle().fill(Color(hex: hex))
                                 .frame(width: 34, height: 34)
@@ -396,14 +395,16 @@ private struct HomeSheetView: View {
 
     private var settings: some View {
         VStack(alignment: .leading, spacing: 14) {
+            #if DEBUG
             Toggle(isOn: Binding(get: { model.isNight }, set: { _ in model.toggleNight() })) {
-                Text("夜晚").font(Toy.body(16, weight: .bold))
+                Text(verbatim: "夜晚（DEBUG）").font(Toy.body(16, weight: .bold))
             }
             .tint(Color(hex: 0x58C25A))
             Toggle(isOn: Binding(get: { model.previewsAllItems }, set: { _ in model.togglePreviewItems() })) {
-                Text("预览：摆满所有物品").font(Toy.body(16, weight: .bold))
+                Text(verbatim: "摆满所有物品（DEBUG）").font(Toy.body(16, weight: .bold))
             }
             .tint(Color(hex: 0x58C25A))
+            #endif
             Button {
                 dismiss()
                 onExit()
@@ -411,29 +412,10 @@ private struct HomeSheetView: View {
                 Text("出门，回首页").font(Toy.body(15, weight: .heavy)).frame(maxWidth: .infinity).padding(12)
             }
             .buttonStyle(ToyButtonStyle(fill: Toy.card))
-            Text("这是「家」的原型：罐子、衣服和记录都是假数据，不影响真实记录。")
-                .font(Toy.body(12)).foregroundStyle(Toy.muted)
         }
         .padding(14)
         .toyCard()
     }
 }
 
-/// A small drawing of a top from the wardrobe.
-private struct OutfitPreview: View {
-    let outfit: HomeOutfit
-
-    var body: some View {
-        Canvas { context, size in
-            let rect = HakuNode.torsoRect
-            let scale = min(size.width / rect.width, size.height / rect.height)
-            context.translateBy(x: (size.width - rect.width * scale) / 2, y: (size.height - rect.height * scale) / 2)
-            context.scaleBy(x: scale, y: scale)
-            context.translateBy(x: -rect.minX, y: -rect.minY)
-            for part in outfit.parts {
-                RunnerDrawing.draw(part, in: context, fillOverride: part == .jacket ? outfit.base : nil)
-            }
-        }
-    }
-}
 #endif

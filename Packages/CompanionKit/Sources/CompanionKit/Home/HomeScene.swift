@@ -41,7 +41,7 @@ final class HomeScene: SKScene {
     private var nextEffect: TimeInterval = 0
 
     // What the drawing shows now, to redraw only what changed.
-    private var shownColors: [HomePaintable: Int]?
+    private var shownColors: [UInt32]?
     private var shownOutfits: [HomeOutfit] = []
     private var shownNight: Bool?
     private var shownScreen: HomeScreen?
@@ -173,12 +173,12 @@ final class HomeScene: SKScene {
 
     /// Brings the drawing up to date with the model.
     func sync(animated: Bool = true) {
-        let colors = model.colors
+        let colors = HomePaintable.allCases.map(model.color)
         if colors != shownColors {
             redraw(flashing: shownColors != nil)
             shownColors = colors
         }
-        let outfits = HomeOutfit.allCases.filter { model.ownedOutfits.contains($0) }
+        let outfits = model.ownedOutfits
         if outfits != shownOutfits {
             shownOutfits = outfits
             let rect = HomeGrid.bounds(HomePiece.wardrobe.boxes)
@@ -355,7 +355,7 @@ final class HomeScene: SKScene {
     }
 
     private func poseHaku() {
-        let tired = model.energy < 35
+        let tired = model.isLow
         var pose: HakuPose = tired ? .tired : .stand
         var face: HakuFace = tired ? .tired : .idle
         var depth = HomeGrid.walkingDepth(point)

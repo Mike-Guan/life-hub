@@ -3,8 +3,8 @@ import HubCore
 import Observation
 import SwiftUI
 
-// Issue #485: everything here is mock data for the prototype. Nothing reads or writes the real
-// mode log, can ledger or wardrobe.
+// Issue #489 (Mike 2026-10-17: the home runs on real data only). The model is built from the app's
+// `HomeSnapshot`; changes go back through the page's callbacks and come in again as a new snapshot.
 
 /// A top HAKU can wear at home.
 enum HomeOutfit: String, CaseIterable, Sendable {
@@ -20,13 +20,21 @@ enum HomeOutfit: String, CaseIterable, Sendable {
         }
     }
 
-    /// The price in cans, or `nil` when owned from the start.
-    var price: Int? {
+    /// The shop item the top is, `nil` for the default jacket.
+    var shopID: String? {
         switch self {
-        case .jacket, .blazer, .aloha: nil
-        case .flame: 40
-        case .varsity: 80
+        case .jacket: nil
+        case .blazer: "haku.top.work.blazer"
+        case .aloha: "haku.top.chill.aloha"
+        case .flame: "haku.top.chill.flame"
+        case .varsity: "haku.set.chill.varsity"
         }
+    }
+
+    // The tops drawn in the room so far (M4 adds the rest); anything else worn shows the default jacket.
+    /// The room version of what is worn: the first drawn top among `worn` item ids, else the jacket.
+    init(worn: Set<String>) {
+        self = Self.allCases.first { $0.shopID.map(worn.contains) ?? false } ?? .jacket
     }
 
     /// The drawn parts of the top, in place of the jacket.
@@ -65,6 +73,9 @@ enum HomePaintable: String, CaseIterable, Sendable {
         }
     }
 
+    /// The piece's id in the saved room layout.
+    var layoutID: String { "home.\(rawValue)" }
+
     /// The colours to pick from; the first is the default.
     var swatches: [UInt32] {
         switch self {
@@ -80,72 +91,15 @@ enum HomePaintable: String, CaseIterable, Sendable {
 struct HomeKeepsake: Identifiable, Sendable {
     let id: String
     let name: String
-    let earned: String
-    let date: String
 }
 
-/// A shop entry for the home.
-enum HomeProduct: Hashable, Sendable {
-    case item(HomeItem)
-    case outfit(HomeOutfit)
-
-    static let all: [HomeProduct] = [
-        .item(.plant), .item(.bag), .item(.cactus), .item(.speaker), .item(.bench), .item(.snowboard),
-        .outfit(.flame), .outfit(.varsity),
-    ]
-
-    /// What the shop offers with `card` as the identity card: the bag is a boxing card item, the snowboard a ski
-    /// card item.
-    static func offered(card: IdentityKind) -> [HomeProduct] {
-        all.filter { product in
-            switch product {
-            case .item(.bag): card == .boxing
-            case .item(.snowboard): card == .ski
-            default: true
-            }
-        }
-    }
-
-    var name: String {
-        switch self {
-        case .item(.plant): "房间绿植"
-        case .item(.bag): "小沙袋"
-        case .item(.cactus): "小仙人掌"
-        case .item(.speaker): "迷你音箱"
-        case .item(.gloves): "墙上的拳套"
-        case .item(.racket): "网球拍"
-        case .item(.snowboard): "滑雪板"
-        case .item(.bench): "卧推架"
-        case .outfit(let o): o.name
-        }
-    }
-
-    var price: Int {
-        switch self {
-        case .item(.plant): 8
-        case .item(.bag): 15
-        case .item(.cactus): 15
-        case .item(.speaker): 20
-        case .item(.bench): 25
-        case .item(.snowboard): 20
-        // The gear on the wall is what the user already owns, hung up while not worn; it is never sold.
-        case .item(.gloves), .item(.racket): 0
-        case .outfit(let o): o.price ?? 0
-        }
-    }
-
-    /// Where the bought thing shows up.
-    var place: String {
-        switch self {
-        case .item(.plant): "门口角落"
-        case .item(.bag): "运动角，拳击日打它"
-        case .item(.cactus): "书桌上"
-        case .item(.speaker): "沙发旁边，下班时放歌"
-        case .item(.gloves), .item(.racket): "运动角的墙上"
-        case .item(.snowboard): "靠在运动角的墙上"
-        case .item(.bench): "运动角，健身日他会用"
-        case .outfit: "衣柜里，随时能换"
-        }
+extension HomeSnapshot {
+    /// HAKU's room before any mode, owning only `owned`; for previews.
+    static func preview(owning owned: Set<String> = []) -> HomeSnapshot {
+        HomeSnapshot(
+            persona: .haku, mode: nil, cards: ModeCards(), cans: 0, owned: owned, wardrobe: Wardrobe(),
+            energy: nil, vitals: HakuVitals(), bedtime: .off, today: [],
+            room: RoomLayout(persona: .haku, now: .distantPast, deviceID: ""))
     }
 }
 
@@ -166,74 +120,105 @@ enum HomeCue: Equatable, Sendable {
     case poof
 }
 
-/// State of the home prototype: where HAKU is going, what he wears, what the room holds.
+/// State of the home page: where HAKU is going, what he wears, what the room holds.
 @MainActor
 @Observable
 final class HomeModel {
-    private(set) var mode: Mode = .chill
-    /// The user's identity card, the fourth mode. Only the boxing card is drawn in the prototype.
-    let card: IdentityKind
+    /// What the app last sent.
+    private(set) var snapshot: HomeSnapshot
+    /// The current mode, `nil` before the first one.
+    private(set) var mode: Mode?
     /// Where HAKU is, or is walking to.
     private(set) var spot: HomeSpot = .idle
     /// Where HAKU was dropped after being carried, until he walks somewhere.
     private(set) var dropPoint: GridPoint?
     /// Seconds until HAKU leaves a place he was sent to or dropped at and goes back to the mode's spot.
     private(set) var visitLeft: Double?
-    private(set) var energy: Double = 62
-    private(set) var cans = 46
-    private(set) var outfit: HomeOutfit = .jacket
-    private(set) var ownedOutfits: Set<HomeOutfit> = [.jacket, .blazer, .aloha]
-    /// The items standing in the room: the bought ones, or all of them while previewing.
-    var items: Set<HomeItem> { previewsAllItems ? Set(HomeItem.allCases) : bought }
-    private(set) var bought: Set<HomeItem> = []
-    /// Whether the room shows every item, bought or not, to see where each one goes.
+    /// The room with the colours picked here, saved through the page.
+    private(set) var layout: RoomLayout
+    /// Whether the room shows every item, owned or not, to see where each one goes. DEBUG builds only.
     private(set) var previewsAllItems = false
-    private(set) var colors: [HomePaintable: Int] = [:]
     var isNight: Bool
     /// What HAKU says on the card.
     private(set) var line = "……来了。随便坐。"
-    private(set) var timeline: [HomeTimelineEntry]
     /// Bumped on every change the scene draws.
     private(set) var revision = 0
     /// One-off animations for the scene, oldest first.
     private(set) var cues: [HomeCue] = []
 
-    let keepsakes: [HomeKeepsake] = [
-        HomeKeepsake(id: "gloves", name: "第一副拳套", earned: "第一次拳击日打满 30 分钟", date: "9 月 21 日"),
-        HomeKeepsake(id: "shoe", name: "旧跑鞋", earned: "第一次跑完 5 公里", date: "9 月 27 日"),
-        HomeKeepsake(id: "cans", name: "罐子塔", earned: "攒到第 50 个罐子", date: "10 月 6 日"),
-        HomeKeepsake(id: "trophy", name: "小奖杯", earned: "一周有 3 天准点睡觉", date: "10 月 12 日"),
-    ]
-
     private var taps: [Date] = []
     private var lineIndex = 0
 
-    init(night: Bool? = nil, cans: Int = 46, card: IdentityKind = .boxing, now: Date = .now) {
-        self.cans = cans
-        self.card = card
+    /// - Parameters:
+    ///   - snapshot: what the app shows.
+    ///   - night: day or night; by default from the clock.
+    ///   - now: the time, for day or night.
+    init(snapshot: HomeSnapshot, night: Bool? = nil, now: Date = .now) {
+        self.snapshot = snapshot
+        mode = snapshot.mode
+        layout = snapshot.room
         let hour = Calendar.current.component(.hour, from: now)
         isNight = night ?? (hour >= 18 || hour < 6)
-        timeline = [
-            HomeTimelineEntry(time: "07:40", mode: nil, title: "起床，睡了 6 小时 50 分"),
-            HomeTimelineEntry(time: "09:05", mode: .work, title: "上班"),
-            HomeTimelineEntry(time: "18:40", mode: .chill, title: "下班"),
-        ]
+        spot = modeSpot
+    }
+
+    /// The user's identity card, the fourth mode.
+    var card: IdentityKind? { snapshot.cards.identity }
+    var cans: Int { snapshot.cans }
+    /// Whether today's energy is low; unknown counts as not low.
+    var isLow: Bool { snapshot.energy == .low }
+    /// The top HAKU wears in the room.
+    var outfit: HomeOutfit { HomeOutfit(worn: snapshot.worn) }
+    /// The drawn tops HAKU owns, hanging in the wardrobe; the jacket always.
+    var ownedOutfits: [HomeOutfit] {
+        HomeOutfit.allCases.filter { $0.shopID.map(snapshot.owned.contains) ?? true }
+    }
+    /// The items standing in the room: the owned ones, or all of them while previewing.
+    var items: Set<HomeItem> {
+        previewsAllItems ? Set(HomeItem.allCases) : Set(snapshot.owned.compactMap(HomeItem.init(shopID:)))
+    }
+    /// The keepsakes on the reward shelf, by name.
+    var keepsakes: [HomeKeepsake] {
+        snapshot.owned.filter { ShopItem.item($0)?.keepsake != nil }.sorted()
+            .map { HomeKeepsake(id: $0, name: ShopItem.item($0)?.title ?? $0) }
+    }
+    /// Today's modes, oldest first.
+    var timeline: [HomeTimelineEntry] {
+        snapshot.today.map {
+            HomeTimelineEntry(time: Self.clock($0.startedAt), mode: $0.mode, title: title($0.mode))
+        }
     }
 
     /// The colour picked for `piece`.
     func color(_ piece: HomePaintable) -> UInt32 {
-        piece.swatches[colors[piece] ?? 0]
+        let picked = piece == .walls ? layout.wallpaper : layout.placements.first { $0.piece == piece.layoutID }?.color
+        return picked.flatMap { UInt32($0, radix: 16) }.flatMap { piece.swatches.contains($0) ? $0 : nil }
+            ?? piece.swatches[0]
     }
 
     // MARK: Actions
 
-    /// Switches the mode and sends HAKU to act it out.
-    func switchMode(_ new: Mode, at time: String = HomeModel.clock()) {
+    /// Takes a new snapshot from the app: HAKU follows a changed mode, and new items show up with a pop.
+    func apply(_ new: HomeSnapshot) {
+        let before = items
+        let modeChanged = new.mode != snapshot.mode
+        snapshot = new
+        layout = new.room
+        for item in items.subtracting(before) { cues.append(.placed(item)) }
+        if modeChanged, new.mode != mode {
+            mode = new.mode
+            go(modeSpot)
+            if let mode = new.mode { line = Self.modeLine(mode, title: title(mode), card: card, items: items) }
+        }
+        changed()
+    }
+
+    /// Switches the mode here at once and sends HAKU to act it out; the page also tells the app.
+    func switchMode(_ new: Mode) {
         mode = new
-        timeline.append(HomeTimelineEntry(time: time, mode: new, title: title(new)))
-        energy = max(5, min(100, energy + Self.energyCost(new)))
         go(modeSpot)
-        line = Self.modeLine(new, card: card, items: items)
+        line = Self.modeLine(new, title: title(new), card: card, items: items)
+        changed()
     }
 
     /// Reacts to a tap in the room.
@@ -245,7 +230,7 @@ final class HomeModel {
             line = "坐一会儿。不一定干活。"
         case .sofa:
             visit(.sofa)
-            line = energy < 35 ? "沙发是我的。今天电量不够。" : "沙发是我的。"
+            line = isLow ? "沙发是我的。今天电量不够。" : "沙发是我的。"
         case .bed:
             visit(.rest)
             line = "……再五分钟。"
@@ -257,7 +242,7 @@ final class HomeModel {
             line = "推几下。不数。"
         case .window:
             visit(.window)
-            line = isNight ? "楼下的灯还亮着。" : "今天天气还行。"
+            line = isNight ? "楼下的灯还亮着。" : "窗外挺亮。"
         case .wardrobe:
             visit(.wardrobe)
             line = "穿什么都一样帅。"
@@ -272,54 +257,30 @@ final class HomeModel {
         changed()
     }
 
-    /// Spends cans on `product`; returns `false` when there aren't enough or it is already owned.
+    /// Picks swatch `index` for `piece` and returns the room to save.
     @discardableResult
-    func buy(_ product: HomeProduct) -> Bool {
-        guard !owns(product), cans >= product.price else { return false }
-        cans -= product.price
-        switch product {
-        case .item(let item):
-            bought.insert(item)
-            cues.append(.placed(item))
-            line = "……行吧，放这儿挺好。"
-        case .outfit(let o):
-            ownedOutfits.insert(o)
-            line = "放衣柜里了。"
+    func paint(_ piece: HomePaintable, _ index: Int, now: Date = .now, deviceID: String = "") -> RoomLayout {
+        guard piece.swatches.indices.contains(index) else { return layout }
+        let hex = String(format: "%06X", piece.swatches[index])
+        if piece == .walls {
+            layout.wallpaper = hex
+        } else if let i = layout.placements.firstIndex(where: { $0.piece == piece.layoutID }) {
+            layout.placements[i].color = hex
+        } else {
+            layout.placements.append(RoomPlacement(piece: piece.layoutID, color: hex))
         }
+        layout.touch(now: now, deviceID: deviceID)
         changed()
-        return true
+        return layout
     }
 
-    /// Whether `product` is already bought.
-    func owns(_ product: HomeProduct) -> Bool {
-        switch product {
-        case .item(let item): bought.contains(item)
-        case .outfit(let o): ownedOutfits.contains(o)
-        }
-    }
-
-    /// Puts on an owned outfit.
-    func wear(_ new: HomeOutfit) {
-        guard ownedOutfits.contains(new), new != outfit else { return }
-        outfit = new
-        cues.append(.poof)
-        line = "换好了。别盯着看。"
-        changed()
-    }
-
-    /// Picks swatch `index` for `piece`.
-    func paint(_ piece: HomePaintable, _ index: Int) {
-        guard piece.swatches.indices.contains(index) else { return }
-        colors[piece] = index
-        changed()
-    }
-
-    /// Shows or hides every item, bought or not.
+    /// Shows or hides every item, owned or not.
     func togglePreviewItems() {
         previewsAllItems.toggle()
         changed()
     }
 
+    /// Switches day and night by hand. DEBUG builds only.
     func toggleNight() {
         isNight.toggle()
         line = isNight ? "天黑了。灯开着就行。" : "天亮了。"
@@ -368,20 +329,15 @@ final class HomeModel {
         changed()
     }
 
-    /// Advances resting: energy climbs slowly while HAKU lies in bed.
+    /// Counts down a visit; when it ends HAKU goes back to the mode's spot.
     func tick(_ seconds: Double) {
-        if let left = visitLeft {
-            if left > seconds {
-                visitLeft = left - seconds
-            } else {
-                go(modeSpot)
-                changed()
-            }
+        guard let left = visitLeft else { return }
+        if left > seconds {
+            visitLeft = left - seconds
+        } else {
+            go(modeSpot)
+            changed()
         }
-        guard spot == .rest, energy < 100 else { return }
-        let before = Int(energy)
-        energy = min(100, energy + seconds * 0.8)
-        if Int(energy) / 10 != before / 10 { changed() }
     }
 
     /// Takes the cues the scene has not played yet.
@@ -400,7 +356,7 @@ final class HomeModel {
             cues.append(.annoyed)
             return
         }
-        let lines = Self.tapLines(spot: spot, energy: energy)
+        let lines = Self.tapLines(spot: spot, low: isLow)
         line = lines[lineIndex % lines.count]
         lineIndex += 1
         cues.append(.bounce)
@@ -420,7 +376,7 @@ final class HomeModel {
 
     /// Where the current mode puts HAKU.
     var modeSpot: HomeSpot {
-        Self.spot(for: mode, card: card, items: items)
+        mode.map { Self.spot(for: $0, card: card, items: items) } ?? .idle
     }
 
     /// How long a visit lasts, in seconds.
@@ -432,13 +388,13 @@ final class HomeModel {
         revision += 1
     }
 
-    /// The mode's name; the fourth mode is named after the identity card.
+    /// The mode's card name, as the user named it.
     func title(_ mode: Mode) -> String {
-        mode == .boxing ? card.title : mode.title
+        snapshot.cards.title(for: mode, persona: snapshot.persona)
     }
 
     // PM 2026-10-15: the fourth mode follows the user's identity card, so its spot and line branch on the card.
-    static func spot(for mode: Mode, card: IdentityKind, items: Set<HomeItem>) -> HomeSpot {
+    static func spot(for mode: Mode, card: IdentityKind?, items: Set<HomeItem>) -> HomeSpot {
         switch mode {
         case .work: .work
         case .chill: .sofa
@@ -447,7 +403,7 @@ final class HomeModel {
         }
     }
 
-    static func cardSpot(_ card: IdentityKind, items: Set<HomeItem>) -> HomeSpot {
+    static func cardSpot(_ card: IdentityKind?, items: Set<HomeItem>) -> HomeSpot {
         switch card {
         case .boxing: items.contains(.bag) ? .box : .shadowbox
         case .fitness: items.contains(.bench) ? .bench : .idle
@@ -455,39 +411,31 @@ final class HomeModel {
         }
     }
 
-    static func modeLine(_ mode: Mode, card: IdentityKind, items: Set<HomeItem>) -> String {
+    /// What HAKU says when the mode changes; `title` is the card's name.
+    static func modeLine(_ mode: Mode, title: String, card: IdentityKind?, items: Set<HomeItem>) -> String {
         switch mode {
-        case .work: "上班。脑子开机中。"
-        case .chill: "下班。今天到此为止。"
+        case .work: "\(title)。脑子开机中。"
+        case .chill: "\(title)。今天到此为止。"
         case .boxing:
             switch card {
-            case .boxing: items.contains(.bag) ? "拳击日。沙袋先挨几下。" : "拳击日。没沙袋，打空气也行。"
-            case .fitness where items.contains(.bench): "\(card.title)。今天练胸。"
-            default: "\(card.title)。准备出门。"
+            case .boxing: items.contains(.bag) ? "\(title)。沙袋先挨几下。" : "\(title)。没沙袋，打空气也行。"
+            case .fitness where items.contains(.bench): "\(title)。推几下。"
+            default: "\(title)。准备出门。"
             }
-        case .money: "副业时间。别打扰，也别走。"
+        case .money: "\(title)。别打扰，也别走。"
         }
     }
 
-    static func energyCost(_ mode: Mode) -> Double {
-        switch mode {
-        case .work: -8
-        case .chill: 4
-        case .boxing: -12
-        case .money: -5
-        }
-    }
-
-    static func tapLines(spot: HomeSpot, energy: Double) -> [String] {
+    static func tapLines(spot: HomeSpot, low: Bool) -> [String] {
         switch spot {
-        case .work: ["在忙。", "……这封邮件写第三遍了。"]
+        case .work: ["在忙。", "……别催。"]
         case .side: ["别看，还没做完。", "就差一点。可能。"]
         case .sofa: ["什么也不想做，这也算一种状态。", "遥控器在你那边。"]
         case .rest: ["……再五分钟。", "zzz"]
         case .box, .shadowbox: ["左、右、左。", "沙袋没惹我，是我今天比较硬。"]
         case .bench: ["推起来，放下去。就这样。", "重量？不告诉你。"]
         default:
-            energy < 35 ? ["电量不太够。", "……干嘛。"] : ["……干嘛。", "看我也不会多一罐。", "嗯。", "今天也没什么特别的。挺好。"]
+            low ? ["电量不太够。", "……干嘛。"] : ["……干嘛。", "看我也不会多一罐。", "嗯。", "今天也没什么特别的。挺好。"]
         }
     }
 
