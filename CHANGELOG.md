@@ -50,6 +50,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - HAKU can wear six Sunday items: an orange or a mint headband, a dotted or a lightning-bolt mask, and a small
   cactus or a mini speaker in the room. The speaker's light ring glows every 3 seconds. The shop lists them once
   their catalog entries are marked drawn. The watch leaves room items out, since they stand on the floor.
+- In DEV and STG builds the shop has two tabs, 衣服 and 房间, with this week's item first on its tab. A room item's
+  preview says where it stands in the home page, and sports gear adds that having it earns no cans. Keepsakes left
+  the shop there, since they live in the home page. Release builds keep one shelf and the keepsakes as before.
 - HAKU can dress for four more identity cards: tennis (visor, racket and ball), fitness (gym bag and a small
   dumbbell), study (green jacket and an open book) and art (green jacket, apron, sketchbook and pencil).
   The watch leaves the gym bag off the floor.

@@ -2,6 +2,22 @@ import CompanionKit
 import HubCore
 import SwiftUI
 
+/// The shop's two shelves.
+enum ShopShelf: CaseIterable {
+    case clothes, room
+
+    /// The shelf's name on its tab.
+    var title: String {
+        switch self {
+        case .clothes: "衣服"
+        case .room: "房间"
+        }
+    }
+
+    /// Whether `item` is on this shelf.
+    func holds(_ item: ShopItem) -> Bool { (item.slot == .room) == (self == .room) }
+}
+
 /// The shop for `persona`: her items to buy with cans, what's owned, and the keepsakes still to earn.
 struct ShopView: View {
     let growth: GrowthStore
@@ -13,7 +29,37 @@ struct ShopView: View {
     @State private var buyError: String?
     @State private var unboxing: CanEntry?
     @State private var previewing: ShopItem?
+    @State private var shelf: ShopShelf
+    @Namespace private var tabs
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    // 商店与家 同步方案 §1: the home screen's door opens the clothes, the home page's door the room.
+    /// - Parameter shelf: the shelf to show first.
+    init(
+        growth: GrowthStore,
+        wardrobe: Binding<Wardrobe>,
+        persona: Persona,
+        mode: Mode? = nil,
+        shelf: ShopShelf = .clothes
+    ) {
+        self.growth = growth
+        _wardrobe = wardrobe
+        self.persona = persona
+        self.mode = mode
+        _shelf = State(initialValue: Self.homeIsOpen ? shelf : .clothes)
+    }
+
+    // Room items and keepsakes live in the home page, which only DEV and STG open so far. Release builds sell no
+    // room items and keep the keepsakes here, so nothing bought or earned stays out of sight. Remove this
+    // switch with the home page's entry in LifeHubApp when release builds open it.
+    /// Whether this build has the home page.
+    static var homeIsOpen: Bool {
+        #if DEBUG || ENV_STG
+        return true
+        #else
+        return false
+        #endif
+    }
 
     // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
     // promises a reward the app can't give yet. Add a win here when its source is wired.
@@ -23,6 +69,9 @@ struct ShopView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 header
+                if Self.homeIsOpen {
+                    shelfTabs
+                }
                 banner
                 // 界面空状态与报错 §2: with no cans yet, how to earn them comes first instead of at the bottom.
                 if balance == 0 {
@@ -45,7 +94,7 @@ struct ShopView: View {
                 if let buyError {
                     ErrorLine(text: buyError)
                 }
-                if !keepsakes.isEmpty {
+                if !Self.homeIsOpen && !keepsakes.isEmpty {
                     Text("纪念品 · 只能靠做到拿")
                         .font(Toy.body(15, weight: .heavy))
                     VStack(spacing: 0) {
@@ -67,6 +116,8 @@ struct ShopView: View {
             .padding(20)
             .frame(maxWidth: 560)
             .frame(maxWidth: .infinity)
+            // 动态: the shelf's items fade over 0.2 s when the tab changes.
+            .animation(fade, value: shelf)
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
@@ -102,25 +153,18 @@ struct ShopView: View {
 
     private var weekly: ShopItem? { ShopItem.weekly(for: persona, ledger: growth.ledger, now: .now) }
 
-    // 商店完整目录 v0 §1.4: this week's item leads the shelf, and stays there marked owned once bought.
+    private var fade: Animation? { reduceMotion ? nil : .smooth(duration: 0.2) }
+
+    // 商店完整目录 v0 §1.4: this week's item leads its shelf, and stays there marked owned once bought.
     private var forSale: [ShopItem] {
         var items = [weekly].compactMap { $0 }
         items += ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) }
-        return items.filter(Self.isShown)
-    }
-
-    // Room items show only in the home page, which only DEV and STG open so far.
-    // Until release builds open it too, they don't sell room items, so nothing bought stays out of sight.
-    private static func isShown(_ item: ShopItem) -> Bool {
-        #if DEBUG || ENV_STG
-        return true
-        #else
-        return item.slot != .room
-        #endif
+        return items.filter(shelf.holds)
     }
 
     private var ownedFromShop: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { $0.price != nil && owned.contains($0.id) && $0.id != weekly?.id }
+        ShopItem.catalog(for: persona)
+            .filter { $0.price != nil && owned.contains($0.id) && $0.id != weekly?.id && shelf.holds($0) }
     }
 
     private var keepsakes: [ShopItem] {
@@ -192,11 +236,42 @@ struct ShopView: View {
         }
     }
 
+    // UI 二组 商店两栏 v1.1: the wardrobe's tabs, with the selected fill sliding to the tapped one.
+    private var shelfTabs: some View {
+        HStack(spacing: 6) {
+            ForEach(ShopShelf.allCases, id: \.self) { tab in
+                Button {
+                    shelf = tab
+                } label: {
+                    Text(tab.title)
+                        .font(Toy.body(14, weight: .heavy))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .foregroundStyle(shelf == tab ? Toy.paper : Toy.ink)
+                        .padding(.horizontal, 6)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background {
+                            if shelf == tab {
+                                Capsule().fill(Toy.ink).matchedGeometryEffect(id: "selected", in: tabs)
+                            } else {
+                                Capsule().fill(Toy.card)
+                            }
+                        }
+                        .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(shelf == tab ? .isSelected : [])
+            }
+        }
+    }
+
     private var banner: some View {
         HStack(alignment: .bottom, spacing: 10) {
             PersonaPortrait(persona: persona, mode: .chill)
                 .frame(width: 88, height: 112)
-            Text(persona == .kuro ? "……随便看看，不急。" : "看上哪个了？……我只是随便问问。")
+            // UI 审核 2026-10-17: the line breaks after the question, so 「问。」 doesn't sit alone.
+            Text(persona == .kuro ? "……随便看看，不急。" : "看上哪个了？\n……我只是随便问问。")
                 .font(Toy.body(14, weight: .heavy))
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
