@@ -38,11 +38,13 @@ public struct HomeItemIcon: View {
     }
 }
 
-/// The real room around one item where it stands, circled, with HAKU breathing and blinking next to it. For the
-/// shop's preview before buying.
+/// The real room around one item where it stands, circled, with HAKU breathing and blinking next to it, over a still
+/// of the same room. For the shop's preview before buying.
 public struct HomeItemPreview: View {
     let item: HomeItem
     @State private var stage: HomeStage
+    // Under the live room, so the preview still shows where SpriteKit can't draw (the CI simulator has no GPU).
+    @State private var still: CGImage?
     @Environment(\.scenePhase) private var scenePhase
 
     /// - Parameter itemID: the shop catalog id, such as `room.bench`. `nil` when the home has no such item.
@@ -65,6 +67,11 @@ public struct HomeItemPreview: View {
         GeometryReader { geo in
             let scale = geo.size.width / crop.width
             ZStack(alignment: .topLeading) {
+                if let still {
+                    Image(decorative: still, scale: 2)
+                        .resizable()
+                        .frame(width: canvas.width * scale, height: canvas.height * scale)
+                }
                 SpriteView(scene: stage.scene, isPaused: scenePhase != .active, options: [.allowsTransparency])
                     .frame(width: canvas.width * scale, height: canvas.height * scale)
                 Ellipse()
@@ -76,6 +83,7 @@ public struct HomeItemPreview: View {
         }
         .aspectRatio(1, contentMode: .fit)
         .clipped()
+        .onAppear { if still == nil { still = stage.scene.still(scale: 2) } }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }

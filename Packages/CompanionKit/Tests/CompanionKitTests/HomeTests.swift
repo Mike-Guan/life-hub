@@ -311,6 +311,16 @@ import Testing
         #expect(HomeItemPreview(itemID: "headband.red") == nil)
     }
 
+    @Test func theRoomDrawsAStillWithoutAGPU() throws {
+        let scene = HomeScene(model: HomeModel(night: false))
+        let still = try #require(scene.still(scale: 2))
+        #expect(still.width == Int(HomeGrid.canvas.width * 2) && still.height == Int(HomeGrid.canvas.height * 2))
+        // The middle of the floor is drawn, not left clear.
+        let data = try #require(still.dataProvider?.data as Data?)
+        let middle = (still.height / 2) * still.bytesPerRow + (still.width / 2) * 4
+        #expect(data[middle + 3] > 0)
+    }
+
     @Test func thePreviewShowsHakuStandingNextToTheItem() throws {
         for item in [HomeItem.plant, .bag, .speaker, .bench, .snowboard, .cactus] {
             let model = HomeModel(night: false, cans: 999)
