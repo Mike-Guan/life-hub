@@ -255,13 +255,24 @@ extension FrameSheets {
         // 343 pt of room on the smallest phone, at 3 pixels a point.
         let onPhone = 343 / HomeGrid.canvas.width * 3
         var crops: [(String, CGImage, CGFloat)] = []
-        for (label, night, t, scale) in [
-            ("夜 · 上床先抱手机", true, 1.0, 4), ("夜 · 点头", true, 8.5, 4),
-            ("夜 · 抱手机 · 手机上实际大小", true, 1.0, onPhone), ("夜 · 睡着，盖被子", true, HomeScene.dozeLength + 3, 4),
-        ] {
-            let model = HomeModel(night: night)
+        let toBed: @MainActor (HomeModel) -> Void = { $0.tap(.bed) }
+        // UI 审核 2026-10-17: a card's day without gear, with the sports corner full, to check the practice spot.
+        let practice: @MainActor (HomeModel) -> Void = { model in
+            for item in [HomeItem.bag, .bench, .snowboard] { model.own(item) }
+            model.switchMode(.boxing)
+        }
+        let cells: [(String, Bool, IdentityKind, @MainActor (HomeModel) -> Void, TimeInterval, CGFloat)] = [
+            ("夜 · 上床先抱手机", true, .boxing, toBed, 1.0, 4),
+            ("夜 · 点头", true, .boxing, toBed, 8.5, 4),
+            ("夜 · 抱手机 · 手机上实际大小", true, .boxing, toBed, 1.0, onPhone),
+            ("夜 · 睡着，盖被子", true, .boxing, toBed, HomeScene.dozeLength + 3, 4),
+            ("白天 · 盖被子睡", false, .boxing, toBed, 1.0, 4),
+            ("网球日 · 运动角摆满", false, .tennis, practice, 1.0, 4),
+        ]
+        for (label, night, card, setUp, t, scale) in cells {
+            let model = HomeModel(night: night, card: card)
             let scene = HomeScene(model: model)
-            model.tap(.bed)
+            setUp(model)
             scene.sync(animated: false)
             scene.settle()
             scene.pose(at: t)
@@ -273,7 +284,7 @@ extension FrameSheets {
             crops.append((label, try #require(image.cropping(to: rect)), scale == onPhone ? 1 : 2))
         }
         let sheet = Grid(alignment: .topLeading, horizontalSpacing: 12, verticalSpacing: 12) {
-            ForEach([0, 2], id: \.self) { row in
+            ForEach([0, 2, 4], id: \.self) { row in
                 GridRow {
                     ForEach(row..<row + 2, id: \.self) { i in
                         VStack(spacing: 6) {
