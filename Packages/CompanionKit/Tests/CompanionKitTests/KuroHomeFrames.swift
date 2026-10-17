@@ -16,7 +16,7 @@ extension FrameSheets {
             ("累了 · 站着", false, .tennis, .low, 1.3, { _ in }),
             ("上班 · 书桌", true, .tennis, nil, 1.3, { $0.switchMode(.work) }),
             ("下班 · 沙发", true, .tennis, nil, 1.3, { $0.switchMode(.chill) }),
-            ("网球日 · 挥拍", false, .tennis, nil, 0.45, { $0.switchMode(.boxing) }),
+            ("网球日（房间规则给的位置）", false, .tennis, nil, 0.45, { $0.switchMode(.boxing) }),
             ("拳击卡 · 戴手套", false, .boxing, nil, 0.4, { $0.switchMode(.boxing) }),
             ("备课 · 书桌", true, .tennis, nil, 1.3, { $0.switchMode(.money) }),
             ("衣柜前", false, .tennis, nil, 1.3, { $0.tap(.wardrobe) }),
@@ -35,6 +35,17 @@ extension FrameSheets {
             scene.pose(at: t)
             cells.append((label, try #require(Self.kuro(in: scene, model, t: t))))
             close.append((label, try #require(Self.closeUp(scene, model, t: t))))
+        }
+        // Her tennis-day move on the sport spot, posed by hand: where the rules send her that day is the room's call.
+        do {
+            let model = HomeModel(night: false, card: .tennis)
+            let scene = HomeScene(model: model)
+            model.switchMode(.boxing)
+            scene.sync(animated: false)
+            scene.settle()
+            scene.pose(at: 0.45)
+            cells.append(("网球日 · 运动区挥拍", try #require(Self.kuro(in: scene, model, t: 0.45, pose: .box))))
+            close.append(("网球日 · 运动区挥拍", try #require(Self.closeUp(scene, model, t: 0.45, pose: .box))))
         }
         // Mid-walk and carried.
         let model = HomeModel(night: false, card: .tennis)
@@ -95,9 +106,14 @@ extension FrameSheets {
 
     /// The scene with her in HAKU's place and pose.
     private static func kuro(
-        in scene: CompanionKit.HomeScene, _ model: HomeModel, t: Double, carried: Bool = false, scale: CGFloat = 2
+        in scene: CompanionKit.HomeScene, _ model: HomeModel, t: Double, carried: Bool = false, scale: CGFloat = 2,
+        pose forced: HakuPose? = nil
     ) -> CGImage? {
-        let (pose, face) = kuroPose(scene, model, t: t, carried: carried)
+        var (pose, face) = kuroPose(scene, model, t: t, carried: carried)
+        if let forced {
+            pose = forced
+            face = .box
+        }
         let kuro = KuroHomeNode()
         kuro.dress(KuroLook(mode: model.mode ?? .chill, card: model.card), worn: [])
         let right = scene.spotReached?.facesRight ?? true
@@ -115,8 +131,10 @@ extension FrameSheets {
     }
 
     /// A 120 pt square around her, two pixels per point.
-    private static func closeUp(_ scene: CompanionKit.HomeScene, _ model: HomeModel, t: Double) -> CGImage? {
-        guard let image = kuro(in: scene, model, t: t, scale: 2) else { return nil }
+    private static func closeUp(
+        _ scene: CompanionKit.HomeScene, _ model: HomeModel, t: Double, pose: HakuPose? = nil
+    ) -> CGImage? {
+        guard let image = kuro(in: scene, model, t: t, scale: 2, pose: pose) else { return nil }
         let p = scene.haku.position
         let x = (p.x - 60) * 2
         let y = (scene.size.height - p.y - 90) * 2

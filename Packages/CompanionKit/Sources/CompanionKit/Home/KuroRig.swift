@@ -87,8 +87,19 @@ final class KuroHomeNode: SKNode {
         if !hair.isHidden {
             setTexture(hair, Self.texture(parts.hair, HakuNode.headRect), HakuNode.headRect, pin: CGPoint(x: 60, y: 95))
         }
-        show(torso, key: "torso", parts.torso, pin: CGPoint(x: 60, y: 138), rect: HakuNode.torsoRect, shown: &shownTorso)
-        let wearsGloves = gloves || pose == .box
+        if back {
+            let key = "back.\(Self.sleeve(look))"
+            if key != shownTorso {
+                shownTorso = key
+                setTexture(torso, Self.torsoBack(Self.sleeve(look)), HakuNode.torsoRect, pin: CGPoint(x: 60, y: 138))
+            }
+        } else {
+            show(
+                torso, key: "torso", parts.torso, pin: CGPoint(x: 60, y: 138), rect: HakuNode.torsoRect,
+                shown: &shownTorso)
+        }
+        // Only her boxing card wears gloves; on her tennis day the sport spot is a forehand swing.
+        let wearsGloves = gloves
         let armKey = "\(Self.sleeve(look)).\(wearsGloves)"
         if armKey != shownArms {
             shownArms = armKey
@@ -393,6 +404,24 @@ final class KuroHomeNode: SKNode {
         case .box: 0x7B5CFF
         case .art: 0xFFE14D
         }
+    }
+
+    // Her top from behind: the same trapezoid as the front, plain, with a seam.
+    private static func torsoBack(_ color: UInt32) -> SKTexture {
+        let key = "back.\(color)"
+        if let cached = textures[key] { return cached }
+        let texture = HomeTextures.texture(HakuNode.torsoRect) { context in
+            var shape = Path()
+            shape.move(to: CGPoint(x: 31, y: 138))
+            shape.addLine(to: CGPoint(x: 36, y: 100))
+            shape.addQuadCurve(to: CGPoint(x: 84, y: 100), control: CGPoint(x: 60, y: 92))
+            shape.addLine(to: CGPoint(x: 89, y: 138))
+            shape.closeSubpath()
+            context.fill(shape, with: .color(Color(hex: color)))
+            context.stroke(shape, with: .color(KuroPalette.ink), style: StrokeStyle(lineWidth: 3.5, lineJoin: .round))
+        }
+        textures[key] = texture
+        return texture
     }
 
     private static func arm(_ sleeve: UInt32, gloves: Bool) -> SKTexture {
