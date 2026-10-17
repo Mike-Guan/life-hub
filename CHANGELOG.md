@@ -123,6 +123,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - A room item from the shop no longer stands in HAKU's 下班 backdrop. Bought room items live in HAKU's home.
 - VoiceOver reads the unboxing as "开箱：" and the item's name instead of the character's mode.
 - On a Japanese or English iPhone, the Photos permission prompt for saving a share card is in that language.
+- The home page's room has zones (家 区域规划 v0): a bought room item goes into its zone, and when the zone is
+  full the earliest item goes into the cupboard; a keepsake is never pushed out by a purchase. Items earlier
+  builds kept in storage move into their zones once. The unboxing of a room item says 「原来的 X 收进柜子了。」
+  when it made room. `RoomLayout.put` and `putAway` are ready for 整理.
 - Opening the app, HAKU says one line at most: a celebration first, then an invite, good night, the late-night
   line, a planned task, bath time and the stretch. A mode change no longer clears it. A tap during a one-off
   animation only makes HAKU blink. At bedtime a tap gets a sleepy mumble instead of switching the side-hustle
@@ -712,6 +716,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The shop's room item preview keeps a still of the room under the live one, so it shows where SpriteKit can't
+  draw, such as the CI simulator.
 - With languages on (Debug and STG), VoiceOver reads the second preset character's overtime lines from her
   string table, so they can show in Japanese and English.
 - After a workout cheer or the off-work move, HAKU can again stretch after a long sit, get up from the sofa,

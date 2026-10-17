@@ -18,6 +18,14 @@ public enum RoomZone: String, CaseIterable, Sendable {
 
     /// Whether the zone holds sports gear, which the character never uses on her own and never pays cans.
     public var isSports: Bool { self == .sportFloor || self == .sportWall }
+
+    /// How many items the zone holds at once.
+    public var capacity: Int {
+        switch self {
+        case .sportWall, .desk: 2
+        case .sportFloor, .sofaSide, .corner: 1
+        }
+    }
 }
 
 extension ShopItem {
