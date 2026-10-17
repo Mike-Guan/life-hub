@@ -1,12 +1,14 @@
 #if os(iOS) || os(macOS)
+import HubCore
 import SpriteKit
 import SwiftUI
 
-/// The isometric room with HAKU in it. SpriteKit draws and moves; `HomeModel` decides.
+/// The isometric room with the character in it. SpriteKit draws and moves; `HomeModel` decides.
 @MainActor
 final class HomeScene: SKScene {
     let model: HomeModel
-    let haku = HakuNode()
+    /// The character's figure: HAKU's, or the second preset character's once hers is drawn.
+    let haku: any HomeFigure
 
     private var pieces: [HomePiece: HomeLayerNode] = [:]
     private var itemNodes: [HomeItem: HomeLayerNode] = [:]
@@ -58,6 +60,7 @@ final class HomeScene: SKScene {
 
     init(model: HomeModel) {
         self.model = model
+        haku = Self.figure(for: model.snapshot.persona)
         super.init(size: HomeGrid.canvas.size)
         anchorPoint = .zero
         scaleMode = .aspectFit
@@ -114,6 +117,13 @@ final class HomeScene: SKScene {
         daylight = glow(GridPoint(x: 2.3, y: 1.0, z: 2.6), 0xFFF1C2, 300)
 
         addChild(haku)
+    }
+
+    /// The figure for `persona`; HAKU's stands in until the second preset character's is drawn.
+    static func figure(for persona: Persona) -> any HomeFigure {
+        switch persona {
+        case .haku, .kuro: HakuNode()
+        }
     }
 
     /// The hard shadow the floating room casts on the page.
@@ -407,8 +417,9 @@ final class HomeScene: SKScene {
         }
         if face.blinks, clock.truncatingRemainder(dividingBy: 3.7) < 0.13 { face = .closed }
 
+        if let node = haku as? HakuNode { node.dress(model.outfit) }
         haku.apply(
-            pose, face: face, outfit: model.outfit, facingRight: facing,
+            pose, face: face, facingRight: facing,
             gloves: model.mode == .boxing && model.card == .boxing, t: clock)
 
         var position = HomeGrid.scene(HomeGrid.plan(point))
