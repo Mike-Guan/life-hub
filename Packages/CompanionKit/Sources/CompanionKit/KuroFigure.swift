@@ -926,8 +926,12 @@ public struct KuroView: View {
     /// Plays her reaction to a tap: a body move for her look, and a line. Taps during a move only change the
     /// line; too many in a row turn her away.
     private func react() {
-        // 抱平板睡着: napping over her tablet, a tap doesn't wake her.
-        if pose.napping { return }
+        // 抱平板睡着: napping over her tablet, a tap doesn't wake her; she rolls over in her sleep, without a word,
+        // like at bedtime (动作展示总表 C14).
+        if pose.napping {
+            if reaction(at: Date.now.timeIntervalSinceReferenceDate) == nil { play(.rollOver, at: .now) }
+            return
+        }
         let now = Date.now
         if style != .watch, unboxStart == nil, reaction(at: now.timeIntervalSinceReferenceDate) == nil,
             reactInScene(at: now)
