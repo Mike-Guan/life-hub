@@ -301,6 +301,8 @@ enum HomeItem: String, CaseIterable, Sendable {
 /// A place HAKU goes to, and the floor point he steps on or off it from.
 enum HomeSpot: String, CaseIterable, Sendable {
     case idle, work, side, sofa, rest, box, shadowbox, bench, wardrobe, shop, window
+    /// The sports corner's open floor, where an identity card's day warms up without gear of its own.
+    case practice
 
     /// The middle of the rug, where HAKU waits.
     static let hub = GridPoint(x: 5.2, y: 6.6)
@@ -318,6 +320,7 @@ enum HomeSpot: String, CaseIterable, Sendable {
         case .wardrobe: GridPoint(x: 7.85, y: 2.0)
         case .shop: GridPoint(x: 9.3, y: 2.0)
         case .window: GridPoint(x: 2.3, y: 0.75)
+        case .practice: GridPoint(x: 4.7, y: 4.2)
         }
     }
 
@@ -335,7 +338,7 @@ enum HomeSpot: String, CaseIterable, Sendable {
     /// How HAKU holds himself once there.
     var pose: HakuPose {
         switch self {
-        case .idle: .stand
+        case .idle, .practice: .stand
         case .work, .side: .back
         case .sofa: .sit
         case .rest: .lie
