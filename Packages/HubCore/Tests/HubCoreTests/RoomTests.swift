@@ -184,3 +184,16 @@ extension RoomTests {
         #expect(layout == before)
     }
 }
+
+extension RoomTests {
+    @Test func everyRoomItemHasAZone() throws {
+        for item in ShopItem.catalog where item.slot == .room {
+            #expect(item.zone != nil, "\(item.id)")
+        }
+        #expect(ShopItem.item("room.bag")?.zone == .sportFloor)
+        #expect(ShopItem.item("room.bag")?.zone?.isSports == true)
+        #expect(ShopItem.item("room.plant")?.zone?.isSports == false)
+        #expect(RoomZone.sportWall.isSports)
+        #expect(ShopItem.item("headband.cyan")?.zone == nil)
+    }
+}

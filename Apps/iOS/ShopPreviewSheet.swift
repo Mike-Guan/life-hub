@@ -33,6 +33,12 @@ struct ShopPreviewSheet: View {
                     Text(whereShown)
                         .font(Toy.body(13, weight: .bold))
                 }
+                // 商店完整目录 §10.2: owning gear is not training.
+                if item.zone?.isSports == true {
+                    Text("摆着不算练过，不给罐子。")
+                        .font(Toy.body(13))
+                        .foregroundStyle(Toy.muted)
+                }
                 if let price = item.price, price > balance {
                     Text("\(price) 能量罐 · 还差 \(price - balance)")
                         .font(Toy.body(13))
@@ -58,7 +64,16 @@ struct ShopPreviewSheet: View {
 
     // UI 审核 (#476): in the app the character always moves, so the preview breathes and blinks like the unboxing.
     @ViewBuilder private var figure: some View {
-        if persona == .kuro {
+        // UI 审核 2026-10-17: a room item shows in the real room, where it stands, circled. Items the home page
+        // doesn't draw yet (the second preset character's) show their icon.
+        if item.slot == .room {
+            if let room = HomeItemPreview(itemID: item.id) {
+                room.frame(width: 260, height: 260)
+            } else {
+                ShopItemIcon(item: item)
+                    .frame(width: 160, height: 160)
+            }
+        } else if persona == .kuro {
             KuroView(
                 look: KuroLook(mode: shownMode, card: card),
                 wearing: wearing.worn(in: shownMode),
@@ -75,6 +90,7 @@ struct ShopPreviewSheet: View {
     // Mike 2026-10-15: without this line he'd assume an item shows in every mode.
     /// Which modes the item shows in, by the user's card names; `nil` when it shows in all of them.
     private var whereShown: String? {
+        if let zone = item.zone { return zone.place }
         let modes = Mode.allCases.filter { mode in
             if let kuro = KuroItem(rawValue: item.id) { return kuro.shows(in: KuroLook(mode: mode, card: card)) }
             return item.shows(in: mode, card: card)
@@ -101,7 +117,7 @@ struct ShopPreviewSheet: View {
 
     private var shownMode: Mode { item.previewMode(current: mode, card: card) }
 
-    private func button(_ title: String, fill: Color, action: @escaping () -> Void) -> some View {
+    private func button(_ title: LocalizedStringKey, fill: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
                 .font(Toy.body(15, weight: .heavy))
@@ -124,5 +140,21 @@ extension ShopItem {
         let own = mode ?? slot.showcaseMode
         // Without a card the identity slot is the old boxing kit, so the item shows in Chill instead.
         return own == .boxing && card == nil ? .chill : own
+    }
+}
+
+extension RoomZone {
+    // UI 二组 商店两栏 v1.1: where a room item stands, in place of the modes it shows in.
+    /// Where in the home page the zone's items stand.
+    var place: String {
+        let text =
+            switch self {
+            case .sportFloor: "摆在家里的运动角，靠墙。哪个模式都在。"
+            case .sportWall: "靠在家里的运动墙上。哪个模式都在。"
+            case .desk: "摆在家里的书桌上。哪个模式都在。"
+            case .sofaSide: "摆在家里的沙发旁边。哪个模式都在。"
+            case .corner: "摆在家里的左前角。哪个模式都在。"
+            }
+        return text.localized
     }
 }

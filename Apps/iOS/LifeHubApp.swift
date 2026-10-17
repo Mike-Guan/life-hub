@@ -23,6 +23,7 @@ struct LifeHubApp: App {
     @State private var showsShop = false
     @State private var showsWardrobe = false
     @State private var showsHome = false
+    @State private var showsHomeShop = false
     @State private var showsOnboarding: Bool
     @State private var unboxing: CanEntry?
     @State private var welcomeBack: CompanionEvent?
@@ -301,15 +302,19 @@ struct LifeHubApp: App {
             ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
         }
         .fullScreenCover(isPresented: $showsHome) {
+            // 商店与家 同步方案 §1: the home page's door opens the same shop on the room tab.
             HakuHomeView(
                 snapshot: homeSnapshot,
                 onSwitch: { store.switchTo($0) },
-                // The home is a cover itself, so the shop and wardrobe open from the home screen for now.
-                onShop: nil,
+                onShop: { showsHomeShop = true },
+                // The wardrobe opens from the home screen for now.
                 onWardrobe: nil,
                 onSave: { $0.store(in: AppGroup.defaults) },
                 onExit: { showsHome = false }
             )
+            .fullScreenCover(isPresented: $showsHomeShop) {
+                ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, shelf: .room)
+            }
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
             WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, cards: cards)

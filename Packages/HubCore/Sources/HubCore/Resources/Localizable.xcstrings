@@ -1514,6 +1514,38 @@
         }
       }
     },
+    "房间单板" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Snowboard"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "スノーボード"
+          }
+        }
+      }
+    },
+    "房间卧推架" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Bench press"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ベンチプレス台"
+          }
+        }
+      }
+    },
     "房间小沙袋" : {
       "localizations" : {
         "en" : {
@@ -1831,16 +1863,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ボーダーヘッドギア"
-          }
-        }
-      }
-    },
-    "校队夹克" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スタジャン"
           }
         }
       }
