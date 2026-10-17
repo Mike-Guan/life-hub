@@ -25,6 +25,7 @@ extension FrameSheets {
             ("床上 · 夜 点头睡着", true, .tennis, nil, 8.5, { $0.tap(.bed) }),
         ]
         var cells: [(String, CGImage)] = []
+        var close: [(String, CGImage)] = []
         for (label, night, card, energy, t, setup) in states {
             let model = HomeModel(night: night, card: card, energy: energy)
             let scene = HomeScene(model: model)
@@ -33,6 +34,7 @@ extension FrameSheets {
             scene.settle()
             scene.pose(at: t)
             cells.append((label, try #require(Self.kuro(in: scene, model, t: t))))
+            close.append((label, try #require(Self.closeUp(scene, model, t: t))))
         }
         // Mid-walk and carried.
         let model = HomeModel(night: false, card: .tennis)
@@ -65,6 +67,21 @@ extension FrameSheets {
         .background(Color.white)
         try save(sheet, as: "kuro-home-1-states", scale: 1)
 
+        let closeSheet = VStack(alignment: .leading, spacing: 8) {
+            Text(verbatim: "近看（每格 120×120 pt）").font(.system(size: 16, weight: .bold))
+            LazyVGrid(columns: Array(repeating: GridItem(.fixed(240)), count: 4), spacing: 10) {
+                ForEach(close.indices, id: \.self) { i in
+                    VStack(spacing: 2) {
+                        Image(decorative: close[i].1, scale: 1).resizable().frame(width: 240, height: 240)
+                        Text(verbatim: close[i].0).font(.system(size: 12, weight: .bold))
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.white)
+        try save(closeSheet, as: "kuro-home-3-close", scale: 1)
+
         // Big, to judge her proportions next to the furniture.
         let big = HomeModel(night: false, card: .tennis)
         let room = HomeScene(model: big)
@@ -95,6 +112,15 @@ extension FrameSheets {
             scene.haku.isHidden = false
         }
         return composite(scene, scale: scale)
+    }
+
+    /// A 120 pt square around her, two pixels per point.
+    private static func closeUp(_ scene: CompanionKit.HomeScene, _ model: HomeModel, t: Double) -> CGImage? {
+        guard let image = kuro(in: scene, model, t: t, scale: 2) else { return nil }
+        let p = scene.haku.position
+        let x = (p.x - 60) * 2
+        let y = (scene.size.height - p.y - 90) * 2
+        return image.cropping(to: CGRect(x: x, y: y, width: 240, height: 240))
     }
 
     // The pose `HomeScene` gives HAKU for the same moment, without his one-offs.
