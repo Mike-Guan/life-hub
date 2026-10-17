@@ -129,6 +129,11 @@ public struct RoomCatalog: Equatable, Codable, Sendable {
         /// Cells along each side of the square floor.
         public var size: Int
         public var cell: Double
+
+        public init(size: Int, cell: Double) {
+            self.size = size
+            self.cell = cell
+        }
     }
 
     public var schemaVersion: Int
@@ -138,6 +143,17 @@ public struct RoomCatalog: Equatable, Codable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case schemaVersion, grid, pieces
     }
+
+    public init(grid: Grid = Grid(size: 10, cell: 1), pieces: [RoomPiece] = []) {
+        schemaVersion = 1
+        self.grid = grid
+        self.pieces = pieces
+    }
+
+    // Until the PM's zone plan lands as a catalog, nothing has a catalog spot, so new items go into storage and
+    // the home page draws them where it knows to.
+    /// The catalog the app ships with.
+    public static let shipped = RoomCatalog()
 
     /// Decodes the catalog; pieces that can't be read are left out.
     /// - Throws: `DecodingError` when the data is not an object.

@@ -88,6 +88,7 @@ struct StatusView: View {
                 look: KuroLook(mode: mode, card: entry.names.identity),
                 energy: entry.energy?.value,
                 bedtime: entry.bedtime,
+                moment: entry.moment,
                 wearing: entry.wardrobe.worn(in: mode),
                 framing: framing,
                 lineArt: renderingMode != .fullColor
