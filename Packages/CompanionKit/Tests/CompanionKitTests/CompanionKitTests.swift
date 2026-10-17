@@ -1281,7 +1281,10 @@ import Testing
         }
     }
 
-    @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
+    // The bench and the snowboard have no figure part; the home draws their icons (HomeTests).
+    @Test(
+        arguments: ShopItem.catalog(for: .haku).filter { $0.isDrawn && !["room.bench", "room.snowboard"].contains($0.id) }
+    )
     func everyItemIconDrawsSomething(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)

@@ -64,10 +64,15 @@ struct ShopPreviewSheet: View {
 
     // UI 审核 (#476): in the app the character always moves, so the preview breathes and blinks like the unboxing.
     @ViewBuilder private var figure: some View {
-        // Room items don't show on the character; until the home page can draw one in place, the item itself shows.
+        // UI 审核 2026-10-17: a room item shows in the real room, where it stands, circled. Items the home page
+        // doesn't draw yet (the second preset character's) show their icon.
         if item.slot == .room {
-            ShopItemIcon(item: item)
-                .frame(width: 160, height: 160)
+            if let room = HomeItemPreview(itemID: item.id) {
+                room.frame(width: 260, height: 260)
+            } else {
+                ShopItemIcon(item: item)
+                    .frame(width: 160, height: 160)
+            }
         } else if persona == .kuro {
             KuroView(
                 look: KuroLook(mode: shownMode, card: card),

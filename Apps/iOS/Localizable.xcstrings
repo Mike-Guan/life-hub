@@ -3453,23 +3453,6 @@
         }
       }
     },
-    "看上哪个了？……我只是随便问问。" : {
-      "comment" : "HAKU",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "See anything you like? …Just asking."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "どれか気になる？……言ってみただけ。"
-          }
-        }
-      }
-    },
     "看哪个模式的样子" : {
       "localizations" : {
         "en" : {
