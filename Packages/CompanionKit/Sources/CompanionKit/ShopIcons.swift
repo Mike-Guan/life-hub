@@ -37,12 +37,19 @@ public struct CanIcon: View {
 /// A wardrobe item as a small square picture, for the shop and wardrobe screens.
 public struct WardrobeItemIcon: View {
     let picture: ItemPicture
+    #if os(iOS) || os(macOS)
+    private var home: HomeItemIcon?
+    #endif
 
     /// - Parameter item: the catalog item to draw.
     public init(item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
         picture = ItemPicture(slot: item.slot, outfit: Outfit(wardrobe), itemID: item.id)
+        #if os(iOS) || os(macOS)
+        // Room items HAKU's figure has no part for, such as the bench, are drawn as the home draws them.
+        home = item.slot == .room && picture.parts.isEmpty ? HomeItemIcon(itemID: item.id) : nil
+        #endif
     }
 
     /// The default look of `slot`, before anything is worn there. Draws nothing for `.room`.
@@ -51,6 +58,18 @@ public struct WardrobeItemIcon: View {
     }
 
     public var body: some View {
+        #if os(iOS) || os(macOS)
+        if let home {
+            home
+        } else {
+            figure
+        }
+        #else
+        figure
+        #endif
+    }
+
+    private var figure: some View {
         Canvas { context, size in
             let crop = picture.crop
             let scale = min(size.width / crop.width, size.height / crop.height)
