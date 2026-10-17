@@ -129,6 +129,7 @@ import Testing
             #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isDisjoint(with: KuroFigure.lap), "\(item)")
             pose.tap = nil
             pose.idle = .blow
+            pose.idleProgress = 0.5
             #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isDisjoint(with: KuroFigure.lap), "\(item)")
         }
     }

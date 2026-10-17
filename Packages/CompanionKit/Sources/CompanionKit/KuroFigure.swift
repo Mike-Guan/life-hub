@@ -228,7 +228,7 @@ struct KuroFigure: View {
         ZStack {
             ForEach(parts, id: \.self) { part in
                 KuroPartView(
-                    part: part, shift: Self.offset(part, pose: pose, hatted: hatted, beanie: beanie),
+                    part: part, shift: Self.offset(part, pose: pose, hatted: hatted, beanie: beanie, watch: watch),
                     turn: Self.turn(part, pose: pose)
                 )
                 .opacity(Self.opacity(part, pose: pose))
@@ -360,26 +360,36 @@ struct KuroFigure: View {
 
     /// How far `part` moves from where the SVG draws it, in SVG units; a hair piece moves with its hair, full
     /// energy raises her ears a little, and her thought bubble and stars move clear of a set hat when `hatted`, the
-    /// bubble also of the beanie when `beanie`.
+    /// bubble also of the beanie when `beanie`; on the `watch` she juggles higher.
     nonisolated static func offset(
-        _ part: KuroPart, pose: KuroPose, hatted: Bool = false, beanie: Bool = false
+        _ part: KuroPart, pose: KuroPose, hatted: Bool = false, beanie: Bool = false, watch: Bool = false
     ) -> CGSize {
         let moved = shift(wornOn[part] ?? part, pose: pose)
-        let lift: CGFloat = pose.full && part == .catEars ? 3 : 0
+        var lift: CGFloat = pose.full && part == .catEars ? 3 : 0
+        if watch, part == .juggleRacket || part == .tapBall { lift += watchJuggleLift }
         var clear = CGSize.zero
         if part == .tapDots { clear = beanie ? beanieDots : hatted ? hattedDots : .zero }
         if part == .sparkle, hatted { clear = hattedStars }
         return CGSize(width: moved.width + clear.width, height: moved.height - lift + clear.height)
     }
 
+    // 动作展示总表 G6: the watch's bottom edge cut the flat racket she juggles on, held as low as on the phone.
+    /// How much higher she juggles on the watch, in SVG units.
+    nonisolated static let watchJuggleLift: CGFloat = 10
+
     /// The looks in her sportswear, where she smiles.
     nonisolated private static let smiling: Set<KuroLook> = [.tennis, .fitness, .dance, .ski]
 
     /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out, and what a tap cut short
-    /// fades as it goes back. The nightlight's glow is `pose.glow`.
+    /// fades as it goes back. At the end of the tablet tap the tablet over her face fades into the one on her lap.
+    /// The nightlight's glow is `pose.glow`.
     nonisolated static func opacity(_ part: KuroPart, pose: KuroPose) -> Double {
         if part == .weeklyRoomNightlightGlow { return pose.glow }
         if part == .tapDots, pose.tap == .turnAway { return KuroTap.dotsOpacity(pose.tapProgress) }
+        if pose.tap == .tablet, part == .tapTablet || part == .workTablet || part == .watchTablet {
+            let down = KuroTap.tabletDown(pose.tapProgress)
+            return part == .tapTablet ? 1 - down : down
+        }
         guard let idle = pose.idle else { return 1 }
         let shown = idle.opacity(part, progress: pose.idleProgress)
         guard pose.tap != nil else { return shown }
@@ -571,6 +581,7 @@ public struct KuroView: View {
     @State private var nodStart: Date?
     @State private var tapKind: KuroTap?
     @State private var tapHeart = false
+    @State private var winkStart: Date?
     @State private var tapTimes: [Date] = []
     @State private var pokes = 0
     @State private var unboxStart: Date?
@@ -699,7 +710,10 @@ public struct KuroView: View {
                 let nod = Self.nod(since: nodStart, at: time)
                 let awake = unbox != nil ? unboxPose : reacting ?? scened(homeScene)
                 // 「……嗯。」 (Issue #236): one blink at the start of the nod.
-                let pose = dozing ? self.pose.showing(.closed) : (nod ?? 1) < 0.1 ? awake.showing(.closed) : awake
+                // 动作展示总表 C14: a tap while a move plays gets a blink instead of nothing.
+                let winking = winkStart.map { (0..<Self.wink).contains(time - $0.timeIntervalSinceReferenceDate) }
+                let shut = (nod ?? 1) < 0.1 || winking == true
+                let pose = dozing ? self.pose.showing(.closed) : shut ? awake.showing(.closed) : awake
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
                 let still = Self.holdsStill(reduceMotion: reduceMotion, unboxing: unbox != nil, dozing: dozing)
                 // KURO-16: her idle runs on from where it was when her pace changes, and eases back in after
@@ -711,6 +725,7 @@ public struct KuroView: View {
                 let loopMotion =
                     sleepy ? IdleMotion.sleeping(time: time) : homeScene?.motion ?? Self.motion(loop, time: idleTime)
                 let motion = napping ? Self.nap(time: time) : loopMotion
+                let moving = Self.rollOver(tap, time: time) ?? motion
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 // Her small idle moves play only in the plain idle.
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
@@ -738,8 +753,8 @@ public struct KuroView: View {
                     }
                 }
                 .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
-                .rotationEffect(.degrees(still ? 0 : motion.angle * ease), anchor: .bottom)
-                .offset(y: (still ? 0 : motion.dy * ease + Self.nodDip(nod)) + hop)
+                .rotationEffect(.degrees(still ? 0 : moving.angle * ease), anchor: .bottom)
+                .offset(y: (still ? 0 : moving.dy * ease + Self.nodDip(nod)) + hop)
             }
             .id(look)
             .transition(.opacity)
@@ -929,10 +944,16 @@ public struct KuroView: View {
             onTap?()
             return
         }
-        if reaction(at: now.timeIntervalSinceReferenceDate) == nil, unboxStart == nil {
-            let sleepy = bedtime == .on || EnergyFace(energy: energy) == .low
-            // KURO-02: at the desk with her chin on her hand she stays seated and taps her cheek.
-            play(pose.overtime ? .chinTap : KuroTap(look: look, sleepy: sleepy), at: now)
+        let playing = reaction(at: now.timeIntervalSinceReferenceDate)
+        if playing == nil, unboxStart == nil {
+            let sleepy = EnergyFace(energy: energy) == .low
+            // KURO-02: at the desk with her chin on her hand she stays seated and taps her cheek. 动作展示总表 C14:
+            // asleep at bedtime she rolls over instead of rubbing an eye.
+            play(pose.overtime ? .chinTap : bedtime == .on ? .rollOver : KuroTap(look: look, sleepy: sleepy), at: now)
+        } else if let playing, playing.0 != .rollOver {
+            // A tap during a move leaves the move playing: a squash and a blink. Rolling over she sleeps on.
+            winkStart = now
+            pop += 1
         }
         if showsBubble { say(Self.line(after: bubble, from: Self.tapLines(lines, bedtime: bedtime))) }
         // 动作总表 C15: at bedtime a tap only gets a mumble; it never changes the mode.
@@ -1048,6 +1069,15 @@ public struct KuroView: View {
         return (0..<1).contains(progress) ? progress : nil
     }
 
+    /// How long her eyes shut for a tap during a move, in seconds.
+    nonisolated static let wink: TimeInterval = 0.15
+
+    /// Her roll-over at `time` while `tap` is one, a slow lean of 8° and back, or nil for any other tap.
+    nonisolated static func rollOver(_ tap: (KuroTap, Double)?, time: TimeInterval) -> IdleMotion? {
+        guard let tap, tap.0 == .rollOver else { return nil }
+        return IdleMotion.rollingOver(time: time, progress: tap.1)
+    }
+
     // 抱平板睡着 v2 (Mike 2026-10-15): a slow breath, and every 8 to 15 s her head drops and comes back.
     /// Napping over her tablet at `time`: a breath every 4 s, 1.2 pt each way, and now and then a 1.6 s nod
     /// that sinks 3 pt and tilts 3°.
@@ -1081,7 +1111,7 @@ public struct KuroView: View {
 
     /// How far she hops at the start of a tap reaction, in points; turning away and the chin tap have no hop.
     nonisolated static func hop(_ tap: (KuroTap, Double)?) -> CGFloat {
-        guard let tap, tap.0 != .turnAway, tap.0 != .chinTap, tap.1 < 0.35 else { return 0 }
+        guard let tap, tap.0 != .turnAway, tap.0 != .chinTap, tap.0 != .rollOver, tap.1 < 0.35 else { return 0 }
         return -8 * CGFloat(sin(tap.1 / 0.35 * .pi))
     }
 

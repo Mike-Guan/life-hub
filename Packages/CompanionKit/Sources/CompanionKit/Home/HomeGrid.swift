@@ -44,6 +44,8 @@ enum HomeGrid {
     static let origin = CGPoint(x: 440, y: 240)
     /// The part of the plan the room is drawn in. Plan coordinates have y pointing down.
     static let canvas = CGRect(x: 124, y: 4, width: 632, height: 604)
+    /// The smallest tap target on screen, in points.
+    static let minTap: CGFloat = 44
 
     private static let across = CGFloat(cos(Double.pi / 6)) * unit
     private static let down = 0.5 * unit

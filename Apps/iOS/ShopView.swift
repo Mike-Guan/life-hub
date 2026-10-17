@@ -385,33 +385,3 @@ extension IdentityKind {
         ModeCards.current(in: AppGroup.defaults, persona: persona).identity
     }
 }
-
-/// A shop item's icon, drawn the way its character shows it.
-struct ShopItemIcon: View {
-    let item: ShopItem
-
-    var body: some View {
-        if let kuro = KuroItem(rawValue: item.id) {
-            KuroItemIcon(item: kuro)
-        } else {
-            WardrobeItemIcon(item: item)
-        }
-    }
-}
-
-/// `persona` standing still in `mode`'s look, dressed for `card` in the identity card mode, wearing `wardrobe`.
-struct PersonaPortrait: View {
-    let persona: Persona
-    let mode: Mode
-    var card: IdentityKind?
-    var wardrobe = Wardrobe()
-
-    var body: some View {
-        if persona == .kuro {
-            KuroPortrait(look: KuroLook(mode: mode, card: card), wearing: wardrobe.worn(in: mode))
-        } else {
-            // C18 (动作展示总表): the shop and the wardrobe show the clothes, so no nap or handheld.
-            CompanionPortrait(mode: mode, card: card, wardrobe: wardrobe, idles: false)
-        }
-    }
-}

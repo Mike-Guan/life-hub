@@ -201,4 +201,72 @@ import Testing
         #expect(scale(0) < -0.9 && abs(scale(1) - 1) < 0.001)
         #expect(KuroFigure.turn(.tennisRacket, pose: tap)?.angle == 0)
     }
+
+    // 动作展示总表 G15 (精修第 2 批, Mike 2026-10-17).
+    @Test func theTabletSlidesBackToHerLapAtTheEnd() {
+        let pose = KuroPose(look: .work, energy: nil)
+        #expect(KuroTap.tabletDown(0.7) == 0 && KuroTap.tabletDown(0.999) > 0.99)
+        let late = pose.reacting(.tablet, progress: 0.9)
+        let parts = KuroFigure.parts(for: .work, pose: late)
+        #expect(parts.contains(.tapTablet) && parts.contains(.workTablet))
+        let fading = KuroFigure.opacity(.tapTablet, pose: late) + KuroFigure.opacity(.workTablet, pose: late)
+        #expect(abs(fading - 1) < 0.001 && KuroFigure.opacity(.workTablet, pose: late) > 0)
+        let early = pose.reacting(.tablet, progress: 0.7)
+        #expect(!KuroFigure.parts(for: .work, pose: early).contains(.workTablet))
+        #expect(KuroFigure.shift(.tapTablet, pose: late).height > KuroFigure.shift(.tapTablet, pose: early).height)
+    }
+
+    // 动作展示总表 C5 (精修第 2 批).
+    @Test func herLapSlidesAwayWhileSheBlowsOnHerDrink() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.blanket]
+        let at = { (p: Double) in pose.idling((.blow, p)) }
+        #expect(KuroFigure.parts(for: .chill, pose: at(0.03)).contains(.itemBlanket))
+        #expect(KuroFigure.shift(.itemBlanket, pose: at(0.03)).height > 0)
+        #expect(!KuroFigure.parts(for: .chill, pose: at(0.5)).contains(.itemBlanket))
+        let back = KuroFigure.parts(for: .chill, pose: at(0.95))
+        #expect(back.contains(.itemBlanket) && back.contains(.chillCup) && !back.contains(.tapCup))
+        #expect(KuroFigure.shift(.itemBlanket, pose: at(0.95)).height > 0)
+        #expect(KuroFigure.shift(.itemBlanket, pose: at(0.999)).height < 1)
+    }
+
+    // 动作展示总表 C7 (精修第 2 批).
+    @Test func theFlatRacketFlipsBackUprightAfterTheJuggle() {
+        let pose = KuroPose(look: .tennis, energy: nil)
+        let at = { (p: Double) in pose.idling((.juggle, p)) }
+        #expect(KuroFigure.turn(.juggleRacket, pose: at(0.5))?.scale == 1)
+        let flat = KuroFigure.parts(for: .tennis, pose: at(0.94))
+        #expect(flat.contains(.juggleRacket) && !flat.contains(.tapBall) && !flat.contains(.tennisRacket))
+        #expect((KuroFigure.turn(.juggleRacket, pose: at(0.95))?.scale ?? 1) < 0.5)
+        let upright = KuroFigure.parts(for: .tennis, pose: at(0.97))
+        #expect(upright.contains(.tennisRacket) && !upright.contains(.juggleRacket))
+        let opening = KuroFigure.turn(.tennisRacket, pose: at(0.97))?.scale ?? 1
+        #expect(opening < 0.5 && opening >= KuroTap.edgeOn)
+        #expect((KuroFigure.turn(.tennisRacket, pose: at(0.999))?.scale ?? 0) > 0.99)
+    }
+
+    // 动作展示总表 G6 / KURO.md C8 (精修第 2 批).
+    @Test func onTheWatchTheRaisedRacketSwingsTwirlsAndJugglesHigher() {
+        let pose = KuroPose(look: .tennis, energy: nil)
+        let swing = KuroFigure.turn(.watchRacket, pose: pose.reacting(.swing, progress: 0.4))
+        #expect(swing?.angle == -75 && swing?.pivot == CGPoint(x: 111, y: 108))
+        #expect((KuroFigure.turn(.watchRacket, pose: pose.idling((.twirl, 0.35)))?.scale ?? 1) < -0.9)
+        #expect(KuroFigure.shift(.watchRacket, pose: pose.idling((.twirl, 0.85))).height < -5)
+        let juggling = pose.idling((.juggle, 0.25))
+        #expect(KuroFigure.parts(for: .tennis, pose: juggling, watch: true).contains(.juggleRacket))
+        let phone = KuroFigure.offset(.tapBall, pose: juggling).height
+        #expect(KuroFigure.offset(.tapBall, pose: juggling, watch: true).height == phone - KuroFigure.watchJuggleLift)
+    }
+
+    // 动作展示总表 C14 (精修第 2 批): at bedtime a tap rolls her over instead of rubbing an eye.
+    @Test func asleepSheRollsOverWithHerEyesShut() {
+        #expect(KuroTap.rollOver.duration == 1.4)
+        let pose = KuroPose(look: .chill, energy: nil, bedtime: .on)
+        for p in [0.1, 0.5, 0.97] { #expect(pose.reacting(.rollOver, progress: p).eyes == .closed) }
+        #expect(KuroView.hop((.rollOver, 0.1)) == 0)
+        let leaning = KuroView.rollOver((.rollOver, 0.5), time: 0)
+        #expect(abs((leaning?.angle ?? 0) - 8) < 0.001)
+        #expect(KuroView.rollOver((.rub, 0.5), time: 0) == nil && KuroView.rollOver(nil, time: 0) == nil)
+        #expect(KuroView.wink == 0.15)
+    }
 }

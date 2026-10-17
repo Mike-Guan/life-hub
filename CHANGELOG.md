@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Share cards: a keepsake or a new top or full set can be shared as a 9:16 or 1:1 picture of the character
+  wearing it, with its name and her line. Rows in 人生收藏 open the keepsake's page, which shows how she looked the
+  day it arrived; its 「分享」 and a quiet 「分享」 link on the unboxing open the choice. Cards carry no date,
+  place or health number, and sharing gives nothing.
+- Every tap target on the home page is at least 44 pt, also on iPhone SE: HAKU, the standing bag, the bench, the
+  floating labels and the header buttons. A tap just beside a small target still lands on it.
+- Second polish batch for the second preset character: the tablet slides back to her lap after the tap, her
+  lap things slide away and back while she blows on her drink, the flat racket flips upright after juggling,
+  the watch's raised racket swings, twirls and juggles, a tap during a move gets a blink, and at bedtime a tap
+  rolls her over instead of rubbing an eye.
 - CompanionKit draws the shop's room items for the app: `HomeItemIcon` (small icon, drawn as in the home) and
   `HomeItemPreview` (the real room around the item where it stands, circled, HAKU next to it). The home's shop
   button now opens the app's shop through `onShop` and reads 商店; the prototype's own shop panel is gone.
@@ -107,6 +117,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   rearranging; the right wall hook moved left so the wardrobe no longer hides it.
 - A room item from the shop no longer stands in HAKU's 下班 backdrop. Bought room items live in HAKU's home.
 - VoiceOver reads the unboxing as "开箱：" and the item's name instead of the character's mode.
+- On a Japanese or English iPhone, the Photos permission prompt for saving a share card is in that language.
 - Opening the app, HAKU says one line at most: a celebration first, then an invite, good night, the late-night
   line, a planned task, bath time and the stretch. A mode change no longer clears it. A tap during a one-off
   animation only makes HAKU blink. At bedtime a tap gets a sleepy mumble instead of switching the side-hustle
