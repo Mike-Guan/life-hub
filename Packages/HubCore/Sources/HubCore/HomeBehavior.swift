@@ -16,7 +16,7 @@ public enum HomeMoment: Hashable, Sendable {
 }
 
 /// Where in the room the character stands.
-public enum HomeSpot: Hashable, Sendable {
+public enum HomePlace: Hashable, Sendable {
     case desk, sofa, bed
     /// The reward shelf.
     case shelf
@@ -48,11 +48,11 @@ public enum HomePriority: Sendable {
 
 /// Where the character is and what she does there, and which rule chose it.
 public struct HomeBeat: Equatable, Sendable {
-    public var spot: HomeSpot
+    public var spot: HomePlace
     public var action: HomeAction
     public var priority: HomePriority
 
-    public init(spot: HomeSpot, action: HomeAction, priority: HomePriority) {
+    public init(spot: HomePlace, action: HomeAction, priority: HomePriority) {
         self.spot = spot
         self.action = action
         self.priority = priority
@@ -87,7 +87,7 @@ public enum HomeBehavior {
         return base
     }
 
-    private static func spot(for moment: HomeMoment, home: HomeSnapshot) -> HomeSpot {
+    private static func spot(for moment: HomeMoment, home: HomeSnapshot) -> HomePlace {
         switch moment {
         case .offWork: .sofa
         case .newItem(let id): .item(id)
