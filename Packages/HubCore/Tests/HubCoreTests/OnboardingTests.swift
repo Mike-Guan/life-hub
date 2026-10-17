@@ -45,6 +45,51 @@ import Testing
         #expect(defaults.data(forKey: OnboardingDraft.defaultsKey) == nil)
     }
 
+    @Test func settingsChangesTheWorkDaysLater() {
+        var cards = ModeCards()
+        var rules = ModeRules.standard
+        rules.workdays = []
+        var draft = OnboardingDraft.editing(.work, persona: .haku, cards: cards, rules: rules)
+        #expect(draft.step == .work && draft.work?.workdays == [])
+        draft.work = OnboardingDraft.Work(workdays: [2, 4], startMinute: 10 * 60, endMinute: 19 * 60)
+        draft.applyStep(to: &cards, rules: &rules)
+        #expect(rules.workdays == [2, 4] && rules.workStartMinute == 10 * 60 && rules.workEndMinute == 19 * 60)
+        #expect(cards == ModeCards())
+    }
+
+    @Test func settingsAddsChangesAndClearsTheIdentityCard() {
+        var cards = ModeCards()
+        var rules = ModeRules.standard
+        var draft = OnboardingDraft.editing(.identity, persona: .kuro, cards: cards, rules: rules)
+        #expect(draft.persona == .kuro && draft.identity == nil && draft.chill == cards.chill)
+        draft.identity = .boxing
+        draft.applyStep(to: &cards, rules: &rules)
+        #expect(cards.identity == .boxing && cards.modes.count == 4)
+        draft = OnboardingDraft.editing(.identity, persona: .kuro, cards: cards, rules: rules)
+        #expect(draft.identity == .boxing)
+        draft.identity = .tennis
+        draft.applyStep(to: &cards, rules: &rules)
+        #expect(cards.identity == .tennis)
+        draft.identity = nil
+        draft.applyStep(to: &cards, rules: &rules)
+        #expect(cards.identity == nil && !cards.modes.contains(.boxing))
+        #expect(rules == .standard)
+    }
+
+    @Test func settingsRenamesTheCommonCardsLater() {
+        var cards = ModeCards(identity: .boxing)
+        cards.rename(.chill, to: "躺平")
+        var rules = ModeRules.standard
+        var draft = OnboardingDraft.editing(.cards, persona: .haku, cards: cards, rules: rules)
+        #expect(draft.names == [Mode.chill.rawValue: "躺平"])
+        draft.names[Mode.work.rawValue] = "搬砖"
+        draft.names[Mode.chill.rawValue] = ""
+        draft.applyStep(to: &cards, rules: &rules)
+        #expect(cards.title(for: .work, persona: .haku) == "搬砖")
+        #expect(cards.names[Mode.chill.rawValue] == nil)
+        #expect(cards.identity == .boxing && rules == .standard)
+    }
+
     @Test func leavingHalfwayPicksUpAtTheSameStep() throws {
         let (defaults, suite) = try defaults()
         defer { defaults.removePersistentDomain(forName: suite) }

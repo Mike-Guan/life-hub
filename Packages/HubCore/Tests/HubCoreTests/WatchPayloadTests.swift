@@ -104,10 +104,41 @@ import Testing
         let expected = WidgetSnapshot.timelineDates(
             after: now,
             bedtime: .standard,
-            needTimes: sent.snapshot.needTimes,
+            needTimes: sent.snapshot.needTimes + WidgetSnapshot.slotDates(after: now),
             calendar: calendar
         )
         #expect(sent.timelineDates(after: now, calendar: calendar) == expected)
+    }
+
+    @Test func redrawsWhenAScenePlays() {
+        let now = date(7, 12, 2)
+        var sent = payload()
+        let start = date(7, 12, 7)
+        sent.scenes = [
+            TimedScene(from: now, scene: HomeScene()), TimedScene(from: start, scene: HomeScene(bath: true)),
+        ]
+        let dates = sent.timelineDates(after: now, calendar: calendar)
+        #expect(dates.contains(start))
+        // The face goes back to the plain look when the scenes run out (#401).
+        #expect(dates.contains(date(7, 15, 2)))
+    }
+
+    @Test func drawsLikeComparesScenesWithinAStep() {
+        let bath = HomeScene(bath: true)
+        var sent = payload()
+        sent.scenes = [TimedScene(from: date(7, 12), scene: HomeScene()), TimedScene(from: date(7, 13), scene: bath)]
+        // A send two minutes later samples the same change up to one step apart.
+        var again = payload()
+        again.scenes = [
+            TimedScene(from: date(7, 12, 2), scene: HomeScene()), TimedScene(from: date(7, 13, 2), scene: bath),
+        ]
+        #expect(sent.drawsLike(again))
+        var moved = again
+        moved.scenes[1].from = date(7, 14)
+        #expect(!sent.drawsLike(moved))
+        var other = again
+        other.scenes[1].scene = HomeScene(moment: .lateCoding)
+        #expect(!sent.drawsLike(other))
     }
 
     @Test func carriesThePersona() throws {
@@ -126,6 +157,18 @@ import Testing
         #expect(sent.scene(at: date(7, 21)) == coding)
         #expect(sent.scene(at: date(7, 23)) == late)
         #expect(payload().scene(at: date(7, 21)) == nil)
+    }
+
+    @Test func carriesThePickedIdentityCard() {
+        var sent = payload()
+        #expect(sent.card(for: .boxing) == nil)
+        sent.cards = ModeCards(identity: .study)
+        #expect(sent.card(for: .boxing) == .study)
+        #expect(sent.card(for: .chill) == nil)
+        // The character's own card draws her default look.
+        sent.persona = .kuro
+        sent.cards = ModeCards(identity: .tennis)
+        #expect(sent.card(for: .boxing) == nil)
     }
 
     @Test func dropsTheLastSceneOnceTheScenesRunOut() {

@@ -90,9 +90,9 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   are separate types. Never derive one by overloading the other.
 - Manual mode changes always win. Automatic sources (Focus filter, calendar, geofence)
   may suggest, or switch only under rules Mike enabled; no auto-switch for 2h after a manual change.
-  The clock never switches the mode: work starts by arriving at the office, ends by leaving it from an hour
-  before the end of work hours (17:30 for 18:30). Place comes first: from then, having left the office or
-  come home ends work even within the 2h window,
+  The clock never switches the mode: work starts by arriving at the office and ends by leaving it, at any
+  time (a lunch break too; coming back starts work again). Place comes first: having left the office or
+  come home today ends work even within the 2h window,
   unless the mode changed after that move. The app re-checks this at every place event and every open.
 - Every ModeChange is stored with its source.
 - Exception: entering the boxing gym geofence (CLMonitor, ~100 m) switches straight to boxing with no
@@ -223,3 +223,10 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   for bedtime and work days; gym, run and identity-card days are learned from records and trigger nothing
   until learned. Mike's own routines (bedtime 23:30, Tue-Thu gym, Saturday run) stop being defaults.
   Existing installs keep their data.
+- 2026-10-15: Mike: 「离开公司就应该下班」. Leaving the office ends work at any time, not only from an hour before
+  the end of work hours. A lunch break ends work and coming back starts it again. The off-work line still
+  plays only from an hour before the end of work hours.
+- 2026-10-15: Mike: the home room keeps semi-realistic furniture, rendered in Blender. Reversed 2026-10-16.
+- 2026-10-16: Mike: the home room is drawn in code (`HomeArt.swift`), the first prototype's ink-line look refined
+  (thinner lines, more detail, contact shadows). The Blender renders are gone: no 3D game, and code keeps colours
+  and new shop items cheap.

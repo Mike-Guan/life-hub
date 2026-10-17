@@ -120,7 +120,7 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
     public func lines(for persona: Persona) -> [String] {
         let lines: (haku: [String], kuro: [String])
         switch self {
-        case .boxing: lines = (["……别碰，手带刚缠好。", "打完再说。", "拳套有点味道。不是我的问题。"], ["……别闹。", "等一下，在系。", "……你看什么。"])
+        case .boxing: lines = (["……别碰，手带刚缠好。", "打完再说。", "拳套有点味道。不是我的问题。"], ["……真是的。", "等一下，在系。", "……你看什么。"])
         case .tennis: lines = (["球拍比我想的重。还是重。", "……别抢。", "捡球的不是我。"], ["……拍子别碰。", "等我颠完。", "……嗯。"])
         case .fitness: lines = (["……我数，你练。", "……这个不重。", "别看我，看镜子。"], ["……我在这儿。", "数到几了？", "……慢点。"])
         case .study: lines = (["安静。", "……这页我看过了。", "你看你的，我看我的。"], ["……嘘。", "这里有点难。", "……翻一页。"])
@@ -309,7 +309,7 @@ public struct ModeCards: Codable, Equatable, Sendable {
     public func title(for mode: Mode, persona: Persona) -> String {
         if let name = names[mode.rawValue] { return name }
         if mode == .boxing, let identity { return identity.title }
-        return mode.title(for: persona)
+        return mode.title(for: persona).localized
     }
 
     /// The identity slot's activity for sentences, without 日: the picked card's, else the character's default.
@@ -389,6 +389,18 @@ public struct ModeCards: Codable, Equatable, Sendable {
         return true
     }
 
+    // 活动分类 v1: one activity sits on one card, so the fitness card takes 健身 out of Chill and gives it back
+    // when another card replaces it.
+    /// Picks `kind` as the identity card, or none for `nil`. Records made with the old card are kept.
+    /// - Returns: `true` when 健身 moved out of Chill into the fitness card.
+    @discardableResult
+    public mutating func pickIdentity(_ kind: IdentityKind?) -> Bool {
+        if identity == .fitness, kind != .fitness { chill.insert(.fitness) }
+        identity = kind
+        guard kind == .fitness else { return false }
+        return chill.remove(.fitness) != nil
+    }
+
     /// The 副业 state after `state` when the user taps the character. A state not picked goes to the first.
     public func next(after state: SideHustle) -> SideHustle {
         guard let index = sideStates.firstIndex(of: state) else { return sideStates[0] }
@@ -424,5 +436,53 @@ public struct ModeCards: Codable, Equatable, Sendable {
     /// Saves the cards in `defaults`.
     public func store(in defaults: UserDefaults) {
         defaults.set(try? JSONEncoder().encode(self), forKey: Self.defaultsKey)
+    }
+
+    // 角色切换 正式版 v0 §3 (Mike 2026-10-15): test builds can try a character with her default cards. The
+    // user's own cards wait under their own key; places and learned days live elsewhere and stay as they are.
+    static let ownKey = "modeCardsOwn"
+    static let ownPersonaKey = "modeCardsOwnPersona"
+
+    /// `persona`'s default cards: the common cards with their default names and her default identity card.
+    public static func characterDefaults(for persona: Persona) -> ModeCards {
+        ModeCards(identity: persona == .kuro ? .tennis : .boxing)
+    }
+
+    /// Whether the saved cards are a character's defaults being tried, with the user's own put aside.
+    public static func isTrying(in defaults: UserDefaults) -> Bool {
+        defaults.data(forKey: ownKey) != nil
+    }
+
+    /// Puts the user's own cards aside, unless they already are, and saves `persona`'s default cards.
+    /// - Parameters:
+    ///   - persona: The character whose default cards are tried.
+    ///   - own: The character picked when the own cards are put aside.
+    ///   - defaults: The store holding the cards.
+    public static func tryDefaults(of persona: Persona, from own: Persona, in defaults: UserDefaults) {
+        if !isTrying(in: defaults) {
+            let cards = defaults.data(forKey: defaultsKey) ?? (try? JSONEncoder().encode(ModeCards()))
+            defaults.set(cards, forKey: ownKey)
+            defaults.set(own.rawValue, forKey: ownPersonaKey)
+        }
+        characterDefaults(for: persona).store(in: defaults)
+    }
+
+    /// Saves the user's own cards back after `tryDefaults(of:from:in:)`; does nothing when none were put aside.
+    public static func restoreOwn(in defaults: UserDefaults) {
+        guard let own = defaults.data(forKey: ownKey) else { return }
+        defaults.set(own, forKey: defaultsKey)
+        defaults.removeObject(forKey: ownKey)
+        defaults.removeObject(forKey: ownPersonaKey)
+    }
+
+    /// Applies a character switch while trying: back to the character picked when trying started restores the
+    /// own cards, any other character gets her default cards. Does nothing when not trying.
+    public static func switchWhileTrying(to persona: Persona, in defaults: UserDefaults) {
+        guard isTrying(in: defaults) else { return }
+        if defaults.string(forKey: ownPersonaKey) == persona.rawValue {
+            restoreOwn(in: defaults)
+        } else {
+            characterDefaults(for: persona).store(in: defaults)
+        }
     }
 }

@@ -1,3 +1,4 @@
+import HubCore
 import SwiftUI
 
 // KURO-12 (UI 审核 2026-10-08): she borrowed HAKU's headphone nod, blinked on his metronome and slept
@@ -52,7 +53,7 @@ enum KuroIdle: CaseIterable, Sendable {
     /// Out (study): she looks down at her phone, smiles a little and puts it away.
     case phone
     // Deferred identity cards (顺延身份卡 预览, UI 审核 round 2 passed 2026-10-14).
-    /// Dance: two notes rise from the speaker and fade, her ponytail swings a beat behind and her eyes smile.
+    /// Dance: two notes rise beside her and fade, her ponytail swings a beat behind and her eyes smile.
     case groove
     /// Music: eyes on the score, one finger taps four places on it and her head nods with each tap.
     case score
@@ -82,8 +83,21 @@ enum KuroIdle: CaseIterable, Sendable {
         }
     }
 
-    /// The moves `look` draws from.
-    static func pool(_ look: KuroLook) -> [KuroIdle] {
+    // 动作展示总表 §3-3 (PM 10/15, UI 三组): cards without a look of their own wear her tennis look, but still get
+    // their base outfit's moves.
+    /// The moves `look` draws from, with `card`'s base outfit moves when she wears the tennis look for it.
+    static func pool(_ look: KuroLook, card: IdentityKind? = nil) -> [KuroIdle] {
+        let own = ownPool(look)
+        guard look == .tennis, let base = card?.baseOutfit(for: .kuro) else { return own }
+        switch base {
+        case .sport: return own + [.reach, .towel]
+        case .outing: return own + [.collar, .phone]
+        case .craft: return own + [.tuck, .frame]
+        }
+    }
+
+    /// The moves `look` draws from on its own.
+    private static func ownPool(_ look: KuroLook) -> [KuroIdle] {
         switch look {
         case .work: [.ears, .stylus, .lookUp]
         case .chill: [.ears, .blow, .aside]
@@ -100,9 +114,10 @@ enum KuroIdle: CaseIterable, Sendable {
         }
     }
 
-    /// The move playing in `look` at idle time `t` and how far into it she is (0..<1), or nil between moves.
-    static func at(_ t: TimeInterval, look: KuroLook) -> (KuroIdle, Double)? {
-        let pool = pool(look)
+    /// The move playing in `look` for `card` at idle time `t` and how far into it she is (0..<1), or nil between
+    /// moves.
+    static func at(_ t: TimeInterval, look: KuroLook, card: IdentityKind? = nil) -> (KuroIdle, Double)? {
+        let pool = pool(look, card: card)
         guard let beat = IdleClock.beat(at: t, lengths: pool.map(\.length), seed: seed) else { return nil }
         let move = pool[beat.kind]
         return (move, beat.phase / move.length)
@@ -286,12 +301,16 @@ enum KuroIdle: CaseIterable, Sendable {
     /// The card props each base-outfit idle puts down.
     private var putDown: Set<KuroPart> {
         switch self {
-        case .reach, .towel: [.gymBlock]
-        case .tuck, .frame: [.workTablet, .watchTablet, .craftPen]
-        case .collar, .phone: [.studyNotebook, .studyHighlighter]
+        case .reach, .towel: Self.rackets.union([.gymBlock])
+        case .tuck, .frame: Self.rackets.union([.workTablet, .watchTablet, .craftPen])
+        case .collar, .phone: Self.rackets.union([.studyNotebook, .studyHighlighter])
         default: []
         }
     }
+
+    // In the tennis look, worn for a card without a look of its own, the racket goes down instead.
+    /// The rackets she may hold in the tennis look.
+    private static let rackets: Set<KuroPart> = [.tennisRacket, .watchRacket, .itemGoldRacket]
 
     /// How far `part` moves `t` seconds into a base-outfit idle, in SVG units (timings from the approved preview).
     private func baseShift(_ part: KuroPart, at t: Double) -> CGSize {
@@ -326,7 +345,7 @@ enum KuroIdle: CaseIterable, Sendable {
     }
 
     /// The parts that stand on the floor.
-    private static let ground: Set<KuroPart> = [.itemFlower, .itemLamp, .itemBag, .boxSandbag]
+    private static let ground: Set<KuroPart> = [.itemFlower, .itemLamp, .itemBag]
 
     /// How far her arms are up `t` seconds into the reach, 0...1.
     static func reachUp(_ t: Double) -> Double {
@@ -350,7 +369,7 @@ enum KuroIdle: CaseIterable, Sendable {
         }
     }
 
-    /// The two notes and when each leaves the speaker, in seconds into the groove.
+    /// The two notes and when each starts rising, in seconds into the groove.
     private static let notes: [(part: KuroPart, start: Double)] = [(.speakerNoteA, 0.2), (.speakerNoteB, 1.4)]
 
     /// How far `note` has risen (0..<1) at `p` into the groove, or nil when it isn't showing.

@@ -70,6 +70,16 @@ struct WatchHomeView: View {
         #endif
     }
 
+    // Used by scripts/watch-launch-check.sh to shoot page 2. Debug builds only.
+    /// Launch argument `-today-page` opens on the second page.
+    static var secondPageFirst: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-today-page")
+        #else
+        false
+        #endif
+    }
+
     /// Page 1: the mode's color to every edge, the character from the chest up, and a small mode chip.
     private func companionPage(_ payload: WatchPayload, mode: Mode?, at date: Date) -> some View {
         let snapshot = payload.snapshot
@@ -77,7 +87,8 @@ struct WatchHomeView: View {
         return Group {
             if payload.persona == .kuro {
                 KuroView(
-                    look: KuroLook(mode: mode ?? .chill),
+                    look: KuroLook(mode: mode ?? .chill, card: mode.flatMap(payload.card(for:))),
+                    card: mode.flatMap(payload.card(for:)),
                     energy: snapshot.energy(at: date)?.value,
                     bedtime: payload.bedtime.state(at: date),
                     need: snapshot.need(at: date),
@@ -91,6 +102,7 @@ struct WatchHomeView: View {
             } else {
                 CompanionView(
                     mode: mode,
+                    card: mode.flatMap(payload.card(for:)),
                     energy: snapshot.energy(at: date)?.value,
                     need: snapshot.need(at: date),
                     needSince: snapshot.needSince(at: date),
@@ -143,7 +155,7 @@ struct WatchHomeView: View {
 // two pages are swapped by hand.
 /// Two full-screen pages: swipe up for the second, down for the first.
 private struct WatchPager<First: View, Second: View>: View {
-    @State private var page = 0
+    @State private var page = WatchHomeView.secondPageFirst ? 1 : 0
     private let first: First
     private let second: Second
 
@@ -153,10 +165,18 @@ private struct WatchPager<First: View, Second: View>: View {
     }
 
     var body: some View {
-        ZStack {
-            if page == 0 {
-                first.transition(.move(edge: .top))
-            } else {
+        // Page 1 stays in the view tree while page 2 shows: rebuilt, the character would replay its opening
+        // reactions, invite hop and line on every swipe back (PM 动作展示总表 C20). Off screen its frame clock stops.
+        let onFirst = page == 0
+        return ZStack {
+            first
+                .visualEffect { content, proxy in
+                    content.offset(y: onFirst ? 0 : -proxy.size.height)
+                }
+                .allowsHitTesting(onFirst)
+                .accessibilityHidden(!onFirst)
+                .environment(\.companionOffscreen, !onFirst)
+            if page == 1 {
                 second.transition(.move(edge: .bottom))
             }
         }
@@ -211,9 +231,23 @@ private struct TodayPage: View {
     let date: Date
 
     var body: some View {
+        // UI 二组 (交付质量排查 C2): three rows with a three-line line run past the 40 and 41 mm screens, and
+        // a scroll view would take the vertical swipe that turns the page. The tighter layout fits there.
+        ViewThatFits(in: .vertical) {
+            card(compact: false)
+            card(compact: true)
+        }
+        // The page dots sit 3 to 8 pt from the right edge, so the card keeps clear of them (C3).
+        .padding(.leading, 6)
+        .padding(.trailing, 14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(mode.color(for: payload.persona).ignoresSafeArea())
+    }
+
+    private func card(compact: Bool) -> some View {
         let snapshot = payload.snapshot
-        VStack(alignment: .leading, spacing: 8) {
-            row("模式") {
+        return VStack(alignment: .leading, spacing: compact ? 4 : 8) {
+            row("模式", compact: compact) {
                 if let since = snapshot.since {
                     Text("\(payload.title(for: mode)) · \(Text(since, style: .relative))")
                 } else {
@@ -221,33 +255,31 @@ private struct TodayPage: View {
                 }
             }
             if let energy = snapshot.energy(at: date) {
-                row("电量") {
+                row("电量", compact: compact) {
                     HStack(spacing: 8) {
                         Text(energy.title)
-                        EnergyBars(filled: Self.bars(energy))
+                        EnergyBars(filled: Self.bars(energy)).accessibilityHidden(true)
                     }
                 }
             }
             if let line = snapshot.line(at: date) {
-                row(payload.persona == .kuro ? "KURO 说" : "HAKU 说") {
+                row(payload.persona == .kuro ? "KURO 说" : "HAKU 说", compact: compact) {
                     Text(line).lineLimit(3).minimumScaleFactor(0.8)
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
+        .padding(compact ? 8 : 12)
         .background(RoundedRectangle(cornerRadius: 20).fill(Toy.card))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(Toy.ink, lineWidth: Toy.outline))
-        .padding(.horizontal, 6)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(mode.color(for: payload.persona).ignoresSafeArea())
     }
 
-    private func row<Value: View>(_ title: String, @ViewBuilder value: () -> Value) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(title).font(Toy.body(11, weight: .bold)).foregroundStyle(Toy.muted)
-            value().font(Toy.body(15, weight: .heavy)).foregroundStyle(Toy.ink)
+    private func row<Value: View>(_ title: String, compact: Bool, @ViewBuilder value: () -> Value) -> some View {
+        VStack(alignment: .leading, spacing: compact ? 0 : 1) {
+            Text(title).font(Toy.body(compact ? 10 : 11, weight: .bold)).foregroundStyle(Toy.muted)
+            value().font(Toy.body(compact ? 13 : 15, weight: .heavy)).foregroundStyle(Toy.ink)
         }
+        .accessibilityElement(children: .combine)
     }
 
     /// How many of the five bars an energy level fills.

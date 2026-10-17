@@ -63,7 +63,11 @@ struct WatchStatusView: View {
     @ViewBuilder private var content: some View {
         switch family {
         case .accessoryCorner:
-            head.widgetLabel(title ?? "打开 iPhone")
+            if let title {
+                head.widgetLabel(title)
+            } else {
+                head.widgetLabel(placeholder)
+            }
         case .accessoryRectangular:
             HStack(spacing: 6) {
                 head.frame(width: 40)
@@ -81,9 +85,17 @@ struct WatchStatusView: View {
     @ViewBuilder private var modeAndTime: some View {
         if let title, let since = entry.payload?.snapshot.since {
             Text("\(title) · \(Text(since, style: .relative))")
+        } else if let title {
+            Text(title)
         } else {
-            Text(title ?? "打开 iPhone")
+            Text(placeholder)
         }
+    }
+
+    // UI 二组 预览 6: once the iPhone has sent, there is nothing to open; the mode just isn't set yet.
+    /// What shows instead of the mode: nothing received yet, or no mode yet.
+    private var placeholder: LocalizedStringKey {
+        entry.payload == nil ? "打开 iPhone" : "还没有模式"
     }
 
     private var title: String? {
@@ -110,7 +122,7 @@ struct WatchStatusView: View {
     @ViewBuilder private var portrait: some View {
         if let payload = entry.payload, let mode = entry.mode, payload.persona == .kuro {
             KuroPortrait(
-                look: KuroLook(mode: mode),
+                look: KuroLook(mode: mode, card: payload.card(for: mode)),
                 energy: payload.snapshot.energy(at: entry.date)?.value,
                 bedtime: payload.bedtime.state(at: entry.date),
                 wearing: payload.wardrobe.worn(in: mode),
@@ -119,16 +131,24 @@ struct WatchStatusView: View {
             )
         } else if let payload = entry.payload, let mode = entry.mode {
             let snapshot = payload.snapshot
+            // The same scene the watch app plays, like the iPhone Lock Screen (PM 动作展示总表 C9).
+            let scene = payload.scene(at: entry.date)
             CompanionPortrait(
                 mode: mode,
+                card: payload.card(for: mode),
                 energy: snapshot.energy(at: entry.date)?.value,
                 need: snapshot.need(at: entry.date),
                 needSince: snapshot.needSince(at: entry.date),
+                activity: scene?.activity,
+                moment: scene?.moment,
                 traces: snapshot.traces(at: entry.date),
                 vitals: snapshot.vitals ?? HakuVitals(),
                 date: entry.date,
                 bedtime: payload.bedtime.state(at: entry.date),
                 wardrobe: payload.wardrobe,
+                daily: scene?.daily,
+                walking: scene?.walking,
+                bath: scene?.bath ?? false,
                 framing: .head
             )
         } else {

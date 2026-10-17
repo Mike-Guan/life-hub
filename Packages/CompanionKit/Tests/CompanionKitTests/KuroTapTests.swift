@@ -106,11 +106,99 @@ import Testing
         #expect(KuroView.hop((.turnAway, 0.1)) == 0 && KuroView.hop((.sip, 0.1)) < 0 && KuroView.hop(nil) == 0)
     }
 
+    // 动作展示总表 G2: she squashes edge-on to swap sides as she turns away and back, and the bubble waits.
+    @Test func sheFlipsLikeACardToTurnAway() {
+        let pose = KuroPose(look: .chill, energy: nil)
+        let length = KuroTap.turnAway.duration
+        let at = { (t: Double) in t / length }
+        let edge = { (t: Double) in abs(KuroTap.turnWidth(at(t)) - KuroTap.edgeOn) < 0.001 }
+        #expect(KuroTap.turnWidth(0) == 1 && edge(0.12) && KuroTap.turnWidth(at(0.5)) == 1 && edge(length - 0.12))
+        #expect(KuroView.width((.turnAway, at(0.06))) < 1 && KuroView.width((.sip, 0.05)) == 1)
+        let front = Set(KuroFigure.parts(for: .chill, pose: pose.reacting(.turnAway, progress: at(0.1))))
+        #expect(front.contains(.faceBase) && !front.contains(.backHead))
+        let back = Set(KuroFigure.parts(for: .chill, pose: pose.reacting(.turnAway, progress: at(0.2))))
+        #expect(back.contains(.backHead) && !back.contains(.tapDots))
+        #expect(KuroTap.dotsOpacity(at(0.29)) > 0 && KuroTap.dotsOpacity(at(0.29)) < 1)
+        #expect(KuroTap.dotsOpacity(at(1.5)) == 1 && KuroTap.dotsOpacity(at(length - 0.2)) == 0)
+        let turning = pose.reacting(.turnAway, progress: at(1.5))
+        #expect(KuroFigure.opacity(.tapDots, pose: turning) == 1)
+        let turnedBack = pose.reacting(.turnAway, progress: at(2.95))
+        #expect(KuroFigure.parts(for: .chill, pose: turnedBack).contains(.faceBase))
+    }
+
+    // 动作展示总表 G1: her eyes shut for a moment at the end instead of jumping back to her own.
+    @Test func aTapEndsWithHerEyesShutWhenTheyChange() {
+        let pose = KuroPose(look: .work, energy: nil)
+        #expect(pose.reacting(.tablet, progress: 0.9).eyes == .down)
+        #expect(pose.reacting(.tablet, progress: 0.97).eyes == .closed)
+        let desk = KuroPose(look: .desk, energy: nil)
+        #expect(desk.reacting(.glasses, progress: 0.97).eyes == desk.eyes)
+        #expect(pose.reacting(.turnAway, progress: 0.99).eyes == pose.eyes)
+    }
+
+    // 动作展示总表 G4: her blanket slides down and away as the cup comes up, and back up after it is down.
+    @Test func herLapSlidesAwayForTheSip() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.blanket]
+        let at = { (t: Double) in pose.reacting(.sip, progress: t / KuroTap.sip.duration) }
+        let leaving = KuroFigure.shift(.itemBlanket, pose: at(0.1)).height
+        #expect(KuroFigure.parts(for: .chill, pose: at(0.1)).contains(.itemBlanket))
+        #expect(leaving > 0 && leaving < KuroTap.lapDrop)
+        #expect(!KuroFigure.parts(for: .chill, pose: at(0.5)).contains(.itemBlanket))
+        #expect(!KuroFigure.parts(for: .chill, pose: at(0.82)).contains(.itemBlanket))
+        let coming = KuroFigure.shift(.itemBlanket, pose: at(0.92)).height
+        #expect(KuroFigure.parts(for: .chill, pose: at(0.92)).contains(.itemBlanket))
+        #expect(coming > 0 && coming < KuroTap.lapDrop)
+        #expect(KuroFigure.shift(.itemBlanket, pose: at(1.05)) == .zero)
+    }
+
     @Test func theHeartShowsAboutOneTapInFour() {
         #expect(KuroTap.heart(0) && !KuroTap.heart(1) && !KuroTap.heart(3))
         let pose = KuroPose(look: .desk, energy: nil).reacting(.glasses, progress: 0.6, heart: true)
         let parts = Set(KuroFigure.parts(for: .desk, pose: pose))
         #expect(parts.isSuperset(of: [.tapHeart, .tapGlint, .mouthFlat]))
         #expect(KuroFigure.shift(.deskGlasses, pose: pose).height < 0)
+    }
+
+    @Test func aTapBringsBackWhatAnIdlePutDownInsteadOfJumping() {
+        // 动作展示总表 C9: the pen she put down for the tuck comes back up over the tap's first 0.2 s.
+        let tap = KuroPose(look: .art, energy: nil).reacting(.sketch, progress: 0.01)
+        let down = tap.cutting((.tuck, 0.5), back: 0)
+        #expect(KuroFigure.parts(for: .art, pose: down).contains(.craftPen))
+        #expect(KuroFigure.shift(.craftPen, pose: down).height > 40)
+        // UI 审核 C9 round 1: never two right hands. Her tucking hand goes down and away, then the pen comes up.
+        let handDown = tap.cutting((.tuck, 0.5), back: 0.25)
+        #expect(KuroFigure.shift(.idleTuckHand, pose: handDown).height > 1)
+        #expect(KuroFigure.opacity(.idleTuckHand, pose: handDown) == 1)
+        #expect(KuroFigure.shift(.craftPen, pose: handDown).height > 40)
+        let penUp = tap.cutting((.tuck, 0.5), back: 0.75)
+        #expect(KuroFigure.opacity(.idleTuckHand, pose: penUp) == 0)
+        let halfway = KuroFigure.shift(.craftPen, pose: penUp).height
+        #expect(halfway > 1 && halfway < 40)
+        #expect(abs(KuroFigure.shift(.craftPen, pose: tap.cutting((.tuck, 0.5), back: 1)).height) < 1)
+        #expect(KuroTap.cutBack == 0.2)
+    }
+
+    @Test func notesCutShortFadeAndTheTapKeepsHerFace() {
+        let tap = KuroPose(look: .dance, energy: nil).reacting(.hug, progress: 0.01)
+        let parts = Set(KuroFigure.parts(for: .dance, pose: tap.cutting((.groove, 0.2), back: 0.5)))
+        #expect(parts.contains(.speakerNoteA) && parts.contains(.eyesClosed) && !parts.contains(.eyesHappy))
+        let shown = KuroIdle.groove.opacity(.speakerNoteA, progress: 0.2)
+        let fading = KuroFigure.opacity(.speakerNoteA, pose: tap.cutting((.groove, 0.2), back: 0.5))
+        #expect(fading > 0 && fading < shown)
+        #expect(KuroFigure.opacity(.speakerNoteA, pose: tap.cutting((.groove, 0.2), back: 1)) == 0)
+    }
+
+    @Test func aCupAtHerLipsStaysThereForTheSip() {
+        let tap = KuroPose(look: .chill, energy: nil).reacting(.sip, progress: 0.01)
+        #expect(KuroFigure.shift(.tapCup, pose: tap.cutting((.blow, 0.5), back: 0.5)) == .zero)
+        #expect(KuroFigure.shift(.tapCup, pose: tap).height > 30)
+    }
+
+    @Test func aTwirlCutShortTurnsBackToTheFront() {
+        let tap = KuroPose(look: .tennis, energy: nil).reacting(.swing, progress: 0.05)
+        let scale = { KuroFigure.turn(.tennisRacket, pose: tap.cutting((.twirl, 0.35), back: $0))?.scale ?? 0 }
+        #expect(scale(0) < -0.9 && abs(scale(1) - 1) < 0.001)
+        #expect(KuroFigure.turn(.tennisRacket, pose: tap)?.angle == 0)
     }
 }
