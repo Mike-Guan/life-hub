@@ -125,6 +125,7 @@ struct WatchStatusView: View {
                 look: KuroLook(mode: mode, card: payload.card(for: mode)),
                 energy: payload.snapshot.energy(at: entry.date)?.value,
                 bedtime: payload.bedtime.state(at: entry.date),
+                moment: payload.scene(at: entry.date)?.moment,
                 wearing: payload.wardrobe.worn(in: mode),
                 framing: .head,
                 lineArt: renderingMode != .fullColor

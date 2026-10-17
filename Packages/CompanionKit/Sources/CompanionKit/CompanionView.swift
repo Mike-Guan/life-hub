@@ -229,6 +229,7 @@ public struct CompanionView: View {
                 .padding(.top, 24)
                 .padding(.horizontal, 12)
                 .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
+                .offset(y: closeUp ? 0 : Self.bubbleRoom(style: style, showsBubble: showsBubble))
                 .animation(.smooth(duration: 0.35), value: closeUp)
 
             if welcomeStart != nil, let replay = welcomeReplay {
@@ -637,6 +638,10 @@ public struct CompanionView: View {
     private func glance(_ pose: RunnerPose) -> RunnerPose {
         var pose = pose
         if style == .watch { pose.propLift = 1 }
+        if !closeUp {
+            pose.starDrop = Self.starDrop(style: style, showsBubble: showsBubble)
+            pose.sunDrop = Self.sunDrop(style: style, showsBubble: showsBubble)
+        }
         if let tapBlinkStart, Date.now.timeIntervalSince(tapBlinkStart) < 0.25 { pose.eyesShut = true }
         pose.eyesDx += 4 * look
         pose.headTilt += 4 * Double(look)
@@ -675,6 +680,27 @@ public struct CompanionView: View {
                     closeUp = false
                 }
             }
+    }
+
+    // D5 (UI 审核 10/15): on a small iPhone the longest one-line bubble covered the hair tips, the headset band and
+    // the gift box on the head. The phone figure sits lower instead of the bubble moving onto the body.
+    /// How far the figure sits below its usual place to leave room for the bubble at the top, in points.
+    nonisolated static func bubbleRoom(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
+        style == .standard && showsBubble ? 24 : 0
+    }
+
+    // D5 (UI 审核 10/15): with the figure 24 pt lower, the sparkles beside the headset still touched the bubble,
+    // and a Japanese line is about 13 pt taller. They drop to clear the bubble while staying off the band.
+    /// How far the sparkles beside the headset sit lower to clear the bubble, in figure units.
+    nonisolated static func starDrop(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
+        bubbleRoom(style: style, showsBubble: showsBubble) > 0 ? 8 : 0
+    }
+
+    // D5 round 3 (UI 审核 10/15): under a Japanese line the window's top edge met the bubble's, so the two black
+    // outlines ran together. It drops to leave a clear gap.
+    /// How far the sunlit window sits lower to clear the bubble, in figure units.
+    nonisolated static func sunDrop(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
+        bubbleRoom(style: style, showsBubble: showsBubble) > 0 ? 3 : 0
     }
 
     /// Whether the off-work pose that played from `start` still holds at `date` in `mode`: in work mode, the same day.

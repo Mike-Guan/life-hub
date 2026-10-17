@@ -324,5 +324,29 @@ import Testing
         #expect(
             scene.hotspot(at: HomeGrid.scene(HomeGrid.plan(4.8, 7.2, 0)), includingHaku: false, minSide: side) == nil)
     }
+
+    @Test func shopIDsNameTheRoomItems() {
+        #expect(HomeItem(shopID: "room.bench") == .bench)
+        #expect(HomeItem(shopID: "room.snowboard") == .snowboard)
+        #expect(HomeItem(shopID: "haku.weekly.room.cactus") == .cactus)
+        #expect(HomeItem(shopID: "room.") == nil)
+        #expect(HomeItem(shopID: "gloves.gold") == nil)
+        #expect(HomeItemIcon(itemID: "room.bag") != nil)
+        #expect(HomeItemPreview(itemID: "headband.red") == nil)
+    }
+
+    @Test func thePreviewShowsHakuStandingNextToTheItem() throws {
+        for item in [HomeItem.plant, .bag, .speaker, .bench, .snowboard, .cactus] {
+            let model = HomeModel(night: false, cans: 999)
+            #expect(model.buy(.item(item)))
+            model.standBeside(item)
+            let at = try #require(model.dropPoint)
+            #expect(HomeNav.room(items: model.items).nearestOpen(to: at) == at, "\(item)")
+            #expect(at.distance(to: item.spot) < 3, "\(item)")
+            let crop = HomeItemPreview.crop(item, haku: at)
+            #expect(crop.contains(HomeItemPreview.ring(item)), "\(item)")
+            #expect(crop.contains(HomeGrid.plan(at)), "\(item)")
+        }
+    }
 }
 #endif

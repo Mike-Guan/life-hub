@@ -99,7 +99,7 @@ struct WardrobeView: View {
         case .clothes: "只列\(cards.title(for: previewMode, persona: persona))能穿的。拿到的东西永远在这，不会丢。"
         case .accessories: "配饰每个模式都戴。拿到的东西永远在这，不会丢。"
         case .props: "道具只在这张卡的模式里拿着。拿到的东西永远在这，不会丢。"
-        case .room: "房间里一次摆一件。拿到的东西永远在这，不会丢。"
+        case .room: "房间里的东西都摆在家里。拿到的东西永远在这，不会丢。"
         }
     }
 
@@ -262,9 +262,17 @@ struct WardrobeView: View {
 
     private func grid(defaultSlots: [Slot], items: [ShopItem]) -> some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
-            defaultTile(defaultSlots)
-            ForEach(items) { item in
-                itemTile(item)
+            // Room items all stand in the home page, so the room shelf only lists them, with nothing to pick.
+            if defaultSlots == [.room] {
+                ForEach(items) { item in
+                    tile(isWorn: false, fill: Toy.card) { itemLabel(item) }
+                        .accessibilityElement(children: .combine)
+                }
+            } else {
+                defaultTile(defaultSlots)
+                ForEach(items) { item in
+                    itemTile(item)
+                }
             }
             // 界面空状态与报错 §4: one line next to the default tile, no link to the shop.
             if items.isEmpty {
@@ -332,19 +340,21 @@ struct WardrobeView: View {
                 previewMode = Mode.allCases.first { KuroLook(mode: $0, card: card) == look } ?? previewMode
             }
         } label: {
-            tile(isWorn: isWorn, fill: item.slot.tileColor(for: persona)) {
-                ShopItemIcon(item: item)
-                    .frame(width: 56, height: 56)
-                // English and Japanese names run longer than the Chinese; two lines fit in the 128 pt tile.
-                Text(item.title)
-                    .font(Toy.body(13, weight: .heavy))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.8)
-            }
+            tile(isWorn: isWorn, fill: item.slot.tileColor(for: persona)) { itemLabel(item) }
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isWorn ? .isSelected : [])
+    }
+
+    @ViewBuilder private func itemLabel(_ item: ShopItem) -> some View {
+        ShopItemIcon(item: item)
+            .frame(width: 56, height: 56)
+        // English and Japanese names run longer than the Chinese; two lines fit in the 128 pt tile.
+        Text(item.title)
+            .font(Toy.body(13, weight: .heavy))
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .minimumScaleFactor(0.8)
     }
 
     private var dashedBorder: some View {
