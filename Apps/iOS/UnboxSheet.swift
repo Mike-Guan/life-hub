@@ -13,6 +13,8 @@ struct UnboxSheet: View {
     /// Opens scrolled to the buttons. Only screenshots set it.
     var startsAtBottom = false
     @State private var sharing = false
+    /// The room items this purchase put in the cupboard.
+    var putAway: [String] = []
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -54,6 +56,13 @@ struct UnboxSheet: View {
             Text(subtitle)
                 .font(Toy.body(15, weight: .heavy))
                 .foregroundStyle(Toy.paper.opacity(0.75))
+            // 家 区域规划 v0 §2: a full zone made room, and the line says so the moment the item is bought.
+            if !putAway.isEmpty {
+                Text(String(format: "原来的%@收进柜子了。".localized, putAwayNames))
+                    .font(Toy.body(15, weight: .heavy))
+                    .foregroundStyle(Toy.paper.opacity(0.75))
+                    .multilineTextAlignment(.center)
+            }
 
             // The character keeps wearing the item after the animation, so the preview has it equipped.
             // Clothes show in the mode they are worn in.
@@ -151,6 +160,10 @@ struct UnboxSheet: View {
         }
     }
 
+    private var putAwayNames: String {
+        putAway.compactMap { ShopItem.item($0)?.title }.formatted(.list(type: .and))
+    }
+
     private var subtitle: String {
         if let keepsake = item.keepsake {
             return "\(keepsake.count) 次\(keepsake.title(for: persona))"
@@ -165,11 +178,13 @@ struct UnboxCover: View {
     @Binding var wardrobe: Wardrobe
     let persona: Persona
     var mode: Mode?
+    /// The room items this purchase put in the cupboard.
+    var putAway: [String] = []
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         if let item = entry.itemID.flatMap(ShopItem.item) {
-            UnboxSheet(entry: entry, item: item, wardrobe: $wardrobe, persona: persona, mode: mode)
+            UnboxSheet(entry: entry, item: item, wardrobe: $wardrobe, persona: persona, mode: mode, putAway: putAway)
         } else {
             Color.clear.onAppear {
                 UnboxLog.markSeen(entry)

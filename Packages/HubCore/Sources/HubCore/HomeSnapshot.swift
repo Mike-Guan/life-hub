@@ -76,7 +76,7 @@ public struct HomeSnapshot: Equatable, Sendable {
         let deviceID = HubDevice.id(defaults: defaults)
         var room = RoomLayout.loaded(in: defaults, persona: persona, catalog: catalog, now: now, deviceID: deviceID)
         let roomItems = mine.owned.filter { ShopItem.item($0)?.slot == .room }.sorted()
-        if room.place(roomItems, catalog: catalog, now: now, deviceID: deviceID) {
+        if !room.place(roomItems, catalog: catalog, now: now, deviceID: deviceID).isEmpty {
             room.store(in: defaults)
         }
         return HomeSnapshot(

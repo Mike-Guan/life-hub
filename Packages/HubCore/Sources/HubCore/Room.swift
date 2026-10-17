@@ -193,6 +193,10 @@ public struct RoomPlacement: Equatable, Codable, Sendable, Identifiable {
     /// Height on the wall, in cells.
     public var v: Double?
     public var on: Mount?
+    /// The `RoomZone` the item stands in, by its raw name, so a zone from a newer build still loads.
+    public var zone: String?
+    /// When the item went into its zone; the earliest one makes room when the zone is full.
+    public var placedAt: Date?
     // DW-02: fields a newer build added, written back unchanged.
     var other: [String: JSONValue] = [:]
 
@@ -213,13 +217,13 @@ public struct RoomPlacement: Equatable, Codable, Sendable, Identifiable {
         return RoomCell(x: x, y: y)
     }
 
-    /// Whether the piece is in storage, not in the room.
+    /// Whether the piece is in storage (the cupboard), not in the room.
     public var isStored: Bool {
-        cell == nil && wall == nil && on == nil
+        cell == nil && wall == nil && on == nil && zone == nil
     }
 
     private enum CodingKeys: String, CodingKey, CaseIterable {
-        case id, piece, x, y, rotation, color, wall, u, v, on
+        case id, piece, x, y, rotation, color, wall, u, v, on, zone, placedAt
     }
 
     /// Decodes the placement; fields this build doesn't know are kept.
@@ -236,6 +240,8 @@ public struct RoomPlacement: Equatable, Codable, Sendable, Identifiable {
         u = try? values.decodeIfPresent(Double.self, forKey: .u)
         v = try? values.decodeIfPresent(Double.self, forKey: .v)
         on = try? values.decodeIfPresent(Mount.self, forKey: .on)
+        zone = try? values.decodeIfPresent(String.self, forKey: .zone)
+        placedAt = try? values.decodeIfPresent(Date.self, forKey: .placedAt)
         other = try RoomKey.others(in: decoder, known: CodingKeys.allCases.map(\.rawValue))
     }
 
@@ -254,6 +260,8 @@ public struct RoomPlacement: Equatable, Codable, Sendable, Identifiable {
         try values.encodeIfPresent(u, forKey: .u)
         try values.encodeIfPresent(v, forKey: .v)
         try values.encodeIfPresent(on, forKey: .on)
+        try values.encodeIfPresent(zone, forKey: .zone)
+        try values.encodeIfPresent(placedAt, forKey: .placedAt)
     }
 
     /// The floor cells the piece covers, given its catalog entry; empty when it isn't on the floor.
@@ -343,26 +351,96 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
     }
 
     // 商店与家 同步方案 v0 §4 (Mike 2026-10-16): a room item bought anywhere goes to its own spot in the room.
-    /// Places each of `items` not yet in the room at its catalog spot, or in storage when it has none.
-    /// - Returns: `true` when something was added.
+    // 家 区域规划 v0 §2: without a catalog spot it goes to its zone, and a full zone puts its earliest item away.
+    /// Places each of `items` not yet in the room at its catalog spot, in its zone, or in the cupboard.
+    /// - Returns: the items added and the ones put away to make room.
     @discardableResult
     public mutating func place(
         _ items: some Sequence<String>, catalog: RoomCatalog, now: Date = Date(), deviceID: String
-    ) -> Bool {
+    ) -> RoomChange {
         var placed = Set(placements.map(\.piece))
-        var added = false
+        var change = RoomChange()
         for item in items where !placed.contains(item) {
             let id = UUID.derived(from: "room.\(persona).\(item)")
             placements.append(RoomPlacement(id: id, piece: item, at: catalog.piece(item)?.defaultSpot))
+            if catalog.piece(item)?.defaultSpot == nil, let zone = ShopItem.item(item)?.zone {
+                change.putAway += settle(placements.count - 1, in: zone, now: now)
+            }
             placed.insert(item)
-            added = true
+            change.added.append(item)
         }
-        if added { touch(now: now, deviceID: deviceID) }
-        return added
+        if !change.isEmpty { touch(now: now, deviceID: deviceID) }
+        return change
+    }
+
+    // 家 区域规划 v0 §2: in 整理 the user picks what stands in a zone; a full zone puts its earliest item away.
+    /// Moves `item` into `zone`, out of the cupboard or another spot.
+    /// - Returns: the items put away to make room.
+    @discardableResult
+    public mutating func put(_ item: String, in zone: RoomZone, now: Date = Date(), deviceID: String) -> [String] {
+        if !placements.contains(where: { $0.piece == item }) {
+            placements.append(RoomPlacement(id: UUID.derived(from: "room.\(persona).\(item)"), piece: item))
+        }
+        guard let index = placements.firstIndex(where: { $0.piece == item }),
+            placements[index].zone != zone.rawValue
+        else { return [] }
+        placements[index].clearSpot()
+        let full = occupants(of: zone)
+        let putAway = full.prefix(max(0, full.count - zone.capacity + 1))
+        for other in putAway { placements[other].clearSpot() }
+        placements[index].zone = zone.rawValue
+        placements[index].placedAt = now
+        touch(now: now, deviceID: deviceID)
+        return putAway.map { placements[$0].piece }
+    }
+
+    /// Puts `item` in the cupboard. Does nothing when it isn't in the room.
+    public mutating func putAway(_ item: String, now: Date = Date(), deviceID: String) {
+        guard let index = placements.firstIndex(where: { $0.piece == item && !$0.isStored }) else { return }
+        placements[index].clearSpot()
+        touch(now: now, deviceID: deviceID)
+    }
+
+    // A bought item makes room by putting the earliest item away, never a keepsake: those go up only by hand. When
+    // only keepsakes fill the zone, the new item waits in the cupboard.
+    private mutating func settle(_ index: Int, in zone: RoomZone, now: Date) -> [String] {
+        var full = occupants(of: zone)
+        var putAway: [String] = []
+        while full.count >= zone.capacity {
+            guard let other = full.first(where: { ShopItem.item(placements[$0].piece)?.keepsake == nil }) else {
+                return putAway
+            }
+            placements[other].clearSpot()
+            putAway.append(placements[other].piece)
+            full.removeAll { $0 == other }
+        }
+        placements[index].zone = zone.rawValue
+        placements[index].placedAt = now
+        return putAway
+    }
+
+    /// The indexes of the placements in `zone`, earliest placed first.
+    private func occupants(of zone: RoomZone) -> [Int] {
+        let inZone = placements.indices.filter { placements[$0].zone == zone.rawValue }
+        return inZone.sorted { (placements[$0].placedAt ?? .distantPast) < (placements[$1].placedAt ?? .distantPast) }
     }
 
     static func defaultsKey(for persona: Persona) -> String { "roomLayout.\(persona.rawValue)" }
     static func migratedKey(for persona: Persona) -> String { "roomLayout.\(persona.rawValue).wardrobeMoved" }
+    static func zonedKey(for persona: Persona) -> String { "roomLayout.\(persona.rawValue).zoned" }
+
+    // 家 区域规划 v0 §2: a purchase places the item at once, so the shop can say what went into the cupboard.
+    /// Places a just-bought room item in `persona`'s saved layout and saves it.
+    /// - Returns: the items put in the cupboard to make room.
+    public static func placeBought(
+        _ item: String, persona: Persona, in defaults: UserDefaults, catalog: RoomCatalog = .shipped, now: Date = Date()
+    ) -> [String] {
+        let deviceID = HubDevice.id(defaults: defaults)
+        var layout = loaded(in: defaults, persona: persona, catalog: catalog, now: now, deviceID: deviceID)
+        let change = layout.place([item], catalog: catalog, now: now, deviceID: deviceID)
+        if !change.isEmpty { layout.store(in: defaults) }
+        return change.putAway
+    }
 
     /// `persona`'s layout saved in `defaults`, or `nil` when none is saved or it can't be read.
     public static func stored(in defaults: UserDefaults, persona: Persona) -> RoomLayout? {
@@ -384,21 +462,57 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
     }
 
     // Before the room page, a character showed one room item from the wardrobe's room slot. That item moves into
-    // the layout once, at its catalog spot or into storage, and the wardrobe is left as it was.
+    // the layout once, at its catalog spot or into its zone, and the wardrobe is left as it was. Builds before the
+    // zones put every bought item in the cupboard; those move into their zones once, oldest first.
     /// `persona`'s layout, made on first use, with the wardrobe's room item moved in once.
     public static func loaded(
         in defaults: UserDefaults, persona: Persona, catalog: RoomCatalog, now: Date = Date(), deviceID: String
     ) -> RoomLayout {
         var layout =
             stored(in: defaults, persona: persona) ?? RoomLayout(persona: persona, now: now, deviceID: deviceID)
-        let migrated = migratedKey(for: persona)
-        guard !defaults.bool(forKey: migrated) else { return layout }
-        if let item = Wardrobe.stored(in: defaults, persona: persona).equipped[.room] {
-            layout.place([item], catalog: catalog, now: now, deviceID: deviceID)
+        var changed = false
+        if !defaults.bool(forKey: migratedKey(for: persona)) {
+            if let item = Wardrobe.stored(in: defaults, persona: persona).equipped[.room] {
+                layout.place([item], catalog: catalog, now: now, deviceID: deviceID)
+            }
+            defaults.set(true, forKey: migratedKey(for: persona))
+            changed = true
         }
-        layout.store(in: defaults)
-        defaults.set(true, forKey: migrated)
+        if !defaults.bool(forKey: zonedKey(for: persona)) {
+            for index in layout.placements.indices where layout.placements[index].isStored {
+                guard let zone = ShopItem.item(layout.placements[index].piece)?.zone else { continue }
+                _ = layout.settle(index, in: zone, now: now)
+            }
+            defaults.set(true, forKey: zonedKey(for: persona))
+            changed = true
+        }
+        if changed { layout.store(in: defaults) }
         return layout
+    }
+}
+
+/// What placing items in a room changed.
+public struct RoomChange: Equatable, Sendable {
+    /// The items added to the layout.
+    public var added: [String] = []
+    /// The items put in the cupboard to make room, for the line 「原来的 X 收进柜子了」.
+    public var putAway: [String] = []
+
+    /// Whether nothing changed.
+    public var isEmpty: Bool { added.isEmpty && putAway.isEmpty }
+}
+
+extension RoomPlacement {
+    /// Takes the item off the floor, the wall, its mount and its zone, into the cupboard.
+    mutating func clearSpot() {
+        x = nil
+        y = nil
+        wall = nil
+        u = nil
+        v = nil
+        on = nil
+        zone = nil
+        placedAt = nil
     }
 }
 

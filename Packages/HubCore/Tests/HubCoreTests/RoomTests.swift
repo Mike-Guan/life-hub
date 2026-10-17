@@ -136,10 +136,10 @@ import Testing
         // The wardrobe is left as it was.
         #expect(Wardrobe.stored(in: defaults, persona: .haku).equipped[.room] == "room.plant")
 
-        // A piece the catalog has no spot for goes into storage.
+        // A piece the catalog has no spot for goes into its zone.
         let kuro = RoomLayout.loaded(in: defaults, persona: .kuro, catalog: catalog, now: now, deviceID: "phone")
         #expect(kuro.placements.first?.piece == "kuro.room.lamp")
-        #expect(kuro.placements.first?.isStored == true)
+        #expect(kuro.placements.first?.zone == "desk")
 
         // Moving the plant into storage sticks: the wardrobe isn't read again.
         var moved = haku
@@ -170,30 +170,92 @@ extension RoomTests {
     @Test func boughtRoomItemsGoToTheirSpotOnce() throws {
         let catalog = try makeCatalog()
         var layout = RoomLayout(persona: .haku, now: now, deviceID: "a")
-        let added = layout.place(["room.plant", "room.bag"], catalog: catalog, now: now, deviceID: "b")
-        #expect(added)
+        let change = layout.place(["room.plant", "room.bag"], catalog: catalog, now: now, deviceID: "b")
+        #expect(change == RoomChange(added: ["room.plant", "room.bag"]))
         #expect(layout.placements.map(\.piece) == ["room.plant", "room.bag"])
         #expect(layout.placements[0].cell == RoomCell(x: 1, y: 8))
-        #expect(layout.placements[1].isStored)
+        #expect(layout.placements[1].zone == RoomZone.sportFloor.rawValue)
+        #expect(layout.placements[1].placedAt == now)
+        #expect(!layout.placements[1].isStored)
         #expect(layout.updatedBy == "b")
 
         layout.placements[0].x = 3
         let before = layout
-        let again = layout.place(["room.plant"], catalog: catalog, now: now, deviceID: "c")
-        #expect(!again)
+        #expect(layout.place(["room.plant"], catalog: catalog, now: now, deviceID: "c").isEmpty)
         #expect(layout == before)
     }
-}
 
-extension RoomTests {
-    @Test func everyRoomItemHasAZone() throws {
-        for item in ShopItem.catalog where item.slot == .room {
-            #expect(item.zone != nil, "\(item.id)")
-        }
-        #expect(ShopItem.item("room.bag")?.zone == .sportFloor)
-        #expect(ShopItem.item("room.bag")?.zone?.isSports == true)
-        #expect(ShopItem.item("room.plant")?.zone?.isSports == false)
-        #expect(RoomZone.sportWall.isSports)
-        #expect(ShopItem.item("headband.cyan")?.zone == nil)
+    @Test func aFullZonePutsItsEarliestItemAway() {
+        var layout = RoomLayout(persona: .haku, now: now, deviceID: "a")
+        layout.place(["room.bag"], catalog: RoomCatalog(), now: now, deviceID: "a")
+        let later = now.addingTimeInterval(60)
+        let change = layout.place(["room.bench"], catalog: RoomCatalog(), now: later, deviceID: "a")
+        #expect(change == RoomChange(added: ["room.bench"], putAway: ["room.bag"]))
+        #expect(layout.placements.first { $0.piece == "room.bag" }?.isStored == true)
+        #expect(layout.placements.first { $0.piece == "room.bench" }?.zone == RoomZone.sportFloor.rawValue)
+        // The bag stays in the cupboard: owning it doesn't place it again.
+        #expect(layout.place(["room.bag", "room.bench"], catalog: RoomCatalog(), now: later, deviceID: "a").isEmpty)
+    }
+
+    @Test func aBoughtItemNeverPutsAKeepsakeAway() {
+        var layout = RoomLayout(persona: .haku, now: now, deviceID: "a")
+        layout.put("gloves.gold", in: .sportFloor, now: now, deviceID: "a")
+        let change = layout.place(["room.bag"], catalog: RoomCatalog(), now: now, deviceID: "a")
+        #expect(change == RoomChange(added: ["room.bag"]))
+        #expect(layout.placements.first { $0.piece == "room.bag" }?.isStored == true)
+        #expect(layout.placements.first { $0.piece == "gloves.gold" }?.zone == RoomZone.sportFloor.rawValue)
+    }
+
+    @Test func puttingAnItemUpByHandSwapsTheEarliest() {
+        var layout = RoomLayout(persona: .haku, now: now, deviceID: "a")
+        layout.place(["room.bag"], catalog: RoomCatalog(), now: now, deviceID: "a")
+        let later = now.addingTimeInterval(60)
+        // By hand a keepsake can take the place of the bag, and the bag can take it back.
+        #expect(layout.put("gloves.gold", in: .sportFloor, now: later, deviceID: "b") == ["room.bag"])
+        #expect(layout.updatedBy == "b")
+        #expect(layout.put("gloves.gold", in: .sportFloor, now: later, deviceID: "c").isEmpty)
+        #expect(layout.updatedBy == "b")
+        #expect(layout.put("room.bag", in: .sportFloor, now: later, deviceID: "c") == ["gloves.gold"])
+        // The desk holds two.
+        #expect(layout.put("haku.weekly.room.cactus", in: .desk, now: later, deviceID: "c").isEmpty)
+        #expect(layout.put("room.plant", in: .desk, now: later, deviceID: "c").isEmpty)
+
+        layout.putAway("room.bag", now: later, deviceID: "d")
+        #expect(layout.placements.first { $0.piece == "room.bag" }?.isStored == true)
+        #expect(layout.updatedBy == "d")
+        layout.putAway("room.bag", now: later, deviceID: "e")
+        #expect(layout.updatedBy == "d")
+    }
+
+    @Test func itemsStoredBeforeTheZonesMoveInOnce() throws {
+        let suite = "RoomTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set(true, forKey: "roomLayout.haku.wardrobeMoved")
+        var old = RoomLayout(persona: .haku, now: now, deviceID: "a")
+        old.placements = [RoomPlacement(piece: "room.bag"), RoomPlacement(piece: "room.bench")]
+        old.store(in: defaults)
+
+        let layout = RoomLayout.loaded(in: defaults, persona: .haku, catalog: RoomCatalog(), now: now, deviceID: "a")
+        #expect(layout.placements.map(\.zone) == [nil, RoomZone.sportFloor.rawValue])
+        #expect(RoomLayout.stored(in: defaults, persona: .haku) == layout)
+
+        // What the user puts away afterwards stays in the cupboard.
+        var tidied = layout
+        tidied.putAway("room.bench", now: now, deviceID: "a")
+        tidied.store(in: defaults)
+        #expect(RoomLayout.loaded(in: defaults, persona: .haku, catalog: RoomCatalog(), deviceID: "a") == tidied)
+    }
+
+    @Test func aPurchaseIsPlacedAndSavedAtOnce() throws {
+        let suite = "RoomTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        #expect(RoomLayout.placeBought("room.bag", persona: .haku, in: defaults, now: now).isEmpty)
+        let later = now.addingTimeInterval(60)
+        #expect(RoomLayout.placeBought("room.bench", persona: .haku, in: defaults, now: later) == ["room.bag"])
+        let saved = try #require(RoomLayout.stored(in: defaults, persona: .haku))
+        #expect(saved.placements.first { $0.piece == "room.bench" }?.zone == RoomZone.sportFloor.rawValue)
+        #expect(RoomLayout.placeBought("room.bench", persona: .haku, in: defaults, now: later).isEmpty)
     }
 }
