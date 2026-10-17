@@ -527,13 +527,9 @@ struct LifeHubApp: App {
         )
     }
 
-    // Issue #485: the home prototype opens from the home screen in DEV and STG builds only.
+    // Mike 2026-10-17: the home page runs on real data in every build.
     private var homeEntry: (() -> Void)? {
-        #if DEBUG || ENV_STG
-        return { showsHome = true }
-        #else
-        return nil
-        #endif
+        ShopView.homeIsOpen(for: persona) ? { showsHome = true } : nil
     }
 
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.

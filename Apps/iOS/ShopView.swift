@@ -48,20 +48,13 @@ struct ShopView: View {
         _wardrobe = wardrobe
         self.persona = persona
         self.mode = mode
-        _shelf = State(initialValue: Self.homeIsOpen ? shelf : .clothes)
+        _shelf = State(initialValue: Self.homeIsOpen(for: persona) ? shelf : .clothes)
     }
 
-    // Room items and keepsakes live in the home page, which only DEV and STG open so far. Release builds sell no
-    // room items and keep the keepsakes here, so nothing bought or earned stays out of sight. Remove this
-    // switch with the home page's entry in LifeHubApp when release builds open it.
-    /// Whether this build has the home page.
-    static var homeIsOpen: Bool {
-        #if DEBUG || ENV_STG
-        return true
-        #else
-        return false
-        #endif
-    }
+    // 家 真实数据清单 v0 row 19: the home page is HAKU's until the second preset character's room version (M5).
+    // Without it the shop sells her no room items and keeps her keepsakes here, so nothing stays out of sight.
+    /// Whether `persona` has the home page.
+    static func homeIsOpen(for persona: Persona) -> Bool { persona == .haku }
 
     // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
     // promises a reward the app can't give yet. Add a win here when its source is wired.
@@ -71,7 +64,7 @@ struct ShopView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 header
-                if Self.homeIsOpen {
+                if Self.homeIsOpen(for: persona) {
                     shelfTabs
                 }
                 banner
@@ -96,7 +89,7 @@ struct ShopView: View {
                 if let buyError {
                     ErrorLine(text: buyError)
                 }
-                if !Self.homeIsOpen && !keepsakes.isEmpty {
+                if !Self.homeIsOpen(for: persona) && !keepsakes.isEmpty {
                     Text("纪念品 · 只能靠做到拿")
                         .font(Toy.body(15, weight: .heavy))
                     VStack(spacing: 0) {
