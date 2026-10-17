@@ -189,8 +189,9 @@ final class KuroHomeNode: SKNode {
             let p = t.truncatingRemainder(dividingBy: 0.9) / 0.9
             body.position.y = 1.5 * CGFloat(sin(p * tau * 2))
             if wearsGloves {
-                // The guard glove sits at her chin, in front of her face.
-                armL.zRotation = 2.2
+                // The guard glove sits by her cheek, beside the chin, in front of her face.
+                armL.zRotation = 2.7
+                armL.yScale = 0.85
                 armL.zPosition = 0.007
                 let punch = p > 0.32 && p < 0.58
                 armR.zRotation = punch ? 1.62 : 2.35
