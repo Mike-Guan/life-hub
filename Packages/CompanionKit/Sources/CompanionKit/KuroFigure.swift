@@ -115,6 +115,8 @@ struct KuroPose: Sendable {
     var overtime = false
     /// The late end shown on a sign above her head, as HH:mm, or nil for no sign.
     var sign: String?
+    /// Dozing off on the couch with her tablet in her arms: eyes shut and a sleepy mouth. Drawn in the chill look.
+    var napping = false
     /// Shop items she wears; each shows only in its own look.
     var items: Set<KuroItem> = []
     /// Acting calm: flat mouth, blush kept.
@@ -171,6 +173,11 @@ struct KuroPose: Sendable {
         case .mid:
             eyes = look == .tennis ? .bright : look == .desk ? .down : .open
         }
+    }
+
+    /// Whether she naps over her tablet: dozing off on the couch in the chill look, before bedtime.
+    static func naps(_ look: KuroLook, bedtime: Bedtime, moment: CompanionMoment?) -> Bool {
+        bedtime == .off && look == .chill && moment == .dozing
     }
 
     /// The same pose with the nightlight's glow at `glow` and the beanie's pom leaning `pom` degrees.
@@ -238,10 +245,11 @@ struct KuroFigure: View {
     nonisolated static func parts(for look: KuroLook, pose: KuroPose, watch: Bool = false) -> [KuroPart] {
         var visible: Set<KuroPart> = [.hairBack, .earL, .earR, .faceBase, .hairFringe, .catEars]
         visible.formUnion(outfit(look))
-        visible.insert(pose.blinking ? .eyesClosed : part(pose.eyes))
+        let napping = pose.napping && look == .chill
+        visible.insert(pose.blinking || napping ? .eyesClosed : part(pose.eyes))
         if !pose.tired { visible.insert(.blush) }
         // Issue #236 (correction preview v6): full reads apart from okay at a glance, even on the watch.
-        if pose.full {
+        if pose.full, !napping {
             // UI 审核 2026-10-13: the round cheeks replace the oval blush rather than smudging over it.
             visible.remove(.blush)
             visible.formUnion([.cheeksFull, .sparkle])
@@ -259,13 +267,20 @@ struct KuroFigure: View {
         if look != .work {
             let mouth: KuroPart =
                 pose.tired || pose.calm ? .mouthFlat : Self.smiling.contains(look) ? .mouthSmile : .mouthCat
-            visible.insert(pose.mouthO ? .mouthO : mouth)
+            visible.insert(napping ? .napMouth : pose.mouthO ? .mouthO : mouth)
         }
         let shown = pose.items.filter { $0.clothes == nil && $0.shows(in: look) }
         let ponytail = visible.contains(.tennisPonytail)
         for item in shown { visible.formUnion(item.parts(ponytail: ponytail)) }
         for item in shown { visible.subtract(item.replaces) }
         pose.scene?.dress(look, items: pose.items, &visible)
+        // 抱平板睡着 v2 (Mike 2026-10-15): the cup is put down for the tablet. With something on her lap her hands
+        // rest higher, on top of it; the watch draws nothing on her lap, so there they stay low.
+        if napping {
+            visible.remove(.chillCup)
+            let onLap = !watch && !visible.isDisjoint(with: lap)
+            visible.formUnion([.napTablet, onLap ? .napHandsUp : .napHands])
+        }
         if pose.tap != nil, let idle = pose.idle { cut(idle, progress: pose.idleProgress, &visible) }
         if let tap = pose.tap {
             apply(tap, progress: pose.tapProgress, to: &visible)
@@ -683,7 +698,10 @@ public struct KuroView: View {
                 let unbox = unbox(at: time)
                 let homeScene = tap == nil && unbox == nil ? scene(at: time) : nil
                 // Her slot's own move plays between taps; with reduced motion she keeps only the slot's face.
-                let slotMove = tap == nil && unbox == nil && !reduceMotion ? slot?.move(in: look, at: time) : nil
+                // Napping over her tablet she plays no slot move, only her breath and the odd nod.
+                let napping = self.pose.napping
+                let slotMove =
+                    tap == nil && unbox == nil && !reduceMotion && !napping ? slot?.move(in: look, at: time) : nil
                 let reacting = (tap ?? slotMove).map {
                     self.pose.reacting($0.0, progress: $0.1, heart: tap != nil && tapHeart)
                 }
@@ -704,8 +722,9 @@ public struct KuroView: View {
                 let ease = Self.settle(since: unboxEnd, at: time)
                 // Out being active she bounces like on her tennis day.
                 let loop = slot == .active ? KuroLook.tennis : look
-                let motion =
+                let loopMotion =
                     sleepy ? IdleMotion.sleeping(time: time) : homeScene?.motion ?? Self.motion(loop, time: idleTime)
+                let motion = napping ? Self.nap(time: time) : loopMotion
                 let moving = Self.rollOver(tap, time: time) ?? motion
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 // Her small idle moves play only in the plain idle.
@@ -907,6 +926,8 @@ public struct KuroView: View {
     /// Plays her reaction to a tap: a body move for her look, and a line. Taps during a move only change the
     /// line; too many in a row turn her away.
     private func react() {
+        // 抱平板睡着: napping over her tablet, a tap doesn't wake her.
+        if pose.napping { return }
         let now = Date.now
         if style != .watch, unboxStart == nil, reaction(at: now.timeIntervalSinceReferenceDate) == nil,
             reactInScene(at: now)
@@ -1057,6 +1078,19 @@ public struct KuroView: View {
         return IdleMotion.rollingOver(time: time, progress: tap.1)
     }
 
+    // 抱平板睡着 v2 (Mike 2026-10-15): a slow breath, and every 8 to 15 s her head drops and comes back.
+    /// Napping over her tablet at `time`: a breath every 4 s, 1.2 pt each way, and now and then a 1.6 s nod
+    /// that sinks 3 pt and tilts 3°.
+    nonisolated static func nap(time t: TimeInterval) -> IdleMotion {
+        let breath = 1.2 * CGFloat(sin(t * 2 * .pi / 4))
+        let beat = IdleClock.beat(at: t, every: 11.5, spread: 1.75, lengths: [napNod], seed: KuroIdle.seed &+ 0x40)
+        let dip = beat.map { IdleClock.dip(CGFloat($0.phase / napNod)) } ?? 0
+        return IdleMotion(dy: breath + 3 * dip, angle: 3 * Double(dip))
+    }
+
+    /// How long one nod takes while she naps, in seconds.
+    nonisolated static let napNod: TimeInterval = 1.6
+
     /// How far she dips in the nod at `progress`, in points: down 4 and back, after the blink.
     nonisolated static func nodDip(_ progress: Double?) -> CGFloat {
         guard let progress, progress > 0.12, progress < 0.5 else { return 0 }
@@ -1205,7 +1239,8 @@ public struct KuroView: View {
         return (id, item)
     }
 
-    /// Her pose for the inputs: during `.overtime` in the work look she waits at the desk with drowsy eyes.
+    /// Her pose for the inputs: during `.overtime` in the work look she waits at the desk with drowsy eyes, and
+    /// during `.dozing` in the chill look she naps over her tablet.
     nonisolated static func pose(
         _ look: KuroLook,
         energy: Double?,
@@ -1215,6 +1250,7 @@ public struct KuroView: View {
         calendar: Calendar = .current
     ) -> KuroPose {
         var pose = KuroPose(look: look, energy: energy, bedtime: bedtime)
+        pose.napping = KuroPose.naps(look, bedtime: bedtime, moment: moment)
         guard bedtime == .off, look == .work, moment == .overtime else { return pose }
         pose.overtime = true
         pose.eyes = .drowsy
@@ -1311,6 +1347,7 @@ public struct KuroPortrait: View {
     let look: KuroLook
     let energy: Double?
     let bedtime: Bedtime
+    let moment: CompanionMoment?
     let wearing: Set<KuroItem>
     let framing: CompanionPortrait.Framing
     let lineArt: Bool
@@ -1319,6 +1356,7 @@ public struct KuroPortrait: View {
     ///   - look: what she wears.
     ///   - energy: energy 0-100, or nil when unknown.
     ///   - bedtime: `.on` gives her sleepy eyes.
+    ///   - moment: the moment of the day; `.dozing` in the chill look shows her napping over her tablet.
     ///   - wearing: ids of her shop items she wears; each shows only in its own look.
     ///   - framing: head to waist, or head only for small round widgets.
     ///   - lineArt: draws her dark fills white, for tinted Lock Screens and watch faces.
@@ -1326,6 +1364,7 @@ public struct KuroPortrait: View {
         look: KuroLook,
         energy: Double? = nil,
         bedtime: Bedtime = .off,
+        moment: CompanionMoment? = nil,
         wearing: Set<String> = [],
         framing: CompanionPortrait.Framing = .full,
         lineArt: Bool = false
@@ -1333,6 +1372,7 @@ public struct KuroPortrait: View {
         self.look = look
         self.energy = energy
         self.bedtime = bedtime
+        self.moment = moment
         self.wearing = KuroItem.items(wearing).subtracting([.spin])
         self.framing = framing
         self.lineArt = lineArt
@@ -1340,6 +1380,7 @@ public struct KuroPortrait: View {
 
     public var body: some View {
         var pose = KuroPose(look: look, energy: energy, bedtime: bedtime)
+        pose.napping = KuroPose.naps(look, bedtime: bedtime, moment: moment)
         pose.items = wearing
         let figure = KuroFigure(look: look, pose: pose)
         return Group {

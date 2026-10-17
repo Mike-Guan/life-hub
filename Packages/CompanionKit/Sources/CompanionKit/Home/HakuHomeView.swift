@@ -18,7 +18,7 @@ final class HomeStage {
 
 /// A panel opened from the room.
 enum HomeSheet: String, Identifiable {
-    case wardrobe, shop, shelf, decorate, settings
+    case wardrobe, shelf, decorate, settings
 
     var id: String { rawValue }
 }
@@ -35,7 +35,7 @@ struct HomeChip: Identifiable {
     static let all = [
         HomeChip(hotspot: .shelf, title: "奖励", symbol: "trophy.fill", at: GridPoint(x: 0.3, y: 5.8, z: 5.7)),
         HomeChip(hotspot: .wardrobe, title: "衣柜", symbol: "tshirt.fill", at: GridPoint(x: 7.8, y: 0.65, z: 5.6)),
-        HomeChip(hotspot: .shop, title: "商城", symbol: "cart.fill", at: GridPoint(x: 9.5, y: 0.65, z: 4.4)),
+        HomeChip(hotspot: .shop, title: "商店", symbol: "cart.fill", at: GridPoint(x: 9.5, y: 0.65, z: 4.4)),
         HomeChip(hotspot: .bed, title: "休息", symbol: "zzz", at: GridPoint(x: 8.6, y: 6.4, z: 2.5)),
         HomeChip(hotspot: nil, title: "家具", symbol: "sofa.fill", at: GridPoint(x: 1.4, y: 6.2, z: 2.4)),
         HomeChip(hotspot: .exit, title: "出门", symbol: "figure.walk", at: GridPoint(x: 4.6, y: 9.5, z: 0.7)),
@@ -44,14 +44,18 @@ struct HomeChip: Identifiable {
 
 /// HAKU's home: the room in SpriteKit, the rest of the screen in SwiftUI. A prototype on mock data.
 public struct HakuHomeView: View {
+    private let onShop: (() -> Void)?
     private let onExit: () -> Void
     @State private var stage = HomeStage()
     @State private var sheet: HomeSheet?
     @State private var carrying = false
     @Environment(\.scenePhase) private var scenePhase
 
-    /// - Parameter onExit: Called when the user leaves the home for the dashboard.
-    public init(onExit: @escaping () -> Void) {
+    /// - Parameters:
+    ///   - onShop: Opens the shop. Without it the home shows no way into the shop.
+    ///   - onExit: Called when the user leaves the home for the dashboard.
+    public init(onShop: (() -> Void)? = nil, onExit: @escaping () -> Void) {
+        self.onShop = onShop
         self.onExit = onExit
     }
 
@@ -88,7 +92,7 @@ public struct HakuHomeView: View {
                     .foregroundStyle(Toy.muted)
                 Spacer()
                 Button {
-                    sheet = .shop
+                    onShop?()
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "bolt.fill").foregroundStyle(Color(hex: 0x7CFF4F))
@@ -100,6 +104,7 @@ public struct HakuHomeView: View {
                     .foregroundStyle(.white)
                 }
                 .buttonStyle(.plain)
+                .disabled(onShop == nil)
                 Button {
                     model.toggleNight()
                 } label: {
@@ -139,7 +144,7 @@ public struct HakuHomeView: View {
                 )
                 .frame(width: geo.size.width, height: geo.size.height)
                 if !carrying {
-                    ForEach(HomeChip.all) { chip in
+                    ForEach(HomeChip.all.filter { $0.hotspot != .shop || onShop != nil }) { chip in
                         let p = HomeGrid.plan(chip.at)
                         chipButton(chip)
                             .position(x: (p.x - canvas.minX) * scale, y: (p.y - canvas.minY) * scale)
@@ -200,7 +205,7 @@ public struct HakuHomeView: View {
             onExit()
             return
         case .wardrobe: sheet = .wardrobe
-        case .shop: sheet = .shop
+        case .shop: onShop?()
         case .shelf: sheet = .shelf
         default: break
         }
@@ -288,7 +293,6 @@ private struct HomeSheetView: View {
     let which: HomeSheet
     let model: HomeModel
     let onExit: () -> Void
-    @State private var confirming: HomeProduct?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -306,7 +310,6 @@ private struct HomeSheetView: View {
     private var title: String {
         switch which {
         case .wardrobe: "衣柜"
-        case .shop: "商城 · \(model.cans) 罐"
         case .shelf: "奖励架"
         case .decorate: "家具换颜色"
         case .settings: "设置"
@@ -316,7 +319,6 @@ private struct HomeSheetView: View {
     @ViewBuilder private var content: some View {
         switch which {
         case .wardrobe: wardrobe
-        case .shop: shop
         case .shelf: shelf
         case .decorate: decorate
         case .settings: settings
@@ -334,7 +336,7 @@ private struct HomeSheetView: View {
                     VStack(spacing: 6) {
                         OutfitPreview(outfit: outfit).frame(height: 56).opacity(owned ? 1 : 0.35)
                         Text(outfit.name).font(Toy.body(12, weight: .bold)).lineLimit(1).minimumScaleFactor(0.8)
-                        Text(owned ? (model.outfit == outfit ? "穿着" : "换上") : "商城有")
+                        Text(owned ? (model.outfit == outfit ? "穿着" : "换上") : "商店有")
                             .font(Toy.body(11)).foregroundStyle(Toy.muted)
                     }
                     .padding(10)
@@ -343,73 +345,6 @@ private struct HomeSheetView: View {
                 .buttonStyle(ToyButtonStyle(fill: Color(hex: 0xE4F5E1), isSelected: model.outfit == outfit))
                 .disabled(!owned)
             }
-        }
-    }
-
-    private var shop: some View {
-        VStack(spacing: 12) {
-            if let product = confirming {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(verbatim: "花 \(product.price) 罐买「\(product.name)」？")
-                        .font(Toy.body(17, weight: .heavy))
-                    Text(verbatim: "会放在\(product.place)。").font(Toy.body(14)).foregroundStyle(Toy.muted)
-                    HStack(spacing: 12) {
-                        Button {
-                            confirming = nil
-                        } label: {
-                            Text("算了").font(Toy.body(15, weight: .bold)).frame(maxWidth: .infinity).padding(12)
-                        }
-                        .buttonStyle(ToyButtonStyle(fill: Toy.card))
-                        Button {
-                            if model.buy(product) { dismiss() }
-                            confirming = nil
-                        } label: {
-                            Text("买").font(Toy.body(15, weight: .heavy)).frame(maxWidth: .infinity).padding(12)
-                        }
-                        .buttonStyle(ToyButtonStyle(fill: Color(hex: 0x7CC77F), isSelected: true))
-                    }
-                }
-                .padding(14)
-                .toyCard()
-            }
-            ForEach(HomeProduct.offered(card: model.card), id: \.self) { product in
-                let owned = model.owns(product)
-                let affordable = model.cans >= product.price
-                HStack(spacing: 12) {
-                    Image(systemName: Self.symbol(product)).font(.system(size: 20, weight: .bold)).frame(width: 32)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(product.name).font(Toy.body(15, weight: .heavy))
-                        Text(product.place).font(Toy.body(12)).foregroundStyle(Toy.muted)
-                    }
-                    Spacer(minLength: 0)
-                    Button {
-                        confirming = product
-                    } label: {
-                        Text(owned ? "已有" : affordable ? "\(product.price) 罐" : "罐子不够")
-                            .font(Toy.body(13, weight: .heavy))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                    }
-                    .buttonStyle(ToyButtonStyle(fill: Color(hex: 0xFFD23F), isSelected: !owned && affordable))
-                    .disabled(owned || !affordable)
-                }
-                .padding(12)
-                .toyCard()
-            }
-        }
-    }
-
-    private static func symbol(_ product: HomeProduct) -> String {
-        switch product {
-        case .item(.plant): "leaf.fill"
-        case .item(.bag): "figure.boxing"
-        case .item(.cactus): "camera.macro"
-        case .item(.speaker): "hifispeaker.fill"
-        case .item(.gloves): "figure.boxing"
-        case .item(.racket): "tennis.racket"
-        case .item(.snowboard): "figure.snowboarding"
-        case .item(.bench): "dumbbell.fill"
-        case .outfit: "tshirt.fill"
         }
     }
 
