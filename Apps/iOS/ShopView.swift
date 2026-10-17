@@ -47,15 +47,10 @@ struct ShopView: View {
         _wardrobe = wardrobe
         self.persona = persona
         self.mode = mode
-        _shelf = State(initialValue: Self.homeIsOpen(for: persona) ? shelf : .clothes)
+        _shelf = State(initialValue: shelf)
     }
 
-    // 家 真实数据清单 v0 row 19: the home page is HAKU's until the second preset character's room version (M5).
-    // Without it the shop sells her no room items and keeps her keepsakes here, so nothing stays out of sight.
-    /// Whether `persona` has the home page.
-    static func homeIsOpen(for persona: Persona) -> Bool { persona == .haku }
-
-    // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
+    // Wins the app can detect today. The footer only mentions these, so nothing
     // promises a reward the app can't give yet. Add a win here when its source is wired.
     static let liveWins: [Win] = [.boxing, .run5k, .exercise, .daylight, .earlySleep, .steps]
 
@@ -63,9 +58,7 @@ struct ShopView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 header
-                if Self.homeIsOpen(for: persona) {
-                    shelfTabs
-                }
+                shelfTabs
                 banner
                 // 界面空状态与报错 §2: with no cans yet, how to earn them comes first instead of at the bottom.
                 if balance == 0 {
@@ -87,18 +80,6 @@ struct ShopView: View {
                 }
                 if let buyError {
                     ErrorLine(text: buyError)
-                }
-                if !Self.homeIsOpen(for: persona) && !keepsakes.isEmpty {
-                    Text("纪念品 · 只能靠做到拿")
-                        .font(Toy.body(15, weight: .heavy))
-                    VStack(spacing: 0) {
-                        ForEach(keepsakes) { item in
-                            keepsakeRow(item)
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 4)
-                    .toyCard(radius: 16, shadow: 4)
                 }
                 if balance > 0 {
                     Text(footer)
@@ -159,13 +140,6 @@ struct ShopView: View {
     private var ownedFromShop: [ShopItem] {
         ShopItem.catalog(for: persona)
             .filter { $0.price != nil && owned.contains($0.id) && $0.id != weekly?.id && shelf.holds($0) }
-    }
-
-    private var keepsakes: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { item in
-            guard let keepsake = item.keepsake, item.isDrawn else { return false }
-            return (Self.liveWins.contains(keepsake.win) && item.suits(card)) || owned.contains(item.id)
-        }
     }
 
     // The user's own names for the modes and the identity card.
@@ -365,36 +339,6 @@ struct ShopView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .toyCard(radius: 14, shadow: 0)
-        .accessibilityElement(children: .combine)
-    }
-
-    private func keepsakeRow(_ item: ShopItem) -> some View {
-        let isOwned = owned.contains(item.id)
-        let keepsake = item.keepsake
-        let count = keepsake.map { min(ledger.count($0.win, card: $0.card), $0.count) } ?? 0
-        let goal = keepsake?.count ?? 1
-        return HStack(spacing: 10) {
-            ShopItemIcon(item: item)
-                .frame(width: 32, height: 32)
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(item.title)
-                    Spacer()
-                    Text(isOwned ? "已拥有" : "\(keepsake?.title(for: persona) ?? "") \(count)/\(goal)")
-                        .foregroundStyle(Toy.muted)
-                        .accessibilityLabel(
-                            isOwned ? "已拥有" : "\(keepsake?.title(for: persona) ?? "")，\(goal) 次里做到了 \(count) 次"
-                        )
-                }
-                .font(Toy.body(14, weight: .heavy))
-                if !isOwned {
-                    ProgressView(value: Double(count), total: Double(goal))
-                        .tint(item.slot.tileColor(for: persona))
-                        .accessibilityHidden(true)
-                }
-            }
-        }
-        .padding(.vertical, 8)
         .accessibilityElement(children: .combine)
     }
 
