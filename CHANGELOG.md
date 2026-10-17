@@ -775,3 +775,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character's taps end more smoothly: her eyes shut for a moment instead of jumping back,
   she turns away and back like a card flipping, her lap blanket slides away and back around a sip, and a tap
   still playing stops when the mode changes; the off-work move waits for the switch.
+- The second preset character's boxing look now wears the white towel on her right shoulder. It hides when
+  she turns away.

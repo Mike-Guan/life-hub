@@ -400,7 +400,7 @@ struct KuroFigure: View {
         case .chill: [.jacketChill, .chillCup]
         case .tennis: [.tennisPonytail, .jacketTennis, .tennisHeadband, .tennisRacket]
         case .desk: [.jacketDesk, .deskGlasses, .deskBooks, .deskPen]
-        case .box: [.tennisPonytail, .jacketBox, .boxHeadband, .boxGloveL, .boxGloveR]
+        case .box: [.tennisPonytail, .jacketBox, .boxShoulderTowel, .boxHeadband, .boxGloveL, .boxGloveR]
         case .fitness: [.tennisPonytail, .jacketTennis, .gymBlock]
         case .study: [.jacketChill, .studyNotebook, .studyHighlighter]
         case .art: [.jacketSmock, .workTablet, .craftPen]
