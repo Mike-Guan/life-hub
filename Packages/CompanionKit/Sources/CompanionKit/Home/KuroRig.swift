@@ -352,7 +352,9 @@ final class KuroHomeNode: SKNode {
 
     /// Her parts for the home, split into the hair behind her, her top and her head. What she holds in the
     /// companion (cup, tablet, racket, books) stays out: in the home her things are in the room.
-    nonisolated static func parts(_ look: KuroLook, items: Set<KuroItem>, face: HakuFace, sleeping: Bool)
+    nonisolated static func parts(
+        _ look: KuroLook, items: Set<KuroItem>, face: HakuFace, sleeping: Bool
+    )
         -> (hair: [KuroPart], torso: [KuroPart], head: [KuroPart])
     {
         var pose = KuroPose(look: look, energy: nil)
