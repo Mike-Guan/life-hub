@@ -443,5 +443,32 @@ import Testing
             #expect(x < ring.minX + 8 || x > ring.maxX - 8, "\(item)")
         }
     }
+
+    @Test func hakuNodsOffOverThePhoneEveryTenSeconds() {
+        #expect(HakuNode.dozeNod(2) == 0)
+        #expect(HakuNode.dozeNod(8.5) == 1)
+        #expect(HakuNode.dozeNod(18.5) == 1)
+        #expect(HakuNode.dozeNod(9.8) == 0)
+    }
+
+    @Test func atNightHakuHoldsThePhoneInBedAndByDayHeDoesNot() {
+        for night in [true, false] {
+            let model = HomeModel(night: night)
+            let scene = HomeScene(model: model)
+            model.tap(.bed)
+            scene.sync(animated: false)
+            scene.settle()
+            scene.pose(at: 2)
+            #expect((scene.haku.heldPhone != nil) == night)
+            // At night he lies on the blanket, so he is drawn over it; by day he is under it.
+            #expect((scene.haku.zPosition > CGFloat(HomePiece.blanket.depth)) == night)
+            if night {
+                let up = scene.haku.heldPhone
+                scene.pose(at: 8.5)
+                let down = scene.haku.heldPhone
+                #expect(up != nil && down != nil && up != down)
+            }
+        }
+    }
 }
 #endif

@@ -81,6 +81,7 @@ final class HakuNode: SKNode {
     private let armL = SKSpriteNode()
     private let armR = SKSpriteNode()
     private let head = SKSpriteNode()
+    private let phone = SKSpriteNode()
 
     private var shownFace: HakuFace?
     private var shownOutfit: HomeOutfit?
@@ -106,7 +107,7 @@ final class HakuNode: SKNode {
         addChild(shadow)
         addChild(flip)
         flip.addChild(body)
-        for part in [legL, legR, sitLegs, torso, armL, armR, head] { body.addChild(part) }
+        for part in [legL, legR, sitLegs, torso, phone, armL, armR, head] { body.addChild(part) }
         shadow.texture = Self.shadowTexture
         shadow.size = Self.shadowRect.size
         shadow.zPosition = -0.004
@@ -119,6 +120,9 @@ final class HakuNode: SKNode {
         setTexture(legR, Self.legTexture, Self.legRect, pin: .zero)
         legR.xScale = -1
         setTexture(sitLegs, Self.sitTexture, Self.sitRect, pin: .zero)
+        setTexture(phone, Self.phoneTexture, Self.phoneRect, pin: .zero)
+        // Over the chest, under the hands and the head, like the bar.
+        phone.zPosition = 0.0055
         flip.setScale(Self.scale)
     }
 
@@ -165,6 +169,7 @@ final class HakuNode: SKNode {
         shadow.isHidden = false
         shadow.position = .zero
         shadow.setScale(1)
+        phone.isHidden = true
 
         let breath = CGFloat(sin(t * tau / 2.8))
         switch pose {
@@ -235,6 +240,21 @@ final class HakuNode: SKNode {
             reach(armL, from: Self.shoulderL, to: CGPoint(x: bar.x - grip.x, y: bar.y - grip.y))
             reach(armR, from: Self.shoulderR, to: CGPoint(x: bar.x + grip.x, y: bar.y + grip.y))
             shadow.isHidden = true
+        case .doze:
+            // On his back in bed holding the phone up over his chest; now and then it sinks onto him as he nods off.
+            body.zRotation = -.pi / 3
+            torso.yScale = 1 + 0.03 * CGFloat(sin(t * tau / 4))
+            let nod = CGFloat(Self.dozeNod(t))
+            let lift = Self.phoneLift * (1 - nod) + Self.phoneRest * nod
+            let held = CGPoint(x: Self.phoneHold.x + Self.up.x * lift, y: Self.phoneHold.y + Self.up.y * lift)
+            phone.isHidden = false
+            phone.position = held
+            phone.yScale = 1 - 0.35 * nod
+            // The hands hold the case's sides, tucked behind it.
+            let grip = CGPoint(x: Self.along.x * 4, y: Self.along.y * 4)
+            reach(armL, from: Self.shoulderL, to: CGPoint(x: held.x - grip.x, y: held.y - grip.y))
+            reach(armR, from: Self.shoulderR, to: CGPoint(x: held.x + grip.x, y: held.y + grip.y))
+            shadow.isHidden = true
         case .lie:
             body.zRotation = -.pi / 3
             torso.yScale = 1 + 0.03 * CGFloat(sin(t * tau / 4))
@@ -254,10 +274,37 @@ final class HakuNode: SKNode {
     }
 
     /// The middle of the bar HAKU presses, in the coordinates of HAKU's parent.
-    var barCenter: CGPoint {
-        let p = convert(bar, from: body)
-        return CGPoint(x: position.x + p.x, y: position.y + p.y)
+    var barCenter: CGPoint { parentPoint(bar) }
+
+    /// Whether HAKU holds the phone, and where its middle is in the coordinates of HAKU's parent.
+    var heldPhone: CGPoint? { phone.isHidden ? nil : parentPoint(phone.position) }
+
+    /// The middle of HAKU's face, in the coordinates of HAKU's parent.
+    var faceCenter: CGPoint { parentPoint(Self.node(60, 58)) }
+
+    /// How far HAKU has nodded off over the phone at time `t`: 0 awake and holding it up, 1 asleep with it on his
+    /// chest. Every 10 s: 7 s up, a slow sink, a moment asleep, then a jerk back awake.
+    nonisolated static func dozeNod(_ t: TimeInterval) -> Double {
+        let p = t.truncatingRemainder(dividingBy: 10)
+        switch p {
+        case ..<7: return 0
+        case ..<7.8: return 0.5 - 0.5 * cos((p - 7) / 0.8 * .pi)
+        case ..<9.2: return 1
+        case ..<9.45: return 1 - (p - 9.2) / 0.25
+        default: return 0
+        }
     }
+
+    private func parentPoint(_ p: CGPoint) -> CGPoint {
+        let q = convert(p, from: body)
+        return CGPoint(x: position.x + q.x, y: position.y + q.y)
+    }
+
+    // How far up from the chest the phone is held, and where it sinks to when he nods off.
+    private static let phoneLift: CGFloat = 30
+    private static let phoneRest: CGFloat = 8
+    // A little below the chest, so his big head doesn't hide the phone and his arms don't stretch.
+    private static let phoneHold = CGPoint(x: 0, y: 30)
 
     /// How high the bar is during a press at time `t`: 0 resting on the chest, 1 at lockout.
     nonisolated static func pressReach(_ t: TimeInterval) -> Double {
@@ -376,6 +423,17 @@ final class HakuNode: SKNode {
         }
         tops[key] = texture
         return texture
+    }
+
+    static let phoneRect = CGRect(x: -12, y: -17, width: 24, height: 34)
+
+    /// The back of a phone.
+    static let phoneTexture = HomeTextures.texture(phoneRect) { context in
+        let phone = Path(roundedRect: CGRect(x: -10, y: -15, width: 20, height: 30), cornerRadius: 4)
+        // A pink case, so the phone stands out against his green jacket and the blanket.
+        context.fill(phone, with: .color(Toy.pink))
+        context.stroke(phone, with: .color(RunnerPalette.ink), lineWidth: 2.5)
+        context.fill(Path(ellipseIn: CGRect(x: -6, y: -11, width: 5, height: 5)), with: .color(RunnerPalette.ink))
     }
 
     static let legTexture = HomeTextures.texture(legRect) { context in

@@ -384,7 +384,7 @@ enum HomeSpot: String, CaseIterable, Sendable {
 
 /// How HAKU's body is posed.
 enum HakuPose: Sendable, Equatable {
-    case stand, walk, sit, lie, back, backStand, box, press, dangle, happy, stretch, tired
+    case stand, walk, sit, lie, doze, back, backStand, box, press, dangle, happy, stretch, tired
 }
 
 /// A walk along stops on the floor.
