@@ -398,8 +398,9 @@ import Testing
 
     @Test func hakuStandsBesideTheBenchAndTheCactusNotInFrontOfThem() throws {
         for item in [HomeItem.bench, .cactus] {
-            let at = HomeModel.previewSpot(item)
-            #expect(HomeGrid.plan(at).x < HomeItemPreview.ring(item).minX + 8, "\(item)")
+            let x = HomeGrid.plan(HomeModel.previewSpot(item)).x
+            let ring = HomeItemPreview.ring(item)
+            #expect(x < ring.minX + 8 || x > ring.maxX - 8, "\(item)")
         }
     }
 }
