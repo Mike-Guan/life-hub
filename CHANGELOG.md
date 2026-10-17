@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Second polish batch for the second preset character: the tablet slides back to her lap after the tap, her
+  lap things slide away and back while she blows on her drink, the flat racket flips upright after juggling,
+  the watch's raised racket swings, twirls and juggles, a tap during a move gets a blink, and at bedtime a tap
+  rolls her over instead of rubbing an eye.
 - CompanionKit draws the shop's room items for the app: `HomeItemIcon` (small icon, drawn as in the home) and
   `HomeItemPreview` (the real room around the item where it stands, circled, HAKU next to it). The home's shop
   button now opens the app's shop through `onShop` and reads 商店; the prototype's own shop panel is gone.

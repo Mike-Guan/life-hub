@@ -128,8 +128,10 @@ enum KuroIdle: CaseIterable, Sendable {
         switch self {
         case .blow:
             // The same cup and puff as her sip tap (UI 审核 2026-10-09: the puff must leave the lips).
+            // 动作展示总表 C5: her lap things slide away and back as in the sip tap, instead of jumping.
+            if Self.lapDown(p) >= 1 { visible.subtract(KuroFigure.lap) }
             guard p < 0.9 else { return }
-            visible.subtract(KuroFigure.lap.union([.chillCup]))
+            visible.remove(.chillCup)
             visible.insert(.tapCup)
             if (0.3..<0.65).contains(p) {
                 visible.subtract([.mouthCat, .mouthFlat])
@@ -140,9 +142,10 @@ enum KuroIdle: CaseIterable, Sendable {
             if (0.5..<0.8).contains(p) { visible.insert(.tapGlint) }
         case .juggle:
             // The flat racket is her own one; with the gold racket from the shop she just holds it.
-            guard visible.contains(.tennisRacket), p < 0.97 else { return }
+            guard visible.contains(.tennisRacket), p < Self.racketSwap else { return }
             visible.remove(.tennisRacket)
-            visible.formUnion([.juggleRacket, .tapBall])
+            visible.insert(.juggleRacket)
+            if p < Self.ballGone { visible.insert(.tapBall) }
             if Self.ballHeight(p) > 30 { Self.swapEyes(&visible, to: .eyesBright) }
             if p >= 0.88 {
                 Self.swapEyes(&visible, to: .eyesHappy)
@@ -237,6 +240,8 @@ enum KuroIdle: CaseIterable, Sendable {
         case .racket where part == .tennisRacket || part == .watchRacket: return CGSize(width: 0, height: -6 * twice)
         case .lookUp where Self.eyes.contains(part): return CGSize(width: 0, height: -3 * held)
         case .aside where Self.eyes.contains(part): return CGSize(width: 3 * held, height: 0)
+        case .blow where KuroFigure.lap.contains(part):
+            return CGSize(width: 0, height: KuroTap.lapDrop * CGFloat(Self.lapDown(p)))
         case .blow where part == .tapCup:
             let lift = CGFloat(Self.hold(p, rise: 0.2, fall: 0.2, end: 0.9))
             return CGSize(width: 26 * (1 - lift), height: 36 * (1 - lift))
@@ -253,6 +258,9 @@ enum KuroIdle: CaseIterable, Sendable {
         case .twirl where part == .tennisRacket:
             let toss = Self.hold(p, from: 0.75, rise: 0.1, fall: 0.1, end: 0.98)
             return CGSize(width: 2 * toss, height: -5.6 * toss)
+        // 动作展示总表 G6: the watch's raised racket stands upright, so its toss goes straight up.
+        case .twirl where part == .watchRacket:
+            return CGSize(width: 0, height: -5.6 * Self.hold(p, from: 0.75, rise: 0.1, fall: 0.1, end: 0.98))
         case .gloves where part == .boxGloveL: return CGSize(width: 4 * Self.together(p), height: 0)
         case .gloves where part == .boxGloveR: return CGSize(width: -4 * Self.together(p), height: 0)
         case .lap where part == .gymBlock:
@@ -400,6 +408,30 @@ enum KuroIdle: CaseIterable, Sendable {
         .hairBack, .earL, .earR, .faceBase, .blush, .hairFringe, .catEars, .tennisPonytail, .skiGoggles,
         .mouthCat, .mouthFlat, .mouthSmile, .mouthO, .sneezePuff,
     ])
+
+    /// How far down (0...1) her lap things are at `p` into blowing on her drink: as in the sip tap, with the cup
+    /// back down at 90%.
+    static func lapDown(_ p: Double) -> Double {
+        KuroTap.lapDown(at: p * KuroIdle.blow.length, cupDown: 0.9 * KuroIdle.blow.length)
+    }
+
+    // 动作展示总表 C7: the flat racket swapped back for her upright one in one frame at the end of the juggle. Now
+    // it flips like a card, as she does turning away (G2).
+    /// Where (0..<1) in the juggle the ball, settled on the racket, is put away and the flat racket starts to flip.
+    static let ballGone = 0.92
+
+    /// Where (0..<1) in the juggle the flat racket, edge-on, swaps for her upright one.
+    static let racketSwap = 0.96
+
+    /// The flat racket's width (`KuroTap.edgeOn`...1) at `p` into the juggle: squashing edge-on before the swap.
+    static func flatRacketWidth(_ p: Double) -> Double {
+        KuroTap.edgeOn + (1 - KuroTap.edgeOn) * (1 - ramp(p, ballGone, racketSwap))
+    }
+
+    /// Her upright racket's width (`KuroTap.edgeOn`...1) at `p` into the juggle: opening out after the swap.
+    static func uprightRacketWidth(_ p: Double) -> Double {
+        KuroTap.edgeOn + (1 - KuroTap.edgeOn) * ramp(p, racketSwap, 1)
+    }
 
     /// How high the juggled ball is above the racket at `p`, in SVG units: three bounces, each lower.
     static func ballHeight(_ p: Double) -> CGFloat {
