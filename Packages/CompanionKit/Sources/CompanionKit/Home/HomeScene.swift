@@ -377,7 +377,7 @@ final class HomeScene: SKScene {
                 // sleeps under it.
                 if model.isNight {
                     pose = .doze
-                    face = HakuNode.dozeNod(clock) < 0.5 ? .tired : .closed
+                    face = HakuNode.dozeNod(clock) < 0.5 ? .idle : .closed
                     // On top of the blanket: drawn over its folded end, which would hide his body and the phone.
                     depth = max(depth, HomePiece.blanket.depth + 0.05)
                 } else {
