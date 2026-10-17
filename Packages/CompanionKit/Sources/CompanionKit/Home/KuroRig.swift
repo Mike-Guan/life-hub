@@ -27,6 +27,7 @@ final class KuroHomeNode: SKNode {
     private var shownHead: String?
     private var shownTorso: String?
     private var shownArms: String?
+    private var bar = CGPoint.zero
 
     private static func node(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
         CGPoint(x: x - 60, y: 172 - y)
@@ -202,9 +203,13 @@ final class KuroHomeNode: SKNode {
             head.zRotation = 0.04 * CGFloat(sin(t * tau / 6))
             shadow.isHidden = true
         case .press:
+            // On her back along the bench, pressing the bar like HAKU, a shorter stroke.
             body.zRotation = -.pi / 3
-            armL.zRotation = 3.0
-            armR.zRotation = -3.0
+            let lift = Self.barRest + Self.barStroke * CGFloat(HakuNode.pressReach(t))
+            bar = CGPoint(x: Self.chest.x + Self.up.x * lift, y: Self.chest.y + Self.up.y * lift)
+            let grip = CGPoint(x: Self.along.x * Self.gripHalf, y: Self.along.y * Self.gripHalf)
+            reach(armL, from: Self.shoulderL, to: CGPoint(x: bar.x - grip.x, y: bar.y - grip.y))
+            reach(armR, from: Self.shoulderR, to: CGPoint(x: bar.x + grip.x, y: bar.y + grip.y))
             shadow.isHidden = true
         case .doze:
             // On her back in bed, the tablet held up over her chest; now and then it sinks onto her as she nods off.
@@ -240,8 +245,11 @@ final class KuroHomeNode: SKNode {
         hair.zRotation = head.zRotation
     }
 
+    /// The middle of the bar she presses, in the coordinates of her parent.
+    var barCenter: CGPoint { parentPoint(bar) }
+
     /// Whether she holds the tablet, and where its middle is in the coordinates of her parent.
-    var heldTablet: CGPoint? { tablet.isHidden ? nil : parentPoint(tablet.position) }
+    var heldPhone: CGPoint? { tablet.isHidden ? nil : parentPoint(tablet.position) }
 
     /// The middle of her face, in the coordinates of her parent.
     var faceCenter: CGPoint { parentPoint(Self.node(60, 62)) }
@@ -257,6 +265,10 @@ final class KuroHomeNode: SKNode {
     private static let tabletHold = CGPoint(x: 0, y: 30)
     private static let up = CGPoint(x: -0.866, y: 0.5)
     private static let along = CGPoint(x: 0.866, y: 0.5)
+    private static let chest = CGPoint(x: 0, y: 40)
+    private static let barRest: CGFloat = 31
+    private static let barStroke: CGFloat = 11
+    private static let gripHalf: CGFloat = 13
 
     private func reach(_ arm: SKSpriteNode, from shoulder: CGPoint, to hand: CGPoint) {
         let v = CGPoint(x: hand.x - shoulder.x, y: hand.y - shoulder.y)
