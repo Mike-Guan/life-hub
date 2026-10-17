@@ -83,6 +83,7 @@ final class HakuNode: SKNode {
     private let head = SKSpriteNode()
     private let phone = SKSpriteNode()
 
+    private var outfit = HomeOutfit.jacket
     private var shownFace: HakuFace?
     private var shownOutfit: HomeOutfit?
     private var shownBack: Bool?
@@ -131,8 +132,13 @@ final class HakuNode: SKNode {
         nil
     }
 
+    /// Puts `outfit` on HAKU from the next pose on.
+    func dress(_ outfit: HomeOutfit) {
+        self.outfit = outfit
+    }
+
     /// Poses the rig for time `t`.
-    func apply(_ pose: HakuPose, face: HakuFace, outfit: HomeOutfit, facingRight: Bool, gloves: Bool, t: TimeInterval) {
+    func apply(_ pose: HakuPose, face: HakuFace, facingRight: Bool, gloves: Bool, t: TimeInterval) {
         let back = pose == .back || pose == .backStand
         dress(outfit, back: back, gloves: gloves || pose == .box)
         let shownHead: HakuFace = back ? .back : face
