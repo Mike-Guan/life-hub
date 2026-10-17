@@ -4,6 +4,11 @@ import Testing
 
 @testable import CompanionKit
 
+// The bench and the snowboard stand only in the home page, which draws them (HomeTests); the figure has no part.
+private let figureItems = ShopItem.catalog(for: .haku).filter {
+    $0.isDrawn && !["room.bench", "room.snowboard"].contains($0.id)
+}
+
 @Suite struct CompanionKitTests {
     @Test(arguments: RunnerPart.allCases)
     func everyPartHasArt(_ part: RunnerPart) {
@@ -1175,7 +1180,7 @@ import Testing
         #expect(Outfit(Wardrobe(equipped: [.gloves: "gloves.someday", .room: "room.someday"])) == Outfit())
     }
 
-    @Test(arguments: ShopItem.catalog(for: .haku).filter(\.isDrawn))
+    @Test(arguments: figureItems)
     func everyWornItemChangesTheLook(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
@@ -1281,10 +1286,7 @@ import Testing
         }
     }
 
-    // The bench and the snowboard have no figure part; the home draws their icons (HomeTests).
-    @Test(
-        arguments: ShopItem.catalog(for: .haku).filter { $0.isDrawn && !["room.bench", "room.snowboard"].contains($0.id) }
-    )
+    @Test(arguments: figureItems)
     func everyItemIconDrawsSomething(_ item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
