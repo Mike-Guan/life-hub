@@ -20,6 +20,8 @@ public struct HomeSnapshot: Equatable, Sendable {
     /// Today's modes, oldest first.
     public var today: [ModeSegment]
     public var room: RoomLayout
+    /// The keepsakes the character earned, oldest first, for the reward shelf.
+    public var keepsakes: [EarnedKeepsake]
 
     public init(
         persona: Persona,
@@ -32,7 +34,8 @@ public struct HomeSnapshot: Equatable, Sendable {
         vitals: HakuVitals,
         bedtime: Bedtime,
         today: [ModeSegment],
-        room: RoomLayout
+        room: RoomLayout,
+        keepsakes: [EarnedKeepsake] = []
     ) {
         self.persona = persona
         self.mode = mode
@@ -45,6 +48,51 @@ public struct HomeSnapshot: Equatable, Sendable {
         self.bedtime = bedtime
         self.today = today
         self.room = room
+        self.keepsakes = keepsakes
+    }
+
+    // 家 真实数据清单 v0 (Mike 2026-10-17: the home page shows only real data). Every field comes from the store
+    // the home screen reads. Room items owned but not yet in the room are placed, and the layout saved.
+    /// The home page's snapshot for `persona` from the app's stores.
+    /// - Parameters:
+    ///   - mode: the current mode, `nil` before the first.
+    ///   - today: today's modes, oldest first.
+    ///   - ledger: the whole can ledger; the snapshot reads `persona`'s part.
+    ///   - energy: the energy log, for today's level and the hidden params.
+    ///   - bedtime: the bedtime state now.
+    ///   - defaults: the App Group defaults holding the cards, wardrobe and room layout.
+    public static func make(
+        persona: Persona,
+        mode: Mode?,
+        today: [ModeSegment],
+        ledger: CanLedger,
+        energy: EnergyLog,
+        bedtime: Bedtime,
+        defaults: UserDefaults,
+        catalog: RoomCatalog = .shipped,
+        now: Date = Date()
+    ) -> HomeSnapshot {
+        let mine = ledger.only(persona)
+        let deviceID = HubDevice.id(defaults: defaults)
+        var room = RoomLayout.loaded(in: defaults, persona: persona, catalog: catalog, now: now, deviceID: deviceID)
+        let roomItems = mine.owned.filter { ShopItem.item($0)?.slot == .room }.sorted()
+        if room.place(roomItems, catalog: catalog, now: now, deviceID: deviceID) {
+            room.store(in: defaults)
+        }
+        return HomeSnapshot(
+            persona: persona,
+            mode: mode,
+            cards: ModeCards.current(in: defaults, persona: persona),
+            cans: mine.balance,
+            owned: mine.owned,
+            wardrobe: Wardrobe.stored(in: defaults, persona: persona),
+            energy: StateEngine.energy(events: energy.active, now: now)?.level,
+            vitals: VitalsEngine.vitals(ledger: mine, energy: energy, now: now),
+            bedtime: bedtime,
+            today: today,
+            room: room,
+            keepsakes: EarnedKeepsake.earned(in: ledger, persona: persona)
+        )
     }
 
     /// The items worn in the current mode, or in Chill before the first mode, without other cards' items.
@@ -56,5 +104,29 @@ public struct HomeSnapshot: Equatable, Sendable {
     public var unplaced: [String] {
         let placed = Set(room.placements.map(\.piece))
         return owned.filter { ShopItem.item($0)?.slot == .room && !placed.contains($0) }.sorted()
+    }
+}
+
+/// A keepsake on the reward shelf: which one and when it was earned.
+public struct EarnedKeepsake: Equatable, Sendable {
+    /// The keepsake's shop item id.
+    public var id: String
+    public var at: Date
+
+    public init(id: String, at: Date) {
+        self.id = id
+        self.at = at
+    }
+
+    // 商店与家 同步方案 §5: only real keepsakes, with their real dates. Unearned ones leave no gap on the shelf.
+    /// The keepsakes `persona` earned in `ledger`, oldest first.
+    public static func earned(in ledger: CanLedger, persona: Persona) -> [EarnedKeepsake] {
+        let mine = ledger.only(persona)
+        return ShopItem.catalog(for: persona)
+            .compactMap { item in
+                guard item.keepsake != nil, let at = mine.ownedAt(item.id) else { return nil }
+                return EarnedKeepsake(id: item.id, at: at)
+            }
+            .sorted { $0.at < $1.at }
     }
 }
