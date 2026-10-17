@@ -28,6 +28,8 @@ struct ShopView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var buyError: String?
     @State private var unboxing: CanEntry?
+    /// The room items the last purchase put in the cupboard, for the unboxing's line.
+    @State private var putAway: [String] = []
     @State private var previewing: ShopItem?
     @State private var shelf: ShopShelf
     @Namespace private var tabs
@@ -140,7 +142,7 @@ struct ShopView: View {
         }
         .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: previewing?.id)
         .fullScreenCover(item: $unboxing) { entry in
-            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona, mode: mode)
+            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona, mode: mode, putAway: putAway)
         }
     }
 
@@ -424,6 +426,7 @@ struct ShopView: View {
         buyError = growth.lastError
         // A failed save stays on screen; the unboxing, still unseen, plays when the shop closes.
         guard buyError == nil else { return }
+        putAway = item.slot == .room ? RoomLayout.placeBought(item.id, persona: persona, in: AppGroup.defaults) : []
         unboxing = ledger.unboxings(seen: UnboxLog.seen, persona: persona).last { $0.itemID == item.id }
     }
 }

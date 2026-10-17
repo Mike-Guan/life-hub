@@ -1672,6 +1672,23 @@
         }
       }
     },
+    "原来的%@收进柜子了。" : {
+      "comment" : "开箱时，区满了换下的房间物品。%@ 是物品名。",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "The old %@ went into the cupboard."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "前の%@は収納にしまいました。"
+          }
+        }
+      }
+    },
     "去健身房" : {
       "comment" : "挣罐方式",
       "localizations" : {

@@ -120,7 +120,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - On a Japanese or English iPhone, the Photos permission prompt for saving a share card is in that language.
 - The home page's room has zones (家 区域规划 v0): a bought room item goes into its zone, and when the zone is
   full the earliest item goes into the cupboard; a keepsake is never pushed out by a purchase. Items earlier
-  builds kept in storage move into their zones once. `RoomLayout.put` and `putAway` are ready for 整理.
+  builds kept in storage move into their zones once. The unboxing of a room item says 「原来的 X 收进柜子了。」
+  when it made room. `RoomLayout.put` and `putAway` are ready for 整理.
 - Opening the app, HAKU says one line at most: a celebration first, then an invite, good night, the late-night
   line, a planned task, bath time and the stretch. A mode change no longer clears it. A tap during a one-off
   animation only makes HAKU blink. At bedtime a tap gets a sleepy mumble instead of switching the side-hustle

@@ -246,4 +246,16 @@ extension RoomTests {
         tidied.store(in: defaults)
         #expect(RoomLayout.loaded(in: defaults, persona: .haku, catalog: RoomCatalog(), deviceID: "a") == tidied)
     }
+
+    @Test func aPurchaseIsPlacedAndSavedAtOnce() throws {
+        let suite = "RoomTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        #expect(RoomLayout.placeBought("room.bag", persona: .haku, in: defaults, now: now).isEmpty)
+        let later = now.addingTimeInterval(60)
+        #expect(RoomLayout.placeBought("room.bench", persona: .haku, in: defaults, now: later) == ["room.bag"])
+        let saved = try #require(RoomLayout.stored(in: defaults, persona: .haku))
+        #expect(saved.placements.first { $0.piece == "room.bench" }?.zone == RoomZone.sportFloor.rawValue)
+        #expect(RoomLayout.placeBought("room.bench", persona: .haku, in: defaults, now: later).isEmpty)
+    }
 }

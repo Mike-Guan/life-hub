@@ -429,6 +429,19 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
     static func migratedKey(for persona: Persona) -> String { "roomLayout.\(persona.rawValue).wardrobeMoved" }
     static func zonedKey(for persona: Persona) -> String { "roomLayout.\(persona.rawValue).zoned" }
 
+    // 家 区域规划 v0 §2: a purchase places the item at once, so the shop can say what went into the cupboard.
+    /// Places a just-bought room item in `persona`'s saved layout and saves it.
+    /// - Returns: the items put in the cupboard to make room.
+    public static func placeBought(
+        _ item: String, persona: Persona, in defaults: UserDefaults, catalog: RoomCatalog = .shipped, now: Date = Date()
+    ) -> [String] {
+        let deviceID = HubDevice.id(defaults: defaults)
+        var layout = loaded(in: defaults, persona: persona, catalog: catalog, now: now, deviceID: deviceID)
+        let change = layout.place([item], catalog: catalog, now: now, deviceID: deviceID)
+        if !change.isEmpty { layout.store(in: defaults) }
+        return change.putAway
+    }
+
     /// `persona`'s layout saved in `defaults`, or `nil` when none is saved or it can't be read.
     public static func stored(in defaults: UserDefaults, persona: Persona) -> RoomLayout? {
         let key = defaultsKey(for: persona)
