@@ -51,8 +51,7 @@ public struct HomeItemPreview: View {
     public init?(itemID: String) {
         guard let item = HomeItem(shopID: itemID) else { return nil }
         self.item = item
-        let model = HomeModel(night: false, cans: 999)
-        _ = model.buy(.item(item))
+        let model = HomeModel(snapshot: .preview(owning: [itemID]), night: false)
         model.standBeside(item)
         let stage = HomeStage(model: model)
         stage.scene.sync(animated: false)

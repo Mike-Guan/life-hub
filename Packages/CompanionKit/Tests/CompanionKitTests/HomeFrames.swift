@@ -19,7 +19,7 @@ extension FrameSheets {
             (
                 "拳击日 · 沙袋", true,
                 {
-                    $0.buy(.item(.bag))
+                    $0.own(.bag)
                     $0.switchMode(.boxing)
                 }
             ),
@@ -43,9 +43,9 @@ extension FrameSheets {
             (
                 "买齐 + 换色 + 西装", false,
                 {
-                    $0.buy(.item(.plant))
-                    $0.buy(.item(.cactus))
-                    $0.buy(.item(.speaker))
+                    $0.own(.plant)
+                    $0.own(.cactus)
+                    $0.own(.speaker)
                     $0.wear(.blazer)
                     $0.paint(.sofa, 2)
                     $0.paint(.rug, 3)
@@ -56,7 +56,7 @@ extension FrameSheets {
         ]
         var cells: [(String, CGImage)] = []
         for (label, night, setup) in states {
-            let model = HomeModel(night: night, cans: 120)
+            let model = HomeModel(night: night)
             let scene = HomeScene(model: model)
             setup(model)
             scene.sync(animated: false)
@@ -67,9 +67,9 @@ extension FrameSheets {
         }
         // Fitness day with the bench: the bar up at lockout, then down on the chest.
         for (label, t) in [("健身日 · 卧推 推起", 1.3), ("健身日 · 卧推 放下", 0.05)] {
-            let model = HomeModel(night: false, cans: 120, card: .fitness)
+            let model = HomeModel(night: false, card: .fitness)
             let scene = HomeScene(model: model)
-            model.buy(.item(.bench))
+            model.own(.bench)
             model.switchMode(.boxing)
             scene.sync(animated: false)
             scene.settle()
@@ -77,7 +77,7 @@ extension FrameSheets {
             cells.append((label, try #require(Self.composite(scene, scale: 2))))
         }
         // Mid-walk and carried, from the first room.
-        let model = HomeModel(night: true, cans: 120)
+        let model = HomeModel(night: true)
         let scene = HomeScene(model: model)
         model.switchMode(.work)
         scene.sync(animated: false)
@@ -129,10 +129,10 @@ extension FrameSheets {
         let width: CGFloat = 343
         let s = width / HomeGrid.canvas.width
         let side = HomeGrid.minTap / s
-        let model = HomeModel(night: false, cans: 120, card: .fitness)
+        let model = HomeModel(night: false, card: .fitness)
         let scene = HomeScene(model: model)
-        model.buy(.item(.bag))
-        model.buy(.item(.bench))
+        model.own(.bag)
+        model.own(.bench)
         scene.sync(animated: false)
         scene.settle()
         scene.pose(at: 1.3)
@@ -196,9 +196,8 @@ extension FrameSheets {
             "room.snowboard",
         ] {
             let item = try #require(HomeItem(shopID: id))
-            let model = HomeModel(night: false, cans: 999)
+            let model = HomeModel(snapshot: .preview(owning: [id]), night: false)
             let scene = HomeScene(model: model)
-            _ = model.buy(.item(item))
             model.standBeside(item)
             scene.sync(animated: false)
             scene.settle()

@@ -303,10 +303,18 @@ struct LifeHubApp: App {
         }
         .fullScreenCover(isPresented: $showsHome) {
             // 商店与家 同步方案 §1: the home page's door opens the same shop on the room tab.
-            HakuHomeView(onShop: { showsHomeShop = true }, onExit: { showsHome = false })
-                .fullScreenCover(isPresented: $showsHomeShop) {
-                    ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, shelf: .room)
-                }
+            HakuHomeView(
+                snapshot: homeSnapshot,
+                onSwitch: { store.switchTo($0) },
+                onShop: { showsHomeShop = true },
+                // The wardrobe opens from the home screen for now.
+                onWardrobe: nil,
+                onSave: { $0.store(in: AppGroup.defaults) },
+                onExit: { showsHome = false }
+            )
+            .fullScreenCover(isPresented: $showsHomeShop) {
+                ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, shelf: .room)
+            }
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
             WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, cards: cards)
@@ -504,6 +512,19 @@ struct LifeHubApp: App {
         } else {
             showNextUnboxing()
         }
+    }
+
+    // Issue #489: built on every redraw, so the page follows mode switches and new items while it is open.
+    private var homeSnapshot: HomeSnapshot {
+        HomeSnapshot.make(
+            persona: persona,
+            mode: store.current,
+            today: store.segments(on: .now),
+            ledger: growth.ledger,
+            energy: energy.log,
+            bedtime: bedtime.state(at: .now),
+            defaults: AppGroup.defaults
+        )
     }
 
     // Issue #485: the home prototype opens from the home screen in DEV and STG builds only.

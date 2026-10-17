@@ -38,7 +38,6 @@ struct SettingsView: View {
     @State private var screenTimeError: String?
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
-    @State private var showsHome = false
     @State private var asksErase = false
     @AppStorage(Languages.key, store: AppGroup.defaults) private var languagesOn = false
 
@@ -213,7 +212,6 @@ struct SettingsView: View {
             // Remove the condition with the CI-CD.md Screen Time step.
             #if DEBUG || ENV_STG
             scrollCard
-            homeCard
             #endif
             #if DEBUG
             languagesCard
@@ -330,31 +328,6 @@ struct SettingsView: View {
                 places: places.places,
                 decisionLogURL: AppGroup.container.decisionLogURL
             )
-        }
-    }
-
-    // Issue #485: the home prototype runs on mock data, so it stays out of PROD.
-    private var homeCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                Text("家（原型）")
-                    .font(Toy.body(16, weight: .heavy))
-                Spacer()
-                Button {
-                    showsHome = true
-                } label: {
-                    Text("进去").tapTarget()
-                }
-                .font(Toy.body(13, weight: .heavy))
-            }
-            Text("HAKU 的房间。罐子、衣服和记录都是假数据，不影响真实记录。")
-                .font(Toy.body(12))
-                .foregroundStyle(Toy.muted)
-        }
-        .padding(16)
-        .toyCard()
-        .fullScreenCover(isPresented: $showsHome) {
-            HakuHomeView { showsHome = false }
         }
     }
 

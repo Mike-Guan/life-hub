@@ -96,46 +96,71 @@ import Testing
 @Suite struct HomeModelTests {
     @Test func eachModeSendsHakuSomewhere() {
         let model = HomeModel(night: true)
-        let before = model.timeline.count
-        model.switchMode(.work, at: "10:00")
+        #expect(model.spot == .idle)
+        model.switchMode(.work)
         #expect(model.spot == .work)
-        model.switchMode(.chill, at: "18:00")
+        model.switchMode(.chill)
         #expect(model.spot == .sofa)
-        model.switchMode(.boxing, at: "19:00")
+        model.switchMode(.boxing)
         #expect(model.spot == .shadowbox)
-        model.switchMode(.money, at: "21:00")
+        model.switchMode(.money)
         #expect(model.spot == .side)
-        #expect(model.timeline.count == before + 4)
-        #expect(model.timeline.last?.mode == .money)
+    }
+
+    @Test func hakuFollowsTheModeInANewSnapshot() {
+        let model = HomeModel(night: false, mode: .work)
+        #expect(model.spot == .work)
+        var next = model.snapshot
+        next.mode = .chill
+        model.apply(next)
+        #expect(model.spot == .sofa)
+        #expect(model.line.hasSuffix("今天到此为止。"))
+        // The same mode again, after he was sent elsewhere, leaves him there.
+        model.tap(.bed)
+        model.apply(next)
+        #expect(model.spot == .rest)
+    }
+
+    @Test func theCardsNameAndTodayComeFromTheSnapshot() throws {
+        let calendar = Calendar.current
+        let day = Date(timeIntervalSinceReferenceDate: 800_000_000)
+        let start = try #require(calendar.date(bySettingHour: 9, minute: 5, second: 0, of: day))
+        var snapshot = HomeSnapshot.preview()
+        snapshot.cards = ModeCards(names: [Mode.money.rawValue: "写作"], identity: .tennis)
+        let log = ModeLog(changes: [ModeChange(mode: .work, at: start, deviceID: "test")])
+        snapshot.today = log.segments(on: start, now: start + 3600, calendar: calendar)
+        let model = HomeModel(snapshot: snapshot, night: false)
+        #expect(model.title(.money) == "写作")
+        #expect(model.title(.boxing) == IdentityKind.tennis.title)
+        #expect(model.timeline.map(\.mode) == [.work])
+        #expect(model.timeline.first?.time == HomeModel.clock(start))
     }
 
     @Test func otherCardsDoNotBox() {
         let model = HomeModel(night: false, card: .tennis)
         model.switchMode(.boxing)
         #expect(model.spot == .idle)
-        #expect(!HomeProduct.offered(card: .tennis).contains(.item(.bag)))
-        #expect(HomeProduct.offered(card: .boxing).contains(.item(.bag)))
     }
 
     @Test func withTheBagBoxingDayHitsIt() {
         let model = HomeModel(night: false)
-        #expect(model.buy(.item(.bag)))
+        model.own(.bag)
         model.switchMode(.boxing)
         #expect(model.spot == .box)
     }
 
     @Test func fitnessDayPressesOnTheBenchOnceThereIsOne() {
-        let model = HomeModel(night: false, cans: 60, card: .fitness)
+        let model = HomeModel(night: false, card: .fitness)
         model.switchMode(.boxing)
         #expect(model.spot == .idle)
-        #expect(model.buy(.item(.bench)))
+        model.own(.bench)
         model.switchMode(.boxing)
         #expect(model.spot == .bench)
         #expect(HomeSpot.bench.pose == .press)
     }
 
     @Test func tappingTheBenchIsAShortVisit() {
-        let model = HomeModel(night: false, cans: 60)
+        let model = HomeModel(night: false)
         model.switchMode(.chill)
         model.tap(.bench)
         #expect(model.spot == .bench)
@@ -143,24 +168,34 @@ import Testing
         #expect(model.spot == .sofa)
     }
 
-    @Test func buyingSpendsCansOnceAndPlacesTheItem() {
-        let model = HomeModel(night: false, cans: 30)
-        #expect(model.buy(.item(.plant)))
-        #expect(model.cans == 22)
-        #expect(model.items.contains(.plant))
-        #expect(model.takeCues() == [.placed(.plant)])
-        #expect(!model.buy(.item(.plant)))
-        #expect(!model.buy(.outfit(.flame)))
-        #expect(model.cans == 22)
+    @Test func ownedRoomItemsStandInTheRoomAndNewOnesPopIn() {
+        let model = HomeModel(night: false)
+        #expect(model.items.isEmpty)
+        var next = model.snapshot
+        next.owned = ["room.plant", "haku.weekly.room.cactus", "headband.cyan"]
+        model.apply(next)
+        #expect(model.items == [.plant, .cactus])
+        let cues = model.takeCues()
+        #expect(cues.count == 2 && cues.contains(.placed(.plant)) && cues.contains(.placed(.cactus)))
+        model.apply(next)
+        #expect(model.takeCues().isEmpty)
     }
 
-    @Test func onlyOwnedOutfitsCanBeWorn() {
-        let model = HomeModel(night: false, cans: 100)
-        model.wear(.flame)
-        #expect(model.outfit == .jacket)
-        #expect(model.buy(.outfit(.flame)))
+    @Test func hakuWearsWhatIsWornWhenItIsDrawnAndTheJacketOtherwise() {
+        #expect(HomeOutfit(worn: ["haku.top.chill.aloha"]) == .aloha)
+        #expect(HomeOutfit(worn: ["haku.top.work.blazer", "headband.cyan"]) == .blazer)
+        #expect(HomeOutfit(worn: ["some.top.not.drawn"]) == .jacket)
+        let model = HomeModel(night: false)
+        #expect(model.ownedOutfits == [.jacket])
         model.wear(.flame)
         #expect(model.outfit == .flame)
+        #expect(model.ownedOutfits == [.jacket, .flame])
+    }
+
+    @Test func lowEnergyIsTheOnlyTiredness() {
+        #expect(HomeModel(night: false, energy: .low).isLow)
+        #expect(!HomeModel(night: false, energy: .okay).isLow)
+        #expect(!HomeModel(night: false).isLow)
     }
 
     @Test func threeQuickTapsAreEnough() {
@@ -184,16 +219,6 @@ import Testing
         #expect(HomeNav.room().isOpen(p))
     }
 
-    @Test func energyComesBackOnlyInBed() {
-        let model = HomeModel(night: true)
-        let start = model.energy
-        model.tick(10)
-        #expect(model.energy == start)
-        model.tap(.bed)
-        model.tick(10)
-        #expect(model.energy > start)
-    }
-
     @Test func aVisitEndsBackAtTheModesSpot() {
         let model = HomeModel(night: true)
         model.switchMode(.work)
@@ -215,30 +240,76 @@ import Testing
         #expect(model.spot == .sofa)
     }
 
-    @Test func paintingPicksASwatch() {
+    @Test func paintingSavesTheColourInTheRoomLayout() {
         let model = HomeModel(night: false)
-        model.paint(.sofa, 2)
+        let saved = model.paint(.sofa, 2, deviceID: "test")
         #expect(model.color(.sofa) == HomePaintable.sofa.swatches[2])
+        #expect(
+            saved.placements.first { $0.piece == "home.sofa" }?.color
+                == String(format: "%06X", HomePaintable.sofa.swatches[2]))
+        #expect(saved.updatedBy == "test")
         model.paint(.sofa, 9)
         #expect(model.color(.sofa) == HomePaintable.sofa.swatches[2])
+        model.paint(.walls, 1)
+        #expect(model.layout.wallpaper == String(format: "%06X", HomePaintable.walls.swatches[1]))
+        // A colour this build doesn't know shows the default.
+        var next = model.snapshot
+        next.room.wallpaper = "123456"
+        model.apply(next)
+        #expect(model.color(.walls) == HomePaintable.walls.swatches[0])
     }
 
-    @Test func thePreviewShowsEveryItemWithoutBuyingIt() {
-        let model = HomeModel(night: false, cans: 10)
+    @Test func keepsakesComeFromWhatWasEarnedOldestFirst() {
+        let model = HomeModel(night: false)
+        #expect(model.keepsakes.isEmpty)
+        var next = model.snapshot
+        next.keepsakes = [
+            EarnedKeepsake(id: "keepsake.headband.runner", at: Date(timeIntervalSince1970: 100)),
+            EarnedKeepsake(id: "keepsake.unknown", at: Date(timeIntervalSince1970: 200)),
+        ]
+        model.apply(next)
+        #expect(model.keepsakes.map(\.id) == ["keepsake.headband.runner", "keepsake.unknown"])
+        #expect(model.keepsakes[0].name == ShopItem.item("keepsake.headband.runner")?.title)
+    }
+
+    @Test func thePreviewShowsEveryItemWithoutOwningIt() {
+        let model = HomeModel(night: false)
         model.togglePreviewItems()
         #expect(model.items == Set(HomeItem.allCases))
-        #expect(model.cans == 10)
-        #expect(!model.owns(.item(.bench)))
+        #expect(model.snapshot.owned.isEmpty)
         model.togglePreviewItems()
         #expect(model.items.isEmpty)
     }
+}
 
-    @Test func wallGearIsNeverSoldAndTheSnowboardOnlyOnTheSkiCard() {
-        #expect(!HomeProduct.all.contains(.item(.gloves)))
-        #expect(!HomeProduct.all.contains(.item(.racket)))
-        #expect(HomeProduct.offered(card: .tennis).contains(.item(.bench)))
-        #expect(!HomeProduct.offered(card: .boxing).contains(.item(.snowboard)))
-        #expect(HomeProduct.offered(card: .ski).contains(.item(.snowboard)))
+@Suite struct HomeZoneTests {
+    @Test func everyItemStandsInsideItsZone() throws {
+        for item in HomeItem.allCases {
+            let box = try #require(item.zone.box, "\(item)")
+            let s = item.spot
+            #expect(s.x >= box.x0 && s.x <= box.x1 && s.y >= box.y0 && s.y <= box.y1, "\(item)")
+        }
+    }
+
+    @Test func wallHooksAreNotHiddenByTheWardrobe() {
+        // The wardrobe's front-left corner, (6.8, 1.3), hides the back wall from x - y = 5.5 on.
+        for hook in HomeZone.sportWall.slots + [HomeItem.racket.spot, HomeItem.snowboard.spot] {
+            #expect(hook.x - hook.y + 0.25 < 5.5, "\(hook)")
+        }
+    }
+
+    @Test func zonesHoldAsManyItemsAsPlanned() {
+        #expect(HomeZone.sportFloor.slots.count == 1)
+        #expect(HomeZone.sportWall.slots.count == 2)
+        #expect(HomeZone.desk.slots.count == 2)
+        #expect(HomeZone.sofaSide.slots.count == 1)
+        #expect(HomeZone.corner.slots.count == 1)
+        for zone in HomeZone.allCases {
+            guard let box = zone.box else { continue }
+            for slot in zone.slots {
+                #expect(slot.x >= box.x0 && slot.x <= box.x1 && slot.y >= box.y0 && slot.y <= box.y1, "\(zone)")
+            }
+        }
     }
 }
 
@@ -276,9 +347,9 @@ import Testing
     }
 
     @Test func pressingHakuTakesTheBarOffTheRack() {
-        let model = HomeModel(night: false, cans: 60)
+        let model = HomeModel(night: false)
         let scene = HomeScene(model: model)
-        model.buy(.item(.bench))
+        model.own(.bench)
         scene.sync(animated: false)
         let bench = HomeGrid.scene(HomeGrid.plan(4.6, 2.2, 0.5))
         #expect(scene.hotspot(at: bench, includingHaku: false) == .bench)
@@ -304,10 +375,10 @@ import Testing
     @Test func everyTapTargetIsAtLeast44PointsOnTheSmallestPhone() {
         // iPhone SE: 375 pt wide, 16 pt margins each side.
         let side = HomeGrid.minTap / (343 / HomeGrid.canvas.width)
-        let model = HomeModel(night: false, cans: 120, card: .fitness)
+        let model = HomeModel(night: false, card: .fitness)
         let scene = HomeScene(model: model)
-        model.buy(.item(.bag))
-        model.buy(.item(.bench))
+        model.own(.bag)
+        model.own(.bench)
         scene.sync(animated: false)
         scene.settle()
         let haku = scene.haku.calculateAccumulatedFrame()
@@ -353,8 +424,8 @@ import Testing
 
     @Test func thePreviewShowsHakuStandingNextToTheItem() throws {
         for item in [HomeItem.plant, .bag, .speaker, .bench, .snowboard, .cactus] {
-            let model = HomeModel(night: false, cans: 999)
-            #expect(model.buy(.item(item)))
+            let model = HomeModel(night: false)
+            model.own(item)
             model.standBeside(item)
             let at = try #require(model.dropPoint)
             #expect(HomeNav.room(items: model.items).nearestOpen(to: at) == at, "\(item)")
@@ -362,6 +433,14 @@ import Testing
             let crop = HomeItemPreview.crop(item, haku: at)
             #expect(crop.contains(HomeItemPreview.ring(item)), "\(item)")
             #expect(crop.contains(HomeGrid.plan(at)), "\(item)")
+        }
+    }
+
+    @Test func hakuStandsBesideTheBenchAndTheCactusNotInFrontOfThem() throws {
+        for item in [HomeItem.bench, .cactus] {
+            let x = HomeGrid.plan(HomeModel.previewSpot(item)).x
+            let ring = HomeItemPreview.ring(item)
+            #expect(x < ring.minX + 8 || x > ring.maxX - 8, "\(item)")
         }
     }
 }
