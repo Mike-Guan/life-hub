@@ -190,10 +190,10 @@ extension RoomTests {
         for item in ShopItem.catalog where item.slot == .room {
             #expect(item.zone != nil, "\(item.id)")
         }
-        #expect(ShopItem.item("room.bag")?.zone == .sportsCorner)
+        #expect(ShopItem.item("room.bag")?.zone == .sportFloor)
         #expect(ShopItem.item("room.bag")?.zone?.isSports == true)
         #expect(ShopItem.item("room.plant")?.zone?.isSports == false)
-        #expect(RoomZone.sportsWall.isSports)
+        #expect(RoomZone.sportWall.isSports)
         #expect(ShopItem.item("headband.cyan")?.zone == nil)
     }
 }

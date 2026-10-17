@@ -144,11 +144,11 @@ extension RoomZone {
     var place: String {
         let text =
             switch self {
-            case .sportsCorner: "摆在家里的运动角，靠墙。哪个模式都在。"
-            case .sportsWall: "靠在家里的运动墙上。哪个模式都在。"
+            case .sportFloor: "摆在家里的运动角，靠墙。哪个模式都在。"
+            case .sportWall: "靠在家里的运动墙上。哪个模式都在。"
             case .desk: "摆在家里的书桌上。哪个模式都在。"
             case .sofaSide: "摆在家里的沙发旁边。哪个模式都在。"
-            case .frontCorner: "摆在家里的左前角。哪个模式都在。"
+            case .corner: "摆在家里的左前角。哪个模式都在。"
             }
         return text.localized
     }
