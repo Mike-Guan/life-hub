@@ -12,6 +12,7 @@ struct UnboxSheet: View {
     var mode: Mode?
     /// Opens scrolled to the buttons. Only screenshots set it.
     var startsAtBottom = false
+    @State private var sharing = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -24,6 +25,16 @@ struct UnboxSheet: View {
         .foregroundStyle(Toy.paper)
         .background(Toy.ink.ignoresSafeArea())
         .onAppear { UnboxLog.markSeen(entry) }
+        .sheet(isPresented: $sharing) {
+            if let card = shareCard {
+                ShareCardSheet(card: card, words: card.words(counting: item.keepsake?.title(for: persona) ?? ""))
+            }
+        }
+    }
+
+    // The item arrived just now, so her look now is that day's look.
+    private var shareCard: ShareCard? {
+        ShareCard(persona: persona, look: Look(mode: nil, wardrobe: wardrobe, card: card), item: item)
     }
 
     private var content: some View {
@@ -94,6 +105,19 @@ struct UnboxSheet: View {
                         .frame(maxWidth: .infinity, minHeight: 48)
                 }
                 .buttonStyle(UnboxButtonStyle(fill: Toy.ink, shadow: Toy.ink))
+            }
+            // 衣柜与纪念品预览: a quiet text link with a 44 pt tap area; sharing never interrupts the unboxing.
+            if shareCard != nil {
+                Button {
+                    sharing = true
+                } label: {
+                    Text("分享")
+                        .font(Toy.body(15, weight: .heavy))
+                        .foregroundStyle(Toy.paper.opacity(0.75))
+                        .frame(minWidth: 88, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 24)
