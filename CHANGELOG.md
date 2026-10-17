@@ -110,6 +110,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - A room item from the shop no longer stands in HAKU's 下班 backdrop. Bought room items live in HAKU's home.
 - VoiceOver reads the unboxing as "开箱：" and the item's name instead of the character's mode.
+- On a Japanese or English iPhone, the Photos permission prompt for saving a share card is in that language.
 - Opening the app, HAKU says one line at most: a celebration first, then an invite, good night, the late-night
   line, a planned task, bath time and the stretch. A mode change no longer clears it. A tap during a one-off
   animation only makes HAKU blink. At bedtime a tap gets a sleepy mumble instead of switching the side-hustle
