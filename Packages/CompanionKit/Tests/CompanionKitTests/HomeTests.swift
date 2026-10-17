@@ -320,9 +320,9 @@ import Testing
             let box = outlines.map { HomeScene.grown($0, to: side) }.reduce(CGRect.null) { $0.union($1) }
             #expect(box.width >= side - 0.01 && box.height >= side - 0.01, "\(hotspot)")
         }
-        // Open floor in front of the bed stays empty.
+        // Open floor on the rug, away from anything small, stays empty.
         #expect(
-            scene.hotspot(at: HomeGrid.scene(HomeGrid.plan(6.5, 8.5, 0)), includingHaku: false, minSide: side) == nil)
+            scene.hotspot(at: HomeGrid.scene(HomeGrid.plan(4.8, 7.2, 0)), includingHaku: false, minSide: side) == nil)
     }
 }
 #endif
