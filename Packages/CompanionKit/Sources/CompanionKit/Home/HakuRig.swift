@@ -121,8 +121,8 @@ final class HakuNode: SKNode {
         legR.xScale = -1
         setTexture(sitLegs, Self.sitTexture, Self.sitRect, pin: .zero)
         setTexture(phone, Self.phoneTexture, Self.phoneRect, pin: .zero)
-        // Over the chest, under the hands and the head, like the bar.
-        phone.zPosition = 0.0055
+        // He holds it only when tucked in bed: it peeks over the blanket's hem, the hands stay under it.
+        phone.zPosition = Self.phoneOverBlanket
         flip.setScale(Self.scale)
     }
 
@@ -302,6 +302,8 @@ final class HakuNode: SKNode {
 
     // How far up from the chest the phone is held, and where it sinks to when he nods off.
     private static let phoneLift: CGFloat = 18
+    // Lifts the phone from HAKU's bed depth (14) over the blanket's (15).
+    private static let phoneOverBlanket: CGFloat = 1.1
     private static let phoneRest: CGFloat = 8
     // A little below the chest, so his big head doesn't hide the phone and his arms don't stretch.
     private static let phoneHold = CGPoint(x: 0, y: 30)
