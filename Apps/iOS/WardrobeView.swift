@@ -11,6 +11,7 @@ struct WardrobeView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var previewMode: Mode
     @State private var shelf: WardrobeShelf = .clothes
+    @State private var opened: ShopItem?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// - Parameters:
@@ -65,6 +66,15 @@ struct WardrobeView: View {
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
+        .fullScreenCover(item: $opened) { item in
+            KeepsakeDetailView(
+                item: item,
+                persona: persona,
+                earned: ledger.ownedAt(item.id).map { earnedLine(item, at: $0) } ?? "",
+                snapshot: growth.looks.look(of: item.id, persona: persona),
+                wardrobe: wardrobe
+            )
+        }
     }
 
     // Each character spends and collects with her own cans.
@@ -115,8 +125,15 @@ struct WardrobeView: View {
 
     private var lifeCollection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("人生收藏")
-                .font(Toy.display(22))
+            HStack(alignment: .firstTextBaseline) {
+                Text("人生收藏")
+                    .font(Toy.display(22))
+                if !collection.isEmpty {
+                    Text("点开看那天的样子")
+                        .font(Toy.body(12, weight: .bold))
+                        .foregroundStyle(Toy.muted)
+                }
+            }
             // 界面空状态与报错 §4: an empty collection still shows, so a new user knows it is there.
             if collection.isEmpty {
                 VStack(spacing: 4) {
@@ -133,19 +150,27 @@ struct WardrobeView: View {
                 .accessibilityElement(children: .combine)
             }
             ForEach(collection, id: \.item.id) { entry in
-                HStack(spacing: 12) {
-                    ShopItemIcon(item: entry.item)
-                        .frame(width: 44, height: 44)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(entry.item.title)
-                            .font(Toy.body(15, weight: .heavy))
-                        Text(earnedLine(entry.item, at: entry.at))
-                            .font(Toy.body(12, weight: .bold))
-                            .foregroundStyle(Toy.muted)
+                Button {
+                    opened = entry.item
+                } label: {
+                    HStack(spacing: 12) {
+                        ShopItemIcon(item: entry.item)
+                            .frame(width: 44, height: 44)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(entry.item.title)
+                                .font(Toy.body(15, weight: .heavy))
+                            Text(earnedLine(entry.item, at: entry.at))
+                                .font(Toy.body(12, weight: .bold))
+                                .foregroundStyle(Toy.muted)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 15, weight: .black))
                     }
-                    Spacer(minLength: 0)
+                    .padding(10)
+                    .contentShape(Rectangle())
                 }
-                .padding(10)
+                .buttonStyle(.plain)
                 .toyCard(radius: 16, shadow: 2)
                 .accessibilityElement(children: .combine)
             }

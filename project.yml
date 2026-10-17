@@ -88,6 +88,7 @@ targets:
         INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "选「始终」后，App 关着时到了公司、家或你设的其他地点也能知道。我们只检查你是否在你设置的这几个地点附近，不记录路线，位置只在这台 iPhone 上用，不会上传。"
         INFOPLIST_KEY_NSHealthShareUsageDescription: "Life Hub 只读取昨晚的睡眠、运动记录、最近几小时和今天的步数、今天的站立小时和日照时长，用来估计电量、判断你是不是窝在家、运动完庆祝、坐太久时陪你伸懒腰，以及晒到太阳、按时睡、走满 6000 步时给能量罐。健康数据只在这台 iPhone 上处理，不会上传；只会把算好的状态发给你自己的 Apple Watch。"
         INFOPLIST_KEY_NSMotionUsageDescription: "Life Hub 只在你从家去公司、从公司回家的路上看一眼你是在走路还是在车上，让角色跟着演；没给健康权限时，也用它数今天的步数，走满 6000 步给能量罐。运动数据只在这台 iPhone 上用，不会上传。"
+        INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "只在你在分享面板里点「存储图像」时，把分享卡存进相册。Life Hub 只往相册里加图，不读你的照片。"
     scheme: {}
   # Drives the "不对" card recording in scripts/check-card-shots.sh; CI doesn't build it.
   LifeHub-UITests:
