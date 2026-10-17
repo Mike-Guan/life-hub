@@ -117,7 +117,7 @@ struct ShopPreviewSheet: View {
 
     private var shownMode: Mode { item.previewMode(current: mode, card: card) }
 
-    private func button(_ title: String, fill: Color, action: @escaping () -> Void) -> some View {
+    private func button(_ title: LocalizedStringKey, fill: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
                 .font(Toy.body(15, weight: .heavy))

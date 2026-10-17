@@ -7,7 +7,7 @@ enum ShopShelf: CaseIterable {
     case clothes, room
 
     /// The shelf's name on its tab.
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .clothes: "衣服"
         case .room: "房间"

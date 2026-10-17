@@ -137,6 +137,23 @@
         }
       }
     },
+    "%@穿" : {
+      "comment" : "商店衣服上的模式签，%@ 是模式名（上班、下班……）。",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "For %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@用"
+          }
+        }
+      }
+    },
     "%lld 次判断" : {
       "localizations" : {
         "ja" : {
@@ -149,6 +166,12 @@
     },
     "%lld 能量罐 换" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Trade %lld cans"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
