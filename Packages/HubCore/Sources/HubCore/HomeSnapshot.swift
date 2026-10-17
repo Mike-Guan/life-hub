@@ -51,6 +51,50 @@ public struct HomeSnapshot: Equatable, Sendable {
         self.keepsakes = keepsakes
     }
 
+    // 家 真实数据清单 v0 (Mike 2026-10-17: the home page shows only real data). Every field comes from the store
+    // the home screen reads. Room items owned but not yet in the room are placed, and the layout saved.
+    /// The home page's snapshot for `persona` from the app's stores.
+    /// - Parameters:
+    ///   - mode: the current mode, `nil` before the first.
+    ///   - today: today's modes, oldest first.
+    ///   - ledger: the whole can ledger; the snapshot reads `persona`'s part.
+    ///   - energy: the energy log, for today's level and the hidden params.
+    ///   - bedtime: the bedtime state now.
+    ///   - defaults: the App Group defaults holding the cards, wardrobe and room layout.
+    public static func make(
+        persona: Persona,
+        mode: Mode?,
+        today: [ModeSegment],
+        ledger: CanLedger,
+        energy: EnergyLog,
+        bedtime: Bedtime,
+        defaults: UserDefaults,
+        catalog: RoomCatalog = .shipped,
+        now: Date = Date()
+    ) -> HomeSnapshot {
+        let mine = ledger.only(persona)
+        let deviceID = HubDevice.id(defaults: defaults)
+        var room = RoomLayout.loaded(in: defaults, persona: persona, catalog: catalog, now: now, deviceID: deviceID)
+        let roomItems = mine.owned.filter { ShopItem.item($0)?.slot == .room }.sorted()
+        if room.place(roomItems, catalog: catalog, now: now, deviceID: deviceID) {
+            room.store(in: defaults)
+        }
+        return HomeSnapshot(
+            persona: persona,
+            mode: mode,
+            cards: ModeCards.current(in: defaults, persona: persona),
+            cans: mine.balance,
+            owned: mine.owned,
+            wardrobe: Wardrobe.stored(in: defaults, persona: persona),
+            energy: StateEngine.energy(events: energy.active, now: now)?.level,
+            vitals: VitalsEngine.vitals(ledger: mine, energy: energy, now: now),
+            bedtime: bedtime,
+            today: today,
+            room: room,
+            keepsakes: EarnedKeepsake.earned(in: ledger, persona: persona)
+        )
+    }
+
     /// The items worn in the current mode, or in Chill before the first mode, without other cards' items.
     public var worn: Set<String> {
         wardrobe.showing(card: cards.identity).worn(in: mode ?? .chill)
