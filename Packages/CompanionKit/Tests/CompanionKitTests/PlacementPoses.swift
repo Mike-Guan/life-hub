@@ -261,6 +261,9 @@ enum PlacementPoses {
                     var heart = base
                     heart.heart = true
                     states.append(("heart", heart))
+                    var nap = base
+                    nap.napping = true
+                    states.append(("nap", nap))
                     for (state, pose) in states {
                         for (itemLabel, items) in itemSets {
                             var worn = pose
