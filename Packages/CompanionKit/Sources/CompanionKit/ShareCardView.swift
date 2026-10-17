@@ -127,7 +127,7 @@ public struct ShareCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             if isKeepsake { name(13) }
             HStack(alignment: .center, spacing: 10) {
-                sticker(isKeepsake ? 157 : 167)
+                sticker(isKeepsake ? 136 : 167)
                 VStack(alignment: .leading, spacing: 0) {
                     if isKeepsake, let item = card.item {
                         ShopItemIcon(item: item)
