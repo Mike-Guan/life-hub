@@ -110,7 +110,7 @@ public struct HakuHomeView: View {
     private func header(_ model: HomeModel) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                Text(verbatim: "\(Self.dateLine) · \(model.title(model.mode))")
+                Text(verbatim: [Self.dateLine, model.mode.map(model.title)].compactMap { $0 }.joined(separator: " · "))
                     .font(Toy.body(13))
                     .foregroundStyle(Toy.muted)
                 Spacer()
