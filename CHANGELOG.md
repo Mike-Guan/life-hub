@@ -12,9 +12,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   the desk or on the sofa or trains in the sports corner, and in about half of the 15-minute slots he walks
   over to look at a home item (a plant, the cactus, the speaker) for 30 s. He never goes to the sports
   gear on his own.
-- At night in the home HAKU dozes in bed over his phone: he holds it up under his chin, its screen
-  lights his face, and every 10 s he nods off with it on his chest, then jerks back awake. By day he sleeps
-  under the blanket.
+- At night in the home HAKU gets into bed and dozes over his phone, tucked in: its screen lights his face,
+  and every 10 s he nods off, then jerks back awake. The third time he falls asleep under the blanket. By day
+  he sleeps under the blanket at once.
 - Share cards: a keepsake or a new top or full set can be shared as a 9:16 or 1:1 picture of the character
   wearing it, with its name and her line. Rows in 人生收藏 open the keepsake's page, which shows how she looked the
   day it arrived; its 「分享」 and a quiet 「分享」 link on the unboxing open the choice. Cards carry no date,

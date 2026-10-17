@@ -35,6 +35,8 @@ final class HomeScene: SKScene {
     private var dragPoint: CGPoint?
 
     private var clock: TimeInterval = 0
+    /// When HAKU got into bed, on the scene's clock.
+    private var restSince: TimeInterval?
     private var lastTime: TimeInterval?
     private var oneOff: (pose: HakuPose?, face: HakuFace, until: TimeInterval)?
     private var hopStart: TimeInterval?
@@ -320,6 +322,7 @@ final class HomeScene: SKScene {
         walk = nil
         point = target.point
         reached = target
+        restSince = target == .rest ? clock : nil
         if let right = target.facesRight { facingRight = right }
         updateScreen()
     }
@@ -384,13 +387,9 @@ final class HomeScene: SKScene {
             case .work, .side: face = .focus
             case .sofa: face = tired ? .tired : .chill
             case .rest:
-                // At night he dozes over the phone on top of the blanket, nodding off now and then; by day he
-                // sleeps under it.
-                if model.isNight {
+                if let t = dozeTime {
                     pose = .doze
-                    face = HakuNode.dozeNod(clock) < 0.5 ? .idle : .closed
-                    // On top of the blanket: drawn over its folded end, which would hide his body and the phone.
-                    depth = max(depth, HomePiece.blanket.depth + 0.05)
+                    face = HakuNode.dozeNod(t) < 0.5 ? .idle : .closed
                 } else {
                     face = .closed
                 }
@@ -424,7 +423,7 @@ final class HomeScene: SKScene {
         }
         haku.apply(
             pose, face: face, facingRight: facing,
-            gloves: model.mode == .boxing && model.card == .boxing, t: clock)
+            gloves: model.mode == .boxing && model.card == .boxing, t: dozeTime ?? clock)
 
         var position = HomeGrid.scene(HomeGrid.plan(point))
         if let hop = hopStart {
@@ -464,6 +463,19 @@ final class HomeScene: SKScene {
         lightFace(pose == .doze)
     }
 
+    // Mike 2026-10-15 approved dozing over the phone tucked in bed before sleep; 2026-10-17 he asked to see him
+    // asleep under the blanket again. So the doze is only the first nods after getting into bed at night, and it
+    // ends as he nods off the third time.
+    /// How long HAKU dozes over the phone after getting into bed at night, in seconds.
+    nonisolated static let dozeLength: TimeInterval = 28.5
+
+    /// Seconds since HAKU got into bed while he still dozes over the phone, `nil` otherwise.
+    private var dozeTime: TimeInterval? {
+        guard model.isNight, reached == .rest, walk == nil, let since = restSince else { return nil }
+        let t = clock - since
+        return t < Self.dozeLength ? t : nil
+    }
+
     /// Lights HAKU's face with the phone's screen while he dozes over it, dimming as it sinks.
     private func lightFace(_ dozing: Bool) {
         if phoneGlow.parent == nil {
@@ -478,12 +490,12 @@ final class HomeScene: SKScene {
         guard dozing else { return }
         phoneGlow.position = haku.faceCenter
         // Faint, so his skin stays skin-coloured and his eyes don't wash into his hair.
-        phoneGlow.alpha = 0.22 * CGFloat(1 - HakuNode.dozeNod(clock))
+        phoneGlow.alpha = 0.22 * CGFloat(1 - HakuNode.dozeNod(dozeTime ?? 0))
     }
 
     private func spawnEffects() {
         guard clock >= nextEffect else { return }
-        if reached == .rest, walk == nil {
+        if reached == .rest, walk == nil, dozeTime == nil {
             nextEffect = clock + 1.5
             float(HomeEffects.zzz, from: HomeGrid.plan(8.2, 5.7, 1.6), drift: CGVector(dx: 14, dy: 26))
         } else if reached == .sofa, walk == nil, model.items.contains(.speaker) {
