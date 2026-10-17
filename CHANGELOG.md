@@ -122,6 +122,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   rearranging; the right wall hook moved left so the wardrobe no longer hides it.
 - A room item from the shop no longer stands in HAKU's 下班 backdrop. Bought room items live in HAKU's home.
 - VoiceOver reads the unboxing as "开箱：" and the item's name instead of the character's mode.
+- The home page is in every build, not only DEV and STG: HAKU's home button on the home screen opens it, and his
+  shop always has the 衣服 and 房间 tabs with keepsakes in the home page. The second preset character keeps one
+  shelf and her keepsakes in the shop until her room version is ready.
 - On a Japanese or English iPhone, the Photos permission prompt for saving a share card is in that language.
 - The home page's room has zones (家 区域规划 v0): a bought room item goes into its zone, and when the zone is
   full the earliest item goes into the cupboard; a keepsake is never pushed out by a purchase. Items earlier
