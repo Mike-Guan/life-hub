@@ -12,6 +12,7 @@ struct WardrobeView: View {
     @State private var previewMode: Mode
     @State private var shelf: WardrobeShelf = .clothes
     @State private var opened: ShopItem?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// - Parameters:
     ///   - persona: the character whose wardrobe it is.
@@ -29,8 +30,10 @@ struct WardrobeView: View {
         self.growth = growth
         _wardrobe = wardrobe
         self.persona = persona
-        self.cards = cards ?? .legacy(for: persona)
-        _previewMode = State(initialValue: mode ?? .chill)
+        let cards = cards ?? .legacy(for: persona)
+        self.cards = cards
+        // A mode with no button in the user's cards (boxing without a card) previews as 下班.
+        _previewMode = State(initialValue: mode.flatMap { cards.modes.contains($0) ? $0 : nil } ?? .chill)
         _shelf = State(initialValue: shelf)
     }
 
@@ -51,13 +54,15 @@ struct WardrobeView: View {
                 Text(shelfNote)
                     .font(Toy.body(13, weight: .bold))
                     .foregroundStyle(Toy.muted)
-                if !collection.isEmpty {
-                    lifeCollection
-                }
+                lifeCollection
             }
             .padding(20)
             .frame(maxWidth: 560)
             .frame(maxWidth: .infinity)
+            // 动态: changing clothes, mode or shelf fades in over 0.25 s instead of cutting.
+            .animation(fade, value: wardrobe)
+            .animation(fade, value: previewMode)
+            .animation(fade, value: shelf)
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
@@ -123,9 +128,26 @@ struct WardrobeView: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("人生收藏")
                     .font(Toy.display(22))
-                Text("点开看那天的样子")
-                    .font(Toy.body(12, weight: .bold))
-                    .foregroundStyle(Toy.muted)
+                if !collection.isEmpty {
+                    Text("点开看那天的样子")
+                        .font(Toy.body(12, weight: .bold))
+                        .foregroundStyle(Toy.muted)
+                }
+            }
+            // 界面空状态与报错 §4: an empty collection still shows, so a new user knows it is there.
+            if collection.isEmpty {
+                VStack(spacing: 4) {
+                    Text("还没有")
+                        .font(Toy.body(14, weight: .heavy))
+                    Text("做到一件事，会记在这里，带日期。")
+                        .font(Toy.body(12.5, weight: .bold))
+                        .foregroundStyle(Toy.muted)
+                }
+                .multilineTextAlignment(.center)
+                .padding(14)
+                .frame(maxWidth: .infinity)
+                .overlay(dashedBorder)
+                .accessibilityElement(children: .combine)
             }
             ForEach(collection, id: \.item.id) { entry in
                 Button {
@@ -156,9 +178,9 @@ struct WardrobeView: View {
         .padding(.top, 8)
     }
 
-    /// "2026-11-02 · 累计 10 次拳击日": when and how a keepsake was earned.
+    /// "2026年11月2日 · 累计 10 次拳击日": when and how a keepsake was earned.
     private func earnedLine(_ item: ShopItem, at date: Date) -> String {
-        let day = date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
+        let day = date.formatted(.dateTime.year().month().day())
         guard let keepsake = item.keepsake else { return day }
         return "\(day) · 累计 \(keepsake.count) 次\(keepsake.title(for: persona))"
     }
@@ -186,15 +208,36 @@ struct WardrobeView: View {
     // UI 审核 R1: a label on the card covered the gloves, so it sits under the card.
     private var preview: some View {
         VStack(alignment: .leading, spacing: 8) {
-            PersonaPortrait(persona: persona, mode: previewMode, card: card, wardrobe: wardrobe.showing(card: card))
-                .frame(width: 210, height: 276)
-                .frame(maxWidth: .infinity, alignment: .bottom)
-                .frame(height: 300, alignment: .bottom)
-                .toyCard(fill: previewMode.color(for: persona))
+            // The look's id changes with each outfit, so the old one fades out as the new one fades in.
+            ZStack {
+                PersonaPortrait(persona: persona, mode: previewMode, card: card, wardrobe: wardrobe.showing(card: card))
+                    .id(PreviewLook(mode: previewMode, worn: wardrobe.showing(card: card).worn(in: previewMode)))
+                    .transition(.opacity)
+            }
+            .frame(width: 210, height: 276)
+            .frame(maxWidth: .infinity, alignment: .bottom)
+            .frame(height: 300, alignment: .bottom)
+            .toyCard(fill: previewMode.color(for: persona))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(previewDescription)
             Text("锁屏上也是这样")
                 .font(Toy.body(13, weight: .heavy))
                 .foregroundStyle(Toy.muted)
         }
+    }
+
+    private var fade: Animation? { reduceMotion ? nil : .easeInOut(duration: 0.25) }
+
+    private struct PreviewLook: Hashable {
+        let mode: Mode
+        let worn: Set<String>
+    }
+
+    /// What VoiceOver reads for the preview: the mode's own name and what is worn in it.
+    private var previewDescription: String {
+        let mode = cards.title(for: previewMode, persona: persona)
+        let worn = wardrobe.showing(card: card).worn(in: previewMode).compactMap { ShopItem.item($0)?.title }.sorted()
+        return worn.isEmpty ? "\(mode)的样子，没穿换来的东西" : "\(mode)的样子，穿着\(worn.joined(separator: "、"))"
     }
 
     // Only changes the preview, never the real mode.
@@ -247,6 +290,16 @@ struct WardrobeView: View {
             defaultTile(defaultSlots)
             ForEach(items) { item in
                 itemTile(item)
+            }
+            // 界面空状态与报错 §4: one line next to the default tile, no link to the shop.
+            if items.isEmpty {
+                Text("在商店换到的，会放在这里。")
+                    .font(Toy.body(12.5, weight: .bold))
+                    .foregroundStyle(Toy.muted)
+                    .multilineTextAlignment(.center)
+                    .padding(8)
+                    .frame(maxWidth: .infinity, minHeight: 128)
+                    .overlay(dashedBorder)
             }
         }
     }
@@ -317,6 +370,11 @@ struct WardrobeView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isWorn ? .isSelected : [])
+    }
+
+    private var dashedBorder: some View {
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .strokeBorder(Toy.muted, style: StrokeStyle(lineWidth: Toy.outline, dash: [6, 4]))
     }
 
     private func tile<Content: View>(isWorn: Bool, fill: Color, @ViewBuilder content: () -> Content) -> some View {

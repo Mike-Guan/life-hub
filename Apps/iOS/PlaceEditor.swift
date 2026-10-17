@@ -16,7 +16,9 @@ struct PlaceEditor: View {
     @State private var place: HubPlace
     @State private var hasLocation: Bool
     @State private var locating = false
-    @State private var error: String?
+    @State private var failure: LocationFailure?
+    @State private var asksDelete = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// - Parameters:
     ///   - place: the place to edit, or a new one with `hasLocation` false.
@@ -45,7 +47,7 @@ struct PlaceEditor: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text(place.kind == .custom ? "地点" : place.title)
+                    Text(verbatim: place.kind == .custom ? place.kind.localizedTitle : shownTitle)
                         .font(Toy.display(24))
                     Spacer()
                     Button {
@@ -60,8 +62,8 @@ struct PlaceEditor: View {
                 }
                 locationCard
                 actionCard
-                if let error {
-                    ErrorLine(text: error)
+                if let failure {
+                    failureLine(failure)
                 }
                 Button {
                     onSave(place)
@@ -73,10 +75,9 @@ struct PlaceEditor: View {
                 }
                 .buttonStyle(ToyButtonStyle(fill: Toy.pink, isSelected: canSave))
                 .disabled(!canSave)
-                if let onDelete {
+                if onDelete != nil {
                     Button(place.kind == .custom ? "删除这个地点" : "清除") {
-                        onDelete()
-                        dismiss()
+                        asksDelete = true
                     }
                     .font(Toy.body(14, weight: .heavy))
                     .foregroundStyle(Toy.alert)
@@ -87,6 +88,40 @@ struct PlaceEditor: View {
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
+        .overlay {
+            if asksDelete, let onDelete {
+                deleteSheet(onDelete)
+                    .transition(reduceMotion ? .identity : .opacity)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: asksDelete)
+    }
+
+    // A preset is named the way Settings lists it, so the identity card's place carries the user's card.
+    private var shownTitle: String {
+        place.kind == .custom ? place.title : place.kind.title(for: persona, cards: cards).localized
+    }
+
+    // UI 二组 gap #14: a place switches modes on arrival, so losing it is asked first. Nothing is lost
+    // for good, so the answer takes the pink, not the red.
+    private func deleteSheet(_ onDelete: @escaping () -> Void) -> some View {
+        let custom = place.kind == .custom
+        return ToyConfirmSheet(
+            question: String(format: (custom ? "删掉「%@」？" : "清除「%@」的位置？").localized, shownTitle),
+            warning: custom
+                ? "删掉以后，到这里不会再自动换模式。以前的记录还在。".localized
+                : "清除以后，到这里不会再自动换模式。随时可以再设。".localized,
+            cancel: "留着".localized,
+            confirm: (custom ? "删掉" : "清除").localized,
+            confirmFill: Toy.pink,
+            confirmText: Toy.ink,
+            onCancel: { asksDelete = false },
+            onConfirm: {
+                asksDelete = false
+                onDelete()
+                dismiss()
+            }
+        )
     }
 
     private var nameCard: some View {
@@ -174,10 +209,34 @@ struct PlaceEditor: View {
             place.latitude = coordinate.latitude
             place.longitude = coordinate.longitude
             hasLocation = true
-            error = nil
+            failure = nil
             monitor.requestAlways()
         } catch {
-            self.error = "拿不到当前位置：\(error.localizedDescription)"
+            failure = LocationFailure(error)
+        }
+    }
+
+    // Preview 5: each failure line is followed by the one step that can fix it.
+    private func failureLine(_ failure: LocationFailure) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ErrorLine(text: failure.message, size: 13)
+            Button {
+                if failure.opensSettings {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } else {
+                    Task { await setHere() }
+                }
+            } label: {
+                Text(failure.opensSettings ? "去设置打开" : "再点一次")
+                    .font(Toy.body(15, weight: .heavy))
+                    .underline()
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(locating)
         }
     }
 }

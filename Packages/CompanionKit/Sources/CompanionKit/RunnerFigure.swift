@@ -200,8 +200,12 @@ struct RunnerPose {
     var cardLook: RunnerCardLook?
     /// Whether the user's identity card is one other than boxing, in any mode.
     var otherCard = false
-    /// Seconds into the card look's own idle, or -1 when it isn't playing.
+    /// Seconds into the card look's idle, or -1 when none is playing.
     var cardBeat: CGFloat = -1
+    /// The base-outfit move `cardBeat` times, or nil for the look's own idle.
+    var baseIdle: RunnerBaseIdle?
+    /// How far the body rises in a shrug, in SVG units (negative is up); the head stays.
+    var shrug: CGFloat = 0
     /// Drawn in the watch's frame, whose bottom edge would leave only a scrap of what stands on the floor.
     var watchFrame = false
     /// -1...1 over a 2.4 s breath: the swing of hanging clothes charms.
@@ -233,8 +237,6 @@ struct RunnerPose {
     var propHidden: CGFloat = 0
     /// What HAKU does alongside Mike, which replaces the need and its own time.
     var activity: CompanionActivity?
-    /// Swing of the heavy bag in degrees after a hit.
-    var bagSwing: Double = 0
     /// Height of the dumbbell while lifting: 0 = down, 1 = curled up.
     var lift: CGFloat = 0
     /// Speed lines drifting back while running, 0...1.
@@ -412,7 +414,8 @@ struct RunnerPose {
         case .collapsed:
             slump = Self.collapse
             blink = 0.15
-        case .blanket:
+        // Until the dozing pose is approved, dozing looks like the blanket.
+        case .blanket, .dozing:
             blink = 0.4
             headDy = 2
         case .morning:
@@ -443,7 +446,6 @@ struct RunnerPose {
             dash = 0.4
         case .boxingAtGym:
             gloveL = CGSize(width: -8, height: -6)
-            bagSwing = 4
         case .runDay, nil: break
         }
         if self.need == .boxingWarmup { eyesDx = -2 }
@@ -552,9 +554,9 @@ struct RunnerPose {
             // Every 18-30 s, one of: shake the wrists out, then a glove up to fix the headband; bump the gloves; or
             // slip left, slip right and duck.
             let plain = self.need == nil && self.life == nil && self.moment == nil && activity == nil
-            // A card look with its own idle plays only that one; both streams together mixed the slip into its nod.
-            let ownIdle = RunnerCardLook(card: card)?.beatLength != nil
-            if plain, r == 0, !ownIdle,
+            // A card look plays only its own idles; both streams together mixed the slip into its nod.
+            let cardIdles = RunnerCardLook(card: card) != nil
+            if plain, r == 0, !cardIdles,
                 let beat = IdleClock.beat(
                     at: t, every: 24, spread: 6, lengths: Self.boxingBeats, seed: Self.seed)
             {
@@ -744,7 +746,7 @@ struct RunnerPose {
             slump = Self.collapse
             blink = 0.15
             headDy = CGFloat(sin(t * 2 * .pi / 4))
-        case .blanket:
+        case .blanket, .dozing:
             // Wrapped up, eyes half shut, sinking a little.
             blink = max(0.15, 0.4 * Self.blink(at: t * 0.5))
             headDy = 2 + CGFloat(sin(t * 2 * .pi / 5))
@@ -931,7 +933,6 @@ struct RunnerPose {
             gloveL = CGSize(width: -14 * jab, height: -10 * jab)
             gloveR = CGSize(width: -40 * cross, height: -12 * cross)
             gloveRScale = 1 + 0.15 * cross
-            bagSwing = Double(5 * Self.bump(phase, from: 0.15, to: 0.75) + 9 * Self.bump(phase, from: 1, to: 1.6))
             eyesDx = -2
         case .gymSession:
             // A slow curl every 2 s, the head pushing along at the top.
@@ -1406,10 +1407,7 @@ struct RunnerFigure: View {
             visible.insert(print.up)
         }
         if let print = outfit.mask, visible.contains(.maskDown) { visible.insert(print.down) }
-        // The room item stays home: hidden while HAKU carries the gym bag, is out boxing, lifting or running, or
-        // stands in the mountains.
-        if mode == .chill, let room = outfit.room, visible.isDisjoint(with: awayParts) { visible.insert(room) }
-        if visible.contains(.roomSpeaker) { visible.insert(.roomSpeakerRing) }
+        // Mike 2026-10-16: bought room items stand in HAKU's home, not in a mode's backdrop.
         if outfit.peaceSign, pose.burst >= 0, !pose.swapping, !pose.bedtime { visible.insert(.peaceHand) }
         // Today's traces: the bandage goes everywhere, the monitor and the sunlight are in the room at home.
         if pose.traces.contains(.bandage) { visible.insert(.bandage) }
@@ -1516,13 +1514,13 @@ struct RunnerFigure: View {
                     if pose.bedtime { visible.subtract(look.held) }
                     if !pose.holdsCardProps {
                         visible.subtract(look.props)
+                    } else if pose.cardBeat >= 0, let idle = pose.baseIdle {
+                        idle.parts(look, at: pose.cardBeat, &visible)
                     } else if pose.cardBeat >= 0 {
                         look.beatParts(at: pose.cardBeat, &visible)
                     }
-                    // UI 审核 10/14: the watch's bottom edge cuts the speaker and the fist with the wristband.
-                    if pose.watchFrame { visible.subtract([.danceSpeaker, .wristbandHand]) }
-                    // One thing per corner: the gym bag by the door takes it from the speaker or the ukulele.
-                    if pose.bagLift >= 0, !pose.bedtime { visible.subtract([.danceSpeaker, .ukulele]) }
+                    // UI 审核 10/14: the watch's bottom edge cuts the fist with the wristband.
+                    if pose.watchFrame { visible.remove(.wristbandHand) }
                 } else {
                     visible.formUnion(boxingParts)
                 }
@@ -1613,7 +1611,7 @@ struct RunnerFigure: View {
             visible.formUnion(moneyParts)
         case .collapsed:
             visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .sofaArm])
-        case .blanket:
+        case .blanket, .dozing:
             visible.formUnion([.blanket, .eyesSleepy, .maskDown, .earringNeon])
         case .morning:
             visible.formUnion([.eyesSleepy, .eyebags, .maskDown, .earringNeon, .toothbrush])
@@ -1769,7 +1767,8 @@ struct RunnerFigure: View {
 
     nonisolated private static func activityParts(_ activity: CompanionActivity) -> Set<RunnerPart> {
         switch activity {
-        case .boxingAtGym: warmupParts.union([.heavyBag])
+        // Mike 2026-10-15: no items in a mode's backdrop, so the gym shows no heavy bag.
+        case .boxingAtGym: warmupParts
         case .gymSession: [.dumbbell]
         case .running: [.speedLines]
         case .runDay: [.runShoe]
@@ -1801,7 +1800,7 @@ struct RunnerFigure: View {
                 moved(part, move, scale: scale)
             } else if let move = SceneMove.welcome(part, pose: pose) {
                 moved(part, move, scale: scale)
-            } else if pose.cardBeat >= 0, let move = pose.cardLook?.move(part, at: pose.cardBeat) {
+            } else if pose.cardBeat >= 0, let move = cardMove(part) {
                 moved(part, move, scale: scale)
             } else if part == .walkDust, pose.walkFrom != nil {
                 moved(part, SceneMove.dust(at: pose.walkTime), scale: scale)
@@ -1810,11 +1809,19 @@ struct RunnerFigure: View {
             }
         }
         .offset(y: (isHead ? pose.headDy : 0) * scale)
+        .offset(y: Self.shrugParts.contains(part) ? pose.shrug * scale : 0)
         .offset(y: isHead || Self.chinParts.contains(part) ? 30 * pose.slump * scale : 0)
         .rotationEffect(
             .degrees(isHead ? -14 * Double(pose.lie) + pose.headTilt : 0),
             anchor: Self.unit(x: 60, y: 96)
         )
+    }
+
+    /// How `part` moves in the card look's idle that is playing, or nil when it stays put.
+    private func cardMove(_ part: RunnerPart) -> SceneMove? {
+        guard let look = pose.cardLook else { return nil }
+        if let idle = pose.baseIdle { return idle.move(part, look, at: pose.cardBeat) }
+        return look.move(part, at: pose.cardBeat)
     }
 
     private func moved(_ part: RunnerPart, _ move: SceneMove, scale: CGFloat) -> some View {
@@ -1857,9 +1864,6 @@ struct RunnerFigure: View {
                 RunnerPartView(part: part).opacity(pose.ledOpacity)
             case .roomSpeakerRing:
                 RunnerPartView(part: part).opacity(pose.speakerGlow)
-            case .ukulele where pose.watchFrame:
-                // UI 审核 10/14: raised into the watch's frame, so it shows beside HAKU.
-                RunnerPartView(part: part).offset(y: -22 * scale)
             case .cupR where pose.cupRUp > 0:
                 // Pushed up off the ear, tilting back.
                 RunnerPartView(part: part)
@@ -1982,9 +1986,6 @@ struct RunnerFigure: View {
             case .dumbbell:
                 // Two quick reps in a celebration, or the curl at the gym.
                 RunnerPartView(part: part).offset(y: -12 * pose.dumbbellRise * scale)
-            case .heavyBag:
-                // Mike 2026-10-14 (G): the big bag hangs top left behind the hair and swings from its chain.
-                RunnerPartView(part: part).rotationEffect(.degrees(pose.bagSwing), anchor: Self.unit(x: 17.5, y: -8))
             case .pillowHug:
                 let move = pose.hugPillow ?? .zero
                 RunnerPartView(part: part)
@@ -2167,6 +2168,9 @@ struct RunnerFigure: View {
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
         .dizzyStar, .setVarsityCap, .eyesBright, .lidsBright, .countMouth, .skiGoggles, .goggleHand, .breathPuff,
     ]
+
+    /// Parts of the body that rise in a shrug while the head stays.
+    private static let shrugParts: Set<RunnerPart> = [.jacket, .stripeNeon, .stripeSport, .hoodCollar]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
     private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown, .maskDotsDown, .maskBoltDown]

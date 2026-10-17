@@ -441,6 +441,31 @@ import Testing
         #expect(saved["clothes"] == ["dance": "x.top", "chill": "haku.top.chill.aloha"])
     }
 
+    @Test func valuesFromANewerBuildAreWrittenBack() throws {
+        let future = Data(
+            #"{"equipped":{"mask":{"id":"mask.stripes","tint":2},"room":"room.bag"},"clothes":{"work":["a","b"]}}"#.utf8
+        )
+        var wardrobe = try JSONDecoder().decode(Wardrobe.self, from: future)
+        #expect(wardrobe.equipped == [.room: "room.bag"])
+        #expect(wardrobe.clothes.isEmpty)
+        wardrobe.equip(try item("haku.top.chill.aloha"))
+        let saved = try JSONDecoder().decode(JSONValue.self, from: JSONEncoder().encode(wardrobe))
+        let expected = try JSONDecoder().decode(
+            JSONValue.self,
+            from: Data(
+                #"{"equipped":{"mask":{"id":"mask.stripes","tint":2},"room":"room.bag"},"clothes":{"work":["a","b"],"chill":"haku.top.chill.aloha"}}"#
+                    .utf8))
+        #expect(saved == expected)
+    }
+
+    @Test func anUnreadableWardrobeIsKeptAside() throws {
+        let defaults = try #require(UserDefaults(suiteName: "wardrobe-\(UUID())"))
+        let broken = Data(#"{"equipped":["mask.stripes"]}"#.utf8)
+        defaults.set(broken, forKey: "wardrobe")
+        #expect(Wardrobe.stored(in: defaults) == Wardrobe())
+        #expect(defaults.data(forKey: "wardrobe.unreadable") == broken)
+    }
+
     // Prices from the shop catalogue (2026-10-14): tops 30-40, full sets 80-90.
     @Test func clothesFollowTheApprovedPricesAndOnlyHakusAreOnTheShelf() {
         for persona in Persona.allCases {

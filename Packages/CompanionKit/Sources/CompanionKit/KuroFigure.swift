@@ -131,6 +131,8 @@ struct KuroPose: Sendable {
     var idle: KuroIdle?
     /// How far into `idle` she is, 0..<1.
     var idleProgress = 0.0
+    /// With `tap`, how far (0...1) what `idle` moved has gone back to where the move starts.
+    var idleBack = 0.0
     /// The home scene she is playing, if any: the invite, a walk or the bath.
     var scene: KuroScene?
     /// How bright the nightlight's glow is, 0...1.
@@ -264,6 +266,7 @@ struct KuroFigure: View {
         for item in shown { visible.formUnion(item.parts(ponytail: ponytail)) }
         for item in shown { visible.subtract(item.replaces) }
         pose.scene?.dress(look, items: pose.items, &visible)
+        if pose.tap != nil, let idle = pose.idle { cut(idle, progress: pose.idleProgress, &visible) }
         if let tap = pose.tap {
             apply(tap, progress: pose.tapProgress, to: &visible)
             // The rubbing hand comes up on her arm, in her look's sleeve; in gloves the left one comes off, and the
@@ -278,7 +281,7 @@ struct KuroFigure: View {
         // One top or set per mode, so the first worn one in catalog order is the only one.
         let worn = KuroItem.allCases.filter { $0.look == look && pose.items.contains($0) }
         if let clothes = worn.lazy.compactMap(\.clothes).first {
-            dress(look, in: clothes, back: pose.tap == .turnAway, &visible)
+            dress(look, in: clothes, back: pose.tap == .turnAway && KuroTap.facesAway(pose.tapProgress), &visible)
         }
         // 位置规划图 §10-2: the beanie needs her cat ears to sit between, so a set hat or the bath towel takes it off.
         if visible.contains(.setPicnicHat) || visible.contains(.setRainHat) || !visible.contains(.catEars) {
@@ -357,12 +360,17 @@ struct KuroFigure: View {
     /// The looks in her sportswear, where she smiles.
     nonisolated private static let smiling: Set<KuroLook> = [.tennis, .fitness, .dance, .ski]
 
-    /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out. The nightlight's glow is
-    /// `pose.glow`.
+    /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out, and what a tap cut short
+    /// fades as it goes back. The nightlight's glow is `pose.glow`.
     nonisolated static func opacity(_ part: KuroPart, pose: KuroPose) -> Double {
         if part == .weeklyRoomNightlightGlow { return pose.glow }
-        guard pose.tap == nil, let idle = pose.idle else { return 1 }
-        return idle.opacity(part, progress: pose.idleProgress)
+        if part == .tapDots, pose.tap == .turnAway { return KuroTap.dotsOpacity(pose.tapProgress) }
+        guard let idle = pose.idle else { return 1 }
+        let shown = idle.opacity(part, progress: pose.idleProgress)
+        guard pose.tap != nil else { return shown }
+        // Her idle hand is gone once it is back, before the prop comes up.
+        if idleHands.contains(part) { return cutPhase(part, back: pose.idleBack) < 1 ? 1 : 0 }
+        return fades.contains(part) ? shown * (1 - pose.idleBack) : 1
     }
 
     // UI 审核 2026-10-14 (direction 2): the watch crop cuts her low props, so on the watch she holds each one
@@ -384,6 +392,7 @@ struct KuroFigure: View {
         ])
     }
 
+    // Mike 2026-10-15: a mode's default look has nothing standing in the room, so no sandbag or speaker.
     /// The parts only `look` wears.
     nonisolated private static func outfit(_ look: KuroLook) -> Set<KuroPart> {
         switch look {
@@ -391,11 +400,11 @@ struct KuroFigure: View {
         case .chill: [.jacketChill, .chillCup]
         case .tennis: [.tennisPonytail, .jacketTennis, .tennisHeadband, .tennisRacket]
         case .desk: [.jacketDesk, .deskGlasses, .deskBooks, .deskPen]
-        case .box: [.tennisPonytail, .jacketBox, .boxHeadband, .boxGloveL, .boxGloveR, .boxSandbag]
+        case .box: [.tennisPonytail, .jacketBox, .boxHeadband, .boxGloveL, .boxGloveR]
         case .fitness: [.tennisPonytail, .jacketTennis, .gymBlock]
         case .study: [.jacketChill, .studyNotebook, .studyHighlighter]
         case .art: [.jacketSmock, .workTablet, .craftPen]
-        case .dance: [.tennisPonytail, .jacketTennis, .danceSpeaker]
+        case .dance: [.tennisPonytail, .jacketTennis]
         case .music: [.jacketChill, .scoreSheet, .scoreFinger]
         case .ski: [.tennisPonytail, .jacketTennis, .skiGoggles]
         }
@@ -532,6 +541,7 @@ public struct KuroView: View {
     @Environment(\.frameReduceMotion) private var frameReduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
+    @Environment(\.companionOffscreen) private var offscreen
     /// True for a moment after the watch screen comes back on, while the figure stays still.
     @State private var settling = false
     /// Set when the watch screen has been dimmed too long to keep listening for shakes.
@@ -595,7 +605,7 @@ public struct KuroView: View {
     ///   - showsBubble: whether a tap shows a line in a speech bubble.
     ///   - cheer: increment to play her cheer.
     ///   - nods: increment to play the nod after an answer.
-    ///   - onTap: called after she reacts to a tap.
+    ///   - onTap: called after she reacts to a tap, except at bedtime.
     ///   - onWelcomeDone: called once she has answered a `.welcomeBack` event, even one already played.
     ///   - onBathDone: called after she shows the towel round her head on a tap during bath time.
     public init(
@@ -653,7 +663,8 @@ public struct KuroView: View {
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
 
             let paused = CompanionView.paused(
-                reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling
+                reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling,
+                offscreen: offscreen
             )
             TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
                 let time = (frameClock ?? context.date).timeIntervalSinceReferenceDate
@@ -685,7 +696,11 @@ public struct KuroView: View {
                 // Her small idle moves play only in the plain idle.
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
                 let fidget = busy ? nil : KuroIdle.at(idleTime, look: look, card: card)
-                let shown = still || tap != nil ? pose : pose.blink(at: time).idling(fidget)
+                // 动作展示总表 C9: what an idle she was in the middle of moved goes back as the tap starts.
+                let cutShort = tap.flatMap { cut(tap: $0, sleepy: sleepy) }
+                let back = (tap.map { $0.1 * $0.0.duration } ?? 0) / KuroTap.cutBack
+                let shown =
+                    still ? pose : tap != nil ? pose.cutting(cutShort, back: back) : pose.blink(at: time).idling(fidget)
                 ZStack {
                     KuroFigure(
                         look: look,
@@ -694,7 +709,11 @@ public struct KuroView: View {
                             : shown.glowing(KuroPose.glow(at: time), pom: KuroPose.pom(at: time)),
                         watch: style == .watch
                     )
-                    .scaleEffect(x: unbox?.spin ?? 1, y: max(unbox?.popOut ?? 1, 0.001), anchor: .bottom)
+                    .scaleEffect(
+                        x: (unbox?.spin ?? 1) * (still ? 1 : Self.width(tap)),
+                        y: max(unbox?.popOut ?? 1, 0.001),
+                        anchor: .bottom
+                    )
                     if let unbox {
                         GiftBox(progress: unbox.box, fill: RunnerPalette.cardboard, ribbon: KuroPalette.pink)
                     }
@@ -714,7 +733,7 @@ public struct KuroView: View {
             .padding(.top, Self.topInset(style))
             .padding(.horizontal, 12)
             // Every look change fades in 0.3 s, also when the mode switched on its own (HAKU-05).
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: look)
+            .animation(reduceMotion ? nil : .easeInOut(duration: Self.lookFade), value: look)
 
             if unboxStart != nil {
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
@@ -756,7 +775,17 @@ public struct KuroView: View {
             let now = Date.now.timeIntervalSinceReferenceDate
             idlePace = (idlePace ?? IdlePace(time: 0, phase: 0, pace: old)).changing(to: new, at: now)
         }
-        .onChange(of: look) { _, _ in
+        .onChange(of: look) { _, new in
+            // 动作展示总表 G3: a tap still playing ends with the old look instead of finishing in the new one. A move
+            // waiting for the switch to fade (off work) plays the new look's.
+            if let start = tapStart {
+                if start > .now {
+                    tapKind = KuroTap(look: new, sleepy: false)
+                } else {
+                    tapKind = nil
+                    tapStart = nil
+                }
+            }
             pop += 1
             if unboxStart == nil { say(nil) }
         }
@@ -884,8 +913,9 @@ public struct KuroView: View {
             // KURO-02: at the desk with her chin on her hand she stays seated and taps her cheek.
             play(pose.overtime ? .chinTap : KuroTap(look: look, sleepy: sleepy), at: now)
         }
-        if showsBubble { say(Self.line(after: bubble, from: lines)) }
-        onTap?()
+        if showsBubble { say(Self.line(after: bubble, from: Self.tapLines(lines, bedtime: bedtime))) }
+        // 动作总表 C15: at bedtime a tap only gets a mumble; it never changes the mode.
+        if bedtime == .off { onTap?() }
     }
 
     /// Plays the unboxing, the workout cheer or the off-work move that `event` brings, if it is new.
@@ -902,8 +932,9 @@ public struct KuroView: View {
         }
         if let day = Self.newOffWork(event, last: lastOffWork) {
             lastOffWork = day
-            // KURO-03: until she has her own off-work animation (新角色清单), she plays her tap move.
-            play(KuroTap(look: look, sleepy: false), at: .now)
+            // KURO-03: until she has her own off-work animation (新角色清单), she plays her tap move. 动作展示总表 G3:
+            // it waits for a mode switch coming with it to fade.
+            play(KuroTap(look: look, sleepy: false), at: .now.addingTimeInterval(Self.lookFade))
             if style == .watch { pokes += 1 }
             if showsBubble { say(KuroBubbleLines.offWork, for: 4) }
         }
@@ -965,11 +996,28 @@ public struct KuroView: View {
         pop += 1
     }
 
+    /// How long a look change fades, in seconds.
+    nonisolated static let lookFade: TimeInterval = 0.3
+
+    /// Her width for `tap`: squashed edge-on as she turns away or back, else 1.
+    nonisolated static func width(_ tap: (KuroTap, Double)?) -> CGFloat {
+        guard let tap, tap.0 == .turnAway else { return 1 }
+        return CGFloat(KuroTap.turnWidth(tap.1))
+    }
+
     /// The tap reaction and its progress (0..<1) at `time`, or nil when none is playing.
     private func reaction(at time: TimeInterval) -> (KuroTap, Double)? {
         guard let kind = tapKind, let start = tapStart?.timeIntervalSinceReferenceDate else { return nil }
         let progress = (time - start) / kind.duration
         return (0..<1).contains(progress) ? (kind, progress) : nil
+    }
+
+    /// The idle move `tap` cut short and how far into it she was, while what it moved is still going back.
+    private func cut(tap: (KuroTap, Double), sleepy: Bool) -> (KuroIdle, Double)? {
+        guard tap.1 * tap.0.duration < KuroTap.cutBack, slot == nil, !sleepy,
+            let start = tapStart?.timeIntervalSinceReferenceDate, scene(at: start) == nil
+        else { return nil }
+        return KuroIdle.at(idlePace?.phase(at: start) ?? start * pace, look: look, card: card)
     }
 
     /// Progress of the nod at `time` (0..<1), or nil when none is playing.
@@ -1152,6 +1200,11 @@ public struct KuroView: View {
 
     private var lines: [String] {
         CompanionLines.lines(for: look.mode, need: need, activity: activity, moment: moment, persona: .kuro)
+    }
+
+    /// The lines a tap picks from: her mumbles at bedtime, otherwise `lines`.
+    nonisolated static func tapLines(_ lines: [String], bedtime: Bedtime) -> [String] {
+        bedtime == .on ? KuroBubbleLines.bedtime : lines
     }
 
     /// A random line from `lines` that isn't `shown`, unless it is the only one.

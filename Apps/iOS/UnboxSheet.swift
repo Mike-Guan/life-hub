@@ -61,8 +61,7 @@ struct UnboxSheet: View {
                 if let kuro = KuroItem(rawValue: item.id) {
                     KuroView(
                         look: kuro.look,
-                        wearing: wearing.worn(
-                            in: item.mode ?? Mode.allCases.first { KuroLook(mode: $0) == kuro.look } ?? .chill),
+                        wearing: wearing.worn(in: item.previewMode(current: nil, card: card)),
                         event: .unlock(id: entry.id.uuidString, item: item.id)
                     )
                 } else {
@@ -76,6 +75,9 @@ struct UnboxSheet: View {
                     )
                 }
             }
+            // UI 二组 交付差距 v1 #8: VoiceOver read the character's mode, not the item coming out of the box.
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(String(format: "开箱：%@".localized, item.title))
             // UI 审核 R1: on small phones, at any text size, both buttons stay on the first screen,
             // so the stage gives up height.
             .containerRelativeFrame(.vertical) { [chrome] height, _ in min(380, max(240, height - chrome)) }
@@ -85,7 +87,7 @@ struct UnboxSheet: View {
                 wardrobe = wearing
                 dismiss()
             } label: {
-                Text("现在戴上")
+                Text(buttons.use)
                     .font(Toy.body(18, weight: .black))
                     .foregroundStyle(Toy.ink)
                     .frame(maxWidth: .infinity, minHeight: 56)
@@ -94,7 +96,7 @@ struct UnboxSheet: View {
             Button {
                 dismiss()
             } label: {
-                Text("先放衣柜")
+                Text(buttons.keep)
                     .font(Toy.body(16, weight: .black))
                     .frame(maxWidth: .infinity, minHeight: 48)
             }
@@ -124,19 +126,23 @@ struct UnboxSheet: View {
 
     private var card: IdentityKind? { .picked(for: persona) }
 
-    // Friends test (写死作息 #3): HAKU no longer always pops out in the boxing kit. It wears the look of the
-    // mode it is in and of the user's own card; an item that doesn't show there falls back to its own mode.
-    private var shownMode: Mode {
-        if let mode, item.shows(in: mode, card: card) { return mode }
-        let own = item.mode ?? item.slot.showcaseMode
-        // Without a card the identity slot is the old boxing kit, so the item shows in Chill instead.
-        return own == .boxing && card == nil ? .chill : own
-    }
+    // Friends test (写死作息 #3): HAKU no longer always pops out in the boxing kit.
+    private var shownMode: Mode { item.previewMode(current: mode, card: card) }
 
     private var wearing: Wardrobe {
         var copy = wardrobe
         copy.equip(item)
         return copy
+    }
+
+    // PM 10-15: a room item isn't worn and a celebration is played, so the buttons say what happens to each.
+    /// The two button titles for the item's kind.
+    private var buttons: (use: LocalizedStringKey, keep: LocalizedStringKey) {
+        switch item.slot {
+        case .room: ("现在摆上", "先收起来")
+        case .celebration: ("现在用上", "先放衣柜")
+        default: ("现在戴上", "先放衣柜")
+        }
     }
 
     private var subtitle: String {

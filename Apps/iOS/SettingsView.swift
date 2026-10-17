@@ -3,6 +3,7 @@ import FamilyControls
 import HubCore
 import SwiftUI
 import UniformTypeIdentifiers
+import UserNotifications
 import WidgetKit
 
 /// App settings: the bedtime reminder time, the places that switch mode, the Daily Widget link and
@@ -18,21 +19,26 @@ struct SettingsView: View {
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
-    /// The user's cards, for the place names and actions.
-    let cards: ModeCards
+    /// The user's cards, for the place names and actions and the identity card row.
+    @Binding var cards: ModeCards
     /// Deletes every record and setting on this iPhone, as on a fresh install.
     let onEraseAll: () -> Void
     /// Starts at the bottom of the page, with the 删除全部数据 confirmation open when `true`. For screenshots only.
     var screenshot: Bool?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+    // Read again on every return to the app, so turning notifications on in Settings clears the line.
+    @State private var notificationsOff = false
     @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
+    @State private var answering: StepEdit?
     @State private var scrollApps = ScrollWatch.selection
     @State private var pickingApps = false
     @State private var screenTimeError: String?
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
+    @State private var showsHome = false
     @State private var asksErase = false
     @AppStorage(Languages.key, store: AppGroup.defaults) private var languagesOn = false
 
@@ -42,6 +48,10 @@ struct SettingsView: View {
         }
         .defaultScrollAnchor(screenshot == nil ? nil : .bottom)
         .task { asksErase = screenshot == true }
+        .task(id: scenePhase) {
+            let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+            notificationsOff = status == .denied
+        }
         .foregroundStyle(Toy.ink)
         .tint(Toy.pink)
         .background(Toy.paper.ignoresSafeArea())
@@ -100,7 +110,12 @@ struct SettingsView: View {
                     isPresented: Binding(get: { switchingTo != nil }, set: { if !$0 { switchingTo = nil } }),
                     presenting: switchingTo
                 ) { next in
-                    Button("换") { persona = next }
+                    Button("换") {
+                        #if DEBUG || ENV_STG
+                        ModeCards.switchWhileTrying(to: next, in: AppGroup.defaults)
+                        #endif
+                        persona = next
+                    }
                     Button("先不换", role: .cancel) {}
                 } message: { next in
                     Text(Self.switchMessage(from: persona, to: next))
@@ -108,6 +123,13 @@ struct SettingsView: View {
                 Text("每个角色有自己的能量罐和东西，换过去从零开始，原来的都留着。生活记录和规则都不变。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+                #if DEBUG || ENV_STG
+                Toggle("连同角色的默认模式一起试", isOn: tryDefaultsBinding)
+                    .font(Toy.body(15))
+                Text("打开后先用这个角色的默认模式卡，你自己的卡先存起来；关掉就换回来。地点和学到的作息不变。只在测试版里有。")
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.muted)
+                #endif
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -120,8 +142,14 @@ struct SettingsView: View {
                         .font(Toy.body(12, weight: .bold))
                         .foregroundStyle(Toy.muted)
                 }
-                Toggle("到点提醒", isOn: $remindsAtBedtime)
+                // UI 二组 gap #11: the prefill is only a suggestion, so the reminder waits for a picked time.
+                // UI 审核: an old install can have it on with no time, so turning it off always works.
+                Toggle("到点提醒", isOn: reminderToggle)
                     .font(Toy.body(15))
+                    .disabled(!bedtime.isSet && !remindsAtBedtime)
+                if remindsAtBedtime, notificationsOff {
+                    notificationsLine
+                }
                 Text("\(persona.title) 从睡觉时间开始变困，一直到起床时间。打开提醒，到点发一条通知，只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
@@ -132,12 +160,18 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("上班时段")
                     .font(Toy.body(16, weight: .heavy))
+                placeRow(title: "上班日".localized, detail: workdaysLabel) {
+                    answering = StepEdit(step: .work)
+                }
                 timeRow("上班", selection: time($rules.workStartMinute))
                 timeRow("下班", selection: time($rules.workEndMinute))
                 Toggle("晚间延长", isOn: eveningBinding)
                     .font(Toy.body(15))
                 if rules.eveningUntilMinute != nil {
                     timeRow("延长到", selection: time(eveningMinute))
+                }
+                if !rules.workdays.isEmpty, notificationsOff {
+                    notificationsLine
                 }
                 Text("到公司才切到上班。在上班的日子，下班前 \(ModeRules.offWorkLead) 分钟提醒一次。晚间延长打开后，下班后还在公司就托腮等到延长时间。")
                     .font(Toy.body(12))
@@ -146,9 +180,32 @@ struct SettingsView: View {
             .padding(16)
             .toyCard()
 
+            VStack(alignment: .leading, spacing: 8) {
+                Text("模式卡名字")
+                    .font(Toy.body(16, weight: .heavy))
+                placeRow(title: commonCardNames, detail: "") {
+                    answering = StepEdit(step: .cards)
+                }
+            }
+            .padding(16)
+            .toyCard()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("身份卡")
+                    .font(Toy.body(16, weight: .heavy))
+                placeRow(title: cards.identity?.title ?? "没有".localized, detail: "") {
+                    answering = StepEdit(step: .identity)
+                }
+            }
+            .padding(16)
+            .toyCard()
+
             placesCard
 
+            // Daily Widget is Mike's own app; testers don't have it, so only DEV builds show the link.
+            #if DEBUG
             dailyCard
+            #endif
 
             memoryCard
 
@@ -156,6 +213,7 @@ struct SettingsView: View {
             // Remove the condition with the CI-CD.md Screen Time step.
             #if DEBUG || ENV_STG
             scrollCard
+            homeCard
             #endif
             #if DEBUG
             languagesCard
@@ -165,6 +223,52 @@ struct SettingsView: View {
             eraseCard
         }
         .padding(20)
+        .sheet(item: $answering) { edit in
+            OnboardingView(
+                places: $places,
+                monitor: monitor,
+                editing: .editing(edit.step, persona: persona, cards: cards, rules: rules)
+            ) { draft in
+                draft.applyStep(to: &cards, rules: &rules)
+                cards.store(in: AppGroup.defaults)
+                answering = nil
+            }
+        }
+    }
+
+    private var commonCardNames: String {
+        cards.modes.filter { $0 != .boxing }.map { cards.title(for: $0, persona: persona) }.joined(separator: " · ")
+    }
+
+    // Issue #416: 周一到周五 as one phrase, else the days in order, Monday first.
+    private var workdaysLabel: String {
+        if rules.workdays.isEmpty { return "不固定".localized }
+        if rules.workdays == [2, 3, 4, 5, 6] { return "周一到周五".localized }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Languages.locale
+        let days = [2, 3, 4, 5, 6, 7, 1].filter(rules.workdays.contains).map { calendar.shortWeekdaySymbols[$0 - 1] }
+        let list = ListFormatter()
+        list.locale = Languages.locale
+        return list.string(from: days) ?? days.joined(separator: " ")
+    }
+
+    // UI 二组 preview 5: with notifications denied, the reminders that are on can't go out.
+    private var notificationsLine: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ErrorLine(text: "通知被关掉了，睡觉提醒和下班提醒发不出去。".localized, size: 13)
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text("去设置打开")
+                    .font(Toy.body(15, weight: .heavy))
+                    .underline()
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // PRD §21.2: the way to take everything back, at the very bottom. The sheet is the second step.
@@ -229,6 +333,31 @@ struct SettingsView: View {
         }
     }
 
+    // Issue #485: the home prototype runs on mock data, so it stays out of PROD.
+    private var homeCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Text("家（原型）")
+                    .font(Toy.body(16, weight: .heavy))
+                Spacer()
+                Button {
+                    showsHome = true
+                } label: {
+                    Text("进去").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
+            }
+            Text("HAKU 的房间。罐子、衣服和记录都是假数据，不影响真实记录。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(16)
+        .toyCard()
+        .fullScreenCover(isPresented: $showsHome) {
+            HakuHomeView { showsHome = false }
+        }
+    }
+
     private var dailyCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Toggle(isOn: dailyBinding) {
@@ -290,6 +419,23 @@ struct SettingsView: View {
         .familyActivityPicker(isPresented: $pickingApps, selection: $scrollApps)
         .onChange(of: scrollApps) { watchScrolling() }
     }
+
+    #if DEBUG || ENV_STG
+    // 角色切换 正式版 v0 §3: test builds try a character with her default cards; off puts the user's own back.
+    private var tryDefaultsBinding: Binding<Bool> {
+        Binding(
+            get: { ModeCards.isTrying(in: AppGroup.defaults) },
+            set: { on in
+                if on {
+                    ModeCards.tryDefaults(of: persona, from: persona, in: AppGroup.defaults)
+                } else {
+                    ModeCards.restoreOwn(in: AppGroup.defaults)
+                }
+                cards = .current(in: AppGroup.defaults, persona: persona)
+            }
+        )
+    }
+    #endif
 
     // Debug only (Issue #350): Japanese and English stay off until every string is in and reviewed. Not in STG,
     // because friends get the same STG build through TestFlight.
@@ -455,6 +601,8 @@ struct SettingsView: View {
                 Text(detail)
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(Toy.body(13, weight: .heavy))
@@ -464,6 +612,15 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    /// The bedtime reminder switch: it turns on only once a bedtime is set.
+    private var reminderToggle: Binding<Bool> {
+        Binding {
+            remindsAtBedtime
+        } set: { on in
+            remindsAtBedtime = on && bedtime.isSet
+        }
     }
 
     // PM 2026-10-13: an unset bedtime shows the prefill; picking a time sets the whole schedule.
@@ -501,6 +658,12 @@ struct SettingsView: View {
             minute.wrappedValue = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
         }
     }
+}
+
+/// The setup step Settings opens to change one answer.
+private struct StepEdit: Identifiable {
+    let step: OnboardingDraft.Step
+    var id: Int { step.rawValue }
 }
 
 /// A place open in the editor; `isNew` until it has a location.

@@ -154,6 +154,13 @@ import Testing
         #expect(KuroView.accessibilityLabel(.tennis, bedtime: .on) == "KURO，困了")
     }
 
+    @Test func atBedtimeATapGetsAMumble() {
+        let day = KuroBubbleLines.lines(for: .money)
+        #expect(KuroView.tapLines(day, bedtime: .on) == KuroBubbleLines.bedtime)
+        #expect(KuroView.tapLines(day, bedtime: .off) == day)
+        #expect(Set(KuroBubbleLines.bedtime).isDisjoint(with: day))
+    }
+
     @Test func sheSharesHakusFrame() {
         #expect(KuroArt.bounds == RunnerArt.bounds)
     }
@@ -175,8 +182,8 @@ import Testing
     }
 
     @Test func herMomentLinesDifferFromHakus() {
-        // Flow and blanket lines are the same for both.
-        for moment in CompanionMoment.allCases where ![.flow, .blanket].contains(moment) {
+        // Flow and blanket lines are the same for both, and dozing is silent.
+        for moment in CompanionMoment.allCases where ![.flow, .blanket, .dozing].contains(moment) {
             let hers = CompanionLines.lines(for: .chill, moment: moment, persona: .kuro)
             #expect(!hers.isEmpty && hers != CompanionLines.lines(for: .chill, moment: moment))
         }

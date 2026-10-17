@@ -67,6 +67,7 @@ public struct CompanionView: View {
     @Environment(\.frameReduceMotion) private var frameReduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
+    @Environment(\.companionOffscreen) private var offscreen
     @Environment(\.companionHold) private var hold
     /// True for a moment after the watch screen comes back on, while the figure stays still.
     @State private var settling = false
@@ -148,6 +149,12 @@ public struct CompanionView: View {
     @AppStorage("companion.lastWelcome") private var lastWelcome = ""
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
+    /// When the app last opened, for the one line it may say then.
+    @State private var openedAt: Date?
+    /// The line that spoke since the app opened, if any.
+    @State private var opening: OpeningLine?
+    /// When a tap during a one-off animation made HAKU blink.
+    @State private var tapBlinkStart: Date?
 
     private var reduceMotion: Bool { frameReduceMotion ?? systemReduceMotion }
 
@@ -252,10 +259,12 @@ public struct CompanionView: View {
         .onChange(of: mode) { _, _ in
             pop += 1
             if offWork(at: Date.now.timeIntervalSinceReferenceDate) == nil { offWorkStart = nil }
-            // The welcome back keeps its line through a mode change (issue #184).
-            if welcomeStart == nil { say(nil) }
+            // The welcome back keeps its line through a mode change (issue #184), and so does the line the app
+            // opened with (C16, 动作展示总表).
+            if welcomeStart == nil, !holdsOpening { say(nil) }
         }
         .onAppear {
+            open()
             if notices { startNotice() }
             startStretchUp()
             startPackUp()
@@ -263,13 +272,13 @@ public struct CompanionView: View {
             if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
             playEventIfNew()
             if invite != nil { startInvite() }
-            if bath { say(Self.bathLine, for: 3) }
+            if bath, claimsOpening(.bath) { say(Self.bathLine, for: 3) }
         }
         .onChange(of: bath) { _, new in
             guard new else { return }
             // The view lives for days, so each evening's bath time starts with dry hair.
             dryStart = nil
-            say(Self.bathLine, for: 3)
+            if claimsOpening(.bath) { say(Self.bathLine, for: 3) }
         }
         .onChange(of: invite) { _, new in
             if new != nil { startInvite() }
@@ -278,6 +287,7 @@ public struct CompanionView: View {
         .onChange(of: daily) { _, _ in startCue() }
         .onChange(of: scenePhase) { _, new in
             if new == .active {
+                open()
                 if notices { startNotice() }
                 startStretchUp()
                 startPackUp()
@@ -431,13 +441,18 @@ public struct CompanionView: View {
     }
 
     private var paused: Bool {
-        Self.paused(reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling)
+        Self.paused(
+            reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling,
+            offscreen: offscreen
+        )
     }
 
     /// Whether the figure's frame clock stops: with Reduce Motion, outside the active scene, with the watch screen
-    /// dimmed, or while settling after it comes back on.
-    nonisolated static func paused(reduceMotion: Bool, scenePhase: ScenePhase, dozing: Bool, settling: Bool) -> Bool {
-        reduceMotion || scenePhase != .active || dozing || settling
+    /// dimmed, while settling after it comes back on, or while kept off screen.
+    nonisolated static func paused(
+        reduceMotion: Bool, scenePhase: ScenePhase, dozing: Bool, settling: Bool, offscreen: Bool = false
+    ) -> Bool {
+        reduceMotion || scenePhase != .active || dozing || settling || offscreen
     }
 
     /// The app is in the background or the watch screen is dimmed.
@@ -622,6 +637,7 @@ public struct CompanionView: View {
     private func glance(_ pose: RunnerPose) -> RunnerPose {
         var pose = pose
         if style == .watch { pose.propLift = 1 }
+        if let tapBlinkStart, Date.now.timeIntervalSince(tapBlinkStart) < 0.25 { pose.eyesShut = true }
         pose.eyesDx += 4 * look
         pose.headTilt += 4 * Double(look)
         if closeUp { pose.eyesDy -= 1 }
@@ -680,6 +696,7 @@ public struct CompanionView: View {
         if let night = Self.newLateNight(at: now, last: lastLateNight) {
             lastLateNight = night
             lateNightStart = now
+            guard claimsOpening(.lateNight) else { return }
             bubbleTask?.cancel()
             bubbleTask = Task {
                 try? await Task.sleep(for: .seconds(noticeDuration))
@@ -695,6 +712,7 @@ public struct CompanionView: View {
         guard shownMoment == .stiff, bedtime == .off, Self.stretchUpDue(last: lastStretchUp, now: now) else { return }
         lastStretchUp = now.timeIntervalSinceReferenceDate
         stretchUpStart = now
+        guard claimsOpening(.stretch) else { return }
         bubbleTask?.cancel()
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(Self.stretchUpDuration * 0.57))
@@ -719,12 +737,12 @@ public struct CompanionView: View {
         case .soon:
             guard let id = Self.newCue(daily, stage: .soon, last: lastDailySoon) else { return }
             lastDailySoon = id
-            say("还有 15 分钟。我先替你紧张一下。", for: 3.5)
+            if claimsOpening(.daily) { say("还有 15 分钟。我先替你紧张一下。", for: 3.5) }
         case .now:
             guard let id = Self.newCue(daily, stage: .now, last: lastDailyNow) else { return }
             lastDailyNow = id
             slapStart = .now
-            say("到点了。")
+            if claimsOpening(.daily) { say("到点了。") }
         }
     }
 
@@ -994,7 +1012,7 @@ public struct CompanionView: View {
             lastCelebration = id
             celebrationKind = kind
             celebrationStart = .now
-            say(CompanionLines.celebration(kind))
+            if claimsOpening(.celebration) { say(CompanionLines.celebration(kind)) }
         }
         if let day = Self.newOffWork(event, last: lastOffWork) {
             lastOffWork = day
@@ -1113,6 +1131,7 @@ public struct CompanionView: View {
         goodnightStart = .now
         guard style != .notification else { return }
         lastGoodnight = Date.now.timeIntervalSinceReferenceDate
+        guard claimsOpening(.goodnight) else { return }
         bubbleTask?.cancel()
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(Self.goodnightDuration * 0.85))
@@ -1163,6 +1182,12 @@ public struct CompanionView: View {
             return
         }
         rollStart = nil
+        // C15 (动作展示总表): at bedtime a tap gets a mumble and changes nothing.
+        if bedtime == .on {
+            pop += 1
+            say(Self.bedtimeMumbles.filter { $0 != bubble }.randomElement())
+            return
+        }
         tapTimes = tapTimes.filter { Date.now.timeIntervalSince($0) < Self.pesterWindow } + [.now]
         if Self.turnsAway(tapTimes, now: .now, count: WatchPoke.tooMany, bedtime: bedtime) {
             tapTimes = []
@@ -1187,17 +1212,19 @@ public struct CompanionView: View {
             card: card
         )
         let candidates = lines.filter { $0 != bubble }
-        // Taps during a one-off animation only get HAKU's reaction.
+        // Taps during a one-off animation only get a blink, and its line stays (G10, C14).
         let time = Date.now.timeIntervalSinceReferenceDate
-        let plays = celebration(at: time) == nil && taskDone(at: time) == nil && !stillOneOff(at: time)
+        guard celebration(at: time) == nil, taskDone(at: time) == nil, !stillOneOff(at: time) else {
+            tapBlinkStart = .now
+            return
+        }
         // The same body move as a poke on the watch (Mike 2026-10-07: one action library for phone and watch).
         var poke: WatchPoke?
-        if plays, let mode {
+        if let mode {
             poke = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on, busy: isBusy(life))
         }
         // The boxing duck and hook ends on its own line (身份卡第 3 轮 B2).
         say(poke == .duckHook ? poke?.line : (candidates.isEmpty ? lines : candidates).randomElement())
-        guard plays else { return }
         if let poke {
             pokeKind = poke
             pokeStart = .now
@@ -1288,7 +1315,13 @@ public struct CompanionView: View {
             say(WatchPoke.tooManyLine)
             return
         }
-        let reaction = ShakeReaction.pick(mode: mode, asleep: bedtime == .on || idleLife(mode, at: now) == .nap)
+        // C14 (动作展示总表): shaken at bedtime, HAKU only rolls over half asleep.
+        if bedtime == .on {
+            pokeKind = .rollOver
+            pokeStart = now
+            return
+        }
+        let reaction = ShakeReaction.pick(mode: mode, asleep: idleLife(mode, at: now) == .nap)
         switch reaction {
         case .dizzy:
             dizzyStart = now
@@ -1314,8 +1347,40 @@ public struct CompanionView: View {
         guard bedtime == .off, let invite else { return }
         pop += 1
         inviteJumps += 1
-        say(invite, for: 5)
+        if claimsOpening(.invite) { say(invite, for: 5) }
     }
+
+    /// Starts a new opening of the app, unless one started within the opening window; cold launch opens twice.
+    private func open() {
+        guard openedAt.map({ Date.now.timeIntervalSince($0) >= Self.openingWindow }) ?? true else { return }
+        openedAt = .now
+        opening = nil
+    }
+
+    /// Whether `line` may speak now: always outside the opening window, else only when no line above it spoke.
+    private func claimsOpening(_ line: OpeningLine) -> Bool {
+        guard let openedAt, Date.now.timeIntervalSince(openedAt) < Self.openingWindow else { return true }
+        guard Self.speaks(line, over: opening) else { return false }
+        opening = line
+        return true
+    }
+
+    /// Whether the line the app opened with is still due or showing.
+    private var holdsOpening: Bool {
+        guard opening != nil, let openedAt else { return false }
+        return Date.now.timeIntervalSince(openedAt) < Self.openingWindow
+    }
+
+    /// Whether `line` speaks when `spoken` already did since the app opened.
+    nonisolated static func speaks(_ line: OpeningLine, over spoken: OpeningLine?) -> Bool {
+        spoken.map { line <= $0 } ?? true
+    }
+
+    // Long enough for the slowest opening line, the stretch at 3.4 s, to come due.
+    private static let openingWindow: TimeInterval = 8
+
+    /// What HAKU mumbles when tapped at bedtime.
+    nonisolated static let bedtimeMumbles = ["……嗯。", "……还没睡。快了。", "……明天再说。"]
 
     private func say(_ text: String?, for seconds: Double = 2.4, after delay: Double = 0) {
         let text = text?.localized(for: .haku)
@@ -1333,6 +1398,15 @@ public struct CompanionView: View {
             withAnimation(.easeOut(duration: 0.2)) { bubble = nil }
         }
     }
+}
+
+// C1 (动作展示总表, Mike 10/15): opening the app with several lines due showed one after another, or the last
+// one over the more important one.
+/// The lines HAKU may say as the app opens, highest first. Only one of them speaks each time the app opens.
+enum OpeningLine: Int, Comparable {
+    case celebration, invite, goodnight, lateNight, daily, bath, stretch
+
+    static func < (lhs: Self, rhs: Self) -> Bool { lhs.rawValue < rhs.rawValue }
 }
 
 // Made-up records for the previews.
@@ -1469,7 +1543,7 @@ struct IdleMotion {
             self.init(mode: .work, time: t)
         case .shooting:
             self.init(mode: .money, time: t)
-        case .collapsed, .blanket:
+        case .collapsed, .blanket, .dozing:
             let breath = IdleMotion.sleeping(time: t)
             self.init(dy: breath.dy, angle: breath.angle)
         case .morning:

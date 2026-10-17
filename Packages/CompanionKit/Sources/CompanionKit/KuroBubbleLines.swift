@@ -52,6 +52,7 @@ enum KuroBubbleLines {
         case .shooting: ["光线不错。", "……这张可以。"]
         case .collapsed: ["……回来了。", "先让我窝五分钟。"]
         case .blanket: ["今天就这样吧。", "毯子分你一半。"]
+        case .dozing: []
         case .morning: ["……早。", "发圈去哪了。"]
         case .timeToLeave: ["……包收好了。", "嗯。"]
         case .stiff: ["……腰。", "……我站起来伸一下。你呢？", "ちょっと休憩。"]
@@ -82,6 +83,9 @@ enum KuroBubbleLines {
 
     /// What KURO says when the off-work notice is tapped (KURO 台词表 `offWorkLine`).
     static let offWork = "……お疲れ。"
+
+    /// KURO's half-asleep mumbles when tapped at bedtime.
+    static let bedtime = ["……嗯……？", "……眼睛睁不开了。", "……晚安……吧。"]
 
     /// What KURO may say for a one-off `event` (KURO 台词表 B “一次性事件”), or none for other events.
     static func oneOff(_ event: CompanionEvent?) -> [String] {
