@@ -46,8 +46,8 @@ struct HomeChip: Identifiable {
 public struct HakuHomeView: View {
     private let snapshot: HomeSnapshot
     private let onSwitch: (Mode) -> Void
-    private let onShop: () -> Void
-    private let onWardrobe: () -> Void
+    private let onShop: (() -> Void)?
+    private let onWardrobe: (() -> Void)?
     private let onSave: (RoomLayout) -> Void
     private let onExit: () -> Void
     @State private var stage: HomeStage
@@ -58,15 +58,15 @@ public struct HakuHomeView: View {
     /// - Parameters:
     ///   - snapshot: What the page shows; pass a new one whenever the data changes.
     ///   - onSwitch: Switches the mode by hand, as the home screen's mode cards do.
-    ///   - onShop: Opens the shop.
-    ///   - onWardrobe: Opens the wardrobe.
+    ///   - onShop: Opens the shop; without it the page shows no way into the shop.
+    ///   - onWardrobe: Opens the wardrobe; without it the page shows no way into the wardrobe.
     ///   - onSave: Saves the room after a colour change.
     ///   - onExit: Called when the user leaves the home for the dashboard.
     public init(
         snapshot: HomeSnapshot,
         onSwitch: @escaping (Mode) -> Void,
-        onShop: @escaping () -> Void,
-        onWardrobe: @escaping () -> Void,
+        onShop: (() -> Void)?,
+        onWardrobe: (() -> Void)?,
         onSave: @escaping (RoomLayout) -> Void,
         onExit: @escaping () -> Void
     ) {
@@ -115,7 +115,7 @@ public struct HakuHomeView: View {
                     .foregroundStyle(Toy.muted)
                 Spacer()
                 Button {
-                    onShop()
+                    onShop?()
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "bolt.fill").foregroundStyle(Color(hex: 0x7CFF4F))
@@ -127,6 +127,7 @@ public struct HakuHomeView: View {
                     .foregroundStyle(.white)
                 }
                 .buttonStyle(.plain)
+                .disabled(onShop == nil)
                 #if DEBUG
                 Button {
                     model.toggleNight()
@@ -168,7 +169,7 @@ public struct HakuHomeView: View {
                 )
                 .frame(width: geo.size.width, height: geo.size.height)
                 if !carrying {
-                    ForEach(HomeChip.all) { chip in
+                    ForEach(chips) { chip in
                         let p = HomeGrid.plan(chip.at)
                         chipButton(chip)
                             .position(x: (p.x - canvas.minX) * scale, y: (p.y - canvas.minY) * scale)
@@ -200,6 +201,17 @@ public struct HakuHomeView: View {
         .aspectRatio(canvas.width / canvas.height, contentMode: .fit)
     }
 
+    /// The labels over the room, without the ones whose page has nothing to open.
+    private var chips: [HomeChip] {
+        HomeChip.all.filter {
+            switch $0.hotspot {
+            case .shop: onShop != nil
+            case .wardrobe: onWardrobe != nil
+            default: true
+            }
+        }
+    }
+
     private func chipButton(_ chip: HomeChip) -> some View {
         Button {
             if let hotspot = chip.hotspot { open(hotspot) } else { sheet = .decorate }
@@ -228,8 +240,8 @@ public struct HakuHomeView: View {
         case .exit:
             onExit()
             return
-        case .wardrobe: onWardrobe()
-        case .shop: onShop()
+        case .wardrobe: onWardrobe?()
+        case .shop: onShop?()
         case .shelf: sheet = .shelf
         default: break
         }
