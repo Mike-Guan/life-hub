@@ -127,6 +127,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   their own character; places and learned days stay.
 - Six lines now say only what the characters felt or sensed: the keepsake gift, the late-night line, the second
   preset character's boxing card line and keepsake line, the racket cheer and her focus-done line.
+- The wardrobe's room shelf and the unboxing of a room item say room things go in the home page. The shelf only lists
+  them, and the unboxing has one button, since room items are not worn.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
   screen edge no longer cuts them off. The iPhone is unchanged.
 - Settings can rename the three common mode cards (上班, 下班, 副业), with the same card screen and length limit
