@@ -59,6 +59,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
   and her identity card. Nothing shows it yet; the keepsake page and share cards will. Wins filled in from
   an earlier day keep no look, because the wardrobe has no history.
+- The home page's snapshot lists the keepsakes the character earned, with the day each was earned, for the
+  reward shelf.
 - Japanese for the first batch of lock-screen lines (both characters) and English for 842 strings
   are in the String Catalogs, behind the Debug-only 「日文和英文」 switch. `scripts/import-strings.py` adds a
   writers' delivery to the right catalogs.

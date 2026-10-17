@@ -39,4 +39,29 @@ import Testing
         #expect(home.cans == 12)
         #expect(home.energy == .full)
     }
+
+    @Test func theShelfHoldsEarnedKeepsakesOldestFirst() {
+        let day = Date(timeIntervalSince1970: 1_800_000_000)
+        func entry(_ item: String, _ kind: CanEntry.Kind, days: Double, persona: Persona = .haku) -> CanEntry {
+            CanEntry(
+                id: UUID(),
+                kind: kind,
+                at: day.addingTimeInterval(days * 86_400),
+                cans: 0,
+                itemID: item,
+                persona: persona,
+                deviceID: "t"
+            )
+        }
+        let ledger = CanLedger(entries: [
+            entry("gloves.gold", .granted, days: 9),
+            entry("room.plant", .bought, days: 1),
+            entry("celebrate.up", .granted, days: 2),
+            entry("celebrate.up", .granted, days: 3, persona: .kuro),
+        ])
+        let shelf = EarnedKeepsake.earned(in: ledger, persona: .haku)
+        #expect(shelf.map(\.id) == ["celebrate.up", "gloves.gold"])
+        #expect(shelf.first?.at == day.addingTimeInterval(2 * 86_400))
+        #expect(EarnedKeepsake.earned(in: CanLedger(), persona: .haku).isEmpty)
+    }
 }

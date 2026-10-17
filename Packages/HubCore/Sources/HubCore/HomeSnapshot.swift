@@ -20,6 +20,8 @@ public struct HomeSnapshot: Equatable, Sendable {
     /// Today's modes, oldest first.
     public var today: [ModeSegment]
     public var room: RoomLayout
+    /// The keepsakes the character earned, oldest first, for the reward shelf.
+    public var keepsakes: [EarnedKeepsake]
 
     public init(
         persona: Persona,
@@ -32,7 +34,8 @@ public struct HomeSnapshot: Equatable, Sendable {
         vitals: HakuVitals,
         bedtime: Bedtime,
         today: [ModeSegment],
-        room: RoomLayout
+        room: RoomLayout,
+        keepsakes: [EarnedKeepsake] = []
     ) {
         self.persona = persona
         self.mode = mode
@@ -45,6 +48,7 @@ public struct HomeSnapshot: Equatable, Sendable {
         self.bedtime = bedtime
         self.today = today
         self.room = room
+        self.keepsakes = keepsakes
     }
 
     /// The items worn in the current mode, or in Chill before the first mode, without other cards' items.
@@ -56,5 +60,29 @@ public struct HomeSnapshot: Equatable, Sendable {
     public var unplaced: [String] {
         let placed = Set(room.placements.map(\.piece))
         return owned.filter { ShopItem.item($0)?.slot == .room && !placed.contains($0) }.sorted()
+    }
+}
+
+/// A keepsake on the reward shelf: which one and when it was earned.
+public struct EarnedKeepsake: Equatable, Sendable {
+    /// The keepsake's shop item id.
+    public var id: String
+    public var at: Date
+
+    public init(id: String, at: Date) {
+        self.id = id
+        self.at = at
+    }
+
+    // 商店与家 同步方案 §5: only real keepsakes, with their real dates. Unearned ones leave no gap on the shelf.
+    /// The keepsakes `persona` earned in `ledger`, oldest first.
+    public static func earned(in ledger: CanLedger, persona: Persona) -> [EarnedKeepsake] {
+        let mine = ledger.only(persona)
+        return ShopItem.catalog(for: persona)
+            .compactMap { item in
+                guard item.keepsake != nil, let at = mine.ownedAt(item.id) else { return nil }
+                return EarnedKeepsake(id: item.id, at: at)
+            }
+            .sorted { $0.at < $1.at }
     }
 }
