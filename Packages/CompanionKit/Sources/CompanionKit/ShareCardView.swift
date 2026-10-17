@@ -127,7 +127,7 @@ public struct ShareCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             if isKeepsake { name(13) }
             HStack(alignment: .center, spacing: 10) {
-                sticker(isKeepsake ? 136 : 167)
+                sticker(squareStickerWidth)
                 VStack(alignment: .leading, spacing: 0) {
                     if isKeepsake, let item = card.item {
                         ShopItemIcon(item: item)
@@ -155,6 +155,14 @@ public struct ShareCardView: View {
         .padding(.horizontal, 21)
         .padding(.top, 21)
         .padding(.bottom, 21)
+    }
+
+    // A Japanese name with a phrase of six or more characters, such as ヘッドバンド, needs the full column to keep
+    // that phrase on one line, so the sticker gives up some width and no phrase is split.
+    private var squareStickerWidth: CGFloat {
+        guard isKeepsake else { return 167 }
+        let longest = Self.japanesePhrases[words.title]?.map(\.count).max() ?? 0
+        return longest > 5 ? 112 : 136
     }
 
     private func name(_ size: CGFloat) -> some View {
