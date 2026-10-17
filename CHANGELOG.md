@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Second polish batch for the second preset character: the tablet slides back to her lap after the tap, her
+  lap things slide away and back while she blows on her drink, the flat racket flips upright after juggling,
+  the watch's raised racket swings, twirls and juggles, a tap during a move gets a blink, and at bedtime a tap
+  rolls her over instead of rubbing an eye.
+- CompanionKit draws the shop's room items for the app: `HomeItemIcon` (small icon, drawn as in the home) and
+  `HomeItemPreview` (the real room around the item where it stands, circled, HAKU next to it). The home's shop
+  button now opens the app's shop through `onShop` and reads 商店; the prototype's own shop panel is gone.
+- The second preset character naps over her tablet when dozing off on the couch: a slow breath and the odd
+  nod, and a still frame on widgets and the watch face. Tapping her doesn't wake her.
 - In the home prototype HAKU uses the bench: tapping it, dropping him on it, or a fitness card day with the
   bench bought sends him to lie on it and press the bar off the rack, up and down.
 - Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
@@ -38,6 +47,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   speaker as notes float up and stops when caught, plays air chords by a ukulele while counting silently, or
   pulls its ski goggles down and back and breathes out a white puff. The watch leaves out the speaker and the
   fist, and raises the ukulele into view. The cards stay out of the picker for now.
+- HubCore decides where the character is in the home page and what she does: a one-time moment first, then
+  bedtime, then the mode's spot. On the identity card's day she uses the card's gear if it stands in the room,
+  and some quarter hours she walks over to a home item for 30 seconds. She never uses sports gear on her own.
 - The second preset character has her own seven weekly items, in her own rotation. They go on sale once
 - Two new wear slots for weekly items: a badge on the clothes, worn in every mode, and a hat, worn only in
   下班. HAKU's star badge and both characters' beanies use them and go on sale once their art is in.
@@ -62,6 +74,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - A keepsake or outfit now remembers how its character looked the day it arrived: her mode, what she wore
   and her identity card. Nothing shows it yet; the keepsake page and share cards will. Wins filled in from
   an earlier day keep no look, because the wardrobe has no history.
+- The home page's snapshot is built from the app's own stores (mode, cards, cans, wardrobe, energy, room) and
+  lists the keepsakes the character earned, with the day each was earned. Room items she owns but hasn't placed
+  go into her room's layout when it is built.
 - Japanese for the first batch of lock-screen lines (both characters) and English for 842 strings
   are in the String Catalogs, behind the Debug-only 「日文和英文」 switch. `scripts/import-strings.py` adds a
   writers' delivery to the right catalogs.
@@ -130,6 +145,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   their own character; places and learned days stay.
 - Six lines now say only what the characters felt or sensed: the keepsake gift, the late-night line, the second
   preset character's boxing card line and keepsake line, the racket cheer and her focus-done line.
+- The wardrobe's room shelf and the unboxing of a room item say room things go in the home page. The shelf only lists
+  them, and the unboxing has one button, since room items are not worn.
 - On the watch, HAKU holds his boxing gloves up beside his chin and his energy can beside his face, so the
   screen edge no longer cuts them off. The iPhone is unchanged.
 - Settings can rename the three common mode cards (上班, 下班, 副业), with the same card screen and length limit
@@ -189,6 +206,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   For example 「起来。我先起了。」 is now 「我先起来了。……你呢？」 and the bedtime notification says
   「到你定的睡觉时间了」. The memory page and settings say 「规律」 instead of 「习惯」, and the Screen Time card no longer
   names two apps and says only this iPhone knows how long you scrolled.
+- On the iPhone home screen HAKU stands 24 pt lower, so a one-line speech bubble no longer covers the tips of
+  its hair, the headset band, the stars beside the headset, the gift box on its head or the sunlit window, also on
+  the smallest iPhone and in Japanese. The watch is unchanged.
 - In the wardrobe, changing an outfit, the previewed mode or the shelf fades over 0.25 s instead of cutting.
 - The small buttons in Settings (看看, 选 App, 导出) and the place editor (取消, 设为当前位置) now have the full
   44 pt tap area. The shop banner grows with longer text instead of cutting it off.
@@ -778,3 +798,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character's taps end more smoothly: her eyes shut for a moment instead of jumping back,
   she turns away and back like a card flipping, her lap blanket slides away and back around a sip, and a tap
   still playing stops when the mode changes; the off-work move waits for the switch.
+- The second preset character's boxing look now wears the white towel on her right shoulder. It hides when
+  she turns away.

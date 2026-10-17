@@ -23,7 +23,7 @@ import Testing
 
     @Test func eachCardLookDrawsItsOwnThings() {
         let expected: [KuroLook: Set<KuroPart>] = [
-            .box: [.jacketBox, .boxHeadband, .boxGloveL, .boxGloveR],
+            .box: [.jacketBox, .boxShoulderTowel, .boxHeadband, .boxGloveL, .boxGloveR],
             .fitness: [.jacketTennis, .gymBlock, .tennisPonytail],
             .study: [.jacketChill, .studyNotebook, .studyHighlighter],
             .art: [.jacketSmock, .workTablet, .craftPen],
@@ -110,5 +110,14 @@ import Testing
         let parts = Set(KuroFigure.parts(for: .ski, pose: sneeze))
         #expect(parts.isSuperset(of: [.sneezePuff, .eyesClosed]) && !parts.contains(.mittenHand))
         #expect(KuroFigure.shift(.faceBase, pose: sneeze).height > 0)
+    }
+
+    // Mike 2026-10-15: the towel rests on her right shoulder in the boxing look; there is no back view of it.
+    @Test func theBoxingTowelStaysOnHerShoulderUntilSheTurns() {
+        let pose = KuroPose(look: .box, energy: 50)
+        #expect(KuroFigure.parts(for: .box, pose: pose).contains(.boxShoulderTowel))
+        #expect(KuroFigure.parts(for: .box, pose: pose, watch: true).contains(.boxShoulderTowel))
+        #expect(!KuroFigure.parts(for: .box, pose: pose.reacting(.turnAway, progress: 0.5)).contains(.boxShoulderTowel))
+        #expect(!KuroFigure.parts(for: .tennis, pose: KuroPose(look: .tennis, energy: 50)).contains(.boxShoulderTowel))
     }
 }

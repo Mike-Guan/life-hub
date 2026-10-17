@@ -2499,6 +2499,22 @@
         }
       }
     },
+    "房间里的东西都摆在家里。拿到的东西永远在这，不会丢。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Room things all go in your home. What you get stays here for good."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "部屋のものはぜんぶ家に飾られます。手に入れたものはずっとここにあって、なくなりません。"
+          }
+        }
+      }
+    },
     "手动 · 地点可选" : {
       "localizations" : {
         "en" : {
@@ -2749,6 +2765,22 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "置くだけじゃ運動にならない。缶も出ない。"
+          }
+        }
+      }
+    },
+    "摆进家里" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it in your home"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家に飾る"
           }
         }
       }
@@ -3405,6 +3437,23 @@
       }
     },
     "看上哪个了？\n……我只是随便问问。" : {
+      "comment" : "HAKU",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See anything you like? …Just asking."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "どれか気になる？……言ってみただけ。"
+          }
+        }
+      }
+    },
+    "看上哪个了？……我只是随便问问。" : {
       "comment" : "HAKU",
       "localizations" : {
         "en" : {

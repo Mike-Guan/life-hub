@@ -747,7 +747,10 @@ enum HomeArt {
         case .snowboard: return [GridBox(x0: s.x - 0.3, y0: 0, x1: s.x + 0.3, y1: 0.4, z1: 3.8)]
         case .gloves, .racket:
             return [GridBox(x0: s.x - 0.5, y0: 0, x1: s.x + 0.5, y1: 0.4, z0: s.z - 0.8, z1: s.z + 0.9)]
-        default: return [GridBox(x0: s.x - 0.5, y0: s.y - 0.5, x1: s.x + 0.5, y1: s.y + 0.5, z0: s.z, z1: s.z + 2.8)]
+        case .cactus:
+            return [GridBox(x0: s.x - 0.25, y0: s.y - 0.25, x1: s.x + 0.25, y1: s.y + 0.25, z0: s.z, z1: s.z + 0.7)]
+        case .speaker: return [GridBox(x0: s.x - 0.35, y0: s.y - 0.35, x1: s.x + 0.35, y1: s.y + 0.35, z1: 1)]
+        case .bag: return [GridBox(x0: s.x - 0.5, y0: s.y - 0.5, x1: s.x + 0.5, y1: s.y + 0.5, z0: s.z, z1: s.z + 2.8)]
         }
     }
 

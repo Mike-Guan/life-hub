@@ -329,6 +329,18 @@ import Testing
         #expect(!CompanionLines.lines(for: nil).isEmpty)
     }
 
+    @Test func onlyThePhoneFigureMakesRoomForTheBubble() {
+        #expect(CompanionView.bubbleRoom(style: .standard, showsBubble: true) == 24)
+        #expect(CompanionView.bubbleRoom(style: .standard, showsBubble: false) == 0)
+        #expect(CompanionView.bubbleRoom(style: .watch, showsBubble: true) == 0)
+        #expect(CompanionView.bubbleRoom(style: .notification, showsBubble: true) == 0)
+        #expect(CompanionView.starDrop(style: .standard, showsBubble: true) == 8)
+        #expect(CompanionView.starDrop(style: .standard, showsBubble: false) == 0)
+        #expect(CompanionView.starDrop(style: .watch, showsBubble: true) == 0)
+        #expect(CompanionView.sunDrop(style: .standard, showsBubble: true) == 3)
+        #expect(CompanionView.sunDrop(style: .notification, showsBubble: true) == 0)
+    }
+
     @Test func theAppOpensWithItsMostImportantLineOnly() {
         #expect(CompanionView.speaks(.stretch, over: nil))
         #expect(CompanionView.speaks(.celebration, over: .invite))
