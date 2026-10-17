@@ -165,7 +165,10 @@ import Testing
         var next = model.snapshot
         next.bedtime = .on
         model.apply(next)
-        model.tick(1)
+        // The rules are asked once a second, not every frame.
+        model.tick(0.5)
+        #expect(model.spot == .sofa)
+        model.tick(0.5)
         #expect(model.spot == .rest)
     }
 

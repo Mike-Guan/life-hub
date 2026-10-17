@@ -152,6 +152,8 @@ final class HomeModel {
     private var lineIndex = 0
     /// What the behavior rules last said, `nil` when they couldn't tell.
     private var beat: HomeBeat?
+    /// Seconds since the rules were last asked.
+    private var sinceBeat = 0.0
 
     /// - Parameters:
     ///   - snapshot: what the app shows.
@@ -348,8 +350,12 @@ final class HomeModel {
                 visitLeft = left - seconds
                 return
             }
-        } else if currentBeat() == beat {
-            return
+        } else {
+            // The scene ticks every frame; the rules change at most every few seconds.
+            sinceBeat += seconds
+            guard sinceBeat >= 1 else { return }
+            sinceBeat = 0
+            guard currentBeat() != beat else { return }
         }
         goHome()
         changed()
