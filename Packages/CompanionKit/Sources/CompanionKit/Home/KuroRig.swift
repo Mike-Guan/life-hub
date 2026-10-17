@@ -21,6 +21,7 @@ final class KuroHomeNode: SKNode {
     private let armR = SKSpriteNode()
     private let head = SKSpriteNode()
     private let tablet = SKSpriteNode()
+    private let racket = SKSpriteNode()
 
     private var look = KuroLook.chill
     private var items: Set<KuroItem> = []
@@ -52,7 +53,8 @@ final class KuroHomeNode: SKNode {
         shadow.zPosition = -0.004
         legL.zPosition = 0.001
         legR.zPosition = 0.001
-        sitLegs.zPosition = 0.002
+        // Her lap is in front of her top.
+        sitLegs.zPosition = 0.0045
         // Her long hair hangs behind her top.
         hair.zPosition = 0.0035
         torso.zPosition = 0.004
@@ -63,6 +65,11 @@ final class KuroHomeNode: SKNode {
         legR.xScale = -1
         setTexture(sitLegs, Self.sitTexture, HakuNode.sitRect, pin: .zero)
         setTexture(tablet, Self.tabletTexture, Self.tabletRect, pin: .zero)
+        // In her right hand, the head out past the fist along the arm.
+        armR.addChild(racket)
+        setTexture(racket, Self.racketTexture, Self.racketRect, pin: .zero)
+        racket.position = CGPoint(x: -2, y: -29)
+        racket.zPosition = -0.0001
         flip.setScale(Self.scale)
     }
 
@@ -123,6 +130,8 @@ final class KuroHomeNode: SKNode {
         legR.zRotation = 0
         torso.position = Self.hip
         torso.yScale = 1
+        torso.xScale = 1
+        racket.isHidden = true
         head.position = Self.neck
         head.zRotation = 0
         hair.position = Self.neck
@@ -180,25 +189,34 @@ final class KuroHomeNode: SKNode {
             let p = t.truncatingRemainder(dividingBy: 0.9) / 0.9
             body.position.y = 1.5 * CGFloat(sin(p * tau * 2))
             if wearsGloves {
-                armL.zRotation = 2.45
+                // The guard glove sits at her chin, in front of her face.
+                armL.zRotation = 2.2
+                armL.zPosition = 0.007
                 let punch = p > 0.32 && p < 0.58
                 armR.zRotation = punch ? 1.62 : 2.35
                 armR.yScale = punch ? 1.3 : 1
             } else {
-                let swing = CGFloat(0.5 - 0.5 * cos(p * tau))
-                armR.zRotation = 0.6 + 1.4 * swing
-                armL.zRotation = -0.5
-                body.zRotation = -0.06 + 0.12 * swing
+                // A forehand: the racket arm goes back at waist height, sweeps across her front and finishes over
+                // the other shoulder, her body turning with it.
+                let swing = CGFloat(Self.forehand(t))
+                armR.zRotation = Self.backswing + (Self.finish - Self.backswing) * swing
+                armR.zPosition = 0.007
+                armL.zRotation = 0.5 - 0.3 * swing
+                body.zRotation = 0.1 - 0.2 * swing
+                torso.xScale = 0.9 + 0.2 * abs(swing - 0.5)
+                racket.isHidden = false
             }
         case .sit:
             body.position.y = Self.seatDrop
             legL.isHidden = true
             legR.isHidden = true
             sitLegs.isHidden = false
-            sitLegs.position = Self.node(60, 136)
-            // Hands folded on her lap.
-            armL.zRotation = 0.45
-            armR.zRotation = -0.45
+            sitLegs.position = Self.node(60, 134)
+            // Hands resting on her thighs.
+            armL.zRotation = 0.3
+            armR.zRotation = -0.3
+            armL.yScale = 1.2
+            armR.yScale = 1.2
             body.zRotation = -0.03
             torso.yScale = 1 + 0.02 * CGFloat(sin(t * tau / 3.6))
             head.position.y -= 1
@@ -255,6 +273,22 @@ final class KuroHomeNode: SKNode {
         hair.position = head.position
         hair.zRotation = head.zRotation
     }
+
+    /// How far through her forehand she is at `t`: 0 racket back, 1 finished over the shoulder. Every 1.6 s: a slow
+    /// take-back, a quick sweep, a hold, then back.
+    nonisolated static func forehand(_ t: TimeInterval) -> Double {
+        let p = t.truncatingRemainder(dividingBy: 1.6)
+        switch p {
+        case ..<0.5: return 0
+        case ..<0.75: return 0.5 - 0.5 * cos((p - 0.5) / 0.25 * .pi)
+        case ..<1.1: return 1
+        default: return 1 - (0.5 - 0.5 * cos((p - 1.1) / 0.5 * .pi))
+        }
+    }
+
+    // Arm angles of the forehand: out to her side at the waist, and up across to the other shoulder.
+    private static let backswing: CGFloat = 1.25
+    private static let finish: CGFloat = -1.9
 
     /// The middle of the bar she presses, in the coordinates of her parent.
     var barCenter: CGPoint { parentPoint(bar) }
@@ -360,7 +394,7 @@ final class KuroHomeNode: SKNode {
         let name = part.rawValue
         guard !name.hasSuffix("_back"), !name.contains("sleeve") else { return false }
         return name.hasPrefix("jacket_") || name.hasPrefix("top_") || name.hasPrefix("base_")
-            || name.hasPrefix("set_") && name.hasSuffix("_top") || part == .boxShoulderTowel || part == .workBadge
+            || name.hasPrefix("set_") && name.hasSuffix("_top") || part == .workBadge
     }
 
     private nonisolated static func isFace(_ part: KuroPart) -> Bool {
@@ -442,6 +476,31 @@ final class KuroHomeNode: SKNode {
         return texture
     }
 
+    static let racketRect = CGRect(x: -12, y: -4, width: 24, height: 48)
+
+    /// Her racket, handle at the top so it hangs on from the fist: violet frame, light strings.
+    static let racketTexture = HomeTextures.texture(racketRect) { context in
+        var handle = Path()
+        handle.move(to: CGPoint(x: 0, y: 0))
+        handle.addLine(to: CGPoint(x: 0, y: 16))
+        context.stroke(handle, with: .color(KuroPalette.ink), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+        context.stroke(handle, with: .color(KuroPalette.navy), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+        let head = Path(ellipseIn: CGRect(x: -9, y: 16, width: 18, height: 25))
+        context.fill(head, with: .color(KuroPalette.goldStrings))
+        var strings = Path()
+        for x: CGFloat in [-4, 0, 4] {
+            strings.move(to: CGPoint(x: x, y: 18))
+            strings.addLine(to: CGPoint(x: x, y: 39))
+        }
+        for y: CGFloat in [23, 28.5, 34] {
+            strings.move(to: CGPoint(x: -8, y: y))
+            strings.addLine(to: CGPoint(x: 8, y: y))
+        }
+        context.stroke(strings, with: .color(KuroPalette.ink.opacity(0.35)), lineWidth: 1)
+        context.stroke(head, with: .color(KuroPalette.ink), lineWidth: 4.5)
+        context.stroke(head, with: .color(KuroPalette.violet), lineWidth: 2)
+    }
+
     static let tabletRect = CGRect(x: -16, y: -13, width: 32, height: 26)
 
     /// The back of her tablet, landscape, in its lilac case.
@@ -478,24 +537,29 @@ final class KuroHomeNode: SKNode {
         context.stroke(stripe, with: .color(KuroPalette.lavender), lineWidth: 2)
     }
 
-    // Seated legs seen from the front, knees together.
+    // Seated legs seen from the front: thighs coming towards us on the seat, knees together, shins down to the floor.
     static let sitTexture = HomeTextures.texture(HakuNode.sitRect) { context in
         let ink = KuroPalette.ink
-        for x: CGFloat in [-11.5, 1.5] {
-            let shin = Path(roundedRect: CGRect(x: x, y: 10, width: 10, height: 36), cornerRadius: 2)
+        for x: CGFloat in [-10.5, 1.5] {
+            let shin = Path(roundedRect: CGRect(x: x, y: 14, width: 9, height: 26), cornerRadius: 2)
             context.fill(shin, with: .color(KuroPalette.navy))
             context.stroke(shin, with: .color(ink), style: StrokeStyle(lineWidth: 3, lineJoin: .round))
         }
-        for x: CGFloat in [-6.5, 6.5] {
-            let shoe = Path(ellipseIn: CGRect(x: x - 7.5, y: 43, width: 15, height: 10))
+        for x: CGFloat in [-6, 6] {
+            let shoe = Path(ellipseIn: CGRect(x: x - 7, y: 37, width: 14, height: 9))
             context.fill(shoe, with: .color(KuroPalette.white))
             context.stroke(shoe, with: .color(ink), lineWidth: 3)
         }
-        for x: CGFloat in [-14, 0] {
-            let thigh = Path(roundedRect: CGRect(x: x, y: -2, width: 14, height: 14), cornerRadius: 5)
+        for x: CGFloat in [-15, 0] {
+            let thigh = Path(roundedRect: CGRect(x: x, y: 0, width: 15, height: 17), cornerRadius: 7)
             context.fill(thigh, with: .color(KuroPalette.navy))
             context.stroke(thigh, with: .color(ink), style: StrokeStyle(lineWidth: 3, lineJoin: .round))
         }
+        // A light crease where the thighs meet the knees, so the lap reads as coming forward.
+        var knees = Path()
+        knees.move(to: CGPoint(x: -12, y: 11))
+        knees.addQuadCurve(to: CGPoint(x: 12, y: 11), control: CGPoint(x: 0, y: 14))
+        context.stroke(knees, with: .color(KuroPalette.lavender.opacity(0.7)), lineWidth: 1.5)
     }
 }
 #endif

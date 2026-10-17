@@ -43,9 +43,10 @@ extension FrameSheets {
             model.switchMode(.boxing)
             scene.sync(animated: false)
             scene.settle()
-            scene.pose(at: 0.45)
-            cells.append(("网球日 · 运动区挥拍", try #require(Self.kuro(in: scene, model, t: 0.45, pose: .box))))
-            close.append(("网球日 · 运动区挥拍", try #require(Self.closeUp(scene, model, t: 0.45, pose: .box))))
+            scene.pose(at: 0.62)
+            let label = "网球日 · 运动区挥拍"
+            cells.append((label, try #require(Self.kuro(in: scene, model, t: 0.62, pose: .box))))
+            close.append((label, try #require(Self.closeUp(scene, model, t: 0.62, pose: .box))))
         }
         // Mid-walk and carried.
         let model = HomeModel(night: false, card: .tennis)
@@ -102,6 +103,47 @@ extension FrameSheets {
         room.pose(at: 1.3)
         let image = try #require(Self.kuro(in: room, big, t: 1.3, scale: 3))
         try save(Image(decorative: image, scale: 1).background(Toy.paper), as: "kuro-home-2-sofa-big", scale: 1)
+    }
+
+    // UI 审核 r1: the sofa, the forehand and the boxing guard, with HAKU on the sofa to compare.
+    @Test func kuroHomeR2() throws {
+        var close: [(String, CGImage)] = []
+        func scene(_ card: IdentityKind, _ mode: Mode, night: Bool) -> (CompanionKit.HomeScene, HomeModel) {
+            let model = HomeModel(night: night, card: card)
+            let scene = HomeScene(model: model)
+            model.switchMode(mode)
+            scene.sync(animated: false)
+            scene.settle()
+            return (scene, model)
+        }
+        let (sofa, sofaModel) = scene(.tennis, .chill, night: false)
+        sofa.pose(at: 1.3)
+        close.append(("她 · 坐沙发", try #require(Self.closeUp(sofa, sofaModel, t: 1.3))))
+        let image = try #require(Self.composite(sofa, scale: 2))
+        let p = sofa.haku.position
+        let rect = CGRect(x: (p.x - 60) * 2, y: (sofa.size.height - p.y - 90) * 2, width: 240, height: 240)
+        close.append(("对照 · HAKU 坐沙发", try #require(image.cropping(to: rect))))
+        let (court, courtModel) = scene(.tennis, .boxing, night: false)
+        for (label, t) in [("挥拍 · 引拍", 0.3), ("挥拍 · 击球", 0.62), ("挥拍 · 收拍", 0.9)] {
+            court.pose(at: t)
+            close.append((label, try #require(Self.closeUp(court, courtModel, t: t, pose: .box))))
+        }
+        let (ring, ringModel) = scene(.boxing, .boxing, night: false)
+        for (label, t) in [("拳击卡 · 护脸", 0.1), ("拳击卡 · 出拳", 0.4)] {
+            ring.pose(at: t)
+            close.append((label, try #require(Self.closeUp(ring, ringModel, t: t))))
+        }
+        let sheet = LazyVGrid(columns: Array(repeating: GridItem(.fixed(240)), count: 4), spacing: 10) {
+            ForEach(close.indices, id: \.self) { i in
+                VStack(spacing: 2) {
+                    Image(decorative: close[i].1, scale: 1).resizable().frame(width: 240, height: 240)
+                    Text(verbatim: close[i].0).font(.system(size: 12, weight: .bold))
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.white)
+        try save(sheet, as: "kuro-home-4-r2", scale: 1)
     }
 
     /// The scene with her in HAKU's place and pose.
