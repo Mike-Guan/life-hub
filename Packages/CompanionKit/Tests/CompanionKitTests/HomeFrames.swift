@@ -124,6 +124,59 @@ extension FrameSheets {
         try save(Image(decorative: cells[0].1, scale: 1).background(Toy.paper), as: "home-2-night-big", scale: 1)
     }
 
+    // The shop's room items: the small icon, and the 260 pt preview of the item where it stands with HAKU beside it.
+    @Test func hakuHomeShopItems() throws {
+        let side: CGFloat = 260
+        var cells: [(String, CGImage, HomeItem)] = []
+        for id in [
+            "room.plant", "room.bag", "haku.weekly.room.cactus", "haku.weekly.room.speaker", "room.bench",
+            "room.snowboard",
+        ] {
+            let item = try #require(HomeItem(shopID: id))
+            let model = HomeModel(night: false, cans: 999)
+            let scene = HomeScene(model: model)
+            _ = model.buy(.item(item))
+            model.standBeside(item)
+            scene.sync(animated: false)
+            scene.settle()
+            scene.pose(at: 1.3)
+            cells.append((id, try #require(Self.composite(scene, scale: 3)), item))
+        }
+        let canvas = HomeGrid.canvas
+        let sheet = VStack(alignment: .leading, spacing: 12) {
+            Text(verbatim: "商店 · 房间物品：小图标 + 260 pt 预览").font(.system(size: 20, weight: .bold))
+            LazyVGrid(columns: [GridItem(.fixed(side + 90)), GridItem(.fixed(side + 90))], spacing: 16) {
+                ForEach(cells.indices, id: \.self) { i in
+                    let (id, image, item) = cells[i]
+                    let crop = HomeItemPreview.crop(item, haku: HomeModel.previewSpot(item))
+                    let ring = HomeItemPreview.ring(item)
+                    let k = side / crop.width
+                    HStack(alignment: .top, spacing: 10) {
+                        VStack(spacing: 4) {
+                            HomeItemIcon(itemID: id).frame(width: 72, height: 72)
+                                .background(RoundedRectangle(cornerRadius: 12).fill(Toy.card))
+                            Text(verbatim: id).font(.system(size: 9)).frame(width: 80)
+                        }
+                        ZStack(alignment: .topLeading) {
+                            Image(decorative: image, scale: 3).resizable()
+                                .frame(width: canvas.width * k, height: canvas.height * k)
+                            Ellipse().stroke(Toy.pink, style: StrokeStyle(lineWidth: 2.5, dash: [6, 4]))
+                                .frame(width: ring.width * k, height: ring.height * k)
+                                .offset(x: (ring.minX - canvas.minX) * k, y: (ring.minY - canvas.minY) * k)
+                        }
+                        .offset(x: -(crop.minX - canvas.minX) * k, y: -(crop.minY - canvas.minY) * k)
+                        .frame(width: side, height: side, alignment: .topLeading)
+                        .clipped()
+                        .background(Toy.paper)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        try save(sheet, as: "home-4-shop-items", scale: 2)
+    }
+
     /// Draws the scene's sprites back to front with Core Graphics.
     static func composite(_ scene: SKScene, scale: CGFloat) -> CGImage? {
         let width = Int(scene.size.width * scale)

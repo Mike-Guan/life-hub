@@ -209,6 +209,12 @@ enum HomeItem: String, CaseIterable, Sendable {
     // The sports corner: gloves, racket and snowboard hang on the back wall, the bench stands under them.
     case gloves, racket, snowboard, bench
 
+    /// The room item a shop catalog id names, such as `room.bench` or `haku.weekly.room.cactus`.
+    init?(shopID: String) {
+        guard let range = shopID.range(of: "room."), range.upperBound < shopID.endIndex else { return nil }
+        self.init(rawValue: String(shopID[range.upperBound...]))
+    }
+
     /// Where the item stands, or hangs.
     var spot: GridPoint {
         switch self {

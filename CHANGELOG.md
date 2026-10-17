@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- CompanionKit draws the shop's room items for the app: `HomeItemIcon` (small icon, drawn as in the home) and
+  `HomeItemPreview` (the real room around the item where it stands, circled, HAKU next to it). The home's shop
+  button now opens the app's shop through `onShop` and reads 商店; the prototype's own shop panel is gone.
 - In the home prototype HAKU uses the bench: tapping it, dropping him on it, or a fitness card day with the
   bench bought sends him to lie on it and press the bar off the rack, up and down.
 - Art for the second preset character's boxing look: a white towel with a pink stripe on her right shoulder.
