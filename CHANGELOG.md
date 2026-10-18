@@ -127,6 +127,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
   reward list names them. The shelf no longer draws gloves nobody earned.
+- The home shows only the room items that stand in the room: the sports floor holds one piece, so buying the
+  bench puts the bag away and it no longer stands in front of the character on the bench. Showing every item
+  keeps to that too.
 - The second preset character, napping over her tablet on the couch, rolls over in her sleep when tapped,
   without a word, as she does at bedtime. Neither roll-over shows the heart bubble.
 - The home page shows only real data: the mode, today's timeline, the cans, what HAKU owns and wears, the earned
