@@ -177,7 +177,11 @@ public enum ModeEngine {
             guard current?.mode != .boxing else { return nil }
             return ModeDecision(mode: .boxing, source: .location, reason: "到\(gym)了")
 
-        case .leftGym, .leftFitness where cards.identity == .fitness:
+        // Without the fitness card, leaving the fitness gym keeps the mode.
+        case .leftFitness where cards.identity != .fitness:
+            return nil
+
+        case .leftGym, .leftFitness:
             // Only undo our own switch: the gym entry must still be the latest change.
             guard let entry = current, isGymVisit(entry) else { return nil }
             guard now.timeIntervalSince(entry.at) >= rules.gymMinimumStay else { return nil }
@@ -204,9 +208,6 @@ public enum ModeEngine {
         case .enteredFitness where cards.identity == .fitness:
             guard current?.mode != .boxing else { return nil }
             return ModeDecision(mode: .boxing, source: .location, reason: "到健身房了")
-
-        case .leftFitness:
-            return nil
 
         case .enteredFitness:
             // PRD section 16, Mike 2026-10-05: lifting happens in Chill, so the gym ends Work or 副业.
