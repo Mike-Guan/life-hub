@@ -42,7 +42,7 @@ public struct HubPlace: Codable, Equatable, Identifiable, Sendable {
             switch self {
             case .gym: entered ? .enteredGym : .leftGym
             case .office: entered ? .enteredOffice : .leftOffice
-            case .fitness: entered ? .enteredFitness : nil
+            case .fitness: entered ? .enteredFitness : .leftFitness
             case .home, .custom: nil
             }
         }

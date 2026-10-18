@@ -58,6 +58,27 @@ import Testing
         #expect(decide(.enteredFitness, log((.money, .manual, date(5, 18, 30))), at: date(5, 19)) == nil)
     }
 
+    @Test func theFitnessGymIsTheFitnessCardsPlace() {
+        let cards = ModeCards(identity: .fitness)
+        func decide(_ trigger: ModeTrigger, _ log: ModeLog, at now: Date) -> ModeDecision? {
+            ModeEngine.decide(trigger, log: log, now: now, cards: cards, calendar: calendar)
+        }
+        // Like the boxing gym, the card's place wins even right after a manual change.
+        let manual = log((.chill, .manual, date(5, 18, 50)))
+        let arrived = decide(.enteredFitness, manual, at: date(5, 19))
+        #expect(arrived == ModeDecision(mode: .boxing, source: .location, reason: "到健身房了"))
+        let visit = log((.chill, .manual, date(5, 18, 40)), (.boxing, .location, date(5, 19)))
+        #expect(decide(.enteredFitness, visit, at: date(5, 19, 10)) == nil)
+        #expect(decide(.leftFitness, visit, at: date(5, 19, 29)) == nil)
+        let left = decide(.leftFitness, visit, at: date(5, 20, 30))
+        #expect(left == ModeDecision(mode: .chill, source: .location, reason: "离开健身房，回到「下班」"))
+    }
+
+    @Test func leavingTheFitnessGymKeepsTheModeWithoutTheFitnessCard() {
+        let visit = log((.chill, .manual, date(5, 18, 40)), (.boxing, .location, date(5, 19)))
+        #expect(decide(.leftFitness, visit, at: date(5, 20, 30)) == nil)
+    }
+
     @Test func leavingTheGymRestoresTheEarlierMode() {
         let visit = log((.chill, .manual, date(5, 18, 40)), (.boxing, .location, date(5, 19)))
         #expect(decide(.leftGym, visit, at: date(5, 19, 29)) == nil)
