@@ -20,7 +20,7 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
     // Kinds whose art is done for every character. A kind joins once UI finishes its art,
     // so a card that slips to a later release needs no other change.
     /// The kinds the picker shows.
-    public static let released: [IdentityKind] = [.boxing, .tennis]
+    public static let released: [IdentityKind] = [.boxing, .tennis, .dance, .music, .ski]
 
     /// Whether the picker shows this kind.
     public var isReleased: Bool { Self.released.contains(self) }
@@ -90,7 +90,8 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         case .music: lines = ("弦调好了", "……谱子翻开")
         case .ski: lines = ("雪镜戴上", "围巾裹好了")
         }
-        return (persona == .kuro ? lines.kuro : lines.haku).localized(for: persona)
+        // The translators keep the short taglines in Localizable, not in the character tables.
+        return (persona == .kuro ? lines.kuro : lines.haku).localized
     }
 
     // 卡片标语与代码 v0 §2: the invite on the learned identity day.

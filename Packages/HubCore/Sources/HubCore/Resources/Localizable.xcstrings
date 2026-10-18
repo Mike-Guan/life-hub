@@ -192,6 +192,38 @@
         }
       }
     },
+    "……谱子翻开" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "…sheets open"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "……楽譜、開く"
+          }
+        }
+      }
+    },
+    "……音乐放上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "…music on"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "……曲、かける"
+          }
+        }
+      }
+    },
     "、" : {
       "comment" : "分隔符",
       "localizations" : {
@@ -1044,6 +1076,22 @@
         }
       }
     },
+    "围巾裹好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "scarf wrapped"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "マフラー、巻いた"
+          }
+        }
+      }
+    },
     "圆领毛衣" : {
       "localizations" : {
         "en" : {
@@ -1364,6 +1412,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "カーディガン"
+          }
+        }
+      }
+    },
+    "弦调好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Strings tuned"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "弦、合わせた"
           }
         }
       }
@@ -1988,6 +2052,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "オレンジのヘッドバンド"
+          }
+        }
+      }
+    },
+    "歌单选好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Playlist set"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "曲、選んだ"
           }
         }
       }
@@ -3361,6 +3441,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "雨の日"
+          }
+        }
+      }
+    },
+    "雪镜戴上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Goggles on"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ゴーグル、オン"
           }
         }
       }

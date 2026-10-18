@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
   her tennis day, guards and punches in two gloves with the boxing card, and dozes over her tablet in bed.
+- The identity card picker offers dance, music and ski, each with its own home tagline and identity-day
+  invite for both characters. The home card taglines now show in Japanese and English too.
 - In the home HAKU now follows the home's behavior rules: at bedtime he goes to bed, by mode he sits at
   the desk or on the sofa or trains in the sports corner, and in about half of the 15-minute slots he walks
   over to look at a home item (a plant, the cactus, the speaker) for 30 s. He never goes to the sports

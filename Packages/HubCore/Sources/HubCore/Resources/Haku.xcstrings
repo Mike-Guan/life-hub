@@ -2394,6 +2394,22 @@
         }
       }
     },
+    "琴我擦过了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Polished your instrument."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "楽器、拭いといた。"
+          }
+        }
+      }
+    },
     "瘫着呢。化了。" : {
       "comment" : "中文改为“瘫着呢。化了。”",
       "localizations" : {
@@ -2779,6 +2795,22 @@
         }
       }
     },
+    "雪板靠在门口了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Board's leaning by the door."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "板、玄関に立てかけといた。"
+          }
+        }
+      }
+    },
     "雪镜起雾了。" : {
       "localizations" : {
         "en" : {
@@ -2791,6 +2823,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ゴーグル、曇った。"
+          }
+        }
+      }
+    },
+    "鞋我放门口了。去不去随你。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Left your shoes by the door. Up to you."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "シューズ、玄関に出しといた。行くかはそっち次第。"
           }
         }
       }
