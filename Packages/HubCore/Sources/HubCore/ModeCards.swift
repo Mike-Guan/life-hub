@@ -72,10 +72,10 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         }
     }
 
-    // 卡片标语与代码 v0 §2. Cards still without lines say their name.
+    // 卡片标语与代码 v0 §2.
     /// The line under the home card in `persona`'s voice.
     public func tagline(for persona: Persona) -> String {
-        let lines: (haku: String, kuro: String)?
+        let lines: (haku: String, kuro: String)
         switch self {
         case .boxing: lines = ("头带系紧", "拳套系好了")
         case .tennis: lines = ("球拍拿好", "拍线刚调过")
@@ -86,16 +86,17 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         case .swimming: lines = ("泳帽塞好了", "毛巾带上")
         case .yoga: lines = ("垫子卷好了", "呼——吸")
         case .ball: lines = ("球打满气了", "帮你看着")
-        case .dance, .music, .ski: lines = nil
+        case .dance: lines = ("歌单选好了", "……音乐放上")
+        case .music: lines = ("弦调好了", "……谱子翻开")
+        case .ski: lines = ("雪镜戴上", "围巾裹好了")
         }
-        guard let lines else { return String(format: "%@中".localized(for: persona), title) }
         return (persona == .kuro ? lines.kuro : lines.haku).localized(for: persona)
     }
 
-    // 卡片标语与代码 v0 §2: the invite on the learned identity day. Cards still without one use a plain line.
+    // 卡片标语与代码 v0 §2: the invite on the learned identity day.
     /// The identity day's invite in `persona`'s voice.
     public func invite(for persona: Persona) -> String {
-        let lines: (haku: String, kuro: String)?
+        let lines: (haku: String, kuro: String)
         switch self {
         case .boxing: lines = ("拳套我都戴好了，你随意啊。", "……拳套系好了。去吗。")
         case .tennis: lines = ("球拍在门口。去不去随你。", "今天网球。……拍子带好了。")
@@ -106,11 +107,10 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         case .swimming: lines = ("泳帽我找到了。", "……毛巾带了吗。")
         case .yoga: lines = ("垫子卷好了。", "……今天去拉伸吗。")
         case .ball: lines = ("球我打好气了。", "……今天去打球吗。")
-        case .dance, .music, .ski: lines = nil
-        }
-        guard let lines else {
-            let line = persona == .kuro ? "……今天去吗。" : "今天%@，我准备好了。"
-            return String(format: line.localized(for: persona), title)
+        case .dance: lines = ("鞋我放门口了。去不去随你。", "……今天去跳吗。")
+        case .music: lines = ("琴我擦过了。", "……今天去练吗。")
+        // Skiing is seasonal: months without going are normal, so the invite stays plain.
+        case .ski: lines = ("雪板靠在门口了。", "……今天上山吗。")
         }
         return (persona == .kuro ? lines.kuro : lines.haku).localized(for: persona)
     }

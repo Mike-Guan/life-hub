@@ -189,7 +189,7 @@ import Testing
         #expect(cards.pickedIdentity(for: .work, persona: .haku) == nil)
         #expect(cards.code(for: .boxing, persona: .haku) == "SWIM")
         #expect(cards.tagline(for: .boxing, persona: .haku) == "泳帽塞好了")
-        #expect(ModeCards(identity: .ski).tagline(for: .boxing, persona: .kuro) == "滑雪中")
+        #expect(ModeCards(identity: .ski).tagline(for: .boxing, persona: .kuro) == "围巾裹好了")
         #expect(cards.code(for: .work, persona: .haku) == "WORK")
         #expect(IdentityKind.swimming.symbol == "figure.pool.swim")
     }
@@ -197,7 +197,7 @@ import Testing
     @Test func eachCardInvitesInTheCharactersVoice() {
         #expect(IdentityKind.tennis.invite(for: .haku) == "球拍在门口。去不去随你。")
         #expect(IdentityKind.tennis.invite(for: .kuro) == "今天网球。……拍子带好了。")
-        #expect(IdentityKind.ski.invite(for: .haku) == "今天滑雪，我准备好了。")
+        #expect(IdentityKind.ski.invite(for: .haku) == "雪板靠在门口了。")
         for kind in IdentityKind.allCases {
             #expect(!kind.invite(for: .kuro).isEmpty && !kind.tagline(for: .kuro).isEmpty)
             #expect(!kind.lines(for: .haku).isEmpty && !kind.lines(for: .kuro).isEmpty)
