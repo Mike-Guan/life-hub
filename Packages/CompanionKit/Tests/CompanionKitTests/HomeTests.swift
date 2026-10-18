@@ -211,12 +211,22 @@ import Testing
         #expect(model.items.isEmpty)
         var next = model.snapshot
         next.owned = ["room.plant", "haku.weekly.room.cactus", "headband.cyan"]
+        next.room.place(["room.plant", "haku.weekly.room.cactus"], catalog: .shipped, deviceID: "test")
         model.apply(next)
         #expect(model.items == [.plant, .cactus])
         let cues = model.takeCues()
         #expect(cues.count == 2 && cues.contains(.placed(.plant)) && cues.contains(.placed(.cactus)))
         model.apply(next)
         #expect(model.takeCues().isEmpty)
+    }
+
+    @Test func theSportsFloorHoldsOnePieceSoTheBagNeverStandsInFrontOfTheBench() {
+        let model = HomeModel(night: false)
+        model.own(.bag)
+        model.own(.bench)
+        #expect(model.items == [.bench])
+        model.togglePreviewItems()
+        #expect(model.items.contains(.bench) && !model.items.contains(.bag))
     }
 
     @Test func hakuWearsWhatIsWornWhenItIsDrawnAndTheJacketOtherwise() {
@@ -310,10 +320,10 @@ import Testing
         #expect(model.keepsakes[0].name == ShopItem.item("keepsake.headband.runner")?.title)
     }
 
-    @Test func thePreviewShowsEveryItemWithoutOwningIt() {
+    @Test func thePreviewShowsEveryItemTheZonesHoldWithoutOwningIt() {
         let model = HomeModel(night: false)
         model.togglePreviewItems()
-        #expect(model.items == Set(HomeItem.allCases))
+        #expect(model.items == Set(HomeItem.allCases).subtracting([.bag]))
         #expect(model.snapshot.owned.isEmpty)
         model.togglePreviewItems()
         #expect(model.items.isEmpty)
