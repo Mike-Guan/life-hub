@@ -434,6 +434,26 @@ import Testing
         #expect(scene.hotspot(at: HomeGrid.scene(HomeGrid.plan(1.4, 6.0, 0.5)), includingHaku: false) == .sofa)
     }
 
+    @Test func aLabelOverTheCharacterStepsAboveHimOrBelowHimAtTheTop() {
+        let figure = CGRect(x: 100, y: 100, width: 40, height: 60)
+        #expect(HomeChip.dodge(CGPoint(x: 300, y: 120), figure: figure) == 0)
+        let up = HomeChip.dodge(CGPoint(x: 120, y: 120), figure: figure)
+        #expect(120 + up + HomeChip.half.height <= figure.minY - HomeChip.gap + 0.001)
+        let nearTop = CGRect(x: 100, y: 10, width: 40, height: 60)
+        let down = HomeChip.dodge(CGPoint(x: 120, y: 20), figure: nearTop)
+        #expect(20 + down - HomeChip.half.height >= nearTop.maxY + HomeChip.gap - 0.001)
+    }
+
+    @Test func theSceneTellsTheLabelsWhereTheCharacterIs() {
+        let model = HomeModel(night: false, mode: .chill)
+        let scene = HomeScene(model: model)
+        scene.sync(animated: false)
+        scene.settle()
+        #expect(model.figureFrame.isNull)
+        scene.step(0.01)
+        #expect(model.figureFrame == scene.haku.calculateAccumulatedFrame().integral)
+    }
+
     @Test func everyTapTargetIsAtLeast44PointsOnTheSmallestPhone() {
         // iPhone SE: 375 pt wide, 16 pt margins each side.
         let side = HomeGrid.minTap / (343 / HomeGrid.canvas.width)

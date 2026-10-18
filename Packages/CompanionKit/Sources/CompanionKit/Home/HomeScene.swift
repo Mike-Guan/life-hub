@@ -36,6 +36,7 @@ final class HomeScene: SKScene {
     private var dragPoint: CGPoint?
 
     private var clock: TimeInterval = 0
+    private var sinceFigure: TimeInterval = 0
     /// When HAKU got into bed, on the scene's clock.
     private var restSince: TimeInterval?
     private var lastTime: TimeInterval?
@@ -372,6 +373,16 @@ final class HomeScene: SKScene {
         }
         poseHaku()
         spawnEffects()
+        noteFigure(dt)
+    }
+
+    // A few times a second is enough for the labels to step aside, and keeps SwiftUI out of every frame.
+    private func noteFigure(_ dt: TimeInterval) {
+        sinceFigure += dt
+        guard sinceFigure >= 0.25 || model.figureFrame.isNull else { return }
+        sinceFigure = 0
+        let frame = haku.calculateAccumulatedFrame().integral
+        if frame != model.figureFrame { model.noteFigure(frame) }
     }
 
     /// Poses HAKU for a still frame at time `t`.

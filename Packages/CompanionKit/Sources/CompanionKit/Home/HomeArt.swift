@@ -728,7 +728,12 @@ enum HomeArt {
     }
 
     private static func floorLamp(_ pen: IsoPen) {
-        pen.line([P.plan(0.6, 8.5, 0.05), P.plan(1.4, 9.2, 0), P.plan(1.4, 9.9, 0)], Color(hex: 0x1B1C26), width: 1.4)
+        // Mike 2026-10-18: the cord ran out across the floor like a stray line. It now runs to a socket beside it.
+        pen.onLeftWall(7.72, 0.28, 7.98, 0.48, Color(hex: 0xFFFBF2), line: 1)
+        pen.box(0, 7.79, 0.32, 0.07, 7.91, 0.44, 0x1B1C26)
+        pen.line(
+            [P.plan(0.07, 7.85, 0.34), P.plan(0.08, 7.88, 0.03), P.plan(0.16, 8.12, 0.02), P.plan(0.3, 8.28, 0.03)],
+            Color(hex: 0x1B1C26), width: 1.4)
         pen.cylinder(0.5, 8.4, r: 0.28, 0, 0.1, 0x1B1C26)
         pen.cylinder(0.5, 8.4, r: 0.17, 0.4, 2.8, 0xFF5A7A)
         pen.line([P.plan(0.5, 8.4, 0.1), P.plan(0.5, 8.4, 0.4)], width: 3)

@@ -155,7 +155,7 @@ enum HomePiece: String, CaseIterable, Sendable {
         case .bed: [GridBox(x0: 6.6, y0: 4.8, x1: 9.6, y1: 8.8, z1: 1.7)]
         case .blanket: [GridBox(x0: 6.55, y0: 6.0, x1: 9.65, y1: 8.85, z1: 1.0)]
         case .nightstand: [GridBox(x0: 9.0, y0: 3.6, x1: 9.9, y1: 4.5, z1: 2.0)]
-        case .floorLamp: [GridBox(x0: 0.2, y0: 8.1, x1: 0.8, y1: 8.7, z1: 3.0)]
+        case .floorLamp: [GridBox(x0: 0, y0: 7.7, x1: 0.8, y1: 8.7, z1: 3.0)]
         case .doormat: [GridBox(x0: 3.6, y0: 9.0, x1: 5.6, y1: 10, z1: 0.05)]
         }
     }

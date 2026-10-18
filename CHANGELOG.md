@@ -127,6 +127,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Changed
 - The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
   reward list names them. The shelf no longer draws gloves nobody earned.
+- In the home the floor lamp's cord runs to a socket on the wall beside it, not out across the floor.
+- In the home the floating labels (奖励, 家具, 商店, 休息) step above the character, or below him at the top
+  of the room, while he would be under them, so they never cover him.
 - The home shows only the room items that stand in the room: the sports floor holds one piece, so buying the
   bench puts the bag away and it no longer stands in front of the character on the bench. Showing every item
   keeps to that too.
