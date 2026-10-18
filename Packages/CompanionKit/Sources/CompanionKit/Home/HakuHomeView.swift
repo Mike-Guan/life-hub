@@ -40,6 +40,46 @@ struct HomeChip: Identifiable {
         HomeChip(hotspot: nil, title: "家具", symbol: "sofa.fill", at: GridPoint(x: 1.4, y: 6.2, z: 2.4)),
         HomeChip(hotspot: .exit, title: "出门", symbol: "figure.walk", at: GridPoint(x: 4.6, y: 9.5, z: 0.7)),
     ]
+
+    /// Half the drawn size of a label, in view points.
+    static let half = CGSize(width: 30, height: 12)
+    /// The space kept between a label that stepped aside and the character, in view points.
+    static let gap: CGFloat = 4
+
+    // Mike 2026-10-18: the labels covered the character. One that would cover him steps above him, or below him
+    // when there is no room above.
+    /// How far a label centred at `center` moves down to clear `figure`, both in view points with y down; 0 when
+    /// it doesn't cover it.
+    static func dodge(_ center: CGPoint, figure: CGRect) -> CGFloat {
+        let label = CGRect(
+            x: center.x - half.width, y: center.y - half.height, width: 2 * half.width, height: 2 * half.height)
+        guard !figure.isNull, label.intersects(figure) else { return 0 }
+        let above = figure.minY - gap - half.height - center.y
+        if center.y + above - half.height >= 0 { return above }
+        return figure.maxY + gap + half.height - center.y
+    }
+}
+
+/// A label over the room that steps aside while the character would be under it.
+private struct HomeChipSpot<Label: View>: View {
+    let model: HomeModel
+    let center: CGPoint
+    let scale: CGFloat
+    let height: CGFloat
+    @ViewBuilder let label: Label
+
+    var body: some View {
+        // The scene's y runs up from the bottom of the room; the view's runs down from its top.
+        let f = model.figureFrame
+        let figure =
+            f.isNull
+            ? CGRect.null
+            : CGRect(x: f.minX * scale, y: height - f.maxY * scale, width: f.width * scale, height: f.height * scale)
+        let dy = HomeChip.dodge(center, figure: figure)
+        label
+            .position(x: center.x, y: center.y + dy)
+            .animation(.easeOut(duration: 0.25), value: dy)
+    }
 }
 
 /// HAKU's home: the room in SpriteKit, the rest of the screen in SwiftUI, on the app's real data.
@@ -177,8 +217,13 @@ public struct HakuHomeView: View {
                 if !carrying {
                     ForEach(chips) { chip in
                         let p = HomeGrid.plan(chip.at)
-                        chipButton(chip)
-                            .position(x: (p.x - canvas.minX) * scale, y: (p.y - canvas.minY) * scale)
+                        HomeChipSpot(
+                            model: stage.model,
+                            center: CGPoint(x: (p.x - canvas.minX) * scale, y: (p.y - canvas.minY) * scale),
+                            scale: scale, height: geo.size.height
+                        ) {
+                            chipButton(chip)
+                        }
                     }
                 }
             }
