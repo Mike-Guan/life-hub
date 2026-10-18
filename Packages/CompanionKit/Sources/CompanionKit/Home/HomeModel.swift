@@ -145,6 +145,8 @@ final class HomeModel {
     private(set) var line = "……来了。随便坐。"
     /// Bumped on every change the scene draws.
     private(set) var revision = 0
+    /// Where the scene last drew the character, in scene points; null before the first frame.
+    private(set) var figureFrame = CGRect.null
     /// One-off animations for the scene, oldest first.
     private(set) var cues: [HomeCue] = []
 
@@ -365,6 +367,11 @@ final class HomeModel {
         }
         goHome()
         changed()
+    }
+
+    /// Notes where the scene draws the character, so the labels over the room can step aside.
+    func noteFigure(_ frame: CGRect) {
+        figureFrame = frame
     }
 
     /// Takes the cues the scene has not played yet.
