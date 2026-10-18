@@ -86,6 +86,22 @@
         }
       }
     },
+    "……今天上山吗。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…heading up today?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……今日、雪山行く？"
+          }
+        }
+      }
+    },
     "……今天也去看会儿书？" : {
       "localizations" : {
         "en" : {
@@ -114,22 +130,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……今日、ちょっと歩きに行く？"
-          }
-        }
-      }
-    },
-    "……今天去吗。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…going today?"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "……今日、行く？"
           }
         }
       }
@@ -178,6 +178,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……今日、描きに行く？"
+          }
+        }
+      }
+    },
+    "……今天去练吗。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…practice today?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……今日、練習行く？"
+          }
+        }
+      }
+    },
+    "……今天去跳吗。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…dancing today?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……今日、踊りに行く？"
           }
         }
       }

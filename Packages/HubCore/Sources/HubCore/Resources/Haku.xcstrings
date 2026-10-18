@@ -542,23 +542,6 @@
         }
       }
     },
-    "今天%@，我准备好了。" : {
-      "comment" : "title 是卡名（Dance、Music、Ski）",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ today. I'm ready."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "今日は%@。準備できてる。"
-          }
-        }
-      }
-    },
     "今天不想动，你呢。" : {
       "comment" : "锁屏两行：もう動かない。 / そっちは？",
       "localizations" : {
@@ -2394,6 +2377,22 @@
         }
       }
     },
+    "琴我擦过了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiped down your instrument."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽器、拭いといた。"
+          }
+        }
+      }
+    },
     "瘫着呢。化了。" : {
       "comment" : "中文改为“瘫着呢。化了。”",
       "localizations" : {
@@ -2779,6 +2778,22 @@
         }
       }
     },
+    "雪板靠在门口了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Board's leaning by the door."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "板、玄関に立てかけといた。"
+          }
+        }
+      }
+    },
     "雪镜起雾了。" : {
       "localizations" : {
         "en" : {
@@ -2791,6 +2806,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ゴーグル、曇った。"
+          }
+        }
+      }
+    },
+    "鞋我放门口了。去不去随你。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shoes are out. Up to you."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シューズ、出しといた。そっち次第。"
           }
         }
       }

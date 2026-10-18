@@ -78,7 +78,7 @@ import Testing
     @Test func onlyReleasedKindsAreListed() {
         #expect(IdentityKind.released.allSatisfy { $0.isReleased })
         #expect(IdentityKind.boxing.isReleased)
-        #expect(!IdentityKind.ski.isReleased)
+        #expect(!IdentityKind.swimming.isReleased)
         #expect(IdentityKind.allCases.count == 12)
         #expect(IdentityKind.allCases.allSatisfy { ModeCards.width(of: $0.title) <= ModeCards.nameWidth })
         #expect(ChillActivity.allCases.allSatisfy { !$0.title.isEmpty })
@@ -189,7 +189,7 @@ import Testing
         #expect(cards.pickedIdentity(for: .work, persona: .haku) == nil)
         #expect(cards.code(for: .boxing, persona: .haku) == "SWIM")
         #expect(cards.tagline(for: .boxing, persona: .haku) == "泳帽塞好了")
-        #expect(ModeCards(identity: .ski).tagline(for: .boxing, persona: .kuro) == "滑雪中")
+        #expect(ModeCards(identity: .ski).tagline(for: .boxing, persona: .kuro) == "围巾裹好了")
         #expect(cards.code(for: .work, persona: .haku) == "WORK")
         #expect(IdentityKind.swimming.symbol == "figure.pool.swim")
     }
@@ -197,7 +197,7 @@ import Testing
     @Test func eachCardInvitesInTheCharactersVoice() {
         #expect(IdentityKind.tennis.invite(for: .haku) == "球拍在门口。去不去随你。")
         #expect(IdentityKind.tennis.invite(for: .kuro) == "今天网球。……拍子带好了。")
-        #expect(IdentityKind.ski.invite(for: .haku) == "今天滑雪，我准备好了。")
+        #expect(IdentityKind.ski.invite(for: .haku) == "雪板靠在门口了。")
         for kind in IdentityKind.allCases {
             #expect(!kind.invite(for: .kuro).isEmpty && !kind.tagline(for: .kuro).isEmpty)
             #expect(!kind.lines(for: .haku).isEmpty && !kind.lines(for: .kuro).isEmpty)
@@ -248,7 +248,7 @@ import Testing
     // Issue #350: with no translation in the catalog the Chinese text comes back unchanged.
     @Test func textWithoutATranslationStaysChinese() {
         #expect("拳击日".localized == "拳击日")
-        #expect(IdentityKind.dance.tagline(for: .haku) == "跳舞中")
+        #expect(IdentityKind.dance.tagline(for: .haku) == "歌单选好了")
         #expect(IdentityKind.ski.lines(for: .kuro) == ["……好冷。", "手好冰。", "……再滑一次？"])
         #expect(ChillActivity.walking.title == "散步晒太阳")
     }

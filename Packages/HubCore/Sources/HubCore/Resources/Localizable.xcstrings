@@ -18,23 +18,6 @@
         }
       }
     },
-    "%@中" : {
-      "comment" : "没标语的卡；“画画手作中”的意思",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ time"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@中"
-          }
-        }
-      }
-    },
     "%@的地方" : {
       "comment" : "地点名，如 “Boxing spot”；activity 这里要首字母大写的卡名，见说明",
       "localizations" : {
@@ -188,6 +171,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……始まった"
+          }
+        }
+      }
+    },
+    "……谱子翻开" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…score open"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……楽譜、開く"
+          }
+        }
+      }
+    },
+    "……音乐放上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…music on"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……曲、かける"
           }
         }
       }
@@ -1044,6 +1059,22 @@
         }
       }
     },
+    "围巾裹好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "scarf wrapped"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マフラー、巻いた"
+          }
+        }
+      }
+    },
     "圆领毛衣" : {
       "localizations" : {
         "en" : {
@@ -1364,6 +1395,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "カーディガン"
+          }
+        }
+      }
+    },
+    "弦调好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strings tuned"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "弦、チューニング済み"
           }
         }
       }
@@ -1988,6 +2035,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "オレンジのヘッドバンド"
+          }
+        }
+      }
+    },
+    "歌单选好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlist set"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲、選んだ"
           }
         }
       }
@@ -3361,6 +3424,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "雨の日"
+          }
+        }
+      }
+    },
+    "雪镜戴上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Goggles on"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゴーグル、オン"
           }
         }
       }
