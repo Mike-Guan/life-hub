@@ -180,9 +180,15 @@ final class HomeModel {
     var ownedOutfits: [HomeOutfit] {
         HomeOutfit.allCases.filter { $0.shopID.map(snapshot.owned.contains) ?? true }
     }
-    /// The items standing in the room: the owned ones, or all of them while previewing.
+    // 家 区域规划 v0: the sports floor holds one piece at a time; the room puts the earlier one away. Mike
+    // 2026-10-18: with every item shown, the bag stood in front of HAKU on the bench, so the preview keeps to that
+    // too and shows the bench.
+    /// The items standing in the room: the owned ones the room has not put away, or while previewing every item
+    /// the zones have room for.
     var items: Set<HomeItem> {
-        previewsAllItems ? Set(HomeItem.allCases) : Set(snapshot.owned.compactMap(HomeItem.init(shopID:)))
+        if previewsAllItems { return Set(HomeItem.allCases).subtracting([.bag]) }
+        let standing = Set(snapshot.room.placements.filter { !$0.isStored }.map(\.piece))
+        return Set(snapshot.owned.filter(standing.contains).compactMap(HomeItem.init(shopID:)))
     }
     /// The keepsakes on the reward shelf, by name, oldest first.
     var keepsakes: [HomeKeepsake] {
