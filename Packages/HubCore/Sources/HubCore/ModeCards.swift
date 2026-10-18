@@ -20,7 +20,7 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
     // Kinds whose art is done for every character. A kind joins once UI finishes its art,
     // so a card that slips to a later release needs no other change.
     /// The kinds the picker shows.
-    public static let released: [IdentityKind] = [.boxing, .tennis]
+    public static let released: [IdentityKind] = [.boxing, .tennis, .fitness, .study, .art]
 
     /// Whether the picker shows this kind.
     public var isReleased: Bool { Self.released.contains(self) }

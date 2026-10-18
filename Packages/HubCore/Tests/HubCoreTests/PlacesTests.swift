@@ -12,7 +12,7 @@ import Testing
         #expect(HubPlace.Kind.home.trigger(entered: true) == nil)
         #expect(HubPlace.Kind.home.trigger(entered: false) == nil)
         #expect(HubPlace.Kind.fitness.trigger(entered: true) == .enteredFitness)
-        #expect(HubPlace.Kind.fitness.trigger(entered: false) == nil)
+        #expect(HubPlace.Kind.fitness.trigger(entered: false) == .leftFitness)
         #expect(Set(HubPlace.Kind.presets.map(\.title)).count == 4)
     }
 
@@ -20,7 +20,7 @@ import Testing
         let gym = HubPlace.custom(name: "第二健身房", action: .fitness, latitude: 1, longitude: 2, id: "customA")
         #expect(gym.presenceKeys == ["customA", "fitness"])
         #expect(gym.trigger(entered: true) == .enteredFitness)
-        #expect(gym.trigger(entered: false) == nil)
+        #expect(gym.trigger(entered: false) == .leftFitness)
         let boxing = HubPlace.custom(name: "拳馆二", action: .boxing, latitude: 1, longitude: 2, id: "customB")
         #expect(boxing.presenceKeys == ["customB", "gym"])
         #expect(boxing.trigger(entered: true) == .enteredGym)
