@@ -60,6 +60,28 @@ struct HomeChip: Identifiable {
     }
 }
 
+/// What a label over the room shows: its symbol and title in a capsule.
+struct HomeChipLabel: View {
+    let chip: HomeChip
+
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: chip.symbol).font(.system(size: 10, weight: .bold))
+            Text(chip.title).font(Toy.body(11, weight: .bold))
+        }
+        .foregroundStyle(Toy.ink)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 4)
+        .background(Capsule().fill(Toy.card))
+        .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+        .overlay(alignment: .topTrailing) {
+            Circle().fill(Color(hex: 0x58C25A)).frame(width: 7, height: 7)
+                .overlay(Circle().stroke(Toy.ink, lineWidth: 1.2))
+                .offset(x: 2, y: -2)
+        }
+    }
+}
+
 /// A label over the room that steps aside while the character would be under it.
 private struct HomeChipSpot<Label: View>: View {
     let model: HomeModel
@@ -267,22 +289,9 @@ public struct HakuHomeView: View {
         Button {
             if let hotspot = chip.hotspot { open(hotspot) } else { sheet = .decorate }
         } label: {
-            HStack(spacing: 3) {
-                Image(systemName: chip.symbol).font(.system(size: 10, weight: .bold))
-                Text(chip.title).font(Toy.body(11, weight: .bold))
-            }
-            .foregroundStyle(Toy.ink)
-            .padding(.horizontal, 7)
-            .padding(.vertical, 4)
-            .background(Capsule().fill(Toy.card))
-            .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
-            .overlay(alignment: .topTrailing) {
-                Circle().fill(Color(hex: 0x58C25A)).frame(width: 7, height: 7)
-                    .overlay(Circle().stroke(Toy.ink, lineWidth: 1.2))
-                    .offset(x: 2, y: -2)
-            }
-            .frame(minWidth: HomeGrid.minTap, minHeight: HomeGrid.minTap)
-            .contentShape(Rectangle())
+            HomeChipLabel(chip: chip)
+                .frame(minWidth: HomeGrid.minTap, minHeight: HomeGrid.minTap)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
