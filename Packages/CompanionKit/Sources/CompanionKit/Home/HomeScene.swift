@@ -406,6 +406,11 @@ final class HomeScene: SKScene {
                 }
             case .box, .shadowbox: face = .box
             case .bench: face = .focus
+            case .practice where model.snapshot.persona == .kuro && model.card == .tennis:
+                // Mike 2026-10-18 approved KURO's sports corner: on a tennis day she swings forehands there. Her
+                // box pose without gloves is the forehand.
+                pose = .box
+                face = .box
             case .idle, .practice:
                 // Now and then he stretches, or glances the other way; in the sports corner that is warming up.
                 let cycle = clock.truncatingRemainder(dividingBy: 16)
