@@ -78,7 +78,7 @@ import Testing
     @Test func onlyReleasedKindsAreListed() {
         #expect(IdentityKind.released.allSatisfy { $0.isReleased })
         #expect(IdentityKind.boxing.isReleased)
-        #expect(!IdentityKind.ski.isReleased)
+        #expect(!IdentityKind.swimming.isReleased)
         #expect(IdentityKind.allCases.count == 12)
         #expect(IdentityKind.allCases.allSatisfy { ModeCards.width(of: $0.title) <= ModeCards.nameWidth })
         #expect(ChillActivity.allCases.allSatisfy { !$0.title.isEmpty })
@@ -248,7 +248,7 @@ import Testing
     // Issue #350: with no translation in the catalog the Chinese text comes back unchanged.
     @Test func textWithoutATranslationStaysChinese() {
         #expect("拳击日".localized == "拳击日")
-        #expect(IdentityKind.dance.tagline(for: .haku) == "跳舞中")
+        #expect(IdentityKind.dance.tagline(for: .haku) == "歌单选好了")
         #expect(IdentityKind.ski.lines(for: .kuro) == ["……好冷。", "手好冰。", "……再滑一次？"])
         #expect(ChillActivity.walking.title == "散步晒太阳")
     }
