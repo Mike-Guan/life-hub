@@ -300,6 +300,68 @@ extension FrameSheets {
         try save(sheet, as: "home-5-doze-big", scale: 1)
     }
 
+    // Mike 2026-10-18: the labels covered the character. The room at iPhone SE width with the real labels, each
+    // where it ends up while the character is under it, beside where it stood before.
+    @Test func hakuHomeChipsStepAside() throws {
+        let width: CGFloat = 343
+        let s = width / HomeGrid.canvas.width
+        let height = HomeGrid.canvas.height * s
+        let cells: [(String, Bool, HomeHotspot)] = [
+            ("坐沙发", false, .sofa), ("在床上", true, .bed), ("在衣柜前", false, .wardrobe), ("在商店前", false, .shop),
+        ]
+        var rooms: [(String, CGImage, [(HomeChip, CGPoint, CGFloat)])] = []
+        for (label, night, hotspot) in cells {
+            let model = HomeModel(night: night)
+            let scene = HomeScene(model: model)
+            model.tap(hotspot)
+            scene.sync(animated: false)
+            scene.settle()
+            scene.pose(at: 1.0)
+            scene.step(0.01)
+            let image = try #require(Self.composite(scene, scale: 3))
+            let f = model.figureFrame
+            let figure = CGRect(x: f.minX * s, y: height - f.maxY * s, width: f.width * s, height: f.height * s)
+            let chips = HomeChip.all.map { chip in
+                let p = HomeGrid.plan(chip.at)
+                let c = CGPoint(x: (p.x - HomeGrid.canvas.minX) * s, y: (p.y - HomeGrid.canvas.minY) * s)
+                return (chip, c, HomeChip.dodge(c, figure: figure))
+            }
+            rooms.append((label, image, chips))
+        }
+        let sheet = VStack(alignment: .leading, spacing: 8) {
+            Text(verbatim: "家 · iPhone SE（343 pt）· 标签让开角色（虚线 = 原位置）").font(.system(size: 15, weight: .bold))
+            Grid(horizontalSpacing: 12, verticalSpacing: 12) {
+                ForEach([0, 2], id: \.self) { row in
+                    GridRow {
+                        ForEach(row..<row + 2, id: \.self) { i in
+                            VStack(spacing: 4) {
+                                ZStack(alignment: .topLeading) {
+                                    Image(decorative: rooms[i].1, scale: 3).resizable().frame(
+                                        width: width, height: height)
+                                    ForEach(rooms[i].2.indices, id: \.self) { j in
+                                        let (chip, c, dy) = rooms[i].2[j]
+                                        if dy != 0 {
+                                            Capsule().stroke(Color.red, style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
+                                                .frame(width: 2 * HomeChip.half.width, height: 2 * HomeChip.half.height)
+                                                .position(c)
+                                        }
+                                        HomeChipLabel(chip: chip).position(x: c.x, y: c.y + dy)
+                                    }
+                                }
+                                .frame(width: width, height: height)
+                                .background(Toy.paper)
+                                Text(verbatim: rooms[i].0).font(.system(size: 12, weight: .bold))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.white)
+        try save(sheet, as: "home-7-chips", scale: 2)
+    }
+
     /// Draws the scene's sprites back to front with Core Graphics.
     static func composite(_ scene: SKScene, scale: CGFloat) -> CGImage? {
         scene.still(scale: scale)
