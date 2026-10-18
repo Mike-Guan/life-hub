@@ -97,7 +97,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "……今日、山行く？"
+            "value" : "……今日、雪山行く？"
           }
         }
       }
@@ -130,22 +130,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……今日、ちょっと歩きに行く？"
-          }
-        }
-      }
-    },
-    "……今天去吗。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…going today?"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "……今日、行く？"
           }
         }
       }

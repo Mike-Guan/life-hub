@@ -542,23 +542,6 @@
         }
       }
     },
-    "今天%@，我准备好了。" : {
-      "comment" : "title 是卡名（Dance、Music、Ski）",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ today. I'm ready."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "今日は%@。準備できてる。"
-          }
-        }
-      }
-    },
     "今天不想动，你呢。" : {
       "comment" : "锁屏两行：もう動かない。 / そっちは？",
       "localizations" : {
@@ -2399,7 +2382,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "Polished your instrument."
+            "value" : "Wiped down your instrument."
           }
         },
         "ja" : {
@@ -2832,13 +2815,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "Left your shoes by the door. Up to you."
+            "value" : "Shoes are out. Up to you."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "シューズ、玄関に出しといた。行くかはそっち次第。"
+            "value" : "シューズ、出しといた。そっち次第。"
           }
         }
       }

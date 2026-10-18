@@ -18,23 +18,6 @@
         }
       }
     },
-    "%@中" : {
-      "comment" : "没标语的卡；“画画手作中”的意思",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ time"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@中"
-          }
-        }
-      }
-    },
     "%@的地方" : {
       "comment" : "地点名，如 “Boxing spot”；activity 这里要首字母大写的卡名，见说明",
       "localizations" : {
@@ -197,7 +180,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "…sheets open"
+            "value" : "…score open"
           }
         },
         "ja" : {
@@ -1427,7 +1410,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "弦、合わせた"
+            "value" : "弦、チューニング済み"
           }
         }
       }
