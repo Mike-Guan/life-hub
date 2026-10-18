@@ -121,4 +121,25 @@ import Testing
         )
         #expect(again.room == home.room)
     }
+
+    @Test func theGlovesLookWornAfterTheCharactersFifthBoxingWin() throws {
+        let suite = "HomeSnapshotTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        func boxing(_ count: Int, persona: Persona = .haku) -> [CanEntry] {
+            (0..<count).map { i in
+                CanEntry(
+                    id: UUID(), kind: .earned, at: now.addingTimeInterval(Double(-i) * 86_400), cans: 1, win: .boxing,
+                    persona: persona, card: .boxing, deviceID: "t")
+            }
+        }
+        func home(_ entries: [CanEntry]) -> HomeSnapshot {
+            HomeSnapshot.make(
+                persona: .haku, mode: .chill, today: [], ledger: CanLedger(entries: entries), energy: EnergyLog(),
+                bedtime: .off, defaults: defaults, now: now)
+        }
+        #expect(!home(boxing(MomentEngine.glovesAfter - 1) + boxing(3, persona: .kuro)).wornGloves)
+        #expect(home(boxing(MomentEngine.glovesAfter)).wornGloves)
+    }
 }

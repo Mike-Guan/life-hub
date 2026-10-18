@@ -11,6 +11,8 @@ enum HomeLayer: Hashable, Sendable {
     case item(HomeItem)
     /// The bench's bar, which HAKU lifts off the rack.
     case barbell
+    /// The worn gloves on the reward shelf.
+    case wornGloves
 
     /// The plan rectangle the layer is drawn in.
     var rect: CGRect {
@@ -19,6 +21,7 @@ enum HomeLayer: Hashable, Sendable {
         case .piece(let piece, _, _): HomeGrid.bounds(piece.boxes, margin: 10)
         case .item(let item): HomeGrid.bounds(HomeArt.boxes(item), margin: 10)
         case .barbell: HomeGrid.bounds([HomeArt.barbellBox], margin: 10)
+        case .wornGloves: HomeGrid.bounds([HomeArt.wornGlovesBox], margin: 10)
         }
     }
 
@@ -32,6 +35,7 @@ enum HomeLayer: Hashable, Sendable {
                 HomeArt.piece(pen, piece, color: color, covering: covering)
             case .item(let item): HomeArt.item(pen, item)
             case .barbell: HomeArt.barbell(pen)
+            case .wornGloves: HomeArt.wornGloves(pen)
             }
             if night {
                 layer.blendMode = .sourceAtop

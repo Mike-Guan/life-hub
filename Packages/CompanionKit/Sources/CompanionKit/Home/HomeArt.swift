@@ -508,12 +508,10 @@ enum HomeArt {
                 pen.onLeftWall(x: 0.02, y, z - 0.25, y + 0.08, z, Color(hex: HomeColors.woodDark), line: 1)
             }
         }
-        // Lower board: trophy, gloves, can tower.
+        // Lower board: trophy and can tower; the worn gloves stand between them once earned.
         pen.cylinder(0.3, 4.7, r: 0.12, 3.42, 3.55, 0xFFD23F)
         pen.box(0.22, 4.62, 3.55, 0.38, 4.78, 3.7, 0xFFD23F)
         pen.cylinder(0.3, 4.7, r: 0.18, 3.7, 4.0, 0xFFD23F)
-        pen.ellipse(at: P.plan(0.3, 5.5, 3.62), rx: 7, ry: 5.5, Color(hex: 0xFF3B4E), line: 1.8)
-        pen.ellipse(at: P.plan(0.3, 5.85, 3.62), rx: 7, ry: 5.5, Color(hex: 0xFF3B4E), line: 1.8)
         for (i, z) in [3.42, 3.66, 3.9].enumerated() {
             pen.cylinder(0.3, 6.75 - Double(i % 2) * 0.05, r: 0.1, z, z + 0.24, 0x1B1C26)
         }
@@ -530,6 +528,34 @@ enum HomeArt {
             pen.line(
                 [P.plan(0.5, y + 0.03, top - 0.1), P.plan(0.5, y + 0.13, top - 0.1)], Color.white.opacity(0.6), width: 1
             )
+        }
+    }
+
+    /// The plan box the worn gloves fill on the shelf's lower board.
+    static let wornGlovesBox = GridBox(x0: 0.1, y0: 5.3, x1: 0.5, y1: 6.1, z0: 3.42, z1: 4.05)
+
+    /// A pair of taped, scuffed boxing gloves standing on their cuffs, thumbs out.
+    static func wornGloves(_ pen: IsoPen) {
+        for (y, side) in [(5.5, -1.0), (5.9, 1.0)] {
+            let b = P.plan(0.3, y, 3.42)
+            let s = CGFloat(side)
+            let stroke = StrokeStyle(lineWidth: 1.6 * IsoPen.weight, lineJoin: .round)
+            let red = Color(hex: 0xC23A44)
+            let thumb = Path(ellipseIn: CGRect(x: b.x + s * 6 - 3.5, y: b.y - 16, width: 7, height: 9))
+            let mitt = Path(roundedRect: CGRect(x: b.x - 7, y: b.y - 21, width: 14, height: 15), cornerRadius: 6)
+            let cuff = Path(roundedRect: CGRect(x: b.x - 5.5, y: b.y - 7.5, width: 11, height: 7.5), cornerRadius: 1.5)
+            for (path, fill) in [(thumb, red), (mitt, red), (cuff, Color(hex: 0xE9E1CF))] {
+                pen.context.fill(path, with: .color(fill))
+                pen.context.stroke(path, with: .color(IsoPen.ink), style: stroke)
+            }
+            // Tape turns on the cuff, and pale scuffs where the leather wore.
+            pen.line(
+                [CGPoint(x: b.x - 5.5, y: b.y - 5), CGPoint(x: b.x + 5.5, y: b.y - 3.5)], tone(0xE9E1CF, -0.3), width: 1
+            )
+            pen.line(
+                [CGPoint(x: b.x - 4, y: b.y - 17), CGPoint(x: b.x - 1, y: b.y - 18)], tone(0xC23A44, 0.45), width: 1.2)
+            pen.line(
+                [CGPoint(x: b.x + 1, y: b.y - 12), CGPoint(x: b.x + 3.5, y: b.y - 11)], tone(0xC23A44, 0.45), width: 1)
         }
     }
 

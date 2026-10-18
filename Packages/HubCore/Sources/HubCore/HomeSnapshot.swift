@@ -22,6 +22,8 @@ public struct HomeSnapshot: Equatable, Sendable {
     public var room: RoomLayout
     /// The keepsakes the character earned, oldest first, for the reward shelf.
     public var keepsakes: [EarnedKeepsake]
+    /// Whether the character boxed often enough for her gloves to look worn; they stand on the reward shelf.
+    public var wornGloves: Bool
 
     public init(
         persona: Persona,
@@ -35,7 +37,8 @@ public struct HomeSnapshot: Equatable, Sendable {
         bedtime: Bedtime,
         today: [ModeSegment],
         room: RoomLayout,
-        keepsakes: [EarnedKeepsake] = []
+        keepsakes: [EarnedKeepsake] = [],
+        wornGloves: Bool = false
     ) {
         self.persona = persona
         self.mode = mode
@@ -49,6 +52,7 @@ public struct HomeSnapshot: Equatable, Sendable {
         self.today = today
         self.room = room
         self.keepsakes = keepsakes
+        self.wornGloves = wornGloves
     }
 
     // 家 真实数据清单 v0 (Mike 2026-10-17: the home page shows only real data). Every field comes from the store
@@ -91,7 +95,9 @@ public struct HomeSnapshot: Equatable, Sendable {
             bedtime: bedtime,
             today: today,
             room: room,
-            keepsakes: EarnedKeepsake.earned(in: ledger, persona: persona)
+            keepsakes: EarnedKeepsake.earned(in: ledger, persona: persona),
+            // Mike 2026-10-18: the worn gloves he earned were missing from the home's reward shelf.
+            wornGloves: mine.count(.boxing, card: .boxing) >= MomentEngine.glovesAfter
         )
     }
 

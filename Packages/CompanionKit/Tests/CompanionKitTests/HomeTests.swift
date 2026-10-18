@@ -320,6 +320,20 @@ import Testing
         #expect(model.keepsakes[0].name == ShopItem.item("keepsake.headband.runner")?.title)
     }
 
+    @Test func theWornGlovesStandOnTheShelfOnceEarned() {
+        let model = HomeModel(night: false)
+        let scene = HomeScene(model: model)
+        scene.sync(animated: false)
+        func shown() -> Bool { scene.children.contains { ($0 as? HomeLayerNode)?.layer == .wornGloves } }
+        #expect(!shown())
+        var next = model.snapshot
+        next.wornGloves = true
+        model.apply(next)
+        scene.sync(animated: false)
+        #expect(shown())
+        #expect(model.keepsakes.map(\.name) == ["磨旧的拳套"])
+    }
+
     @Test func thePreviewShowsEveryItemTheZonesHoldWithoutOwningIt() {
         let model = HomeModel(night: false)
         model.togglePreviewItems()

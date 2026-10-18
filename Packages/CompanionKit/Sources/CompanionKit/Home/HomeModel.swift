@@ -192,9 +192,10 @@ final class HomeModel {
         let standing = Set(snapshot.room.placements.filter { !$0.isStored }.map(\.piece))
         return Set(snapshot.owned.filter(standing.contains).compactMap(HomeItem.init(shopID:)))
     }
-    /// The keepsakes on the reward shelf, by name, oldest first.
+    /// The keepsakes on the reward shelf, by name, oldest first, then the worn gloves once earned.
     var keepsakes: [HomeKeepsake] {
-        snapshot.keepsakes.map { HomeKeepsake(id: $0.id, name: ShopItem.item($0.id)?.title ?? $0.id) }
+        let earned = snapshot.keepsakes.map { HomeKeepsake(id: $0.id, name: ShopItem.item($0.id)?.title ?? $0.id) }
+        return earned + (snapshot.wornGloves ? [HomeKeepsake(id: "wornGloves", name: "磨旧的拳套")] : [])
     }
     /// Today's modes, oldest first.
     var timeline: [HomeTimelineEntry] {

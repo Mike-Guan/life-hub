@@ -362,6 +362,43 @@ extension FrameSheets {
         try save(sheet, as: "home-7-chips", scale: 2)
     }
 
+    // Mike 2026-10-18: the reward shelf close up, before and after the worn gloves are earned, by day and night.
+    @Test func hakuHomeShelfBig() throws {
+        let scale: CGFloat = 4
+        var crops: [(String, CGImage)] = []
+        for (label, night, worn) in [
+            ("白天 · 还没得", false, false), ("白天 · 磨旧的拳套", false, true), ("夜 · 磨旧的拳套", true, true),
+        ] {
+            let model = HomeModel(night: night)
+            var next = model.snapshot
+            next.wornGloves = worn
+            model.apply(next)
+            let scene = HomeScene(model: model)
+            scene.sync(animated: false)
+            scene.settle()
+            let image = try #require(Self.composite(scene, scale: scale))
+            let plan = HomeGrid.bounds(HomePiece.shelf.boxes, margin: 16)
+            let a = HomeGrid.scene(CGPoint(x: plan.minX, y: plan.minY))
+            let b = HomeGrid.scene(CGPoint(x: plan.maxX, y: plan.maxY))
+            let shelf = CGRect(x: min(a.x, b.x), y: min(a.y, b.y), width: abs(b.x - a.x), height: abs(b.y - a.y))
+            let rect = CGRect(
+                x: shelf.minX * scale, y: (scene.size.height - shelf.maxY) * scale,
+                width: shelf.width * scale, height: shelf.height * scale)
+            crops.append((label, try #require(image.cropping(to: rect))))
+        }
+        let sheet = HStack(alignment: .top, spacing: 12) {
+            ForEach(crops.indices, id: \.self) { i in
+                VStack(spacing: 6) {
+                    Image(decorative: crops[i].1, scale: 2)
+                    Text(verbatim: crops[i].0).font(.system(size: 14, weight: .bold))
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.white)
+        try save(sheet, as: "home-6-shelf-big", scale: 1)
+    }
+
     /// Draws the scene's sprites back to front with Core Graphics.
     static func composite(_ scene: SKScene, scale: CGFloat) -> CGImage? {
         scene.still(scale: scale)
