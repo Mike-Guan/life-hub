@@ -126,6 +126,8 @@ public enum ModeTrigger: Equatable, Sendable {
     case leftOffice
     /// Arriving at the fitness gym, or a place that counts as one.
     case enteredFitness
+    /// Leaving the fitness gym, or a place that counts as one.
+    case leftFitness
     /// Arriving at a place Mike added that switches to `mode`.
     case enteredPlace(Mode, name: String)
     /// An iOS Focus with the 副业 filter turned on, for vibe coding.
@@ -175,7 +177,7 @@ public enum ModeEngine {
             guard current?.mode != .boxing else { return nil }
             return ModeDecision(mode: .boxing, source: .location, reason: "到\(gym)了")
 
-        case .leftGym:
+        case .leftGym, .leftFitness where cards.identity == .fitness:
             // Only undo our own switch: the gym entry must still be the latest change.
             guard let entry = current, isGymVisit(entry) else { return nil }
             guard now.timeIntervalSince(entry.at) >= rules.gymMinimumStay else { return nil }
@@ -183,7 +185,8 @@ public enum ModeEngine {
             let previous = changes.dropLast().last
             let before = previous.map { $0.source.isManual ? $0.mode : .chill } ?? .chill
             guard before != .boxing else { return nil }
-            let reason = "离开\(gym)，回到「\(cards.title(for: before, persona: persona))」"
+            let place = trigger == .leftFitness ? HubPlace.Kind.fitness.title : gym
+            let reason = "离开\(place)，回到「\(cards.title(for: before, persona: persona))」"
             return ModeDecision(mode: before, source: .location, reason: reason)
 
         case .enteredOffice:
@@ -195,6 +198,15 @@ public enum ModeEngine {
             // back switches to work again.
             guard !isHeld(changes, now: now, rules: rules), current?.mode == .work else { return nil }
             return ModeDecision(mode: .chill, source: .location, reason: "离开公司了")
+
+        // 活动分类 v1: with the fitness card the fitness gym is the card's place, so arriving switches to the card
+        // straight away, like the boxing gym, and leaving gives back the earlier mode.
+        case .enteredFitness where cards.identity == .fitness:
+            guard current?.mode != .boxing else { return nil }
+            return ModeDecision(mode: .boxing, source: .location, reason: "到健身房了")
+
+        case .leftFitness:
+            return nil
 
         case .enteredFitness:
             // PRD section 16, Mike 2026-10-05: lifting happens in Chill, so the gym ends Work or 副业.

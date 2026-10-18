@@ -12,7 +12,7 @@ import Testing
         #expect(HubPlace.Kind.home.trigger(entered: true) == nil)
         #expect(HubPlace.Kind.home.trigger(entered: false) == nil)
         #expect(HubPlace.Kind.fitness.trigger(entered: true) == .enteredFitness)
-        #expect(HubPlace.Kind.fitness.trigger(entered: false) == nil)
+        #expect(HubPlace.Kind.fitness.trigger(entered: false) == .leftFitness)
         #expect(Set(HubPlace.Kind.presets.map(\.title)).count == 4)
     }
 
