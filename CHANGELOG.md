@@ -125,6 +125,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- In the home the floor lamp's cord runs to a socket on the wall beside it, not out across the floor.
 - In the home the floating labels (奖励, 家具, 商店, 休息) step above the character, or below him at the top
   of the room, while he would be under them, so they never cover him.
 - The home shows only the room items that stand in the room: the sports floor holds one piece, so buying the
