@@ -13,6 +13,7 @@ final class HomeScene: SKScene {
     private var pieces: [HomePiece: HomeLayerNode] = [:]
     private var itemNodes: [HomeItem: HomeLayerNode] = [:]
     private var barbell: HomeLayerNode?
+    private var gloves: HomeLayerNode?
     private let phoneGlow = SKSpriteNode(texture: HomeEffects.glow)
     private let shell = HomeLayerNode()
     private let skyDay = SKSpriteNode()
@@ -215,6 +216,16 @@ final class HomeScene: SKScene {
             barbell?.removeFromParent()
             barbell = nil
         }
+        if model.snapshot.wornGloves, gloves == nil {
+            let node = HomeLayerNode()
+            node.show(.wornGloves, night: model.isNight)
+            node.zPosition = CGFloat(HomePiece.shelf.depth) + 0.05
+            gloves = node
+            addChild(node)
+        } else if !model.snapshot.wornGloves {
+            gloves?.removeFromParent()
+            gloves = nil
+        }
         if model.isNight != shownNight {
             setNight(model.isNight, animated: animated && shownNight != nil)
             shownNight = model.isNight
@@ -264,7 +275,7 @@ final class HomeScene: SKScene {
         fade(clothes, night ? 0.6 : 1)
         fade(daylight, night ? 0 : 0.35)
         for light in nightLights { fade(light, night ? 0.85 : 0) }
-        for node in [shell] + Array(pieces.values) + Array(itemNodes.values) + [barbell].compactMap({ $0 }) {
+        for node in [shell] + Array(pieces.values) + Array(itemNodes.values) + [barbell, gloves].compactMap({ $0 }) {
             node.setNight(night, duration: duration)
         }
     }

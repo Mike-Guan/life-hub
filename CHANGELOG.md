@@ -125,6 +125,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
+  reward list names them. The shelf no longer draws gloves nobody earned.
 - The second preset character, napping over her tablet on the couch, rolls over in her sleep when tapped,
   without a word, as she does at bedtime. Neither roll-over shows the heart bubble.
 - The home page shows only real data: the mode, today's timeline, the cans, what HAKU owns and wears, the earned
