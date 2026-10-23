@@ -36,7 +36,7 @@ import Testing
     func apply(_ event: PlaceEvent, _ store: ModeStore, _ presence: PlacePresence) -> PlaceEvent.Applied? {
         event.apply(
             to: presence, store: store, rules: .standard, cards: .legacy(for: .haku), persona: .haku,
-            now: at(10), calendar: calendar
+            calendar: calendar
         )
     }
 
@@ -107,12 +107,27 @@ import Testing
         store.switchTo(.work, source: .location, at: at(6))
         var presence = PlacePresence()
         presence.record(office, entered: true, at: at(6))
-        // The leave switches to chill, logged at the launch (10:00), later than the gym arrival.
         let left = try #require(apply(PlaceEvent(place: office, entered: false, date: at(8)), store, presence))
         #expect(left.decision?.mode == .chill)
         let arrived = try #require(apply(PlaceEvent(place: gym, entered: true, date: at(9)), store, left.after))
         #expect(arrived.decision?.mode == .boxing)
         #expect(store.current == .boxing)
+    }
+
+    @Test func holdIsJudgedAtTheEventTime() throws {
+        let (store, presence) = commuting(in: .money)
+        // Mike chose chill at 16:00 and reached the office at 17:00, inside the 2-hour hold. The app
+        // replays the arrival at 19:00, after the hold, and still keeps chill.
+        store.switchTo(.chill, at: at(16))
+        let applied = try #require(apply(PlaceEvent(place: office, entered: true, date: at(17)), store, presence))
+        #expect(applied.decision == nil)
+        #expect(store.current == .chill)
+    }
+
+    @Test func replayIsLoggedAtTheEventTime() throws {
+        let (store, presence) = commuting(in: .chill)
+        _ = try #require(apply(PlaceEvent(place: office, entered: true, date: at(9)), store, presence))
+        #expect(store.log.current?.at == at(9))
     }
 
     @Test func addedFitnessPlaceIsKnownByItsOwnKey() {

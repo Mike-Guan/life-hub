@@ -750,6 +750,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   (including the background one a geofence causes) replays the last state of every place fence, and the
   place handling moved into HubCore (`PlaceEvent`) with tests. A place whose stored coordinates come back a
   hair off is no longer re-added at each launch, which dropped the fence's state.
+- A place event caught up at a later launch is judged and logged at the time it happened, so the 2-hour hold
+  after a manual change and the work-hour rules apply as they would have then.
 - The shop's room item preview keeps a still of the room under the live one, so it shows where SpriteKit can't
   draw, such as the CI simulator.
 - With languages on (Debug and STG), VoiceOver reads the second preset character's overtime lines from her
