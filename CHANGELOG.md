@@ -746,6 +746,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- With the app closed, arriving at or leaving a place now switches the mode, in every mode. Each launch
+  (including the background one a geofence causes) replays the last state of every place fence, and the
+  place handling moved into HubCore (`PlaceEvent`) with tests. A place whose stored coordinates come back a
+  hair off is no longer re-added at each launch, which dropped the fence's state.
 - The shop's room item preview keeps a still of the room under the live one, so it shows where SpriteKit can't
   draw, such as the CI simulator.
 - With languages on (Debug and STG), VoiceOver reads the second preset character's overtime lines from her
