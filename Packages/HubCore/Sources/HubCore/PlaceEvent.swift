@@ -55,7 +55,9 @@ public struct PlaceEvent: Equatable, Sendable {
         if !changedSince {
             if !entered, let stayStart, date.timeIntervalSince(stayStart) < PlacePresence.bounce {
                 // Walking past a fence takes back the switch the arrival made.
-                decision = store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules, now: date, calendar: calendar)
+                decision = store.autoSwitch(
+                    .passedBy(arrivedAt: stayStart), rules: rules, now: date, calendar: calendar
+                )
             } else if let trigger = place.trigger(entered: entered) {
                 decision = store.autoSwitch(
                     trigger, rules: rules, cards: cards, persona: persona, now: date, calendar: calendar
