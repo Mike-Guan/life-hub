@@ -551,40 +551,44 @@ struct LifeHubApp: App {
         needs: NeedTracker,
         growth: GrowthStore
     ) {
-        monitor.start(places) { place, entered in
-            var presence = PlacePresence.stored(in: AppGroup.defaults)
-            let arrived = presence.since(place.action == .boxing ? .gym : .fitness)
-            let stayStart = presence.since(place)
-            if entered, place.action == .fitness, presence.since(.fitness) == nil {
+        monitor.start(places) { event in
+            let place = event.place
+            let entered = event.entered
+            let persona = Persona.stored(in: AppGroup.defaults)
+            let rules = ModeRules.stored(in: AppGroup.defaults)
+            guard
+                let applied = event.apply(
+                    to: .stored(in: AppGroup.defaults),
+                    store: store,
+                    rules: rules,
+                    cards: ModeCards.current(in: AppGroup.defaults, persona: persona),
+                    persona: persona
+                )
+            else { return }
+            let before = applied.before
+            let presence = applied.after
+            if entered, place.action == .fitness, before.since(.fitness) == nil {
                 let departure = GymDeparture.stored(in: AppGroup.defaults)
                 let deviceID = HubDevice.id(defaults: AppGroup.defaults)
-                if let went = ChangeEngine.wentAfterGo(departure: departure, arrivedAt: .now, deviceID: deviceID) {
+                let went = ChangeEngine.wentAfterGo(departure: departure, arrivedAt: event.date, deviceID: deviceID)
+                if let went {
                     ChangeLog.note(went, in: AppGroup.defaults)
                 }
             }
-            presence.record(place, entered: entered, at: .now)
             presence.store(in: AppGroup.defaults)
             let identity = IdentityKind.picked(for: growth.persona)
-            if !entered, let arrived, let visit = Win.visit(place.action, from: arrived, to: .now, identity: identity) {
+            let arrived = before.since(place.action == .boxing ? .gym : .fitness)
+            if !entered, let arrived,
+                let visit = Win.visit(place.action, from: arrived, to: event.date, identity: identity)
+            {
                 growth.record(visit.win, source: visit.source, at: visit.at, card: visit.card)
             }
-            let rules = ModeRules.stored(in: AppGroup.defaults)
-            let decision: ModeDecision?
-            if !entered, let stayStart, Date.now.timeIntervalSince(stayStart) < PlacePresence.bounce {
-                // Walking past a fence takes back the switch the arrival made.
-                decision = store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules)
-            } else if let trigger = place.trigger(entered: entered) {
-                // After a GPS-drift return the stay continues; this puts back a mode the leave changed.
-                let persona = Persona.stored(in: AppGroup.defaults)
-                let cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
-                decision = store.autoSwitch(trigger, rules: rules, cards: cards, persona: persona)
-            } else {
-                decision = nil
-            }
-            // Place comes first: a leave that was held still ends work at the next place event.
-            let made = decision ?? store.settle(presence: presence)
-            let outcome = made.map { "切到\($0.mode.title)" } ?? "不切（\(Self.keptBecause(store: store, rules: rules))）"
-            Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
+            let kept = "不切（\(Self.keptBecause(store: store, rules: rules))）"
+            let outcome = applied.decision.map { "切到\($0.mode.title)" } ?? kept
+            // A late event was missed while the app was closed and caught up at this launch.
+            let time = event.date.formatted(date: .omitted, time: .shortened)
+            let late = Date.now.timeIntervalSince(event.date) > 60 ? "（补上 \(time)）" : ""
+            Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)\(late)，\(outcome)")
             needs.refresh(
                 places: places,
                 manualSince: store.log.active.last(where: \.source.isManual)?.at,

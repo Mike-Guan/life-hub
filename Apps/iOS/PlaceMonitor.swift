@@ -22,8 +22,9 @@ final class PlaceMonitor {
 
     // Called at launch too: after a geofence wakes the app in the background, iterating the
     // events of the monitor with the same name delivers the event that woke it.
-    /// Watches `settings` and calls `onEvent` with the place and whether Mike entered it.
-    func start(_ settings: PlaceSettings, onEvent: @escaping @MainActor (HubPlace, Bool) -> Void) {
+    /// Watches `settings` and calls `onEvent` for each arrival and departure. At each start it first
+    /// replays the last state of every fence, so a change missed while the app was closed is applied too.
+    func start(_ settings: PlaceSettings, onEvent: @escaping @MainActor (PlaceEvent) -> Void) {
         task?.cancel()
         lastError = nil
         session = settings.places.isEmpty ? nil : CLServiceSession(authorization: .always)
@@ -45,24 +46,32 @@ final class PlaceMonitor {
                 let condition = CLMonitor.CircularGeographicCondition(center: center, radius: place.radius)
                 await monitor.add(condition, identifier: place.id)
             }
-            var lastState: [String: CLMonitor.Event.State] = [:]
+            // The handler skips what the stored presence already shows, so a replay is applied once.
+            for place in settings.places {
+                guard let event = await monitor.record(for: place.id)?.lastEvent,
+                    let entered = Self.entered(event.state)
+                else { continue }
+                onEvent(PlaceEvent(place: place, entered: entered, date: event.date))
+            }
             do {
                 for try await event in await monitor.events {
                     Self.noteDiagnostics(event)
-                    guard let place = settings.places.first(where: { $0.id == event.identifier }) else { continue }
-                    guard lastState[event.identifier] != event.state else { continue }
-                    lastState[event.identifier] = event.state
-                    let entered: Bool
-                    switch event.state {
-                    case .satisfied: entered = true
-                    case .unsatisfied: entered = false
-                    default: continue
-                    }
-                    onEvent(place, entered)
+                    guard let place = settings.places.first(where: { $0.id == event.identifier }),
+                        let entered = Self.entered(event.state)
+                    else { continue }
+                    onEvent(PlaceEvent(place: place, entered: entered, date: event.date))
                 }
             } catch {
                 lastError = String(format: "地点监测停了：%@".localized, error.localizedDescription)
             }
+        }
+    }
+
+    private static func entered(_ state: CLMonitor.Event.State) -> Bool? {
+        switch state {
+        case .satisfied: true
+        case .unsatisfied: false
+        default: nil
         }
     }
 
@@ -120,9 +129,10 @@ final class PlaceMonitor {
     static let goodAccuracy: CLLocationAccuracy = 50
 
     private static func matches(_ condition: CLMonitor.CircularGeographicCondition, _ place: HubPlace) -> Bool {
+        // Core Location may hand back a stored value a hair off; re-adding would drop the fence's state.
         let center = condition.center
-        let samePoint = center.latitude == place.latitude && center.longitude == place.longitude
-        return samePoint && condition.radius == place.radius
+        let samePoint = abs(center.latitude - place.latitude) < 1e-6 && abs(center.longitude - place.longitude) < 1e-6
+        return samePoint && abs(condition.radius - place.radius) < 1
     }
 }
 
