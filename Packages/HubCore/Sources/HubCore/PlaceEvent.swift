@@ -30,10 +30,10 @@ public struct PlaceEvent: Equatable, Sendable {
         public var decision: ModeDecision?
     }
 
+    // A replay is judged and logged at the event's own time, so the 2-hour hold after a manual change
+    // and the work-hour rules apply as they would have then.
     /// Records the event in `presence` and switches the mode in `store` as the place rules say.
-    /// - Parameters:
-    ///   - presence: where Mike is as last stored.
-    ///   - now: when the event is handled; later than `date` when it's caught up at a launch.
+    /// - Parameter presence: where Mike is as last stored.
     /// - Returns: `nil` when `presence` already shows the event, so nothing changed.
     @MainActor
     public func apply(
@@ -42,29 +42,28 @@ public struct PlaceEvent: Equatable, Sendable {
         rules: ModeRules,
         cards: ModeCards,
         persona: Persona,
-        now: Date = .now,
         calendar: Calendar = .current
     ) -> Applied? {
         guard !isKnown(in: presence) else { return nil }
         let stayStart = presence.since(place)
         var after = presence
         after.record(place, entered: entered, at: date)
-        // Manual wins: a mode Mike chose after he moved stays. Automatic switches count as now, so an
+        // Manual wins: a mode Mike chose after he moved stays. Automatic switches don't count, so an
         // earlier replay at the same launch doesn't block this one.
         let changedSince = store.log.active.last(where: \.source.isManual).map { $0.at > date } ?? false
         var decision: ModeDecision?
         if !changedSince {
             if !entered, let stayStart, date.timeIntervalSince(stayStart) < PlacePresence.bounce {
                 // Walking past a fence takes back the switch the arrival made.
-                decision = store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules, now: now, calendar: calendar)
+                decision = store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules, now: date, calendar: calendar)
             } else if let trigger = place.trigger(entered: entered) {
                 decision = store.autoSwitch(
-                    trigger, rules: rules, cards: cards, persona: persona, now: now, calendar: calendar
+                    trigger, rules: rules, cards: cards, persona: persona, now: date, calendar: calendar
                 )
             }
         }
         // Place comes first: a leave that was held still ends work at the next place event.
-        let made = decision ?? store.settle(presence: after, now: now, calendar: calendar)
+        let made = decision ?? store.settle(presence: after, now: date, calendar: calendar)
         return Applied(before: presence, after: after, decision: made)
     }
 }
