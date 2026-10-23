@@ -102,6 +102,19 @@ import Testing
         #expect(applied.after.since(.office) == at(9))
     }
 
+    @Test func replaysAtOneLaunchDontBlockEachOther() throws {
+        let store = ModeStore(fileURL: nil, deviceID: "test")
+        store.switchTo(.work, source: .location, at: at(6))
+        var presence = PlacePresence()
+        presence.record(office, entered: true, at: at(6))
+        // The leave switches to chill, logged at the launch (10:00), later than the gym arrival.
+        let left = try #require(apply(PlaceEvent(place: office, entered: false, date: at(8)), store, presence))
+        #expect(left.decision?.mode == .chill)
+        let arrived = try #require(apply(PlaceEvent(place: gym, entered: true, date: at(9)), store, left.after))
+        #expect(arrived.decision?.mode == .boxing)
+        #expect(store.current == .boxing)
+    }
+
     @Test func addedFitnessPlaceIsKnownByItsOwnKey() {
         let lifting = HubPlace.custom(name: "Lift", action: .fitness, latitude: 6, longitude: 6, id: "customlift")
         var presence = PlacePresence()

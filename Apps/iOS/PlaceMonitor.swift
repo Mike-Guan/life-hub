@@ -47,11 +47,16 @@ final class PlaceMonitor {
                 await monitor.add(condition, identifier: place.id)
             }
             // The handler skips what the stored presence already shows, so a replay is applied once.
+            // Oldest first, so leaving home comes before arriving at the office.
+            var replays: [PlaceEvent] = []
             for place in settings.places {
                 guard let event = await monitor.record(for: place.id)?.lastEvent,
                     let entered = Self.entered(event.state)
                 else { continue }
-                onEvent(PlaceEvent(place: place, entered: entered, date: event.date))
+                replays.append(PlaceEvent(place: place, entered: entered, date: event.date))
+            }
+            for event in replays.sorted(by: { $0.date < $1.date }) {
+                onEvent(event)
             }
             do {
                 for try await event in await monitor.events {

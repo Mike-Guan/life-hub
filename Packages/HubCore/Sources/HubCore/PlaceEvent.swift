@@ -49,8 +49,9 @@ public struct PlaceEvent: Equatable, Sendable {
         let stayStart = presence.since(place)
         var after = presence
         after.record(place, entered: entered, at: date)
-        // Manual wins: a mode chosen after Mike moved stays.
-        let changedSince = store.log.active.last.map { $0.at > date } ?? false
+        // Manual wins: a mode Mike chose after he moved stays. Automatic switches count as now, so an
+        // earlier replay at the same launch doesn't block this one.
+        let changedSince = store.log.active.last(where: \.source.isManual).map { $0.at > date } ?? false
         var decision: ModeDecision?
         if !changedSince {
             if !entered, let stayStart, date.timeIntervalSince(stayStart) < PlacePresence.bounce {
