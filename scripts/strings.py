@@ -59,7 +59,10 @@ def main() -> int:
         catalog = json.loads(path.read_text(encoding="utf-8"))
         for key, entry in catalog.get("strings", {}).items():
             for language, localization in entry.get("localizations", {}).items():
-                value = localization.get("stringUnit", {}).get("value", "")
+                plural = localization.get("variations", {}).get("plural", {})
+                # A plural's "one" form may spell the number out, so only "other" must keep every placeholder.
+                unit = plural["other"] if plural else localization
+                value = unit.get("stringUnit", {}).get("value", "")
                 if placeholders(value) != placeholders(key):
                     stale.append(f"{path.relative_to(ROOT)}: {language} for {key!r} has other placeholders")
     for line in stale:

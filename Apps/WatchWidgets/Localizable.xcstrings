@@ -24,6 +24,12 @@
             "state" : "translated",
             "value" : "What your character is up to."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャラクターがいま何をしているか。"
+          }
         }
       }
     },
