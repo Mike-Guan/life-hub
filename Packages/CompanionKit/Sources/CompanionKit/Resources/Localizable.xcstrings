@@ -9,6 +9,12 @@
             "state" : "translated",
             "value" : "KURO, sleepy"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、眠そうにしている"
+          }
         }
       }
     },
@@ -19,6 +25,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KURO, drawing on a tablet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、タブレットで絵を描いている"
           }
         }
       }
@@ -31,6 +43,12 @@
             "state" : "translated",
             "value" : "KURO, busy"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、忙しそうにしている"
+          }
         }
       }
     },
@@ -41,6 +59,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KURO, in boxing gloves"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、グローブをはめている"
           }
         }
       }
@@ -53,6 +77,12 @@
             "state" : "translated",
             "value" : "KURO, in glasses, marking papers"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、メガネをかけて採点している"
+          }
         }
       }
     },
@@ -63,6 +93,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KURO, in ski goggles"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、ゴーグルをつけている"
           }
         }
       }
@@ -75,6 +111,12 @@
             "state" : "translated",
             "value" : "KURO, holding a yoga block"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、ヨガブロックを抱えている"
+          }
         }
       }
     },
@@ -85,6 +127,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KURO, holding a notebook"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、ノートを持っている"
           }
         }
       }
@@ -97,6 +145,12 @@
             "state" : "translated",
             "value" : "KURO, holding a tennis racket"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、テニスラケットを持っている"
+          }
         }
       }
     },
@@ -107,6 +161,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KURO, holding sheet music"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、楽譜を両手で持っている"
           }
         }
       }
@@ -119,6 +179,12 @@
             "state" : "translated",
             "value" : "KURO, holding a warm drink"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、温かい飲み物を両手で持っている"
+          }
         }
       }
     },
@@ -129,6 +195,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KURO, swaying to the music"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロ、音楽に合わせて体を揺らしている"
+          }
+        }
+      }
+    },
+    "下楼走 10 分钟？我先穿鞋。" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10分、下まで歩く？靴はいとく。"
+          }
+        }
+      }
+    },
+    "休息" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rest"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "休む"
+          }
+        }
+      }
+    },
+    "你好" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "こんにちは"
+          }
+        }
+      }
+    },
+    "出门" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go out"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出かける"
+          }
+        }
+      }
+    },
+    "出门，回首页" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave the room"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出かけて、ホームへ戻る"
           }
         }
       }
@@ -141,6 +287,12 @@
             "state" : "translated",
             "value" : "pssh"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プシュッ"
+          }
         }
       }
     },
@@ -152,6 +304,220 @@
             "state" : "translated",
             "value" : "Pick a mode on your iPhone"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhoneでモードを選んで"
+          }
+        }
+      }
+    },
+    "地毯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rug"
+          }
+        }
+      }
+    },
+    "墙" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walls"
+          }
+        }
+      }
+    },
+    "夜晚（DEBUG）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Night (DEBUG)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "夜（DEBUG）"
+          }
+        }
+      }
+    },
+    "奖励" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rewards"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ごほうび"
+          }
+        }
+      }
+    },
+    "奖励架" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reward shelf"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ごほうび棚"
+          }
+        }
+      }
+    },
+    "家具" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Furniture"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家具"
+          }
+        }
+      }
+    },
+    "家具换颜色" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recolor furniture"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家具の色を変える"
+          }
+        }
+      }
+    },
+    "打了 2 次拳。" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボクシング2回。"
+          }
+        }
+      }
+    },
+    "拿到了金拳套。" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のグローブを手に入れた。"
+          }
+        }
+      }
+    },
+    "摆满所有物品（DEBUG）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show all items (DEBUG)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部飾る（DEBUG）"
+          }
+        }
+      }
+    },
+    "晚上好" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evening"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "こんばんは"
+          }
+        }
+      }
+    },
+    "每一件都是真的发生过的事换来的。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each one came from something that really happened."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "どれも、本当にあったことで手に入れたもの。"
+          }
+        }
+      }
+    },
+    "沙发" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couch"
+          }
+        }
+      }
+    },
+    "磨旧的拳套" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Worn-out gloves"
+          }
+        }
+      }
+    },
+    "被子" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blanket"
+          }
+        }
+      }
+    },
+    "跑了 1 次 5 公里。" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5km、1回走った。"
+          }
         }
       }
     },
@@ -161,6 +527,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pick a mode and HAKU shows up"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モードを選ぶと、HAKUが出てくる |"
+          }
+        }
+      }
+    },
+    "默认外套" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basic jacket"
           }
         }
       }

@@ -263,7 +263,7 @@ final class HomeModel {
             line = "穿什么都一样帅。"
         case .shop:
             visit(.shop)
-            line = "罐子要花在刀刃上。"
+            line = "罐子是你的。我只是看着。"
         case .shelf:
             line = "这些都是真的发生过的。"
         case .exit:

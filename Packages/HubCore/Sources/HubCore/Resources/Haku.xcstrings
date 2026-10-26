@@ -100,6 +100,16 @@
         }
       }
     },
+    "……别盯着看。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…No need to stare."
+          }
+        }
+      }
+    },
     "……别碰，手带刚缠好。" : {
       "localizations" : {
         "en" : {
@@ -1278,6 +1288,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ min barely moving. Me too."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家で%@分、動いてない。俺もだらけ中。"
           }
         }
       }

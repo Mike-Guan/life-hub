@@ -985,6 +985,16 @@
         }
       }
     },
+    "……换好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…changed clothes."
+          }
+        }
+      }
+    },
     "……早。" : {
       "localizations" : {
         "en" : {
@@ -1229,6 +1239,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……まだ終わらない。"
+          }
+        }
+      }
+    },
+    "……这个，留着。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…keep this."
           }
         }
       }
@@ -1750,6 +1770,12 @@
     },
     "嗯。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mm."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",

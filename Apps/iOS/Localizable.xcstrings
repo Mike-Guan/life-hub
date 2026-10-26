@@ -3,6 +3,12 @@
   "strings" : {
     "%1$@ · %2$@卡" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13,6 +19,12 @@
     },
     "%1$@ · 累计 %2$lld 次%3$@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %3$@ ×%2$lld"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21,8 +33,34 @@
         }
       }
     },
+    "%1$@ 中 · 点 %2$@ 换状态" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@中・%2$@で切り替え"
+          }
+        }
+      }
+    },
+    "%1$@ 那天 +%2$@（每周一次）" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の日 +%2$@（週1回）"
+          }
+        }
+      }
+    },
     "%1$@ 陪你举铁，待满 30 分钟算一次健身，得 %2$lld 个能量罐。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ lifts with you. Stay 30 minutes and it counts as a gym visit: %2$lld cans."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -31,8 +69,50 @@
         }
       }
     },
+    "%1$@的样子，穿着%2$@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ look, wearing %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の姿、%2$@を着ている"
+          }
+        }
+      }
+    },
+    "%1$@，%2$@ 手动切过" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@、%2$@に手動で切り替え済み"
+          }
+        }
+      }
+    },
+    "%1$@，切到%2$@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@、%2$@に切り替え"
+          }
+        }
+      }
+    },
     "%1$lld 条 · 决策 %2$lld 条" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld entries · %2$lld decisions"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -43,6 +123,12 @@
     },
     "%1$lld 次%2$@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$@ ×%1$lld"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -53,6 +139,12 @@
     },
     "%1$lld 次判断 · 纠正 %2$lld 次" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld decisions · %2$lld corrected"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -63,6 +155,12 @@
     },
     "%1$lld 能量罐 · 还差 %2$lld" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld cans · %2$lld to go"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -73,6 +171,12 @@
     },
     "%@ · 手动" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · manual"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -83,6 +187,12 @@
     },
     "%@ · 手表" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · watch"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -107,8 +217,44 @@
         }
       }
     },
+    "%@ · 进行中" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@・進行中"
+          }
+        }
+      }
+    },
+    "%@ 个能量罐" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缶%@個"
+          }
+        }
+      }
+    },
+    "%@ 中 · 点 %@ 换状态" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · tap %@ to switch"
+          }
+        }
+      }
+    },
     "%@ 从睡觉时间开始变困，一直到起床时间。打开提醒，到点发一条通知，只提醒一次。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gets sleepy from bedtime until wake-up. Turn on the reminder for one notification at bedtime. Just one."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -124,15 +270,53 @@
             "state" : "translated",
             "value" : "%@ is already yawning."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@、もうあくびしてる。"
+          }
+        }
+      }
+    },
+    "%@ 那天 +%@（每周一次）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ +%@ (once a week)"
+          }
         }
       }
     },
     "%@的地方" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ spot"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@の場所"
+          }
+        }
+      }
+    },
+    "%@的样子，没穿换来的东西" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ look, nothing from the shop"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の姿、交換したものは着ていない"
           }
         }
       }
@@ -142,7 +326,7 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "For %@"
           }
         },
@@ -156,6 +340,24 @@
     },
     "%lld 次判断" : {
       "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "1 decision"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld decisions"
+                }
+              }
+            }
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -168,7 +370,7 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Trade %lld cans"
           }
         },
@@ -216,6 +418,12 @@
     },
     "M月d日 EEE" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EEE, MMM d"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -226,6 +434,12 @@
     },
     "Screen Time 没打开：%@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen Time isn't on: %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -240,6 +454,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Screen Time tracking didn't stop: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen Timeの監視を止められませんでした：%@ |"
           }
         }
       }
@@ -260,8 +480,24 @@
         }
       }
     },
+    "\\n\\n决策记录（%@ 条）\\n" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\\n\\n判断の記録（%@件）\\n"
+          }
+        }
+      }
+    },
     "\\n\\n决策记录（%lld 条）\\n" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\\n\\nDecision log (%lld)\\n"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -272,6 +508,12 @@
     },
     "iOS 最多同时看 %lld 个地点，删掉一个才能再加。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS can watch up to %lld places at once. Delete one to add another."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -282,6 +524,12 @@
     },
     "……你好。你平时一天都怎么过？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Hi. What are your days like?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -292,6 +540,12 @@
     },
     "……好，那就看你去哪儿。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Okay. I'll go by where you are."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -302,6 +556,12 @@
     },
     "……就这样。以后慢慢来。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…That's it. We'll figure out the rest."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -312,6 +572,12 @@
     },
     "……就这样吧。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…That'll do."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -322,6 +588,12 @@
     },
     "……新来的？你平时一天都在干嘛？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…New here? So what do your days look like?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -332,6 +604,12 @@
     },
     "……行，那我不管时间了。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Fine. I'll ignore the clock."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -342,6 +620,12 @@
     },
     "……这样可以吗？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Is this okay?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -352,6 +636,12 @@
     },
     "……这样？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Like this?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -395,6 +685,12 @@
     },
     "一" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -439,6 +735,12 @@
     },
     "一般几点睡呀？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When do you usually go to bed?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -449,6 +751,12 @@
     },
     "一般几点睡？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What time do you usually sleep?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -459,6 +767,12 @@
     },
     "三" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wed"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -508,6 +822,12 @@
             "state" : "translated",
             "value" : "Start"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仕事"
+          }
         }
       }
     },
@@ -518,6 +838,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Workdays"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出勤日"
           }
         }
       }
@@ -540,6 +866,12 @@
     },
     "上班的地方" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where you work"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -550,6 +882,12 @@
     },
     "下一步" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -566,11 +904,23 @@
             "state" : "translated",
             "value" : "End"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オフ"
+          }
         }
       }
     },
     "下班以后会做什么？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What do you do after work?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -581,6 +931,12 @@
     },
     "下班以后呢？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "And after work?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -591,6 +947,12 @@
     },
     "下班以后还在弄自己的事吗？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still working on your own stuff after work?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -615,12 +977,28 @@
         }
       }
     },
+    "下班提醒没设上：%@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終業前の通知を設定できませんでした：%@ |"
+          }
+        }
+      }
+    },
     "不切换" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Don't switch"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切り替えない"
           }
         }
       }
@@ -637,6 +1015,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "切り替えません。家でくつろいでいるかを見るために使います。"
+          }
+        }
+      }
+    },
+    "不切（%@）" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切り替えない（%@）"
           }
         }
       }
@@ -674,6 +1062,16 @@
         }
       }
     },
+    "不在使用中" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用中ではない"
+          }
+        }
+      }
+    },
     "不对" : {
       "comment" : "和后面的“？”拼成 Not right?",
       "localizations" : {
@@ -681,6 +1079,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Not right"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ちがう"
           }
         }
       }
@@ -693,11 +1097,23 @@
             "state" : "translated",
             "value" : "Not right?"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ちがう？"
+          }
         }
       }
     },
     "不用" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No thanks"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -724,6 +1140,12 @@
     },
     "二" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tue"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -734,6 +1156,12 @@
     },
     "五" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fri"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -797,6 +1225,12 @@
             "state" : "translated",
             "value" : "No sleep data today"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日は睡眠データがありません |"
+          }
         }
       }
     },
@@ -806,6 +1240,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No mode switches yet today."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日はまだモードを切り替えていません。 |"
           }
         }
       }
@@ -844,6 +1284,12 @@
     },
     "他" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "his"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -854,6 +1300,12 @@
     },
     "以后再说" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maybe later"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -901,6 +1353,12 @@
             "state" : "translated",
             "value" : "Location isn't set to “Always,” so with the app closed it can't tell when you reach or leave the office or home. Go to Settings > Life Hub > Location and pick “Always.”"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "位置情報が「常に」ではありません。アプリを閉じているあいだは、会社や家に着いた・離れたことがわかりません。「設定 > Life Hub > 位置情報」で「常に」を選んでください。 |"
+          }
         }
       }
     },
@@ -922,6 +1380,12 @@
     },
     "你到了哪里，我就跟着换样子。可以让我知道你在哪吗？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wherever you go, I'll change to match. Can I know where you are?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -932,6 +1396,12 @@
     },
     "你到公司、回家，我自己换衣服。要知道你在哪。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You get to work, you get home, I change outfits. Mind telling me where you are?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -942,6 +1412,12 @@
     },
     "你在走路还是坐车，我想跟着一起。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walking or riding? I'd like to go along."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -952,6 +1428,12 @@
     },
     "你的三张卡" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your three cards"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -962,6 +1444,12 @@
     },
     "你的四张卡" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your four cards"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -972,6 +1460,12 @@
     },
     "你睡得好不好、有没有动一动，我想知道。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How you slept, whether you moved a little… I'd like to know."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -982,6 +1476,12 @@
     },
     "你睡得少我会困。你练完我会知道。要看看你的睡眠和运动。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You sleep less, I get sleepy. You work out, I notice. Can I read your sleep and workouts?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -998,11 +1498,23 @@
             "state" : "translated",
             "value" : "Your life should leave traces."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ちゃんと過ごした毎日を、なかったことにしない。"
+          }
         }
       }
     },
     "你走路还是坐车，我想跟着演。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walking or riding? I want to act it out."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1034,6 +1546,12 @@
             "state" : "translated",
             "value" : "Countdown couldn't show: %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カウントダウンを表示できませんでした：%@ |"
+          }
         }
       }
     },
@@ -1055,6 +1573,12 @@
     },
     "健身房" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gym"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1081,6 +1605,12 @@
     },
     "先不选" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip for now"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1146,6 +1676,12 @@
             "state" : "translated",
             "value" : "You start with three cards: Work, Chill and Projects. No card for your thing yet. Bedtime and workdays stay unset, so there are no reminders for them. You can set all of it later in Settings."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まずは「仕事」「オフ」「副業」の3枚だけ。マイカードはなし。寝る時間と出勤日は未設定なので、その通知は出ません。どれもあとから「設定」で追加できます。"
+          }
         }
       }
     },
@@ -1200,6 +1736,12 @@
     },
     "六" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sat"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1240,8 +1782,24 @@
         }
       }
     },
+    "分享" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シェア |"
+          }
+        }
+      }
+    },
     "切到%@。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switches to %@."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1257,6 +1815,12 @@
             "state" : "translated",
             "value" : "Switch to Projects"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "副業に切り替え"
+          }
         }
       }
     },
@@ -1266,6 +1830,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Switch to Projects · vibe coding"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "副業に切り替え・vibe coding"
           }
         }
       }
@@ -1467,6 +2037,12 @@
     },
     "到「%@」的地方 · 手动" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrive at “%@” · manual"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1494,6 +2070,12 @@
     },
     "到了再说" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When I get there"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1526,11 +2108,23 @@
             "state" : "translated",
             "value" : "It's the bedtime you set"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定した寝る時間になりました"
+          }
         }
       }
     },
     "到公司才切到上班。在上班的日子，下班前 %lld 分钟提醒一次。晚间延长打开后，下班后还在公司就托腮等到延长时间。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work only starts when you get to the office. On work days, you get one reminder %lld minutes before the end of work. With late evenings on, if you're still at the office after hours, the character waits, chin in hand, until that time."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1595,11 +2189,23 @@
             "state" : "translated",
             "value" : "Projects · vibe coding"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "副業・vibe coding |"
+          }
         }
       }
     },
     "副业的地方" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where you do projects"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1656,6 +2262,22 @@
         }
       }
     },
+    "卡上不放日期和地点。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No date or place on the card."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カードに日付と場所は入りません。"
+          }
+        }
+      }
+    },
     "卡名会显示在锁屏、小组件和手表上。最多 4 个汉字或 8 个字母。" : {
       "localizations" : {
         "en" : {
@@ -1677,14 +2299,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "The old %@ went into the cupboard."
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "前の%@は収納にしまいました。"
+            "state" : "translated",
+            "value" : "前の%@はクローゼットにしまった。"
           }
         }
       }
@@ -1740,12 +2362,34 @@
         }
       }
     },
+    "发帖" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posts"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投稿向け"
+          }
+        }
+      }
+    },
     "发饰" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hair"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘアアクセ"
           }
         }
       }
@@ -1768,6 +2412,12 @@
     },
     "只列%@能穿的。拿到的东西永远在这，不会丢。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only what works in %@. What you get stays here for good."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1884,6 +2534,12 @@
     },
     "周%@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1900,11 +2556,23 @@
             "state" : "translated",
             "value" : "Mon–Fri"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月曜から金曜"
+          }
         }
       }
     },
     "哪几天上班？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which days do you work?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1915,6 +2583,12 @@
     },
     "哪几天要上班？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which days are work days?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1939,6 +2613,16 @@
         }
       }
     },
+    "商店，%@ 个能量罐" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ショップ、缶%@個"
+          }
+        }
+      }
+    },
     "嘴硬的室友，其实什么都记得" : {
       "comment" : "角色卡下的一句",
       "localizations" : {
@@ -1958,6 +2642,12 @@
     },
     "四" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thu"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2088,6 +2778,12 @@
             "state" : "translated",
             "value" : "Place tracking stopped: %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "場所の検知が止まりました：%@ |"
+          }
         }
       }
     },
@@ -2098,11 +2794,23 @@
             "state" : "translated",
             "value" : "Headband"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘッドバンド"
+          }
         }
       }
     },
     "她" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "her"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2113,6 +2821,12 @@
     },
     "好" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Okay"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2212,6 +2926,12 @@
             "state" : "translated",
             "value" : "Location"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "位置"
+          }
         }
       }
     },
@@ -2222,6 +2942,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Location · watch"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "位置・ウォッチ"
           }
         }
       }
@@ -2260,6 +2986,12 @@
     },
     "家" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2290,6 +3022,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Widgets can't reach the shared folder (App Group), so they'll stay empty"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウィジェットが共有フォルダ（App Group）に接続できないため、空のままになります |"
           }
         }
       }
@@ -2361,6 +3099,24 @@
     },
     "已选 %lld 项" : {
       "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "1 picked"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld picked"
+                }
+              }
+            }
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2460,6 +3216,12 @@
             "state" : "translated",
             "value" : "Forget %@?"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%@」を忘れる？"
+          }
         }
       }
     },
@@ -2486,6 +3248,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Almost off work"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "そろそろ終業"
+          }
+        }
+      }
+    },
+    "快拍、朋友圈" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stories"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ストーリーズ向け"
           }
         }
       }
@@ -2588,6 +3372,26 @@
         }
       }
     },
+    "手表打开，%1$@，切到%2$@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウォッチで開いた、%1$@、%2$@に切り替え"
+          }
+        }
+      }
+    },
+    "手表连接没建立：%@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウォッチとの接続を確立できませんでした：%@ |"
+          }
+        }
+      }
+    },
     "打开后先用这个角色的默认模式卡，你自己的卡先存起来；关掉就换回来。地点和学到的作息不变。只在测试版里有。" : {
       "localizations" : {
         "en" : {
@@ -2644,6 +3448,12 @@
             "state" : "translated",
             "value" : "Can't find the Daily folder anymore. Link it again in Settings."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dailyのフォルダが見つかりません。設定でもう一度連携してください |"
+          }
         }
       }
     },
@@ -2654,11 +3464,23 @@
             "state" : "translated",
             "value" : "Gloves"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グローブ"
+          }
         }
       }
     },
     "拳馆" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boxing gym"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2669,6 +3491,12 @@
     },
     "拿不到当前位置：%@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't get your location: %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2711,6 +3539,12 @@
     },
     "换成 %@？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to %@?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2721,6 +3555,12 @@
     },
     "授权失败：%@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't get permission: %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2733,14 +3573,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Goes on the desk in your home. There in every mode."
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "家の机の上に置く。どのモードでもある。"
+            "state" : "translated",
+            "value" : "家の机の上に置きます。どのモードでも見えます。"
           }
         }
       }
@@ -2749,14 +3589,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Goes in the front left corner of your home. There in every mode."
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "家の左手前のすみに置く。どのモードでもある。"
+            "state" : "translated",
+            "value" : "家の左手前のすみに置きます。どのモードでも見えます。"
           }
         }
       }
@@ -2765,14 +3605,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Goes next to the sofa in your home. There in every mode."
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "家のソファの横に置く。どのモードでもある。"
+            "state" : "translated",
+            "value" : "家のソファの横に置きます。どのモードでも見えます。"
           }
         }
       }
@@ -2781,14 +3621,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Goes in your home, in the workout corner by the wall. There in every mode."
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "家の運動コーナーに、壁ぎわで置く。どのモードでもある。"
+            "state" : "translated",
+            "value" : "家の運動コーナーの壁ぎわに置きます。どのモードでも見えます。"
           }
         }
       }
@@ -2797,14 +3637,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Having it doesn't count as a workout. No cans for it."
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "置くだけじゃ運動にならない。缶も出ない。"
+            "state" : "translated",
+            "value" : "置くだけでは運動になりません。缶も増えません。"
           }
         }
       }
@@ -2827,10 +3667,32 @@
     },
     "新东西：%@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New: %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "新しいもの：%@"
+          }
+        }
+      }
+    },
+    "方形 1:1" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Square 1:1"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正方形 1:1"
           }
         }
       }
@@ -2853,6 +3715,12 @@
     },
     "日" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sun"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2886,6 +3754,12 @@
             "state" : "translated",
             "value" : "The Japanese font didn't install, so Japanese text uses the system font: %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日本語フォントを読み込めなかったため、システムフォントで表示します：%@ |"
+          }
         }
       }
     },
@@ -2895,6 +3769,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yesterday"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "昨日 |"
           }
         }
       }
@@ -2933,6 +3813,12 @@
     },
     "最多 %lld 个，先去掉一个。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to %lld. Remove one first."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2943,6 +3829,12 @@
     },
     "最多选 %lld 个。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick up to %lld."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2986,6 +3878,12 @@
     },
     "有没有一件特别属于你的事？没有也没关系。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is there something that's really yours? It's okay if not."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2996,6 +3894,12 @@
     },
     "有没有下班后自己在做的事？" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anything you work on after hours?"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3023,6 +3927,12 @@
     },
     "本周 %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This week: %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3087,6 +3997,22 @@
             "state" : "translated",
             "value" : "Blanket"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "毛布"
+          }
+        }
+      }
+    },
+    "没发到手表：%@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウォッチに送れませんでした：%@ |"
+          }
         }
       }
     },
@@ -3113,6 +4039,32 @@
             "state" : "translated",
             "value" : "Motion & Fitness is off, so on the commute HAKU can only walk. You can turn it on in Settings > Privacy & Security."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「モーションとフィットネス」がオフなので、通勤中のHAKUは歩くだけです。「設定 > プライバシーとセキュリティ」でオンにできます。 |"
+          }
+        }
+      }
+    },
+    "没授权" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未許可"
+          }
+        }
+      }
+    },
+    "没授权，不判断刷手机" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未許可のため、スマホだらだらは判定しない"
+          }
         }
       }
     },
@@ -3123,6 +4075,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "None"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "なし"
           }
         }
       }
@@ -3181,6 +4139,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未選択"
+          }
+        }
+      }
+    },
+    "没选 App，不判断刷手机" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリ未選択のため、スマホだらだらは判定しない"
           }
         }
       }
@@ -3257,6 +4225,12 @@
             "state" : "translated",
             "value" : "Your soul can leave early."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "魂は先に帰っていい。"
+          }
         }
       }
     },
@@ -3267,15 +4241,43 @@
             "state" : "translated",
             "value" : "Tap to wear it. What you get stays here for good."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タップで着替え。手に入れたものはずっとここにあって、なくなりません。"
+          }
         }
       }
     },
     "点一个地点设置位置。右上角 + 加自己的地点，选到了 %@ 做什么。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a place to set where it is. Tap + to add your own, and choose what %@ does there."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "場所をタップして位置を設定します。右上の＋で自分の場所を追加し、そこで%@が何をするか選べます。"
+          }
+        }
+      }
+    },
+    "点开看那天的样子" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to see that day's look"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タップであの日の様子を見る"
           }
         }
       }
@@ -3298,6 +4300,12 @@
     },
     "现在就在这儿" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I'm here now"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3338,8 +4346,24 @@
         }
       }
     },
+    "现在是%@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いまは%@"
+          }
+        }
+      }
+    },
     "现在没有" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not right now"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3381,8 +4405,46 @@
         }
       }
     },
+    "用 %1$@ 个能量罐换%2$@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缶%1$@個で%2$@と交換"
+          }
+        }
+      }
+    },
+    "用 %@ 个能量罐换%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trade %@ cans for %@"
+          }
+        }
+      }
+    },
     "用 %lld 个能量罐换的" : {
       "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Got it for 1 can"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Got it for %lld cans"
+                }
+              }
+            }
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3458,6 +4520,12 @@
     },
     "监测没启动：%@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tracking didn't start: %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3468,6 +4536,12 @@
     },
     "直接切到%@。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switches straight to %@."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3548,6 +4622,12 @@
             "state" : "translated",
             "value" : "Bedtime reminder didn't get set: %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "寝る時間の通知を設定できませんでした：%@ |"
+          }
         }
       }
     },
@@ -3583,8 +4663,30 @@
         }
       }
     },
+    "竖版 9:16" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Portrait 9:16"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "縦 9:16"
+          }
+        }
+      }
+    },
     "第 %lld 步，共 8 步" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Step %lld of 8"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3657,6 +4759,26 @@
         }
       }
     },
+    "编程专注，不切" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コーディング集中、切り替えない"
+          }
+        }
+      }
+    },
+    "编程专注，切到 vibe coding" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コーディング集中、vibe codingに切り替え"
+          }
+        }
+      }
+    },
     "网球" : {
       "comment" : "句中用，小写；同一 key 只能一种译法，已统一（锁屏 ≤22）",
       "localizations" : {
@@ -3664,6 +4786,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tennis"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テニス"
           }
         }
       }
@@ -3690,6 +4818,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Couldn't link Daily: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dailyと連携できませんでした：%@ |"
           }
         }
       }
@@ -3729,6 +4863,12 @@
     },
     "能量罐只靠真的做到才有：%@。不过期，也不会被扣。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cans only come from things you actually did: %@. They don't expire and never get taken away."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3760,11 +4900,23 @@
             "state" : "translated",
             "value" : "Auto"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動"
+          }
         }
       }
     },
     "范围 %lld 米" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radius %lld m"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3777,7 +4929,7 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Clothes"
           }
         },
@@ -3837,6 +4989,16 @@
         }
       }
     },
+    "要会话" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セッションが必要"
+          }
+        }
+      }
+    },
     "规律、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。" : {
       "comment" : "中文已改“规律”",
       "localizations" : {
@@ -3861,6 +5023,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Routines, long-term memories, daily records and decisions are all deleted. Every character will meet you like it's the first time. Cans, shop items, wardrobe and keepsakes aren't memories, so they stay. This can't be undone."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "わかってきたこと、ずっと覚えてること、毎日の記録、判断がすべて消えます。消したあとは、どのキャラクターもはじめて会ったときに戻ります。缶、ショップのアイテム、クローゼット、思い出の品は残ります。元には戻せません。"
           }
         }
       }
@@ -3985,6 +5153,12 @@
             "state" : "translated",
             "value" : "Can't read the Daily folder: %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dailyのフォルダを読めません：%@ |"
+          }
         }
       }
     },
@@ -3994,6 +5168,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Couldn't read daylight, sleep or steps from the Health app: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルスケアの日光・睡眠・歩数を読めません：%@ |"
           }
         }
       }
@@ -4005,6 +5185,12 @@
             "state" : "translated",
             "value" : "Can't read sleep from the Health app: %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルスケアの睡眠を読めません：%@ |"
+          }
         }
       }
     },
@@ -4015,6 +5201,12 @@
             "state" : "translated",
             "value" : "Can't read workouts and steps from the Health app: %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルスケアの運動と歩数を読めません：%@ |"
+          }
         }
       }
     },
@@ -4024,6 +5216,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Can't read your motion on the commute: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通勤中の移動状態を読めません：%@ |"
           }
         }
       }
@@ -4052,6 +5250,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Go"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行く"
           }
         }
       }
@@ -4107,6 +5311,12 @@
     },
     "跳过" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4117,6 +5327,12 @@
     },
     "跳过，直接开始" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip and start"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4133,6 +5349,12 @@
             "state" : "translated",
             "value" : "Your card"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイカード"
+          }
         }
       }
     },
@@ -4148,6 +5370,32 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "30分運動した"
+          }
+        }
+      }
+    },
+    "运动存好后叫醒 App 没开成：%@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "運動の保存後にアプリを起動できませんでした：%@ |"
+          }
+        }
+      }
+    },
+    "返回" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "戻る |"
           }
         }
       }
@@ -4223,6 +5471,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "While this Focus is on, switch to Projects · vibe coding. Not within 2 hours of a manual mode change."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この集中モードがオンのあいだは「副業・vibe coding」に切り替えます。手動でモードを切り替えてから2時間は切り替えません。"
           }
         }
       }
@@ -4310,6 +5564,12 @@
     },
     "选一个住进你手机的家伙" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick who moves into your phone"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4336,6 +5596,12 @@
     },
     "选你最容易刷停不下来的 App。一天合计刷满 %1$lld 分钟，%2$@ 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Pick the apps you're most likely to get stuck scrolling. After %1$lld minutes in a day, %2$@ flops on the couch too. Stop for 20 minutes, move around or switch modes by hand, and they get back up."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4350,6 +5616,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notifications are off, so the bedtime reminder can't go out. You can turn them on in Settings."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知がオフなので、寝る時間の通知が届きません。iPhoneの設定でオンにできます。 |"
           }
         }
       }
@@ -4372,6 +5644,12 @@
     },
     "道具" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gear"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4397,8 +5675,30 @@
         }
       }
     },
+    "那天的样子" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That day's look"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あの日の様子"
+          }
+        }
+      }
+    },
     "配饰" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessories"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4459,14 +5759,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Leans on the workout wall in your home. There in every mode."
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "家の運動用の壁に立てかける。どのモードでもある。"
+            "state" : "translated",
+            "value" : "家の運動用の壁に立てかけます。どのモードでも見えます。"
           }
         }
       }
@@ -4477,6 +5777,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mask"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘッドギア"
           }
         }
       }
@@ -4499,6 +5805,12 @@
     },
     "默认周一到周五，%1$@ 到 %2$@。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default: Monday to Friday, %1$@ to %2$@."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4520,6 +5832,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "固定・外せない"
+          }
+        }
+      }
+    },
+    "（补上 %@）" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（%@を補完）"
           }
         }
       }
@@ -4548,6 +5870,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "？"
           }
         }
       }
