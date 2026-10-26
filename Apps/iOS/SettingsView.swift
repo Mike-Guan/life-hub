@@ -460,7 +460,8 @@ struct SettingsView: View {
             Spacer()
             Picker("语言", selection: languageBinding) {
                 ForEach(Languages.Choice.allCases, id: \.self) { choice in
-                    Text(choice.language.map { LocalizedStringKey($0.name) } ?? "跟随系统").tag(choice)
+                    // Each language keeps its own name (日本語, English) whatever language the app shows.
+                    (choice.language.map { Text(verbatim: $0.name) } ?? Text("跟随系统")).tag(choice)
                 }
             }
             .pickerStyle(.menu)
