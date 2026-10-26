@@ -894,12 +894,18 @@
         }
       }
     },
-    "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。到 设置 > Life Hub > 位置 选「始终」" : {
+    "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Location isn't set to “Always,” so with the app closed it can't tell when you reach or leave the office or home. Go to Settings > Life Hub > Location and pick “Always.”"
+            "state" : "needs_review",
+            "value" : "Location isn’t set to “Always,” so with the app closed it can’t tell when you reach or leave the office or home."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "位置情報が「常に」になっていないので、アプリを閉じている間は職場や家への出入りがわかりません。"
           }
         }
       }
@@ -3122,12 +3128,18 @@
         }
       }
     },
-    "没开「运动与健身」权限：通勤路上 HAKU 只会走路。可以在设置 > 隐私与安全性里打开。" : {
+    "没开「运动与健身」权限：通勤路上 %@ 只会走路。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Motion & Fitness is off, so on the commute HAKU can only walk. You can turn it on in Settings > Privacy & Security."
+            "state" : "needs_review",
+            "value" : "Motion & Fitness is off, so %@ only walks on your commute."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "「モーションとフィットネス」がオフなので、通勤中の%@は歩くだけです。"
           }
         }
       }
