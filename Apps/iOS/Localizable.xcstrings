@@ -527,7 +527,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Screen Timeの監視を止められませんでした：%@ |"
+            "value" : "Screen Timeの監視を止められませんでした：%@"
           }
         }
       }
@@ -1066,7 +1066,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "終業前の通知を設定できませんでした：%@ |"
+            "value" : "終業前の通知を設定できませんでした：%@"
           }
         }
       }
@@ -1325,7 +1325,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "今日は睡眠データがありません |"
+            "value" : "今日は睡眠データがありません"
           }
         }
       }
@@ -1341,7 +1341,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "今日はまだモードを切り替えていません。 |"
+            "value" : "今日はまだモードを切り替えていません。"
           }
         }
       }
@@ -1454,12 +1454,6 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "位置情報が「常に」になっていないので、アプリを閉じている間は職場や家への出入りがわかりません。"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "位置情報が「常に」ではありません。アプリを閉じているあいだは、会社や家に着いた・離れたことがわかりません。「設定 > Life Hub > 位置情報」で「常に」を選んでください。 |"
           }
         }
       }
@@ -1652,7 +1646,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "カウントダウンを表示できませんでした：%@ |"
+            "value" : "カウントダウンを表示できませんでした：%@"
           }
         }
       }
@@ -1905,7 +1899,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "シェア |"
+            "value" : "シェア"
           }
         }
       }
@@ -2321,7 +2315,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "副業・vibe coding |"
+            "value" : "副業・vibe coding"
           }
         }
       }
@@ -2932,7 +2926,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "場所の検知が止まりました：%@ |"
+            "value" : "場所の検知が止まりました：%@"
           }
         }
       }
@@ -3177,7 +3171,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ウィジェットが共有フォルダ（App Group）に接続できないため、空のままになります |"
+            "value" : "ウィジェットが共有フォルダ（App Group）に接続できないため、空のままになります"
           }
         }
       }
@@ -3579,7 +3573,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ウォッチとの接続を確立できませんでした：%@ |"
+            "value" : "ウォッチとの接続を確立できませんでした：%@"
           }
         }
       }
@@ -3660,7 +3654,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dailyのフォルダが見つかりません。設定でもう一度連携してください |"
+            "value" : "Dailyのフォルダが見つかりません。設定でもう一度連携してください"
           }
         }
       }
@@ -3966,7 +3960,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "日本語フォントを読み込めなかったため、システムフォントで表示します：%@ |"
+            "value" : "日本語フォントを読み込めなかったため、システムフォントで表示します：%@"
           }
         }
       }
@@ -3982,7 +3976,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "昨日 |"
+            "value" : "昨日"
           }
         }
       }
@@ -4225,7 +4219,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ウォッチに送れませんでした：%@ |"
+            "value" : "ウォッチに送れませんでした：%@"
           }
         }
       }
@@ -4258,12 +4252,6 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "「モーションとフィットネス」がオフなので、通勤中の%@は歩くだけです。"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「モーションとフィットネス」がオフなので、通勤中のHAKUは歩くだけです。「設定 > プライバシーとセキュリティ」でオンにできます。 |"
           }
         }
       }
@@ -4888,7 +4876,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "寝る時間の通知を設定できませんでした：%@ |"
+            "value" : "寝る時間の通知を設定できませんでした：%@"
           }
         }
       }
@@ -5107,7 +5095,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dailyと連携できませんでした：%@ |"
+            "value" : "Dailyと連携できませんでした：%@"
           }
         }
       }
@@ -5447,7 +5435,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dailyのフォルダを読めません：%@ |"
+            "value" : "Dailyのフォルダを読めません：%@"
           }
         }
       }
@@ -5463,7 +5451,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルスケアの日光・睡眠・歩数を読めません：%@ |"
+            "value" : "ヘルスケアの日光・睡眠・歩数を読めません：%@"
           }
         }
       }
@@ -5479,7 +5467,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルスケアの睡眠を読めません：%@ |"
+            "value" : "ヘルスケアの睡眠を読めません：%@"
           }
         }
       }
@@ -5495,7 +5483,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルスケアの運動と歩数を読めません：%@ |"
+            "value" : "ヘルスケアの運動と歩数を読めません：%@"
           }
         }
       }
@@ -5511,7 +5499,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "通勤中の移動状態を読めません：%@ |"
+            "value" : "通勤中の移動状態を読めません：%@"
           }
         }
       }
@@ -5675,7 +5663,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "運動の保存後にアプリを起動できませんでした：%@ |"
+            "value" : "運動の保存後にアプリを起動できませんでした：%@"
           }
         }
       }
@@ -5691,7 +5679,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "戻る |"
+            "value" : "戻る"
           }
         }
       }
@@ -5927,7 +5915,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "通知がオフなので、寝る時間の通知が届きません。iPhoneの設定でオンにできます。 |"
+            "value" : "通知がオフなので、寝る時間の通知が届きません。iPhoneの設定でオンにできます。"
           }
         }
       }

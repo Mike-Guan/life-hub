@@ -28,7 +28,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "今日のエナジー |"
+            "value" : "今日のエナジー"
           }
         }
       }
@@ -78,7 +78,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "モードを切り替え |"
+            "value" : "モードを切り替え"
           }
         }
       }
@@ -175,7 +175,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Life Hubを一度開いてください |"
+            "value" : "Life Hubを一度開いてください"
           }
         }
       }
@@ -208,7 +208,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "モード |"
+            "value" : "モード"
           }
         }
       }
@@ -305,7 +305,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "エナジー |"
+            "value" : "エナジー"
           }
         }
       }
@@ -337,7 +337,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "エナジー不明 |"
+            "value" : "エナジー不明"
           }
         }
       }

@@ -77,7 +77,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iPhoneから届いた状態を保存できませんでした：%@ |"
+            "value" : "iPhoneから届いた状態を保存できませんでした：%@"
           }
         }
       }

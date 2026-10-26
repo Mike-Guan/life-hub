@@ -716,7 +716,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "何もしたくない。これも状態。 |"
+            "value" : "何もしたくない。これも状態。"
           }
         }
       }
@@ -748,7 +748,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "今日も特に何もない。それでいい。 |"
+            "value" : "今日も特に何もない。それでいい。"
           }
         }
       }
@@ -1713,7 +1713,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "あと少し。たぶん。 |"
+            "value" : "あと少し。たぶん。"
           }
         }
       }
@@ -1955,7 +1955,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "上げて、下ろす。それだけ。 |"
+            "value" : "上げて、下ろす。それだけ。"
           }
         }
       }
@@ -2099,7 +2099,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "サンドバッグは悪くない。俺が硬いだけ。 |"
+            "value" : "サンドバッグは悪くない。俺が硬いだけ。"
           }
         }
       }
@@ -2212,7 +2212,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "エナジー、ちょっと足りない。 |"
+            "value" : "エナジー、ちょっと足りない。"
           }
         }
       }
@@ -2228,7 +2228,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "見ても缶は増えない。 |"
+            "value" : "見ても缶は増えない。"
           }
         }
       }
@@ -2647,7 +2647,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "リモコン、そっち側。 |"
+            "value" : "リモコン、そっち側。"
           }
         }
       }
@@ -2679,7 +2679,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "重さ？秘密。 |"
+            "value" : "重さ？秘密。"
           }
         }
       }
