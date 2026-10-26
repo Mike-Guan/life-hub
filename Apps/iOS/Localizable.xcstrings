@@ -6,7 +6,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Decision log (%@)"
+            "value" : "\n\nDecision log (%@)\n"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\n\n判断の記録（%@件）\n"
           }
         }
       }
@@ -379,16 +385,6 @@
         }
       }
     },
-    "%@的样子，穿着%@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@の姿、%2$@を着ている"
-          }
-        }
-      }
-    },
     "%@穿" : {
       "comment" : "商店衣服上的模式签，%@ 是模式名（上班、下班……）。",
       "localizations" : {
@@ -564,32 +560,6 @@
         }
       }
     },
-    "\\n\\n决策记录（%@ 条）\\n" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "\\n\\n判断の記録（%@件）\\n"
-          }
-        }
-      }
-    },
-    "\\n\\n决策记录（%lld 条）\\n" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "\\n\\nDecision log (%lld)\\n"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "\n\n判断の記録（%lld件）\n"
-          }
-        }
-      }
-    },
     "iOS 最多同时看 %lld 个地点，删掉一个才能再加。" : {
       "localizations" : {
         "en" : {
@@ -751,6 +721,22 @@
         }
       }
     },
+    "、" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", "
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "、"
+          }
+        }
+      }
+    },
     "「健身」从下班里拿出来，放进这张卡了。一件事只放一张卡。" : {
       "localizations" : {
         "en" : {
@@ -904,6 +890,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "You've got it all"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ラインナップ、ぜんぶ交換済み"
           }
         }
       }
@@ -1674,6 +1666,12 @@
             "state" : "translated",
             "value" : "Things you do get kept here, with the date."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "なにかやったら、日付つきでここに残ります。"
+          }
         }
       }
     },
@@ -2185,6 +2183,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arrive at work · manual"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "職場に着く・手動"
           }
         }
       }
@@ -2862,6 +2866,12 @@
             "state" : "translated",
             "value" : "Things you get in the shop go here."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "交換したものがここに並ぶ。"
+          }
         }
       }
     },
@@ -3359,6 +3369,12 @@
             "state" : "translated",
             "value" : "Unbox: %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開封：%@"
+          }
         }
       }
     },
@@ -3451,6 +3467,12 @@
             "state" : "translated",
             "value" : "How to get cans"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缶のもらい方"
+          }
         }
       }
     },
@@ -3525,6 +3547,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manual"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動"
           }
         }
       }
@@ -5064,6 +5092,12 @@
             "state" : "translated",
             "value" : "Your cans stay put. A new This week item comes every week."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缶はずっと残ります。毎週、今週のアイテムが1つ入ります。"
+          }
         }
       }
     },
@@ -5706,6 +5740,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nothing yet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだない"
           }
         }
       }

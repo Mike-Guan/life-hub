@@ -526,6 +526,34 @@
         }
       }
     },
+    "做完了 %lld 件提前定好的事。" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Did the one thing you planned."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Did %lld things you'd planned."
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "決めてあったことを%lld個やった。"
+          }
+        }
+      }
+    },
     "做项目" : {
       "comment" : "“做项目”",
       "localizations" : {
@@ -900,6 +928,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "原宿レインコート"
+          }
+        }
+      }
+    },
+    "去了 %lld 次健身房。" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Went to the gym once."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Went to the gym %lld times."
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジムに%lld回行った。"
           }
         }
       }
@@ -1679,6 +1735,34 @@
         }
       }
     },
+    "打了 %lld 次拳。" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Boxed once."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Boxed %lld times."
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボクシング%lld回。"
+          }
+        }
+      }
+    },
     "拍摄" : {
       "comment" : "副业状态名",
       "localizations" : {
@@ -1791,6 +1875,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ボクシングジム"
+          }
+        }
+      }
+    },
+    "拿到了%@。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got the %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@を手に入れた。"
           }
         }
       }
@@ -3082,6 +3182,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "立ち上がってお祝い"
+          }
+        }
+      }
+    },
+    "跑了 %lld 次 5 公里。" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ran a 5K."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ran %lld 5Ks."
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5km、%lld回走った。"
           }
         }
       }

@@ -237,7 +237,8 @@ struct WardrobeView: View {
     private var previewDescription: String {
         let mode = cards.title(for: previewMode, persona: persona)
         let worn = wardrobe.showing(card: card).worn(in: previewMode).compactMap { ShopItem.item($0)?.title }.sorted()
-        return worn.isEmpty ? "\(mode)的样子，没穿换来的东西" : "\(mode)的样子，穿着\(worn.joined(separator: "、"))"
+        guard !worn.isEmpty else { return String(format: "%@的样子，没穿换来的东西".localized, mode) }
+        return String(format: "%1$@的样子，穿着%2$@".localized, mode, worn.joined(separator: "、".localized))
     }
 
     // Only changes the preview, never the real mode.
