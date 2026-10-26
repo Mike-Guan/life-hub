@@ -434,6 +434,22 @@
         }
       }
     },
+    "%lld 次判断 · 纠正 %lld 次" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%lld decisions · %lld corrected"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "判断%lld回 · 訂正%lld回"
+          }
+        }
+      }
+    },
     "%lld 能量罐 换" : {
       "localizations" : {
         "en" : {
