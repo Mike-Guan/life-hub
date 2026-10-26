@@ -1166,14 +1166,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "…what are you looking at?"
+            "state" : "translated",
+            "value" : "…looking at something?"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "……何見てるの。"
+            "state" : "translated",
+            "value" : "……なに見てるの。"
           }
         }
       }
