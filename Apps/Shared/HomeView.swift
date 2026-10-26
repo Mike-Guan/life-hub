@@ -613,7 +613,7 @@ private struct Header: View {
 
     // UI 二组 preview 6: a new user has no mode yet, and says so in words, not in a code.
     private var subtitle: Text {
-        let date = Date.now.formatted(.dateTime.month().day().weekday(.wide))
+        let date = Date.now.formatted(.dateTime.month().day().weekday(.wide).locale(Languages.locale))
         guard let mode else { return Text("\(date) · 还没有模式") }
         return Text(verbatim: "\(date) · \(cards.code(for: mode, persona: persona)) MODE")
     }
