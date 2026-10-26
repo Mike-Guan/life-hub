@@ -141,8 +141,8 @@ final class HomeModel {
     /// Whether the room shows every item, owned or not, to see where each one goes. DEBUG builds only.
     private(set) var previewsAllItems = false
     var isNight: Bool
-    /// What HAKU says on the card.
-    private(set) var line = "……来了。随便坐。"
+    /// What the character says on the card.
+    private(set) var line: String
     /// Bumped on every change the scene draws.
     private(set) var revision = 0
     /// Where the scene last drew the character, in scene points; null before the first frame.
@@ -163,6 +163,7 @@ final class HomeModel {
     ///   - now: the time, for day or night.
     init(snapshot: HomeSnapshot, night: Bool? = nil, now: Date = .now) {
         self.snapshot = snapshot
+        line = HomeLines(snapshot.persona).arrive
         mode = snapshot.mode
         layout = snapshot.room
         let hour = Calendar.current.component(.hour, from: now)
@@ -176,6 +177,7 @@ final class HomeModel {
     var cans: Int { snapshot.cans }
     /// Whether today's energy is low; unknown counts as not low.
     var isLow: Bool { snapshot.energy == .low }
+    private var lines: HomeLines { HomeLines(snapshot.persona) }
     /// The top HAKU wears in the room.
     var outfit: HomeOutfit { HomeOutfit(worn: snapshot.worn) }
     /// The drawn tops HAKU owns, hanging in the wardrobe; the jacket always.
@@ -223,7 +225,9 @@ final class HomeModel {
         if modeChanged, new.mode != mode {
             mode = new.mode
             goHome()
-            if let mode = new.mode { line = Self.modeLine(mode, title: title(mode), card: card, items: items) }
+            if let mode = new.mode {
+                line = Self.modeLine(mode, title: title(mode), card: card, items: items, persona: new.persona)
+            }
         }
         changed()
     }
@@ -232,7 +236,7 @@ final class HomeModel {
     func switchMode(_ new: Mode) {
         mode = new
         goHome()
-        line = Self.modeLine(new, title: title(new), card: card, items: items)
+        line = Self.modeLine(new, title: title(new), card: card, items: items, persona: snapshot.persona)
         changed()
     }
 
@@ -242,30 +246,30 @@ final class HomeModel {
         case .haku: tapHaku(at: date)
         case .desk:
             visit(mode == .money ? .side : .work)
-            line = "坐一会儿。不一定干活。"
+            line = lines.desk
         case .sofa:
             visit(.sofa)
-            line = isLow ? "沙发是我的。今天电量不够。" : "沙发是我的。"
+            line = isLow ? lines.sofaLow : lines.sofa
         case .bed:
             visit(.rest)
-            line = "……再五分钟。"
+            line = lines.bed
         case .bag:
             visit(.box)
-            line = "左、右、左。"
+            line = lines.bag
         case .bench:
             visit(.bench)
-            line = "推几下。不数。"
+            line = lines.bench
         case .window:
             visit(.window)
-            line = isNight ? "楼下的灯还亮着。" : "窗外挺亮。"
+            line = isNight ? lines.windowNight : lines.windowDay
         case .wardrobe:
             visit(.wardrobe)
-            line = "穿什么都一样帅。"
+            line = lines.wardrobe
         case .shop:
             visit(.shop)
-            line = "罐子是你的。我只是看着。"
+            line = lines.shop
         case .shelf:
-            line = "这些都是真的发生过的。"
+            line = lines.shelf
         case .exit:
             break
         }
@@ -317,7 +321,7 @@ final class HomeModel {
             visitLeft = Self.landingPause
             cues.append(.bounce)
         }
-        line = "……放我下来就行。"
+        line = lines.drop
         changed()
     }
 
@@ -346,7 +350,7 @@ final class HomeModel {
 
     /// HAKU was picked up.
     func lift() {
-        line = "喂。"
+        line = lines.lift
         changed()
     }
 
@@ -387,12 +391,12 @@ final class HomeModel {
         taps = taps.filter { date.timeIntervalSince($0) < 2 } + [date]
         if taps.count >= 3 {
             taps = []
-            line = "够了。"
+            line = lines.annoyed
             cues.append(.annoyed)
             return
         }
-        let lines = Self.tapLines(spot: spot, low: isLow)
-        line = lines[lineIndex % lines.count]
+        let said = Self.tapLines(spot: spot, low: isLow, persona: snapshot.persona)
+        line = said[lineIndex % said.count]
         lineIndex += 1
         cues.append(.bounce)
     }
@@ -471,32 +475,36 @@ final class HomeModel {
         }
     }
 
-    /// What HAKU says when the mode changes; `title` is the card's name.
-    static func modeLine(_ mode: Mode, title: String, card: IdentityKind?, items: Set<HomeItem>) -> String {
-        func line(_ format: String) -> String { String(format: format.localized(for: .haku), title) }
+    /// What `persona` says when the mode changes; `title` is the card's name.
+    static func modeLine(
+        _ mode: Mode, title: String, card: IdentityKind?, items: Set<HomeItem>, persona: Persona = .haku
+    ) -> String {
+        let lines = HomeLines(persona)
+        func line(_ format: String) -> String { String(format: format.localized(for: persona), title) }
         return switch mode {
-        case .work: line("%@。脑子开机中。")
-        case .chill: line("%@。今天到此为止。")
+        case .work: line(lines.work)
+        case .chill: line(lines.chill)
         case .boxing:
             switch card {
-            case .boxing: line(items.contains(.bag) ? "%@。沙袋先挨几下。" : "%@。没沙袋，打空气也行。")
-            case .fitness where items.contains(.bench): line("%@。推几下。")
-            default: line("%@。准备出门。")
+            case .boxing: line(items.contains(.bag) ? lines.boxBag : lines.boxAir)
+            case .fitness where items.contains(.bench): line(lines.benchMode)
+            default: line(lines.goingOut)
             }
-        case .money: line("%@。别打扰，也别走。")
+        case .money: line(lines.money)
         }
     }
 
-    static func tapLines(spot: HomeSpot, low: Bool) -> [String] {
-        switch spot {
-        case .work: ["在忙。", "……别催。"]
-        case .side: ["别看，还没做完。", "就差一点。可能。"]
-        case .sofa: ["什么也不想做，这也算一种状态。", "遥控器在你那边。"]
-        case .rest: ["……再五分钟。", "zzz"]
-        case .box, .shadowbox: ["左、右、左。", "沙袋没惹我，是我今天比较硬。"]
-        case .bench: ["推起来，放下去。就这样。", "重量？不告诉你。"]
-        default:
-            low ? ["电量不太够。", "……干嘛。"] : ["……干嘛。", "看我也不会多一罐。", "嗯。", "今天也没什么特别的。挺好。"]
+    /// What `persona` may say when tapped at `spot`; `low` when energy is low.
+    static func tapLines(spot: HomeSpot, low: Bool, persona: Persona = .haku) -> [String] {
+        let lines = HomeLines(persona)
+        return switch spot {
+        case .work: lines.atWork
+        case .side: lines.atSide
+        case .sofa: lines.atSofa
+        case .rest: lines.atRest
+        case .box, .shadowbox: lines.atBox
+        case .bench: lines.atBench
+        default: low ? lines.low : lines.idle
         }
     }
 

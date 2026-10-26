@@ -316,19 +316,31 @@ public struct HakuHomeView: View {
 
     // MARK: Below the room
 
+    // UI 三组 10-26: the card shows whoever lives here, head only, in her mode's look.
+    @ViewBuilder private func portrait(_ model: HomeModel) -> some View {
+        let mode = model.mode ?? .chill
+        let snapshot = model.snapshot
+        if snapshot.persona == .kuro {
+            KuroPortrait(
+                look: KuroLook(mode: mode, card: model.card), energy: snapshot.energy?.value,
+                wearing: snapshot.wardrobe.worn(in: mode), framing: .head)
+        } else {
+            CompanionPortrait(
+                mode: mode, card: model.card, energy: snapshot.energy?.value, wardrobe: snapshot.wardrobe,
+                idles: false, framing: .head)
+        }
+    }
+
     private func lineCard(_ model: HomeModel) -> some View {
         Button {
             model.tap(.haku)
         } label: {
             HStack(spacing: 12) {
-                CompanionPortrait(
-                    mode: model.mode ?? .chill, card: model.card, energy: model.snapshot.energy?.value,
-                    wardrobe: model.snapshot.wardrobe, idles: false, framing: .head
-                )
-                .frame(width: 54, height: 54)
+                portrait(model).frame(width: 54, height: 54)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(verbatim: "HAKU").font(Toy.body(12, weight: .heavy)).foregroundStyle(Toy.muted)
-                    Text(model.line.localized(for: .haku))
+                    Text(verbatim: model.snapshot.persona.title).font(Toy.body(12, weight: .heavy))
+                        .foregroundStyle(Toy.muted)
+                    Text(model.line.localized(for: model.snapshot.persona))
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
                         .id(model.line)
