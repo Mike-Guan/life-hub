@@ -1,6 +1,118 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
+    "%@。今天到此为止。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. That's it for today."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。今日はここまで。"
+          }
+        }
+      }
+    },
+    "%@。准备出门。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Getting ready to go."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。出かける準備。"
+          }
+        }
+      }
+    },
+    "%@。别打扰，也别走。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Quiet, but stay."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。邪魔はなし。でもいて。"
+          }
+        }
+      }
+    },
+    "%@。推几下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. A few reps."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。何回か押す。"
+          }
+        }
+      }
+    },
+    "%@。沙袋先挨几下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. The bag goes first."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。まずサンドバッグから。"
+          }
+        }
+      }
+    },
+    "%@。没沙袋，打空气也行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. No bag. Air works."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。サンドバッグなし。空気でいい。"
+          }
+        }
+      }
+    },
+    "%@。脑子开机中。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Brain booting up."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。脳、起動中。"
+          }
+        }
+      }
+    },
     "HAKU，困了" : {
       "comment" : "VoiceOver",
       "localizations" : {
@@ -178,6 +290,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……あと5分。"
+          }
+        }
+      }
+    },
+    "……别催。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…don't rush me."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "……あとちょっとだから。"
           }
         }
       }
@@ -1328,6 +1456,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "はあ。"
+          }
+        }
+      }
+    },
+    "喂。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hey."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おーい。"
           }
         }
       }

@@ -473,16 +473,17 @@ final class HomeModel {
 
     /// What HAKU says when the mode changes; `title` is the card's name.
     static func modeLine(_ mode: Mode, title: String, card: IdentityKind?, items: Set<HomeItem>) -> String {
-        switch mode {
-        case .work: "\(title)。脑子开机中。"
-        case .chill: "\(title)。今天到此为止。"
+        func line(_ format: String) -> String { String(format: format.localized(for: .haku), title) }
+        return switch mode {
+        case .work: line("%@。脑子开机中。")
+        case .chill: line("%@。今天到此为止。")
         case .boxing:
             switch card {
-            case .boxing: items.contains(.bag) ? "\(title)。沙袋先挨几下。" : "\(title)。没沙袋，打空气也行。"
-            case .fitness where items.contains(.bench): "\(title)。推几下。"
-            default: "\(title)。准备出门。"
+            case .boxing: line(items.contains(.bag) ? "%@。沙袋先挨几下。" : "%@。没沙袋，打空气也行。")
+            case .fitness where items.contains(.bench): line("%@。推几下。")
+            default: line("%@。准备出门。")
             }
-        case .money: "\(title)。别打扰，也别走。"
+        case .money: line("%@。别打扰，也别走。")
         }
     }
 

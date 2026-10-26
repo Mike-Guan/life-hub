@@ -302,6 +302,22 @@
         }
       }
     },
+    "商店" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shop"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ショップ"
+          }
+        }
+      }
+    },
     "在 iPhone 上选个模式" : {
       "comment" : "手表",
       "localizations" : {
@@ -543,6 +559,22 @@
         }
       }
     },
+    "衣柜" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wardrobe"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クローゼット"
+          }
+        }
+      }
+    },
     "被子" : {
       "localizations" : {
         "en" : {
@@ -555,6 +587,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ふとん"
+          }
+        }
+      }
+    },
+    "设置" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定"
           }
         }
       }
