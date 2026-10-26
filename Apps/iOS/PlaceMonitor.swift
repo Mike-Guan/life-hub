@@ -87,7 +87,7 @@ final class PlaceMonitor {
     }
 
     private static var notAlways: String {
-        "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。到 设置 > Life Hub > 位置 选「始终」".localized
+        "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。".localized
     }
 
     // The background delivery problem Mike hit on 2026-10-05 left no trace; these flags say why.
