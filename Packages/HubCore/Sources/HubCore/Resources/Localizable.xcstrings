@@ -115,6 +115,22 @@
         }
       }
     },
+    "……别盯着看。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…No need to stare."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……そんなに見なくていい。"
+          }
+        }
+      }
+    },
     "……又不是在等你。" : {
       "comment" : "ツンデレ式那一句，只在这里",
       "localizations" : {
@@ -138,6 +154,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…mm."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……うん。"
           }
         }
       }
@@ -175,6 +197,22 @@
         }
       }
     },
+    "……换好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…changed clothes."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……着替えた。"
+          }
+        }
+      }
+    },
     "……谱子翻开" : {
       "localizations" : {
         "en" : {
@@ -187,6 +225,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……楽譜、開く"
+          }
+        }
+      }
+    },
+    "……这个，留着。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…keep this."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……これ、取っとく。"
           }
         }
       }
@@ -1565,13 +1619,13 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Snowboard"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "スノーボード"
           }
         }
@@ -1581,13 +1635,13 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Bench press"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "ベンチプレス台"
           }
         }
@@ -1741,6 +1795,22 @@
         }
       }
     },
+    "换上了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New look"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "着替えた"
+          }
+        }
+      }
+    },
     "搬不动旧记录 %1$@：%2$@" : {
       "comment" : "多个占位符：按中文出现顺序编号，请工程核对顺序",
       "localizations" : {
@@ -1825,6 +1895,12 @@
     },
     "晒太阳" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunlight"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1921,6 +1997,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Varsity jacket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スタジャン"
           }
         }
       }
@@ -3206,6 +3288,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "daily look records"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「あの日の様子」の記録"
           }
         }
       }

@@ -74,14 +74,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Saves a share card to your Photos only when you tap “Save Image” in the share sheet. Life Hub only adds images to Photos and never reads your photos."
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "共有シートで「画像を保存」をタップしたときだけ、シェアカードを写真に保存します。Life Hub は写真に画像を追加するだけで、あなたの写真は読み取りません。"
+            "state" : "translated",
+            "value" : "共有シートで「画像を保存」をタップしたときだけ、シェアカードを写真に保存します。Life Hubは写真に画像を追加するだけで、写真を読み取ることはありません。"
           }
         }
       }
