@@ -5663,8 +5663,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "iPhoneに合わせる"
+            "state" : "translated",
+            "value" : "端末の言語"
           }
         }
       }
