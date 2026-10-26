@@ -325,7 +325,6 @@ struct SettingsView: View {
         .toyCard()
     }
 
-    // Issue #237: what the companion remembers, on its own page.
     // TestFlight external review needs a privacy policy the user can reach from the app.
     private func privacyCard(_ url: URL) -> some View {
         HStack(spacing: 10) {
@@ -341,6 +340,7 @@ struct SettingsView: View {
         .toyCard()
     }
 
+    // Issue #237: what the companion remembers, on its own page.
     private var memoryCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
