@@ -210,7 +210,7 @@ struct MemoryView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                Text(title)
+                Text(title.localized)
                     .font(Toy.body(16, weight: .heavy))
                 Spacer()
                 trailing()

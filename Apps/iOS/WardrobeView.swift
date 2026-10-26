@@ -269,7 +269,7 @@ struct WardrobeView: View {
                     shelf = tab
                 } label: {
                     // Four tabs share the row; a long name shrinks instead of breaking inside a word.
-                    Text(tab.title)
+                    Text(tab.title.localized)
                         .font(Toy.body(14, weight: .heavy))
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
