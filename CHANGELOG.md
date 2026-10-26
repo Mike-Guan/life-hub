@@ -12,6 +12,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   fitness gym is the card's place: arriving switches to the card at once and leaving gives back the earlier mode.
 - The identity card picker offers dance, music and ski, each with its own home tagline and identity-day
   invite for both characters. The home card taglines now show in Japanese and English too.
+- The app follows the phone's language (Chinese, Japanese or English; other languages get English), and
+  Settings has a language picker to choose one by hand. The watch follows the watch's language. The
+  onboarding hints under each card, such as the place it switches at, are translated too.
 - Notifications, the setup's 以后再说 button, the memory page's dates and counts, the place names and note in
   Settings > 地点, and a few error lines now follow the app's language.
 - About 230 more Japanese and 170 more English strings, and HAKU's line at the home shop no longer tells you how to spend cans.

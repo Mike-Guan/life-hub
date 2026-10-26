@@ -4,23 +4,51 @@ import Testing
 @testable import HubCore
 
 @Suite(.serialized) struct LanguagesTests {
-    // Issue #350: Japanese and English stay off until every string is in, whatever the phone's language.
-    @Test func offUntilTurnedOn() throws {
-        let defaults = try #require(UserDefaults(suiteName: "languages-\(UUID().uuidString)"))
-        Languages.load(from: defaults)
+    // Issue #350: code that never loads a choice keeps the Chinese source text.
+    @Test func chineseUntilLoaded() {
         #expect(!Languages.isOn)
         #expect(Languages.locale == Languages.chinese)
         #expect("拳击日".localized == "拳击日")
         #expect("又上班。".localized(for: .haku) == "又上班。")
     }
 
-    @Test func switchIsReadFromDefaults() throws {
+    // These read the defaults without loading them, so other suites running at the same time keep Chinese.
+    @Test func aNewInstallFollowsThePhoneAndAPickIsKept() throws {
         let defaults = try #require(UserDefaults(suiteName: "languages-\(UUID().uuidString)"))
-        defaults.set(true, forKey: Languages.key)
-        Languages.load(from: defaults)
-        defer { Languages.isOn = false }
-        #expect(Languages.isOn)
-        #expect(Languages.locale.identifier == Locale.autoupdatingCurrent.identifier)
+        #expect(Languages.stored(in: defaults) == .system)
+        defaults.set(Languages.Choice.japanese.rawValue, forKey: Languages.key)
+        #expect(Languages.stored(in: defaults) == .japanese)
+        defaults.set("klingon", forKey: Languages.key)
+        #expect(Languages.stored(in: defaults) == .system)
+        #expect(Languages.Choice.system.language == nil)
+        #expect(Languages.Choice.english.language == .english)
+    }
+
+    // `swift test` copies the String Catalogs without compiling them, so this builds the `.lproj` folders an
+    // app build makes. Chinese never looks anything up: `.localized` returns the key while `isOn` is false.
+    @Test func eachLanguageReadsItsOwnStrings() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: "languages-\(UUID().uuidString).bundle")
+        defer { try? FileManager.default.removeItem(at: root) }
+        for (code, title) in [("ja", "ボクシング"), ("en", "Boxing")] {
+            let folder = root.appending(path: "\(code).lproj")
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let strings = "\"拳击日\" = \"\(title)\";"
+            try strings.write(to: folder.appending(path: "Localizable.strings"), atomically: true, encoding: .utf8)
+        }
+        let bundle = try #require(Bundle(path: root.path))
+        func title(_ language: Languages.Language) -> String {
+            String(localized: "拳击日", table: "Localizable", bundle: Languages.bundle(bundle, for: language))
+        }
+        #expect(title(.japanese) == "ボクシング")
+        #expect(title(.english) == "Boxing")
+    }
+
+    @Test func thePhonesFirstKnownLanguageWins() {
+        #expect(Languages.language(for: ["fr-FR", "ja-JP", "en-US"]) == .japanese)
+        #expect(Languages.language(for: ["zh-Hant-TW"]) == .chinese)
+        #expect(Languages.language(for: ["en-GB", "zh-Hans-CN"]) == .english)
+        #expect(Languages.language(for: ["fr-FR", "de-DE"]) == .english)
+        #expect(Languages.language(for: []) == .english)
     }
 
     @Test func weekStartsWhereThePhoneSays() {
@@ -28,8 +56,8 @@ import Testing
         #expect(Languages.weekCalendar(firstWeekday: 1).weekdaysInOrder == [1, 2, 3, 4, 5, 6, 7])
     }
 
-    @Test func weekdayNamesFollowTheSwitch() {
-        Languages.isOn = false
+    @Test func weekdayNamesFollowTheChoice() {
+        Languages.choice = .chinese
         let chinese = Languages.weekCalendar(firstWeekday: 2)
         // Index 1 is Monday.
         #expect(chinese.veryShortWeekdaySymbols[1] == "一")

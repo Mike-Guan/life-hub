@@ -8,12 +8,13 @@ extension String {
     /// This text in the user's language, from HubCore's `Localizable` table.
     var localized: String {
         guard Languages.isOn else { return self }
-        return String(localized: LocalizationValue(self), table: "Localizable", bundle: .module)
+        return String(localized: LocalizationValue(self), table: "Localizable", bundle: Languages.bundle(.module))
     }
 
     /// This line in the user's language, from `persona`'s table in HubCore.
     func localized(for persona: Persona) -> String {
         guard Languages.isOn else { return self }
-        return String(localized: LocalizationValue(self), table: persona == .kuro ? "Kuro" : "Haku", bundle: .module)
+        let table = persona == .kuro ? "Kuro" : "Haku"
+        return String(localized: LocalizationValue(self), table: table, bundle: Languages.bundle(.module))
     }
 }

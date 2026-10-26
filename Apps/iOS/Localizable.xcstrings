@@ -5474,6 +5474,22 @@
         }
       }
     },
+    "语言" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Language"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "言語"
+          }
+        }
+      }
+    },
     "读不到 Daily 的文件夹：%@" : {
       "localizations" : {
         "en" : {
@@ -5633,6 +5649,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "5km走った"
+          }
+        }
+      }
+    },
+    "跟随系统" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Match iPhone"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "端末の言語"
           }
         }
       }
