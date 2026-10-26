@@ -107,6 +107,12 @@
             "state" : "translated",
             "value" : "…No need to stare."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……そんなに見なくていい。"
+          }
         }
       }
     },

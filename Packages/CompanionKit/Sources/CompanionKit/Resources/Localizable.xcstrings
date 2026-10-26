@@ -320,6 +320,12 @@
             "state" : "translated",
             "value" : "Rug"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ラグ"
+          }
         }
       }
     },
@@ -329,6 +335,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Walls"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "壁"
           }
         }
       }
@@ -488,6 +500,12 @@
             "state" : "translated",
             "value" : "Couch"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソファ"
+          }
         }
       }
     },
@@ -498,6 +516,12 @@
             "state" : "translated",
             "value" : "Worn-out gloves"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "くたびれたグローブ"
+          }
         }
       }
     },
@@ -507,6 +531,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Blanket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ふとん"
           }
         }
       }
@@ -543,6 +573,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Basic jacket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いつものジャケット"
           }
         }
       }

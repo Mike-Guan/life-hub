@@ -992,6 +992,12 @@
             "state" : "translated",
             "value" : "…changed clothes."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……着替えた。"
+          }
         }
       }
     },
@@ -1249,6 +1255,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…keep this."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……これ、取っとく。"
           }
         }
       }

@@ -1576,6 +1576,12 @@
     },
     "地毯" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rug"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1618,6 +1624,12 @@
     },
     "墙" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walls"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2030,6 +2042,12 @@
     },
     "沙发" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couch"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2233,6 +2251,12 @@
     },
     "磨旧的拳套" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Worn-out gloves"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2453,6 +2477,12 @@
     },
     "被子" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blanket"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2720,6 +2750,12 @@
     },
     "默认外套" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basic jacket"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",

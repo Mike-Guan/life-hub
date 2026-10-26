@@ -244,6 +244,12 @@
             "state" : "translated",
             "value" : "%@ · tap %@ to switch"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@中・%2$@で切り替え"
+          }
         }
       }
     },
@@ -286,6 +292,12 @@
             "state" : "translated",
             "value" : "%@ +%@ (once a week)"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の日 +%2$@（週1回）"
+          }
         }
       }
     },
@@ -317,6 +329,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@の姿、交換したものは着ていない"
+          }
+        }
+      }
+    },
+    "%@的样子，穿着%@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の姿、%2$@を着ている"
           }
         }
       }
@@ -4421,6 +4443,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trade %@ cans for %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缶%1$@個で%2$@と交換"
           }
         }
       }
