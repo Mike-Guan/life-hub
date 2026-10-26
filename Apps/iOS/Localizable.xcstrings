@@ -2650,6 +2650,22 @@
         }
       }
     },
+    "打开" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Open"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "開く"
+          }
+        }
+      }
+    },
     "打开后先用这个角色的默认模式卡，你自己的卡先存起来；关掉就换回来。地点和学到的作息不变。只在测试版里有。" : {
       "localizations" : {
         "en" : {
@@ -4551,6 +4567,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ずっと覚えてること"
+          }
+        }
+      }
+    },
+    "隐私政策" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Privacy Policy"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "プライバシーポリシー"
           }
         }
       }
