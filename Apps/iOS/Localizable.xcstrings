@@ -6,7 +6,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Decision log (%@)"
+            "value" : "\n\nDecision log (%@)\n"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\n\n判断の記録（%@件）\n"
           }
         }
       }
@@ -885,6 +891,12 @@
             "state" : "translated",
             "value" : "You've got it all"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ラインナップ、ぜんぶ交換済み"
+          }
         }
       }
     },
@@ -1654,6 +1666,12 @@
             "state" : "translated",
             "value" : "Things you do get kept here, with the date."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "なにかやったら、日付つきでここに残ります。"
+          }
         }
       }
     },
@@ -2165,6 +2183,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arrive at work · manual"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "職場に着く・手動"
           }
         }
       }
@@ -2842,6 +2866,12 @@
             "state" : "translated",
             "value" : "Things you get in the shop go here."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "交換したものがここに並ぶ。"
+          }
         }
       }
     },
@@ -3339,6 +3369,12 @@
             "state" : "translated",
             "value" : "Unbox: %@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開封：%@"
+          }
         }
       }
     },
@@ -3431,6 +3467,12 @@
             "state" : "translated",
             "value" : "How to get cans"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缶のもらい方"
+          }
         }
       }
     },
@@ -3505,6 +3547,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manual"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動"
           }
         }
       }
@@ -5044,6 +5092,12 @@
             "state" : "translated",
             "value" : "Your cans stay put. A new This week item comes every week."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缶はずっと残ります。毎週、今週のアイテムが1つ入ります。"
+          }
         }
       }
     },
@@ -5686,6 +5740,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nothing yet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだない"
           }
         }
       }
