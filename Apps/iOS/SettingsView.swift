@@ -259,7 +259,7 @@ struct SettingsView: View {
     // QA 10-26 必修 5: a permission the user declined, in grey, with the way to turn it on.
     private func permissionLine(_ text: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(text)
+            Text(text.localized)
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             Button {
@@ -545,11 +545,11 @@ struct SettingsView: View {
     // UI 审核 #340: a prefilled time that isn't set yet is drawn muted, so it doesn't look in effect.
     private func timeRow(_ title: String, selection: Binding<Date>, muted: Bool = false) -> some View {
         HStack {
-            Text(title)
+            Text(title.localized)
                 .font(Toy.body(15, weight: .bold))
                 .foregroundStyle(muted ? Toy.muted : Toy.ink)
             Spacer()
-            DatePicker(title, selection: selection, displayedComponents: .hourAndMinute)
+            DatePicker(title.localized, selection: selection, displayedComponents: .hourAndMinute)
                 .labelsHidden()
                 .font(Toy.body(16, weight: .heavy))
                 .foregroundStyle(muted ? Toy.muted : Toy.ink)
@@ -623,9 +623,9 @@ struct SettingsView: View {
     private func placeRow(title: String, detail: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Text(title)
+                Text(title.localized)
                     .font(Toy.body(15, weight: .bold))
-                Text(detail)
+                Text(detail.localized)
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                     .lineLimit(1)

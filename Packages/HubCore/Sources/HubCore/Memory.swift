@@ -93,7 +93,7 @@ public enum Memory {
         var list = [
             LearnedHabit(
                 habit: .gymDays,
-                title: "健身日",
+                title: "健身日".localized,
                 days: weekdays(learned.gymWeekdays.isEmpty ? days.gymWeekdays : learned.gymWeekdays),
                 isLearned: !learned.gymWeekdays.isEmpty
             )
@@ -147,7 +147,7 @@ public enum Memory {
         let earned = ledger.since(resets.all).active.filter { $0.kind == .earned }
         for (win, title) in firstWins {
             if let first = earned.first(where: { $0.win == win }) {
-                list.append(LongMemory(title: title, date: first.at))
+                list.append(LongMemory(title: title.localized, date: first.at))
             }
         }
         // Visits aren't stored, so a place counts by the automatic switches into the mode it sets.
@@ -161,7 +161,7 @@ public enum Memory {
         .sorted { $0.1 > $1.1 }
         .prefix(3)
         if !often.isEmpty {
-            list.append(LongMemory(title: "常待的地方", detail: often.map(\.0).joined(separator: "、")))
+            list.append(LongMemory(title: "常待的地方".localized, detail: often.map(\.0).joined(separator: "、")))
         }
         return list
     }
@@ -181,7 +181,10 @@ public enum Memory {
     /// `days` as Chinese weekday names in week order from Monday, e.g. "周二、周四".
     static func weekdays(_ days: Set<Int>) -> String {
         let names = [1: "周日", 2: "周一", 3: "周二", 4: "周三", 5: "周四", 6: "周五", 7: "周六"]
-        return days.sorted { ($0 + 5) % 7 < ($1 + 5) % 7 }.compactMap { names[$0] }.joined(separator: "、")
+        let ordered = days.sorted { ($0 + 5) % 7 < ($1 + 5) % 7 }
+        guard Languages.isOn else { return ordered.compactMap { names[$0] }.joined(separator: "、") }
+        let symbols = Languages.weekCalendar().shortWeekdaySymbols
+        return ordered.map { symbols[$0 - 1] }.formatted(.list(type: .and).locale(Languages.locale))
     }
 }
 

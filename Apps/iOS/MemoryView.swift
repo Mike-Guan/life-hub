@@ -97,7 +97,7 @@ struct MemoryView: View {
                     ForEach(habits, id: \.habit) { habit in
                         HStack(spacing: 10) {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("\(habit.title)：\(habit.days)")
+                                Text(String(format: "%1$@：%2$@".localized, habit.title, habit.days))
                                     .font(Toy.body(15, weight: .heavy))
                                 Text("从你去的日子学的")
                                     .font(Toy.body(12))
@@ -223,14 +223,14 @@ struct MemoryView: View {
     }
 
     private func note(_ text: String) -> some View {
-        Text(text)
+        Text(text.localized)
             .font(Toy.body(12))
             .foregroundStyle(Toy.muted)
     }
 
     private func deleteButton(_ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
+            Text(title.localized)
                 .font(Toy.body(13, weight: .heavy))
                 .foregroundStyle(Toy.alertText)
                 .padding(.horizontal, 12)

@@ -145,6 +145,23 @@
         }
       }
     },
+    "%1$@：%2$@" : {
+      "comment" : "A learned routine and its days, such as 健身日：周二、周四",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@：%2$@"
+          }
+        }
+      }
+    },
     "%1$lld 条 · 决策 %2$lld 条" : {
       "localizations" : {
         "en" : {
