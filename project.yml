@@ -147,6 +147,7 @@ targets:
           - Info.plist
           - "*.entitlements"
       - Apps/iOS/AppGroup.swift
+      - Apps/iOS/AppText.swift
       - Apps/iOS/InviteReminder.swift
       - Apps/iOS/OffWorkReminder.swift
     dependencies:
