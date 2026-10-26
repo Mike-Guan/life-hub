@@ -5877,7 +5877,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pick the apps you're most likely to get stuck scrolling. After %1$lld minutes in a day, %2$@ flops on the couch too. Stop for 20 minutes, move around or switch modes by hand, and the couch time ends."
+            "value" : "Pick the apps you're most likely to get stuck scrolling. After %1$lld minutes in a day, %2$@ flops on the couch too. Stop for 20 minutes, move around or switch modes by hand to end it."
           }
         },
         "ja" : {
