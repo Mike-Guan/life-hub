@@ -1162,18 +1162,18 @@
         }
       }
     },
-    "……看我，不会多一罐。……但可以。" : {
+    "……看什么呢。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "…no can for looking. …but sure."
+            "state" : "needs_review",
+            "value" : "…what are you looking at?"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "……見ても増えないけど。……いいよ。"
+            "state" : "needs_review",
+            "value" : "……何見てるの。"
           }
         }
       }
