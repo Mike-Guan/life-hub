@@ -189,9 +189,10 @@ struct MemoryView: View {
 
     private var judgements: String {
         let kept = decisions.kept
-        guard !kept.isEmpty else { return "还没有判断" }
+        guard !kept.isEmpty else { return "还没有判断".localized }
         let corrected = kept.filter { $0.feedback == .corrected }.count
-        return corrected == 0 ? "\(kept.count) 次判断" : "\(kept.count) 次判断 · 纠正 \(corrected) 次"
+        guard corrected > 0 else { return String(format: "%lld 次判断".localized, kept.count) }
+        return String(format: "%lld 次判断 · 纠正 %lld 次".localized, kept.count, corrected)
     }
 
     private func section<Rows: View>(_ title: String, @ViewBuilder rows: () -> Rows) -> some View {
@@ -299,12 +300,16 @@ struct MemoryView: View {
         return error
     }
 
-    /// `date` as e.g. "10月4日 周日".
+    /// `date` as e.g. "10月4日 周日", or the same month, day and weekday in the user's language.
     static func day(_ date: Date) -> String {
-        // FormatStyle drew "9/12周六"; a fixed pattern keeps the 月/日 words and the space.
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "M月d日 EEE"
+        formatter.locale = Languages.locale
+        if Languages.isOn {
+            formatter.setLocalizedDateFormatFromTemplate("MMMdEEE")
+        } else {
+            // FormatStyle drew "9/12周六"; a fixed pattern keeps the 月/日 words and the space.
+            formatter.dateFormat = "M月d日 EEE"
+        }
         return formatter.string(from: date)
     }
 }

@@ -1,7 +1,56 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
-
+    "下班提醒没设上：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off-work reminder didn't get set: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終業前の通知を設定できませんでした：%@"
+          }
+        }
+      }
+    },
+    "快下班了" : {
+      "comment" : "通知标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almost off work"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "そろそろ終業"
+          }
+        }
+      }
+    },
+    "灵魂可以先走。" : {
+      "comment" : "HAKU 口气；中文“灵魂可以先走。”",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your soul can leave early."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "魂は先に帰っていい。"
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

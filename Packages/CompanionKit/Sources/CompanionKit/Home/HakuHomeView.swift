@@ -41,8 +41,9 @@ struct HomeChip: Identifiable {
         HomeChip(hotspot: .exit, title: "出门", symbol: "figure.walk", at: GridPoint(x: 4.6, y: 9.5, z: 0.7)),
     ]
 
+    // Japanese and English labels run wider than two Chinese characters; "Furniture" is the widest.
     /// Half the drawn size of a label, in view points.
-    static let half = CGSize(width: 30, height: 12)
+    static var half: CGSize { CGSize(width: Languages.isOn ? 46 : 30, height: 12) }
     /// The space kept between a label that stepped aside and the character, in view points.
     static let gap: CGFloat = 4
 
@@ -67,7 +68,7 @@ struct HomeChipLabel: View {
     var body: some View {
         HStack(spacing: 3) {
             Image(systemName: chip.symbol).font(.system(size: 10, weight: .bold))
-            Text(chip.title).font(Toy.body(11, weight: .bold))
+            Text(chip.title.localized).font(Toy.body(11, weight: .bold))
         }
         .foregroundStyle(Toy.ink)
         .padding(.horizontal, 7)
@@ -213,7 +214,7 @@ public struct HakuHomeView: View {
                 }
                 .buttonStyle(.plain)
             }
-            Text(model.isNight ? "晚上好" : "你好")
+            Text((model.isNight ? "晚上好" : "你好").localized)
                 .font(Toy.display(28))
                 .foregroundStyle(Toy.ink)
         }
@@ -324,7 +325,7 @@ public struct HakuHomeView: View {
                 .frame(width: 54, height: 54)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(verbatim: "HAKU").font(Toy.body(12, weight: .heavy)).foregroundStyle(Toy.muted)
-                    Text(model.line)
+                    Text(model.line.localized(for: .haku))
                         .font(Toy.body(16, weight: .bold))
                         .foregroundStyle(Toy.ink)
                         .id(model.line)
@@ -402,7 +403,7 @@ private struct HomeSheetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(title).font(Toy.display(22)).foregroundStyle(Toy.ink)
+            Text(title.localized).font(Toy.display(22)).foregroundStyle(Toy.ink)
             ScrollView {
                 content.padding(.bottom, 20)
             }
@@ -430,10 +431,10 @@ private struct HomeSheetView: View {
 
     private var shelf: some View {
         VStack(spacing: 12) {
-            Text("每一件都是真的发生过的事换来的。").font(Toy.body(13)).foregroundStyle(Toy.muted)
+            Text("每一件都是真的发生过的事换来的。".localized).font(Toy.body(13)).foregroundStyle(Toy.muted)
                 .frame(maxWidth: .infinity, alignment: .leading)
             ForEach(model.keepsakes) { keepsake in
-                Text(keepsake.name).font(Toy.body(16, weight: .heavy))
+                Text(keepsake.name.localized).font(Toy.body(16, weight: .heavy))
                     .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .toyCard()
@@ -445,7 +446,8 @@ private struct HomeSheetView: View {
         VStack(spacing: 12) {
             ForEach(HomePaintable.allCases, id: \.self) { piece in
                 HStack(spacing: 12) {
-                    Text(piece.name).font(Toy.body(15, weight: .heavy)).frame(width: 44, alignment: .leading)
+                    Text(piece.name.localized).font(Toy.body(15, weight: .heavy))
+                        .frame(width: Languages.isOn ? 72 : 44, alignment: .leading)
                     ForEach(Array(piece.swatches.enumerated()), id: \.offset) { index, hex in
                         let picked = model.color(piece) == hex
                         Button {
@@ -483,7 +485,7 @@ private struct HomeSheetView: View {
                 dismiss()
                 onExit()
             } label: {
-                Text("出门，回首页").font(Toy.body(15, weight: .heavy)).frame(maxWidth: .infinity).padding(12)
+                Text("出门，回首页".localized).font(Toy.body(15, weight: .heavy)).frame(maxWidth: .infinity).padding(12)
             }
             .buttonStyle(ToyButtonStyle(fill: Toy.card))
         }

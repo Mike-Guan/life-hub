@@ -25,8 +25,8 @@ enum OffWorkReminder {
         notePlan(time, mode: mode, atOffice: atOffice, now: now)
         guard let time else { return nil }
         let content = UNMutableNotificationContent()
-        content.title = "快下班了"
-        content.body = "灵魂可以先走。"
+        content.title = "快下班了".localized
+        content.body = "灵魂可以先走。".localized
         content.sound = .default
         content.categoryIdentifier = category
         let parts = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: time)
@@ -35,7 +35,7 @@ enum OffWorkReminder {
             try await center.add(UNNotificationRequest(identifier: requestID, content: content, trigger: trigger))
             return nil
         } catch {
-            return "下班提醒没设上：\(error.localizedDescription)"
+            return String(format: "下班提醒没设上：%@".localized, error.localizedDescription)
         }
     }
 

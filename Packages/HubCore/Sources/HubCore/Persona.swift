@@ -61,11 +61,11 @@ extension Mode {
 }
 
 extension HubPlace.Kind {
-    /// The place's name for `persona`: KURO's identity place is a tennis court.
+    /// The place's name for `persona` in the app's language: KURO's identity place is a tennis court.
     public func title(for persona: Persona) -> String {
         switch (persona, self) {
-        case (.kuro, .gym): "网球场"
-        default: title
+        case (.kuro, .gym): "网球场".localized
+        default: localizedTitle
         }
     }
 }
@@ -102,11 +102,11 @@ extension HubPlace.Action {
         }
     }
 
-    /// What the action is called for `persona`.
+    /// What the action is called for `persona`, in the app's language.
     public func title(for persona: Persona) -> String {
         switch (persona, self) {
-        case (.kuro, .boxing): "当网球场"
-        default: title
+        case (.kuro, .boxing): "当网球场".localized
+        default: title.localized
         }
     }
 }

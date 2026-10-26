@@ -33,10 +33,10 @@ enum BedtimeReminder {
                 return nil
             }
             guard allowed else {
-                return "通知被关掉了，睡觉提醒发不出来。可以在系统设置里打开。"
+                return "通知被关掉了，睡觉提醒发不出来。可以在系统设置里打开。".localized
             }
             let content = UNMutableNotificationContent()
-            content.title = "到你定的睡觉时间了"
+            content.title = "到你定的睡觉时间了".localized
             content.body = String(format: "%@ 已经在打哈欠了。".localized, persona.title)
             content.sound = .default
             content.categoryIdentifier = category

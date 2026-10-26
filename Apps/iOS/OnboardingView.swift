@@ -803,7 +803,7 @@ struct OnboardingView: View {
 
     private func textButton(_ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
+            Text(title.localized)
                 .font(Toy.body(15, weight: .heavy))
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())

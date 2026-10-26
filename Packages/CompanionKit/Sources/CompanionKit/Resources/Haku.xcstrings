@@ -1,6 +1,118 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
+    "%@。今天到此为止。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. That's it for today."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。今日はここまで。"
+          }
+        }
+      }
+    },
+    "%@。准备出门。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Getting ready to go."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。出かける準備。"
+          }
+        }
+      }
+    },
+    "%@。别打扰，也别走。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Quiet, but stay."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。邪魔はなし。でもいて。"
+          }
+        }
+      }
+    },
+    "%@。推几下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. A few reps."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。何回か押す。"
+          }
+        }
+      }
+    },
+    "%@。沙袋先挨几下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. The bag goes first."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。まずサンドバッグから。"
+          }
+        }
+      }
+    },
+    "%@。没沙袋，打空气也行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. No bag. Air works."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。サンドバッグなし。空気でいい。"
+          }
+        }
+      }
+    },
+    "%@。脑子开机中。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Brain booting up."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。脳、起動中。"
+          }
+        }
+      }
+    },
     "HAKU，困了" : {
       "comment" : "VoiceOver",
       "localizations" : {
@@ -166,6 +278,38 @@
         }
       }
     },
+    "……再五分钟。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…Five more minutes."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……あと5分。"
+          }
+        }
+      }
+    },
+    "……别催。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…don't rush me."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……いまやってる。"
+          }
+        }
+      }
+    },
     "……别晃了。我要吐了。" : {
       "localizations" : {
         "en" : {
@@ -188,6 +332,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…Eyes on the bag, not me."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……俺じゃなくてサンドバッグ見て。"
           }
         }
       }
@@ -366,6 +516,12 @@
             "state" : "translated",
             "value" : "…My bag's on."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……カバン、持った。"
+          }
         }
       }
     },
@@ -449,6 +605,22 @@
         }
       }
     },
+    "……放我下来就行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…You can put me down now."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……下ろしてくれればいい。"
+          }
+        }
+      }
+    },
     "……明天再说。" : {
       "comment" : "C15 睡前嘟囔",
       "localizations" : {
@@ -462,6 +634,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……明日にする。"
+          }
+        }
+      }
+    },
+    "……来了。随便坐。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…You're here. Sit anywhere."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……来たか。適当に座れば。"
           }
         }
       }
@@ -636,6 +824,28 @@
             "state" : "translated",
             "value" : "Who invented Mondays."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月曜って誰が作ったんだ。"
+          }
+        }
+      }
+    },
+    "什么也不想做，这也算一种状态。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doing nothing is a state too."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "何もしたくない。これも状態。"
+          }
         }
       }
     },
@@ -655,12 +865,34 @@
         }
       }
     },
+    "今天也没什么特别的。挺好。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing special today. Good."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日も特に何もない。それでいい。"
+          }
+        }
+      }
+    },
     "今天就这样吧。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calling it a day."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日はもうこれで。"
           }
         }
       }
@@ -768,6 +1000,12 @@
             "state" : "translated",
             "value" : "You survived too, huh."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生きて帰ってきたか。"
+          }
         }
       }
     },
@@ -842,6 +1080,12 @@
             "state" : "translated",
             "value" : "Just a bit more."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あと少しだけ。"
+          }
         }
       }
     },
@@ -867,6 +1111,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Five more minutes."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あと5分。……たぶん。"
           }
         }
       }
@@ -959,6 +1209,12 @@
             "state" : "translated",
             "value" : "Shh. In the zone."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "静かに。今いじってる。"
+          }
         }
       }
     },
@@ -974,6 +1230,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "静かに。このステージもうすぐクリア。"
+          }
+        }
+      }
+    },
+    "别看，还没做完。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Don't look. Not done."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ途中。"
           }
         }
       }
@@ -1066,6 +1338,12 @@
             "state" : "translated",
             "value" : "Circling back to work."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "また仕事か。"
+          }
         }
       }
     },
@@ -1075,6 +1353,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Work again. Already."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "また出勤か。"
           }
         }
       }
@@ -1176,6 +1460,22 @@
         }
       }
     },
+    "喂。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hey."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おーい。"
+          }
+        }
+      }
+    },
     "嗯，活过来了。" : {
       "localizations" : {
         "en" : {
@@ -1215,6 +1515,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oh. You're back."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おかえり。"
           }
         }
       }
@@ -1295,6 +1601,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "こっそりお菓子を食べている"
+          }
+        }
+      }
+    },
+    "在忙。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Working."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作業中。"
           }
         }
       }
@@ -1396,6 +1718,38 @@
         }
       }
     },
+    "地毯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rug"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ラグ"
+          }
+        }
+      }
+    },
+    "坐一会儿。不一定干活。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitting. Not saying it's work."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ちょっと座る。働くとは言ってない。"
+          }
+        }
+      }
+    },
     "坐太久了，扭扭腰，捶捶背" : {
       "localizations" : {
         "en" : {
@@ -1412,6 +1766,70 @@
         }
       }
     },
+    "墙" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walls"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "壁"
+          }
+        }
+      }
+    },
+    "够了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…That's enough."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "はい、そこまで。"
+          }
+        }
+      }
+    },
+    "天亮了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light out."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "明るくなった。"
+          }
+        }
+      }
+    },
+    "天黑了。灯开着就行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark out. Lamp's on. Good enough."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暗くなった。電気ついてればいい。"
+          }
+        }
+      }
+    },
     "头带系紧了吗？" : {
       "localizations" : {
         "en" : {
@@ -1424,6 +1842,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ヘッドバンド、締めた？"
+          }
+        }
+      }
+    },
+    "就差一点。可能。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almost there. Maybe."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あと少し。たぶん。"
           }
         }
       }
@@ -1472,6 +1906,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ほんとに走りきった。"
+          }
+        }
+      }
+    },
+    "左、右、左。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left, right, left."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "左、右、左。"
           }
         }
       }
@@ -1597,6 +2047,12 @@
             "state" : "translated",
             "value" : "Gloves on. No rush."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グローブ装着。ご自由に。"
+          }
         }
       }
     },
@@ -1612,6 +2068,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ランニングシューズを持ってアップしている"
+          }
+        }
+      }
+    },
+    "推几下。不数。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A few reps. Not counting."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "何回か押す。数えない。"
+          }
+        }
+      }
+    },
+    "推起来，放下去。就这样。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up. Down. That's it."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上げて、下ろす。それだけ。"
           }
         }
       }
@@ -1664,12 +2152,98 @@
         }
       }
     },
+    "楼下的灯还亮着。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lights still on downstairs."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下の部屋、まだ電気ついてる。"
+          }
+        }
+      }
+    },
     "毯子分你一半。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Blanket? Take half."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "毛布、半分やる。"
+          }
+        }
+      }
+    },
+    "沙发" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couch"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソファ"
+          }
+        }
+      }
+    },
+    "沙发是我的。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couch is mine."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソファは俺の。"
+          }
+        }
+      }
+    },
+    "沙发是我的。今天电量不够。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couch is mine. Low battery today."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソファは俺の。今日はエナジー足りない。"
+          }
+        }
+      }
+    },
+    "沙袋没惹我，是我今天比较硬。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not the bag's fault. I'm stiff."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サンドバッグは悪くない。俺が硬いだけ。"
           }
         }
       }
@@ -1771,6 +2345,38 @@
         }
       }
     },
+    "电量不太够。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Battery's kind of low."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エナジー、ちょっと足りない。"
+          }
+        }
+      }
+    },
+    "看我也不会多一罐。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staring won't get you a can."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見ても缶は増えない。"
+          }
+        }
+      }
+    },
     "眼皮有点重……" : {
       "localizations" : {
         "en" : {
@@ -1787,6 +2393,38 @@
         }
       }
     },
+    "磨旧的拳套" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Worn-out gloves"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "くたびれたグローブ"
+          }
+        }
+      }
+    },
+    "穿什么都一样帅。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I look good in anything."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "何着ても似合う。俺は。"
+          }
+        }
+      }
+    },
     "穿着连帽衫在写代码" : {
       "localizations" : {
         "en" : {
@@ -1799,6 +2437,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "パーカーを着てコードを書いている"
+          }
+        }
+      }
+    },
+    "窗外挺亮。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bright out there."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外、明るい。"
           }
         }
       }
@@ -1827,6 +2481,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finally. Free."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "やっと。"
+          }
+        }
+      }
+    },
+    "罐子是你的。我只是看着。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your cans. I just watch."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缶はそっちの。俺は見てるだけ。"
           }
         }
       }
@@ -1943,12 +2619,34 @@
         }
       }
     },
+    "被子" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blanket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ふとん"
+          }
+        }
+      }
+    },
     "裹着毯子打瞌睡" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "dozing in a blanket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "毛布にくるまって、うとうとしている"
           }
         }
       }
@@ -2034,6 +2732,22 @@
         }
       }
     },
+    "这些都是真的发生过的。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All of this really happened."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "これ、全部本当にあったこと。"
+          }
+        }
+      }
+    },
     "这张可以。" : {
       "localizations" : {
         "en" : {
@@ -2066,6 +2780,22 @@
         }
       }
     },
+    "遥控器在你那边。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remote's on your side."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リモコン、そっち側。"
+          }
+        }
+      }
+    },
     "那个包……算了。" : {
       "localizations" : {
         "en" : {
@@ -2078,6 +2808,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "あのバッグ……まあいいや。"
+          }
+        }
+      }
+    },
+    "重量？不告诉你。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weight? Not telling."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重さ？秘密。"
           }
         }
       }
@@ -2136,6 +2882,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Food?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……メシは？"
+          }
+        }
+      }
+    },
+    "默认外套" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basic jacket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いつものジャケット"
           }
         }
       }

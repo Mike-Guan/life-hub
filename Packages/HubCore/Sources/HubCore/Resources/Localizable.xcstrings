@@ -115,6 +115,22 @@
         }
       }
     },
+    "……别盯着看。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…No need to stare."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……そんなに見なくていい。"
+          }
+        }
+      }
+    },
     "……又不是在等你。" : {
       "comment" : "ツンデレ式那一句，只在这里",
       "localizations" : {
@@ -138,6 +154,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…mm."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……うん。"
           }
         }
       }
@@ -175,6 +197,22 @@
         }
       }
     },
+    "……换好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…changed clothes."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……着替えた。"
+          }
+        }
+      }
+    },
     "……谱子翻开" : {
       "localizations" : {
         "en" : {
@@ -187,6 +225,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……楽譜、開く"
+          }
+        }
+      }
+    },
+    "……这个，留着。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…keep this."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……これ、取っとく。"
           }
         }
       }
@@ -468,6 +522,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@を保存できませんでした：%2$@"
+          }
+        }
+      }
+    },
+    "做完了 %lld 件提前定好的事。" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Did the one thing you planned."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Did %lld things you'd planned."
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "決めてあったことを%lld個やった。"
           }
         }
       }
@@ -846,6 +928,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "原宿レインコート"
+          }
+        }
+      }
+    },
+    "去了 %lld 次健身房。" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Went to the gym once."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Went to the gym %lld times."
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジムに%lld回行った。"
           }
         }
       }
@@ -1565,13 +1675,13 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Snowboard"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "スノーボード"
           }
         }
@@ -1581,13 +1691,13 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Bench press"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "ベンチプレス台"
           }
         }
@@ -1621,6 +1731,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "観葉植物"
+          }
+        }
+      }
+    },
+    "打了 %lld 次拳。" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Boxed once."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Boxed %lld times."
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボクシング%lld回。"
           }
         }
       }
@@ -1741,6 +1879,38 @@
         }
       }
     },
+    "拿到了%@。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got the %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@を手に入れた。"
+          }
+        }
+      }
+    },
+    "换上了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New look"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "着替えた"
+          }
+        }
+      }
+    },
     "搬不动旧记录 %1$@：%2$@" : {
       "comment" : "多个占位符：按中文出现顺序编号，请工程核对顺序",
       "localizations" : {
@@ -1825,6 +1995,12 @@
     },
     "晒太阳" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunlight"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1921,6 +2097,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Varsity jacket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スタジャン"
           }
         }
       }
@@ -3004,6 +3186,34 @@
         }
       }
     },
+    "跑了 %lld 次 5 公里。" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ran a 5K."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ran %lld 5Ks."
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5km、%lld回走った。"
+          }
+        }
+      }
+    },
     "跑步" : {
       "localizations" : {
         "en" : {
@@ -3206,6 +3416,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "daily look records"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「あの日の様子」の記録"
           }
         }
       }

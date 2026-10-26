@@ -58,7 +58,7 @@ final class DailyLink {
         guard let bookmark = AppGroup.defaults.data(forKey: Self.bookmarkKey) else { return }
         var stale = false
         guard let folder = try? URL(resolvingBookmarkData: bookmark, options: [], bookmarkDataIsStale: &stale) else {
-            lastError = "找不到 Daily 的文件夹了，请在设置里重新联动"
+            lastError = "找不到 Daily 的文件夹了，请在设置里重新联动".localized
             return
         }
         let result = await Task.detached { Self.load(from: folder) }.value

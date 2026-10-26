@@ -8,6 +8,12 @@
             "state" : "translated",
             "value" : "HAKU says"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAKUのひとこと"
+          }
         }
       }
     },
@@ -17,6 +23,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KURO says"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KUROのひとこと"
           }
         }
       }
@@ -29,6 +41,12 @@
             "state" : "translated",
             "value" : "Open Life Hub on your iPhone once first"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先にiPhoneでLife Hubを一度開いてください"
+          }
         }
       }
     },
@@ -38,6 +56,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mode"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モード"
+          }
+        }
+      }
+    },
+    "没存下 iPhone 发来的状态：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Didn't save the status from your iPhone: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhoneから届いた状態を保存できませんでした：%@"
           }
         }
       }
@@ -49,6 +89,12 @@
             "state" : "translated",
             "value" : "Energy"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エナジー"
+          }
         }
       }
     },
@@ -58,6 +104,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No mode yet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだモードなし"
           }
         }
       }

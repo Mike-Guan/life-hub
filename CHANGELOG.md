@@ -15,9 +15,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The app follows the phone's language (Chinese, Japanese or English; other languages get English), and
   Settings has a language picker to choose one by hand. The watch follows the watch's language. The
   onboarding hints under each card, such as the place it switches at, are translated too.
+- Notifications, the setup's 以后再说 button, the memory page's dates and counts, the place names and note in
+  Settings > 地点, and a few error lines now follow the app's language.
+- About 230 more Japanese and 170 more English strings, and HAKU's line at the home shop no longer tells you how to spend cans.
 - Declined permissions no longer put a red bar on the home screen. Location not set to Always and Motion &
   Fitness turned off each show a grey line in Settings > 地点, with a button to open the iPhone's Settings.
 - Settings has a 隐私政策 row that opens the privacy policy, shown once the page has its address.
+- The home page shows its labels, sheets and HAKU's lines in Japanese or English when the app runs in that language.
+- The welcome-back recap and the wardrobe's VoiceOver label now follow the app's language.
 - In the home HAKU now follows the home's behavior rules: at bedtime he goes to bed, by mode he sits at
   the desk or on the sofa or trains in the sports corner, and in about half of the 15-minute slots he walks
   over to look at a home item (a plant, the cactus, the speaker) for 30 s. He never goes to the sports
