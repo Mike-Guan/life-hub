@@ -51,7 +51,7 @@ struct SettingsView: View {
         .task(id: scenePhase) {
             let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
             notificationsOff = status == .denied
-            motionOff = CommuteMotion.isDenied
+            motionOff = CommuteMotion.isDenied || ScreenshotMode.settings == "places"
         }
         .foregroundStyle(Toy.ink)
         .tint(Toy.pink)
@@ -77,7 +77,15 @@ struct SettingsView: View {
         .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: asksErase)
     }
 
-    private var content: some View {
+    @ViewBuilder private var content: some View {
+        if ScreenshotMode.settings == "places" {
+            placesCard.padding(16)
+        } else {
+            fullContent
+        }
+    }
+
+    private var fullContent: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
                 Text("设置")
@@ -567,7 +575,7 @@ struct SettingsView: View {
             Text(placesNote)
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
-            if let warning = monitor.accessWarning {
+            if let warning = monitor.accessWarning ?? (ScreenshotMode.settings == "places" ? PlaceMonitor.notAlways : nil) {
                 permissionLine(warning)
             }
             if motionOff {

@@ -86,7 +86,7 @@ final class PlaceMonitor {
         accessWarning = settings.places.isEmpty || always ? nil : Self.notAlways
     }
 
-    private static var notAlways: String {
+    static var notAlways: String {
         "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。".localized
     }
 
