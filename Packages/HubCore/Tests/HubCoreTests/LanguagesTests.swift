@@ -32,8 +32,8 @@ import Testing
         for (code, title) in [("ja", "ボクシング"), ("en", "Boxing")] {
             let folder = root.appending(path: "\(code).lproj")
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-            try "\"拳击日\" = \"\(title)\";".write(
-                to: folder.appending(path: "Localizable.strings"), atomically: true, encoding: .utf8)
+            let strings = "\"拳击日\" = \"\(title)\";"
+            try strings.write(to: folder.appending(path: "Localizable.strings"), atomically: true, encoding: .utf8)
         }
         let bundle = try #require(Bundle(path: root.path))
         func title(_ language: Languages.Language) -> String {
