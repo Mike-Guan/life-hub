@@ -30,6 +30,7 @@ struct SettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
     // Read again on every return to the app, so turning notifications on in Settings clears the line.
     @State private var notificationsOff = false
+    @State private var motionOff = false
     @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
     @State private var answering: StepEdit?
@@ -50,6 +51,7 @@ struct SettingsView: View {
         .task(id: scenePhase) {
             let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
             notificationsOff = status == .denied
+            motionOff = CommuteMotion.isDenied
         }
         .foregroundStyle(Toy.ink)
         .tint(Toy.pink)
@@ -248,6 +250,27 @@ struct SettingsView: View {
         let list = ListFormatter()
         list.locale = Languages.locale
         return list.string(from: days) ?? days.joined(separator: " ")
+    }
+
+    // QA 10-26 必修 5: a permission the user declined, in grey, with the way to turn it on.
+    private func permissionLine(_ text: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(text)
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text("去设置打开")
+                    .font(Toy.body(15, weight: .heavy))
+                    .underline()
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // UI 二组 preview 5: with notifications denied, the reminders that are on can't go out.
@@ -544,6 +567,14 @@ struct SettingsView: View {
             Text(placesNote)
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
+            if let warning = monitor.accessWarning {
+                permissionLine(warning)
+            }
+            if motionOff {
+                permissionLine(
+                    String(format: "没开「运动与健身」权限：通勤路上 %@ 只会走路。".localized, persona.title)
+                )
+            }
         }
         .padding(16)
         .toyCard()

@@ -86,7 +86,9 @@ final class PlaceMonitor {
         accessWarning = settings.places.isEmpty || always ? nil : Self.notAlways
     }
 
-    private static let notAlways = "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。到 设置 > Life Hub > 位置 选「始终」"
+    private static var notAlways: String {
+        "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。到 设置 > Life Hub > 位置 选「始终」".localized
+    }
 
     // The background delivery problem Mike hit on 2026-10-05 left no trace; these flags say why.
     private static func noteDiagnostics(_ event: CLMonitor.Event) {

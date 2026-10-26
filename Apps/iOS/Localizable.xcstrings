@@ -901,6 +901,12 @@
             "state" : "translated",
             "value" : "Location isn't set to “Always,” so with the app closed it can't tell when you reach or leave the office or home. Go to Settings > Life Hub > Location and pick “Always.”"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "位置情報が「常に」になっていないので、アプリを閉じている間は職場や家への出入りがわかりません。設定 > Life Hub > 位置情報 で「常に」を選んでください。"
+          }
         }
       }
     },
@@ -3102,6 +3108,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "現在地を取得できませんでした。もう一度タップしてください。"
+          }
+        }
+      }
+    },
+    "没开「运动与健身」权限：通勤路上 %@ 只会走路。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Motion & Fitness is off, so %@ only walks on your commute."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "「モーションとフィットネス」がオフなので、通勤中の%@は歩くだけです。"
           }
         }
       }
