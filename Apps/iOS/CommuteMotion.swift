@@ -9,6 +9,12 @@ enum CommuteMotion {
     /// Thrown when Mike turned off Motion & Fitness for Life Hub.
     struct NotAuthorized: Error {}
 
+    /// Whether Motion & Fitness is turned off or restricted for the app.
+    static var isDenied: Bool {
+        let status = CMMotionActivityManager.authorizationStatus()
+        return status == .denied || status == .restricted
+    }
+
     // Kept for the app's life so a query isn't dropped with its manager.
     private static let manager = CMMotionActivityManager()
 
@@ -17,9 +23,7 @@ enum CommuteMotion {
     /// - Throws: `NotAuthorized` without Motion & Fitness access, or the Core Motion error.
     static func samples(from start: Date, to now: Date = .now) async throws -> [MotionSample] {
         guard CMMotionActivityManager.isActivityAvailable() else { return [] }
-        guard CMMotionActivityManager.authorizationStatus() != .denied,
-            CMMotionActivityManager.authorizationStatus() != .restricted
-        else { throw NotAuthorized() }
+        guard !isDenied else { throw NotAuthorized() }
         return try await withCheckedThrowingContinuation { continuation in
             // The first query shows the permission prompt.
             manager.queryActivityStarting(from: start, to: now, to: .main) { activities, error in

@@ -533,10 +533,12 @@ struct LifeHubApp: App {
         unboxing = UnboxLog.next(in: growth.ledger, persona: persona)
     }
 
+    // QA 10-26 必修 5: declined permissions (location not "Always", Motion & Fitness off) are shown as a grey
+    // line in Settings, not as a red error on the home screen.
     private var firstError: String? {
         let errors = [
             widgets.lastError, growth.lastError, reminderError, offWorkError, healthError,
-            placeMonitor.lastError, placeMonitor.accessWarning, needs.lastError, countdownError, screenTimeError,
+            placeMonitor.lastError, needs.lastError, countdownError, screenTimeError,
             daily.lastError, DecisionLog.lastError(in: AppGroup.defaults),
         ]
         return (setupErrors + errors.compactMap { $0 }).first
