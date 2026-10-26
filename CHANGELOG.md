@@ -24,6 +24,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The home page shows its labels, sheets and HAKU's lines in Japanese or English when the app runs in that language.
 - The welcome-back recap and the wardrobe's VoiceOver label now follow the app's language.
 - The home page's date reads 周一，10/26 in Chinese and 10/26（月） in Japanese.
+- Picking 中文 in Settings now turns the whole app Chinese on a phone in another language, not only the characters' lines.
 - The mode cards' taglines, the memory page's section titles, the wardrobe tabs, the energy you picked and the second preset character's 备课 card follow the app's language.
 - The first-run setup shows HAKU's questions, the buttons and the notes in Japanese or English too.
 - In the home HAKU now follows the home's behavior rules: at bedtime he goes to bed, by mode he sits at

@@ -136,6 +136,17 @@ jobs:
       - name: Privacy manifests in every app and extension
         run: scripts/privacy-check.sh build/Build/Products
 
+      # Chinese, the strings' source, has no table of its own: it is found only as the development region.
+      # With English there, 中文 in Settings showed English.
+      - name: Chinese is the iOS app's development region
+        run: |
+          app=build/Build/Products/Debug-iphonesimulator/LifeHub.app
+          region=$(/usr/libexec/PlistBuddy -c 'Print CFBundleDevelopmentRegion' "$app/Info.plist")
+          [ "$region" = zh-Hans ] || { echo "::error::Development region is $region, not zh-Hans"; exit 1; }
+          for lang in ja en; do
+            [ -d "$app/$lang.lproj" ] || { echo "::error::$lang.lproj is missing from LifeHub.app"; exit 1; }
+          done
+
       - name: Launch the watch app (simulator)
         run: scripts/watch-launch-check.sh build/Build/Products/Debug-watchsimulator/LifeHubWatch.app
 
