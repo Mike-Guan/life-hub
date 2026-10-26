@@ -419,7 +419,7 @@ struct SettingsView: View {
                 }
                 .font(Toy.body(13, weight: .heavy))
             }
-            Text("选你最容易刷停不下来的 App。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
+            Text(scrollNote)
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             Text("用了多久只有这台 iPhone 知道，我们看不到。")
@@ -492,7 +492,7 @@ struct SettingsView: View {
             HStack(spacing: 10) {
                 Text("调试记录")
                     .font(Toy.body(16, weight: .heavy))
-                Text("\(log.entries.count) 条 · 决策 \(decisions.kept.count) 条")
+                Text(String(format: "%1$lld 条 · 决策 %2$lld 条".localized, log.entries.count, decisions.kept.count))
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
@@ -512,10 +512,15 @@ struct SettingsView: View {
         .toyCard()
     }
 
+    private var scrollNote: String {
+        let format = "选你最容易刷停不下来的 App。一天合计刷满 %1$lld 分钟，%2$@ 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。"
+        return String(format: format.localized, ScrollWatch.minutes, persona.title)
+    }
+
     private var pickedLabel: String {
         let apps = scrollApps.applicationTokens.count + scrollApps.categoryTokens.count
         let count = apps + scrollApps.webDomainTokens.count
-        return count == 0 ? "没选" : "已选 \(count) 项"
+        return count == 0 ? "没选".localized : String(format: "已选 %lld 项".localized, count)
     }
 
     // Screen Time asks once; after that the picker opens straight away.

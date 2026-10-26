@@ -161,7 +161,7 @@ public enum Memory {
         .sorted { $0.1 > $1.1 }
         .prefix(3)
         if !often.isEmpty {
-            list.append(LongMemory(title: "常待的地方".localized, detail: often.map(\.0).joined(separator: "、")))
+            list.append(LongMemory(title: "常待的地方".localized, detail: list(often.map(\.0))))
         }
         return list
     }
@@ -182,9 +182,14 @@ public enum Memory {
     static func weekdays(_ days: Set<Int>) -> String {
         let names = [1: "周日", 2: "周一", 3: "周二", 4: "周三", 5: "周四", 6: "周五", 7: "周六"]
         let ordered = days.sorted { ($0 + 5) % 7 < ($1 + 5) % 7 }
-        guard Languages.isOn else { return ordered.compactMap { names[$0] }.joined(separator: "、") }
+        guard Languages.isOn else { return list(ordered.compactMap { names[$0] }) }
         let symbols = Languages.weekCalendar().shortWeekdaySymbols
-        return ordered.map { symbols[$0 - 1] }.formatted(.list(type: .and).locale(Languages.locale))
+        return list(ordered.map { symbols[$0 - 1] })
+    }
+
+    /// `items` joined with 、 in Chinese, else as a list in the app's language (Tue and Thu).
+    static func list(_ items: [String]) -> String {
+        Languages.isOn ? items.formatted(.list(type: .and).locale(Languages.locale)) : items.joined(separator: "、")
     }
 }
 
