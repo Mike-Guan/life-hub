@@ -331,7 +331,7 @@ public struct HakuHomeView: View {
         }
     }
 
-    private func lineCard(_ model: HomeModel) -> some View {
+    func lineCard(_ model: HomeModel) -> some View {
         Button {
             model.tap(.haku)
         } label: {
