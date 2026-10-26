@@ -28,6 +28,8 @@ import Testing
         func title(_ language: Languages.Language) -> String {
             String(localized: "拳击日", table: "Localizable", bundle: Languages.bundle(.module, for: language))
         }
+        let found = (try? FileManager.default.subpathsOfDirectory(atPath: Bundle.module.bundlePath)) ?? []
+        #expect(Bundle.module.localizations.contains("ja"), "\(Bundle.module.localizations) \(found)")
         #expect(title(.japanese) == "ボクシング")
         #expect(title(.english) == "Boxing")
     }
