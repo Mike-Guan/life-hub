@@ -5,14 +5,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Couldn't set the off-work notice: %@"
+            "state" : "translated",
+            "value" : "Off-work reminder didn't get set: %@"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "退勤の通知を設定できませんでした：%@"
+            "state" : "translated",
+            "value" : "終業前の通知を設定できませんでした：%@"
           }
         }
       }
@@ -28,8 +28,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "もうすぐ退勤"
+            "state" : "translated",
+            "value" : "そろそろ終業"
           }
         }
       }
@@ -45,8 +45,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "魂はお先にどうぞ。"
+            "state" : "translated",
+            "value" : "魂は先に帰っていい。"
           }
         }
       }
