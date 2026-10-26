@@ -550,7 +550,8 @@ struct SettingsView: View {
             }
             ForEach(HubPlace.Kind.presets(with: cards), id: \.self) { kind in
                 let place = places[kind]
-                placeRow(title: kind.title(for: persona, cards: cards), detail: place == nil ? "没设" : "已设") {
+                let detail = (place == nil ? "没设" : "已设").localized
+                placeRow(title: kind.title(for: persona, cards: cards), detail: detail) {
                     let blank = HubPlace(kind: kind, latitude: 0, longitude: 0)
                     editing = PlaceEdit(place: place ?? blank, isNew: place == nil)
                 }
@@ -580,9 +581,9 @@ struct SettingsView: View {
     }
 
     private var placesNote: String {
-        let full = places.canAdd ? "" : "iOS 最多同时看 \(PlaceSettings.limit) 个地点，删掉一个才能再加。"
-        return full + "点一个地点设置位置。右上角 + 加自己的地点，选到了 \(persona.title) 做什么。"
-            + "地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。"
+        let full = places.canAdd ? "" : String(format: "iOS 最多同时看 %lld 个地点，删掉一个才能再加。".localized, PlaceSettings.limit)
+        return full + String(format: "点一个地点设置位置。右上角 + 加自己的地点，选到了 %@ 做什么。".localized, persona.title)
+            + "地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。".localized
     }
 
     private func placeRow(title: String, detail: String, action: @escaping () -> Void) -> some View {
