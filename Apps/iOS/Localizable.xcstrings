@@ -409,9 +409,21 @@
     "%lld 次判断" : {
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "%lld decisions"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "1 decision"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld decisions"
+                }
+              }
+            }
           }
         },
         "ja" : {
@@ -1063,14 +1075,14 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Couldn't set the off-work notice: %@"
+            "state" : "translated",
+            "value" : "Off-work reminder didn't get set: %@"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "退勤の通知を設定できませんでした：%@"
+            "state" : "translated",
+            "value" : "終業前の通知を設定できませんでした：%@"
           }
         }
       }
@@ -1328,8 +1340,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "今日の睡眠データはありません"
+            "state" : "translated",
+            "value" : "今日は睡眠データがありません"
           }
         }
       }
@@ -1402,8 +1414,8 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Later"
+            "state" : "translated",
+            "value" : "Maybe later"
           }
         },
         "ja" : {
@@ -2237,8 +2249,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "決めた就寝時間になりました"
+            "state" : "translated",
+            "value" : "設定した寝る時間になりました"
           }
         }
       }
@@ -3410,8 +3422,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "もうすぐ退勤"
+            "state" : "translated",
+            "value" : "そろそろ終業"
           }
         }
       }
@@ -3657,8 +3669,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Daily のフォルダが見つかりません。設定でもう一度連携してください。"
+            "state" : "translated",
+            "value" : "Dailyのフォルダが見つかりません。設定でもう一度連携してください"
           }
         }
       }
@@ -4464,8 +4476,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "魂はお先にどうぞ。"
+            "state" : "translated",
+            "value" : "魂は先に帰っていい。"
           }
         }
       }
@@ -5918,8 +5930,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "通知がオフなので、就寝リマインダーを送れません。設定でオンにできます。"
+            "state" : "translated",
+            "value" : "通知がオフなので、寝る時間の通知が届きません。iPhoneの設定でオンにできます。"
           }
         }
       }
