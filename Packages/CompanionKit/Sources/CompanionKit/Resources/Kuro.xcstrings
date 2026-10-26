@@ -8,6 +8,12 @@
             "state" : "translated",
             "value" : "%@. …home."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。……ただいま。"
+          }
         }
       }
     },
@@ -17,6 +23,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@. …shh. you can stay."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。……静かめで。……いてもいい。"
           }
         }
       }
@@ -28,6 +40,12 @@
             "state" : "translated",
             "value" : "%@. …here we go."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。……始まった。"
+          }
         }
       }
     },
@@ -37,6 +55,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@. bag first."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。まずサンドバッグ、何発か。"
           }
         }
       }
@@ -48,6 +72,12 @@
             "state" : "translated",
             "value" : "%@. bag's packed."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。バッグ、持った。"
+          }
         }
       }
     },
@@ -58,6 +88,12 @@
             "state" : "translated",
             "value" : "%@. two reps."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。ちょっとだけ上げる。"
+          }
         }
       }
     },
@@ -66,7 +102,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@. no bag… air's fine."
+            "value" : "%@. no bag… I'll shadowbox."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@。サンドバッグないし……エアで。"
           }
         }
       }
@@ -302,6 +344,12 @@
             "state" : "translated",
             "value" : "…zzz"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……zzz"
+          }
         }
       }
     },
@@ -328,6 +376,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…one, two."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……いち、に。"
           }
         }
       }
@@ -405,6 +459,12 @@
             "state" : "translated",
             "value" : "…which one today."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……今日はどれにしよ。"
+          }
         }
       }
     },
@@ -415,6 +475,12 @@
             "state" : "translated",
             "value" : "…you pick. I'm right here."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……選ぶのはそっち。私は隣。"
+          }
         }
       }
     },
@@ -424,6 +490,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…you're here. sit."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……来たんだ。どこでも。"
           }
         }
       }
@@ -466,6 +538,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…one more minute."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……あと少し。"
           }
         }
       }
@@ -540,6 +618,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…not at me. eyes forward."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……私じゃなくて、前。"
           }
         }
       }
@@ -697,6 +781,12 @@
             "state" : "translated",
             "value" : "…just sitting. not really busy."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……座るだけ。たぶん。"
+          }
         }
       }
     },
@@ -771,6 +861,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…what's up?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……どうしたの。"
           }
         }
       }
@@ -847,6 +943,12 @@
             "state" : "translated",
             "value" : "…two reps. …just two."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……二回だけ。……ほんとに二回。"
+          }
         }
       }
     },
@@ -856,6 +958,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…here's fine."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……ここでいい。"
           }
         }
       }
@@ -915,6 +1023,12 @@
             "state" : "translated",
             "value" : "…that tickles."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……くすぐったい。"
+          }
         }
       }
     },
@@ -924,6 +1038,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…each one has its day."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……どれにも、その日がある。"
           }
         }
       }
@@ -1001,6 +1121,12 @@
             "state" : "translated",
             "value" : "…battery's dead."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……充電切れ。"
+          }
         }
       }
     },
@@ -1042,6 +1168,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…no can for looking. …but sure."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……見ても増えないけど。……いいよ。"
           }
         }
       }
@@ -1150,6 +1282,12 @@
             "state" : "translated",
             "value" : "…whoa."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……わっ。"
+          }
         }
       }
     },
@@ -1257,6 +1395,12 @@
             "state" : "translated",
             "value" : "…my spot. no battery today."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……こっちは私の。今日は充電切れ。"
+          }
         }
       }
     },
@@ -1266,6 +1410,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "…weight's a secret."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "……重さは、ひみつ。"
           }
         }
       }
@@ -1438,7 +1588,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "nothing special today. …nice."
+            "value" : "…just a normal day. …nice."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日はふつう。……いい感じ。"
           }
         }
       }
@@ -1449,6 +1605,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "nice light today."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日、光がいい感じ。"
           }
         }
       }
@@ -1755,6 +1917,12 @@
             "state" : "translated",
             "value" : "lights on across the street."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "向かい、まだ明かりついてる。"
+          }
         }
       }
     },
@@ -1781,6 +1949,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "almost done."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もうすぐ終わる。"
           }
         }
       }
@@ -1968,6 +2142,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "this spot's mine."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "こっち、私の席。"
           }
         }
       }
