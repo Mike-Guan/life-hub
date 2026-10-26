@@ -311,7 +311,7 @@ public struct ModeCards: Codable, Equatable, Sendable {
         // A name the user typed has no key and comes back as typed; 备课, the old default, is translated.
         if let name = names[mode.rawValue] { return name.localized }
         if mode == .boxing, let identity { return identity.title }
-        return mode.title(for: persona).localized
+        return mode.localizedTitle(for: persona)
     }
 
     /// The identity slot's activity for sentences, without 日: the picked card's, else the character's default.

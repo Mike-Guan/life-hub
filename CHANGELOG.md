@@ -29,6 +29,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The mode cards' taglines, the memory page's section titles, the wardrobe tabs, the energy you picked and the second preset character's 备课 card follow the app's language.
 - The first-run setup shows HAKU's questions, the buttons and the notes in Japanese or English too.
 - The first-run setup's work hours note, the 副业 pick limit, the 副业 states and the 副业 card name follow the app's language.
+- The first-run setup names the cards Work, Chill and Projects in English, as everywhere else.
 - In the home HAKU now follows the home's behavior rules: at bedtime he goes to bed, by mode he sits at
   the desk or on the sofa or trains in the sports corner, and in about half of the 15-minute slots he walks
   over to look at a home item (a plant, the cactus, the speaker) for 30 s. He never goes to the sports

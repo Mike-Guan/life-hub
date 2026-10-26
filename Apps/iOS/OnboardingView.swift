@@ -734,7 +734,7 @@ struct OnboardingView: View {
                     // The default name shows as the prompt, in ink like a typed name.
                     TextField(
                         "", text: name(mode),
-                        prompt: Text(mode.title(for: draft.persona).localized).foregroundStyle(Toy.ink)
+                        prompt: Text(mode.localizedTitle(for: draft.persona)).foregroundStyle(Toy.ink)
                     )
                     .font(Toy.body(17, weight: .black))
                     .foregroundStyle(Toy.ink)
