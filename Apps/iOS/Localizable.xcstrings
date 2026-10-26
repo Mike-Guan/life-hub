@@ -156,10 +156,32 @@
     },
     "%lld 次判断" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%lld decisions"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "判断%lld回"
+          }
+        }
+      }
+    },
+    "%lld 次判断 · 纠正 %lld 次" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%lld decisions · %lld corrected"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "判断%lld回 · 訂正%lld回"
           }
         }
       }
@@ -615,6 +637,22 @@
         }
       }
     },
+    "下班提醒没设上：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couldn't set the off-work notice: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "退勤の通知を設定できませんでした：%@"
+          }
+        }
+      }
+    },
     "不切换" : {
       "localizations" : {
         "en" : {
@@ -797,6 +835,12 @@
             "state" : "translated",
             "value" : "No sleep data today"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "今日の睡眠データはありません"
+          }
         }
       }
     },
@@ -854,6 +898,12 @@
     },
     "以后再说" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Later"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1525,6 +1575,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "It's the bedtime you set"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "決めた就寝時間になりました"
           }
         }
       }
@@ -2487,6 +2543,12 @@
             "state" : "translated",
             "value" : "Almost off work"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "もうすぐ退勤"
+          }
         }
       }
     },
@@ -2643,6 +2705,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Can't find the Daily folder anymore. Link it again in Settings."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Daily のフォルダが見つかりません。設定でもう一度連携してください。"
           }
         }
       }
@@ -3256,6 +3324,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your soul can leave early."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "魂はお先にどうぞ。"
           }
         }
       }
@@ -4350,6 +4424,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notifications are off, so the bedtime reminder can't go out. You can turn them on in Settings."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "通知がオフなので、就寝リマインダーを送れません。設定でオンにできます。"
           }
         }
       }

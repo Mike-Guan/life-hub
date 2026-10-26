@@ -360,7 +360,7 @@ struct HomeView: View {
     // UI 审核 2026-10-13: the whole row is the tap target, and it is 44 pt tall with or without the button,
     // so the cards below never jump.
     @ViewBuilder private func energyRow(_ reading: EnergyReading?) -> some View {
-        let text = Text(reading?.reasons.first ?? "今天没有睡眠数据")
+        let text = (reading?.reasons.first).map { Text($0) } ?? Text("今天没有睡眠数据")
             .font(Toy.body(13, weight: .bold))
             .foregroundStyle(Toy.muted)
         if let reading, reading.source != .selfReport {
