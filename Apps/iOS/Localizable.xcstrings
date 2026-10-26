@@ -379,16 +379,6 @@
         }
       }
     },
-    "%@的样子，穿着%@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@の姿、%2$@を着ている"
-          }
-        }
-      }
-    },
     "%@穿" : {
       "comment" : "商店衣服上的模式签，%@ 是模式名（上班、下班……）。",
       "localizations" : {
@@ -564,32 +554,6 @@
         }
       }
     },
-    "\\n\\n决策记录（%@ 条）\\n" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "\\n\\n判断の記録（%@件）\\n"
-          }
-        }
-      }
-    },
-    "\\n\\n决策记录（%lld 条）\\n" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "\\n\\nDecision log (%lld)\\n"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "\n\n判断の記録（%lld件）\n"
-          }
-        }
-      }
-    },
     "iOS 最多同时看 %lld 个地点，删掉一个才能再加。" : {
       "localizations" : {
         "en" : {
@@ -747,6 +711,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……ゆっくり見てって。"
+          }
+        }
+      }
+    },
+    "、" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", "
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "、"
           }
         }
       }

@@ -128,19 +128,24 @@ public struct ReturnCard: Codable, Equatable, Sendable {
         func add(_ kind: Kind, _ count: Int, _ text: String) {
             if count > 0 { cards.append(ReturnCard(kind: kind, count: count, text: text)) }
         }
-        add(.boxing, count(.boxing), "打了 \(count(.boxing)) 次拳。")
-        add(.run5k, count(.run5k), "跑了 \(count(.run5k)) 次 5 公里。")
-        add(.gym, count(.gym), "去了 \(count(.gym)) 次健身房。")
-        add(.sleptWell, slept, slept == 1 ? "有一天睡得挺好。" : "有几天睡得挺好。")
-        add(.plannedTask, count(.plannedTask), "做完了 \(count(.plannedTask)) 件提前定好的事。")
+        // The counts are formats, so the catalog holds one key for every number.
+        func counted(_ format: String, _ count: Int) -> String {
+            String(format: format.localized, count)
+        }
+        add(.boxing, count(.boxing), counted("打了 %lld 次拳。", count(.boxing)))
+        add(.run5k, count(.run5k), counted("跑了 %lld 次 5 公里。", count(.run5k)))
+        add(.gym, count(.gym), counted("去了 %lld 次健身房。", count(.gym)))
+        add(.sleptWell, slept, (slept == 1 ? "有一天睡得挺好。" : "有几天睡得挺好。").localized)
+        add(.plannedTask, count(.plannedTask), counted("做完了 %lld 件提前定好的事。", count(.plannedTask)))
         for trace in traces {
-            guard let line = line(for: trace) else { continue }
+            guard let line = line(for: trace)?.localized else { continue }
             cards.append(ReturnCard(kind: .trace, count: 1, item: trace.rawValue, text: line))
         }
         for entry in granted {
             // The return is HAKU's, so KURO's keepsakes granted at the same milestones stay out.
             guard let id = entry.itemID, let item = ShopItem.item(id), item.persona == .haku else { continue }
-            cards.append(ReturnCard(kind: .keepsake, count: 1, item: id, text: "拿到了\(item.title)。"))
+            let text = String(format: "拿到了%@。".localized, item.title)
+            cards.append(ReturnCard(kind: .keepsake, count: 1, item: id, text: text))
         }
         return cards
     }
