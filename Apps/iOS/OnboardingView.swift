@@ -925,10 +925,11 @@ struct OnboardingView: View {
         switch mode {
         case .work:
             let name = draft.names[Mode.work.rawValue].flatMap { $0.isEmpty ? nil : $0 }
-            return name.map { "到「\($0)」的地方 · 手动" } ?? "到上班的地方 · 手动"
-        case .chill: return "回家 · 从上班的地方离开 · 手动"
-        case .money: return "手动 · 地点可选"
-        case .boxing: return cards.identity.map { "\($0.howItSwitches) · 手动" } ?? "手动"
+            return name.map { String(format: "到「%@」的地方 · 手动".localized, $0) } ?? "到上班的地方 · 手动".localized
+        case .chill: return "回家 · 从上班的地方离开 · 手动".localized
+        case .money: return "手动 · 地点可选".localized
+        case .boxing:
+            return cards.identity.map { String(format: "%@ · 手动".localized, $0.howItSwitches) } ?? "手动".localized
         }
     }
 
@@ -1126,18 +1127,18 @@ extension IdentityKind {
     /// Where the card's place usually is, for the places screen.
     fileprivate var placeName: String {
         switch self {
-        case .boxing: "拳馆"
-        case .tennis: "球场"
-        case .fitness: "健身房"
-        case .study: "图书馆"
-        case .art: "画室"
-        default: "\(title)的地方"
+        case .boxing: "拳馆".localized
+        case .tennis: "球场".localized
+        case .fitness: "健身房".localized
+        case .study: "图书馆".localized
+        case .art: "画室".localized
+        default: String(format: "%@的地方".localized, title)
         }
     }
 
     /// How the card switches, under its name.
     fileprivate var howItSwitches: String {
-        workouts.isEmpty ? placeName : "\(placeName) · 手表"
+        workouts.isEmpty ? placeName : String(format: "%@ · 手表".localized, placeName)
     }
 
     fileprivate var placeID: String { self == .boxing ? HubPlace.Kind.gym.rawValue : "onboardingIdentity" }

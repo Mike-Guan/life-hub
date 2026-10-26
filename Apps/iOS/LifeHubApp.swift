@@ -47,7 +47,7 @@ struct LifeHubApp: App {
     @State private var taps: NotificationTaps
     @State private var daily = DailyLink()
     @State private var bathDoneAt = BathTime.doneAt(in: AppGroup.defaults)
-    @AppStorage(Languages.key, store: AppGroup.defaults) private var languagesOn = false
+    @AppStorage(Languages.key, store: AppGroup.defaults) private var languageChoice = Languages.Choice.system.rawValue
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -174,8 +174,14 @@ struct LifeHubApp: App {
                 home
             }
         }
-        // Read on every change of the switch, so views and HubCore's lines change language together.
-        .environment(\.locale, languagesOn ? .autoupdatingCurrent : Languages.chinese)
+        // Read on every change of the choice, so views and HubCore's lines change language together.
+        .environment(\.locale, locale)
+    }
+
+    // Reading `languageChoice` redraws the views when the user picks another language.
+    private var locale: Locale {
+        _ = languageChoice
+        return Languages.locale
     }
 
     private var home: some View {

@@ -5,6 +5,11 @@ import WidgetKit
 
 @main
 struct LifeHubWatchWidgets: WidgetBundle {
+    init() {
+        // Like the watch app, the complications follow the watch's system language.
+        Languages.load(from: .standard)
+    }
+
     var body: some Widget {
         WatchStatusWidget()
     }

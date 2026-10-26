@@ -39,7 +39,7 @@ struct SettingsView: View {
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
     @State private var asksErase = false
-    @AppStorage(Languages.key, store: AppGroup.defaults) private var languagesOn = false
+    @AppStorage(Languages.key, store: AppGroup.defaults) private var languageChoice = Languages.Choice.system.rawValue
 
     var body: some View {
         ScrollView {
@@ -213,8 +213,8 @@ struct SettingsView: View {
             #if DEBUG || ENV_STG
             scrollCard
             #endif
-            #if DEBUG
             languagesCard
+            #if DEBUG
             dogfoodCard
             #endif
 
@@ -410,28 +410,30 @@ struct SettingsView: View {
     }
     #endif
 
-    // Debug only (Issue #350): Japanese and English stay off until every string is in and reviewed. Not in STG,
-    // because friends get the same STG build through TestFlight.
+    // Issue #350: the app follows the phone's language until the user picks one here.
     private var languagesCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Toggle(isOn: languagesBinding) {
-                Text("日文和英文")
-                    .font(Toy.body(16, weight: .heavy))
+        HStack {
+            Text("语言")
+                .font(Toy.body(16, weight: .heavy))
+            Spacer()
+            Picker("语言", selection: languageBinding) {
+                ForEach(Languages.Choice.allCases, id: \.self) { choice in
+                    Text(choice.language.map { LocalizedStringKey($0.name) } ?? "跟随系统").tag(choice)
+                }
             }
-            Text("打开后跟手机的系统语言走；还没翻译的地方仍是中文。关着时一律中文。只在开发版里有。")
-                .font(Toy.body(12))
-                .foregroundStyle(Toy.muted)
+            .pickerStyle(.menu)
+            .tint(Toy.ink)
         }
         .padding(16)
         .toyCard()
     }
 
-    private var languagesBinding: Binding<Bool> {
+    private var languageBinding: Binding<Languages.Choice> {
         Binding(
-            get: { languagesOn },
+            get: { Languages.Choice(rawValue: languageChoice) ?? .system },
             set: {
-                Languages.isOn = $0
-                languagesOn = $0
+                Languages.store($0, in: AppGroup.defaults)
+                languageChoice = $0.rawValue
                 WidgetCenter.shared.reloadAllTimelines()
             }
         )

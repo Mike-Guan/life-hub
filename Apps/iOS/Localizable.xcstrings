@@ -73,6 +73,12 @@
     },
     "%@ · 手动" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@ · Manual"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -83,6 +89,12 @@
     },
     "%@ · 手表" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@ · Watch"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -129,6 +141,12 @@
     },
     "%@的地方" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@ spot"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1055,6 +1073,12 @@
     },
     "健身房" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Gym"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1467,10 +1491,32 @@
     },
     "到「%@」的地方 · 手动" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "At “%@” · Manual"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "「%@」の場所に着く・手動"
+          }
+        }
+      }
+    },
+    "到上班的地方 · 手动" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "At work · Manual"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "職場 · 手動"
           }
         }
       }
@@ -2555,6 +2601,22 @@
         }
       }
     },
+    "手动" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Manual"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "手動"
+          }
+        }
+      }
+    },
     "手动 · 地点可选" : {
       "localizations" : {
         "en" : {
@@ -2659,6 +2721,12 @@
     },
     "拳馆" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Boxing gym"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3978,6 +4046,22 @@
         }
       }
     },
+    "语言" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Language"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "言語"
+          }
+        }
+      }
+    },
     "读不到 Daily 的文件夹：%@" : {
       "localizations" : {
         "en" : {
@@ -4101,6 +4185,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "5km走った"
+          }
+        }
+      }
+    },
+    "跟随系统" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Match iPhone"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "iPhoneに合わせる"
           }
         }
       }

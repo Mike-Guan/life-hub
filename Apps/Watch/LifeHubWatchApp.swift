@@ -6,6 +6,8 @@ import SwiftUI
 @main
 struct LifeHubWatchApp: App {
     init() {
+        // The watch has no language setting of its own; it follows the watch's system language.
+        Languages.load(from: .standard)
         // Started at launch, so a background launch for a complication transfer gets its data.
         WatchReceiver.shared.activate()
     }
@@ -13,8 +15,6 @@ struct LifeHubWatchApp: App {
     var body: some Scene {
         WindowGroup {
             WatchHomeView()
-                // The switch reaches the watch with the payload once Japanese and English ship; until then
-                // the watch always shows Chinese.
                 .environment(\.locale, Languages.locale)
         }
         .backgroundTask(.watchConnectivity) {
