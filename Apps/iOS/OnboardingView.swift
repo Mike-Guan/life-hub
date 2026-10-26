@@ -125,7 +125,8 @@ struct OnboardingView: View {
                 Text("选一个住进你手机的家伙").font(Toy.display(26))
                 Text("以后可以换，各自的东西分开存。").font(Toy.body(14, weight: .bold)).foregroundStyle(Toy.muted)
             }
-            HStack(spacing: 14) {
+            // UI 审核 10-26: the cards keep their top edges level when one description is longer.
+            HStack(alignment: .top, spacing: 14) {
                 personaCard(.haku, line: "嘴硬的室友，其实什么都记得")
                 personaCard(.kuro, line: "安静，会在旁边陪着")
             }
@@ -237,7 +238,7 @@ struct OnboardingView: View {
         page(dot: 4) {
             hero(
                 irregular ? line(.irregular) : line(.work),
-                sub: irregular ? "" : "默认周一到周五，\(clock(9 * 60)) 到 \(clock(18 * 60))。")
+                sub: irregular ? "" : String(format: "默认周一到周五，%1$@ 到 %2$@。".localized, clock(9 * 60), clock(18 * 60)))
             if !irregular {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(spacing: 4) {
@@ -307,7 +308,7 @@ struct OnboardingView: View {
     private var sideScreen: some View {
         let states = draft.sideStates ?? []
         return page(dot: 6) {
-            hero(line(.sideHustle), sub: "最多选 \(ModeCards.sideStateLimit) 个。")
+            hero(line(.sideHustle), sub: String(format: "最多选 %lld 个。".localized, ModeCards.sideStateLimit))
             Text("\(states.count) / \(ModeCards.sideStateLimit)")
                 .font(Toy.body(14, weight: .black))
                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -325,7 +326,7 @@ struct OnboardingView: View {
                 }
             }
             if sideFull > 0 {
-                ErrorLine(text: "最多 \(ModeCards.sideStateLimit) 个，先去掉一个。", size: 13)
+                ErrorLine(text: String(format: "最多 %lld 个，先去掉一个。".localized, ModeCards.sideStateLimit), size: 13)
             }
             fine("进了副业以后，点它就能换成另一件。")
         } foot: {
@@ -441,7 +442,8 @@ struct OnboardingView: View {
                 VStack(alignment: .leading, spacing: 16) { main }
                     .padding(.horizontal, 20)
                     .padding(.top, 4)
-                    .padding(.bottom, 16)
+                    // Clear of the buttons' fade when scrolled to the end.
+                    .padding(.bottom, 28)
             }
             .scrollDismissesKeyboard(.interactively)
             .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -695,9 +697,13 @@ struct OnboardingView: View {
         .buttonStyle(.plain)
     }
 
+    // UI 审核 10-26: a declined permission reads as in Settings (#537), in grey, not as an error.
     private func settingsLine(_ text: String, link: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            ErrorLine(text: text.localized, size: 13)
+            Text(text.localized)
+                .font(Toy.body(13, weight: .bold))
+                .foregroundStyle(Toy.muted)
+                .fixedSize(horizontal: false, vertical: true)
             Button {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)

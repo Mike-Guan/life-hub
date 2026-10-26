@@ -2323,6 +2323,22 @@
         }
       }
     },
+    "副业" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projects"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "副業"
+          }
+        }
+      }
+    },
     "副业 · vibe coding" : {
       "comment" : "“副业”跟卡名走",
       "localizations" : {
@@ -2627,7 +2643,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "通知のタイミングにだけ使います。何時に寝たかは記録しません。"
+            "value" : "通知の時間にだけ使います。\n寝た時刻は記録しません。"
           }
         }
       }
@@ -2643,7 +2659,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "睡眠と運動の記録を読むだけです。送信はしません。"
+            "value" : "睡眠と運動の記録は読むだけです。\n送信はしません。"
           }
         }
       }
