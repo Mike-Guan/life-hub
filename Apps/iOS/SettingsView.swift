@@ -220,6 +220,10 @@ struct SettingsView: View {
             dogfoodCard
             #endif
 
+            if let url = AppLinks.privacyPolicy {
+                privacyCard(url)
+            }
+
             eraseCard
         }
         .padding(20)
@@ -322,6 +326,21 @@ struct SettingsView: View {
     }
 
     // Issue #237: what the companion remembers, on its own page.
+    // TestFlight external review needs a privacy policy the user can reach from the app.
+    private func privacyCard(_ url: URL) -> some View {
+        HStack(spacing: 10) {
+            Text("隐私政策")
+                .font(Toy.body(16, weight: .heavy))
+            Spacer()
+            Link(destination: url) {
+                Text("打开").tapTarget()
+            }
+            .font(Toy.body(13, weight: .heavy))
+        }
+        .padding(16)
+        .toyCard()
+    }
+
     private var memoryCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
