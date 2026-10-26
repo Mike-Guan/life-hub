@@ -220,9 +220,12 @@ public struct HakuHomeView: View {
         }
     }
 
+    // UI 审核 10-26: the order and comma follow each language (周一，10/26 · 10/26（月） · Mon, 10/26).
     private static var dateLine: String {
-        let format = Date.FormatStyle().month(.defaultDigits).day().weekday(.abbreviated)
-        return Date.now.formatted(format)
+        let locale = Languages.locale
+        let day = Date.now.formatted(Date.FormatStyle(locale: locale).month(.defaultDigits).day())
+        let weekday = Date.now.formatted(Date.FormatStyle(locale: locale).weekday(.abbreviated))
+        return String(format: "%1$@，%2$@".localized, weekday, day)
     }
 
     // MARK: Room
