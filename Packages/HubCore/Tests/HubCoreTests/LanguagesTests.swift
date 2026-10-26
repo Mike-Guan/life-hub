@@ -25,7 +25,7 @@ import Testing
     }
 
     // `swift test` copies the String Catalogs without compiling them, so this builds the `.lproj` folders an
-    // app build makes.
+    // app build makes. Chinese never looks anything up: `.localized` returns the key while `isOn` is false.
     @Test func eachLanguageReadsItsOwnStrings() throws {
         let root = FileManager.default.temporaryDirectory.appending(path: "languages-\(UUID().uuidString).bundle")
         defer { try? FileManager.default.removeItem(at: root) }
@@ -41,7 +41,6 @@ import Testing
         }
         #expect(title(.japanese) == "ボクシング")
         #expect(title(.english) == "Boxing")
-        #expect(title(.chinese) == "拳击日")
     }
 
     @Test func thePhonesFirstKnownLanguageWins() {
