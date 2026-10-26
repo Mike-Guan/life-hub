@@ -237,7 +237,7 @@ struct OnboardingView: View {
         page(dot: 4) {
             hero(
                 irregular ? line(.irregular) : line(.work),
-                sub: irregular ? "" : "默认周一到周五，\(clock(9 * 60)) 到 \(clock(18 * 60))。")
+                sub: irregular ? "" : String(format: "默认周一到周五，%1$@ 到 %2$@。".localized, clock(9 * 60), clock(18 * 60)))
             if !irregular {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(spacing: 4) {
@@ -307,7 +307,7 @@ struct OnboardingView: View {
     private var sideScreen: some View {
         let states = draft.sideStates ?? []
         return page(dot: 6) {
-            hero(line(.sideHustle), sub: "最多选 \(ModeCards.sideStateLimit) 个。")
+            hero(line(.sideHustle), sub: String(format: "最多选 %lld 个。".localized, ModeCards.sideStateLimit))
             Text("\(states.count) / \(ModeCards.sideStateLimit)")
                 .font(Toy.body(14, weight: .black))
                 .frame(maxWidth: .infinity, alignment: .trailing)

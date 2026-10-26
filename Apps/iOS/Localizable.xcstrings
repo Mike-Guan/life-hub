@@ -2323,6 +2323,22 @@
         }
       }
     },
+    "副业" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projects"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "副業"
+          }
+        }
+      }
+    },
     "副业 · vibe coding" : {
       "comment" : "“副业”跟卡名走",
       "localizations" : {

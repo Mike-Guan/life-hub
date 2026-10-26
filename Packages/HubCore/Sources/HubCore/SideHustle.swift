@@ -16,7 +16,10 @@ public enum SideHustle: String, Codable, CaseIterable, Sendable {
         self = tag.flatMap(SideHustle.init(rawValue:)) ?? .vibeCoding
     }
 
-    public var title: String {
+    /// The state's name in the app's language.
+    public var title: String { chinese.localized }
+
+    private var chinese: String {
         switch self {
         case .vibeCoding: "vibe coding"
         case .shooting: "拍摄"
