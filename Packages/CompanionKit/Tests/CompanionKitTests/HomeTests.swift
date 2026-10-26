@@ -246,6 +246,19 @@ import Testing
         #expect(!HomeModel(night: false).isLow)
     }
 
+    @Test func theSecondCharacterSaysHerOwnLines() {
+        var snapshot = HomeSnapshot.preview()
+        snapshot.persona = .kuro
+        snapshot.cards = ModeCards(identity: .tennis)
+        let model = HomeModel(snapshot: snapshot, night: false, now: HomeModel.start)
+        model.tap(.sofa)
+        #expect(model.line == "这边是我的位置。")
+        model.switchMode(.work)
+        #expect(model.line.hasSuffix("。……开始了。"))
+        #expect(HomeModel.tapLines(spot: .work, low: false, persona: .kuro) == ["……在听。", "快好了。"])
+        #expect(HomeModel.tapLines(spot: .work, low: false) == ["在忙。", "……别催。"])
+    }
+
     @Test func threeQuickTapsAreEnough() {
         let model = HomeModel(night: false)
         let now = Date(timeIntervalSinceReferenceDate: 0)
