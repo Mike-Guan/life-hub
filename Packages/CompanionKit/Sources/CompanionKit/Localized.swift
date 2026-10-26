@@ -5,6 +5,12 @@ import HubCore
 // unchanged. Bubble lines live in one table per character (Haku, Kuro). Until `Languages` is on, every line
 // stays Chinese.
 extension String {
+    /// This text in the user's language, from CompanionKit's `Localizable` table.
+    var localized: String {
+        guard Languages.isOn else { return self }
+        return String(localized: LocalizationValue(self), table: "Localizable", bundle: .module)
+    }
+
     /// This line in the user's language, from `persona`'s table in CompanionKit.
     func localized(for persona: Persona) -> String {
         guard Languages.isOn else { return self }

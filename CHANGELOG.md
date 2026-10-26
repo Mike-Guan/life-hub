@@ -18,6 +18,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Declined permissions no longer put a red bar on the home screen. Location not set to Always and Motion &
   Fitness turned off each show a grey line in Settings > 地点, with a button to open the iPhone's Settings.
 - Settings has a 隐私政策 row that opens the privacy policy, shown once the page has its address.
+- The home page shows its labels, sheets and HAKU's lines in Japanese or English when the app runs in that language.
 - The welcome-back recap and the wardrobe's VoiceOver label now follow the app's language.
 - In the home HAKU now follows the home's behavior rules: at bedtime he goes to bed, by mode he sits at
   the desk or on the sofa or trains in the sports corner, and in about half of the 15-minute slots he walks
