@@ -304,8 +304,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "……あとちょっとだから。"
+            "state" : "translated",
+            "value" : "……いまやってる。"
           }
         }
       }
