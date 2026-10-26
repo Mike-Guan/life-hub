@@ -24,14 +24,24 @@ import Testing
         #expect(Languages.Choice.english.language == .english)
     }
 
-    @Test func eachLanguageReadsItsOwnStrings() {
-        func title(_ language: Languages.Language) -> String {
-            String(localized: "拳击日", table: "Localizable", bundle: Languages.bundle(.module, for: language))
+    // `swift test` copies the String Catalogs without compiling them, so this builds the `.lproj` folders an
+    // app build makes.
+    @Test func eachLanguageReadsItsOwnStrings() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: "languages-\(UUID().uuidString).bundle")
+        defer { try? FileManager.default.removeItem(at: root) }
+        for (code, title) in [("ja", "ボクシング"), ("en", "Boxing")] {
+            let folder = root.appending(path: "\(code).lproj")
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try "\"拳击日\" = \"\(title)\";".write(
+                to: folder.appending(path: "Localizable.strings"), atomically: true, encoding: .utf8)
         }
-        let found = (try? FileManager.default.subpathsOfDirectory(atPath: Bundle.module.bundlePath)) ?? []
-        #expect(Bundle.module.localizations.contains("ja"), "\(Bundle.module.localizations) \(found)")
+        let bundle = try #require(Bundle(path: root.path))
+        func title(_ language: Languages.Language) -> String {
+            String(localized: "拳击日", table: "Localizable", bundle: Languages.bundle(bundle, for: language))
+        }
         #expect(title(.japanese) == "ボクシング")
         #expect(title(.english) == "Boxing")
+        #expect(title(.chinese) == "拳击日")
     }
 
     @Test func thePhonesFirstKnownLanguageWins() {
