@@ -6,8 +6,9 @@ options:
     macOS: "26.0"
     watchOS: "26.0"
   createIntermediateGroups: true
-  # Chinese is the source language; Japanese and English come from the String Catalogs (Localizable.xcstrings).
-  developmentLanguage: zh-Hans
+  # Chinese is the source language of the String Catalogs (their keys). The bundle's development region is
+  # English so that a phone in a language the app lacks (French, say) falls back to English, not Chinese.
+  developmentLanguage: en
 # DEV = Debug (local), STG = Staging (TestFlight internal), PROD = Release (Mike's daily build).
 configs:
   Debug: debug
