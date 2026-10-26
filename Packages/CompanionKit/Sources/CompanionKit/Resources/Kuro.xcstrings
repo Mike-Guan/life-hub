@@ -1,6 +1,76 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
+    "%@。……回来了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. …home."
+          }
+        }
+      }
+    },
+    "%@。……安静一点。……留下也行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. …shh. you can stay."
+          }
+        }
+      }
+    },
+    "%@。……开始了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. …here we go."
+          }
+        }
+      }
+    },
+    "%@。先打几下沙袋。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. bag first."
+          }
+        }
+      }
+    },
+    "%@。包拎好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. bag's packed."
+          }
+        }
+      }
+    },
+    "%@。推两下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. two reps."
+          }
+        }
+      }
+    },
+    "%@。没沙袋……打空气也行。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. no bag… air's fine."
+          }
+        }
+      }
+    },
     "KURO，困了" : {
       "localizations" : {
         "en" : {
@@ -225,6 +295,16 @@
         }
       }
     },
+    "……zzz" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…zzz"
+          }
+        }
+      }
+    },
     "……お疲れ。" : {
       "comment" : "下班提醒点开",
       "localizations" : {
@@ -238,6 +318,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……お疲れ。"
+          }
+        }
+      }
+    },
+    "……一下，两下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…one, two."
           }
         }
       }
@@ -308,6 +398,36 @@
         }
       }
     },
+    "……今天穿哪件呢。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…which one today."
+          }
+        }
+      }
+    },
+    "……你挑。我在旁边。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…you pick. I'm right here."
+          }
+        }
+      }
+    },
+    "……你来了。坐吧。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…you're here. sit."
+          }
+        }
+      }
+    },
     "……先热个身。" : {
       "localizations" : {
         "en" : {
@@ -336,6 +456,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……まず、どれか選ぼ。"
+          }
+        }
+      }
+    },
+    "……再一下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…one more minute."
           }
         }
       }
@@ -400,6 +530,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……静かに。もう終わる。"
+          }
+        }
+      }
+    },
+    "……别看我。看前面。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…not at me. eyes forward."
           }
         }
       }
@@ -550,6 +690,16 @@
         }
       }
     },
+    "……坐一下。不一定在弄。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…just sitting. not really busy."
+          }
+        }
+      }
+    },
     "……坐这边。" : {
       "localizations" : {
         "en" : {
@@ -611,6 +761,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……始まった。"
+          }
+        }
+      }
+    },
+    "……怎么了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…what's up?"
           }
         }
       }
@@ -680,6 +840,26 @@
         }
       }
     },
+    "……推两下。……就两下。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…two reps. …just two."
+          }
+        }
+      }
+    },
+    "……放这儿就好。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…here's fine."
+          }
+        }
+      }
+    },
     "……整理一下。" : {
       "localizations" : {
         "en" : {
@@ -724,6 +904,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……明日もある。"
+          }
+        }
+      }
+    },
+    "……有点痒。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…that tickles."
+          }
+        }
+      }
+    },
+    "……每一件，都有那一天。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…each one has its day."
           }
         }
       }
@@ -794,6 +994,16 @@
         }
       }
     },
+    "……没电了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…battery's dead."
+          }
+        }
+      }
+    },
     "……洗好了。" : {
       "localizations" : {
         "en" : {
@@ -822,6 +1032,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……電池、一個戻った。"
+          }
+        }
+      }
+    },
+    "……看我，不会多一罐。……但可以。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…no can for looking. …but sure."
           }
         }
       }
@@ -923,6 +1143,16 @@
         }
       }
     },
+    "……诶。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…whoa."
+          }
+        }
+      }
+    },
     "……走吗。网球包拎好了。" : {
       "localizations" : {
         "en" : {
@@ -1016,6 +1246,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……この一枚、いい。"
+          }
+        }
+      }
+    },
+    "……这边是我的。今天没电了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…my spot. no battery today."
+          }
+        }
+      }
+    },
+    "……重量，秘密。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…weight's a secret."
           }
         }
       }
@@ -1179,6 +1429,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "今日も開いてる。……言ってみただけ。"
+          }
+        }
+      }
+    },
+    "今天也没什么特别的。……挺好。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nothing special today. …nice."
+          }
+        }
+      }
+    },
+    "今天光线不错。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nice light today."
           }
         }
       }
@@ -1478,6 +1748,16 @@
         }
       }
     },
+    "对面还亮着灯。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lights on across the street."
+          }
+        }
+      }
+    },
     "快了。" : {
       "comment" : "E1",
       "localizations" : {
@@ -1491,6 +1771,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "……もうすぐ。"
+          }
+        }
+      }
+    },
+    "快好了。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "almost done."
           }
         }
       }
@@ -1668,6 +1958,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "このボール、ちょっと生意気。"
+          }
+        }
+      }
+    },
+    "这边是我的位置。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "this spot's mine."
           }
         }
       }
