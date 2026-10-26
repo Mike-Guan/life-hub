@@ -1,6 +1,23 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
+    "%1$@，%2$@" : {
+      "comment" : "Home date line: %1$@ weekday, %2$@ month/day.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$@（%1$@）"
+          }
+        }
+      }
+    },
     "KURO，困了" : {
       "comment" : "VoiceOver",
       "localizations" : {
