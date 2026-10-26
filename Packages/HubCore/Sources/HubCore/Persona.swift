@@ -40,6 +40,11 @@ extension Mode {
         }
     }
 
+    /// The mode's name for `persona` in the app's language.
+    public func localizedTitle(for persona: Persona) -> String {
+        title(for: persona).localized
+    }
+
     /// The mode's short English code for `persona`: KURO's identity slot is TENNIS.
     public func code(for persona: Persona) -> String {
         switch (persona, self) {
