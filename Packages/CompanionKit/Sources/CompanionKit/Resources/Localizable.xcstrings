@@ -207,6 +207,12 @@
     },
     "下楼走 10 分钟？我先穿鞋。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10-minute walk downstairs? I'm getting my shoes."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -427,6 +433,12 @@
     },
     "打了 2 次拳。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boxed twice."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -437,6 +449,12 @@
     },
     "拿到了金拳套。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got the gold gloves."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -543,6 +561,12 @@
     },
     "跑了 1 次 5 公里。" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ran a 5K once."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",

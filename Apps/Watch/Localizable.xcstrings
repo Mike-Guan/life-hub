@@ -68,6 +68,12 @@
     },
     "没存下 iPhone 发来的状态：%@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Didn't save the status from your iPhone: %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",

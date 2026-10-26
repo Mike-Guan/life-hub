@@ -312,6 +312,12 @@
     },
     "电量%@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Energy: %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -322,6 +328,12 @@
     },
     "电量未知" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Energy: unknown"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
