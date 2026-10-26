@@ -308,7 +308,8 @@ public struct ModeCards: Codable, Equatable, Sendable {
     /// The name of the card in `mode`'s slot: the user's name, else the identity card's, else the
     /// character's default.
     public func title(for mode: Mode, persona: Persona) -> String {
-        if let name = names[mode.rawValue] { return name }
+        // A name the user typed has no key and comes back as typed; 备课, the old default, is translated.
+        if let name = names[mode.rawValue] { return name.localized }
         if mode == .boxing, let identity { return identity.title }
         return mode.title(for: persona).localized
     }
@@ -326,8 +327,8 @@ public struct ModeCards: Codable, Equatable, Sendable {
 
     /// The line under the home card: the identity card's own in the identity slot, else the mode's.
     public func tagline(for mode: Mode, persona: Persona) -> String {
-        guard mode == .boxing, let identity else { return mode.tagline(for: persona) }
-        return identity.tagline(for: persona)
+        guard mode == .boxing, let identity else { return mode.tagline(for: persona).localized }
+        return identity.tagline(for: persona).localized
     }
 
     // 台词 泛化修改 v0 §1: lines about a sports bag are only for users who do sport.

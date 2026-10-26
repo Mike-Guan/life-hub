@@ -144,7 +144,7 @@ struct OnboardingView: View {
         page(dot: nil, back: true, skips: false) {
             figure(.chill, width: 220)
                 .frame(maxWidth: .infinity)
-            Text(line(.intro)).font(Toy.display(26))
+            Text(line(.intro).localized).font(Toy.display(26))
         } foot: {
             primary("告诉它") { next() }
             textButton("跳过，直接开始") { asksDefaults = true }
@@ -344,7 +344,7 @@ struct OnboardingView: View {
         let cards = draft.cards
         return page(dot: 8, skips: false) {
             hero(line(.cards), sub: "", figureWidth: 64)
-            Text(cards.modes.count == 4 ? "你的四张卡" : "你的三张卡")
+            Text((cards.modes.count == 4 ? "你的四张卡" : "你的三张卡").localized)
                 .font(Toy.display(20))
             ForEach(cards.modes, id: \.self) { mode in
                 modeCard(mode, cards: cards)
@@ -374,9 +374,9 @@ struct OnboardingView: View {
             figure(.chill, width: 190)
                 .frame(maxWidth: .infinity)
             VStack(alignment: .leading, spacing: 8) {
-                Text(line).font(Toy.display(20))
+                Text(line.localized).font(Toy.display(20))
                 if let note {
-                    Text(note).font(Toy.body(14, weight: .bold)).foregroundStyle(Toy.muted)
+                    Text(note.localized).font(Toy.body(14, weight: .bold)).foregroundStyle(Toy.muted)
                 }
             }
         } foot: {
@@ -479,9 +479,9 @@ struct OnboardingView: View {
         HStack(alignment: .top, spacing: 14) {
             figure(mode, width: figureWidth)
             VStack(alignment: .leading, spacing: 4) {
-                Text(text).font(Toy.display(20))
+                Text(text.localized).font(Toy.display(20))
                 if !sub.isEmpty {
-                    Text(sub).font(Toy.body(14, weight: .bold)).foregroundStyle(Toy.muted)
+                    Text(sub.localized).font(Toy.body(14, weight: .bold)).foregroundStyle(Toy.muted)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -526,7 +526,7 @@ struct OnboardingView: View {
                 .background(Mode.chill.color(for: persona))
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 Text(persona.title).font(Toy.display(20))
-                Text(line).font(Toy.body(12, weight: .bold)).foregroundStyle(Toy.muted)
+                Text(line.localized).font(Toy.body(12, weight: .bold)).foregroundStyle(Toy.muted)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(10)
@@ -646,7 +646,7 @@ struct OnboardingView: View {
                 .font(.system(size: 20, weight: .bold))
                 .frame(width: 40, height: 40)
             VStack(alignment: .leading, spacing: 6) {
-                Text(row.title).font(Toy.body(16, weight: .heavy))
+                Text(row.title.localized).font(Toy.body(16, weight: .heavy))
                 if isSet {
                     fine("范围 \(Int(HubPlace.defaultRadius)) 米")
                 } else if !canSet {
@@ -683,7 +683,7 @@ struct OnboardingView: View {
         Button(action: action) {
             HStack(spacing: 3) {
                 if let symbol { Image(systemName: symbol) }
-                Text(title)
+                Text(title.localized)
             }
             .font(Toy.body(13, weight: .black))
             .padding(.horizontal, 10)
@@ -697,13 +697,13 @@ struct OnboardingView: View {
 
     private func settingsLine(_ text: String, link: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            ErrorLine(text: text, size: 13)
+            ErrorLine(text: text.localized, size: 13)
             Button {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
                 }
             } label: {
-                Text(link)
+                Text(link.localized)
                     .font(Toy.body(13, weight: .black))
                     .underline()
                     .frame(minHeight: 44)
@@ -727,7 +727,8 @@ struct OnboardingView: View {
                 } else {
                     // The default name shows as the prompt, in ink like a typed name.
                     TextField(
-                        "", text: name(mode), prompt: Text(mode.title(for: draft.persona)).foregroundStyle(Toy.ink)
+                        "", text: name(mode),
+                        prompt: Text(mode.title(for: draft.persona).localized).foregroundStyle(Toy.ink)
                     )
                     .font(Toy.body(17, weight: .black))
                     .foregroundStyle(Toy.ink)
@@ -764,7 +765,7 @@ struct OnboardingView: View {
     private func note(_ symbol: String, _ text: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: symbol).font(.system(size: 15, weight: .bold))
-            Text(text).font(Toy.body(13, weight: .bold))
+            Text(text.localized).font(Toy.body(13, weight: .bold))
         }
         .padding(.horizontal, 11)
         .padding(.vertical, 9)
@@ -775,13 +776,13 @@ struct OnboardingView: View {
     }
 
     private func fine(_ text: String) -> some View {
-        Text(text).font(Toy.body(12.5, weight: .bold)).foregroundStyle(Toy.muted)
+        Text(text.localized).font(Toy.body(12.5, weight: .bold)).foregroundStyle(Toy.muted)
             .fixedSize(horizontal: false, vertical: true)
     }
 
     private func primary(_ title: String, enabled: Bool = true, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
+            Text(title.localized)
                 .font(Toy.body(17, weight: .black))
                 .frame(maxWidth: .infinity, minHeight: 52)
                 .toyCard(fill: enabled ? Toy.pink : Toy.paper, radius: 14, shadow: enabled ? 4 : 0)
@@ -793,7 +794,7 @@ struct OnboardingView: View {
 
     private func secondary(_ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
+            Text(title.localized)
                 .font(Toy.body(17, weight: .black))
                 .frame(maxWidth: .infinity, minHeight: 52)
                 .toyCard(radius: 14, shadow: 4)
@@ -983,7 +984,7 @@ private struct FlowRow: View {
     var body: some View {
         FlowLayout(spacing: 6) {
             ForEach(items, id: \.self) { item in
-                Text(item)
+                Text(item.localized)
                     .font(Toy.body(13, weight: .heavy))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 3)
