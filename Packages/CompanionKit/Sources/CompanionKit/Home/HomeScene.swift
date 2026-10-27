@@ -215,6 +215,8 @@ final class HomeScene: SKScene {
         pieces[.posters]?.isHidden = items.contains { $0.zone == .posterWall }
         if items.contains(.bench), barbell == nil {
             let bar = HomeLayerNode(pivot: Self.rackedBar)
+            // On the rack from the start, before HAKU's first pose places it.
+            bar.zPosition = CGFloat(HomeItem.bench.depth + 0.01)
             bar.show(.barbell, night: model.isNight)
             barbell = bar
             addChild(bar)
