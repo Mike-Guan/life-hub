@@ -26,7 +26,10 @@ struct UnboxSheet: View {
         .defaultScrollAnchor(startsAtBottom ? .bottom : nil)
         .foregroundStyle(Toy.paper)
         .background(Toy.ink.ignoresSafeArea())
-        .onAppear { UnboxLog.markSeen(entry) }
+        .onAppear {
+            UnboxLog.markSeen(entry)
+            SoundPlayer.shared.play(.unbox)
+        }
         .sheet(isPresented: $sharing) {
             if let card = shareCard {
                 ShareCardSheet(card: card, words: card.words(counting: item.keepsake?.title(for: persona) ?? ""))

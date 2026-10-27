@@ -47,6 +47,8 @@ struct HomeView: View {
     var onShop: (() -> Void)?
     /// Shows a house button that calls this, when set.
     var onHome: (() -> Void)?
+    /// Called after each tap on a mode card, with whether it switched the mode.
+    var onModeTap: ((Mode, Bool) -> Void)?
     /// What the character wears.
     var wardrobe = Wardrobe()
     /// Which character the card draws.
@@ -519,6 +521,7 @@ struct HomeView: View {
         }
         // A tap during the replay ends it, so the buttons show what was tapped.
         replayEnded = true
+        onModeTap?(mode, changed)
         if changed { manualSwitches += 1 }
         // Boxing day gets a pep jump on entry.
         if changed, mode == .boxing { cheer += 1 }

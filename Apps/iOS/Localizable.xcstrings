@@ -2974,6 +2974,22 @@
         }
       }
     },
+    "声音" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sound"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サウンド"
+          }
+        }
+      }
+    },
     "头带" : {
       "localizations" : {
         "en" : {
@@ -3183,6 +3199,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "家"
+          }
+        }
+      }
+    },
+    "家的音乐" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Music at home"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家の音楽"
           }
         }
       }
@@ -5670,6 +5702,22 @@
         }
       }
     },
+    "跟着手机的静音键走，静音时什么都不响。别的 App 在放音乐时，家里不放音乐。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Follows your phone's silent switch: nothing plays when it's on. When another app is playing music, home stays quiet."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone の消音スイッチに従います。消音中は何も鳴りません。ほかのアプリで音楽を流しているときは、家の音楽は流れません。"
+          }
+        }
+      }
+    },
     "跟随系统" : {
       "localizations" : {
         "en" : {
@@ -6198,6 +6246,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ヘッドギア"
+          }
+        }
+      }
+    },
+    "音效" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sound effects"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "効果音"
           }
         }
       }

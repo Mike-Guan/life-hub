@@ -364,6 +364,7 @@ struct ShopView: View {
         buyError = growth.lastError
         // A failed save stays on screen; the unboxing, still unseen, plays when the shop closes.
         guard buyError == nil else { return }
+        SoundPlayer.shared.play(.buy)
         putAway = item.slot == .room ? RoomLayout.placeBought(item.id, persona: persona, in: AppGroup.defaults) : []
         unboxing = ledger.unboxings(seen: UnboxLog.seen, persona: persona).last { $0.itemID == item.id }
     }

@@ -1,4 +1,4 @@
-.PHONY: project open test coverage lint format hooks check art art-check strings screenshots
+.PHONY: project open test coverage lint format hooks check art art-check strings screenshots sounds
 
 project:
 	xcodegen generate
@@ -40,6 +40,10 @@ art-check: art
 # Fail if a package's String Catalog holds a Chinese key no longer in its source (Issue #350).
 strings:
 	scripts/strings.py
+
+# Synthesise the app's sounds into Apps/iOS/Sounds (needs numpy and ffmpeg).
+sounds:
+	python3 scripts/make-sounds.py
 
 # Redraw the README images in docs/screenshots/ (iOS simulator + Mac window, one per mode).
 screenshots:
