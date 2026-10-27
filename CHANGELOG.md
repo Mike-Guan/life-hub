@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character's shop has three more accessories: a red ribbon (on her ponytail, else at the
+  side of her hair), a moon hair clip and a check lap blanket. At home she wears the ribbon and the clip.
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
   her tennis day, guards and punches in two gloves with the boxing card, and dozes over her tablet in bed.

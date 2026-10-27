@@ -421,6 +421,7 @@ final class KuroHomeNode: SKNode {
         let name = part.rawValue
         if isFace(part) { return true }
         if name.hasPrefix("weekly_hair_") || name.hasPrefix("weekly_hat_") { return true }
+        if name.hasPrefix("item_ribbon_") || part == .itemClipMoon { return true }
         let head: Set<KuroPart> = [
             .earL, .earR, .faceBase, .maskWork, .hairFringe, .catEars, .tennisHeadband, .boxHeadband, .itemSakura,
             .setPicnicHat, .setRainHat, .deskGlasses, .skiGoggles,

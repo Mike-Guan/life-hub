@@ -205,7 +205,7 @@ extension KuroFigure {
         .itemBlanket, .jacketTennis, .itemBag, .jacketDesk, .earL, .earR, .catEars, .deskBooks, .jacketBox,
         .jacketSmock, .boxSandbag, .danceSpeaker, .weeklyHairMintPony, .weeklyHairCherryPony, .weeklyHairStarPony,
         .weeklyBlanketBear, .weeklyRoomCloud, .weeklyRoomSucculent, .weeklyRoomNightlightGlow, .weeklyRoomNightlight,
-        .weeklyHatBeanie, .weeklyHatBeaniePom,
+        .weeklyHatBeanie, .weeklyHatBeaniePom, .itemRibbonPony, .itemBlanketCheck,
     ]
 
     /// Her eyes and mouths, which the tap sets even while an idle it cut short goes back.
@@ -229,7 +229,7 @@ extension KuroFigure {
     }
 
     /// What lies on her lap; put away when she drinks.
-    nonisolated static let lap: Set<KuroPart> = [.itemBlanket, .weeklyBlanketBear, .weeklyRoomCloud]
+    nonisolated static let lap: Set<KuroPart> = [.itemBlanket, .weeklyBlanketBear, .weeklyRoomCloud, .itemBlanketCheck]
 
     /// Changes `visible` for `tap` at `progress`.
     nonisolated static func apply(_ tap: KuroTap, progress p: Double, to visible: inout Set<KuroPart>) {

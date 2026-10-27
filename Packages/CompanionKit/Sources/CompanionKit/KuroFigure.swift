@@ -355,7 +355,8 @@ struct KuroFigure: View {
     nonisolated private static let wornOn: [KuroPart: KuroPart] = [
         .itemScrunchie: .tennisPonytail, .weeklyHairMintPony: .tennisPonytail, .weeklyHairCherryPony: .tennisPonytail,
         .weeklyHairStarPony: .tennisPonytail, .weeklyHairMintSide: .hairFringe, .weeklyHairCherrySide: .hairFringe,
-        .weeklyHairStarSide: .hairFringe,
+        .weeklyHairStarSide: .hairFringe, .itemRibbonPony: .tennisPonytail, .itemRibbonSide: .hairFringe,
+        .itemClipMoon: .hairFringe,
     ]
 
     /// How far `part` moves from where the SVG draws it, in SVG units; a hair piece moves with its hair, full
@@ -413,7 +414,7 @@ struct KuroFigure: View {
         }
         visible.subtract([
             .deskPen, .workStylus, .workBadge, .itemFlower, .itemLamp, .itemBlanket, .danceSpeaker,
-            .weeklyRoomSucculent, .weeklyBlanketBear, .weeklyRoomCloud,
+            .weeklyRoomSucculent, .weeklyBlanketBear, .weeklyRoomCloud, .itemBlanketCheck,
         ])
     }
 

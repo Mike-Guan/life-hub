@@ -514,6 +514,10 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(id: "kuro.room.flower", slot: .room, title: "地上小粉花", price: 8, persona: .kuro),
         ShopItem(id: "kuro.hair.scrunchie", slot: .headband, title: "粉色发圈", price: 10, persona: .kuro),
         ShopItem(id: "kuro.blanket.cats", slot: .mask, title: "粉色猫猫毯", price: 12, persona: .kuro),
+        // 商店扩充 v1 §3.
+        ShopItem(id: "kuro.hair.ribbon", slot: .headband, title: "蝴蝶结发圈", price: 12, persona: .kuro),
+        ShopItem(id: "kuro.hair.clip.moon", slot: .headband, title: "月亮发夹", price: 15, persona: .kuro),
+        ShopItem(id: "kuro.blanket.check", slot: .mask, title: "格子小毯", price: 15, persona: .kuro),
         ShopItem(id: "kuro.room.lamp", slot: .room, title: "猫耳台灯", price: 15, persona: .kuro),
         ShopItem(
             id: "kuro.bag.tennis",
