@@ -206,6 +206,27 @@ enum HomePiece: String, CaseIterable, Sendable {
 }
 
 // PM 家 区域规划 v0 (Mike 2026-10-17: the room is split into zones, each holding items the user picks).
+/// The rug's style: the free fringed one, or one bought in the shop. Each takes the rug colours.
+enum HomeRug: String, CaseIterable, Sendable {
+    case fringe, stripe, round
+
+    /// The middle of the round rug.
+    static let centre = GridPoint(x: 4.3, y: 6.0)
+    static let radius = 2.05
+
+    /// The floor the rug covers, with the fringe.
+    var box: GridBox {
+        switch self {
+        case .fringe: GridBox(x0: 2.6, y0: 3.64, x1: 6.0, y1: 8.36, z1: 0)
+        case .stripe: GridBox(x0: 2.6, y0: 3.8, x1: 6.0, y1: 8.2, z1: 0)
+        case .round:
+            GridBox(
+                x0: Self.centre.x - Self.radius, y0: Self.centre.y - Self.radius, x1: Self.centre.x + Self.radius,
+                y1: Self.centre.y + Self.radius, z1: 0)
+        }
+    }
+}
+
 /// An area of the room that holds items.
 enum HomeZone: String, CaseIterable, Sendable {
     case furniture, sportFloor, sportWall, shelf, desk, sofaSide, corner

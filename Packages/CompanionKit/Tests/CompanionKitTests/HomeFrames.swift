@@ -399,6 +399,69 @@ extension FrameSheets {
         try save(sheet, as: "home-6-shelf-big", scale: 1)
     }
 
+    // 商店扩充 v1 §2.4: the two rugs for sale next to the free fringed one, in the full room by day and night with
+    // HAKU on the rug, then each new one in the four rug colours.
+    @Test func hakuHomeRugs() throws {
+        var rooms: [(String, CGImage)] = []
+        for night in [false, true] {
+            for rug in HomeRug.allCases {
+                let model = HomeModel(night: night)
+                let scene = HomeScene(model: model)
+                model.togglePreviewItems()
+                model.lay(rug)
+                scene.sync(animated: false)
+                scene.settle()
+                scene.pose(at: 1.3)
+                rooms.append(("\(rug.rawValue) · \(night ? "夜" : "白天")", try #require(Self.composite(scene, scale: 2))))
+            }
+        }
+        let scale: CGFloat = 2
+        var swatches: [(String, CGImage)] = []
+        for rug in [HomeRug.stripe, .round] {
+            for i in HomePaintable.rug.swatches.indices {
+                let model = HomeModel(night: false)
+                let scene = HomeScene(model: model)
+                model.lay(rug)
+                model.paint(.rug, i)
+                scene.sync(animated: false)
+                scene.settle()
+                let image = try #require(Self.composite(scene, scale: scale))
+                let plan = HomeGrid.bounds([HomeRug.round.box, HomeRug.fringe.box], margin: 12)
+                let a = HomeGrid.scene(CGPoint(x: plan.minX, y: plan.minY))
+                let b = HomeGrid.scene(CGPoint(x: plan.maxX, y: plan.maxY))
+                let area = CGRect(x: min(a.x, b.x), y: min(a.y, b.y), width: abs(b.x - a.x), height: abs(b.y - a.y))
+                let rect = CGRect(
+                    x: area.minX * scale, y: (scene.size.height - area.maxY) * scale,
+                    width: area.width * scale, height: area.height * scale)
+                swatches.append(("\(rug.rawValue) · 色 \(i + 1)", try #require(image.cropping(to: rect))))
+            }
+        }
+        let sheet = VStack(alignment: .leading, spacing: 12) {
+            Text(verbatim: "家 · 地毯三款（流苏免费 / 条纹 / 圆形编织）").font(.system(size: 20, weight: .bold))
+            LazyVGrid(columns: Array(repeating: GridItem(.fixed(330)), count: 3), spacing: 14) {
+                ForEach(rooms.indices, id: \.self) { i in
+                    VStack(spacing: 4) {
+                        Image(decorative: rooms[i].1, scale: 2).resizable().aspectRatio(contentMode: .fit)
+                            .frame(width: 330).background(Toy.paper)
+                        Text(verbatim: rooms[i].0).font(.system(size: 13, weight: .bold))
+                    }
+                }
+            }
+            LazyVGrid(columns: Array(repeating: GridItem(.fixed(240)), count: 4), spacing: 14) {
+                ForEach(swatches.indices, id: \.self) { i in
+                    VStack(spacing: 4) {
+                        Image(decorative: swatches[i].1, scale: 2).resizable().aspectRatio(contentMode: .fit)
+                            .frame(width: 240).background(Toy.paper)
+                        Text(verbatim: swatches[i].0).font(.system(size: 13, weight: .bold))
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        try save(sheet, as: "home-9-rugs", scale: 1)
+    }
+
     /// Draws the scene's sprites back to front with Core Graphics.
     static func composite(_ scene: SKScene, scale: CGFloat) -> CGImage? {
         scene.still(scale: scale)
