@@ -420,6 +420,7 @@ extension FrameSheets {
             let scene = HomeScene(model: model)
             scene.sync(animated: false)
             scene.settle()
+            scene.pose(at: 1.3)
             rooms.append((label, try #require(Self.composite(scene, scale: 2))))
         }
         let sheet = VStack(alignment: .leading, spacing: 12) {
