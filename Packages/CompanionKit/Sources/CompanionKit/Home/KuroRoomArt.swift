@@ -306,12 +306,14 @@ enum KuroRoomArt {
 
     // MARK: Corner
 
-    // A sakura tree in a mist-coloured pot, with a petal on the floor.
+    // A sakura tree in a mist-coloured pot painted with petals, and a petal on the floor.
     private static func sakura(_ pen: IsoPen, _ s: GridPoint) {
         pen.contact(s.x - 0.35, s.y - 0.35, s.x + 0.35, s.y + 0.35)
         pen.box(s.x - 0.32, s.y - 0.32, 0, s.x + 0.32, s.y + 0.32, 0.7, 0xF2E8FF)
-        pen.line(
-            [P.plan(s.x + 0.32, s.y - 0.3, 0.5), P.plan(s.x + 0.32, s.y + 0.3, 0.5)], KuroPalette.lavender, width: 2.2)
+        // Three petals painted on the pot's front.
+        for (dx, z) in [(-0.18, 0.45), (0.0, 0.3), (0.16, 0.5)] {
+            pen.ellipse(at: P.plan(s.x + dx, s.y + 0.32, z), rx: 2.2, ry: 1.8, KuroPalette.sakura, line: 0.8)
+        }
         let top = P.plan(s.x, s.y, 0.7)
         let soil = CGFloat(0.32) * HomeGrid.unit
         pen.ellipse(at: top, rx: soil * 0.95, ry: soil * 0.45, Color(hex: 0x5B3A29), line: 0)
@@ -340,7 +342,7 @@ enum KuroRoomArt {
         pen.ellipse(at: P.plan(s.x + 0.5, s.y + 0.6, 0.01), rx: 2.2, ry: 1.2, KuroPalette.petal, line: 0.6)
     }
 
-    // A small A-frame easel holding a canvas with a sakura tree and a sun.
+    // A small A-frame easel holding a canvas: a sakura tree, a sun and flowers in the grass.
     private static func easel(_ pen: IsoPen, _ s: GridPoint) {
         pen.contact(s.x - 0.4, s.y - 0.25, s.x + 0.4, s.y + 0.25)
         let legs: [((Double, Double), (Double, Double), Double)] = [
@@ -353,15 +355,20 @@ enum KuroRoomArt {
             pen.line(leg, width: 4.6)
             pen.line(leg, Color(hex: HomeColors.wood), width: 2.6)
         }
-        pen.box(s.x + 0.02, s.y - 0.5, 0.74, s.x + 0.24, s.y + 0.5, 0.82, HomeColors.wood, line: 1.6)
+        // The canvas faces the room; the ledge it stands on runs along its bottom edge.
         let c = { (u: Double, v: Double) in P.plan(s.x + 0.12 + u * 0.7071, s.y + 0.12 - u * 0.7071, v) }
-        pen.polygon([c(-0.5, 0.82), c(0.5, 0.82), c(0.5, 1.85), c(-0.5, 1.85)], .white, line: 2)
+        let ledge = [c(-0.58, 0.72), c(0.58, 0.72), c(0.58, 0.84), c(-0.58, 0.84)]
+        pen.polygon(ledge, Color(hex: HomeColors.wood), line: 1.6)
+        pen.polygon([c(-0.5, 0.84), c(0.5, 0.84), c(0.5, 1.85), c(-0.5, 1.85)], .white, line: 2)
         pen.polygon([c(-0.44, 0.88), c(0.44, 0.88), c(0.44, 1.25), c(-0.44, 1.25)], Color(hex: 0xBFEBD3), line: 0)
         pen.polygon([c(-0.44, 1.25), c(0.44, 1.25), c(0.44, 1.79), c(-0.44, 1.79)], Color(hex: 0xDDEBFF), line: 0)
         pen.ellipse(at: c(0.24, 1.58), rx: 4.5, ry: 4.5, KuroPalette.yellow, line: 0)
         let tree = c(-0.18, 1.2)
         pen.line([tree, CGPoint(x: tree.x, y: tree.y - 9)], Color(hex: HomeColors.woodDark), width: 2)
         pen.ellipse(at: CGPoint(x: tree.x, y: tree.y - 12), rx: 7, ry: 5.5, KuroPalette.sakura, line: 0)
-        pen.line([c(-0.2, 0.98), c(0.3, 0.98)], KuroPalette.pink, width: 1.6)
+        for (u, v) in [(-0.3, 0.98), (0.04, 0.95), (0.32, 1.0)] {
+            pen.ellipse(at: c(u, v), rx: 1.8, ry: 1.8, KuroPalette.pink, line: 0)
+            pen.ellipse(at: c(u, v), rx: 0.6, ry: 0.6, KuroPalette.yellow, line: 0)
+        }
     }
 }
