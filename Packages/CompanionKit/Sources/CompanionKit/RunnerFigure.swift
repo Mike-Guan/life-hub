@@ -1301,6 +1301,7 @@ struct RunnerFigure: View {
                     }
                 }
                 .rotationEffect(.degrees(pose.lean), anchor: Self.unit(x: 60, y: 140))
+                .environment(\.partColors, pose.outfit.props)
                 .opacity(pose.presence)
                 .offset(x: pose.shift * scale, y: pose.bounce * scale)
                 .scaleEffect(
@@ -2212,13 +2213,20 @@ struct RunnerPartView: View {
     var fillOverride: Color?
     /// Replaces boxing red fills, for wardrobe gloves and headbands.
     var red: Color?
+    @Environment(\.partColors) private var partColors
 
     var body: some View {
+        let swaps = partColors[part] ?? [:]
         Canvas { context, size in
             RunnerDrawing.enterFigureSpace(&context, size: size)
-            RunnerDrawing.draw(part, in: context, red: red, fillOverride: fillOverride)
+            RunnerDrawing.draw(part, in: context, red: red, fillOverride: fillOverride, swaps: swaps)
         }
     }
+}
+
+extension EnvironmentValues {
+    /// Colours swapped in single parts of the figure, such as a recoloured card prop.
+    @Entry var partColors: [RunnerPart: [Color: Color]] = [:]
 }
 
 /// Draws one `RunnerText` in figure space.
@@ -2247,8 +2255,12 @@ enum RunnerDrawing {
     /// - Parameters:
     ///   - red: replaces boxing red fills.
     ///   - fillOverride: replaces every fill.
-    static func draw(_ part: RunnerPart, in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil) {
-        draw(RunnerArt.cachedInks(part), in: context, red: red, fillOverride: fillOverride)
+    ///   - swaps: replaces fill and line colours, each by the one it maps to.
+    static func draw(
+        _ part: RunnerPart, in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil,
+        swaps: [Color: Color] = [:]
+    ) {
+        draw(RunnerArt.cachedInks(part), in: context, red: red, fillOverride: fillOverride, swaps: swaps)
         if let text = RunnerArt.text(part) {
             draw(text, in: context)
         }
@@ -2258,7 +2270,11 @@ enum RunnerDrawing {
     /// - Parameters:
     ///   - red: replaces boxing red fills.
     ///   - fillOverride: replaces every fill.
-    static func draw(_ inks: [RunnerInk], in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil) {
+    ///   - swaps: replaces fill and line colours, each by the one it maps to.
+    static func draw(
+        _ inks: [RunnerInk], in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil,
+        swaps: [Color: Color] = [:]
+    ) {
         for ink in inks {
             var layer = context
             layer.opacity = ink.opacity
@@ -2266,12 +2282,12 @@ enum RunnerDrawing {
             if let gradient = ink.gradient {
                 layer.fill(ink.path, with: gradient.shading)
             } else if let fill = ink.fill {
-                let swapped = fill == RunnerPalette.boxingRed ? red ?? fill : fill
+                let swapped = fill == RunnerPalette.boxingRed ? red ?? fill : swaps[fill] ?? fill
                 layer.fill(ink.path, with: .color((fillOverride ?? swapped).opacity(ink.fillOpacity)))
             }
             if let stroke = ink.stroke {
                 let style = StrokeStyle(lineWidth: ink.lineWidth, lineCap: ink.cap, lineJoin: ink.join, dash: ink.dash)
-                layer.stroke(ink.path, with: .color(stroke), style: style)
+                layer.stroke(ink.path, with: .color(swaps[stroke] ?? stroke), style: style)
             }
         }
     }

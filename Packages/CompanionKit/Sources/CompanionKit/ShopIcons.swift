@@ -77,7 +77,7 @@ public struct WardrobeItemIcon: View {
             context.scaleBy(x: scale, y: scale)
             context.translateBy(x: -crop.minX, y: -crop.minY)
             for part in picture.parts {
-                RunnerDrawing.draw(part, in: context, red: picture.red)
+                RunnerDrawing.draw(part, in: context, red: picture.red, swaps: picture.swaps[part] ?? [:])
             }
         }
         .aspectRatio(1, contentMode: .fit)
@@ -90,11 +90,22 @@ struct ItemPicture: Equatable {
     var parts: [RunnerPart]
     /// Replaces boxing red, for gloves and headbands.
     var red: Color?
+    /// Colours swapped in a recoloured card prop, by part.
+    var swaps: [RunnerPart: [Color: Color]] = [:]
     /// The square shown, in SVG units.
     var crop: CGRect
 
     init(slot: Slot, outfit: Outfit, itemID: String?) {
         switch slot {
+        case .gloves where !outfit.props.isEmpty:
+            // A card's prop, drawn on its own and framed to fit.
+            parts = RunnerPart.allCases.filter { outfit.props[$0] != nil }
+            swaps = outfit.props
+            let bounds = parts.flatMap { RunnerArt.cachedInks($0) }.reduce(CGRect.null) {
+                $0.union($1.path.boundingRect)
+            }
+            let side = max(bounds.width, bounds.height) + 8
+            crop = CGRect(x: bounds.midX - side / 2, y: bounds.midY - side / 2, width: side, height: side)
         case .gloves:
             parts = [.gloveR]
             red = outfit.gloves
