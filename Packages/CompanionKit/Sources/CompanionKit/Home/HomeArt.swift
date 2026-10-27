@@ -789,6 +789,11 @@ enum HomeArt {
         case .monstera: return [GridBox(x0: s.x - 1.3, y0: s.y - 1.3, x1: s.x + 0.7, y1: s.y + 0.7, z1: 2.9)]
         case .skateboard: return [GridBox(x0: 0, y0: s.y - 0.3, x1: s.x + 0.15, y1: s.y + 0.3, z1: 1.8)]
         case .arcadePoster, .cityPoster: return [HomeZone.posterWall.box ?? GridBox(x0: 0, y0: 0, x1: 0, y1: 0, z1: 0)]
+        case .mat: return [GridBox(x0: 3.95, y0: 0.45, x1: 5.15, y1: 3.4, z1: 0.45)]
+        case .rope:
+            return [GridBox(x0: s.x - 0.4, y0: 0, x1: s.x + 0.4, y1: 0.4, z0: s.z - 1.2, z1: s.z + 0.7)]
+        case .danceMirror: return [GridBox(x0: s.x - 0.45, y0: 0, x1: s.x + 0.45, y1: 0.2, z0: 0.5, z1: s.z + 1.75)]
+        case .musicStand: return [GridBox(x0: s.x - 0.6, y0: s.y - 0.6, x1: s.x + 0.6, y1: s.y + 0.6, z1: 2.5)]
         }
     }
 
@@ -875,6 +880,120 @@ enum HomeArt {
         case .skateboard: skateboard(pen, at: s)
         case .arcadePoster: arcadePoster(pen)
         case .cityPoster: cityPoster(pen)
+        case .mat: mat(pen, at: s)
+        case .rope: rope(pen, at: s)
+        case .danceMirror: danceMirror(pen, at: s)
+        case .musicStand: musicStand(pen, at: s)
+        }
+    }
+
+    // MARK: Shared items
+
+    /// A yoga mat rolled out along the sports floor, its far end still rolled up against the wall.
+    private static func mat(_ pen: IsoPen, at s: GridPoint) {
+        let lilac: UInt32 = 0x9C8CFF
+        let (x0, x1) = (s.x - 0.5, s.x + 0.5)
+        pen.floor(x0, 0.85, x1, 3.3, Color(hex: lilac), z: 0.02, line: 2)
+        pen.floor(x0 + 0.08, 0.95, x1 - 0.08, 3.2, tone(lilac, 0.2), z: 0.02, line: 0)
+        for y in stride(from: 1.2, to: 3.2, by: 0.35) {
+            pen.line(
+                [HomeGrid.plan(x0 + 0.1, y, 0.02), HomeGrid.plan(x1 - 0.1, y, 0.02)], tone(lilac, -0.12), width: 0.8)
+        }
+        // The roll: its side, then its round end facing the room with the mat's spiral.
+        let (y, z, r) = (0.72, 0.17, 0.17)
+        pen.box(GridBox(x0: x0, y0: y - r, x1: x1, y1: y + r, z0: 0, z1: 2 * r), lilac, line: 0)
+        pen.line([HomeGrid.plan(x0, y + r, z), HomeGrid.plan(x1, y + r, z)], width: 2)
+        pen.line([HomeGrid.plan(x0, y - 0.02, 2 * r), HomeGrid.plan(x1, y - 0.02, 2 * r)], width: 2)
+        pen.line(
+            [HomeGrid.plan(x0, y + 0.1, 2 * r - 0.02), HomeGrid.plan(x1, y + 0.1, 2 * r - 0.02)], tone(lilac, 0.4),
+            width: 1.2)
+        pen.discAcross(x: x1, y, z, r: r, tone(lilac, -0.15), line: 1.8)
+        let spiral = (0..<28).map { i -> CGPoint in
+            let a = Double(i) / 28 * 4 * .pi
+            let k = r * 0.85 * (1 - Double(i) / 32)
+            return HomeGrid.plan(x1, y + k * cos(a), z + k * sin(a))
+        }
+        pen.line(spiral, tone(lilac, 0.35), width: 1)
+        pen.contact(x0, y - r, x1, y + r)
+    }
+
+    /// A jump rope hanging from a hook by its handles, the rope looping below.
+    private static func rope(_ pen: IsoPen, at s: GridPoint) {
+        let p = { (x: Double, z: Double) in HomeGrid.plan(x, s.y, z) }
+        let hook = p(s.x, s.z + 0.5)
+        pen.box(s.x - 0.05, 0, s.z + 0.45, s.x + 0.05, 0.12, s.z + 0.55, 0xC3C8D2, line: 1.4)
+        // The rope: from each handle's bottom, down in a loop under them.
+        var loop = Path()
+        loop.move(to: p(s.x - 0.17, s.z - 0.12))
+        loop.addCurve(
+            to: p(s.x + 0.17, s.z - 0.12), control1: p(s.x - 0.32, s.z - 1.25), control2: p(s.x + 0.3, s.z - 1.2))
+        pen.context.stroke(loop, with: .color(IsoPen.ink), style: StrokeStyle(lineWidth: 3.4, lineCap: .round))
+        pen.context.stroke(
+            loop, with: .color(Color(hex: 0x3EC8FF)), style: StrokeStyle(lineWidth: 1.8, lineCap: .round))
+        var inner = Path()
+        inner.move(to: p(s.x - 0.12, s.z - 0.12))
+        inner.addCurve(
+            to: p(s.x + 0.12, s.z - 0.12), control1: p(s.x - 0.22, s.z - 0.85), control2: p(s.x + 0.2, s.z - 0.8))
+        pen.context.stroke(inner, with: .color(IsoPen.ink), style: StrokeStyle(lineWidth: 3.4, lineCap: .round))
+        pen.context.stroke(
+            inner, with: .color(Color(hex: 0x3EC8FF)), style: StrokeStyle(lineWidth: 1.8, lineCap: .round))
+        // Handles hanging off the hook by short cords.
+        for dx in [-0.15, 0.15] {
+            let top = p(s.x + dx, s.z + 0.28)
+            pen.line([hook, top], width: 1.2)
+            let handle = Path(roundedRect: CGRect(x: top.x - 3, y: top.y, width: 6, height: 15), cornerRadius: 3)
+            pen.context.fill(handle, with: .color(Color(hex: HomeColors.pink)))
+            pen.context.stroke(handle, with: .color(IsoPen.ink), lineWidth: 1.6 * IsoPen.weight)
+            pen.line(
+                [CGPoint(x: top.x - 2, y: top.y + 3), CGPoint(x: top.x - 2, y: top.y + 11)], Color.white.opacity(0.5),
+                width: 1)
+        }
+    }
+
+    /// A tall dance mirror on the sports wall, in a light wood frame, with the room's light on the glass.
+    private static func danceMirror(_ pen: IsoPen, at s: GridPoint) {
+        let (u0, u1, v0, v1) = (s.x - 0.38, s.x + 0.38, 0.55, s.z + 1.7)
+        pen.box(u0 - 0.06, 0, v0 - 0.06, u1 + 0.06, 0.06, v1 + 0.06, 0xE2B887, line: 2)
+        pen.onBackWall(y: 0.065, u0, v0, u1, v1, Color(hex: 0xCFE9F5), line: 1.6)
+        // A faint copy of the window's light, then two bright streaks.
+        pen.onBackWall(y: 0.066, u0, v1 - 0.9, u0 + 0.3, v1, Color.white.opacity(0.35), line: 0)
+        for (a, b, w) in [(0.15, 0.9, 3.0), (0.4, 1.3, 1.6)] {
+            pen.line(
+                [HomeGrid.plan(u0 + a, 0.066, v1 - 0.2), HomeGrid.plan(u0 + a + 0.3, 0.066, v1 - b)],
+                Color.white.opacity(0.75), width: w)
+        }
+        pen.line(
+            [HomeGrid.plan(u1 - 0.2, 0.066, v0 + 0.5), HomeGrid.plan(u1 - 0.05, 0.066, v0 + 0.25)],
+            Color.white.opacity(0.6), width: 1.6)
+    }
+
+    /// A black folding music stand with a page of music on it, facing the room.
+    private static func musicStand(_ pen: IsoPen, at s: GridPoint) {
+        let p = { (x: Double, y: Double, z: Double) in HomeGrid.plan(x, y, z) }
+        let black = Color(hex: 0x1B1C26)
+        pen.contact(s.x - 0.35, s.y - 0.35, s.x + 0.35, s.y + 0.35)
+        for (dx, dy) in [(-0.35, -0.2), (0.3, -0.25), (0.05, 0.38)] {
+            pen.line([p(s.x, s.y, 0.45), p(s.x + dx, s.y + dy, 0)], width: 2.6)
+        }
+        pen.line([p(s.x, s.y, 0.45), p(s.x, s.y, 1.55)], width: 3)
+        pen.line([p(s.x, s.y, 0.45), p(s.x, s.y, 1.55)], Color(hex: 0x3A3D52), width: 1.2)
+        // The desk leans back: its bottom edge in front, its top towards the wall.
+        let (b, t) = ((x: s.x + 0.05, z: 1.5), (x: s.x - 0.2, z: 2.25))
+        let (y0, y1) = (s.y - 0.48, s.y + 0.48)
+        pen.polygon([p(b.x, y0, b.z), p(b.x, y1, b.z), p(t.x, y1, t.z), p(t.x, y0, t.z)], black, line: 2)
+        pen.box(
+            GridBox(x0: b.x - 0.02, y0: y0, x1: b.x + 0.1, y1: y1, z0: b.z - 0.06, z1: b.z + 0.04), 0x1B1C26, line: 1.4)
+        // The page and its staves with a few notes.
+        let page = { (u: Double, v: Double) in
+            p(b.x + (t.x - b.x) * v - 0.02, y0 + 0.1 + u * (y1 - y0 - 0.2), b.z + 0.04 + (t.z - b.z - 0.06) * v)
+        }
+        pen.polygon([page(0, 0), page(1, 0), page(1, 1), page(0, 1)], Color(hex: 0xFFFBF2), line: 1.2)
+        for v in [0.3, 0.55, 0.8] {
+            pen.line([page(0.08, v), page(0.92, v)], Color(hex: 0x6B6F85), width: 0.8)
+        }
+        for (u, v) in [(0.2, 0.33), (0.38, 0.27), (0.6, 0.58), (0.78, 0.52), (0.5, 0.83)] {
+            pen.ellipse(at: page(u, v), rx: 1.6, ry: 1.2, black, line: 0)
+            pen.line([page(u + 0.02, v), page(u + 0.02, v + 0.12)], black, width: 0.8)
         }
     }
 

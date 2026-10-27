@@ -352,7 +352,7 @@ import Testing
         model.togglePreviewItems()
         #expect(
             model.items == [
-                .plant, .cactus, .clipLamp, .speaker, .gloves, .racket, .snowboard, .bench, .arcadePoster,
+                .plant, .cactus, .clipLamp, .speaker, .gloves, .racket, .bench, .arcadePoster,
             ])
         #expect(model.snapshot.owned.isEmpty)
         model.togglePreviewItems()
@@ -374,6 +374,12 @@ import Testing
         #expect(HomeItem.places([.cube]) == [.cube: slots[0]])
         #expect(HomeItem.places([.cube, .cactus]) == [.cactus: slots[0], .cube: slots[1]])
         #expect(HomeItem.places([.plant, .gamepad])[.plant] == HomeItem.plant.spot)
+        // On the sports wall an item keeps its own height in its slot, and alone it hangs at its spot.
+        let wall = HomeItem.places([.snowboard, .rope])
+        #expect(wall[.rope]?.x == HomeZone.sportWall.slots[0].x && wall[.rope]?.z == HomeItem.rope.spot.z)
+        #expect(wall[.snowboard]?.x == HomeZone.sportWall.slots[1].x && wall[.snowboard]?.z == 0)
+        #expect(HomeItem.places([.danceMirror]) == [.danceMirror: HomeItem.danceMirror.spot])
+        #expect(HomeItem.places([.gloves, .danceMirror])[.danceMirror]?.x == HomeZone.sportWall.slots[0].x)
         for item in HomeItem.allCases where item.zone == .desk { #expect(item.spot == slots[0], "\(item)") }
     }
 

@@ -403,6 +403,7 @@ extension FrameSheets {
     @Test func hakuHomeNewItems() throws {
         let items: [HomeItem] = [
             .clipLamp, .headphones, .gamepad, .cube, .comics, .fan, .monstera, .skateboard, .arcadePoster, .cityPoster,
+            .mat, .rope, .danceMirror, .musicStand,
         ]
         var rooms: [(String, CGImage)] = []
         for (label, night, set) in [
@@ -411,6 +412,8 @@ extension FrameSheets {
                 [HomeItem.clipLamp, .headphones, .arcadePoster, .monstera, .comics]
             ),
             ("夜 · 手柄 + 魔方 · 城市海报 · 滑板 · 风扇", true, [HomeItem.gamepad, .cube, .cityPoster, .skateboard, .fan]),
+            ("白天 · 瑜伽垫 · 练舞镜 + 跳绳 · 谱架", false, [HomeItem.mat, .rope, .danceMirror, .musicStand]),
+            ("白天 · 卧推架 · 拳套 + 跳绳（墙上两格）", false, [HomeItem.bench, .gloves, .rope]),
         ] {
             let model = HomeModel(night: night)
             model.stand(set)
@@ -420,7 +423,7 @@ extension FrameSheets {
             rooms.append((label, try #require(Self.composite(scene, scale: 2))))
         }
         let sheet = VStack(alignment: .leading, spacing: 12) {
-            Text(verbatim: "HAKU 房间新物品 10 件（商店小图标 2x）").font(.system(size: 20, weight: .bold))
+            Text(verbatim: "HAKU 房间新物品 10 件 + 共用 4 件（商店小图标）").font(.system(size: 20, weight: .bold))
             LazyVGrid(columns: Array(repeating: GridItem(.fixed(132)), count: 5), spacing: 12) {
                 ForEach(items, id: \.self) { item in
                     VStack(spacing: 4) {
@@ -430,10 +433,12 @@ extension FrameSheets {
                     }
                 }
             }
-            ForEach(rooms.indices, id: \.self) { i in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(verbatim: rooms[i].0).font(.system(size: 14, weight: .bold))
-                    Image(decorative: rooms[i].1, scale: 2)
+            LazyVGrid(columns: [GridItem(.fixed(632)), GridItem(.fixed(632))], alignment: .leading, spacing: 12) {
+                ForEach(rooms.indices, id: \.self) { i in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(verbatim: rooms[i].0).font(.system(size: 14, weight: .bold))
+                        Image(decorative: rooms[i].1, scale: 2)
+                    }
                 }
             }
         }

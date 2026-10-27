@@ -249,6 +249,10 @@ enum HomeItem: String, CaseIterable, Sendable {
     case headphones, gamepad, cube, comics, fan, monstera, skateboard
     case arcadePoster = "poster.arcade"
     case cityPoster = "poster.city"
+    // §2.4 and §4: shared by both characters, the last two only with the dance or music card.
+    case mat, rope
+    case danceMirror = "mirror.dance"
+    case musicStand = "stand.music"
 
     /// The room item a shop catalog id names, such as `room.bench` or `haku.weekly.room.cactus`.
     init?(shopID: String) {
@@ -259,11 +263,11 @@ enum HomeItem: String, CaseIterable, Sendable {
     /// The zone the item goes in.
     var zone: HomeZone {
         switch self {
-        case .plant, .monstera, .skateboard: .corner
-        case .bag, .bench: .sportFloor
+        case .plant, .monstera, .skateboard, .musicStand: .corner
+        case .bag, .bench, .mat: .sportFloor
         case .cactus, .clipLamp, .headphones, .gamepad, .cube: .desk
         case .speaker, .comics, .fan: .sofaSide
-        case .gloves, .racket, .snowboard: .sportWall
+        case .gloves, .racket, .snowboard, .rope, .danceMirror: .sportWall
         case .arcadePoster, .cityPoster: .posterWall
         }
     }
@@ -272,7 +276,7 @@ enum HomeItem: String, CaseIterable, Sendable {
     // Wall items stay left of x 5.5: further right the wardrobe's side hides them.
     var spot: GridPoint {
         switch self {
-        case .plant, .monstera: GridPoint(x: 1.5, y: 9.3)
+        case .plant, .monstera, .musicStand: GridPoint(x: 1.5, y: 9.3)
         case .skateboard: GridPoint(x: 1.0, y: 9.3)
         case .bag: GridPoint(x: 5.9, y: 3.1)
         case .cactus, .clipLamp, .headphones, .gamepad, .cube: HomeZone.desk.slots[0]
@@ -280,22 +284,24 @@ enum HomeItem: String, CaseIterable, Sendable {
         case .gloves: GridPoint(x: 4.9, y: 0.15, z: 3.4)
         case .racket: GridPoint(x: 5.25, y: 0.1, z: 3.3)
         case .snowboard: GridPoint(x: 5.3, y: 0.1)
-        case .bench: GridPoint(x: 4.55, y: 2.0)
+        case .bench, .mat: GridPoint(x: 4.55, y: 2.0)
+        case .rope: GridPoint(x: 4.85, y: 0.12, z: 3.4)
+        case .danceMirror: GridPoint(x: 4.85, y: 0.05, z: 2.6)
         case .arcadePoster, .cityPoster: HomeZone.posterWall.slots[0]
         }
     }
 
-    /// Where each of `items` stands. Items sharing the desk take its slots in catalog order, the first at its spot.
+    /// Where each of `items` stands: alone in its zone at its spot; sharing a zone, the items take its slots in
+    /// catalog order, each keeping its own height.
     static func places(_ items: Set<HomeItem>) -> [HomeItem: GridPoint] {
         var places: [HomeItem: GridPoint] = [:]
-        let slots = HomeZone.desk.slots
-        var onDesk = 0
-        for item in allCases where items.contains(item) {
-            if item.zone == .desk, onDesk < slots.count {
-                places[item] = slots[onDesk]
-                onDesk += 1
-            } else {
-                places[item] = item.spot
+        for zone in HomeZone.allCases {
+            // The mirror is too wide for the sports wall's right slot, by the wardrobe, so it takes the left one.
+            let here = allCases.filter { items.contains($0) && $0.zone == zone }
+                .sorted { $0 == .danceMirror && $1 != .danceMirror }
+            for (i, item) in here.enumerated() {
+                let slot = here.count > 1 && i < zone.slots.count ? zone.slots[i] : nil
+                places[item] = slot.map { GridPoint(x: $0.x, y: $0.y, z: item.spot.z) } ?? item.spot
             }
         }
         return places
@@ -305,13 +311,14 @@ enum HomeItem: String, CaseIterable, Sendable {
     var footprint: GridBox? {
         let s = spot
         switch self {
+        // HAKU walks over the mat.
         case .cactus, .clipLamp, .headphones, .gamepad, .cube, .gloves, .racket, .snowboard, .arcadePoster,
-            .cityPoster:
+            .cityPoster, .mat, .rope, .danceMirror:
             return nil
         case .bench: return GridBox(x0: 3.9, y0: 0.3, x1: 5.2, y1: 3.4, z1: 1.9)
         case .bag: return GridBox(x0: s.x - 0.4, y0: s.y - 0.4, x1: s.x + 0.4, y1: s.y + 0.4, z1: 2.5)
         case .skateboard: return GridBox(x0: 0.1, y0: s.y - 0.25, x1: s.x + 0.1, y1: s.y + 0.25, z1: 1.7)
-        case .plant, .speaker, .comics, .fan, .monstera:
+        case .plant, .speaker, .comics, .fan, .monstera, .musicStand:
             return GridBox(x0: s.x - 0.3, y0: s.y - 0.3, x1: s.x + 0.3, y1: s.y + 0.3, z1: 1)
         }
     }
@@ -319,13 +326,14 @@ enum HomeItem: String, CaseIterable, Sendable {
     /// Back to front, as `HomePiece.depth`.
     var depth: Double {
         switch self {
-        case .plant, .monstera: 10.8
+        case .plant, .monstera, .musicStand: 10.8
         case .skateboard: 10.3
         case .bag: 9.0
         case .cactus, .clipLamp, .headphones, .gamepad, .cube: 3.7
         case .speaker, .comics, .fan: 11.1
-        case .gloves, .racket, .snowboard: 0.6
+        case .gloves, .racket, .snowboard, .rope, .danceMirror: 0.6
         case .bench: 6.55
+        case .mat: -0.9
         case .arcadePoster, .cityPoster: 0.55
         }
     }

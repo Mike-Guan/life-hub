@@ -7,8 +7,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
   puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
-  corner, and an arcade or a city poster on the wall over the desk. Two desk items stand side by side, and a
-  poster replaces the two default ones. The shop doesn't sell them yet.
+  corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters
+  can have: a yoga mat, a jump rope, a dance mirror and a music stand. Two items in the same zone (desk or
+  sports wall) stand side by side, and a poster replaces the two default ones. The shop doesn't sell them yet.
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
   her tennis day, guards and punches in two gloves with the boxing card, and dozes over her tablet in bed.

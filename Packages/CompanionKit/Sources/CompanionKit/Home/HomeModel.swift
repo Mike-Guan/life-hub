@@ -186,15 +186,14 @@ final class HomeModel {
     }
     // 家 区域规划 v0: the sports floor holds one piece at a time; the room puts the earlier one away. Mike
     // 2026-10-18: with every item shown, the bag stood in front of HAKU on the bench, so the preview keeps to that
-    // too and shows the bench. The sports wall keeps all three of its pieces in the preview, as before.
+    // too and shows the bench.
     /// The items standing in the room: the owned ones the room has not put away, or while previewing, the first
     /// items in catalog order the zones have room for.
     var items: Set<HomeItem> {
         if previewsAllItems {
             return Set(
                 HomeZone.allCases.flatMap { zone in
-                    let fits = HomeItem.allCases.filter { $0.zone == zone && $0 != .bag }
-                    return fits.prefix(zone == .sportWall ? fits.count : zone.slots.count)
+                    HomeItem.allCases.filter { $0.zone == zone && $0 != .bag }.prefix(zone.slots.count)
                 })
         }
         let standing = Set(snapshot.room.placements.filter { !$0.isStored }.map(\.piece))
