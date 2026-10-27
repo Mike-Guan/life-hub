@@ -54,3 +54,19 @@ struct HandInTests {
         #expect(held.propRaise == 1 && !parts.contains(.monsterCan) && parts.contains(.stickyNote))
     }
 }
+
+// UI 审核 HAKU-27: scene effects breathe instead of blinking between two opacities.
+struct SceneEffectFadeTests {
+    @Test func effectsFadeThroughInBetweenOpacities() {
+        let effects: [(DailyScene, RunnerPart)] = [
+            (.coffee, .blowLines), (.shopping, .shopShine), (.friends, .waveArcs), (.haircut, .buzzLines),
+            (.doctor, .ouchLines),
+        ]
+        for (scene, part) in effects {
+            let opacities = (0..<200).compactMap { SceneMove.of(part, in: scene, at: CGFloat($0) * 0.01)?.opacity }
+            #expect(opacities.contains { $0 > 0.05 && $0 < 0.95 }, "\(scene) \(part)")
+            let steps = zip(opacities, opacities.dropFirst()).map { abs($0 - $1) }
+            #expect(steps.allSatisfy { $0 < 0.3 }, "\(scene) \(part)")
+        }
+    }
+}

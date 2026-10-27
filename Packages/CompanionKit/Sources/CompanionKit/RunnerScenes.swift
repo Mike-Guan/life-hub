@@ -68,8 +68,9 @@ struct SceneMove {
                 move.opacity = 0.5 + 0.5 * Double(sin(t * 4))
             }
         case (.coffee, .blowLines):
+            // UI 审核 HAKU-27: the effects used to blink 0/1; they breathe between a low and full opacity.
             let c = loop(t, 3.4)
-            move.opacity = c > 0.5 && c < 1.8 && sin(t * 12) > -0.3 ? 1 : 0
+            move.opacity = Double(min(1, 3 * bump(c, from: 0.5, to: 1.8))) * pulse(t * 12, low: 0.5)
         case (.meal, .chopsticks), (.drinks, .chopsticks):
             let k = bump(loop(t, 1.6), from: 0, to: 1.1)
             move.offset = CGSize(width: -4 * k, height: -10 * k)
@@ -91,7 +92,7 @@ struct SceneMove {
             move.angle = part == .paperBagL ? swing : -swing
             move.anchor = part == .paperBagL ? anchor(21, 99) : anchor(99, 99)
         case (.shopping, .shopShine):
-            move.opacity = sin(t * 5) > 0 ? 1 : 0.2
+            move.opacity = pulse(t * 5, low: 0.2)
         case (.cook, .spatula):
             move.angle = -24 * Double(bump(loop(t, 1.4), from: 0, to: 0.7))
             move.anchor = anchor(93, 122)
@@ -115,7 +116,7 @@ struct SceneMove {
             move.angle = 14 * Double(sin(t / 0.8 * .pi))
             move.anchor = anchor(90, 104)
         case (.friends, .waveArcs):
-            move.opacity = sin(t / 0.8 * .pi) > 0 ? 1 : 0.2
+            move.opacity = pulse(t / 0.8 * .pi, low: 0.2)
         case (.haircut, .clipArm), (.haircut, .clipper):
             move.offset.height = 5 * sin(t * .pi)
             move.angle = -2 * Double(sin(t * .pi))
@@ -125,11 +126,11 @@ struct SceneMove {
             move.offset = CGSize(width: -2 * p, height: 16 * p)
             move.opacity = Double(1 - p)
         case (.haircut, .buzzLines):
-            move.opacity = sin(t * 20) > 0 ? 1 : 0.3
+            move.opacity = pulse(t * 20, low: 0.3)
         case (.doctor, .cheekHand):
             move.offset.height = sin(t * 5)
         case (.doctor, .ouchLines):
-            move.opacity = sin(t * 6) > 0 ? 1 : 0.2
+            move.opacity = pulse(t * 6, low: 0.2)
         default:
             break
         }
@@ -232,6 +233,11 @@ private func frac(_ x: CGFloat) -> CGFloat {
 
 private func bump(_ x: CGFloat, from a: CGFloat, to b: CGFloat) -> CGFloat {
     sin(min(max((x - a) / (b - a), 0), 1) * .pi)
+}
+
+/// A smooth beat between `low` and full opacity, at phase `x` in radians.
+private func pulse(_ x: CGFloat, low: Double) -> Double {
+    low + (1 - low) * (0.5 + 0.5 * Double(sin(x)))
 }
 
 // Bath call (Mike approved the preview 2026-10-05): before bedtime HAKU carries shampoo and a rubber duck
