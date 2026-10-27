@@ -1,3 +1,4 @@
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 // 商店扩充 v1 §2.3: her own room items, drawn like HomeArt's pieces (thin ink lines, flat colours).
@@ -341,7 +342,9 @@ enum KuroRoomArt {
         for (dx, dy, r) in blossoms {
             pen.ellipse(at: CGPoint(x: top.x + dx, y: top.y + dy), rx: r, ry: r * 0.82, KuroPalette.sakura, line: 1.8)
         }
-        let petals: [(CGFloat, CGFloat)] = [(-12, -52), (6, -62), (16, -50), (-2, -46), (-20, -40), (10, -44), (0, -56)]
+        let petals: [(CGFloat, CGFloat)] = [
+            (-12, -52), (6, -62), (16, -50), (-2, -46), (-20, -40), (10, -44), (0, -56),
+        ]
         for (dx, dy) in petals {
             let q = CGPoint(x: top.x + dx, y: top.y + dy)
             pen.ellipse(at: q, rx: 2, ry: 2, KuroPalette.petal, line: 0)
@@ -380,3 +383,4 @@ enum KuroRoomArt {
         }
     }
 }
+#endif
