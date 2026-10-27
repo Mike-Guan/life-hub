@@ -19455,7 +19455,7 @@ enum KuroArt {
                     p.addLine(to: .init(x: 84, y: 108))
                 },
                 stroke: KuroPalette.ink,
-                lineWidth: 5,
+                lineWidth: 6.4,
                 cap: .round
             ),
             RunnerInk(
@@ -19464,16 +19464,16 @@ enum KuroArt {
                     p.addLine(to: .init(x: 84, y: 108))
                 },
                 stroke: KuroPalette.sky,
-                lineWidth: 2.6,
+                lineWidth: 4,
                 cap: .round
             ),
             RunnerInk(
                 path: Path { p in
-                    p.move(to: .init(x: 81, y: 112))
-                    p.addLine(to: .init(x: 83, y: 109.4))
+                    p.move(to: .init(x: 73.6, y: 119.4))
+                    p.addLine(to: .init(x: 82.4, y: 108.2))
                 },
                 stroke: KuroPalette.white,
-                lineWidth: 1.4,
+                lineWidth: 1.3,
                 cap: .round
             ),
             RunnerInk(
