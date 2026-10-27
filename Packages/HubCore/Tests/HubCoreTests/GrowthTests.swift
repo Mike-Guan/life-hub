@@ -304,7 +304,9 @@ import Testing
         let kuro = ShopItem.catalog(for: .kuro).filter { $0.week == nil && $0.mode != .boxing }
         #expect(ShopItem.catalog(for: .haku).count + ShopItem.catalog(for: .kuro).count == ShopItem.catalog.count)
         #expect(kuro.compactMap(\.price).sorted() == haku.compactMap(\.price).sorted())
-        #expect(kuro.filter(\.isDrawn).compactMap(\.keepsake).map(\.win) == [.gotUp, .run5k, .boxing])
+        // Her gold racket, then her four gold card props.
+        let wins = kuro.filter(\.isDrawn).compactMap(\.keepsake).map(\.win)
+        #expect(wins == [.gotUp, .run5k, .boxing, .boxing, .boxing, .boxing, .boxing])
     }
 
     @Test func ledgerPersistsAndKeepsUnreadableEntries() throws {
@@ -638,8 +640,9 @@ import Testing
         ]
         for (persona, kinds) in cards {
             for card in kinds {
+                // The second character's are drawn; HAKU's wait for their art.
                 let line = ShopItem.catalog(for: persona).filter {
-                    $0.card == card && $0.slot == .gloves && !$0.isDrawn
+                    $0.card == card && $0.slot == .gloves && $0.isDrawn == (persona == .kuro)
                 }
                 #expect(line.compactMap(\.price) == [15], "\(persona) \(card)")
                 #expect(line.compactMap(\.keepsake).map(\.count) == [10], "\(persona) \(card)")

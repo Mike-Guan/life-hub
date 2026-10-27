@@ -395,7 +395,7 @@ final class KuroHomeNode: SKNode {
         var head = visible.filter { isHead($0) }
         // Asleep she keeps what her look wears on her head, but takes off glasses, goggles and the mask for bed.
         if sleeping {
-            let offForBed: Set<KuroPart> = [.deskGlasses, .skiGoggles, .maskWork]
+            let offForBed: Set<KuroPart> = [.deskGlasses, .itemGlassesRed, .skiGoggles, .maskWork]
             head.formUnion(dressed.filter { isHead($0) && !isFace($0) })
             head.subtract(offForBed)
         }
@@ -423,7 +423,7 @@ final class KuroHomeNode: SKNode {
         if name.hasPrefix("weekly_hair_") || name.hasPrefix("weekly_hat_") { return true }
         let head: Set<KuroPart> = [
             .earL, .earR, .faceBase, .maskWork, .hairFringe, .catEars, .tennisHeadband, .boxHeadband, .itemSakura,
-            .setPicnicHat, .setRainHat, .deskGlasses, .skiGoggles,
+            .setPicnicHat, .setRainHat, .deskGlasses, .itemGlassesRed, .skiGoggles,
         ]
         return head.contains(part)
     }
