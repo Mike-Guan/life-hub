@@ -232,8 +232,9 @@ enum HomeZone: String, CaseIterable, Sendable {
         case .furniture, .shelf: []
         case .sportFloor: [GridPoint(x: 4.55, y: 2.0)]
         case .sportWall: [GridPoint(x: 4.4, y: 0.15, z: 3.4), GridPoint(x: 5.3, y: 0.15, z: 3.4)]
-        // The desk's front corner, left and right of the mouse; the lamp and mug fill the back.
-        case .desk: [GridPoint(x: 0.45, y: 3.05, z: 1.36), GridPoint(x: 1.15, y: 3.05, z: 1.36)]
+        // UI 审核 2026-10-27: two items in the left front corner touched. One stands left of the mouse, the other on
+        // the right by the mug, in front of the notebook.
+        case .desk: [GridPoint(x: 0.45, y: 3.05, z: 1.36), GridPoint(x: 1.25, y: 1.35, z: 1.36)]
         case .sofaSide: [GridPoint(x: 2.6, y: 8.5)]
         case .corner: [GridPoint(x: 1.5, y: 9.3)]
         case .posterWall: [GridPoint(x: 0.02, y: 1.95, z: 3.7)]
@@ -278,7 +279,9 @@ enum HomeItem: String, CaseIterable, Sendable {
     // Wall items stay left of x 5.5: further right the wardrobe's side hides them.
     var spot: GridPoint {
         switch self {
-        case .plant, .monstera, .musicStand: GridPoint(x: 1.5, y: 9.3)
+        case .plant, .musicStand: GridPoint(x: 1.5, y: 9.3)
+        // UI 审核 2026-10-27: at the plant's spot its leaves covered the floor lamp's pole; further into the corner.
+        case .monstera: GridPoint(x: 1.15, y: 9.55)
         case .skateboard: GridPoint(x: 1.0, y: 9.3)
         case .bag: GridPoint(x: 5.9, y: 3.1)
         case .cactus, .clipLamp, .headphones, .gamepad, .cube: HomeZone.desk.slots[0]
