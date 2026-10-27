@@ -334,6 +334,17 @@ enum Placement {
         .craftPen: Spot(.handR, "craftPen"),
         .gymBlock: Spot(.handsFront, "gymBlock"),
         .studyNotebook: Spot(.handsFront, "studyNotebook"),
+        // Card props drawn in place of her own (KuroItem.skin) take that prop's spot; the red glasses are glasses.
+        .itemGlovePinkL: Spot(.handL, "拳套"),
+        .itemGlovePinkR: Spot(.handR, "拳套"),
+        .itemGloveGoldL: Spot(.handL, "拳套"),
+        .itemGloveGoldR: Spot(.handR, "拳套"),
+        .itemBlockMint: Spot(.handsFront, "gymBlock"),
+        .itemBlockGold: Spot(.handsFront, "gymBlock"),
+        .itemBookmarkGold: Spot(.handsFront, "studyNotebook"),
+        .itemStylusBlue: Spot(.handR, "craftPen"),
+        .itemBrushGold: Spot(.handR, "craftPen"),
+        .itemGlassesRed: Spot(.eyes, "deskGlasses"),
         .boxSandbag: Spot(.corner1, "boxSandbag"),
         // Deferred identity cards (顺延身份卡 预览): the finger on the score is part of holding it.
         .danceSpeaker: Spot(.corner1, "danceSpeaker"),
