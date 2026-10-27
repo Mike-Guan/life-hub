@@ -181,7 +181,7 @@ def effects():
         print(write_wav(name, x))
 
 
-# 家 music: a slow, chill jazz loop (Mike 10/27: 「jazz 风格一点，chill 一点」). F major, 64 BPM swing,
+# 家 music: slow, chill electric-piano jazz (Mike 10/27: 「jazz 风格一点，chill 一点」, then no high bells). F major, 64 BPM swing,
 # 16 bars of a ii-V-I turn played twice, ends where it starts.
 
 BPM = 64
@@ -195,10 +195,11 @@ def swung(beat):
     return whole + 2 / 3 if abs(beat - whole - 0.5) < 1e-6 else beat
 
 
-def rhodes(freq, seconds):
+def rhodes(freq, seconds, tine=0.04):
+    """Electric piano. `tine` is the short metallic ping at the start; the melody leaves it out."""
     t = t_axis(seconds)
     tone = np.sin(2 * np.pi * freq * t) + 0.3 * np.sin(2 * np.pi * freq * 2 * t) * np.exp(-t / 0.3)
-    tone += 0.06 * np.sin(2 * np.pi * freq * 7.1 * t) * np.exp(-t / 0.02)
+    tone += tine * np.sin(2 * np.pi * freq * 7.1 * t) * np.exp(-t / 0.02)
     tone *= 1 + 0.1 * np.sin(2 * np.pi * 3.6 * t)
     release = np.clip((seconds - t) / 0.2, 0, 1)
     return tone * env(t, 0.008, 1.4) * release
@@ -213,27 +214,11 @@ def upright(freq, seconds):
     return tone * env(t, 0.006, 0.7) * release
 
 
-def vibes(freq, seconds=1.8):
-    t = t_axis(seconds)
-    tone = np.sin(2 * np.pi * freq * t) + 0.15 * np.sin(2 * np.pi * freq * 4 * t) * np.exp(-t / 0.05)
-    tone *= 1 + 0.25 * np.sin(2 * np.pi * 5.0 * t)
-    return tone * env(t, 0.004, 0.7)
-
-
 def brush(seconds=0.32):
     """A brush swept across the snare."""
     t = t_axis(seconds)
     swish = bandpass(rng.standard_normal(len(t)), 900, 5000)
     return swish * np.sin(np.pi * t / seconds) ** 2 * np.exp(-t / 0.25)
-
-
-def ride(seconds=0.9):
-    t = t_axis(seconds)
-    ping = np.zeros_like(t)
-    for ratio, level in ((1.0, 1.0), (1.48, 0.7), (2.13, 0.5), (2.89, 0.35)):
-        ping += level * np.sin(2 * np.pi * 3200 * ratio * t + rng.uniform(0, 6.28))
-    wash = bandpass(rng.standard_normal(len(t)), 5000, 11000)
-    return (0.4 * ping + wash) * env(t, 0.001, 0.25)
 
 
 def music():
@@ -266,36 +251,29 @@ def music():
         for beat, hold in comp[bar % 2]:
             for k, n in enumerate(voicing):
                 add(beat0 + beat + 0.012 * k, rhodes(note(n), hold * BEAT), 0.085)
-        # Ride: ding, ding-a, ding, ding-a. Brushes on 2 and 4.
-        for beat, level in ((0, 1.0), (1, 0.8), (1.5, 0.5), (2, 1.0), (3, 0.8), (3.5, 0.5)):
-            add(beat0 + beat, ride(), 0.012 * level)
+        # Brushes on 2 and 4.
         for beat in (1, 3):
             add(beat0 + beat - 0.1, brush(), 0.05)
 
-    # Vibes: a short, lazy phrase every two bars, answered by silence.
+    # Melody on the same electric piano: a short, lazy phrase every two bars, answered by silence.
     phrase_a = [(0.5, "A4"), (1, "C5"), (1.5, "D5"), (2, "F5"), (3.5, "E5"), (5, "D5")]
     phrase_b = [(0.5, "G4"), (1, "A4"), (2, "C5"), (2.5, "E5"), (4, "D5"), (5.5, "A4")]
     phrase_c = [(1, "F5"), (1.5, "E5"), (2, "D5"), (2.5, "C5"), (3, "A4"), (4.5, "Bb4"), (5, "A4")]
     for start, phrase in ((0, phrase_a), (8, phrase_b), (16, phrase_a), (24, phrase_c),
                           (32, phrase_b), (40, phrase_a), (48, phrase_c), (56, phrase_b[:4])):
-        for beat, n in phrase:
-            add(start + beat, vibes(note(n)), 0.16)
-
-    # A little record crackle, very low, for the lo-fi feel.
-    for _ in range(int(BARS * 4 * BEAT * 6)):
-        i = rng.integers(0, length)
-        click = rng.standard_normal(40) * np.hanning(40)
-        out[i:i + 40] += 0.04 * rng.uniform(0.2, 1.0) * click
+        for k, (beat, n) in enumerate(phrase):
+            following = phrase[k + 1][0] if k + 1 < len(phrase) else beat + 2
+            add(start + beat, rhodes(note(n), min(following - beat + 0.3, 2.0) * BEAT, tine=0.0), 0.15)
 
     wet = room(out, seconds=2.0, mix=0.4, brightness=3500)
     # Wrap everything past the loop point back to the start, so the loop has no seam.
     loop = wet[:length].copy()
     tail = wet[length:]
     loop[: len(tail)] += tail[: length]
-    # Low-pass at 7 kHz and halve the rate in the frequency domain, which treats the loop as a circle: no seam.
+    # Low-pass at 5 kHz and halve the rate in the frequency domain, which treats the loop as a circle: no seam.
     spectrum = np.fft.rfft(loop)
     freqs = np.fft.rfftfreq(length, 1 / RATE)
-    spectrum *= 1 / (1 + (freqs / 7000) ** 4)
+    spectrum *= 1 / (1 + (freqs / 5000) ** 4)
     loop = np.fft.irfft(spectrum[: length // 4 + 1], length // 2) / 2
     loop = loop / np.abs(loop).max() * 10 ** (-6 / 20)
     # Plain 16-bit PCM: IMA4 starts its first packet from silence and AAC pads, and both leave a click at the loop point.
