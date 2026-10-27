@@ -306,7 +306,7 @@ enum HomeItem: String, CaseIterable, Sendable {
         // UI 三组 2026-10-27: at the plant's spot both covered the floor lamp's pole and base; further forward along
         // the wall, past the lamp on screen.
         case .sakura: GridPoint(x: 0.75, y: 9.65)
-        case .easel: GridPoint(x: 0.55, y: 9.65)
+        case .easel: GridPoint(x: 0.5, y: 9.8)
         // UI 审核 2026-10-27: at the plant's spot its leaves covered the floor lamp's pole; further into the corner.
         case .monstera: GridPoint(x: 1.15, y: 9.55)
         case .skateboard: GridPoint(x: 1.0, y: 9.3)
