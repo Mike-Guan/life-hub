@@ -222,7 +222,8 @@ enum HomeZone: String, CaseIterable, Sendable {
         case .shelf: GridBox(x0: 0, y0: 4.2, x1: 0.6, y1: 7.4, z0: 3.2, z1: 5.3)
         case .desk: GridBox(x0: 0, y0: 0.4, x1: 1.5, y1: 3.4, z0: 1.36, z1: 2.4)
         case .sofaSide: GridBox(x0: 2.3, y0: 8.2, x1: 2.9, y1: 8.8, z1: 1)
-        case .corner: GridBox(x0: 0.9, y0: 8.7, x1: 2.1, y1: 9.9, z1: 2.6)
+        // From x 0.5 for her sakura and easel, which stand closer to the wall than the plant.
+        case .corner: GridBox(x0: 0.5, y0: 8.7, x1: 2.1, y1: 9.9, z1: 2.6)
         case .posterWall: GridBox(x0: 0, y0: 0.6, x1: 0.1, y1: 3.3, z0: 2.6, z1: 4.8)
         }
     }
@@ -301,9 +302,13 @@ enum HomeItem: String, CaseIterable, Sendable {
     // Wall items stay left of x 5.5: further right the wardrobe's side hides them.
     var spot: GridPoint {
         switch self {
-        case .plant, .musicStand, .easel: GridPoint(x: 1.5, y: 9.3)
+        case .plant, .musicStand: GridPoint(x: 1.5, y: 9.3)
+        // UI 三组 2026-10-27: at the plant's spot both covered the floor lamp's pole and base; further forward along
+        // the wall, past the lamp on screen.
+        case .sakura: GridPoint(x: 0.75, y: 9.65)
+        case .easel: GridPoint(x: 0.55, y: 9.65)
         // UI 审核 2026-10-27: at the plant's spot its leaves covered the floor lamp's pole; further into the corner.
-        case .monstera, .sakura: GridPoint(x: 1.15, y: 9.55)
+        case .monstera: GridPoint(x: 1.15, y: 9.55)
         case .skateboard: GridPoint(x: 1.0, y: 9.3)
         case .bag: GridPoint(x: 5.9, y: 3.1)
         case .cactus, .clipLamp, .headphones, .gamepad, .cube, .catClock, .jar, .strawberryMug, .mirror:
