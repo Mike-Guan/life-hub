@@ -11,9 +11,10 @@ extension FrameSheets {
         let rows: [(IdentityKind, [String])] = [
             (.tennis, ["haku.racket.tennis.mint", "haku.racket.tennis.gold"]),
             (.fitness, ["haku.dumbbell.gym.orange", "haku.dumbbell.gym.gold"]),
-            (.study, ["haku.book.study.navy"]),
+            (.study, ["haku.book.study.navy", "haku.bookmark.study.gold"]),
             (.art, ["haku.sketch.art.yellow", "haku.pencil.art.gold"]),
             (.dance, ["haku.wristband.dance.pink", "haku.wristband.dance.gold"]),
+            (.music, ["haku.pick.music.neon", "haku.pick.music.gold"]),
             (.ski, ["haku.goggles.ski.cyan", "haku.goggles.ski.gold"]),
         ]
         let sheet = VStack(alignment: .leading, spacing: 10) {

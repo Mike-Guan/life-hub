@@ -63,7 +63,8 @@ enum RunnerCardLook: CaseIterable, Sendable {
         switch self {
         case .tennis: [.tennisRacket, .racketHand, .tennisBall]
         case .fitness: [.handWeight]
-        case .study: [.book, .bookPage]
+        // The gold bookmark goes down with the book.
+        case .study: [.book, .bookPage, .bookmarkRibbon]
         case .art: [.sketchbook, .pencil]
         case .dance, .ski: [.wristbandHand]
         case .music: []

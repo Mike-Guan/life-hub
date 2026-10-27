@@ -6,8 +6,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Added
 - HAKU's identity card props can be drawn in a bought colour and in gold: a mint or gold racket, an orange or
-  gold dumbbell, a wine red book cover, a yellow sketchbook and a gold pencil, a pink or gold dance wristband and
-  cyan or gold ski goggles. The shop icon shows the prop itself. HAKU also gets a checked headband, a flame
+  gold dumbbell, a wine red book cover and a gold bookmark, a yellow sketchbook and a gold pencil, a pink or gold dance wristband and
+  cyan or gold ski goggles, and a neon or gold pick on a cord for the music card. The shop icon shows the prop itself. HAKU also gets a checked headband, a flame
   headband and a smiley mask sticker. The shop doesn't sell any of them yet.
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on

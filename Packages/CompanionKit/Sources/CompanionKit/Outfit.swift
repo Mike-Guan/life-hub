@@ -76,7 +76,7 @@ struct Outfit: Equatable, Sendable {
     }
 
     // 商店完整目录 v0 §1.2 and 商店扩充 v1 §4: each card's prop in a bought colour, and in gold on the card's 10th
-    // win. The props share the gloves slot. Ids not yet in the catalog (dance, ski) are the ones handed to engineering.
+    // win. The props share the gloves slot. Ids not yet in the catalog (dance, music, ski) go to engineering.
     static let propColors: [String: [RunnerPart: [Color: Color]]] = [
         "haku.racket.tennis.mint": [.tennisRacket: [RunnerPalette.catOrange: RunnerPalette.mint]],
         "haku.racket.tennis.gold": [.tennisRacket: [RunnerPalette.catOrange: RunnerPalette.gold]],
@@ -88,6 +88,10 @@ struct Outfit: Equatable, Sendable {
         ],
         // The default cover is already navy, so the bought one is wine red (proposed to PM 10/27).
         "haku.book.study.navy": [.book: [RunnerPalette.hood: Color(hex: 0x8E2A44)]],
+        // The gold bookmark and the pick are things of their own: worn, they add their part to the card's look.
+        "haku.bookmark.study.gold": [.bookmarkRibbon: [:]],
+        "haku.pick.music.neon": [.pickPendant: [:]],
+        "haku.pick.music.gold": [.pickPendant: [RunnerPalette.neonCyan: RunnerPalette.gold]],
         "haku.sketch.art.yellow": [.sketchbook: [RunnerPalette.white: RunnerPalette.catYellow]],
         // A deeper gold than the pencil's own yellow, so the keepsake reads as gold.
         "haku.pencil.art.gold": [.pencil: [RunnerPalette.catYellow: Color(hex: 0xE8A317)]],

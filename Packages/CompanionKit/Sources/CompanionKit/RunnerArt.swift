@@ -72,6 +72,7 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case stripeNeon = "stripe_neon"
     case stripeSport = "stripe_sport"
     case hoodCollar = "hood_collar"
+    case pickPendant = "pick_pendant"
     case hoodieStrings = "hoodie_strings"
     case topWorkIvy = "top_work_ivy"
     case topWorkPixel = "top_work_pixel"
@@ -174,6 +175,7 @@ enum RunnerPart: String, CaseIterable, Sendable {
     case pencil
     case book
     case bookPage = "book_page"
+    case bookmarkRibbon = "bookmark_ribbon"
     case cloth
     case gymBag = "gym_bag"
     case handWeight = "hand_weight"
@@ -301,6 +303,7 @@ enum RunnerArt {
         case .stripeNeon: stripeNeon()
         case .stripeSport: stripeSport()
         case .hoodCollar: hoodCollar()
+        case .pickPendant: pickPendant()
         case .hoodieStrings: hoodieStrings()
         case .topWorkIvy: topWorkIvy()
         case .topWorkPixel: topWorkPixel()
@@ -403,6 +406,7 @@ enum RunnerArt {
         case .pencil: pencil()
         case .book: book()
         case .bookPage: bookPage()
+        case .bookmarkRibbon: bookmarkRibbon()
         case .cloth: cloth()
         case .gymBag: gymBag()
         case .handWeight: handWeight()
@@ -2259,6 +2263,44 @@ enum RunnerArt {
                 },
                 stroke: RunnerPalette.hood,
                 lineWidth: 4.5,
+                cap: .round
+            ),
+        ]
+    }
+
+    private static func pickPendant() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 51, y: 100))
+                    p.addLine(to: .init(x: 60, y: 109))
+                    p.addLine(to: .init(x: 69, y: 100))
+                },
+                stroke: RunnerPalette.ink,
+                lineWidth: 1.6,
+                cap: .round,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 54.5, y: 110))
+                    p.addQuadCurve(to: .init(x: 65.5, y: 110), control: .init(x: 60, y: 107))
+                    p.addQuadCurve(to: .init(x: 60, y: 121), control: .init(x: 65.5, y: 114.5))
+                    p.addQuadCurve(to: .init(x: 54.5, y: 110), control: .init(x: 54.5, y: 114.5))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.neonCyan,
+                stroke: RunnerPalette.ink,
+                lineWidth: 2,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 57, y: 110.8))
+                    p.addQuadCurve(to: .init(x: 61, y: 110.3), control: .init(x: 59, y: 109.8))
+                },
+                stroke: RunnerPalette.white,
+                lineWidth: 1.3,
                 cap: .round
             ),
         ]
@@ -18381,6 +18423,35 @@ enum RunnerArt {
                 stroke: RunnerPalette.beigeShade,
                 lineWidth: 2,
                 cap: .round
+            ),
+        ]
+    }
+
+    private static func bookmarkRibbon() -> [RunnerInk] {
+        [
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 58.6, y: 104))
+                    p.addLine(to: .init(x: 61.4, y: 104))
+                    p.addLine(to: .init(x: 62.3, y: 138.2))
+                    p.addLine(to: .init(x: 60, y: 135.8))
+                    p.addLine(to: .init(x: 57.7, y: 138.2))
+                    p.closeSubpath()
+                },
+                fill: RunnerPalette.gold,
+                stroke: RunnerPalette.ink,
+                lineWidth: 1.6,
+                join: .round
+            ),
+            RunnerInk(
+                path: Path { p in
+                    p.move(to: .init(x: 59.4, y: 110))
+                    p.addLine(to: .init(x: 59.8, y: 133))
+                },
+                stroke: RunnerPalette.white,
+                lineWidth: 0.9,
+                cap: .round,
+                opacity: 0.7
             ),
         ]
     }

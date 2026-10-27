@@ -1525,6 +1525,11 @@ struct RunnerFigure: View {
                     } else if pose.cardBeat >= 0 {
                         look.beatParts(at: pose.cardBeat, &visible)
                     }
+                    // A bought pick hangs on the music look; the gold bookmark lies in the open book.
+                    if look == .music, pose.outfit.props[.pickPendant] != nil { visible.insert(.pickPendant) }
+                    if visible.contains(.book), pose.outfit.props[.bookmarkRibbon] != nil {
+                        visible.insert(.bookmarkRibbon)
+                    }
                     // UI 审核 10/14: the watch's bottom edge cuts the fist with the wristband.
                     if pose.watchFrame { visible.remove(.wristbandHand) }
                 } else {

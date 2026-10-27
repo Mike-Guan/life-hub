@@ -10,6 +10,7 @@ import Testing
         let outfit = Outfit(Wardrobe(equipped: [.gloves: id]))
         #expect(!outfit.props.isEmpty)
         #expect(outfit.gloves == nil, "a prop colour leaves the gloves red")
+        // The gold bookmark and the neon pick are drawn in their own colours.
         for (part, swaps) in outfit.props {
             let inks = RunnerArt.cachedInks(part)
             let colours = Set(inks.compactMap(\.fill) + inks.compactMap(\.stroke))
@@ -18,6 +19,19 @@ import Testing
                 #expect(!colours.contains(to), "\(id): \(part) already has that colour")
             }
         }
+    }
+
+    @Test func aBoughtPickAndBookmarkJoinTheirCardsLook() {
+        func parts(_ card: IdentityKind, _ id: String?) -> [RunnerPart] {
+            var pose = RunnerPose().wearing(Outfit(Wardrobe(equipped: id.map { [.gloves: $0] } ?? [:])))
+            pose.cardLook = RunnerCardLook(card: card)
+            return RunnerFigure.parts(for: .boxing, pose: pose)
+        }
+        #expect(!parts(.music, nil).contains(.pickPendant))
+        #expect(parts(.music, "haku.pick.music.neon").contains(.pickPendant))
+        #expect(!parts(.study, "haku.pick.music.neon").contains(.pickPendant))
+        #expect(!parts(.study, nil).contains(.bookmarkRibbon))
+        #expect(parts(.study, "haku.bookmark.study.gold").contains(.bookmarkRibbon))
     }
 
     @Test func aPropIconFramesTheProp() {

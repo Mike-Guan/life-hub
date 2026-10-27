@@ -175,6 +175,8 @@ enum Placement {
         .sketchbook: Spot(.handsFront, "sketchbook"),
         .book: Spot(.handsFront, "book"),
         .bookPage: Spot(.handsFront, "book"),
+        .bookmarkRibbon: Spot(.handsFront, "book"),
+        .pickPendant: Spot(.badge, "拨片"),
         .laptop: Spot(.handsFront, "笔记本"),
         .laptopClosed: Spot(.handsFront, "笔记本"),
         .typingHands: Spot(.handsFront, "笔记本"),
