@@ -40,6 +40,7 @@ struct SettingsView: View {
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
     @State private var asksErase = false
+    @State private var sound = SoundSettings.stored(in: AppGroup.defaults)
     @AppStorage(Languages.key, store: AppGroup.defaults) private var languageChoice = Languages.Choice.system.rawValue
 
     var body: some View {
@@ -210,6 +211,8 @@ struct SettingsView: View {
 
             memoryCard
 
+            soundCard
+
             // PROD has no Family Controls entitlement yet, so the button could only fail there.
             // Remove the condition with the CI-CD.md Screen Time step.
             #if DEBUG || ENV_STG
@@ -371,6 +374,24 @@ struct SettingsView: View {
                 decisionLogURL: AppGroup.container.decisionLogURL
             )
         }
+    }
+
+    // 音效与家的音乐 v0 §3: both start on; the silent switch mutes everything anyway.
+    private var soundCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("声音")
+                .font(Toy.body(16, weight: .heavy))
+            Toggle("音效", isOn: $sound.effects)
+                .font(Toy.body(15))
+            Toggle("家的音乐", isOn: $sound.homeMusic)
+                .font(Toy.body(15))
+            Text("跟着手机的静音键走，静音时什么都不响。别的 App 在放音乐时，家里不放音乐。")
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(16)
+        .toyCard()
+        .onChange(of: sound) { sound.store(in: AppGroup.defaults) }
     }
 
     private var dailyCard: some View {

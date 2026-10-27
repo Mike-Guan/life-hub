@@ -209,6 +209,7 @@ struct LifeHubApp: App {
             cans: growth.ledger.only(persona).balance,
             onShop: { showsShop = true },
             onHome: { showsHome = true },
+            onModeTap: { SoundPlayer.shared.play(.forMode($0, changed: $1)) },
             wardrobe: wardrobe,
             persona: persona,
             greetingName: Greeting.name(in: AppGroup.defaults),
@@ -237,8 +238,10 @@ struct LifeHubApp: App {
                 // A box return left halfway was still seen, so it counts toward the 30 days.
                 markBoxIfShown()
                 welcomeBack = nil
+                SoundPlayer.shared.stopHomeMusic(now: true)
             }
             guard phase == .active else { return }
+            if showsHome { SoundPlayer.shared.startHomeMusic(bedtime: bedtime.state(at: .now)) }
             let away = AppGroup.defaults.object(forKey: Self.lastBackgroundKey) as? Date
             replayFrom = OpenReplay.switchFrom(log: store.log, lastSeen: away, now: .now)
             // Mike may have changed location access in Settings while away.
@@ -251,6 +254,14 @@ struct LifeHubApp: App {
             // The setup asks for each permission on its own screen, so nothing else asks while it shows.
             guard !showsOnboarding else { return }
             Task { await refreshOnOpen(away: away) }
+        }
+        .onChange(of: showsHome) {
+            if showsHome {
+                SoundPlayer.shared.play(.homeOpen)
+                SoundPlayer.shared.startHomeMusic(bedtime: bedtime.state(at: .now))
+            } else {
+                SoundPlayer.shared.stopHomeMusic()
+            }
         }
         .onChange(of: remindsAtBedtime) {
             BedtimeSchedule.setRemindsAtBedtime(remindsAtBedtime, in: AppGroup.defaults)
@@ -311,11 +322,17 @@ struct LifeHubApp: App {
             // 商店与家 同步方案 §1: the home page's door opens the same shop on the room tab.
             HakuHomeView(
                 snapshot: homeSnapshot,
-                onSwitch: { store.switchTo($0) },
+                onSwitch: { mode in
+                    let changed = store.switchTo(mode)
+                    SoundPlayer.shared.play(.forMode(mode, changed: changed))
+                },
                 onShop: { showsHomeShop = true },
                 // The wardrobe opens from the home screen for now.
                 onWardrobe: nil,
-                onSave: { $0.store(in: AppGroup.defaults) },
+                onSave: {
+                    $0.store(in: AppGroup.defaults)
+                    SoundPlayer.shared.play(.place)
+                },
                 onExit: { showsHome = false }
             )
             .fullScreenCover(isPresented: $showsHomeShop) {

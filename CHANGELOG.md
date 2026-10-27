@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- Sounds: each mode card has its own short sound, and the shop, unboxing and entering 家 get one too. 家
+  plays a slow music loop. All follow the silent switch, never stop the user's own music, and Settings > 声音
+  turns effects or the music off. Every sound is synthesised by `scripts/make-sounds.py`.
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
   her tennis day, guards and punches in two gloves with the boxing card, and dozes over her tablet in bed.
