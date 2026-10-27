@@ -5,9 +5,9 @@ import Testing
 @Suite struct HomeRugTests {
     @Test func everyRugLiesUnderHakusWaitingSpot() {
         for rug in HomeRug.allCases {
-            #expect(rug.box.covers(HomeGrid.hub), "\(rug)")
+            #expect(rug.box.covers(HomeSpot.hub), "\(rug)")
         }
-        #expect(HomeGrid.hub.distance(to: HomeRug.centre) < HomeRug.radius)
+        #expect(HomeSpot.hub.distance(to: HomeRug.centre) < HomeRug.radius)
     }
 }
 
