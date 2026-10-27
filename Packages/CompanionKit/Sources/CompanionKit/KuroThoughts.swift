@@ -48,7 +48,8 @@ struct KuroThoughtBubble: View {
             context.opacity = reduceMotion ? 1 : Self.fade(time, length: length)
             let ink = GraphicsContext.Shading.color(Toy.ink)
             let white = GraphicsContext.Shading.color(.white)
-            let dots = [CGRect(x: 2, y: 46, width: 6, height: 6), CGRect(x: 8, y: 34, width: 10, height: 10)]
+            // The small dot sits up and right of the box corner, clear of her right ear tip.
+            let dots = [CGRect(x: 5, y: 43, width: 6, height: 6), CGRect(x: 10, y: 33, width: 10, height: 10)]
             for dot in dots.map({ Path(ellipseIn: $0) }) {
                 context.fill(dot, with: white)
                 context.stroke(dot, with: ink, lineWidth: 2.5)
@@ -81,6 +82,8 @@ struct KuroThoughtBubble: View {
     // A grey cloud that bobs 1.5 every 1.6 s, three drops falling 0.8 s each, a third of a fall apart.
     private static func rain(in context: GraphicsContext, time: TimeInterval) {
         let bob = 1.5 * sin(time * 2 * .pi / 1.6)
+        // Sky alone was too pale on a light blue screen, so the drops take a third of navy.
+        let drops = KuroPalette.sky.mix(with: KuroPalette.navy, by: 0.35)
         for (index, x) in [37.0, 44, 51].enumerated() {
             let fall = (time / 0.8 + Double(index) / 3).truncatingRemainder(dividingBy: 1)
             let y = 23 + fall * 9
@@ -89,7 +92,7 @@ struct KuroThoughtBubble: View {
             drop.addLine(to: CGPoint(x: x - 1.2, y: y + 3.5))
             var faded = context
             faded.opacity *= 1 - fall * 0.6
-            faded.stroke(drop, with: .color(KuroPalette.sky), style: StrokeStyle(lineWidth: 2.4, lineCap: .round))
+            faded.stroke(drop, with: .color(drops), style: StrokeStyle(lineWidth: 2.4, lineCap: .round))
         }
         var cloud = Path()
         cloud.move(to: CGPoint(x: 31, y: 21 + bob))

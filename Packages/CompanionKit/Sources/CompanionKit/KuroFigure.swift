@@ -983,7 +983,8 @@ public struct KuroView: View {
 
     /// Shows the thought bubble her energy or the user's need calls for, once a day each.
     private func thinkIfNew() {
-        guard bedtime == .off, style != .notification, thoughtStart == nil,
+        // Only on the home screen, where she talks: not on the watch, in a notification or in a preview.
+        guard bedtime == .off, style == .standard, showsBubble, thoughtStart == nil,
             let new = KuroThought.pick(energy: energy, need: need)
         else { return }
         let last = new == .rain ? lastRain : lastTangle
