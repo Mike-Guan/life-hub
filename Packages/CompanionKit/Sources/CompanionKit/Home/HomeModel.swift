@@ -186,14 +186,22 @@ final class HomeModel {
     }
     // 家 区域规划 v0: the sports floor holds one piece at a time; the room puts the earlier one away. Mike
     // 2026-10-18: with every item shown, the bag stood in front of HAKU on the bench, so the preview keeps to that
-    // too and shows the bench.
-    /// The items standing in the room: the owned ones the room has not put away, or while previewing every item
-    /// the zones have room for.
+    // too and shows the bench. The sports wall keeps all three of its pieces in the preview, as before.
+    /// The items standing in the room: the owned ones the room has not put away, or while previewing, the first
+    /// items in catalog order the zones have room for.
     var items: Set<HomeItem> {
-        if previewsAllItems { return Set(HomeItem.allCases).subtracting([.bag]) }
+        if previewsAllItems {
+            return Set(
+                HomeZone.allCases.flatMap { zone in
+                    let fits = HomeItem.allCases.filter { $0.zone == zone && $0 != .bag }
+                    return fits.prefix(zone == .sportWall ? fits.count : zone.slots.count)
+                })
+        }
         let standing = Set(snapshot.room.placements.filter { !$0.isStored }.map(\.piece))
         return Set(snapshot.owned.filter(standing.contains).compactMap(HomeItem.init(shopID:)))
     }
+    /// Where each standing item is.
+    var places: [HomeItem: GridPoint] { HomeItem.places(items) }
     /// The keepsakes on the reward shelf, by name, oldest first, then the worn gloves once earned.
     var keepsakes: [HomeKeepsake] {
         let earned = snapshot.keepsakes.map { HomeKeepsake(id: $0.id, name: ShopItem.item($0.id)?.title ?? $0.id) }
@@ -334,13 +342,12 @@ final class HomeModel {
 
     /// The open floor next to `item`, a step towards the middle of the room.
     static func previewSpot(_ item: HomeItem, items: Set<HomeItem>? = nil) -> GridPoint {
-        // In front of the cactus or the bench HAKU would hide it; by the chair, or left of the bench, he stands
+        // In front of a desk item or the bench HAKU would hide it; by the chair, or left of the bench, he stands
         // beside it.
         let s: GridPoint
         switch item {
-        case .cactus: s = GridPoint(x: 1.2, y: 1.6)
         case .bench: s = GridPoint(x: 2.5, y: 3.2)
-        default: s = item.spot
+        default: s = item.zone == .desk ? GridPoint(x: 1.2, y: 1.6) : item.spot
         }
         let hub = HomeSpot.hub
         let d = max(0.01, s.distance(to: hub))

@@ -399,6 +399,49 @@ extension FrameSheets {
         try save(sheet, as: "home-6-shelf-big", scale: 1)
     }
 
+    // 商店扩充 v1 §2.2: HAKU's ten new room items, each as its shop icon, then in the room two sets at a time.
+    @Test func hakuHomeNewItems() throws {
+        let items: [HomeItem] = [
+            .clipLamp, .headphones, .gamepad, .cube, .comics, .fan, .monstera, .skateboard, .arcadePoster, .cityPoster,
+        ]
+        var rooms: [(String, CGImage)] = []
+        for (label, night, set) in [
+            (
+                "白天 · 台灯 + 耳机架 · 街机海报 · 龟背竹 · 漫画", false,
+                [HomeItem.clipLamp, .headphones, .arcadePoster, .monstera, .comics]
+            ),
+            ("夜 · 手柄 + 魔方 · 城市海报 · 滑板 · 风扇", true, [HomeItem.gamepad, .cube, .cityPoster, .skateboard, .fan]),
+        ] {
+            let model = HomeModel(night: night)
+            model.stand(set)
+            let scene = HomeScene(model: model)
+            scene.sync(animated: false)
+            scene.settle()
+            rooms.append((label, try #require(Self.composite(scene, scale: 2))))
+        }
+        let sheet = VStack(alignment: .leading, spacing: 12) {
+            Text(verbatim: "HAKU 房间新物品 10 件（商店小图标 2x）").font(.system(size: 20, weight: .bold))
+            LazyVGrid(columns: Array(repeating: GridItem(.fixed(132)), count: 5), spacing: 12) {
+                ForEach(items, id: \.self) { item in
+                    VStack(spacing: 4) {
+                        HomeItemIcon(itemID: "haku.room.\(item.rawValue)").frame(width: 128, height: 128)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(Toy.card))
+                        Text(verbatim: item.rawValue).font(.system(size: 11))
+                    }
+                }
+            }
+            ForEach(rooms.indices, id: \.self) { i in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(verbatim: rooms[i].0).font(.system(size: 14, weight: .bold))
+                    Image(decorative: rooms[i].1, scale: 2)
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        try save(sheet, as: "home-8-new-items", scale: 2)
+    }
+
     /// Draws the scene's sprites back to front with Core Graphics.
     static func composite(_ scene: SKScene, scale: CGFloat) -> CGImage? {
         scene.still(scale: scale)

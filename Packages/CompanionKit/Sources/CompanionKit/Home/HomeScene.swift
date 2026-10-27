@@ -208,6 +208,11 @@ final class HomeScene: SKScene {
             node.removeFromParent()
             itemNodes[item] = nil
         }
+        // An item is drawn at its spot; its node moves to the slot it takes.
+        for (item, place) in model.places {
+            itemNodes[item]?.position = HomeGrid.scene(HomeGrid.plan(place))
+        }
+        pieces[.posters]?.isHidden = items.contains { $0.zone == .posterWall }
         if items.contains(.bench), barbell == nil {
             let bar = HomeLayerNode(pivot: Self.rackedBar)
             bar.show(.barbell, night: model.isNight)

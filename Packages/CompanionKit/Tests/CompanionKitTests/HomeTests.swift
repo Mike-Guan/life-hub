@@ -350,7 +350,10 @@ import Testing
     @Test func thePreviewShowsEveryItemTheZonesHoldWithoutOwningIt() {
         let model = HomeModel(night: false)
         model.togglePreviewItems()
-        #expect(model.items == Set(HomeItem.allCases).subtracting([.bag]))
+        #expect(
+            model.items == [
+                .plant, .cactus, .clipLamp, .speaker, .gloves, .racket, .snowboard, .bench, .arcadePoster,
+            ])
         #expect(model.snapshot.owned.isEmpty)
         model.togglePreviewItems()
         #expect(model.items.isEmpty)
@@ -366,6 +369,21 @@ import Testing
         }
     }
 
+    @Test func deskItemsTakeTheDeskSlotsInCatalogOrder() {
+        let slots = HomeZone.desk.slots
+        #expect(HomeItem.places([.cube]) == [.cube: slots[0]])
+        #expect(HomeItem.places([.cube, .cactus]) == [.cactus: slots[0], .cube: slots[1]])
+        #expect(HomeItem.places([.plant, .gamepad])[.plant] == HomeItem.plant.spot)
+        for item in HomeItem.allCases where item.zone == .desk { #expect(item.spot == slots[0], "\(item)") }
+    }
+
+    @Test func shopIDsNameTheNewRoomItems() {
+        #expect(HomeItem(shopID: "haku.room.lamp.clip") == .clipLamp)
+        #expect(HomeItem(shopID: "haku.room.poster.city") == .cityPoster)
+        #expect(HomeItem(shopID: "haku.room.monstera") == .monstera)
+        #expect(HomeItem(shopID: "kuro.room.poster.cat") == nil)
+    }
+
     @Test func wallHooksAreNotHiddenByTheWardrobe() {
         // The wardrobe's front-left corner, (6.8, 1.3), hides the back wall from x - y = 5.5 on.
         for hook in HomeZone.sportWall.slots + [HomeItem.racket.spot, HomeItem.snowboard.spot] {
@@ -379,6 +397,7 @@ import Testing
         #expect(HomeZone.desk.slots.count == 2)
         #expect(HomeZone.sofaSide.slots.count == 1)
         #expect(HomeZone.corner.slots.count == 1)
+        #expect(HomeZone.posterWall.slots.count == 1)
         for zone in HomeZone.allCases {
             guard let box = zone.box else { continue }
             for slot in zone.slots {
@@ -509,6 +528,22 @@ import Testing
         let data = try #require(still.dataProvider?.data as Data?)
         let middle = (still.height / 2) * still.bytesPerRow + (still.width / 2) * 4
         #expect(data[middle + 3] > 0)
+    }
+
+    @Test func twoDeskItemsStandApartAndABoughtPosterReplacesTheDefaultOnes() throws {
+        let model = HomeModel(night: false)
+        let scene = HomeScene(model: model)
+        model.stand([.cube, .headphones, .cityPoster])
+        scene.sync(animated: false)
+        let nodes = scene.children.compactMap { $0 as? HomeLayerNode }
+        func node(_ item: HomeItem) throws -> HomeLayerNode {
+            try #require(nodes.first { $0.layer == .item(item) })
+        }
+        let slots = HomeZone.desk.slots.map { HomeGrid.scene(HomeGrid.plan($0)) }
+        #expect(try node(.headphones).position == slots[0])
+        #expect(try node(.cube).position == slots[1])
+        let posters = try #require(nodes.first { $0.layer == .piece(.posters, color: 0, covering: false) })
+        #expect(posters.isHidden)
     }
 
     @Test func everyDrawnRoomItemHasAHomePicture() {
