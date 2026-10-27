@@ -376,8 +376,8 @@ import Testing
         #expect(HomeItem.places([.plant, .gamepad])[.plant] == HomeItem.plant.spot)
         // On the sports wall an item keeps its own height in its slot, and alone it hangs at its spot.
         let wall = HomeItem.places([.snowboard, .rope])
-        #expect(wall[.rope]?.x == HomeZone.sportWall.slots[0].x && wall[.rope]?.z == HomeItem.rope.spot.z)
-        #expect(wall[.snowboard]?.x == HomeZone.sportWall.slots[1].x && wall[.snowboard]?.z == 0)
+        #expect(wall[.snowboard]?.x == HomeZone.sportWall.slots[0].x && wall[.snowboard]?.z == 0)
+        #expect(wall[.rope]?.x == HomeZone.sportWall.slots[1].x && wall[.rope]?.z == HomeItem.rope.spot.z)
         #expect(HomeItem.places([.danceMirror]) == [.danceMirror: HomeItem.danceMirror.spot])
         #expect(HomeItem.places([.gloves, .danceMirror])[.danceMirror]?.x == HomeZone.sportWall.slots[0].x)
         for item in HomeItem.allCases where item.zone == .desk { #expect(item.spot == slots[0], "\(item)") }
@@ -546,8 +546,10 @@ import Testing
             try #require(nodes.first { $0.layer == .item(item) })
         }
         let slots = HomeZone.desk.slots.map { HomeGrid.scene(HomeGrid.plan($0)) }
-        #expect(try node(.headphones).position == slots[0])
-        #expect(try node(.cube).position == slots[1])
+        // SpriteKit keeps positions in Float, so compare to the nearest point.
+        func near(_ a: CGPoint, _ b: CGPoint) -> Bool { abs(a.x - b.x) < 0.01 && abs(a.y - b.y) < 0.01 }
+        #expect(try near(node(.headphones).position, slots[0]))
+        #expect(try near(node(.cube).position, slots[1]))
         let posters = try #require(nodes.first { $0.layer == .piece(.posters, color: 0, covering: false) })
         #expect(posters.isHidden)
     }
