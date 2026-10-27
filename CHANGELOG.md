@@ -765,6 +765,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The TODAY card's 进行中 after the running mode shows in Japanese and English too.
 - With the app closed, arriving at or leaving a place now switches the mode, in every mode. Each launch
   (including the background one a geofence causes) replays the last state of every place fence, and the
   place handling moved into HubCore (`PlaceEvent`) with tests. A place whose stored coordinates come back a
