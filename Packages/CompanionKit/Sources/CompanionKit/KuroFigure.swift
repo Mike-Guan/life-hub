@@ -988,6 +988,12 @@ public struct KuroView: View {
             let new = KuroThought.pick(energy: energy, need: need)
         else { return }
         let last = new == .rain ? lastRain : lastTangle
+        // SCRATCH ONLY: screenshot runs keep the bubble up and ignore the day.
+        if ProcessInfo.processInfo.arguments.contains("-screenshot-thought") {
+            thought = new
+            thoughtStart = .now
+            return
+        }
         guard let day = KuroThought.newDay(at: .now, last: last) else { return }
         if new == .rain { lastRain = day } else { lastTangle = day }
         thought = new
