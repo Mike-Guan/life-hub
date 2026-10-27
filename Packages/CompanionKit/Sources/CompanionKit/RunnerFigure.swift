@@ -1390,6 +1390,7 @@ struct RunnerFigure: View {
         if pose.puff { visible.insert(.talkDots) }
         // Gloves fill both hands, so the peace sign never adds a third one (Mike 2026-10-07).
         if !visible.isDisjoint(with: [.gloveL, .gloveR]) { visible.remove(.peaceHand) }
+        if let print = pose.outfit.headbandPrint, visible.contains(.headband) { visible.insert(print) }
         if pose.turnedAway {
             // From the back, clothes show as the jacket in their base colour; the cap and a lowered hood stay.
             if !visible.isDisjoint(with: pose.outfit.clothes[mode] ?? []) { visible.insert(.jacket) }
@@ -1735,7 +1736,8 @@ struct RunnerFigure: View {
         .door, .sunlight, .roomPc, .deskMonitor, .pillow, .roomPlant, .roomBag, .roomCactus, .roomSpeaker,
         .roomSpeakerRing, .runningShoes, .heavyBag, .speedLines, .desk, .canStackOne, .canStackTwo, .canStackThree,
         .sofaArm,
-        .jacket, .hoodCollar, .hairBack, .earL, .earR, .headset, .cupL, .cupR, .headband,
+        .jacket, .hoodCollar, .hairBack, .earL, .earR, .headset, .cupL, .cupR, .headband, .headbandCheck,
+        .headbandFlame,
     ]
     nonisolated private static let openEyes: Set<RunnerPart> = [
         .eyesWork, .lidsWork, .eyesChill, .eyesChillTired, .cateyeL, .cateyeR, .eyesMoney, .eyeGlint, .eyesSleepy,
@@ -1852,13 +1854,15 @@ struct RunnerFigure: View {
                     .scaleEffect(x: 1, y: 0.5 + 0.5 * pose.squeeze, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale)
             case .maskUp where pose.unmasking, .panelLines where pose.unmasking, .ledLine where pose.unmasking,
-                .maskStripes where pose.unmasking, .maskDots where pose.unmasking, .maskBolt where pose.unmasking:
+                .maskStripes where pose.unmasking, .maskDots where pose.unmasking, .maskBolt where pose.unmasking,
+                .maskSmile where pose.unmasking:
                 // Off work or staying home: the mask slides down to the chin.
                 RunnerPartView(part: part)
                     .offset(y: 12 * pose.maskDrop * scale)
                     .opacity(Double(1 - pose.maskDrop))
             case .maskDown where pose.unmasking, .maskStripesDown where pose.unmasking,
-                .maskDotsDown where pose.unmasking, .maskBoltDown where pose.unmasking:
+                .maskDotsDown where pose.unmasking, .maskBoltDown where pose.unmasking,
+                .maskSmileDown where pose.unmasking:
                 RunnerPartView(part: part).opacity(Double(pose.maskDrop))
             case .ledLine where pose.ledFlare > 0:
                 // Flares wider with a glow.
@@ -2169,8 +2173,9 @@ struct RunnerFigure: View {
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .eyebagsMask, .browsWork, .eyesChill,
         .eyesChillTired, .eyebagsChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
-        .maskDots, .maskBolt,
-        .ledLine, .ledYen, .hairFringe, .earringNeon, .headband, .headset, .cupL, .cupR, .mic,
+        .maskDots, .maskBolt, .maskSmile,
+        .ledLine, .ledYen, .hairFringe, .earringNeon, .headband, .headbandCheck, .headbandFlame, .headset, .cupL, .cupR,
+        .mic,
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .sparkleWork, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
@@ -2181,7 +2186,9 @@ struct RunnerFigure: View {
     private static let shrugParts: Set<RunnerPart> = [.jacket, .stripeNeon, .stripeSport, .hoodCollar]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
-    private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown, .maskDotsDown, .maskBoltDown]
+    private static let chinParts: Set<RunnerPart> = [
+        .maskDown, .maskStripesDown, .maskDotsDown, .maskBoltDown, .maskSmileDown,
+    ]
 
     /// The jacket fill for the mode, or for the identity card's look.
     private var jacket: Color {

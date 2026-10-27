@@ -111,7 +111,7 @@ struct ItemPicture: Equatable {
             red = outfit.gloves
             crop = CGRect(x: 66, y: 101, width: 40, height: 40)
         case .headband:
-            parts = [.headband]
+            parts = [.headband] + [outfit.headbandPrint].compactMap { $0 }
             red = outfit.headband
             crop = CGRect(x: 23, y: -0.5, width: 86, height: 86)
         case .mask:

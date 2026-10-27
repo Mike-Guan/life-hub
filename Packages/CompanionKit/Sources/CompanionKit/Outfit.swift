@@ -9,6 +9,8 @@ struct Outfit: Equatable, Sendable {
     var gloves: Color?
     /// Replaces the boxing red of the headband, or `nil` for red.
     var headband: Color?
+    /// The print drawn over the headband, such as checks, or `nil` for a plain band.
+    var headbandPrint: RunnerPart?
     /// The print on the mask, or `nil` for the plain mask.
     var mask: MaskPrint?
     /// The room item next to HAKU at home, or `nil` for none.
@@ -40,6 +42,15 @@ struct Outfit: Equatable, Sendable {
             case "keepsake.headband.runner": RunnerPalette.white
             case "haku.weekly.headband.orange": RunnerPalette.catOrange
             case "haku.weekly.headband.mint": RunnerPalette.mint
+            case "haku.headband.check": RunnerPalette.cream
+            case "haku.headband.flame": RunnerPalette.jacket
+            default: nil
+            }
+        // 商店扩充 v1 §3.
+        headbandPrint =
+            switch worn[.headband] {
+            case "haku.headband.check": .headbandCheck
+            case "haku.headband.flame": .headbandFlame
             default: nil
             }
         props = worn[.gloves].flatMap { Self.propColors[$0] } ?? [:]
@@ -48,6 +59,7 @@ struct Outfit: Equatable, Sendable {
             case "mask.stripes": .stripes
             case "haku.weekly.mask.dots": .dots
             case "haku.weekly.mask.bolt": .bolt
+            case "haku.mask.smile": .smile
             default: nil
             }
         room =
@@ -118,6 +130,8 @@ enum MaskPrint: CaseIterable, Sendable {
     case dots
     /// A yellow lightning bolt sticker.
     case bolt
+    /// A yellow smiley sticker.
+    case smile
 
     /// The print on the raised mask.
     var up: RunnerPart {
@@ -125,6 +139,7 @@ enum MaskPrint: CaseIterable, Sendable {
         case .stripes: .maskStripes
         case .dots: .maskDots
         case .bolt: .maskBolt
+        case .smile: .maskSmile
         }
     }
 
@@ -134,6 +149,7 @@ enum MaskPrint: CaseIterable, Sendable {
         case .stripes: .maskStripesDown
         case .dots: .maskDotsDown
         case .bolt: .maskBoltDown
+        case .smile: .maskSmileDown
         }
     }
 }

@@ -46,6 +46,57 @@ extension FrameSheets {
         .background(Color.white)
         try save(sheet, as: "card-prop-colours", scale: 2)
     }
+
+    // 商店扩充 v1 §3: the checked and the flame headband in boxing, the smiley mask raised at work and at the chin.
+    @Test func hakuShopAccessories() throws {
+        let looks: [(String, Mode, Slot, String)] = [
+            ("格纹头带", .boxing, .headband, "haku.headband.check"),
+            ("火焰头带", .boxing, .headband, "haku.headband.flame"),
+            ("笑脸面罩 · 上班", .work, .mask, "haku.mask.smile"),
+            ("笑脸面罩 · 下班", .chill, .mask, "haku.mask.smile"),
+        ]
+        let sheet = VStack(alignment: .leading, spacing: 10) {
+            Text(verbatim: "HAKU 配饰 3 件（全身 + 头部放大 + 商店小图标）").font(.system(size: 18, weight: .bold))
+            HStack(alignment: .top, spacing: 16) {
+                ForEach(looks.indices, id: \.self) { i in
+                    let (label, mode, slot, id) = looks[i]
+                    let wardrobe = Wardrobe(equipped: [slot: id])
+                    VStack(spacing: 6) {
+                        CompanionPortrait(mode: mode, date: Self.base, wardrobe: wardrobe, idles: false)
+                            .frame(width: 180, height: 180)
+                        CompanionPortrait(
+                            mode: mode, date: Self.base, wardrobe: wardrobe, idles: false, framing: .head
+                        )
+                        .frame(width: 120, height: 120)
+                        AccessoryIcon(picture: ItemPicture(slot: slot, outfit: Outfit(wardrobe), itemID: id))
+                            .frame(width: 56, height: 56)
+                            .background(RoundedRectangle(cornerRadius: 10).fill(slot.tileColor))
+                        Text(verbatim: label).font(.system(size: 12, weight: .bold))
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        try save(sheet, as: "haku-accessories", scale: 2)
+    }
+}
+
+/// An item icon's drawing, as `WardrobeItemIcon` draws it, for items not in the catalog yet.
+private struct AccessoryIcon: View {
+    let picture: ItemPicture
+
+    var body: some View {
+        Canvas { context, size in
+            let crop = picture.crop
+            let scale = min(size.width / crop.width, size.height / crop.height)
+            context.scaleBy(x: scale, y: scale)
+            context.translateBy(x: -crop.minX, y: -crop.minY)
+            for part in picture.parts {
+                RunnerDrawing.draw(part, in: context, red: picture.red, swaps: picture.swaps[part] ?? [:])
+            }
+        }
+    }
 }
 
 /// The shop icon's drawing of a prop, as `WardrobeItemIcon` draws it, for items not in the catalog yet.
