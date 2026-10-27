@@ -42,7 +42,9 @@ extension FrameSheets {
     /// `item` at `spot` on a patch of wall, desk or floor, centred on the spot and drawn twice the room's size.
     private static func roomCell(_ item: KuroRoomItem, at spot: GridPoint, place: RoomPatch) -> some View {
         Canvas { context, size in
-            let lift = place == .floor ? 0.6 : place == .desk ? 0.35 : 0
+            // The pot and the easel stand taller than the other floor items, so their cells look higher up.
+            let tall = item == .sakura || item == .easel
+            let lift = place == .floor ? (tall ? 1.3 : 0.6) : place == .desk ? 0.35 : 0
             let centre = HomeGrid.plan(spot.x, spot.y, spot.z + lift)
             context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: 0xFFF6E5)))
             context.translateBy(x: size.width / 2, y: size.height / 2)
