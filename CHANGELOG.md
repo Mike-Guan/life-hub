@@ -148,6 +148,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- HAKU's hands and what they hold come up into view and go down again instead of popping in: the phone he
+  glances at, the scratching hand and the watch he taps before a planned task. When a planned task's prop
+  comes up, the can in his hand goes down first.
 - The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
   reward list names them. The shelf no longer draws gloves nobody earned.
 - In the home the floor lamp's cord runs to a socket on the wall beside it, not out across the floor.

@@ -128,6 +128,8 @@ public struct CompanionView: View {
     // Seconds since the reference date HAKU last started packing up, shared by every CompanionView.
     @AppStorage("companion.lastPackUp") private var lastPackUp: Double = 0
     @State private var slapStart: Date?
+    // When the planned task's cue came in while the app was open; nil shows it already in place.
+    @State private var cueStart: Date?
     // Ids of the last planned tasks HAKU reacted to before and at their start, shared by every CompanionView so
     // each plays once.
     @AppStorage("companion.lastDailySoon") private var lastDailySoon = ""
@@ -581,7 +583,10 @@ public struct CompanionView: View {
         } else if bath {
             pose.callToBath(time: CGFloat(time))
         }
-        if let daily { pose.cue(daily, time: time, slap: slap(at: time)) }
+        if let daily {
+            let entered = cueStart.map { CGFloat(min(1, (time - $0.timeIntervalSinceReferenceDate) / 0.8)) } ?? 1
+            pose.cue(daily, time: time, slap: slap(at: time), entered: entered)
+        }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
         if let progress = Self.progress(since: nodStart, at: time, duration: Self.nodDuration) {
             pose.nod(progress: CGFloat(progress), still: reduceMotion)
@@ -763,11 +768,13 @@ public struct CompanionView: View {
         case .soon:
             guard let id = Self.newCue(daily, stage: .soon, last: lastDailySoon) else { return }
             lastDailySoon = id
+            cueStart = .now
             if claimsOpening(.daily) { say("还有 15 分钟。我先替你紧张一下。", for: 3.5) }
         case .now:
             guard let id = Self.newCue(daily, stage: .now, last: lastDailyNow) else { return }
             lastDailyNow = id
             slapStart = .now
+            if lastDailySoon != id { cueStart = .now }
             if claimsOpening(.daily) { say("到点了。") }
         }
     }
