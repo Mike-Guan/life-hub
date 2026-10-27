@@ -396,10 +396,15 @@ final class KuroHomeNode: SKNode {
         var head = visible.filter { isHead($0) }
         // Asleep she keeps what her look wears on her head, but takes off glasses, goggles and the mask for bed.
         if sleeping {
-            let offForBed: Set<KuroPart> = [.deskGlasses, .itemGlassesRed, .skiGoggles, .maskWork]
+            let offForBed: Set<KuroPart> = [
+                .deskGlasses, .itemGlassesRed, .skiGoggles, .maskWork, .itemPhonesMint, .itemPhonesGold,
+            ]
             head.formUnion(dressed.filter { isHead($0) && !isFace($0) })
             head.subtract(offForBed)
         }
+        // A card prop she wears on her head, like the goggles, is drawn in place of her own.
+        let skins = KuroFigure.skins(look, items: items)
+        head = Set(head.flatMap { skins[$0] ?? [$0] })
         return (sorted(hair), sorted(torso), sorted(head))
     }
 
@@ -424,7 +429,7 @@ final class KuroHomeNode: SKNode {
         if name.hasPrefix("weekly_hair_") || name.hasPrefix("weekly_hat_") { return true }
         let head: Set<KuroPart> = [
             .earL, .earR, .faceBase, .maskWork, .hairFringe, .catEars, .tennisHeadband, .boxHeadband, .itemSakura,
-            .setPicnicHat, .setRainHat, .deskGlasses, .itemGlassesRed, .skiGoggles,
+            .setPicnicHat, .setRainHat, .deskGlasses, .itemGlassesRed, .skiGoggles, .itemPhonesMint, .itemPhonesGold,
         ]
         return head.contains(part)
     }

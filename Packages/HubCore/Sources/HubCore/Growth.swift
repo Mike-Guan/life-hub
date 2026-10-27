@@ -574,6 +574,14 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(prop: "kuro.bookmark.study.gold", title: "金书签", card: .study, persona: .kuro, drawn: true),
         ShopItem(prop: "kuro.stylus.art.blue", title: "蓝色触控笔", price: 15, card: .art, persona: .kuro, drawn: true),
         ShopItem(prop: "kuro.brush.art.gold", title: "金画笔", card: .art, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.phones.dance.mint", title: "薄荷挂脖耳机", price: 15, card: .dance, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.phones.dance.gold", title: "金挂脖耳机", card: .dance, persona: .kuro, drawn: true),
+        ShopItem(
+            prop: "kuro.folder.music.sakura", title: "樱色乐谱夹", price: 15, card: .music, persona: .kuro, drawn: true
+        ),
+        ShopItem(prop: "kuro.folder.music.gold", title: "金乐谱夹", card: .music, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.goggles.ski.sakura", title: "樱色雪镜", price: 15, card: .ski, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.goggles.ski.gold", title: "金雪镜", card: .ski, persona: .kuro, drawn: true),
         // Clothes (商店完整目录 v0 §1.1 and §2.1, prices of 2026-10-14), off the shelf until drawn.
         // HAKU's eight are the pop set Mike approved 2026-10-14; the second character's are still placeholders.
         ShopItem(clothes: "haku.top.work.blazer", slot: .top, title: "学院西装", price: 30, mode: .work),

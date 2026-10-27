@@ -345,6 +345,12 @@ enum Placement {
         .itemStylusBlue: Spot(.handR, "craftPen"),
         .itemBrushGold: Spot(.handR, "craftPen"),
         .itemGlassesRed: Spot(.eyes, "deskGlasses"),
+        .itemPhonesMint: Spot(.neck, "挂脖耳机"),
+        .itemPhonesGold: Spot(.neck, "挂脖耳机"),
+        .itemFolderSakura: Spot(.handsFront, "乐谱"),
+        .itemFolderGold: Spot(.handsFront, "乐谱"),
+        .itemGogglesSakura: Spot(.headTop, "skiGoggles"),
+        .itemGogglesGold: Spot(.headTop, "skiGoggles"),
         .boxSandbag: Spot(.corner1, "boxSandbag"),
         // Deferred identity cards (顺延身份卡 预览): the finger on the score is part of holding it.
         .danceSpeaker: Spot(.corner1, "danceSpeaker"),

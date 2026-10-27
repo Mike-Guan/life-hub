@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
+  headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
+  headphones she bought.
 - The second preset character's identity card props are in the shop: pink and gold gloves (boxing), a mint
   and a gold yoga block (fitness), red glasses and a gold bookmark (study), a blue stylus and a gold brush (art).
   Each one moves with every tap and idle of the prop it replaces, and her gloves at home take their colour.

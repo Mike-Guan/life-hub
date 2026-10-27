@@ -13,7 +13,10 @@ import Testing
         let catalog = ShopItem.catalog(for: .kuro)
         #expect(Set(ids).isSubset(of: catalog.map(\.id)))
         #expect(Set(catalog.filter(\.isDrawn).map(\.id)).isSubset(of: ids))
-        let keepsakes: [KuroItem] = [.spin, .sakura, .goldRacket, .goldGloves, .goldBlock, .goldBookmark, .goldBrush]
+        let keepsakes: [KuroItem] = [
+            .spin, .sakura, .goldRacket, .goldGloves, .goldBlock, .goldBookmark, .goldBrush, .goldPhones, .goldFolder,
+            .goldGoggles,
+        ]
         #expect(KuroItem.allCases.filter(\.isKeepsake) == keepsakes)
         #expect(KuroItem.items(["kuro.room.flower", "gloves.gold", "nope"]) == [.flower])
     }
@@ -273,6 +276,15 @@ import Testing
         #expect(bookmark == [.studyNotebook: [.studyNotebook, .itemBookmarkGold]])
         #expect(KuroFigure.skins(.art, items: [.blueStylus])[.craftPen] == [.itemStylusBlue])
         #expect(KuroFigure.skins(.fitness, items: [.goldBlock])[.gymBlock] == [.itemBlockGold])
+        #expect(KuroFigure.skins(.music, items: [.sakuraFolder])[.scoreSheet] == [.itemFolderSakura, .scoreSheet])
+        #expect(KuroFigure.skins(.ski, items: [.sakuraGoggles, .goldGoggles])[.skiGoggles] == [.itemGogglesGold])
+    }
+
+    @Test func herHeadphonesHangOnHerNeckOnlyWhenSheDances() {
+        var pose = KuroPose(look: .dance, energy: nil)
+        pose.items = [.mintPhones]
+        #expect(KuroFigure.parts(for: .dance, pose: pose).contains(.itemPhonesMint))
+        #expect(!KuroFigure.parts(for: .ski, pose: pose).contains(.itemPhonesMint))
     }
 
     @Test func herRedGlassesGoOnInStudyAndNotFromBehind() {
