@@ -26,7 +26,7 @@ extension FrameSheets {
                 ForEach(cells.indices, id: \.self) { i in
                     let (item, label, spot, place) = cells[i]
                     VStack(spacing: 2) {
-                        Self.roomCell(item, at: spot, place: place).frame(width: 200, height: 160)
+                        Self.roomCell(item, at: spot, place: place).frame(width: 200, height: 160).clipped()
                         Text(verbatim: label).font(.system(size: 12, weight: .bold))
                     }
                 }
