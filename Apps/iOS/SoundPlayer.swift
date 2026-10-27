@@ -78,7 +78,7 @@ final class SoundPlayer {
 
     private func musicPlayer() -> AVAudioPlayer? {
         if let music { return music }
-        let player = load("home-loop", extension: "caf")
+        let player = load("home-loop", extension: "wav")
         player?.numberOfLoops = -1
         music = player
         return player

@@ -41,7 +41,7 @@ art-check: art
 strings:
 	scripts/strings.py
 
-# Synthesise the app's sounds into Apps/iOS/Sounds (needs numpy and ffmpeg).
+# Synthesise the app's sounds into Apps/iOS/Sounds (needs numpy).
 sounds:
 	python3 scripts/make-sounds.py
 

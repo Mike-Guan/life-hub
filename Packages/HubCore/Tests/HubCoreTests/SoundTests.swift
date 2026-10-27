@@ -25,7 +25,7 @@ import Testing
             let file = sounds.appending(path: "\(cue.fileName).wav")
             #expect(FileManager.default.fileExists(atPath: file.path), "\(file.path)")
         }
-        #expect(FileManager.default.fileExists(atPath: sounds.appending(path: "home-loop.caf").path))
+        #expect(FileManager.default.fileExists(atPath: sounds.appending(path: "home-loop.wav").path))
     }
 
     @Test func bothSwitchesStartOnAndRoundTrip() throws {

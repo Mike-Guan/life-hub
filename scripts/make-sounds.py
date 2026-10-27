@@ -2,12 +2,11 @@
 """Synthesises every sound in Apps/iOS/Sounds from code (numpy only).
 
 Nothing here is sampled or downloaded, so the files are our own work.
-Run `make sounds` (needs numpy and ffmpeg) and commit the results.
+Run `make sounds` (needs numpy) and commit the results.
 Plan and the list of cues: energy-bank/03 Product/音效与家的音乐 v0.md.
 """
 
 import os
-import subprocess
 import sys
 import wave
 
@@ -141,13 +140,13 @@ def finish(x, peak_db):
     return x / np.abs(x).max() * 10 ** (peak_db / 20)
 
 
-def write_wav(name, x):
+def write_wav(name, x, rate=RATE):
     path = os.path.join(OUT, name + ".wav")
     data = (np.clip(x, -1, 1) * 32767).astype("<i2")
     with wave.open(path, "wb") as f:
         f.setnchannels(1)
         f.setsampwidth(2)
-        f.setframerate(RATE)
+        f.setframerate(rate)
         f.writeframes(data.tobytes())
     return path
 
@@ -182,80 +181,125 @@ def effects():
         print(write_wav(name, x))
 
 
-# 家 music: a slow, warm loop. F major, 70 BPM, 16 bars, ends where it starts.
+# 家 music: a slow, chill jazz loop (Mike 10/27: 「jazz 风格一点，chill 一点」). F major, 64 BPM swing,
+# 16 bars of a ii-V-I turn played twice, ends where it starts.
 
-BPM = 70
+BPM = 64
 BEAT = 60 / BPM
 BARS = 16
 
 
+def swung(beat):
+    """Moves an off-beat eighth to the last third of its beat."""
+    whole = np.floor(beat)
+    return whole + 2 / 3 if abs(beat - whole - 0.5) < 1e-6 else beat
+
+
 def rhodes(freq, seconds):
     t = t_axis(seconds)
-    tone = np.sin(2 * np.pi * freq * t) + 0.25 * np.sin(2 * np.pi * freq * 2 * t) * np.exp(-t / 0.4)
-    tone *= 1 + 0.12 * np.sin(2 * np.pi * 4.2 * t)
-    shape = env(t, 0.012, 1.6)
-    release = np.clip((seconds - t) / 0.25, 0, 1)
-    return tone * shape * release
+    tone = np.sin(2 * np.pi * freq * t) + 0.3 * np.sin(2 * np.pi * freq * 2 * t) * np.exp(-t / 0.3)
+    tone += 0.06 * np.sin(2 * np.pi * freq * 7.1 * t) * np.exp(-t / 0.02)
+    tone *= 1 + 0.1 * np.sin(2 * np.pi * 3.6 * t)
+    release = np.clip((seconds - t) / 0.2, 0, 1)
+    return tone * env(t, 0.008, 1.4) * release
 
 
-def bass(freq, seconds):
+def upright(freq, seconds):
+    """Plucked double bass: a thump into a round, dying note."""
     t = t_axis(seconds)
-    tone = np.sin(2 * np.pi * freq * t) + 0.1 * np.sin(2 * np.pi * freq * 2 * t)
-    release = np.clip((seconds - t) / 0.15, 0, 1)
-    return tone * env(t, 0.02, 1.2) * release
+    tone = np.sin(2 * np.pi * freq * t) + 0.35 * np.sin(2 * np.pi * freq * 2 * t) * np.exp(-t / 0.15)
+    tone += 0.12 * np.sin(2 * np.pi * freq * 3 * t) * np.exp(-t / 0.06)
+    release = np.clip((seconds - t) / 0.08, 0, 1)
+    return tone * env(t, 0.006, 0.7) * release
+
+
+def vibes(freq, seconds=1.8):
+    t = t_axis(seconds)
+    tone = np.sin(2 * np.pi * freq * t) + 0.15 * np.sin(2 * np.pi * freq * 4 * t) * np.exp(-t / 0.05)
+    tone *= 1 + 0.25 * np.sin(2 * np.pi * 5.0 * t)
+    return tone * env(t, 0.004, 0.7)
+
+
+def brush(seconds=0.32):
+    """A brush swept across the snare."""
+    t = t_axis(seconds)
+    swish = bandpass(rng.standard_normal(len(t)), 900, 5000)
+    return swish * np.sin(np.pi * t / seconds) ** 2 * np.exp(-t / 0.25)
+
+
+def ride(seconds=0.9):
+    t = t_axis(seconds)
+    ping = np.zeros_like(t)
+    for ratio, level in ((1.0, 1.0), (1.48, 0.7), (2.13, 0.5), (2.89, 0.35)):
+        ping += level * np.sin(2 * np.pi * 3200 * ratio * t + rng.uniform(0, 6.28))
+    wash = bandpass(rng.standard_normal(len(t)), 5000, 11000)
+    return (0.4 * ping + wash) * env(t, 0.001, 0.25)
 
 
 def music():
-    length = int(BARS * 4 * BEAT * RATE)
+    # Even, so halving the rate keeps every sample.
+    length = int(BARS * 4 * BEAT * RATE) // 2 * 2
     out = np.zeros(length + RATE * 6)
 
     def add(start_beats, sig, gain):
-        i = int(start_beats * BEAT * RATE)
+        i = int(swung(start_beats) * BEAT * RATE)
         out[i:i + len(sig)] += gain * sig
 
-    chords = [
-        ("F2", ["A3", "C4", "E4"]),  # Fmaj7
-        ("A2", ["G3", "C4", "E4"]),  # Am7
-        ("D2", ["F3", "A3", "C4"]),  # Dm7
-        ("Bb1", ["F3", "A3", "D4"]),  # Bbmaj7
+    # (bass line as (beat, note), rootless voicing). Two bars of ii-V, then home, then a turn back.
+    bars = [
+        ([(0, "G2"), (2, "D2"), (3.5, "Gb2")], ["F3", "Bb3", "D4", "A4"]),  # Gm9
+        ([(0, "C2"), (2, "G2"), (3, "E2")], ["E3", "Bb3", "D4", "A4"]),  # C13
+        ([(0, "F2"), (2, "C3"), (3.5, "A2")], ["E3", "A3", "C4", "G4"]),  # Fmaj9
+        ([(0, "D2"), (2, "A2"), (3.5, "C3")], ["F3", "C4", "E4", "A4"]),  # Dm9
+        ([(0, "Bb1"), (2, "F2"), (3, "Bb2")], ["A3", "D4", "F4", "C5"]),  # Bbmaj9
+        ([(0, "A1"), (2, "E2"), (3.5, "G2")], ["G3", "C#4", "F4", "Bb4"]),  # A7(b9 b13)
+        ([(0, "D2"), (2, "A2"), (3, "F2")], ["F3", "C4", "E4", "A4"]),  # Dm9
+        ([(0, "D2"), (2, "F#2"), (3.5, "Ab2")], ["F#3", "C4", "Eb4", "A4"]),  # D7(b9) back to Gm9
     ]
+    # Comping hits: (beat, length in beats); a lazy anticipation on the and of 2 every other bar.
+    comp = [[(0, 1.6), (2.5, 1.2)], [(0.5, 1.2), (3, 0.9)]]
     for bar in range(BARS):
-        root, voicing = chords[bar % 4]
+        line, voicing = bars[bar % 8]
         beat0 = bar * 4
-        add(beat0, bass(note(root), 3.6 * BEAT), 0.32)
-        add(beat0 + 2.5, bass(note(root) * 1.5, 1.2 * BEAT), 0.12)
-        for k, n in enumerate(voicing):
-            add(beat0 + 0.03 * k, rhodes(note(n), 3.8 * BEAT), 0.13)
-        # Off-beat soft shaker, the room ticking along.
-        for b in range(4):
-            shake = lowpass(rng.standard_normal(int(0.07 * RATE)), 7000) - lowpass(rng.standard_normal(int(0.07 * RATE)), 3000)
-            shake *= np.hanning(len(shake))
-            add(beat0 + b + 0.5, shake, 0.025)
+        for beat, n in line:
+            add(beat0 + beat, upright(note(n), 1.9 * BEAT), 0.36)
+        for beat, hold in comp[bar % 2]:
+            for k, n in enumerate(voicing):
+                add(beat0 + beat + 0.012 * k, rhodes(note(n), hold * BEAT), 0.085)
+        # Ride: ding, ding-a, ding, ding-a. Brushes on 2 and 4.
+        for beat, level in ((0, 1.0), (1, 0.8), (1.5, 0.5), (2, 1.0), (3, 0.8), (3.5, 0.5)):
+            add(beat0 + beat, ride(), 0.012 * level)
+        for beat in (1, 3):
+            add(beat0 + beat - 0.1, brush(), 0.05)
 
-    # Kalimba line: sparse, with rests. Two phrases, each played twice with a change.
-    phrase_a = [(0, "C5"), (1.5, "A4"), (2, "G4"), (4, "E5"), (5, "C5"), (8, "D5"), (9.5, "C5"), (10, "A4"),
-                (12, "F4"), (13.5, "G4")]
-    phrase_b = [(0, "A4"), (1, "C5"), (2, "F5"), (4.5, "E5"), (5, "C5"), (8, "D5"), (9, "F5"), (10, "A4"),
-                (12, "C5"), (14, "A4")]
-    for start, phrase in ((0, phrase_a), (16, phrase_b), (32, phrase_a[:-1] + [(13.5, "E4")]), (48, phrase_b[:8])):
+    # Vibes: a short, lazy phrase every two bars, answered by silence.
+    phrase_a = [(0.5, "A4"), (1, "C5"), (1.5, "D5"), (2, "F5"), (3.5, "E5"), (5, "D5")]
+    phrase_b = [(0.5, "G4"), (1, "A4"), (2, "C5"), (2.5, "E5"), (4, "D5"), (5.5, "A4")]
+    phrase_c = [(1, "F5"), (1.5, "E5"), (2, "D5"), (2.5, "C5"), (3, "A4"), (4.5, "Bb4"), (5, "A4")]
+    for start, phrase in ((0, phrase_a), (8, phrase_b), (16, phrase_a), (24, phrase_c),
+                          (32, phrase_b), (40, phrase_a), (48, phrase_c), (56, phrase_b[:4])):
         for beat, n in phrase:
-            add(start + beat, kalimba(note(n), 1.6), 0.22)
+            add(start + beat, vibes(note(n)), 0.16)
 
-    wet = room(out, seconds=2.4, mix=0.5, brightness=3000)
+    # A little record crackle, very low, for the lo-fi feel.
+    for _ in range(int(BARS * 4 * BEAT * 6)):
+        i = rng.integers(0, length)
+        click = rng.standard_normal(40) * np.hanning(40)
+        out[i:i + 40] += 0.04 * rng.uniform(0.2, 1.0) * click
+
+    wet = room(out, seconds=2.0, mix=0.4, brightness=3500)
     # Wrap everything past the loop point back to the start, so the loop has no seam.
     loop = wet[:length].copy()
     tail = wet[length:]
     loop[: len(tail)] += tail[: length]
-    loop = lowpass(loop, 6000)
+    # Low-pass at 7 kHz and halve the rate in the frequency domain, which treats the loop as a circle: no seam.
+    spectrum = np.fft.rfft(loop)
+    freqs = np.fft.rfftfreq(length, 1 / RATE)
+    spectrum *= 1 / (1 + (freqs / 7000) ** 4)
+    loop = np.fft.irfft(spectrum[: length // 4 + 1], length // 2) / 2
     loop = loop / np.abs(loop).max() * 10 ** (-6 / 20)
-    wav = write_wav("home-loop", loop)
-    # IMA4 in CAF has no encoder padding (AAC does), so the loop stays seamless. 22 kHz is enough after the 6 kHz low-pass.
-    caf = os.path.join(OUT, "home-loop.caf")
-    subprocess.run(
-        ["ffmpeg", "-y", "-loglevel", "error", "-i", wav, "-ar", "22050", "-c:a", "adpcm_ima_qt", caf], check=True
-    )
-    os.remove(wav)
-    print(caf)
+    # Plain 16-bit PCM: IMA4 starts its first packet from silence and AAC pads, and both leave a click at the loop point.
+    print(write_wav("home-loop", loop, RATE // 2))
 
 
 if __name__ == "__main__":
