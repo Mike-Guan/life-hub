@@ -34,6 +34,18 @@ import Testing
         #expect(KuroFigure.shift(.overtimeHand, pose: tapped) != .zero)
     }
 
+    // KURO-18: a cheer while her chin is on her hand used to raise the tablet in front of the desk and her hand.
+    @Test func kurosCheerAtTheDeskKeepsTheTabletDown() {
+        #expect(KuroView.cheerMove(.work, overtime: true) == .chinTap)
+        #expect(KuroView.cheerMove(.work, overtime: false) == .tablet)
+        let pose = KuroView.pose(.work, energy: 50, bedtime: .off, moment: .overtime, overtimeUntil: nil)
+        for step in 0..<10 {
+            let move = KuroView.cheerMove(.work, overtime: pose.overtime)
+            let parts = KuroFigure.parts(for: .work, pose: pose.reacting(move, progress: Double(step) / 10))
+            #expect(!parts.contains(.tapTablet) && !parts.contains(.workTablet))
+        }
+    }
+
     @Test(arguments: Mode.allCases)
     func hakusTapIsMoreThanABubble(_ mode: Mode) {
         let progress = Self.tapAt / WatchPoke.duration

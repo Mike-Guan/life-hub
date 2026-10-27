@@ -4,6 +4,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ## [Unreleased]
 
+### Fixed
+- A workout cheer while the second preset character rests her chin on her hand at the desk no longer raises her
+  tablet in front of the desk and her hand: she stays seated and taps her cheek.
+
 ### Added
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
