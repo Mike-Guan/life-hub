@@ -8,8 +8,8 @@ import Testing
 extension FrameSheets {
     @Test func kuroRoomItems() throws {
         let cells: [(KuroRoomItem, String, GridPoint, RoomPatch)] = [
-            (.posterCat, "猫咪海报", GridPoint(x: 0, y: 1.35, z: 3.4), .wall),
-            (.posterStars, "星空海报", GridPoint(x: 0, y: 2.6, z: 3.4), .wall),
+            (.posterCat, "猫咪海报", GridPoint(x: 0.02, y: 1.95, z: 3.7), .wall),
+            (.posterStars, "星空海报", GridPoint(x: 0.02, y: 1.95, z: 3.7), .wall),
             (.clockCat, "小猫闹钟", GridPoint(x: 0.6, y: 2.0, z: 1.35), .desk),
             (.jar, "香薰小罐", GridPoint(x: 0.6, y: 2.0, z: 1.35), .desk),
             (.mugStrawberry, "草莓牛奶杯", GridPoint(x: 0.6, y: 2.0, z: 1.35), .desk),

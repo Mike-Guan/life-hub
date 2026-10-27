@@ -1,7 +1,8 @@
 import SwiftUI
 
 // 商店扩充 v1 §2.3: her own room items, drawn like HomeArt's pieces (thin ink lines, flat colours).
-/// A room item only the second preset character's shop sells. Raw values follow `room.` in the shop id.
+/// A room item only the second preset character's shop sells. Raw values are what follows `room.` in the shop id,
+/// as in `HomeItem`.
 enum KuroRoomItem: String, CaseIterable, Sendable {
     case posterCat = "poster.cat"
     case posterStars = "poster.stars"
@@ -13,23 +14,17 @@ enum KuroRoomItem: String, CaseIterable, Sendable {
     case plush
     case sakura
     case easel
-
-    /// The item a shop catalog id names, such as `kuro.room.poster.cat`.
-    init?(shopID: String) {
-        guard shopID.hasPrefix("kuro.room.") else { return nil }
-        self.init(rawValue: String(shopID.dropFirst("kuro.room.".count)))
-    }
 }
 
 /// The drawing of her room items, in plan coordinates.
 enum KuroRoomArt {
     typealias P = HomeGrid
 
-    /// Draws `item` standing at `s`; a poster hangs on the left wall above the desk wherever `s` is.
+    /// Draws `item` standing at `s`; a poster hangs on the left wall with its middle at `s`.
     static func draw(_ item: KuroRoomItem, _ pen: IsoPen, at s: GridPoint) {
         switch item {
-        case .posterCat: posterCat(pen)
-        case .posterStars: posterStars(pen)
+        case .posterCat: posterCat(pen, s)
+        case .posterStars: posterStars(pen, s)
         case .clockCat: clockCat(pen, s)
         case .jar: jar(pen, s)
         case .mugStrawberry: mug(pen, s)
@@ -44,8 +39,8 @@ enum KuroRoomArt {
     /// The boxes the drawing of `item` at `s` fills.
     static func boxes(_ item: KuroRoomItem, at s: GridPoint) -> [GridBox] {
         switch item {
-        case .posterCat: [GridBox(x0: 0, y0: 0.8, x1: 0.1, y1: 1.9, z0: 2.8, z1: 4.5)]
-        case .posterStars: [GridBox(x0: 0, y0: 2.0, x1: 0.1, y1: 3.2, z0: 2.9, z1: 4.5)]
+        case .posterCat: [GridBox(x0: 0, y0: s.y - 0.55, x1: 0.1, y1: s.y + 0.55, z0: s.z - 0.85, z1: s.z + 0.85)]
+        case .posterStars: [GridBox(x0: 0, y0: s.y - 0.6, x1: 0.1, y1: s.y + 0.6, z0: s.z - 0.8, z1: s.z + 0.8)]
         case .clockCat, .jar, .mugStrawberry, .mirror:
             [GridBox(x0: s.x - 0.25, y0: s.y - 0.25, x1: s.x + 0.25, y1: s.y + 0.25, z0: s.z, z1: s.z + 0.95)]
         case .yarn, .plush: [GridBox(x0: s.x - 0.4, y0: s.y - 0.4, x1: s.x + 0.4, y1: s.y + 0.4, z1: 1.2)]
@@ -74,8 +69,19 @@ enum KuroRoomArt {
         return path
     }
 
-    /// A point on the left wall: `u` along it, `v` up.
-    private static func wall(_ u: Double, _ v: Double) -> CGPoint { P.plan(0.02, u, v) }
+    // Each poster is drawn round a fixed middle on the left wall and moved to its slot.
+    /// A point on the left wall, `u` along it and `v` up, moved from `middle` to `s`.
+    private static func onWall(_ s: GridPoint, middle: (Double, Double)) -> (Double, Double) -> CGPoint {
+        { u, v in P.plan(0.02, u + s.y - middle.0, v + s.z - middle.1) }
+    }
+
+    /// A rectangle on the left wall from `u0`, `v0` to `u1`, `v1`.
+    private static func sheet(
+        _ pen: IsoPen, _ wall: (Double, Double) -> CGPoint, _ u0: Double, _ v0: Double, _ u1: Double, _ v1: Double,
+        _ fill: Color, line: CGFloat = 2.2
+    ) {
+        pen.polygon([wall(u0, v0), wall(u1, v0), wall(u1, v1), wall(u0, v1)], fill, line: line)
+    }
 
     /// A four-point star round `c`, `r` from its middle to each point's base.
     private static func star(_ c: CGPoint, _ r: CGFloat) -> Path {
@@ -90,9 +96,10 @@ enum KuroRoomArt {
     // MARK: Poster wall
 
     // A cat's face on a white sheet with a lilac border, pinned with a red pin.
-    private static func posterCat(_ pen: IsoPen) {
-        pen.onLeftWall(x: 0.02, 0.8, 2.8, 1.9, 4.5, KuroPalette.mist)
-        pen.onLeftWall(x: 0.02, 0.9, 2.9, 1.8, 4.4, .white, line: 0)
+    private static func posterCat(_ pen: IsoPen, _ s: GridPoint) {
+        let wall = onWall(s, middle: (1.35, 3.65))
+        sheet(pen, wall, 0.8, 2.8, 1.9, 4.5, KuroPalette.mist)
+        sheet(pen, wall, 0.9, 2.9, 1.8, 4.4, .white, line: 0)
         let c = { (u: Double, v: Double) in wall(1.35 + u, 3.55 + v) }
         for side in [-1.0, 1] {
             let ear = polygon([c(0.3 * side, 0.15), c(0.26 * side, 0.52), c(0.08 * side, 0.28)])
@@ -120,8 +127,9 @@ enum KuroRoomArt {
     }
 
     // A night sky: a crescent moon, small stars and a lilac hill line.
-    private static func posterStars(_ pen: IsoPen) {
-        pen.onLeftWall(x: 0.02, 2.0, 2.9, 3.2, 4.5, KuroPalette.navy)
+    private static func posterStars(_ pen: IsoPen, _ s: GridPoint) {
+        let wall = onWall(s, middle: (2.6, 3.7))
+        sheet(pen, wall, 2.0, 2.9, 3.2, 4.5, KuroPalette.navy)
         let moon = wall(2.85, 4.05)
         pen.ellipse(at: moon, rx: 6.5, ry: 7, KuroPalette.yellow, line: 0)
         pen.ellipse(at: CGPoint(x: moon.x + 2.8, y: moon.y - 2), rx: 5.6, ry: 6, KuroPalette.navy, line: 0)
