@@ -75,7 +75,7 @@ struct KuroThoughtBubble: View {
     }
 
     /// The bubble's opacity: in over 0.15 s, out over the last 0.4 s of `length`.
-    static func fade(_ time: TimeInterval, length: TimeInterval) -> Double {
+    nonisolated static func fade(_ time: TimeInterval, length: TimeInterval) -> Double {
         min(max(time / 0.15, 0), 1, max((length - time) / 0.4, 0))
     }
 
