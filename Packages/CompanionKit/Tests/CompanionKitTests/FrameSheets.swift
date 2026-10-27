@@ -163,6 +163,16 @@ struct FrameSheets {
         try write("haku-8-celebration", rows, frames: 13, step: CompanionView.celebrationDuration / 12)
     }
 
+    // The same sparkles on a mode switch, 0.5 s.
+    @Test func hakuSwapSparkles() throws {
+        let rows = [Mode.work, .chill].map { mode in
+            Row(label: "swap · \(mode.rawValue)", start: Self.base) {
+                AnyView(SwapFrame(mode: mode, start: Self.base))
+            }
+        }
+        try write("haku-8-swap-sparkles", rows, frames: 6, step: 0.1)
+    }
+
     @Test func kuroLooks() throws {
         var rows: [Row] = []
         for look in KuroLook.allCases {
@@ -382,6 +392,22 @@ struct FrameSheets {
                 .rotationEffect(.degrees(motion.angle), anchor: .bottom)
                 .offset(y: motion.dy)
                 .scaleEffect(x: 1 + 0.08 * motion.squash, y: 1 - 0.12 * motion.squash, anchor: .bottom)
+                .padding(12)
+                .background(mode.color)
+        }
+    }
+
+    /// HAKU in `mode` with the mode-switch sparkles, 0.5 s long.
+    struct SwapFrame: View {
+        let mode: Mode
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            var pose = RunnerPose(mode: mode, time: 0, face: .mid, react: 0)
+            pose.burst = CGFloat(min((clock ?? start).timeIntervalSince(start) / 0.5, 0.999))
+            pose.swapping = true
+            return RunnerFigure(mode: mode, pose: pose)
                 .padding(12)
                 .background(mode.color)
         }
