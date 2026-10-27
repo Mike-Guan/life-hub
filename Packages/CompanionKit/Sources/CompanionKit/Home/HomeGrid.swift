@@ -1,5 +1,6 @@
 import CoreGraphics
 import Foundation
+import HubCore
 
 // Issue #485: the home prototype. The numbers in this file are the room's layout table; the shipping
 // home copies them, not the prototype's drawing code.
@@ -256,6 +257,27 @@ enum HomeItem: String, CaseIterable, Sendable {
     case mat, rope
     case danceMirror = "mirror.dance"
     case musicStand = "stand.music"
+    // §2.3: the second preset character's own items, drawn by `KuroRoomArt`.
+    case catPoster = "poster.cat"
+    case starsPoster = "poster.stars"
+    case catClock = "clock.cat"
+    case jar
+    case strawberryMug = "mug.strawberry"
+    case mirror, yarn, plush, sakura, easel
+
+    /// The character whose shop alone sells the item, `nil` when both do.
+    var persona: Persona? {
+        switch self {
+        case .clipLamp, .headphones, .gamepad, .cube, .comics, .fan, .monstera, .skateboard, .arcadePoster,
+            .cityPoster:
+            .haku
+        case .catPoster, .starsPoster, .catClock, .jar, .strawberryMug, .mirror, .yarn, .plush, .sakura, .easel:
+            .kuro
+        case .plant, .bag, .cactus, .speaker, .gloves, .racket, .snowboard, .bench, .mat, .rope, .danceMirror,
+            .musicStand:
+            nil
+        }
+    }
 
     /// The room item a shop catalog id names, such as `room.bench` or `haku.weekly.room.cactus`.
     init?(shopID: String) {
@@ -266,12 +288,12 @@ enum HomeItem: String, CaseIterable, Sendable {
     /// The zone the item goes in.
     var zone: HomeZone {
         switch self {
-        case .plant, .monstera, .skateboard, .musicStand: .corner
+        case .plant, .monstera, .skateboard, .musicStand, .sakura, .easel: .corner
         case .bag, .bench, .mat: .sportFloor
-        case .cactus, .clipLamp, .headphones, .gamepad, .cube: .desk
-        case .speaker, .comics, .fan: .sofaSide
+        case .cactus, .clipLamp, .headphones, .gamepad, .cube, .catClock, .jar, .strawberryMug, .mirror: .desk
+        case .speaker, .comics, .fan, .yarn, .plush: .sofaSide
         case .gloves, .racket, .snowboard, .rope, .danceMirror: .sportWall
-        case .arcadePoster, .cityPoster: .posterWall
+        case .arcadePoster, .cityPoster, .catPoster, .starsPoster: .posterWall
         }
     }
 
@@ -279,20 +301,21 @@ enum HomeItem: String, CaseIterable, Sendable {
     // Wall items stay left of x 5.5: further right the wardrobe's side hides them.
     var spot: GridPoint {
         switch self {
-        case .plant, .musicStand: GridPoint(x: 1.5, y: 9.3)
+        case .plant, .musicStand, .easel: GridPoint(x: 1.5, y: 9.3)
         // UI 审核 2026-10-27: at the plant's spot its leaves covered the floor lamp's pole; further into the corner.
-        case .monstera: GridPoint(x: 1.15, y: 9.55)
+        case .monstera, .sakura: GridPoint(x: 1.15, y: 9.55)
         case .skateboard: GridPoint(x: 1.0, y: 9.3)
         case .bag: GridPoint(x: 5.9, y: 3.1)
-        case .cactus, .clipLamp, .headphones, .gamepad, .cube: HomeZone.desk.slots[0]
-        case .speaker, .comics, .fan: GridPoint(x: 2.6, y: 8.5)
+        case .cactus, .clipLamp, .headphones, .gamepad, .cube, .catClock, .jar, .strawberryMug, .mirror:
+            HomeZone.desk.slots[0]
+        case .speaker, .comics, .fan, .yarn, .plush: GridPoint(x: 2.6, y: 8.5)
         case .gloves: GridPoint(x: 4.9, y: 0.15, z: 3.4)
         case .racket: GridPoint(x: 5.25, y: 0.1, z: 3.3)
         case .snowboard: GridPoint(x: 5.3, y: 0.1)
         case .bench, .mat: GridPoint(x: 4.55, y: 2.0)
         case .rope: GridPoint(x: 4.85, y: 0.12, z: 3.4)
         case .danceMirror: GridPoint(x: 4.85, y: 0.05, z: 2.6)
-        case .arcadePoster, .cityPoster: HomeZone.posterWall.slots[0]
+        case .arcadePoster, .cityPoster, .catPoster, .starsPoster: HomeZone.posterWall.slots[0]
         }
     }
 
@@ -318,12 +341,12 @@ enum HomeItem: String, CaseIterable, Sendable {
         switch self {
         // HAKU walks over the mat.
         case .cactus, .clipLamp, .headphones, .gamepad, .cube, .gloves, .racket, .snowboard, .arcadePoster,
-            .cityPoster, .mat, .rope, .danceMirror:
+            .cityPoster, .mat, .rope, .danceMirror, .catPoster, .starsPoster, .catClock, .jar, .strawberryMug, .mirror:
             return nil
         case .bench: return GridBox(x0: 3.9, y0: 0.3, x1: 5.2, y1: 3.4, z1: 1.9)
         case .bag: return GridBox(x0: s.x - 0.4, y0: s.y - 0.4, x1: s.x + 0.4, y1: s.y + 0.4, z1: 2.5)
         case .skateboard: return GridBox(x0: 0.1, y0: s.y - 0.25, x1: s.x + 0.1, y1: s.y + 0.25, z1: 1.7)
-        case .plant, .speaker, .comics, .fan, .monstera, .musicStand:
+        case .plant, .speaker, .comics, .fan, .monstera, .musicStand, .yarn, .plush, .sakura, .easel:
             return GridBox(x0: s.x - 0.3, y0: s.y - 0.3, x1: s.x + 0.3, y1: s.y + 0.3, z1: 1)
         }
     }
@@ -331,15 +354,15 @@ enum HomeItem: String, CaseIterable, Sendable {
     /// Back to front, as `HomePiece.depth`.
     var depth: Double {
         switch self {
-        case .plant, .monstera, .musicStand: 10.8
+        case .plant, .monstera, .musicStand, .sakura, .easel: 10.8
         case .skateboard: 10.3
         case .bag: 9.0
-        case .cactus, .clipLamp, .headphones, .gamepad, .cube: 3.7
-        case .speaker, .comics, .fan: 11.1
+        case .cactus, .clipLamp, .headphones, .gamepad, .cube, .catClock, .jar, .strawberryMug, .mirror: 3.7
+        case .speaker, .comics, .fan, .yarn, .plush: 11.1
         case .gloves, .racket, .snowboard, .rope, .danceMirror: 0.6
         case .bench: 6.55
         case .mat: -0.9
-        case .arcadePoster, .cityPoster: 0.55
+        case .arcadePoster, .cityPoster, .catPoster, .starsPoster: 0.55
         }
     }
 }

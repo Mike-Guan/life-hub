@@ -794,6 +794,8 @@ enum HomeArt {
             return [GridBox(x0: s.x - 0.4, y0: 0, x1: s.x + 0.4, y1: 0.4, z0: s.z - 1.2, z1: s.z + 0.7)]
         case .danceMirror: return [GridBox(x0: s.x - 0.45, y0: 0, x1: s.x + 0.45, y1: 0.2, z0: 0.5, z1: s.z + 1.75)]
         case .musicStand: return [GridBox(x0: s.x - 0.6, y0: s.y - 0.6, x1: s.x + 0.6, y1: s.y + 0.6, z1: 2.5)]
+        case .catPoster, .starsPoster, .catClock, .jar, .strawberryMug, .mirror, .yarn, .plush, .sakura, .easel:
+            return item.kuro.map { KuroRoomArt.boxes($0, at: s) } ?? []
         }
     }
 
@@ -884,6 +886,8 @@ enum HomeArt {
         case .rope: rope(pen, at: s)
         case .danceMirror: danceMirror(pen, at: s)
         case .musicStand: musicStand(pen, at: s)
+        case .catPoster, .starsPoster, .catClock, .jar, .strawberryMug, .mirror, .yarn, .plush, .sakura, .easel:
+            if let kuro = item.kuro { KuroRoomArt.draw(kuro, pen, at: s) }
         }
     }
 
@@ -1388,4 +1392,8 @@ enum HomeScreen: Sendable {
     case off, code, sketch
 }
 
+extension HomeItem {
+    /// Her own item's drawing, `nil` for the rest.
+    var kuro: KuroRoomItem? { KuroRoomItem(rawValue: rawValue) }
+}
 #endif

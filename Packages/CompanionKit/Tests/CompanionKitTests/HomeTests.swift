@@ -352,11 +352,23 @@ import Testing
         model.togglePreviewItems()
         #expect(
             model.items == [
-                .plant, .cactus, .clipLamp, .speaker, .gloves, .racket, .bench, .arcadePoster,
+                .monstera, .clipLamp, .headphones, .comics, .gloves, .racket, .bench, .arcadePoster,
             ])
         #expect(model.snapshot.owned.isEmpty)
         model.togglePreviewItems()
         #expect(model.items.isEmpty)
+    }
+
+    @Test func herPreviewShowsHerOwnItemsAndNoneOfHis() {
+        var snapshot = HomeSnapshot.preview()
+        snapshot.persona = .kuro
+        let model = HomeModel(snapshot: snapshot, night: false, now: HomeModel.start)
+        model.togglePreviewItems()
+        #expect(
+            model.items == [
+                .sakura, .catClock, .jar, .yarn, .gloves, .racket, .bench, .catPoster,
+            ])
+        #expect(model.items.allSatisfy { $0.persona != .haku })
     }
 }
 
@@ -381,6 +393,17 @@ import Testing
         #expect(HomeItem.places([.danceMirror]) == [.danceMirror: HomeItem.danceMirror.spot])
         #expect(HomeItem.places([.gloves, .danceMirror])[.danceMirror]?.x == HomeZone.sportWall.slots[0].x)
         for item in HomeItem.allCases where item.zone == .desk { #expect(item.spot == slots[0], "\(item)") }
+    }
+
+    @Test func herRoomItemsGoInTheirZonesAndDrawHerPictures() {
+        #expect(HomeItem(shopID: "kuro.room.poster.cat") == .catPoster)
+        #expect(HomeItem(shopID: "kuro.room.mug.strawberry") == .strawberryMug)
+        let hers = HomeItem.allCases.filter { $0.persona == .kuro }
+        #expect(hers.count == KuroRoomItem.allCases.count)
+        #expect(Set(hers.compactMap(\.kuro)) == Set(KuroRoomItem.allCases))
+        #expect(hers.filter { $0.zone == .desk }.count == 4)
+        let desk = HomeItem.places([.catClock, .jar])
+        #expect(desk[.catClock] == HomeZone.desk.slots[0] && desk[.jar] == HomeZone.desk.slots[1])
     }
 
     @Test func shopIDsNameTheNewRoomItems() {

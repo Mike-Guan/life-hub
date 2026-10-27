@@ -188,13 +188,14 @@ final class HomeModel {
     // 2026-10-18: with every item shown, the bag stood in front of HAKU on the bench, so the preview keeps to that
     // too and shows the bench.
     /// The items standing in the room: the owned ones the room has not put away, or while previewing, the first
-    /// items in catalog order the zones have room for.
+    /// items the character's shop sells that the zones have room for, her or his own first, then in catalog order.
     var items: Set<HomeItem> {
         if previewsAllItems {
+            let persona = snapshot.persona
+            let sold = HomeItem.allCases.filter { $0 != .bag && ($0.persona.map { $0 == persona } ?? true) }
+            let ownFirst = sold.filter { $0.persona != nil } + sold.filter { $0.persona == nil }
             return Set(
-                HomeZone.allCases.flatMap { zone in
-                    HomeItem.allCases.filter { $0.zone == zone && $0 != .bag }.prefix(zone.slots.count)
-                })
+                HomeZone.allCases.flatMap { zone in ownFirst.filter { $0.zone == zone }.prefix(zone.slots.count) })
         }
         let standing = Set(snapshot.room.placements.filter { !$0.isStored }.map(\.piece))
         return Set(snapshot.owned.filter(standing.contains).compactMap(HomeItem.init(shopID:)))
