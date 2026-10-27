@@ -2026,6 +2026,22 @@
         }
       }
     },
+    "月亮发夹" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moon hair clip"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月のヘアピン"
+          }
+        }
+      }
+    },
     "有一天睡得挺好。" : {
       "localizations" : {
         "en" : {
@@ -2107,6 +2123,22 @@
         }
       }
     },
+    "格子小毯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check lap blanket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チェックのひざ掛け"
+          }
+        }
+      }
+    },
     "格子罩衫" : {
       "localizations" : {
         "en" : {
@@ -2119,6 +2151,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "チェックのスモック"
+          }
+        }
+      }
+    },
+    "格纹头带" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check headband"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チェックのヘッドバンド"
           }
         }
       }
@@ -2432,6 +2480,22 @@
         }
       }
     },
+    "火焰头带" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flame headband"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ほのおのヘッドバンド"
+          }
+        }
+      }
+    },
     "火焰连帽卫衣" : {
       "localizations" : {
         "en" : {
@@ -2705,6 +2769,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "会社を出た"
+          }
+        }
+      }
+    },
+    "笑脸面罩" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smiley mask"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "にこにこマスク"
           }
         }
       }
@@ -3116,6 +3196,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "紺のブックカバー"
+          }
+        }
+      }
+    },
+    "蝴蝶结发圈" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ribbon hair tie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リボンのヘアゴム"
           }
         }
       }
