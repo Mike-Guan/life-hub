@@ -222,6 +222,7 @@ enum HomeZone: String, CaseIterable, Sendable {
         case .desk: GridBox(x0: 0, y0: 0.4, x1: 1.5, y1: 3.4, z0: 1.36, z1: 2.4)
         case .sofaSide: GridBox(x0: 2.3, y0: 8.2, x1: 2.9, y1: 8.8, z1: 1)
         case .corner: GridBox(x0: 0.9, y0: 8.7, x1: 2.1, y1: 9.9, z1: 2.6)
+        case .posterWall: GridBox(x0: 0, y0: 0.6, x1: 0.1, y1: 3.3, z0: 2.6, z1: 4.8)
         }
     }
 
@@ -235,6 +236,7 @@ enum HomeZone: String, CaseIterable, Sendable {
         case .desk: [GridPoint(x: 0.45, y: 3.05, z: 1.36), GridPoint(x: 1.15, y: 3.05, z: 1.36)]
         case .sofaSide: [GridPoint(x: 2.6, y: 8.5)]
         case .corner: [GridPoint(x: 1.5, y: 9.3)]
+        case .posterWall: [GridPoint(x: 0.02, y: 1.95, z: 3.7)]
         }
     }
 }

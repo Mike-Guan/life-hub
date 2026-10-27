@@ -1142,7 +1142,7 @@ enum HomeArt {
         let hub = (y: s.y, z: 0.9)
         pen.contact(s.x - 0.25, s.y - 0.25, s.x + 0.25, s.y + 0.25)
         pen.cylinder(s.x, s.y, r: 0.24, 0, 0.07, mint, line: 1.6)
-        pen.box(s.x - 0.04, s.y - 0.04, 0.07, s.x + 0.04, s.y + 0.04, 0.62, tone(mint, -0.2), line: 1.4)
+        pen.box(s.x - 0.04, s.y - 0.04, 0.07, s.x + 0.04, s.y + 0.04, 0.62, 0x4FA898, line: 1.4)
         pen.discAcross(x: s.x - 0.08, hub.y, hub.z, r: 0.1, tone(mint, -0.25), line: 1.4)
         pen.discAcross(x: s.x, hub.y, hub.z, r: 0.36, Color.white.opacity(0.35), line: 2)
         for k in 0..<3 {
