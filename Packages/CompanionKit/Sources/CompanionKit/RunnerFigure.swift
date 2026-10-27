@@ -1305,6 +1305,8 @@ struct RunnerFigure: View {
                     let parts = Self.parts(for: mode, pose: pose)
                     ForEach(parts, id: \.self) { part in
                         layer(part, scale: scale, headband: parts.contains(.headset))
+                            // UI 审核 HAKU-19: the arm comes up from behind the shoulder, under the head and body.
+                            .zIndex(part == .scratchHand && pose.handIn < 1 ? -1 : 0)
                     }
                     if pose.sleepTalk >= 0, pose.life == .nap, !pose.bedtime {
                         RunnerTextView(text: Self.sleepTalkText)
@@ -1833,7 +1835,9 @@ struct RunnerFigure: View {
         }
         .offset(y: (isHead ? pose.headDy : 0) * scale)
         .offset(y: Self.reachParts.contains(part) ? 24 * (1 - pose.handIn) * scale : 0)
-        .opacity(Self.reachParts.contains(part) ? Double(pose.handIn) : 1)
+        // Fully opaque within the first third of the rise, so nothing shows through a see-through arm.
+        .opacity(Self.reachParts.contains(part) ? Double(min(1, 3 * pose.handIn)) : 1)
+        .clipped(if: Self.reachParts.contains(part))
         .offset(y: Self.shrugParts.contains(part) ? pose.shrug * scale : 0)
         .offset(y: isHead || Self.chinParts.contains(part) ? 30 * pose.slump * scale : 0)
         .rotationEffect(
@@ -2048,6 +2052,8 @@ struct RunnerFigure: View {
                     .rotationEffect(.degrees(pose.canAngle), anchor: Self.unit(x: 102, y: 136))
                     .offset(x: pose.canShown.width * scale, y: pose.canShown.height * scale)
                     .opacity(pose.canOpacity)
+                    // UI 审核 HAKU-19: going down, the can stays inside the card.
+                    .clipped()
             case .headband:
                 RunnerPartView(part: part, red: pose.outfit.headband)
             case .gloveL:
@@ -2688,4 +2694,11 @@ struct HeadCrop<Content: View>: View {
         }
     }
     .padding()
+}
+
+extension View {
+    /// Clips the view to its frame when `on`.
+    @ViewBuilder fileprivate func clipped(if on: Bool) -> some View {
+        if on { clipped() } else { self }
+    }
 }
