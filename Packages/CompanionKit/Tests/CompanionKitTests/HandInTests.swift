@@ -67,6 +67,8 @@ struct SceneEffectFadeTests {
             #expect(opacities.contains { $0 > 0.05 && $0 < 0.95 }, "\(scene) \(part)")
             let steps = zip(opacities, opacities.dropFirst()).map { abs($0 - $1) }
             #expect(steps.allSatisfy { $0 < 0.3 }, "\(scene) \(part)")
+            // The marks that stay on screen never go dim enough to read as dirt.
+            if scene != .coffee { #expect(opacities.allSatisfy { $0 >= 0.4 - 1e-9 }, "\(scene) \(part)") }
         }
     }
 }
