@@ -1376,6 +1376,8 @@ public struct KuroPortrait: View {
     let energy: Double?
     let bedtime: Bedtime
     let moment: CompanionMoment?
+    let need: CompanionNeed?
+    let activity: CompanionActivity?
     let wearing: Set<KuroItem>
     let framing: CompanionPortrait.Framing
     let lineArt: Bool
@@ -1385,6 +1387,8 @@ public struct KuroPortrait: View {
     ///   - energy: energy 0-100, or nil when unknown.
     ///   - bedtime: `.on` gives her sleepy eyes.
     ///   - moment: the moment of the day; `.dozing` in the chill look shows her napping over her tablet.
+    ///   - need: the user's need, if any; her face shows she noticed.
+    ///   - activity: what the user is out doing, if anything; her face follows it.
     ///   - wearing: ids of her shop items she wears; each shows only in its own look.
     ///   - framing: head to waist, or head only for small round widgets.
     ///   - lineArt: draws her dark fills white, for tinted Lock Screens and watch faces.
@@ -1393,6 +1397,8 @@ public struct KuroPortrait: View {
         energy: Double? = nil,
         bedtime: Bedtime = .off,
         moment: CompanionMoment? = nil,
+        need: CompanionNeed? = nil,
+        activity: CompanionActivity? = nil,
         wearing: Set<String> = [],
         framing: CompanionPortrait.Framing = .full,
         lineArt: Bool = false
@@ -1401,16 +1407,16 @@ public struct KuroPortrait: View {
         self.energy = energy
         self.bedtime = bedtime
         self.moment = moment
+        self.need = need
+        self.activity = activity
         self.wearing = KuroItem.items(wearing).subtracting([.spin])
         self.framing = framing
         self.lineArt = lineArt
     }
 
     public var body: some View {
-        var pose = KuroPose(look: look, energy: energy, bedtime: bedtime)
-        pose.napping = KuroPose.naps(look, bedtime: bedtime, moment: moment)
-        pose.items = wearing
         let figure = KuroFigure(look: look, pose: pose)
+            .rotationEffect(.degrees(leansOut ? KuroPortrait.peekAngle : 0), anchor: .bottom)
         return Group {
             switch framing {
             case .full: figure
@@ -1420,6 +1426,26 @@ public struct KuroPortrait: View {
         .environment(\.kuroLineArt, lineArt)
         .accessibilityLabel(KuroView.accessibilityLabel(look, bedtime: bedtime))
     }
+
+    // 朋友测前 打磨清单 小组件: her widget face used to stay the same all day. It now takes the same pose and slot
+    // face as the home screen (overtime at the desk, worn out, focused, noticing a need), still, without a move.
+    /// Her still pose for the portrait.
+    var pose: KuroPose {
+        var pose = KuroView.pose(look, energy: energy, bedtime: bedtime, moment: moment, overtimeUntil: nil)
+        pose.items = wearing
+        guard bedtime == .off, let slot = KuroSlot(need: need, activity: activity, moment: moment, look: look) else {
+            return pose
+        }
+        return slot.dressing(pose)
+    }
+
+    // UI 审核 2026-10-28: bright eyes alone don't show a need on a tinted Lock Screen, so she leans out as she
+    // does when she peeks at you on the home screen.
+    /// Whether she leans out to look at you, for a need of yours before bedtime.
+    var leansOut: Bool { bedtime == .off && need != nil }
+
+    /// How far she leans out, in degrees.
+    static let peekAngle = 7.0
 }
 
 #Preview("KURO") {

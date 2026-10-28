@@ -89,6 +89,8 @@ struct StatusView: View {
                 energy: entry.energy?.value,
                 bedtime: entry.bedtime,
                 moment: entry.moment,
+                need: entry.need,
+                activity: entry.activity,
                 wearing: entry.wardrobe.worn(in: mode),
                 framing: framing,
                 lineArt: renderingMode != .fullColor
