@@ -621,6 +621,8 @@ public struct KuroView: View {
     @AppStorage("companion.lastRevived") private var lastRevived = ""
     @AppStorage("companion.lastTaskDone") private var lastTaskDone = ""
     @AppStorage("companion.lastWelcome") private var lastWelcome = ""
+    // Shared with HAKU's: one good night an evening, whoever is shown.
+    @AppStorage("companion.lastGoodnight") private var lastGoodnight: Double = 0
 
     private var reduceMotion: Bool { frameReduceMotion ?? systemReduceMotion }
 
@@ -740,7 +742,7 @@ public struct KuroView: View {
                 let loopMotion =
                     sleepy ? IdleMotion.sleeping(time: time) : homeScene?.motion ?? Self.motion(loop, time: idleTime)
                 let motion = napping ? Self.nap(time: time) : loopMotion
-                let moving = Self.rollOver(tap, time: time) ?? motion
+                let moving = Self.rollOver(tap, time: time) ?? Self.goodNight(tap, time: time) ?? motion
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 // Her small idle moves play only in the plain idle.
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
@@ -844,6 +846,10 @@ public struct KuroView: View {
             if invite != nil { startInvite() }
             if let walking { say(KuroScene.walkLine(from: walking), for: 3) }
             if bath { startBath() }
+            if bedtime == .on, !CompanionView.playedTonight(last: lastGoodnight, now: .now) { startGoodNight() }
+        }
+        .onChange(of: bedtime) { _, new in
+            if new == .on { startGoodNight() }
         }
         .onChange(of: invite) { _, new in
             if new != nil { startInvite() }
@@ -1057,6 +1063,14 @@ public struct KuroView: View {
         return (id, kind)
     }
 
+    /// Plays her good night once, without the squash a tap gets.
+    private func startGoodNight() {
+        tapKind = .goodNight
+        tapStart = .now
+        tapHeart = false
+        if style != .notification { lastGoodnight = Date.now.timeIntervalSinceReferenceDate }
+    }
+
     private func play(_ kind: KuroTap, at now: Date) {
         tapKind = kind
         tapStart = now
@@ -1114,6 +1128,17 @@ public struct KuroView: View {
         return IdleMotion(dy: breath + 3 * dip, angle: 3 * Double(dip))
     }
 
+    // 第 5 批 晚安: her own good night instead of only dimming. The stretch eases into the sleeping breath.
+    /// Her good night at `time` while `tap` is one: up 4 pt and a 3° lean in the yawn's stretch, then down 2 pt as
+    /// she settles, on top of her sleeping breath; nil for any other tap.
+    nonisolated static func goodNight(_ tap: (KuroTap, Double)?, time: TimeInterval) -> IdleMotion? {
+        guard let tap, tap.0 == .goodNight else { return nil }
+        let breath = IdleMotion.sleeping(time: time)
+        let stretch = sin(.pi * min(max((tap.1 - 0.3) / 0.35, 0), 1))
+        let settle = sin(.pi * min(max((tap.1 - 0.65) / 0.35, 0), 1))
+        return IdleMotion(dy: breath.dy - 4 * CGFloat(stretch) + 2 * CGFloat(settle), angle: -3 * stretch)
+    }
+
     /// How long one nod takes while she naps, in seconds.
     nonisolated static let napNod: TimeInterval = 1.6
 
@@ -1137,7 +1162,9 @@ public struct KuroView: View {
 
     /// How far she hops at the start of a tap reaction, in points; turning away and the chin tap have no hop.
     nonisolated static func hop(_ tap: (KuroTap, Double)?) -> CGFloat {
-        guard let tap, tap.0 != .turnAway, tap.0 != .chinTap, tap.0 != .rollOver, tap.1 < 0.35 else { return 0 }
+        guard let tap, ![.turnAway, .chinTap, .rollOver, .goodNight].contains(tap.0), tap.1 < 0.35 else {
+            return 0
+        }
         return -8 * CGFloat(sin(tap.1 / 0.35 * .pi))
     }
 
