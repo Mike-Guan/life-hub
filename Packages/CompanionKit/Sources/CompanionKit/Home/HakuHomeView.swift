@@ -140,6 +140,10 @@ public struct HakuHomeView: View {
         self.onSave = onSave
         self.onExit = onExit
         _stage = State(initialValue: HomeStage(model: HomeModel(snapshot: snapshot)))
+        #if DEBUG
+        // The app's `-screenshot-growth home-decorate` draws the panel open.
+        if ProcessInfo.processInfo.arguments.contains("home-decorate") { _sheet = State(initialValue: .decorate) }
+        #endif
     }
 
     public var body: some View {
@@ -419,8 +423,15 @@ private struct HomeSheetView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(title.localized).font(Toy.display(22)).foregroundStyle(Toy.ink)
-            ScrollView {
-                content.padding(.bottom, 20)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    content.padding(.bottom, 20)
+                }
+                .onAppear {
+                    // UI 二组 (地毯两款): on a small screen at half height the rug's style and colour rows both show.
+                    guard which == .decorate, model.rugs.count > 1 else { return }
+                    Task { @MainActor in proxy.scrollTo(HomePaintable.rug, anchor: .bottom) }
+                }
             }
         }
         .padding(20)
@@ -460,26 +471,72 @@ private struct HomeSheetView: View {
     private var decorate: some View {
         VStack(spacing: 12) {
             ForEach(HomePaintable.allCases, id: \.self) { piece in
-                HStack(spacing: 12) {
-                    Text(piece.name.localized).font(Toy.body(15, weight: .heavy))
-                        .frame(width: Languages.isOn ? 72 : 44, alignment: .leading)
-                    ForEach(Array(piece.swatches.enumerated()), id: \.offset) { index, hex in
-                        let picked = model.color(piece) == hex
-                        Button {
-                            onSave(model.paint(piece, index))
-                        } label: {
-                            Circle().fill(Color(hex: hex))
-                                .frame(width: 34, height: 34)
-                                .overlay(Circle().stroke(Toy.ink, lineWidth: picked ? 4 : 2))
-                                .scaleEffect(picked ? 1.1 : 1)
-                                .animation(.spring(duration: 0.25), value: picked)
+                // 商店扩充 v1 §2.4, UI 二组 地毯两款 v1: once a second rug is bought, the rug's card picks its style too.
+                if piece == .rug && model.rugs.count > 1 {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(piece.name.localized).font(Toy.body(15, weight: .heavy))
+                        Text("款式".localized).font(Toy.body(13, weight: .bold)).foregroundStyle(Toy.muted)
+                        rugStyles
+                        Text("颜色 · 免费".localized).font(Toy.body(13, weight: .bold)).foregroundStyle(Toy.muted)
+                        HStack(spacing: 12) {
+                            swatches(piece)
+                            Spacer(minLength: 0)
                         }
-                        .buttonStyle(.plain)
                     }
-                    Spacer(minLength: 0)
+                    .padding(12)
+                    .toyCard()
+                    .id(piece)
+                } else {
+                    HStack(spacing: 12) {
+                        Text(piece.name.localized).font(Toy.body(15, weight: .heavy))
+                            .frame(width: Languages.isOn ? 72 : 44, alignment: .leading)
+                        swatches(piece)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(12)
+                    .toyCard()
                 }
-                .padding(12)
-                .toyCard()
+            }
+        }
+    }
+
+    private func swatches(_ piece: HomePaintable) -> some View {
+        ForEach(Array(piece.swatches.enumerated()), id: \.offset) { index, hex in
+            let picked = model.color(piece) == hex
+            Button {
+                onSave(model.paint(piece, index))
+            } label: {
+                Circle().fill(Color(hex: hex))
+                    .frame(width: 34, height: 34)
+                    .overlay(Circle().stroke(Toy.ink, lineWidth: picked ? 4 : 2))
+                    .scaleEffect(picked ? 1.1 : 1)
+                    .animation(.spring(duration: 0.25), value: picked)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // UI 二组: capsules like the shop's shelf tabs; the rug in the room is the preview.
+    private var rugStyles: some View {
+        HStack(spacing: 6) {
+            ForEach(model.rugs, id: \.self) { rug in
+                let picked = model.rug == rug
+                Button {
+                    onSave(model.lay(rug))
+                } label: {
+                    Text(rug.label.localized)
+                        .font(Toy.body(14, weight: .heavy))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .foregroundStyle(picked ? Toy.paper : Toy.ink)
+                        .padding(.horizontal, 10)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background(Capsule().fill(picked ? Toy.ink : Toy.card))
+                        .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(picked ? .isSelected : [])
             }
         }
     }

@@ -13,6 +13,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- The shop's room tab sells 16 new things per character (her own ten, a yoga mat, a jump rope, a dance mirror,
+  a music stand and two rugs), and HAKU's identity-card props in their colours. A bought poster replaces the two over
+  the desk; a bought rug is laid at once, and 家具换颜色 lets you switch the rug's style back.
 - With the watch screen dimmed (Always On), the second preset character naps over her tablet when she is off work
   before bedtime, instead of only closing her eyes.
 - The second preset character has her own looks for the swimming, yoga, ball and outdoor cards (goggles, a

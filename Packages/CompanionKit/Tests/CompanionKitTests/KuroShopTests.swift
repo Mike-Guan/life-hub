@@ -12,7 +12,9 @@ import Testing
         // Clothes are drawn before the shop offers them, so every offered item is drawn but not the other way.
         let catalog = ShopItem.catalog(for: .kuro)
         #expect(Set(ids).isSubset(of: catalog.map(\.id)))
-        #expect(Set(catalog.filter(\.isDrawn).map(\.id)).isSubset(of: ids))
+        // Room items the home draws aren't on her figure.
+        let onHer = catalog.filter { $0.isDrawn && HomeItem(shopID: $0.id) == nil && HomeRug(shopID: $0.id) == nil }
+        #expect(Set(onHer.map(\.id)).isSubset(of: ids))
         let keepsakes: [KuroItem] = [
             .spin, .sakura, .goldRacket, .goldGloves, .goldBlock, .goldBookmark, .goldBrush, .goldPhones, .goldFolder,
             .goldGoggles,

@@ -2486,6 +2486,22 @@
         }
       }
     },
+    "原来的款式留着，在家里随时换回。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Your old style stays, so you can switch back at home any time."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "もとの柄はとっておけて、家でいつでも戻せます。"
+          }
+        }
+      }
+    },
     "去健身房" : {
       "comment" : "挣罐方式",
       "localizations" : {
@@ -2925,6 +2941,22 @@
         }
       }
     },
+    "地毯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Rugs"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ラグ"
+          }
+        }
+      }
+    },
     "地点" : {
       "comment" : "同一中文要两种译法（见上一行），请工程把中文改得稍有不同",
       "localizations" : {
@@ -2986,6 +3018,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "場所の検知が止まりました：%@"
+          }
+        }
+      }
+    },
+    "墙上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "On the wall"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "壁"
           }
         }
       }
@@ -3784,6 +3832,22 @@
         }
       }
     },
+    "挂在家里书桌上方的墙上，换掉原来那两张海报。哪个模式都在。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Hangs on the wall over the desk in your home, in place of the two posters there. There in every mode."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "家の机の上の壁に貼ります。もとの2枚のポスターと入れ替わります。どのモードでも見えます。"
+          }
+        }
+      }
+    },
     "按时睡" : {
       "localizations" : {
         "en" : {
@@ -3828,6 +3892,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@に変える？"
+          }
+        }
+      }
+    },
+    "换掉家里的地毯款式。颜色在家里免费换。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Replaces the rug's style in your home. You can change its colour there for free."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "家のラグの柄を入れ替えます。色は家で無料で変えられます。"
           }
         }
       }
