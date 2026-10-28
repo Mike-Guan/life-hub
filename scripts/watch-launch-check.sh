@@ -91,5 +91,12 @@ JSON
   sleep 8
   xcrun simctl io "$udid" screenshot "$out/watch-haku-today-$lang.png"
 done
+# Before the iPhone has sent anything, for the layout review (UI 二组 交付差距 item 4).
+for folder in "${folders[@]}"; do
+  rm -f "$folder/watch-payload.json"
+done
+xcrun simctl launch --terminate-running-process "$udid" "$bundle" >/dev/null
+sleep 8
+xcrun simctl io "$udid" screenshot "$out/watch-first-run.png"
 xcrun simctl terminate "$udid" "$bundle" || true
 ! $failed
