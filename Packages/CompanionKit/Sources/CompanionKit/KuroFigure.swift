@@ -767,7 +767,9 @@ public struct KuroView: View {
                 let loopMotion =
                     sleepy ? IdleMotion.sleeping(time: time) : homeScene?.motion ?? Self.motion(loop, time: idleTime)
                 let motion = napping ? Self.nap(time: time) : loopMotion
-                let moving = Self.rollOver(tap, time: time) ?? Self.goodNight(tap, time: time) ?? motion
+                let moving =
+                    Self.rollOver(tap, time: time) ?? Self.goodNight(tap, time: time)
+                    ?? Self.peek(tap ?? slotMove, motion: motion) ?? motion
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 // Her small idle moves play only in the plain idle.
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
@@ -1153,6 +1155,16 @@ public struct KuroView: View {
         return IdleMotion(dy: breath + 3 * dip, angle: 3 * Double(dip))
     }
 
+    // 第 5 批 偷看: she leans out from behind what she holds, like a cat round a door, then back.
+    /// `motion` with her peek while `move` is one: a 7° lean out that holds and comes back, lifting her 2 pt;
+    /// nil for any other move.
+    nonisolated static func peek(_ move: (KuroTap, Double)?, motion: IdleMotion) -> IdleMotion? {
+        guard let move, move.0 == .peek else { return nil }
+        let p = move.1
+        let out = p < 0.25 ? sin(p / 0.25 * .pi / 2) : p < 0.7 ? 1 : cos((p - 0.7) / 0.3 * .pi / 2)
+        return IdleMotion(dy: motion.dy - 2 * CGFloat(out), angle: motion.angle + 7 * out)
+    }
+
     // 第 5 批 晚安: her own good night instead of only dimming. The stretch eases into the sleeping breath.
     /// Her good night at `time` while `tap` is one: up 4 pt and a 3° lean in the yawn's stretch, then down 2 pt as
     /// she settles, on top of her sleeping breath; nil for any other tap.
@@ -1344,8 +1356,10 @@ public struct KuroView: View {
         return String(format: "%02d:%02d", time.hour ?? 0, time.minute ?? 0)
     }
 
+    // KURO-06: her peeking lines show while she leans out to peek.
     private var lines: [String] {
-        CompanionLines.lines(for: look.mode, need: need, activity: activity, moment: moment, persona: .kuro)
+        CompanionLines.lines(
+            for: look.mode, need: need, peeking: slot == .peek, activity: activity, moment: moment, persona: .kuro)
     }
 
     /// The lines a tap picks from: her mumbles at bedtime, otherwise `lines`.
