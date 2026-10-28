@@ -208,6 +208,12 @@ extension KuroFigure {
         .weeklyHatBeanie, .weeklyHatBeaniePom,
     ]
 
+    /// Keeps in `visible` only what shows from behind, with the back of her head.
+    nonisolated static func turnAround(_ visible: inout Set<KuroPart>) {
+        visible.formIntersection(backView)
+        visible.insert(.backHead)
+    }
+
     /// Her eyes and mouths, which the tap sets even while an idle it cut short goes back.
     nonisolated private static let face: Set<KuroPart> = [
         .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow, .eyesWink,
@@ -260,8 +266,7 @@ extension KuroFigure {
             break
         case .turnAway:
             guard KuroTap.facesAway(p) else { return }
-            visible.formIntersection(backView)
-            visible.insert(.backHead)
+            turnAround(&visible)
             if KuroTap.dotsOpacity(p) > 0 { visible.insert(.tapDots) }
         }
     }
