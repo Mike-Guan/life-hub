@@ -2414,18 +2414,18 @@
         }
       }
     },
-    "泳帽塞好了" : {
+    "泳镜推上去了" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cap on, hair in"
+            "value" : "Goggles up"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キャップ、かぶった"
+            "value" : "ゴーグル、上げた"
           }
         }
       }
