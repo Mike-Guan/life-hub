@@ -248,6 +248,15 @@ import Testing
         #expect(KuroUnbox(.spin, progress: 0.9).spin == 1)
     }
 
+    @Test func halfwayThroughASpinSheShowsHerBack() {
+        var pose = KuroPose(look: .chill, energy: nil).showing(.low)
+        pose.items = [.chillHoodie]
+        pose.facingAway = true
+        let back = Set(KuroFigure.parts(for: .chill, pose: pose))
+        #expect(back.contains(.backHead) && !back.contains(.faceBase) && !back.contains(.eyesLow))
+        #expect(back.isSuperset(of: [.catEars, .topChillCathoodieBack]) && !back.contains(.topChillCathoodie))
+    }
+
     @Test func eachUnboxingOfHerItemsPlaysOnce() {
         let event = CompanionEvent.unlock(id: "e1", item: KuroItem.bag.rawValue)
         #expect(KuroView.newUnbox(event, last: "")?.1 == .bag)
