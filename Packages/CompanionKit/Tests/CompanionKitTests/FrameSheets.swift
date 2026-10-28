@@ -219,6 +219,27 @@ struct FrameSheets {
         try write("haku-9-hands-in", sheet + effectRows, frames: 13, step: 0.1)
     }
 
+    // HAKU-23 (UI 审核 2026-10-08): the sports celebration crouches before each hop and lands pressed down.
+    @Test func hakuCelebration() throws {
+        let kinds: [(WorkoutSummary.Kind, Mode)] = [(.boxing, .boxing), (.running, .chill), (.strength, .chill)]
+        let rows = kinds.map { kind, mode in
+            Row(label: "celebrate · \(kind)", start: Self.base) {
+                AnyView(CelebrationFrame(kind: kind, mode: mode, start: Self.base))
+            }
+        }
+        try write("haku-8-celebration", rows, frames: 13, step: CompanionView.celebrationDuration / 12)
+    }
+
+    // The same sparkles on a mode switch, 0.5 s.
+    @Test func hakuSwapSparkles() throws {
+        let rows = [Mode.work, .chill].map { mode in
+            Row(label: "swap · \(mode.rawValue)", start: Self.base) {
+                AnyView(SwapFrame(mode: mode, start: Self.base))
+            }
+        }
+        try write("haku-8-swap-sparkles", rows, frames: 6, step: 0.1)
+    }
+
     @Test func kuroLooks() throws {
         var rows: [Row] = []
         for look in KuroLook.allCases {
@@ -430,6 +451,44 @@ struct FrameSheets {
 
         var body: some View {
             RunnerFigure(mode: mode, pose: pose((clock ?? start).timeIntervalSince(start)))
+                .padding(12)
+                .background(mode.color)
+        }
+    }
+
+    /// HAKU celebrating `kind`, moved and squashed the way `CompanionView` does it.
+    struct CelebrationFrame: View {
+        let kind: WorkoutSummary.Kind
+        let mode: Mode
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            let t = (clock ?? start).timeIntervalSince(start) / CompanionView.celebrationDuration
+            let p = min(t, 0.999)
+            let motion = IdleMotion.celebrating(progress: p)
+            var pose = RunnerPose(face: .mid)
+            pose.celebrate(kind, progress: CGFloat(p))
+            return RunnerFigure(mode: mode, pose: pose)
+                .rotationEffect(.degrees(motion.angle), anchor: .bottom)
+                .offset(y: motion.dy)
+                .scaleEffect(x: 1 + 0.08 * motion.squash, y: 1 - 0.12 * motion.squash, anchor: .bottom)
+                .padding(12)
+                .background(mode.color)
+        }
+    }
+
+    /// HAKU in `mode` with the mode-switch sparkles, 0.5 s long.
+    struct SwapFrame: View {
+        let mode: Mode
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            var pose = RunnerPose(mode: mode, time: 0, face: .mid, react: 0)
+            pose.burst = CGFloat(min((clock ?? start).timeIntervalSince(start) / 0.5, 0.999))
+            pose.swapping = true
+            return RunnerFigure(mode: mode, pose: pose)
                 .padding(12)
                 .background(mode.color)
         }

@@ -342,6 +342,7 @@ public struct CompanionView: View {
                     let motion = idleMotion(mode, life: life, time: time)
                     // HAKU-04: a new bit at home starts with a quick squash instead of parts just swapping.
                     let turn = reduceMotion ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
+                    let squash = reduceMotion ? 0 : motion.squash
                     let posed = pose(mode, life: life, time: time, react: react)
                     let dressed = posed.dressed(
                         for: card, in: mode, watch: style == .watch, time: reduceMotion ? nil : time
@@ -351,7 +352,11 @@ public struct CompanionView: View {
                         .brightness(vitals.brightness)
                         .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
                         .offset(y: reduceMotion ? 0 : motion.dy)
-                        .scaleEffect(x: 1 + 0.07 * turn, y: 1 - 0.1 * turn, anchor: .bottom)
+                        .scaleEffect(
+                            x: 1 + 0.07 * turn + 0.08 * squash,
+                            y: 1 - 0.1 * turn - 0.12 * squash,
+                            anchor: .bottom
+                        )
                 }
             } keyframes: { _ in
                 KeyframeTrack {
@@ -912,7 +917,8 @@ public struct CompanionView: View {
     }
 
     private static let goodnightDuration = 3.2
-    private static let celebrationDuration = 1.6
+    // HAKU-23: 1.6 s read the same as a poke; 2.4 s leaves room to crouch before each hop and land.
+    static let celebrationDuration = 2.4
     // 「哦。」 stays up 1.6 s; the nod plays inside it (Issue #236, 纠正预览 v6).
     nonisolated static let nodDuration = 1.6
     private static let offWorkDuration = 4.0
@@ -1524,20 +1530,44 @@ public enum CompanionStyle: Sendable {
 struct IdleMotion {
     var dy: CGFloat
     var angle: Double
+    /// How far the body is pressed wide and low, 0 (standing) to 1 (deepest crouch).
+    var squash: CGFloat = 0
 
     /// Slumped on the couch: tilted back, barely breathing.
     static func slumped(time t: TimeInterval) -> IdleMotion {
         IdleMotion(dy: 4 + CGFloat(sin(t * 2 * .pi / 5)), angle: -3)
     }
 
-    /// Two happy hops over a celebration; `progress` runs 0..<1.
-    static func celebrating(progress: Double) -> IdleMotion {
-        IdleMotion(dy: -CGFloat(abs(sin(progress * 2 * .pi))) * 22, angle: sin(progress * 4 * .pi) * 3)
+    /// Two happy hops over a celebration, each from a crouch and landing pressed down; `progress` runs 0..<1.
+    static func celebrating(progress p: Double) -> IdleMotion {
+        // Crouch 0-0.1, hop 0.1-0.38, land into the next crouch 0.38-0.48, hop 0.48-0.76, land 0.76-0.92.
+        let hops = [(0.1, 0.38), (0.48, 0.76)]
+        guard let (up, down) = hops.first(where: { p >= $0.0 && p < $0.1 }) else {
+            return IdleMotion(dy: 0, angle: 0, squash: CGFloat(crouch(at: p)))
+        }
+        let air = (p - up) / (down - up)
+        let release = 1 - smooth(min(1, (p - up) / 0.04))
+        return IdleMotion(dy: -CGFloat(sin(air * .pi)) * 22, angle: sin(air * 2 * .pi) * 3, squash: CGFloat(release))
     }
+
+    /// The crouch while standing between hops: down before the first, held through the landing into the
+    /// second, then eased back up after the last landing.
+    private static func crouch(at p: Double) -> Double {
+        switch p {
+        case ..<0.1: smooth(p / 0.1)
+        case 0.38..<0.48: smooth(min(1, (p - 0.38) / 0.05))
+        case 0.76..<0.8: smooth((p - 0.76) / 0.04)
+        case 0.8..<0.92: 1 - smooth((p - 0.8) / 0.12)
+        default: 0
+        }
+    }
+
+    /// Ease in and out over `x` in 0...1.
+    private static func smooth(_ x: Double) -> Double { x * x * (3 - 2 * x) }
 
     /// The same motion with its bounce scaled by `factor`.
     func bouncing(_ factor: CGFloat) -> IdleMotion {
-        IdleMotion(dy: dy * factor, angle: angle)
+        IdleMotion(dy: dy * factor, angle: angle, squash: squash)
     }
 
     /// Slow breathing at bedtime, 4 s period.
@@ -1551,9 +1581,10 @@ struct IdleMotion {
         return IdleMotion(dy: breath.dy + 2 * CGFloat(sin(progress * .pi)), angle: 8 * sin(progress * .pi))
     }
 
-    init(dy: CGFloat, angle: Double) {
+    init(dy: CGFloat, angle: Double, squash: CGFloat = 0) {
         self.dy = dy
         self.angle = angle
+        self.squash = squash
     }
 
     /// The idle loop for `moment`: walking bob, a slumped breath, or the mode's own loop.
