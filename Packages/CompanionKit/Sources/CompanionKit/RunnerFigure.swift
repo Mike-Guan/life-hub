@@ -1941,10 +1941,12 @@ struct RunnerFigure: View {
                     .offset(y: -5 * pose.feed * scale)
                     .opacity(Double(1 - 0.6 * pose.feed))
             case .sparkle where pose.burst >= 0, .sparkleWork where pose.burst >= 0:
-                // Celebration: the sparkles fly out from the head and fade.
+                // Celebration: the sparkles fly out from the head and fade. UI 审核 2026-10-27 (HAKU-23): over the
+                // longer celebration the slow fade read as grey dots and the stars grew past the card, so they grow
+                // less and fade only over the last fifth.
                 RunnerPartView(part: part)
-                    .scaleEffect(0.8 + 0.7 * pose.burst, anchor: Self.unit(x: 60, y: 40))
-                    .opacity(Double(sin(pose.burst * .pi)))
+                    .scaleEffect(0.8 + 0.25 * pose.burst, anchor: Self.unit(x: 60, y: 40))
+                    .opacity(Double(min(1, pose.burst / 0.1, (1 - pose.burst) / 0.2)))
             case .sparkle, .sparkleWork:
                 // UI 审核 2026-10-13: with the headset on, the sparkles sit 2pt clear of its band on the watch.
                 RunnerPartView(part: part)
