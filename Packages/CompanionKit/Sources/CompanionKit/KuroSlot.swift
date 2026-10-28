@@ -85,12 +85,10 @@ enum KuroSlot: CaseIterable, Sendable {
         case .focus:
             pose.eyes = .down
             pose.calm = true
-        case .invite, .active:
+        case .invite, .peek, .active:
             if !pose.tired { pose.eyes = .bright }
         case .packingUp:
             if !pose.tired { pose.eyes = .happy }
-        case .peek:
-            break
         }
         return pose
     }

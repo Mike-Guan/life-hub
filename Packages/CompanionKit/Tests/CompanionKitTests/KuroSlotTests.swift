@@ -112,6 +112,7 @@ import Testing
         let low = KuroPose(look: .chill, energy: 10)
         #expect(KuroSlot.invite.dressing(low).eyes == .low)
         #expect(KuroSlot.invite.dressing(KuroPose(look: .chill, energy: 50)).eyes == .bright)
+        #expect(KuroSlot.peek.dressing(KuroPose(look: .chill, energy: 50)).eyes == .bright)
         #expect(KuroSlot.tired.dressing(low).eyes == .drowsy)
     }
 
