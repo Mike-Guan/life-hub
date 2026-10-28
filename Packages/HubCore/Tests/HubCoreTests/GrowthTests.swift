@@ -304,9 +304,9 @@ import Testing
         let kuro = ShopItem.catalog(for: .kuro).filter { $0.week == nil && $0.mode != .boxing }
         #expect(ShopItem.catalog(for: .haku).count + ShopItem.catalog(for: .kuro).count == ShopItem.catalog.count)
         #expect(kuro.compactMap(\.price).sorted() == haku.compactMap(\.price).sorted())
-        // Her gold racket, then her four gold card props.
+        // Her gold racket, then her seven gold card props.
         let wins = kuro.filter(\.isDrawn).compactMap(\.keepsake).map(\.win)
-        #expect(wins == [.gotUp, .run5k, .boxing, .boxing, .boxing, .boxing, .boxing])
+        #expect(wins == [.gotUp, .run5k] + Array(repeating: .boxing, count: 8))
     }
 
     @Test func ledgerPersistsAndKeepsUnreadableEntries() throws {
