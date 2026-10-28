@@ -97,7 +97,7 @@ final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
             guard let url = AppGroup.container.watchPayloadURL else { throw CocoaError(.fileNoSuchFile) }
             try payload.write(to: url)
         } catch {
-            post(Self.didFail, "没存下 iPhone 发来的状态：\(error.localizedDescription)")
+            post(Self.didFail, error.localizedDescription)
             return
         }
         // Widget reloads have a daily budget, and the iPhone now also sends while the app is open.
