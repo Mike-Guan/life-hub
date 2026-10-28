@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Fixed
+- The second preset character's face on the widgets and watch face follows the day like on the home screen:
+  drowsy when worn out, eyes down when busy, bright when she notices a need, chin on hand at overtime.
 - A workout cheer while the second preset character rests her chin on her hand at the desk no longer raises her
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
