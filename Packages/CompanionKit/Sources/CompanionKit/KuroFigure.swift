@@ -1416,6 +1416,7 @@ public struct KuroPortrait: View {
 
     public var body: some View {
         let figure = KuroFigure(look: look, pose: pose)
+            .rotationEffect(.degrees(leansOut ? KuroPortrait.peekAngle : 0), anchor: .bottom)
         return Group {
             switch framing {
             case .full: figure
@@ -1437,6 +1438,14 @@ public struct KuroPortrait: View {
         }
         return slot.dressing(pose)
     }
+
+    // UI 审核 2026-10-28: bright eyes alone don't show a need on a tinted Lock Screen, so she leans out as she
+    // does when she peeks at you on the home screen.
+    /// Whether she leans out to look at you, for a need of yours before bedtime.
+    var leansOut: Bool { bedtime == .off && need != nil }
+
+    /// How far she leans out, in degrees.
+    static let peekAngle = 7.0
 }
 
 #Preview("KURO") {

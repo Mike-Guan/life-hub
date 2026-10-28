@@ -60,6 +60,9 @@ import Testing
         #expect(KuroPortrait(look: .desk, energy: 50, moment: .flow).pose.eyes == .down)
         #expect(KuroPortrait(look: .work, energy: 50, moment: .overtime).pose.overtime)
         #expect(KuroPortrait(look: .chill, energy: 50, bedtime: .on, need: .sitting).pose.eyes == .drowsy)
+        #expect(KuroPortrait(look: .chill, energy: 50, need: .sitting).leansOut)
+        #expect(!KuroPortrait(look: .chill, energy: 50).leansOut)
+        #expect(!KuroPortrait(look: .chill, energy: 50, bedtime: .on, need: .sitting).leansOut)
     }
 
     // 抱平板睡着 v2 (Mike 2026-10-15).
