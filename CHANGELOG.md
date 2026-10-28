@@ -11,6 +11,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
+  pulled down and pushed back), yoga (a mat in hand, palms pressed while swaying), ball (a ball on the fist,
+  spun on a fingertip until it drops and bounces back) and outdoor (backpack and trekking pole, a hand over the
+  eyes to look far while the wind blows by).
 - The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
   headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
   headphones she bought.
