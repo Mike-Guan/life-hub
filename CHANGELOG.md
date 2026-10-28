@@ -157,6 +157,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The shop's room shelf is grouped by where each item goes in the home: on the desk, by the sofa, in the corner
+  and the workout corner. This week's item still comes first.
 - After a workout HAKU crouches before each of his two hops and lands pressed down, and the celebration
   runs 2.4 s instead of 1.6 s, so it no longer looks like a poke.
 - The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
@@ -470,6 +472,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
 - The character on the watch face shows the same scene as the watch app and the iPhone Lock Screen (the gym
   bag, setting off, the bath) and changes its pose every 15 minutes, instead of only the plain mode look.
+- On the watch, the labels on the second page, the mode chip, a save failure and the page actions follow the
+  watch's language (Japanese and English), and VoiceOver can turn between the two pages. The no-mode complication
+  has a spoken label.
 - On the watch, both characters sit a little smaller and lower (less on the smaller watch), so the hair
   clears the clock and what they hold stays on screen. When the watch screen dims, HAKU comes to rest
   instead of freezing mid-move.
