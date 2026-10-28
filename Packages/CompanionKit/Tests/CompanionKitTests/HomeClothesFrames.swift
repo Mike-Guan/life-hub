@@ -6,8 +6,8 @@ import Testing
 
 @testable import CompanionKit
 
-// 商店与家 同步方案 v0, M4: every drawn top in the room, front, back, at the desk and on the sofa, then the first
-// week's accessories, for the UI review.
+// 商店与家 同步方案 v0, M4: every drawn top in the room, front, back, at the desk and on the sofa, the first week's
+// accessories, then each mode's and identity card's default look, for the UI review.
 extension FrameSheets {
     @Test func hakuHomeClothes() throws {
         let columns: [(String, Bool, (HomeModel) -> Void)] = [
@@ -17,7 +17,7 @@ extension FrameSheets {
             ("沙发", true, { $0.switchMode(.chill) }),
         ]
         var rows: [(String, [CGImage])] = []
-        for outfit in HomeOutfit.allCases {
+        for outfit in HomeOutfit.allCases where outfit.shopID != nil {
             var cells: [CGImage] = []
             for (_, night, setup) in columns {
                 let model = HomeModel(night: night)
@@ -49,6 +49,25 @@ extension FrameSheets {
             scene.pose(at: t)
             extras.append((label, try #require(Self.hakuCloseUp(scene))))
         }
+        var defaults: [(String, [CGImage])] = []
+        let modes: [(String, Mode, IdentityKind)] = [
+            ("上班", .work, .boxing), ("下班", .chill, .boxing), ("副业", .money, .boxing),
+            ("拳击卡", .boxing, .boxing), ("网球卡", .boxing, .tennis), ("健身卡", .boxing, .fitness),
+            ("滑雪卡", .boxing, .ski), ("手作卡", .boxing, .art), ("学习卡", .boxing, .study),
+        ]
+        for (label, mode, card) in modes {
+            var cells: [CGImage] = []
+            for back in [false, true] {
+                let model = HomeModel(night: false, card: card, mode: mode)
+                let scene = HomeScene(model: model)
+                if back { model.tap(.wardrobe) }
+                scene.sync(animated: false)
+                scene.settle()
+                scene.pose(at: 1.3)
+                cells.append(try #require(Self.hakuCloseUp(scene)))
+            }
+            defaults.append(("\(label) · \(HomeOutfit(worn: [], mode: mode, card: card).name)", cells))
+        }
         let sheet = VStack(alignment: .leading, spacing: 8) {
             Text(verbatim: "家 · HAKU 衣服房间版（每格 120×120 pt）").font(.system(size: 16, weight: .bold))
             HStack(spacing: 10) {
@@ -72,6 +91,16 @@ extension FrameSheets {
                     VStack(spacing: 2) {
                         Image(decorative: extras[i].1, scale: 1).resizable().frame(width: 240, height: 240)
                         Text(verbatim: extras[i].0).font(.system(size: 11, weight: .bold)).frame(width: 240)
+                    }
+                }
+            }
+            Text(verbatim: "模式和身份卡的默认衣服（正面 / 背面 · 衣柜前）").font(.system(size: 14, weight: .bold))
+            ForEach(defaults.indices, id: \.self) { r in
+                HStack(spacing: 10) {
+                    Text(verbatim: defaults[r].0).font(.system(size: 12, weight: .bold)).frame(
+                        width: 110, alignment: .leading)
+                    ForEach(defaults[r].1.indices, id: \.self) { c in
+                        Image(decorative: defaults[r].1[c], scale: 1).resizable().frame(width: 240, height: 240)
                     }
                 }
             }

@@ -391,11 +391,13 @@ final class HakuNode: SKNode {
         return texture
     }
 
-    /// The parts of the head, back to front: as in the companion, the cap gives way to the boxing headband and a
-    /// print goes over the lowered mask.
+    /// The parts of the head, back to front: as in the companion, any other hat gives way to the boxing headband
+    /// and a print goes over the lowered mask. From behind the visor and the goggles, drawn from the front, are left
+    /// off.
     static func headParts(_ face: HakuFace, hat: RunnerPart?, mask: MaskPrint?) -> [RunnerPart] {
         var parts = Set(face.parts)
-        if let hat, !(hat == .setVarsityCap && parts.contains(.headband)) { parts.insert(hat) }
+        let frontOnly: Set<RunnerPart> = [.tennisVisor, .skiGoggles]
+        if let hat, !parts.contains(.headband), !(face == .back && frontOnly.contains(hat)) { parts.insert(hat) }
         if let mask, parts.contains(.maskDown) { parts.insert(mask.down) }
         return RunnerPart.allCases.filter(parts.contains)
     }
