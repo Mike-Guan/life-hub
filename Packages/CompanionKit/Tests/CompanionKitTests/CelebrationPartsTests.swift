@@ -34,6 +34,7 @@ import Testing
         .tennis: [.swingLines],
         .desk: [.tapFinger, .tapGlint],
         .box: [], .fitness: [], .study: [.studyMark], .art: [], .dance: [], .music: [], .ski: [],
+        .swimming: [], .yoga: [], .ball: [], .outdoor: [],
     ]
     static let kuroFace: Set<KuroPart> = [
         .eyesOpen, .eyesClosed, .eyesDrowsy, .eyesBright, .eyesDown, .eyesHappy, .eyesSurprised, .eyesLow,

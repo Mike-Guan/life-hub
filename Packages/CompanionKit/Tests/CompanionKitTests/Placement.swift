@@ -346,6 +346,15 @@ enum Placement {
         .mittenHand: Spot(.handL, "手套"),
         .snowBits: .fx,
         .sneezePuff: .fx,
+        // Identity cards, batch 2 (第 2 批身份卡 草稿): the pack and its straps are one thing on her back, the hand under
+        // the ball is part of holding it.
+        .swimGoggles: Spot(.headTop, "swimGoggles"),
+        .yogaMat: Spot(.handR, "yogaMat"),
+        .sportBall: Spot(.handR, "球"),
+        .sportBallHand: Spot(.handR, "球"),
+        .outPole: Spot(.handR, "登山杖"),
+        .outBackpack: Spot(.torso, "背包"),
+        .outStraps: Spot(.torso, "背包"),
         .studyMark: .fx,
         // Base-outfit idles (K4-K7, K10-K11, UI 四组 2026-10-14): the card props go down out of the frame first.
         .idleStrand: .figure,

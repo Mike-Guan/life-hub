@@ -395,7 +395,7 @@ final class KuroHomeNode: SKNode {
         var head = visible.filter { isHead($0) }
         // Asleep she keeps what her look wears on her head, but takes off glasses, goggles and the mask for bed.
         if sleeping {
-            let offForBed: Set<KuroPart> = [.deskGlasses, .skiGoggles, .maskWork]
+            let offForBed: Set<KuroPart> = [.deskGlasses, .skiGoggles, .swimGoggles, .maskWork]
             head.formUnion(dressed.filter { isHead($0) && !isFace($0) })
             head.subtract(offForBed)
         }
@@ -423,7 +423,7 @@ final class KuroHomeNode: SKNode {
         if name.hasPrefix("weekly_hair_") || name.hasPrefix("weekly_hat_") { return true }
         let head: Set<KuroPart> = [
             .earL, .earR, .faceBase, .maskWork, .hairFringe, .catEars, .tennisHeadband, .boxHeadband, .itemSakura,
-            .setPicnicHat, .setRainHat, .deskGlasses, .skiGoggles,
+            .setPicnicHat, .setRainHat, .deskGlasses, .skiGoggles, .swimGoggles,
         ]
         return head.contains(part)
     }
@@ -446,8 +446,8 @@ final class KuroHomeNode: SKNode {
     static func sleeve(_ look: KuroLook) -> UInt32 {
         switch look {
         case .work: 0x2D3250
-        case .chill, .study, .music: 0xC9B8FF
-        case .tennis, .fitness, .dance, .ski: 0xFFFFFF
+        case .chill, .study, .music, .outdoor: 0xC9B8FF
+        case .tennis, .fitness, .dance, .ski, .swimming, .yoga, .ball: 0xFFFFFF
         case .desk: 0xF2E8FF
         case .box: 0x7B5CFF
         case .art: 0xFFE14D

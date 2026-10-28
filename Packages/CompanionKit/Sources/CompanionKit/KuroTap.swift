@@ -44,7 +44,7 @@ enum KuroTap: Equatable, Sendable {
         case .study: self = .mark
         case .art: self = .sketch
         // Until each deferred card has its own tap (新角色清单), she shuts her eyes happily like the fitness hug.
-        case .dance, .music, .ski: self = .hug
+        case .dance, .music, .ski, .swimming, .yoga, .ball, .outdoor: self = .hug
         }
     }
 
@@ -326,7 +326,8 @@ extension KuroFigure {
             guard p >= 0.15 else { return .zero }
             let side: CGFloat = part == .boxGloveL ? 1 : -1
             return CGSize(width: 4 * side * KuroIdle.together((p - 0.15) / 0.85), height: 0)
-        case (.hug, .gymBlock):
+        // Batch 2 cards: whatever her right hand holds comes up with the hug, like the block.
+        case (.hug, .gymBlock), (.hug, .yogaMat), (.hug, .sportBall), (.hug, .sportBallHand), (.hug, .outPole):
             return CGSize(width: 0, height: -4 * CGFloat(sin(min(p / 0.8, 1) * .pi)))
         case (.mark, .studyHighlighter):
             // Back to the start of the line, then across it.

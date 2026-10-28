@@ -9,6 +9,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- The second preset character has her own looks for the swimming, yoga, ball and outdoor cards (goggles, a
+  rolled mat, a ball, a backpack and trekking pole), each with its own idle move. The cards are not in the
+  picker yet.
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
   her tennis day, guards and punches in two gloves with the boxing card, and dozes over her tablet in bed.
