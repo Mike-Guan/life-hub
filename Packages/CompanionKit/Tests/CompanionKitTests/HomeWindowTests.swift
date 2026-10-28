@@ -23,6 +23,10 @@ import Testing
         #expect(middle == CGPoint(x: 320 - 167.5, y: 345 - 62))
         let corner = HomeWindow.origin(figure: CGRect(x: 0, y: 0, width: 40, height: 90), room: room, window: window)
         #expect(corner == .zero)
+        // A figure taller than the window keeps 8 points over its head.
+        let tall = HomeWindow.origin(
+            figure: CGRect(x: 300, y: 300, width: 40, height: 130), room: room, window: window)
+        #expect(tall.y == 292)
         let far = HomeWindow.origin(figure: CGRect(x: 600, y: 560, width: 40, height: 40), room: room, window: window)
         #expect(far == CGPoint(x: 632 - 335, y: 604 - 124))
     }

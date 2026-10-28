@@ -78,11 +78,14 @@ public struct HomeWindow: View {
             line: Self.line(model.spot, persona: key.snapshot.persona))
     }
 
-    /// The top left corner of the window in the room, the character in its middle, kept inside the room.
+    // UI 审核 2026-10-28: the second character's ear tips touched the top edge; the head keeps 8 pt above it.
+    /// The top left corner of the window in the room: the character in its middle with at least 8 points over her
+    /// head, kept inside the room.
     static func origin(figure: CGRect, room: CGSize, window: CGSize) -> CGPoint {
-        CGPoint(
+        let top = min(figure.midY - window.height / 2, figure.minY - 8)
+        return CGPoint(
             x: min(max(figure.midX - window.width / 2, 0), max(room.width - window.width, 0)),
-            y: min(max(figure.midY - window.height / 2, 0), max(room.height - window.height, 0)))
+            y: min(max(top, 0), max(room.height - window.height, 0)))
     }
 
     /// Where the character is, in words: only the place, nothing she can't be seen doing.
