@@ -507,6 +507,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - On the watch, both characters sit a little smaller and lower (less on the smaller watch), so the hair
   clears the clock and what they hold stays on screen. When the watch screen dims, HAKU comes to rest
   instead of freezing mid-move.
+- Before the iPhone has sent anything, the watch shows the home's paper colour with a phone icon and what to do,
+  instead of plain system text on black. A note that the watch could not save the iPhone's status goes away
+  after 10 seconds.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
