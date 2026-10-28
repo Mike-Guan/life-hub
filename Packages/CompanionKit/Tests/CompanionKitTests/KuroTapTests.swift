@@ -270,6 +270,25 @@ import Testing
         #expect(KuroView.wink == 0.15)
     }
 
+    // 第 5 批 晚安: as bedtime starts she rubs an eye, yawns stretching up, then settles drowsy.
+    @Test func herGoodNightRubsYawnsAndSettles() {
+        #expect(KuroTap.goodNight.duration == 3.2)
+        let pose = KuroPose(look: .chill, energy: nil, bedtime: .on)
+        let rubbing = pose.reacting(.goodNight, progress: 0.15, heart: true)
+        #expect(KuroFigure.parts(for: .chill, pose: rubbing).contains(.tapRub) && !rubbing.heart)
+        #expect(KuroFigure.shift(.tapRub, pose: rubbing) != .zero)
+        let yawning = pose.reacting(.goodNight, progress: 0.5)
+        #expect(yawning.mouthO && yawning.eyes == .closed)
+        #expect(!KuroFigure.parts(for: .chill, pose: yawning).contains(.tapRub))
+        #expect(pose.reacting(.goodNight, progress: 0.85).eyes == .drowsy)
+        #expect(KuroView.hop((.goodNight, 0.1)) == 0)
+        let stretch = KuroView.goodNight((.goodNight, 0.475), time: 0)
+        #expect((stretch?.dy ?? 0) < -3 && (stretch?.angle ?? 0) < -2)
+        let settle = KuroView.goodNight((.goodNight, 0.825), time: 0)
+        #expect((settle?.dy ?? 0) > 1.5)
+        #expect(KuroView.goodNight((.rollOver, 0.5), time: 0) == nil && KuroView.goodNight(nil, time: 0) == nil)
+    }
+
     @Test func asleepOrNappingSheRollsOverWithoutAHeart() {
         var napping = KuroPose(look: .chill, energy: nil)
         napping.napping = true
