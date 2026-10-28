@@ -1256,6 +1256,14 @@ private let figureItems = ShopItem.catalog(for: .haku).filter {
         #expect(pose.outfit.clothesBack[.boxing] != nil)
     }
 
+    @Test func heldPropsSitLowerOverABoughtCardTop() {
+        let plain = RunnerPose().dressed(for: .study, in: .boxing)
+        #expect(RunnerFigure.propDrop(plain, mode: .boxing) == 0)
+        let cardigan = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.boxing: "haku.top.study.cardigan"])))
+        #expect(RunnerFigure.propDrop(cardigan.dressed(for: .study, in: .boxing), mode: .boxing) > 0)
+        #expect(RunnerFigure.propDrop(cardigan, mode: .boxing) == 0)
+    }
+
     @Test func capGivesWayToHeadgear() {
         let varsity = Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"]))
         var pose = RunnerPose(need: .boxingWarmup).wearing(varsity)
