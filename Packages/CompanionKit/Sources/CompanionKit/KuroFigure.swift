@@ -225,11 +225,12 @@ struct KuroFigure: View {
         let parts = Self.parts(for: look, pose: pose, watch: watch)
         let hatted = parts.contains(.setPicnicHat) || parts.contains(.setRainHat)
         let beanie = parts.contains(.weeklyHatBeanie)
+        let skins = Self.skins(look, items: pose.items)
         ZStack {
             ForEach(parts, id: \.self) { part in
                 KuroPartView(
                     part: part, shift: Self.offset(part, pose: pose, hatted: hatted, beanie: beanie, watch: watch),
-                    turn: Self.turn(part, pose: pose)
+                    turn: Self.turn(part, pose: pose), drawn: skins[part]
                 )
                 .opacity(Self.opacity(part, pose: pose))
             }
@@ -238,6 +239,14 @@ struct KuroFigure: View {
             }
         }
         .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
+    }
+
+    /// The parts drawn in place of her own props in `look` for the card props among `items`.
+    nonisolated static func skins(_ look: KuroLook, items: Set<KuroItem>) -> [KuroPart: [KuroPart]] {
+        // In catalog order, so a gold prop wins over its colour.
+        KuroItem.allCases.filter { items.contains($0) && $0.shows(in: look) }.reduce(into: [:]) { skins, item in
+            skins.merge(item.skin) { _, gold in gold }
+        }
     }
 
     /// Visible parts in back-to-front order; `watch` swaps her low props for the raised watch ones and leaves off
@@ -516,6 +525,8 @@ struct KuroPartView: View {
     var shift: CGSize = .zero
     /// How the part turns about a point, if it does.
     var turn: KuroTurn?
+    /// The parts drawn in its place, for a shop item that recolours it; `nil` draws the part itself.
+    var drawn: [KuroPart]?
     @Environment(\.kuroLineArt) private var lineArt
 
     var body: some View {
@@ -529,7 +540,7 @@ struct KuroPartView: View {
                 context.rotate(by: .degrees(-turn.axis))
                 context.translateBy(x: -turn.pivot.x, y: -turn.pivot.y)
             }
-            let inks = KuroArt.cachedInks(part)
+            let inks = (drawn ?? [part]).flatMap(KuroArt.cachedInks)
             RunnerDrawing.draw(lineArt ? KuroArt.lineArt(inks) : inks, in: context)
         }
     }
@@ -852,7 +863,7 @@ public struct KuroView: View {
         .onChange(of: nods) { _, _ in nodStart = .now }
         .onChange(of: cheer) { _, _ in
             guard bedtime == .off, unboxStart == nil else { return }
-            play(KuroTap(look: look, sleepy: false), at: .now)
+            play(Self.cheerMove(look, overtime: pose.overtime), at: .now)
         }
         .onChange(of: asleep) { _, new in
             guard style == .watch else { return }
@@ -968,6 +979,13 @@ public struct KuroView: View {
         if bedtime == .off { onTap?() }
     }
 
+    // KURO-18 (动画精修计划 v1, F6): with her chin on her hand the tablet is already down, so a cheer stays seated
+    // and taps her cheek instead of raising the tablet in front of the desk and her hand.
+    /// The move she plays for a cheer, a workout or a one-off in `look`.
+    nonisolated static func cheerMove(_ look: KuroLook, overtime: Bool) -> KuroTap {
+        overtime ? .chinTap : KuroTap(look: look, sleepy: false)
+    }
+
     /// Plays the unboxing, the workout cheer or the off-work move that `event` brings, if it is new.
     private func playEventIfNew() {
         playUnboxIfNew()
@@ -975,7 +993,7 @@ public struct KuroView: View {
         if let (id, kind) = Self.newCelebration(event, last: lastCelebration) {
             lastCelebration = id
             // Until she has her own cheer per workout group (新角色清单), she plays her tap move with a heart.
-            play(KuroTap(look: look, sleepy: false), at: .now)
+            play(Self.cheerMove(look, overtime: pose.overtime), at: .now)
             tapHeart = true
             if style == .watch { pokes += 1 }
             if showsBubble { say(KuroBubbleLines.celebration(kind), for: 4) }
@@ -991,7 +1009,7 @@ public struct KuroView: View {
         if let oneOff = KuroOneOff(event), oneOff.id != last(oneOff) {
             markPlayed(oneOff)
             // KURO-04: until she has her own animation for each (新角色清单), she plays her tap move.
-            play(KuroTap(look: look, sleepy: false), at: .now)
+            play(Self.cheerMove(look, overtime: pose.overtime), at: .now)
             tapHeart = oneOff.heart
             if style == .watch { pokes += 1 }
             if showsBubble, let line = KuroBubbleLines.oneOff(event).randomElement() { say(line, for: 3) }

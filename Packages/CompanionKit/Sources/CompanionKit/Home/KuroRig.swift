@@ -119,10 +119,11 @@ final class KuroHomeNode: SKNode {
         }
         // Only her boxing card wears gloves; on her tennis day the sport spot is a forehand swing.
         let wearsGloves = gloves
-        let armKey = "\(sleeve).\(wearsGloves)"
+        let glove = wearsGloves ? Self.glove(items) : nil
+        let armKey = "\(sleeve).\(glove?.rawValue ?? "")"
         if armKey != shownArms {
             shownArms = armKey
-            let arm = Self.arm(sleeve, gloves: wearsGloves)
+            let arm = Self.arm(sleeve, glove: glove)
             setTexture(armL, arm, HakuNode.armRect, pin: .zero)
             setTexture(armR, arm, HakuNode.armRect, pin: .zero)
             armR.xScale = -1
@@ -402,10 +403,15 @@ final class KuroHomeNode: SKNode {
         var head = visible.filter { isHead($0) }
         // Asleep she keeps what her look wears on her head, but takes off glasses, goggles and the mask for bed.
         if sleeping {
-            let offForBed: Set<KuroPart> = [.deskGlasses, .skiGoggles, .maskWork]
+            let offForBed: Set<KuroPart> = [
+                .deskGlasses, .itemGlassesRed, .skiGoggles, .maskWork, .itemPhonesMint, .itemPhonesGold,
+            ]
             head.formUnion(dressed.filter { isHead($0) && !isFace($0) })
             head.subtract(offForBed)
         }
+        // A card prop she wears on her head, like the goggles, is drawn in place of her own.
+        let skins = KuroFigure.skins(look, items: items)
+        head = Set(head.flatMap { skins[$0] ?? [$0] })
         return (sorted(hair), sorted(torso), sorted(head))
     }
 
@@ -430,7 +436,7 @@ final class KuroHomeNode: SKNode {
         if name.hasPrefix("weekly_hair_") || name.hasPrefix("weekly_hat_") { return true }
         let head: Set<KuroPart> = [
             .earL, .earR, .faceBase, .maskWork, .hairFringe, .catEars, .tennisHeadband, .boxHeadband, .itemSakura,
-            .setPicnicHat, .setRainHat, .deskGlasses, .skiGoggles,
+            .setPicnicHat, .setRainHat, .deskGlasses, .itemGlassesRed, .skiGoggles, .itemPhonesMint, .itemPhonesGold,
         ]
         return head.contains(part)
     }
@@ -490,8 +496,13 @@ final class KuroHomeNode: SKNode {
         return texture
     }
 
-    private static func arm(_ sleeve: UInt32, gloves: Bool) -> SKTexture {
-        let key = "arm.\(sleeve).\(gloves)"
+    /// The part her gloves are drawn like: her own red ones, or the pink or gold ones she wears.
+    nonisolated static func glove(_ items: Set<KuroItem>) -> KuroPart {
+        KuroFigure.skins(.box, items: items)[.boxGloveR]?.first ?? .boxGloveR
+    }
+
+    private static func arm(_ sleeve: UInt32, glove: KuroPart?) -> SKTexture {
+        let key = "arm.\(sleeve).\(glove?.rawValue ?? "")"
         if let cached = textures[key] { return cached }
         let texture = HomeTextures.texture(HakuNode.armRect) { context in
             var arm = Path()
@@ -499,13 +510,21 @@ final class KuroHomeNode: SKNode {
             arm.addQuadCurve(to: CGPoint(x: -2, y: 27), control: CGPoint(x: -2, y: 14))
             context.stroke(arm, with: .color(KuroPalette.ink), style: StrokeStyle(lineWidth: 11.5, lineCap: .round))
             context.stroke(arm, with: .color(Color(hex: sleeve)), style: StrokeStyle(lineWidth: 6.5, lineCap: .round))
-            let r: CGFloat = gloves ? 8 : 5
+            let r: CGFloat = glove == nil ? 5 : 8
             let hand = Path(ellipseIn: CGRect(x: -2 - r, y: 29 - r, width: 2 * r, height: 2 * r))
-            context.fill(hand, with: .color(gloves ? KuroPalette.red : KuroPalette.skin))
+            context.fill(hand, with: .color(glove.map(Self.gloveColor) ?? KuroPalette.skin))
             context.stroke(hand, with: .color(KuroPalette.ink), lineWidth: 2.5)
         }
         textures[key] = texture
         return texture
+    }
+
+    private static func gloveColor(_ glove: KuroPart) -> Color {
+        switch glove {
+        case .itemGlovePinkR: KuroPalette.pink
+        case .itemGloveGoldR: KuroPalette.gold
+        default: KuroPalette.red
+        }
     }
 
     static let racketRect = CGRect(x: -12, y: -4, width: 24, height: 48)

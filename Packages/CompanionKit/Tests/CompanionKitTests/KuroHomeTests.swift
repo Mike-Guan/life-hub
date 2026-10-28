@@ -53,6 +53,28 @@ import Testing
         #expect(KuroHomeNode.forehand(0.62) > 0 && KuroHomeNode.forehand(0.62) < 1)
     }
 
+    @Test func atHomeSheWearsTheGlovesSheBought() {
+        #expect(KuroHomeNode.glove([]) == .boxGloveR)
+        #expect(KuroHomeNode.glove([.pinkGloves]) == .itemGlovePinkR)
+        #expect(KuroHomeNode.glove([.pinkGloves, .goldGloves]) == .itemGloveGoldR)
+    }
+
+    @Test func atHomeHerRedGlassesComeOffForBed() {
+        let awake = KuroHomeNode.parts(.study, items: [.redGlasses], face: .idle, sleeping: false)
+        #expect(awake.head.contains(.itemGlassesRed))
+        let asleep = KuroHomeNode.parts(.study, items: [.redGlasses], face: .closed, sleeping: true)
+        #expect(!asleep.head.contains(.itemGlassesRed))
+    }
+
+    @Test func atHomeSheWearsTheGogglesAndHeadphonesSheBought() {
+        let ski = KuroHomeNode.parts(.ski, items: [.sakuraGoggles], face: .idle, sleeping: false)
+        #expect(ski.head.contains(.itemGogglesSakura) && !ski.head.contains(.skiGoggles))
+        let dance = KuroHomeNode.parts(.dance, items: [.goldPhones], face: .idle, sleeping: false)
+        #expect(dance.head.contains(.itemPhonesGold))
+        let asleep = KuroHomeNode.parts(.ski, items: [.sakuraGoggles], face: .closed, sleeping: true)
+        #expect(!asleep.head.contains(.itemGogglesSakura))
+    }
+
     @MainActor @Test func theHomeDrawsHerForHerPersona() {
         #expect(CompanionKit.HomeScene.figure(for: .kuro) is KuroHomeNode)
         #expect(CompanionKit.HomeScene.figure(for: .haku) is HakuNode)
