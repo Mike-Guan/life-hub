@@ -192,7 +192,7 @@ struct OnboardingView: View {
                 mode: shownLook
             )
             LazyVGrid(columns: Self.columns, spacing: 12) {
-                ForEach(IdentityKind.released, id: \.self) { kind in
+                ForEach(Self.pickable, id: \.self) { kind in
                     identityTile(kind)
                 }
             }
@@ -971,6 +971,15 @@ struct OnboardingView: View {
     }
 
     private static let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+    // CEO 办公室 10/28: the batch-2 cards show in test builds only until their lines and the device check are done.
+    /// The cards the picker offers in this build.
+    private static var pickable: [IdentityKind] {
+        #if DEBUG || ENV_STG
+        IdentityKind.released + [.swimming, .yoga, .ball, .outdoor]
+        #else
+        IdentityKind.released
+        #endif
+    }
     private static let sideStates: [SideHustle] = [.project, .vibeCoding, .shooting, .writing, .operating, .studying]
     private static let sidePlaceID = "onboardingSide"
 }
