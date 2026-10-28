@@ -78,7 +78,8 @@ extension FrameSheets {
                 let model = HomeModel(kuroAtNight: false, card: .tennis, wearing: [mode: item.rawValue])
                 let scene = HomeScene(model: model)
                 model.switchMode(mode)
-                if back { model.tap(.wardrobe) }
+                // From the front on the sofa, where her desk doesn't hide the top.
+                model.tap(back ? .wardrobe : .sofa)
                 scene.sync(animated: false)
                 scene.settle()
                 scene.pose(at: 1.3)

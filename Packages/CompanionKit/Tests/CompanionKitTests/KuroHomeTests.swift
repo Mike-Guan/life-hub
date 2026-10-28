@@ -35,6 +35,7 @@ import Testing
         #expect(KuroHomeNode.parts(.work, items: [], face: .back, sleeping: false).torso.isEmpty)
         let rain = KuroHomeNode.parts(.work, items: [.rain], face: .back, sleeping: false)
         #expect(rain.torso == [.setRainBack] && rain.head.contains(.setRainHat))
+        #expect(back.head.contains(.catEars) && back.head.contains(.backHead) && !rain.head.contains(.catEars))
     }
 
     @Test func herSleevesMatchTheTopSheBought() {

@@ -398,7 +398,10 @@ final class KuroHomeNode: SKNode {
             let hats = dressed.filter {
                 $0.rawValue.hasPrefix("weekly_hat_") || $0 == .setPicnicHat || $0 == .setRainHat
             }
-            return (sorted(hair), back, sorted(hair.filter { $0 != .hairBack }.union([.backHead]).union(hats)))
+            // UI 审核 10/28: her cat ears stay on the back of her head, as when she turns away.
+            let ears = dressed.intersection([.earL, .earR, .catEars])
+            let head = hair.filter { $0 != .hairBack }.union([.backHead]).union(ears).union(hats)
+            return (sorted(hair), back, sorted(head))
         }
         var head = visible.filter { isHead($0) }
         // Asleep she keeps what her look wears on her head, but takes off glasses, goggles and the mask for bed.
