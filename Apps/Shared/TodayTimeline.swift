@@ -80,7 +80,7 @@ struct TodayTimeline: View {
         private var durationText: String {
             let minutes = Int(segment.fullDuration / 60)
             let text = minutes >= 60 ? "\(minutes / 60)h \(minutes % 60)m" : "\(minutes)m"
-            return segment.isOngoing ? "\(text) · 进行中" : text
+            return segment.isOngoing ? String(localized: "\(text) · 进行中") : text
         }
     }
 }

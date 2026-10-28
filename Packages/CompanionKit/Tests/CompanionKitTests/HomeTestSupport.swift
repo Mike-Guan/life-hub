@@ -27,6 +27,21 @@ extension HomeModel {
         apply(next)
     }
 
+    /// Hands the model a snapshot in which the character owns `items`, each standing in its zone, placed in order.
+    /// The ids aren't in the shop catalog yet, so the zones are set here rather than by `RoomLayout.place`.
+    func stand(_ items: [HomeItem]) {
+        var next = snapshot
+        for (i, item) in items.enumerated() {
+            let id = "haku.room.\(item.rawValue)"
+            next.owned.insert(id)
+            var placement = RoomPlacement(piece: id)
+            placement.zone = item.zone.rawValue
+            placement.placedAt = now.addingTimeInterval(Double(i))
+            next.room.placements.append(placement)
+        }
+        apply(next)
+    }
+
     /// Hands the model a snapshot in which the character owns `outfit` and wears it, in its mode.
     func wear(_ outfit: HomeOutfit) {
         guard let id = outfit.shopID, let item = ShopItem.item(id) else { return }
