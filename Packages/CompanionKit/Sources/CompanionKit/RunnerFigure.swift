@@ -1301,6 +1301,7 @@ struct RunnerFigure: View {
                     }
                 }
                 .rotationEffect(.degrees(pose.lean), anchor: Self.unit(x: 60, y: 140))
+                .environment(\.partColors, pose.outfit.props)
                 .opacity(pose.presence)
                 .offset(x: pose.shift * scale, y: pose.bounce * scale)
                 .scaleEffect(
@@ -1389,6 +1390,7 @@ struct RunnerFigure: View {
         if pose.puff { visible.insert(.talkDots) }
         // Gloves fill both hands, so the peace sign never adds a third one (Mike 2026-10-07).
         if !visible.isDisjoint(with: [.gloveL, .gloveR]) { visible.remove(.peaceHand) }
+        if let print = pose.outfit.headbandPrint, visible.contains(.headband) { visible.insert(print) }
         if pose.turnedAway {
             // From the back, clothes show as the jacket in their base colour; the cap and a lowered hood stay.
             if !visible.isDisjoint(with: pose.outfit.clothes[mode] ?? []) { visible.insert(.jacket) }
@@ -1522,6 +1524,11 @@ struct RunnerFigure: View {
                         idle.parts(look, at: pose.cardBeat, &visible)
                     } else if pose.cardBeat >= 0 {
                         look.beatParts(at: pose.cardBeat, &visible)
+                    }
+                    // A bought pick hangs on the music look; the gold bookmark lies in the open book.
+                    if look == .music, pose.outfit.props[.pickPendant] != nil { visible.insert(.pickPendant) }
+                    if visible.contains(.book), pose.outfit.props[.bookmarkRibbon] != nil {
+                        visible.insert(.bookmarkRibbon)
                     }
                     // UI 审核 10/14: the watch's bottom edge cuts the fist with the wristband.
                     if pose.watchFrame { visible.remove(.wristbandHand) }
@@ -1734,7 +1741,8 @@ struct RunnerFigure: View {
         .door, .sunlight, .roomPc, .deskMonitor, .pillow, .roomPlant, .roomBag, .roomCactus, .roomSpeaker,
         .roomSpeakerRing, .runningShoes, .heavyBag, .speedLines, .desk, .canStackOne, .canStackTwo, .canStackThree,
         .sofaArm,
-        .jacket, .hoodCollar, .hairBack, .earL, .earR, .headset, .cupL, .cupR, .headband,
+        .jacket, .hoodCollar, .hairBack, .earL, .earR, .headset, .cupL, .cupR, .headband, .headbandCheck,
+        .headbandFlame,
     ]
     nonisolated private static let openEyes: Set<RunnerPart> = [
         .eyesWork, .lidsWork, .eyesChill, .eyesChillTired, .cateyeL, .cateyeR, .eyesMoney, .eyeGlint, .eyesSleepy,
@@ -1851,13 +1859,15 @@ struct RunnerFigure: View {
                     .scaleEffect(x: 1, y: 0.5 + 0.5 * pose.squeeze, anchor: Self.unit(x: 60, y: 65))
                     .offset(x: pose.eyesDx * scale)
             case .maskUp where pose.unmasking, .panelLines where pose.unmasking, .ledLine where pose.unmasking,
-                .maskStripes where pose.unmasking, .maskDots where pose.unmasking, .maskBolt where pose.unmasking:
+                .maskStripes where pose.unmasking, .maskDots where pose.unmasking, .maskBolt where pose.unmasking,
+                .maskSmile where pose.unmasking:
                 // Off work or staying home: the mask slides down to the chin.
                 RunnerPartView(part: part)
                     .offset(y: 12 * pose.maskDrop * scale)
                     .opacity(Double(1 - pose.maskDrop))
             case .maskDown where pose.unmasking, .maskStripesDown where pose.unmasking,
-                .maskDotsDown where pose.unmasking, .maskBoltDown where pose.unmasking:
+                .maskDotsDown where pose.unmasking, .maskBoltDown where pose.unmasking,
+                .maskSmileDown where pose.unmasking:
                 RunnerPartView(part: part).opacity(Double(pose.maskDrop))
             case .ledLine where pose.ledFlare > 0:
                 // Flares wider with a glow.
@@ -2170,8 +2180,9 @@ struct RunnerFigure: View {
         .hairBack, .earL, .earR, .faceBase, .eyesWork, .lidsWork, .eyebags, .eyebagsMask, .browsWork, .eyesChill,
         .eyesChillTired, .eyebagsChill,
         .cateyeL, .cateyeR, .browsBox, .eyesMoney, .mouthSmile, .mouthFang, .maskUp, .panelLines, .maskStripes,
-        .maskDots, .maskBolt,
-        .ledLine, .ledYen, .hairFringe, .earringNeon, .headband, .headset, .cupL, .cupR, .mic,
+        .maskDots, .maskBolt, .maskSmile,
+        .ledLine, .ledYen, .hairFringe, .earringNeon, .headband, .headbandCheck, .headbandFlame, .headset, .cupL, .cupR,
+        .mic,
         .eyesSleepy, .mouthYawn, .eyeGlint, .sparkle, .sparkleWork, .ledCode, .bandage, .headBack, .rubHand,
         .scratchHand, .hairTuft, .eyesClosed, .hairBits, .screenGlow, .phoneEar, .talkDots, .cheekHand, .ouchLines,
         .bathTowel, .headSteam, .bathBlush, .dropsL, .dropsR, .cheerGoggles, .cheerEarTap, .eyeSwirlL, .eyeSwirlR,
@@ -2182,7 +2193,9 @@ struct RunnerFigure: View {
     private static let shrugParts: Set<RunnerPart> = [.jacket, .stripeNeon, .stripeSport, .hoodCollar]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
-    private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown, .maskDotsDown, .maskBoltDown]
+    private static let chinParts: Set<RunnerPart> = [
+        .maskDown, .maskStripesDown, .maskDotsDown, .maskBoltDown, .maskSmileDown,
+    ]
 
     /// The jacket fill for the mode, or for the identity card's look.
     private var jacket: Color {
@@ -2214,13 +2227,20 @@ struct RunnerPartView: View {
     var fillOverride: Color?
     /// Replaces boxing red fills, for wardrobe gloves and headbands.
     var red: Color?
+    @Environment(\.partColors) private var partColors
 
     var body: some View {
+        let swaps = partColors[part] ?? [:]
         Canvas { context, size in
             RunnerDrawing.enterFigureSpace(&context, size: size)
-            RunnerDrawing.draw(part, in: context, red: red, fillOverride: fillOverride)
+            RunnerDrawing.draw(part, in: context, red: red, fillOverride: fillOverride, swaps: swaps)
         }
     }
+}
+
+extension EnvironmentValues {
+    /// Colours swapped in single parts of the figure, such as a recoloured card prop.
+    @Entry var partColors: [RunnerPart: [Color: Color]] = [:]
 }
 
 /// Draws one `RunnerText` in figure space.
@@ -2249,8 +2269,12 @@ enum RunnerDrawing {
     /// - Parameters:
     ///   - red: replaces boxing red fills.
     ///   - fillOverride: replaces every fill.
-    static func draw(_ part: RunnerPart, in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil) {
-        draw(RunnerArt.cachedInks(part), in: context, red: red, fillOverride: fillOverride)
+    ///   - swaps: replaces fill and line colours, each by the one it maps to.
+    static func draw(
+        _ part: RunnerPart, in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil,
+        swaps: [Color: Color] = [:]
+    ) {
+        draw(RunnerArt.cachedInks(part), in: context, red: red, fillOverride: fillOverride, swaps: swaps)
         if let text = RunnerArt.text(part) {
             draw(text, in: context)
         }
@@ -2260,7 +2284,11 @@ enum RunnerDrawing {
     /// - Parameters:
     ///   - red: replaces boxing red fills.
     ///   - fillOverride: replaces every fill.
-    static func draw(_ inks: [RunnerInk], in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil) {
+    ///   - swaps: replaces fill and line colours, each by the one it maps to.
+    static func draw(
+        _ inks: [RunnerInk], in context: GraphicsContext, red: Color? = nil, fillOverride: Color? = nil,
+        swaps: [Color: Color] = [:]
+    ) {
         for ink in inks {
             var layer = context
             layer.opacity = ink.opacity
@@ -2268,12 +2296,12 @@ enum RunnerDrawing {
             if let gradient = ink.gradient {
                 layer.fill(ink.path, with: gradient.shading)
             } else if let fill = ink.fill {
-                let swapped = fill == RunnerPalette.boxingRed ? red ?? fill : fill
+                let swapped = fill == RunnerPalette.boxingRed ? red ?? fill : swaps[fill] ?? fill
                 layer.fill(ink.path, with: .color((fillOverride ?? swapped).opacity(ink.fillOpacity)))
             }
             if let stroke = ink.stroke {
                 let style = StrokeStyle(lineWidth: ink.lineWidth, lineCap: ink.cap, lineJoin: ink.join, dash: ink.dash)
-                layer.stroke(ink.path, with: .color(stroke), style: style)
+                layer.stroke(ink.path, with: .color(swaps[stroke] ?? stroke), style: style)
             }
         }
     }
