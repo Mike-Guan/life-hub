@@ -13,8 +13,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
-- At home the second preset character wears the tops and sets she bought from behind too, and her sleeves
-  match them.
+- The second preset character has her own looks for the swimming, yoga, ball and outdoor cards (goggles, a
+  rolled mat, a ball, a backpack and trekking pole), each with its own idle move. The cards are not in the
+  picker yet.
 - When the second preset character notices one of your needs she leans out to peek at you, blinks and leans
   back smiling, instead of hopping with her look's move. When the need is scrolling on the couch, a tap
   then shows her peeking lines.
@@ -30,6 +31,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
   headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
   headphones she bought.
+- At home the second preset character wears the tops and sets she bought from behind too, and her sleeves
+  match them.
 - The second preset character's identity card props are in the shop: pink and gold gloves (boxing), a mint
   and a gold yoga block (fitness), red glasses and a gold bookmark (study), a blue stylus and a gold brush (art).
   Each one moves with every tap and idle of the prop it replaces, and her gloves at home take their colour.

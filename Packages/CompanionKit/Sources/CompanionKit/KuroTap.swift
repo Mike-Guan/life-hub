@@ -48,7 +48,7 @@ enum KuroTap: Equatable, Sendable {
         case .study: self = .mark
         case .art: self = .sketch
         // Until each deferred card has its own tap (新角色清单), she shuts her eyes happily like the fitness hug.
-        case .dance, .music, .ski: self = .hug
+        case .dance, .music, .ski, .swimming, .yoga, .ball, .outdoor: self = .hug
         }
     }
 
@@ -348,7 +348,8 @@ extension KuroFigure {
             guard p >= 0.15 else { return .zero }
             let side: CGFloat = part == .boxGloveL ? 1 : -1
             return CGSize(width: 4 * side * KuroIdle.together((p - 0.15) / 0.85), height: 0)
-        case (.hug, .gymBlock):
+        // Batch 2 cards: whatever her right hand holds comes up with the hug, like the block.
+        case (.hug, .gymBlock), (.hug, .yogaMat), (.hug, .sportBall), (.hug, .sportBallHand), (.hug, .outPole):
             return CGSize(width: 0, height: -4 * CGFloat(sin(min(p / 0.8, 1) * .pi)))
         case (.mark, .studyHighlighter):
             // Back to the start of the line, then across it.
@@ -373,6 +374,11 @@ extension KuroFigure {
     nonisolated static func turn(_ part: KuroPart, pose: KuroPose) -> KuroTurn? {
         // About a point inside her head, so the pom swings side to side on top of the beanie.
         if part == .weeklyHatBeaniePom, pose.pom != 0 { return KuroTurn(pivot: CGPoint(x: 60, y: 30), angle: pose.pom) }
+        // The yoga stretch bends her whole body about her hips; a tap that cuts it short eases her back upright.
+        if let idle = pose.idle, let angle = idle.lean(part, progress: pose.idleProgress) {
+            let back = pose.tap == nil ? 0 : ease(pose.idleBack)
+            return KuroTurn(pivot: KuroIdle.hips, angle: angle * (1 - back))
+        }
         // 动作展示总表 C7: at the end of the juggle the flat racket flips edge-on about her grip.
         if part == .juggleRacket {
             guard pose.tap == nil, pose.idle == .juggle else { return nil }

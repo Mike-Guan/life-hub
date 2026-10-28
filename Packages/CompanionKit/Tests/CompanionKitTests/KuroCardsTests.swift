@@ -14,9 +14,13 @@ import Testing
         #expect(KuroLook(mode: .boxing, card: .dance) == .dance)
         #expect(KuroLook(mode: .boxing, card: .music) == .music)
         #expect(KuroLook(mode: .boxing, card: .ski) == .ski)
+        #expect(KuroLook(mode: .boxing, card: .swimming) == .swimming)
+        #expect(KuroLook(mode: .boxing, card: .yoga) == .yoga)
+        #expect(KuroLook(mode: .boxing, card: .ball) == .ball)
+        #expect(KuroLook(mode: .boxing, card: .outdoor) == .outdoor)
         #expect(KuroLook(mode: .boxing, card: .tennis) == .tennis)
-        // No card, or one she has no look for yet, keeps her tennis day.
-        #expect(KuroLook(mode: .boxing) == .tennis && KuroLook(mode: .boxing, card: .swimming) == .tennis)
+        // No card keeps her tennis day.
+        #expect(KuroLook(mode: .boxing) == .tennis)
         // The card only changes the card slot.
         #expect(KuroLook(mode: .work, card: .boxing) == .work && KuroLook(mode: .money, card: .art) == .desk)
     }
@@ -30,6 +34,10 @@ import Testing
             .dance: [.jacketTennis, .tennisPonytail],
             .music: [.jacketChill, .scoreSheet, .scoreFinger],
             .ski: [.jacketTennis, .skiGoggles, .tennisPonytail],
+            .swimming: [.jacketTennis, .swimGoggles, .tennisPonytail],
+            .yoga: [.jacketTennis, .yogaMat, .tennisPonytail],
+            .ball: [.jacketTennis, .sportBall, .sportBallHand, .tennisPonytail],
+            .outdoor: [.jacketChill, .outBackpack, .outStraps, .outPole],
         ]
         for (look, things) in expected {
             let parts = Set(KuroFigure.parts(for: look, pose: KuroPose(look: look, energy: 50)))
@@ -110,6 +118,70 @@ import Testing
         let parts = Set(KuroFigure.parts(for: .ski, pose: sneeze))
         #expect(parts.isSuperset(of: [.sneezePuff, .eyesClosed]) && !parts.contains(.mittenHand))
         #expect(KuroFigure.shift(.faceBase, pose: sneeze).height > 0)
+    }
+
+    // Identity cards, batch 2 (第 2 批身份卡 草稿): each card has its own move and its base outfit's moves.
+    @Test func eachBatchTwoCardHasItsOwnIdleMove() {
+        #expect(KuroIdle.pool(.swimming) == [.ears, .ponytail, .goggles, .reach])
+        #expect(KuroIdle.pool(.yoga) == [.ears, .ponytail, .stretch, .reach, .towel])
+        #expect(KuroIdle.pool(.ball) == [.ears, .ponytail, .dribble, .reach, .towel])
+        #expect(KuroIdle.pool(.outdoor) == [.ears, .gaze, .collar, .phone])
+        #expect(KuroIdle.stretch.length == 2 * KuroIdle.snow.length)
+    }
+
+    @Test func theGogglesComeDownThenSnapBackUp() {
+        let pose = KuroPose(look: .swimming, energy: 50)
+        let on = pose.idling((.goggles, 1 / 2.5))
+        #expect(KuroFigure.shift(.swimGoggles, pose: on).height > 25)
+        #expect(KuroFigure.parts(for: .swimming, pose: pose.idling((.goggles, 1.05 / 2.5))).contains(.eyesClosed))
+        let snapped = pose.idling((.goggles, 1.7 / 2.5))
+        #expect(KuroFigure.shift(.swimGoggles, pose: snapped).height < 0.5)
+        #expect(Set(KuroFigure.parts(for: .swimming, pose: snapped)).isSuperset(of: [.eyesSurprised, .mouthO]))
+    }
+
+    // UI 审核 #569 r1: the bend has to read as one, at least 6° each way, with the mat standing still.
+    @Test func sheBendsSideToSideButTheMatStays() {
+        let pose = KuroPose(look: .yoga, energy: 50)
+        let left = pose.idling((.stretch, 2 / 6))
+        let right = pose.idling((.stretch, 4.1 / 6))
+        for part in [KuroPart.faceBase, .jacketTennis, .hairBack, .catEars] {
+            #expect((KuroFigure.turn(part, pose: left)?.angle ?? 0) <= -6, "\(part)")
+            #expect((KuroFigure.turn(part, pose: right)?.angle ?? 0) >= 6, "\(part)")
+        }
+        #expect(KuroFigure.turn(.yogaMat, pose: left) == nil && KuroFigure.turn(.yogaMat, pose: right) == nil)
+        #expect(KuroFigure.shift(.yogaMat, pose: left) == .zero && KuroFigure.shift(.yogaMat, pose: right) == .zero)
+        // Upright again before she breathes out, and still between moves.
+        #expect((KuroFigure.turn(.faceBase, pose: pose.idling((.stretch, 5.5 / 6)))?.angle ?? 0) == 0)
+        #expect(KuroFigure.turn(.faceBase, pose: pose) == nil)
+        #expect(KuroFigure.parts(for: .yoga, pose: left).contains(.eyesClosed))
+    }
+
+    @Test func theBallBouncesTwiceAndComesBackToHerHand() {
+        let pose = KuroPose(look: .ball, energy: 50)
+        let lows = [0.55, 1.25].map { KuroFigure.shift(.sportBall, pose: pose.idling((.dribble, $0 / 2.4))).height }
+        #expect(lows.allSatisfy { $0 > 15 })
+        #expect(KuroFigure.shift(.sportBall, pose: pose.idling((.dribble, 0.9 / 2.4))).height < 1)
+        #expect(KuroFigure.parts(for: .ball, pose: pose.idling((.dribble, 0.55 / 2.4))).contains(.eyesDown))
+        #expect(KuroFigure.parts(for: .ball, pose: pose.idling((.dribble, 2 / 2.4))).contains(.eyesHappy))
+    }
+
+    @Test func outdoorsTheWindCatchesHerEarsAndHair() {
+        let pose = KuroPose(look: .outdoor, energy: 50)
+        #expect(KuroFigure.shift(.outPole, pose: pose.idling((.gaze, 0.3 / 3.5))).height < -4)
+        let looking = pose.idling((.gaze, 1.3 / 3.5))
+        #expect(KuroFigure.shift(.eyesOpen, pose: looking).height < -2)
+        #expect(KuroFigure.shift(.catEars, pose: looking).height < -2)
+        #expect(KuroFigure.shift(.hairBack, pose: looking).width > 0.5)
+        #expect(KuroFigure.parts(for: .outdoor, pose: pose.idling((.gaze, 2.8 / 3.5))).contains(.eyesHappy))
+    }
+
+    // Walking off she carries her walk backpack, so the outdoor one comes off; the pole goes down with her props.
+    @Test func walkingSheSwapsTheOutdoorPackForHerWalkPack() {
+        var pose = KuroPose(look: .outdoor, energy: 50)
+        pose.scene = .walking(from: .home, time: 0, lookingBack: false)
+        let parts = Set(KuroFigure.parts(for: .outdoor, pose: pose))
+        #expect(parts.isSuperset(of: [.walkPack, .walkStraps]))
+        #expect(parts.isDisjoint(with: [.outBackpack, .outStraps, .outPole]))
     }
 
     // Mike 2026-10-15: the towel rests on her right shoulder in the boxing look; there is no back view of it.
