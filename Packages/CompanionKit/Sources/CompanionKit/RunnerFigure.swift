@@ -1815,11 +1815,19 @@ struct RunnerFigure: View {
         }
         .offset(y: (isHead ? pose.headDy : 0) * scale)
         .offset(y: Self.shrugParts.contains(part) ? pose.shrug * scale : 0)
+        .offset(y: part == .sportBall ? ballLift * scale : 0)
         .offset(y: isHead || Self.chinParts.contains(part) ? 30 * pose.slump * scale : 0)
         .rotationEffect(
             .degrees(isHead ? -14 * Double(pose.lie) + pose.headTilt : 0),
             anchor: Self.unit(x: 60, y: 96)
         )
+    }
+
+    // UI 审核 10/28: the watch's bottom edge cuts the ball on the fist in half, so there it rests a little higher.
+    /// How far the ball card's ball sits above the fist, in SVG units: only on the watch.
+    private var ballLift: CGFloat {
+        guard pose.watchFrame else { return 0 }
+        return RunnerCardLook.watchBallLift(at: pose.baseIdle == nil ? pose.cardBeat : -1)
     }
 
     /// How `part` moves in the card look's idle that is playing, or nil when it stays put.

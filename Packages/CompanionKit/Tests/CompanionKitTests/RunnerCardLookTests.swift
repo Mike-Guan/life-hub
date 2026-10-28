@@ -100,9 +100,12 @@ import Testing
             #expect(pose.watchFrame)
             #expect(!Set(RunnerFigure.parts(for: .boxing, pose: pose)).contains(.wristbandHand), "\(card)")
         }
-        // The ball stays by the shoulder, above the watch's bottom edge.
+        // The ball stays by the shoulder, raised clear of the watch's bottom edge, and is on the fist mid-spin.
         let ball = RunnerPose().dressed(for: .ball, in: .boxing, watch: true)
         #expect(Set(RunnerFigure.parts(for: .boxing, pose: ball)).contains(.sportBall))
+        #expect(106 + 9 + RunnerCardLook.watchBallLift(at: -1) < 110)
+        #expect(RunnerCardLook.watchBallLift(at: 1.0) == 0)
+        #expect(abs(RunnerCardLook.watchBallLift(at: 3.4) - RunnerCardLook.watchBallLift(at: -1)) < 0.01)
     }
 
     private func beat(_ card: IdentityKind, at t: CGFloat) -> Set<RunnerPart> {

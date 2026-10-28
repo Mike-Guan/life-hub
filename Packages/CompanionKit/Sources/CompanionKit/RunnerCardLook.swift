@@ -340,6 +340,13 @@ extension RunnerCardLook {
         ramp(t, 0.45, 0.95) * (1 - ramp(t, 1.55, 2.05))
     }
 
+    /// How far the ball rests above the fist on the watch, `t` seconds into the ball idle (negative `t` at rest), in
+    /// SVG units: down to the fist before it goes up to the fingertip, back up once it has bounced home.
+    static func watchBallLift(at t: CGFloat) -> CGFloat {
+        guard t >= 0 else { return -6 }
+        return -6 * (1 - ramp(t, 0.15, 0.4) + ramp(t, 3.1, 3.4))
+    }
+
     /// The yoga sway in degrees: left, right, then upright to look at you.
     private static func sway(at t: CGFloat) -> Double {
         Double(-6 * ramp(t, 0.7, 1.3) + 10 * ramp(t, 1.5, 2.2) - 4 * ramp(t, 2.4, 2.9))
