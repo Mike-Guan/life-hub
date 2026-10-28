@@ -326,9 +326,7 @@ struct KuroFigure: View {
         if pose.heart { visible.insert(.tapHeart) }
         if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
         if pose.facingAway { turnAround(&visible) }
-        // One top or set per mode, so the first worn one in catalog order is the only one.
-        let worn = KuroItem.allCases.filter { $0.look == look && pose.items.contains($0) }
-        if let clothes = worn.lazy.compactMap(\.clothes).first {
+        if let clothes = clothes(look, items: pose.items) {
             let back = pose.facingAway || pose.tap == .turnAway && KuroTap.facesAway(pose.tapProgress)
             dress(look, in: clothes, back: back, &visible)
         }
@@ -357,6 +355,12 @@ struct KuroFigure: View {
         }
         if visible.remove(rubSleeve(look)) != nil { visible.insert(clothes.rubSleeve) }
         if visible.remove(KuroScene.sleeve(look)) != nil { visible.insert(clothes.inviteSleeve) }
+    }
+
+    // One top or set per mode, so the first worn one in catalog order is the only one.
+    /// The top or set she wears in `look` among `items`, if any.
+    nonisolated static func clothes(_ look: KuroLook, items: Set<KuroItem>) -> KuroClothes? {
+        KuroItem.allCases.lazy.filter { $0.look == look && items.contains($0) }.compactMap(\.clothes).first
     }
 
     /// Her own top in `look`.
