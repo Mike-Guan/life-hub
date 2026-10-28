@@ -105,11 +105,12 @@ final class KuroHomeNode: SKNode {
         }
         guard let parts = split?.parts else { return }
         show(head, key: "head", parts.head, pin: CGPoint(x: 60, y: 95), rect: HakuNode.headRect, shown: &shownHead)
-        if back {
-            let key = "back.\(Self.sleeve(look))"
+        let sleeve = Self.sleeve(look, items: items)
+        if back, parts.torso.isEmpty {
+            let key = "back.\(sleeve)"
             if key != shownTorso {
                 shownTorso = key
-                setTexture(torso, Self.torsoBack(Self.sleeve(look)), HakuNode.torsoRect, pin: CGPoint(x: 60, y: 138))
+                setTexture(torso, Self.torsoBack(sleeve), HakuNode.torsoRect, pin: CGPoint(x: 60, y: 138))
             }
         } else {
             show(
@@ -118,10 +119,10 @@ final class KuroHomeNode: SKNode {
         }
         // Only her boxing card wears gloves; on her tennis day the sport spot is a forehand swing.
         let wearsGloves = gloves
-        let armKey = "\(Self.sleeve(look)).\(wearsGloves)"
+        let armKey = "\(sleeve).\(wearsGloves)"
         if armKey != shownArms {
             shownArms = armKey
-            let arm = Self.arm(Self.sleeve(look), gloves: wearsGloves)
+            let arm = Self.arm(sleeve, gloves: wearsGloves)
             setTexture(armL, arm, HakuNode.armRect, pin: .zero)
             setTexture(armR, arm, HakuNode.armRect, pin: .zero)
             armR.xScale = -1
@@ -390,7 +391,13 @@ final class KuroHomeNode: SKNode {
         let hair = dressed.filter(hairParts.contains)
         let torso = dressed.filter(isTop)
         if face == .back {
-            return (sorted(hair), sorted(torso), sorted(hair.filter { $0 != .hairBack }.union([.backHead])))
+            // From behind: the plain back of the top she bought, or nothing for her own top (drawn plain), and her
+            // hats, which look the same from behind.
+            let back = KuroFigure.clothes(look, items: items).map { [$0.back] } ?? []
+            let hats = dressed.filter {
+                $0.rawValue.hasPrefix("weekly_hat_") || $0 == .setPicnicHat || $0 == .setRainHat
+            }
+            return (sorted(hair), back, sorted(hair.filter { $0 != .hairBack }.union([.backHead]).union(hats)))
         }
         var head = visible.filter { isHead($0) }
         // Asleep she keeps what her look wears on her head, but takes off glasses, goggles and the mask for bed.
@@ -442,8 +449,19 @@ final class KuroHomeNode: SKNode {
         return texture
     }
 
+    /// The colour of her sleeves in `look` wearing `items`: the sleeve of the top she bought, else her own.
+    nonisolated static func sleeve(_ look: KuroLook, items: Set<KuroItem>) -> UInt32 {
+        switch KuroFigure.clothes(look, items: items)?.top {
+        case .topChillStrawberry: 0xFFD1DC
+        case .topChillCathoodie, .topSideDenim: 0x7FB7FF
+        case .setRainTop: 0xFFE14D
+        case .some: 0xFFFFFF
+        case nil: sleeve(look)
+        }
+    }
+
     /// The colour of her sleeves in `look`, matching its top.
-    static func sleeve(_ look: KuroLook) -> UInt32 {
+    nonisolated static func sleeve(_ look: KuroLook) -> UInt32 {
         switch look {
         case .work: 0x2D3250
         case .chill, .study, .music: 0xC9B8FF
