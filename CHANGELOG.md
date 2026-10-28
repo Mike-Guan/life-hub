@@ -9,6 +9,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- The second preset character's ten room items stand in her home: two posters on the poster wall, a cat
+  clock, a jar, a strawberry mug and a mirror on the desk, yarn and a plush by the sofa, a sakura pot and an easel
+  in the corner. Each character's item preview shows only what her or his shop sells, own items first.
 - The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
   puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
   corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters
