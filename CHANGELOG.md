@@ -9,6 +9,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- Test builds (DEV and STG) offer the swimming, yoga, ball and outdoor identity cards in the picker. The App
+  Store build keeps the eight cards it has until their lines are final and both characters were checked on a
+  device.
 - The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
   headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
   headphones she bought.
