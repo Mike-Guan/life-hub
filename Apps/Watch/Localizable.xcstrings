@@ -33,6 +33,38 @@
         }
       }
     },
+    "上一页" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Previous page"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "前のページ"
+          }
+        }
+      }
+    },
+    "下一页" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Next page"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "次のページ"
+          }
+        }
+      }
+    },
     "先在 iPhone 上打开一次 Life Hub" : {
       "comment" : "App 名定了再改",
       "localizations" : {
