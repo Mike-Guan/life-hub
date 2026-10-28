@@ -27,6 +27,8 @@ enum KuroTap: Equatable, Sendable {
     case chinTap
     /// Asleep at bedtime: eyes shut, she leans over and back as if rolling over.
     case rollOver
+    /// Bedtime starting: she rubs an eye, stretches up in a big yawn, then settles with heavy eyes.
+    case goodNight
 
     /// The reaction to a tap in `look`; when `sleepy` she rubs her eyes instead.
     init(look: KuroLook, sleepy: Bool) {
@@ -53,6 +55,7 @@ enum KuroTap: Equatable, Sendable {
         switch self {
         case .turnAway: 3
         case .rollOver: 1.4
+        case .goodNight: 3.2
         default: 1.1
         }
     }
@@ -146,7 +149,7 @@ extension KuroPose {
         var pose = self
         pose.tap = tap
         pose.tapProgress = p
-        pose.heart = heart && tap != .turnAway && tap != .rollOver
+        pose.heart = heart && tap != .turnAway && tap != .rollOver && tap != .goodNight
         pose.blinking = false
         switch tap {
         case .tablet:
@@ -170,6 +173,11 @@ extension KuroPose {
             pose.eyes = p < 0.75 ? .open : .drowsy
         case .rollOver:
             pose.eyes = .closed
+        case .goodNight:
+            // Rubs an eye (0-0.3), yawns with her eyes squeezed shut (0.3-0.65), then settles, drowsy.
+            pose.eyes = p < 0.65 ? .closed : .drowsy
+            pose.mouthO = (0.3..<0.65).contains(p)
+            pose.calm = p < 0.3 || p >= 0.65
         case .bump:
             pose.eyes = p < 0.15 ? .surprised : KuroIdle.together((p - 0.15) / 0.85) > 0.85 ? .closed : .open
             pose.mouthO = p < 0.15
@@ -254,6 +262,8 @@ extension KuroFigure {
             }
         case .rub:
             if p < 0.65 { visible.insert(.tapRub) }
+        case .goodNight:
+            if p < 0.3 { visible.insert(.tapRub) }
         case .mark:
             if p >= 0.5 { visible.insert(.studyMark) }
         case .chinTap, .bump, .hug, .sketch, .rollOver:
@@ -334,6 +344,10 @@ extension KuroFigure {
             return CGSize(width: -12 * CGFloat(back), height: 0)
         case (.sketch, .craftPen):
             return CGSize(width: 0, height: -14 * CGFloat(sin(min(p / 0.9, 1) * .pi)))
+        case (.goodNight, .tapRub):
+            // Comes up from below, rubs side to side, goes back down before the yawn.
+            let up = min(p / 0.06, 1, max((0.3 - p) / 0.05, 0))
+            return CGSize(width: 1.5 * CGFloat(sin(p * 40)), height: 12 * CGFloat(1 - ease(up)))
         case (.chinTap, .overtimeHand):
             // Two taps on the cheek between 0.15 and 0.75.
             guard (0.15..<0.75).contains(p) else { return .zero }
