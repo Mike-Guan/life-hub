@@ -175,10 +175,10 @@ final class HomeScene: SKScene {
 
     /// The layer that shows `piece` with the colours picked now.
     private func layer(_ piece: HomePiece, covering: Bool) -> HomeLayer {
+        if piece == .rug { return .rug(model.rug, color: model.color(.rug)) }
         let color: UInt32 =
             switch piece {
             case .sofaBack, .sofaFarArm, .sofaSeat, .sofaNearArm: model.color(.sofa)
-            case .rug: model.color(.rug)
             case .blanket: model.color(.bed)
             default: 0
             }
@@ -189,7 +189,8 @@ final class HomeScene: SKScene {
 
     /// Brings the drawing up to date with the model.
     func sync(animated: Bool = true) {
-        let colors = HomePaintable.allCases.map(model.color)
+        // The rug's style redraws the room like a colour does.
+        let colors = HomePaintable.allCases.map(model.color) + [UInt32(HomeRug.allCases.firstIndex(of: model.rug) ?? 0)]
         if colors != shownColors {
             redraw(flashing: shownColors != nil)
             shownColors = colors

@@ -8,6 +8,8 @@ enum HomeLayer: Hashable, Sendable {
     case shell(walls: UInt32)
     /// A piece in its colour; the blanket is pulled up when `covering`.
     case piece(HomePiece, color: UInt32, covering: Bool)
+    /// The rug in its style and colour.
+    case rug(HomeRug, color: UInt32)
     case item(HomeItem)
     /// The bench's bar, which HAKU lifts off the rack.
     case barbell
@@ -19,6 +21,7 @@ enum HomeLayer: Hashable, Sendable {
         switch self {
         case .shell: HomeGrid.canvas
         case .piece(let piece, _, _): HomeGrid.bounds(piece.boxes, margin: 10)
+        case .rug(let rug, _): HomeGrid.bounds([rug.box], margin: 10)
         case .item(let item): HomeGrid.bounds(HomeArt.boxes(item), margin: 10)
         case .barbell: HomeGrid.bounds([HomeArt.barbellBox], margin: 10)
         case .wornGloves: HomeGrid.bounds([HomeArt.wornGlovesBox], margin: 10)
@@ -33,6 +36,7 @@ enum HomeLayer: Hashable, Sendable {
             case .shell(let walls): HomeArt.shell(pen, walls: walls, night: night)
             case .piece(let piece, let color, let covering):
                 HomeArt.piece(pen, piece, color: color, covering: covering)
+            case .rug(let rug, let color): HomeArt.rug(pen, rug, color)
             case .item(let item): HomeArt.item(pen, item)
             case .barbell: HomeArt.barbell(pen)
             case .wornGloves: HomeArt.wornGloves(pen)
