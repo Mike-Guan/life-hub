@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Fixed
+- When the second preset character pops out of a gift box she grows as a whole instead of stretching up, and
+  halfway through the spin you see her back instead of her face mirrored.
 - A workout cheer while the second preset character rests her chin on her hand at the desk no longer raises her
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
@@ -12,6 +14,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Test builds (DEV and STG) offer the swimming, yoga, ball and outdoor identity cards in the picker. The App
   Store build keeps the eight cards it has until their lines are final and both characters were checked on a
   device.
+- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
+  pulled down and pushed back), yoga (a mat in hand, palms pressed while swaying), ball (a ball on the fist,
+  spun on a fingertip until it drops and bounces back) and outdoor (backpack and trekking pole, a hand over the
+  eyes to look far while the wind blows by).
 - The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
   headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
   headphones she bought.
@@ -486,6 +492,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - On the watch, the labels on the second page, the mode chip, a save failure and the page actions follow the
   watch's language (Japanese and English), and VoiceOver can turn between the two pages. The no-mode complication
   has a spoken label.
+- On the watch, both characters sit a little smaller and lower (less on the smaller watch), so the hair
+  clears the clock and what they hold stays on screen. When the watch screen dims, HAKU comes to rest
+  instead of freezing mid-move.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
