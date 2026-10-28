@@ -410,7 +410,7 @@ import Testing
         #expect(HomeItem(shopID: "haku.room.lamp.clip") == .clipLamp)
         #expect(HomeItem(shopID: "haku.room.poster.city") == .cityPoster)
         #expect(HomeItem(shopID: "haku.room.monstera") == .monstera)
-        #expect(HomeItem(shopID: "kuro.room.poster.cat") == nil)
+        #expect(HomeItem(shopID: "kuro.room.poster.none") == nil)
     }
 
     @Test func wallHooksAreNotHiddenByTheWardrobe() {
