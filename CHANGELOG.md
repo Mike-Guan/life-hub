@@ -5,10 +5,33 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Fixed
+- The second preset character's face on the widgets and watch face follows the day like on the home screen:
+  drowsy when worn out, eyes down when busy, bright when she notices a need, chin on hand at overtime.
+- When the second preset character pops out of a gift box she grows as a whole instead of stretching up, and
+  halfway through the spin you see her back instead of her face mirrored.
 - A workout cheer while the second preset character rests her chin on her hand at the desk no longer raises her
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- The second preset character has her own good night: as bedtime starts she rubs an eye, stretches up in a
+  big yawn and settles with heavy eyes, instead of only dimming.
+- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
+- Test builds (DEV and STG) offer the swimming, yoga, ball and outdoor identity cards in the picker. The App
+  Store build keeps the eight cards it has until their lines are final and both characters were checked on a
+  device.
+- HAKU can dress for four more identity cards: swimming (goggles up on the hair,
+  pulled down and pushed back), yoga (a mat in hand, palms pressed while swaying), ball (a ball on the fist,
+  spun on a fingertip until it drops and bounces back) and outdoor (backpack and trekking pole, a hand over the
+  eyes to look far while the wind blows by).
+- The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
+  headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
+  headphones she bought.
+- The second preset character's identity card props are in the shop: pink and gold gloves (boxing), a mint
+  and a gold yoga block (fitness), red glasses and a gold bookmark (study), a blue stylus and a gold brush (art).
+  Each one moves with every tap and idle of the prop it replaces, and her gloves at home take their colour.
+- The second preset character's ten room items stand in her home: two posters on the poster wall, a cat
+  clock, a jar, a strawberry mug and a mirror on the desk, yarn and a plush by the sofa, a sakura pot and an easel
+  in the corner. Each character's item preview shows only what her or his shop sells, own items first.
 - HAKU's seven identity card tops are drawn and on the shop shelf: the black and gold boxing jacket, the sport
   tank and the white sport jacket, the cardigan and the windbreaker for outings, and the canvas apron and the
   overalls for crafts. Each shows only with a card that wears it, and from behind as a plain jacket.
@@ -17,6 +40,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters
   can have: a yoga mat, a jump rope, a dance mirror and a music stand. Two items in the same zone (desk or
   sports wall) stand side by side, and a poster replaces the two default ones. The shop doesn't sell them yet.
+- The home can lay two more rugs next to the free fringed one: a striped rug and a round braided rug, each
+  in the four rug colours. The shop sells them after 0.1.0.
+- HAKU's identity card props can be drawn in a bought colour and in gold: a mint or gold racket, an orange or
+  gold dumbbell, a wine red book cover and a gold bookmark, a yellow sketchbook and a gold pencil, a pink or gold dance wristband and
+  cyan or gold ski goggles, and a neon or gold pick on a cord for the music card. The shop icon shows the prop itself. HAKU also gets a checked headband, a flame
+  headband and a smiley mask sticker. The shop doesn't sell any of them yet.
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
   her tennis day, guards and punches in two gloves with the boxing card, and dozes over her tablet in bed.
@@ -160,8 +189,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The shop's room shelf is grouped by where each item goes in the home: on the desk, by the sofa, in the corner
+  and the workout corner. This week's item still comes first.
 - After a workout HAKU crouches before each of his two hops and lands pressed down, and the celebration
   runs 2.4 s instead of 1.6 s, so it no longer looks like a poke.
+- HAKU's hands and what they hold come up into view and go down again instead of popping in: the phone he
+  glances at, the scratching hand and the watch he taps before a planned task. When a planned task's prop
+  comes up, the can in his hand goes down first.
+- Scene effects such as the coffee breath, the haircut buzz and the ouch lines fade in and out instead of
+  blinking on and off.
 - The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
   reward list names them. The shelf no longer draws gloves nobody earned.
 - In the home the floor lamp's cord runs to a socket on the wall beside it, not out across the floor.
@@ -473,6 +509,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
 - The character on the watch face shows the same scene as the watch app and the iPhone Lock Screen (the gym
   bag, setting off, the bath) and changes its pose every 15 minutes, instead of only the plain mode look.
+- On the watch, the labels on the second page, the mode chip, a save failure and the page actions follow the
+  watch's language (Japanese and English), and VoiceOver can turn between the two pages. The no-mode complication
+  has a spoken label.
+- On the watch, both characters sit a little smaller and lower (less on the smaller watch), so the hair
+  clears the clock and what they hold stays on screen. When the watch screen dims, HAKU comes to rest
+  instead of freezing mid-move.
+- Before the iPhone has sent anything, the watch shows the home's paper colour with a phone icon and what to do,
+  instead of plain system text on black. A note that the watch could not save the iPhone's status goes away
+  after 10 seconds.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
