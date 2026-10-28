@@ -9,10 +9,14 @@ struct Outfit: Equatable, Sendable {
     var gloves: Color?
     /// Replaces the boxing red of the headband, or `nil` for red.
     var headband: Color?
+    /// The print drawn over the headband, such as checks, or `nil` for a plain band.
+    var headbandPrint: RunnerPart?
     /// The print on the mask, or `nil` for the plain mask.
     var mask: MaskPrint?
     /// The room item next to HAKU at home, or `nil` for none.
     var room: RunnerPart?
+    /// Colours swapped in the identity card's prop, by part, such as the racket's frame; empty for its own colours.
+    var props: [RunnerPart: [Color: Color]] = [:]
     /// A sneaky peace sign in every celebration and unboxing.
     var peaceSign = false
     /// The parts of the top or full set worn in each mode, in place of the jacket.
@@ -38,13 +42,24 @@ struct Outfit: Equatable, Sendable {
             case "keepsake.headband.runner": RunnerPalette.white
             case "haku.weekly.headband.orange": RunnerPalette.catOrange
             case "haku.weekly.headband.mint": RunnerPalette.mint
+            case "haku.headband.check": RunnerPalette.cream
+            case "haku.headband.flame": RunnerPalette.jacket
             default: nil
             }
+        // 商店扩充 v1 §3.
+        headbandPrint =
+            switch worn[.headband] {
+            case "haku.headband.check": .headbandCheck
+            case "haku.headband.flame": .headbandFlame
+            default: nil
+            }
+        props = worn[.gloves].flatMap { Self.propColors[$0] } ?? [:]
         mask =
             switch worn[.mask] {
             case "mask.stripes": .stripes
             case "haku.weekly.mask.dots": .dots
             case "haku.weekly.mask.bolt": .bolt
+            case "haku.mask.smile": .smile
             default: nil
             }
         room =
@@ -59,6 +74,32 @@ struct Outfit: Equatable, Sendable {
         clothes = wardrobe.clothes.compactMapValues { Self.clothesParts[$0] }
         clothesBack = wardrobe.clothes.compactMapValues { Self.clothesBackColors[$0] }
     }
+
+    // 商店完整目录 v0 §1.2 and 商店扩充 v1 §4: each card's prop in a bought colour, and in gold on the card's 10th
+    // win. The props share the gloves slot. Ids not yet in the catalog (dance, music, ski) go to engineering.
+    static let propColors: [String: [RunnerPart: [Color: Color]]] = [
+        "haku.racket.tennis.mint": [.tennisRacket: [RunnerPalette.catOrange: RunnerPalette.mint]],
+        "haku.racket.tennis.gold": [.tennisRacket: [RunnerPalette.catOrange: RunnerPalette.gold]],
+        "haku.dumbbell.gym.orange": [
+            .handWeight: [RunnerPalette.mask: RunnerPalette.catOrange, RunnerPalette.maskLine: Color(hex: 0xC9721F)]
+        ],
+        "haku.dumbbell.gym.gold": [
+            .handWeight: [RunnerPalette.mask: RunnerPalette.gold, RunnerPalette.maskLine: Color(hex: 0xB8901A)]
+        ],
+        // The default cover is already navy, so the bought one is wine red (proposed to PM 10/27).
+        "haku.book.study.navy": [.book: [RunnerPalette.hood: Color(hex: 0x8E2A44)]],
+        // The gold bookmark and the pick are things of their own: worn, they add their part to the card's look.
+        "haku.bookmark.study.gold": [.bookmarkRibbon: [:]],
+        "haku.pick.music.neon": [.pickPendant: [:]],
+        "haku.pick.music.gold": [.pickPendant: [RunnerPalette.neonCyan: RunnerPalette.gold]],
+        "haku.sketch.art.yellow": [.sketchbook: [RunnerPalette.white: RunnerPalette.catYellow]],
+        // A deeper gold than the pencil's own yellow, so the keepsake reads as gold.
+        "haku.pencil.art.gold": [.pencil: [RunnerPalette.catYellow: Color(hex: 0xE8A317)]],
+        "haku.wristband.dance.pink": [.wristbandHand: [RunnerPalette.catOrange: RunnerPalette.neonPink]],
+        "haku.wristband.dance.gold": [.wristbandHand: [RunnerPalette.catOrange: RunnerPalette.gold]],
+        "haku.goggles.ski.cyan": [.skiGoggles: [RunnerPalette.catOrange: RunnerPalette.neonCyan]],
+        "haku.goggles.ski.gold": [.skiGoggles: [RunnerPalette.catOrange: RunnerPalette.gold]],
+    ]
 
     // 商店衣服 pop (Mike 2026-10-14). The second character's clothes are not drawn yet.
     static let clothesParts: [String: Set<RunnerPart>] = [
@@ -93,6 +134,8 @@ enum MaskPrint: CaseIterable, Sendable {
     case dots
     /// A yellow lightning bolt sticker.
     case bolt
+    /// A yellow smiley sticker.
+    case smile
 
     /// The print on the raised mask.
     var up: RunnerPart {
@@ -100,6 +143,7 @@ enum MaskPrint: CaseIterable, Sendable {
         case .stripes: .maskStripes
         case .dots: .maskDots
         case .bolt: .maskBolt
+        case .smile: .maskSmile
         }
     }
 
@@ -109,6 +153,7 @@ enum MaskPrint: CaseIterable, Sendable {
         case .stripes: .maskStripesDown
         case .dots: .maskDotsDown
         case .bolt: .maskBoltDown
+        case .smile: .maskSmileDown
         }
     }
 }
