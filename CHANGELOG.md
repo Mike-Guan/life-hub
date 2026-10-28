@@ -9,6 +9,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- The home screen has a window into the home under the mode cards: a still of the real room around the character,
+  with a line saying where she is (at the desk, on the sofa, in bed). Tapping it opens the home; the header's
+  house button is gone. The picture fades to the new one when the mode changes.
 - The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
   puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
   corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters

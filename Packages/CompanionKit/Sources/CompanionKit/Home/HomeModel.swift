@@ -166,10 +166,15 @@ final class HomeModel {
         line = HomeLines(snapshot.persona).arrive
         mode = snapshot.mode
         layout = snapshot.room
-        let hour = Calendar.current.component(.hour, from: now)
-        isNight = night ?? (hour >= 18 || hour < 6)
+        isNight = night ?? Self.isNight(at: now)
         self.now = now
         goHome()
+    }
+
+    /// Whether the room is in its night look at `now`: from 18:00 to 6:00.
+    static func isNight(at now: Date) -> Bool {
+        let hour = Calendar.current.component(.hour, from: now)
+        return hour >= 18 || hour < 6
     }
 
     /// The user's identity card, the fourth mode.

@@ -209,6 +209,7 @@ struct LifeHubApp: App {
             cans: growth.ledger.only(persona).balance,
             onShop: { showsShop = true },
             onHome: { showsHome = true },
+            homeSnapshot: homeSnapshot,
             wardrobe: wardrobe,
             persona: persona,
             greetingName: Greeting.name(in: AppGroup.defaults),
