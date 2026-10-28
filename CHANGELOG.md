@@ -15,9 +15,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - At home the second preset character wears the tops and sets she bought from behind too, and her sleeves
   match them.
+- When the second preset character notices one of your needs she leans out to peek at you, blinks and leans
+  back smiling, instead of hopping with her look's move. When the need is scrolling on the couch, a tap
+  then shows her peeking lines.
 - The second preset character has her own good night: as bedtime starts she rubs an eye, stretches up in a
   big yawn and settles with heavy eyes, instead of only dimming.
-- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
 - Test builds (DEV and STG) offer the swimming, yoga, ball and outdoor identity cards in the picker. The App
   Store build keeps the eight cards it has until their lines are final and both characters were checked on a
   device.
