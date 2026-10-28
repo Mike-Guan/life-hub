@@ -26,12 +26,12 @@ xcrun simctl install "$udid" "$ios_app"
 bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$ios_app/Info.plist")
 for mode in "${modes[@]}"; do
   xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode"
-  sleep 4
+  sleep 10
   xcrun simctl io "$udid" screenshot "$out/ios-$mode.png"
   # The same mode with KURO picked, for checking the second character before an install.
   xcrun simctl launch --terminate-running-process "$udid" "$bundle" -screenshot-mode "$mode" \
     -screenshot-persona kuro
-  sleep 4
+  sleep 10
   xcrun simctl io "$udid" screenshot "$out/ios-kuro-$mode.png"
 done
 # Throwaway preview branch: only the home screen, on Pro above and SE here.
@@ -47,7 +47,7 @@ if se=$(xcrun simctl create "Screenshot SE" com.apple.CoreSimulator.SimDeviceTyp
     for persona in haku kuro; do
       xcrun simctl launch --terminate-running-process "$se" "$bundle" -screenshot-mode "$mode" \
         -screenshot-persona "$persona"
-      sleep 5
+      sleep 10
       xcrun simctl io "$se" screenshot "$out/ios-se-$persona-$mode.png"
     done
   done
