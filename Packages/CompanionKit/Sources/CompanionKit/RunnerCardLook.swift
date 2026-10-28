@@ -18,6 +18,15 @@ enum RunnerCardLook: CaseIterable, Sendable {
     case music
     /// Sport base and ski goggles on the forehead.
     case ski
+    // 第2批 身份卡 (HAKU 第2批 说明, 10/13 draft); the swimming look is the PM's style B: no cap, goggles up.
+    /// Sport base and swimming goggles pushed up on the hair.
+    case swimming
+    /// Sport base and a rolled mat standing in the right hand.
+    case yoga
+    /// Sport base and a plain ball on the fist with the wristband.
+    case ball
+    /// Out base, the backpack and a trekking pole in the right hand.
+    case outdoor
 
     // The only place the card-to-look mapping lives, like `KuroLook(mode:card:)`.
     /// The look for `card`, or nil for boxing and for cards without a look yet, which keep the boxing kit.
@@ -30,12 +39,21 @@ enum RunnerCardLook: CaseIterable, Sendable {
         case .dance: self = .dance
         case .music: self = .music
         case .ski: self = .ski
+        case .swimming: self = .swimming
+        case .yoga: self = .yoga
+        case .ball: self = .ball
+        case .outdoor: self = .outdoor
         default: return nil
         }
     }
 
     /// Whether this look wears the sport base: the dark jacket with the orange stripe.
-    var sporty: Bool { self == .tennis || self == .fitness || self == .dance || self == .ski }
+    var sporty: Bool {
+        switch self {
+        case .tennis, .fitness, .dance, .ski, .swimming, .yoga, .ball: true
+        case .study, .art, .music, .outdoor: false
+        }
+    }
 
     /// Every part of the look, figure included.
     var parts: Set<RunnerPart> {
@@ -54,6 +72,10 @@ enum RunnerCardLook: CaseIterable, Sendable {
         case .dance: parts.formUnion([.eyesChill, .wristbandHand])
         case .music: parts.insert(.eyesWork)
         case .ski: parts.formUnion([.eyesChill, .wristbandHand, .skiGoggles])
+        case .swimming: parts.formUnion([.eyesChill, .cheerGoggles])
+        case .yoga: parts.formUnion([.eyesChill, .yogaMat, .matHand])
+        case .ball: parts.formUnion([.eyesChill, .wristbandHand, .sportBall])
+        case .outdoor: parts.formUnion([.eyesChill, .outPack, .outStraps, .outPole, .poleFist])
         }
         return parts
     }
@@ -67,14 +89,17 @@ enum RunnerCardLook: CaseIterable, Sendable {
         case .study: [.book, .bookPage, .bookmarkRibbon]
         case .art: [.sketchbook, .pencil]
         case .dance, .ski: [.wristbandHand]
-        case .music: []
+        case .music, .swimming: []
+        case .yoga: [.yogaMat, .matHand]
+        case .ball: [.wristbandHand, .sportBall]
+        case .outdoor: [.outPole, .poleFist]
         }
     }
 
     // Mike 2026-10-15: a card's own backdrop holds no items, so nothing stands in the corner.
     /// What the look puts aside while HAKU does something else: what it holds and what it wears over the base.
     var props: Set<RunnerPart> {
-        held.union([.tennisVisor, .apron, .skiGoggles])
+        held.union([.tennisVisor, .apron, .skiGoggles, .cheerGoggles, .outPack, .outStraps])
     }
 
     /// The jacket fill: dark for sport, the green off-work jacket for out and craft.
@@ -118,6 +143,10 @@ extension RunnerCardLook {
         switch self {
         case .dance, .music: 3
         case .ski: 3.5
+        case .swimming: 3.2
+        case .yoga: 4
+        case .ball: 3.4
+        case .outdoor: 3.6
         default: nil
         }
     }
@@ -150,9 +179,38 @@ extension RunnerCardLook {
                     visible.insert(.countMouth)
                 }
             }
+        case .swimming:
+            // UI 审核 10/13: the lenses are see-through, so the eyes stay and only blink under them.
+            if t > 0.25, t < 2.25 { visible.insert(.goggleHand) }
+            if t > 1.1, t < 1.35 { Self.swapEyes(&visible, to: .eyesClosed) }
+            if t > 2.1, t < 3.0 { Self.swapEyes(&visible, to: .eyesWork) }
+        case .yoga:
+            if t > 0.45, t < 3.45 { visible.remove(.matHand) }
+            if t > 0.3, t < 3.6 { visible.insert(.yogaPalms) }
+            if t > 0.5, t < 2.9 { Self.swapEyes(&visible, to: .eyesClosed) }
+            if t >= 2.9, t < 3.5 { Self.swapEyes(&visible, to: .eyesWork) }
+        case .ball:
+            if t > 0.3, t < 2.3 {
+                visible.remove(.wristbandHand)
+                visible.insert(.cheerBallHand)
+            }
+            if t > 2.4, t < 3.3 { Self.swapEyes(&visible, to: .eyesWork) }
+        case .outdoor:
+            if t > 0.45, t < 2.9 { visible.remove(.poleFist) }
+            if t > 0.3, t < 3.05 { visible.insert(.browHand) }
+            if t > 0.6, t < 2.9 { Self.swapEyes(&visible, to: t > 1.9 && t < 2.05 ? .eyesClosed : .eyesWork) }
+            if t > 1.0, t < 1.9 { visible.insert(.windGust) }
         default:
             break
         }
+    }
+
+    /// Swaps whichever eyes are showing for `eyes`.
+    private static func swapEyes(_ visible: inout Set<RunnerPart>, to eyes: RunnerPart) {
+        let all: Set<RunnerPart> = [.eyesChill, .eyesWork, .lidsWork, .eyesClosed]
+        guard !visible.contains(eyes), !visible.isDisjoint(with: all) else { return }
+        visible.subtract(all)
+        visible.insert(eyes)
     }
 
     /// How `part` moves `t` seconds into the look's idle, or nil when it stays put.
@@ -178,10 +236,58 @@ extension RunnerCardLook {
             move.scale = 0.5 + 0.7 * Self.ramp(u, 0, 0.5)
             move.anchor = Self.point(73, 84)
             move.opacity = Double(1 - Self.ramp(u, 0.55, 1))
+        case (.swimming, .cheerGoggles):
+            move.offset.height = 20 * Self.gogglesDown(at: t)
+        case (.swimming, .goggleHand):
+            let hand = Self.ramp(t, 0.25, 0.45) * (1 - Self.ramp(t, 2.05, 2.25))
+            move.offset = CGSize(width: 10 * (1 - hand), height: 20 * Self.gogglesDown(at: t) + 24 * (1 - hand))
+        case (.yoga, .matHand):
+            move.opacity = Double(1 - Self.ramp(t, 0.3, 0.45) + Self.ramp(t, 3.45, 3.6))
+        case (.yoga, .yogaPalms):
+            move.angle = Self.sway(at: t)
+            move.anchor = Self.point(60, 138)
+            move.offset.height = 6 * (1 - Self.ramp(t, 0.3, 0.5) + Self.ramp(t, 3.4, 3.6))
+            move.opacity = Double(Self.ramp(t, 0.3, 0.45) * (1 - Self.ramp(t, 3.45, 3.6)))
+        case (.yoga, .jacket), (.yoga, .stripeSport), (.yoga, .hoodCollar):
+            // The body sways; the mat stands still.
+            move.angle = Self.sway(at: t)
+            move.anchor = Self.point(60, 138)
+        case (.ball, .sportBall):
+            let spot = Self.ballSpot(at: t)
+            move.offset = CGSize(width: spot.x, height: spot.y)
+            move.angle = 720 * Double(Self.ramp(t, 0.4, 1.9)) - 180 * Double(Self.ramp(t, 2.3, 2.6))
+            move.anchor = Self.point(104.5, 106)
+        case (.outdoor, .outPole):
+            // Leans on the pack while the hand shades the eyes.
+            move.angle = -12 * Double(Self.ramp(t, 0.3, 0.6) * (1 - Self.ramp(t, 2.8, 3.1)))
+            move.anchor = Self.point(111.8, 137)
+        case (.outdoor, .poleFist):
+            move.opacity = Double(1 - Self.ramp(t, 0.3, 0.45) + Self.ramp(t, 2.9, 3.05))
+        case (.outdoor, .browHand):
+            move.offset.height = 8 * (1 - Self.ramp(t, 0.3, 0.6) + Self.ramp(t, 2.75, 3.05))
+            move.opacity = Double(Self.ramp(t, 0.3, 0.45) * (1 - Self.ramp(t, 2.9, 3.05)))
+        case (.outdoor, .windGust):
+            let u = (t - 1.0) / 0.9
+            move.offset.width = 10 * u
+            move.opacity = Double(Self.ramp(u, 0, 0.2) * (1 - Self.ramp(u, 0.7, 1)))
         default:
             return nil
         }
         return move
+    }
+
+    /// The eye offset `t` seconds into the look's idle, in SVG units.
+    func eyes(at t: CGFloat) -> CGSize {
+        switch self {
+        // The eyes follow the ball down, then look away as if nothing fell.
+        case .ball:
+            CGSize(
+                width: -3 * Self.ramp(t, 2.3, 2.5) * (1 - Self.ramp(t, 3.1, 3.3)),
+                height: 3 * Self.ramp(t, 1.9, 2.1) * (1 - Self.ramp(t, 2.3, 2.5)))
+        // Looking far ahead, a little to the right.
+        case .outdoor: CGSize(width: 2 * Self.ramp(t, 0.6, 0.9) * (1 - Self.ramp(t, 2.6, 2.9)), height: 0)
+        default: .zero
+        }
     }
 
     /// Head nod and tilt `t` seconds into the look's idle.
@@ -193,6 +299,8 @@ extension RunnerCardLook {
         case .music:
             guard t > 0.3, t < 2.6 else { return (0, 0) }
             return (1.2 * sin(Self.countPhase(at: t) * .pi), 0)
+        case .yoga:
+            return (0, Self.sway(at: t))
         default:
             return (0, 0)
         }
@@ -233,6 +341,32 @@ extension RunnerCardLook {
         ramp(t, 0.45, 0.95) * (1 - ramp(t, 1.55, 2.05))
     }
 
+    /// How far the ball rests above the fist on the watch, `t` seconds into the ball idle (negative `t` at rest), in
+    /// SVG units: down to the fist before it goes up to the fingertip, back up once it has bounced home.
+    static func watchBallLift(at t: CGFloat) -> CGFloat {
+        guard t >= 0 else { return -6 }
+        return -6 * (1 - ramp(t, 0.15, 0.4) + ramp(t, 3.1, 3.4))
+    }
+
+    /// The yoga sway in degrees: left, right, then upright to look at you.
+    private static func sway(at t: CGFloat) -> Double {
+        Double(-6 * ramp(t, 0.7, 1.3) + 10 * ramp(t, 1.5, 2.2) - 4 * ramp(t, 2.4, 2.9))
+    }
+
+    // Up to the fingertip, two turns, then it drops below and left of the fist, clear of it (UI 审核 10/28), rolls a
+    // little and bounces back onto the fist.
+    /// Where the ball is `t` seconds into the ball idle, as an offset from the fist in SVG units.
+    private static func ballSpot(at t: CGFloat) -> CGPoint {
+        if t < 1.9 { return CGPoint(x: 0, y: -27 * ramp(t, 0.15, 0.4)) }
+        if t < 2.3 {
+            let u = (t - 1.9) / 0.4
+            return CGPoint(x: -13 * u, y: -27 + 51 * u * u)
+        }
+        if t < 2.6 { return CGPoint(x: -13 - 2 * ramp(t, 2.3, 2.6), y: 24) }
+        let v = min((t - 2.6) / 0.5, 1)
+        return CGPoint(x: -15 * (1 - v), y: 24 * (1 - v) - 14 * sin(v * .pi))
+    }
+
     /// 0 before `a`, 1 after `b`, eased in between.
     private static func ramp(_ x: CGFloat, _ a: CGFloat, _ b: CGFloat) -> CGFloat {
         let p = min(max((x - a) / (b - a), 0), 1)
@@ -248,7 +382,7 @@ extension RunnerCardLook {
 
 extension RunnerPose {
     /// The pose `t` seconds into `look`'s own idle, or into `idle` when given.
-    fileprivate mutating func play(_ look: RunnerCardLook, _ idle: RunnerBaseIdle?, at t: CGFloat) {
+    mutating func play(_ look: RunnerCardLook, _ idle: RunnerBaseIdle?, at t: CGFloat) {
         cardBeat = t
         baseIdle = idle
         if let idle {
@@ -262,5 +396,8 @@ extension RunnerPose {
         let head = look.head(at: t)
         headDy += head.dy
         headTilt += head.tilt
+        let eyes = look.eyes(at: t)
+        eyesDx += eyes.width
+        eyesDy += eyes.height
     }
 }

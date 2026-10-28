@@ -265,6 +265,15 @@ enum Placement {
         .outStraps: Spot(.torso, "背包"),
         .pencilLoose: Spot(.handR, "pencil"),
         .paintHand: Spot(.handR, "paintHand"),
+        // 第2批 身份卡: the pole leans on the pack while the hand shades the eyes, so the hand sits on the brow.
+        .outPole: Spot(.handR, "登山杖"),
+        .poleFist: Spot(.handR, "登山杖"),
+        .browHand: Spot(.headTop, "手搭眉"),
+        .windGust: .fx,
+        .yogaMat: Spot(.handR, "瑜伽垫"),
+        .matHand: Spot(.handR, "瑜伽垫"),
+        .yogaPalms: Spot(.handsFront, "合掌"),
+        .sportBall: Spot(.handR, "球"),
     ]
 
     static let kuro: [KuroPart: Spot] = [
@@ -495,6 +504,7 @@ enum Placement {
     ]
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
+    // the ball card's ball sits on the fist with the wristband (第2批 身份卡);
     // the swimming cheer's ear tap over the earring. KURO's rows are UI 三组's: the rub over the blush, the pen on the
     // books, the ball bouncing on the racket, the sleeve in front of the tablet, yoga block or notebook. The spin is a
     // cheer, not held.
@@ -506,7 +516,7 @@ enum Placement {
         .cheek: [["bandage", "bathBlush"], ["blush", "tapRub"]],
         .handR: [
             ["deskBooks", "deskPen"], ["tapBall", "tennisRacket"],
-            ["itemGoldRacket", "tapBall"],
+            ["itemGoldRacket", "tapBall"], ["wristbandHand", "球"],
         ],
         .handsFront: [
             ["workTablet", "揉眼袖子"], ["gymBlock", "揉眼袖子"], ["studyNotebook", "揉眼袖子"], ["乐谱", "揉眼袖子"],
