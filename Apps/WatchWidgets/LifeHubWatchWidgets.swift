@@ -132,6 +132,8 @@ struct WatchStatusView: View {
                 energy: payload.snapshot.energy(at: entry.date)?.value,
                 bedtime: payload.bedtime.state(at: entry.date),
                 moment: payload.scene(at: entry.date)?.moment,
+                need: payload.snapshot.need(at: entry.date),
+                activity: payload.scene(at: entry.date)?.activity,
                 wearing: payload.wardrobe.worn(in: mode),
                 framing: .head,
                 lineArt: renderingMode != .fullColor

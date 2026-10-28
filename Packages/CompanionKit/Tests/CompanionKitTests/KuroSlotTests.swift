@@ -52,6 +52,19 @@ import Testing
         #expect(KuroSlot.invite.hops && KuroSlot.active.hops && !KuroSlot.focus.hops && !KuroSlot.tired.hops)
     }
 
+    // 朋友测前 打磨清单: her widget face follows the day like the home screen's.
+    @Test @MainActor func herPortraitFaceFollowsTheDay() {
+        #expect(KuroPortrait(look: .chill, energy: 50).pose.eyes == .open)
+        #expect(KuroPortrait(look: .chill, energy: 50, need: .sitting).pose.eyes == .bright)
+        #expect(KuroPortrait(look: .chill, energy: 50, moment: .drowsy).pose.eyes == .drowsy)
+        #expect(KuroPortrait(look: .desk, energy: 50, moment: .flow).pose.eyes == .down)
+        #expect(KuroPortrait(look: .work, energy: 50, moment: .overtime).pose.overtime)
+        #expect(KuroPortrait(look: .chill, energy: 50, bedtime: .on, need: .sitting).pose.eyes == .drowsy)
+        #expect(KuroPortrait(look: .chill, energy: 50, need: .sitting).leansOut)
+        #expect(!KuroPortrait(look: .chill, energy: 50).leansOut)
+        #expect(!KuroPortrait(look: .chill, energy: 50, bedtime: .on, need: .sitting).leansOut)
+    }
+
     // 抱平板睡着 v2 (Mike 2026-10-15).
     @Test func dozingOnTheCouchSheNapsOverHerTablet() {
         let nap = KuroView.pose(.chill, energy: 50, bedtime: .off, moment: .dozing, overtimeUntil: nil)
