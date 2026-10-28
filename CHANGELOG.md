@@ -11,11 +11,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - The second preset character has her own good night: as bedtime starts she rubs an eye, stretches up in a
   big yawn and settles with heavy eyes, instead of only dimming.
+- The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
+  headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
+  headphones she bought.
+- The second preset character's identity card props are in the shop: pink and gold gloves (boxing), a mint
+  and a gold yoga block (fitness), red glasses and a gold bookmark (study), a blue stylus and a gold brush (art).
+  Each one moves with every tap and idle of the prop it replaces, and her gloves at home take their colour.
 - The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
   puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
   corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters
   can have: a yoga mat, a jump rope, a dance mirror and a music stand. Two items in the same zone (desk or
   sports wall) stand side by side, and a poster replaces the two default ones. The shop doesn't sell them yet.
+- The home can lay two more rugs next to the free fringed one: a striped rug and a round braided rug, each
+  in the four rug colours. The shop sells them after 0.1.0.
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
   her tennis day, guards and punches in two gloves with the boxing card, and dozes over her tablet in bed.
@@ -477,6 +485,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - On the watch, the labels on the second page, the mode chip, a save failure and the page actions follow the
   watch's language (Japanese and English), and VoiceOver can turn between the two pages. The no-mode complication
   has a spoken label.
+- On the watch, both characters sit a little smaller and lower (less on the smaller watch), so the hair
+  clears the clock and what they hold stays on screen. When the watch screen dims, HAKU comes to rest
+  instead of freezing mid-move.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
