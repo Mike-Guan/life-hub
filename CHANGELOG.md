@@ -4,9 +4,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ## [Unreleased]
 
+### Fixed
+- A workout cheer while the second preset character rests her chin on her hand at the desk no longer raises her
+  tablet in front of the desk and her hand: she stays seated and taps her cheek.
+
 ### Added
 - The second preset character has her own good night: as bedtime starts she rubs an eye, stretches up in a
   big yawn and settles with heavy eyes, instead of only dimming.
+- The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
+  puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
+  corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters
+  can have: a yoga mat, a jump rope, a dance mirror and a music stand. Two items in the same zone (desk or
+  sports wall) stand side by side, and a poster replaces the two default ones. The shop doesn't sell them yet.
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
   her tennis day, guards and punches in two gloves with the boxing card, and dozes over her tablet in bed.
@@ -150,6 +159,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The shop's room shelf is grouped by where each item goes in the home: on the desk, by the sofa, in the corner
+  and the workout corner. This week's item still comes first.
+- After a workout HAKU crouches before each of his two hops and lands pressed down, and the celebration
+  runs 2.4 s instead of 1.6 s, so it no longer looks like a poke.
 - The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
   reward list names them. The shelf no longer draws gloves nobody earned.
 - In the home the floor lamp's cord runs to a socket on the wall beside it, not out across the floor.
@@ -461,6 +474,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
 - The character on the watch face shows the same scene as the watch app and the iPhone Lock Screen (the gym
   bag, setting off, the bath) and changes its pose every 15 minutes, instead of only the plain mode look.
+- On the watch, the labels on the second page, the mode chip, a save failure and the page actions follow the
+  watch's language (Japanese and English), and VoiceOver can turn between the two pages. The no-mode complication
+  has a spoken label.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his

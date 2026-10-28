@@ -43,7 +43,7 @@ struct WatchHomeView: View {
                 // stays in its plain look. Page 2 reads the mode, so there is only this page.
                 companionPage(payload, mode: nil, at: context.date)
             } else {
-                Text(failure ?? "先在 iPhone 上打开一次 Life Hub")
+                (failure.map(Self.failureLine) ?? Text("先在 iPhone 上打开一次 Life Hub"))
                     .font(.footnote)
                     .multilineTextAlignment(.center)
             }
@@ -58,6 +58,12 @@ struct WatchHomeView: View {
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active { WatchReceiver.shared.askPhoneToCheck() }
         }
+    }
+
+    /// The line for a payload that could not be saved, looked up in the view's locale.
+    /// - Parameter reason: why the write failed.
+    private static func failureLine(_ reason: String) -> Text {
+        Text("没存下 iPhone 发来的状态：\(reason)")
     }
 
     // Used by scripts/recordings.sh for promo stills. Debug builds only.
@@ -128,7 +134,7 @@ struct WatchHomeView: View {
         .ignoresSafeArea()
         .overlay(alignment: .topLeading) {
             if let failure {
-                Text(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2).padding(.leading, 4)
+                Self.failureLine(failure).font(.caption2).foregroundStyle(Toy.ink).lineLimit(2).padding(.leading, 4)
             }
         }
         // The chip sits in the clock's row, the top safe area, so no character's hair runs into it.
@@ -187,7 +193,12 @@ private struct WatchPager<First: View, Second: View>: View {
                 }
             }
             .padding(.trailing, 3)
+            .accessibilityHidden(true)
         }
+        // The swipe below can't be made with VoiceOver, so the two pages are also offered as actions.
+        .accessibilityElement(children: .contain)
+        .accessibilityAction(named: Text("下一页")) { page = 1 }
+        .accessibilityAction(named: Text("上一页")) { page = 0 }
         .animation(.easeInOut(duration: 0.25), value: page)
         .simultaneousGesture(
             DragGesture(minimumDistance: 20).onEnded { drag in
@@ -212,15 +223,22 @@ private struct ModeChip: View {
     let payload: WatchPayload
 
     var body: some View {
-        Text(mode.map(payload.title(for:)) ?? "还没有模式")
-            .font(Toy.body(12, weight: .heavy))
-            .foregroundStyle(Toy.ink)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 2)
-            .background(Capsule().fill(Toy.card))
-            .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
+        Group {
+            if let mode {
+                // Already in the user's language.
+                Text(payload.title(for: mode))
+            } else {
+                Text("还没有模式")
+            }
+        }
+        .font(Toy.body(12, weight: .heavy))
+        .foregroundStyle(Toy.ink)
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 2)
+        .background(Capsule().fill(Toy.card))
+        .overlay(Capsule().stroke(Toy.ink, lineWidth: 2))
     }
 }
 
@@ -274,7 +292,9 @@ private struct TodayPage: View {
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(Toy.ink, lineWidth: Toy.outline))
     }
 
-    private func row<Value: View>(_ title: String, compact: Bool, @ViewBuilder value: () -> Value) -> some View {
+    private func row<Value: View>(
+        _ title: LocalizedStringKey, compact: Bool, @ViewBuilder value: () -> Value
+    ) -> some View {
         VStack(alignment: .leading, spacing: compact ? 0 : 1) {
             Text(title).font(Toy.body(compact ? 10 : 11, weight: .bold)).foregroundStyle(Toy.muted)
             value().font(Toy.body(compact ? 13 : 15, weight: .heavy)).foregroundStyle(Toy.ink)
