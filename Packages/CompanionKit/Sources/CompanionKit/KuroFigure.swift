@@ -123,6 +123,8 @@ struct KuroPose: Sendable {
     var calm = false
     /// A round open mouth, replacing her look's mouth.
     var mouthO = false
+    /// Seen from behind, halfway through a spin.
+    var facingAway = false
     /// The reaction to a tap she is playing, if any.
     var tap: KuroTap?
     /// How far into `tap` she is, 0..<1.
@@ -225,11 +227,12 @@ struct KuroFigure: View {
         let parts = Self.parts(for: look, pose: pose, watch: watch)
         let hatted = parts.contains(.setPicnicHat) || parts.contains(.setRainHat)
         let beanie = parts.contains(.weeklyHatBeanie)
+        let skins = Self.skins(look, items: pose.items)
         ZStack {
             ForEach(parts, id: \.self) { part in
                 KuroPartView(
                     part: part, shift: Self.offset(part, pose: pose, hatted: hatted, beanie: beanie, watch: watch),
-                    turn: Self.turn(part, pose: pose)
+                    turn: Self.turn(part, pose: pose), drawn: skins[part]
                 )
                 .opacity(Self.opacity(part, pose: pose))
             }
@@ -238,6 +241,14 @@ struct KuroFigure: View {
             }
         }
         .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
+    }
+
+    /// The parts drawn in place of her own props in `look` for the card props among `items`.
+    nonisolated static func skins(_ look: KuroLook, items: Set<KuroItem>) -> [KuroPart: [KuroPart]] {
+        // In catalog order, so a gold prop wins over its colour.
+        KuroItem.allCases.filter { items.contains($0) && $0.shows(in: look) }.reduce(into: [:]) { skins, item in
+            skins.merge(item.skin) { _, gold in gold }
+        }
     }
 
     /// Visible parts in back-to-front order; `watch` swaps her low props for the raised watch ones and leaves off
@@ -293,10 +304,12 @@ struct KuroFigure: View {
         }
         if pose.heart { visible.insert(.tapHeart) }
         if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
+        if pose.facingAway { turnAround(&visible) }
         // One top or set per mode, so the first worn one in catalog order is the only one.
         let worn = KuroItem.allCases.filter { $0.look == look && pose.items.contains($0) }
         if let clothes = worn.lazy.compactMap(\.clothes).first {
-            dress(look, in: clothes, back: pose.tap == .turnAway && KuroTap.facesAway(pose.tapProgress), &visible)
+            let back = pose.facingAway || pose.tap == .turnAway && KuroTap.facesAway(pose.tapProgress)
+            dress(look, in: clothes, back: back, &visible)
         }
         // 位置规划图 §10-2: the beanie needs her cat ears to sit between, so a set hat or the bath towel takes it off.
         if visible.contains(.setPicnicHat) || visible.contains(.setRainHat) || !visible.contains(.catEars) {
@@ -512,6 +525,8 @@ struct KuroPartView: View {
     var shift: CGSize = .zero
     /// How the part turns about a point, if it does.
     var turn: KuroTurn?
+    /// The parts drawn in its place, for a shop item that recolours it; `nil` draws the part itself.
+    var drawn: [KuroPart]?
     @Environment(\.kuroLineArt) private var lineArt
 
     var body: some View {
@@ -525,7 +540,7 @@ struct KuroPartView: View {
                 context.rotate(by: .degrees(-turn.axis))
                 context.translateBy(x: -turn.pivot.x, y: -turn.pivot.y)
             }
-            let inks = KuroArt.cachedInks(part)
+            let inks = (drawn ?? [part]).flatMap(KuroArt.cachedInks)
             RunnerDrawing.draw(lineArt ? KuroArt.lineArt(inks) : inks, in: context)
         }
     }
@@ -708,7 +723,7 @@ public struct KuroView: View {
                 // KURO-04 (UI 审核 2026-10-09): with the watch screen dimmed she dozes, eyes shut and body still,
                 // instead of freezing mid-hop or mid-blink.
                 let nod = Self.nod(since: nodStart, at: time)
-                let awake = unbox != nil ? unboxPose : reacting ?? scened(homeScene)
+                let awake = unbox.map(unboxPose) ?? reacting ?? scened(homeScene)
                 // 「……嗯。」 (Issue #236): one blink at the start of the nod.
                 // 动作展示总表 C14: a tap while a move plays gets a blink instead of nothing.
                 let winking = winkStart.map { (0..<Self.wink).contains(time - $0.timeIntervalSinceReferenceDate) }
@@ -744,7 +759,7 @@ public struct KuroView: View {
                         watch: style == .watch
                     )
                     .scaleEffect(
-                        x: (unbox?.spin ?? 1) * (still ? 1 : Self.width(tap)),
+                        x: (unbox.map { $0.spin * $0.popOut } ?? 1) * (still ? 1 : Self.width(tap)),
                         y: max(unbox?.popOut ?? 1, 0.001),
                         anchor: .bottom
                     )
@@ -1206,10 +1221,12 @@ public struct KuroView: View {
         }
     }
 
-    /// Her pose while unboxing: acting calm in the new item, with low eyes and a flat mouth.
-    private var unboxPose: KuroPose {
+    /// Her pose during `unbox`: acting calm in the new item, with low eyes and a flat mouth, and her back
+    /// halfway through a spin.
+    private func unboxPose(_ unbox: KuroUnbox) -> KuroPose {
         var pose = KuroPose(look: look, energy: nil).showing(.low)
         pose.calm = true
+        pose.facingAway = unbox.spin < 0
         pose.items = wearing.union(unboxItem.map { [$0] } ?? [])
         return pose
     }

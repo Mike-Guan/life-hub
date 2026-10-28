@@ -114,6 +114,7 @@ struct WatchStatusView: View {
     @ViewBuilder private var head: some View {
         if entry.payload == nil || entry.mode == nil {
             Image(systemName: "circle.dashed")
+                .accessibilityLabel(placeholder)
         } else if renderingMode == .fullColor {
             portrait
         } else {

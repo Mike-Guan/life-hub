@@ -399,7 +399,7 @@ enum HomeArt {
         case .sofaSeat: sofaSeat(pen, color)
         case .sofaNearArm: sofaArm(pen, color, near: true)
         case .table: table(pen)
-        case .rug: rug(pen, color)
+        case .rug: rug(pen, .fringe, color)
         case .wardrobe: wardrobe(pen)
         case .shop: shop(pen)
         case .bed: bed(pen)
@@ -610,7 +610,16 @@ enum HomeArt {
         pen.box(3.48, 5.97, 0.58, 3.67, 6.13, 0.61, 0x1B1C26, line: 1)
     }
 
-    private static func rug(_ pen: IsoPen, _ c: UInt32) {
+    /// Draws the rug in `style` and colour `c`.
+    static func rug(_ pen: IsoPen, _ style: HomeRug, _ c: UInt32) {
+        switch style {
+        case .fringe: fringeRug(pen, c)
+        case .stripe: stripeRug(pen, c)
+        case .round: roundRug(pen, c)
+        }
+    }
+
+    private static func fringeRug(_ pen: IsoPen, _ c: UInt32) {
         pen.floor(2.6, 3.8, 6.0, 8.2, Color(hex: c), z: 0.01)
         pen.floor(2.85, 4.05, 5.75, 7.95, tone(c, 0.25), z: 0.01, line: 0)
         pen.floor(3.05, 4.25, 5.55, 7.75, Color(hex: c), z: 0.01, line: 0)
@@ -619,6 +628,51 @@ enum HomeArt {
             let x = 2.7 + Double(i) * 0.18
             pen.line([P.plan(x, 8.2, 0.01), P.plan(x, 8.36, 0.01)], tone(c, 0.35), width: 1.1)
             pen.line([P.plan(x, 3.8, 0.01), P.plan(x, 3.64, 0.01)], tone(c, 0.35), width: 1.1)
+        }
+    }
+
+    // UI 二组 地毯两款 v1 (iso.py), passed by UI 审核 2026-10-27.
+    /// The striped rug: the fringe rug's floor, light bands across its length, bound ends and no fringe.
+    private static func stripeRug(_ pen: IsoPen, _ c: UInt32) {
+        let (x0, y0, x1, y1) = (2.6, 3.8, 6.0, 8.2)
+        let band = 0.45
+        pen.floor(x0, y0, x1, y1, Color(hex: c), z: 0.01)
+        let seams = Array(stride(from: y0 + 0.3, through: y1 - 0.3 + 1e-6, by: band))
+        for (k, y) in seams.dropLast().enumerated() where k % 2 == 1 {
+            pen.floor(x0, y, x1, y + band, tone(c, 0.6), z: 0.01, line: 0)
+        }
+        for y in seams {
+            pen.line([P.plan(x0 + 0.04, y, 0.01), P.plan(x1 - 0.04, y, 0.01)], tone(c, -0.38), width: 1.2)
+        }
+        pen.floor(x0, y0, x1, y0 + 0.3, tone(c, -0.25), z: 0.01, line: 0)
+        pen.floor(x0, y1 - 0.3, x1, y1, tone(c, -0.25), z: 0.01, line: 0)
+        pen.floor(x0, y0, x1, y1, .clear, z: 0.01)
+    }
+
+    /// The round braided rug under the table: coils in two tones, stitched across the two outer seams.
+    private static func roundRug(_ pen: IsoPen, _ c: UInt32) {
+        let (cx, cy) = (HomeRug.centre.x, HomeRug.centre.y)
+        func ring(_ r: Double, _ n: Int = 56) -> [CGPoint] {
+            (0...n).map {
+                let t = 2 * Double.pi * Double($0) / Double(n)
+                return P.plan(cx + r * cos(t), cy + r * sin(t), 0.01)
+            }
+        }
+        let radii = [HomeRug.radius, 1.72, 1.38, 1.04, 0.7, 0.36]
+        for (i, r) in radii.enumerated() {
+            pen.polygon(ring(r), i % 2 == 0 ? Color(hex: c) : tone(c, 0.35), line: i == 0 ? 2.2 : 0)
+        }
+        for r in radii.dropFirst() { pen.line(ring(r), tone(c, -0.18), width: 1) }
+        // The middle stays calm under the table.
+        for (r, turn) in [(1.72, 0.0), (1.38, 10.0)] {
+            for degrees in stride(from: 0.0, to: 360, by: 20) {
+                let t = (degrees + turn) * .pi / 180
+                pen.line(
+                    [
+                        P.plan(cx + (r - 0.08) * cos(t), cy + (r - 0.08) * sin(t), 0.01),
+                        P.plan(cx + (r + 0.08) * cos(t), cy + (r + 0.08) * sin(t), 0.01),
+                    ], tone(c, -0.32), width: 1.1)
+            }
         }
     }
 
@@ -794,6 +848,8 @@ enum HomeArt {
             return [GridBox(x0: s.x - 0.4, y0: 0, x1: s.x + 0.4, y1: 0.4, z0: s.z - 1.2, z1: s.z + 0.7)]
         case .danceMirror: return [GridBox(x0: s.x - 0.45, y0: 0, x1: s.x + 0.45, y1: 0.2, z0: 0.5, z1: s.z + 1.75)]
         case .musicStand: return [GridBox(x0: s.x - 0.6, y0: s.y - 0.6, x1: s.x + 0.6, y1: s.y + 0.6, z1: 2.5)]
+        case .catPoster, .starsPoster, .catClock, .jar, .strawberryMug, .mirror, .yarn, .plush, .sakura, .easel:
+            return item.kuro.map { KuroRoomArt.boxes($0, at: s) } ?? []
         }
     }
 
@@ -884,6 +940,8 @@ enum HomeArt {
         case .rope: rope(pen, at: s)
         case .danceMirror: danceMirror(pen, at: s)
         case .musicStand: musicStand(pen, at: s)
+        case .catPoster, .starsPoster, .catClock, .jar, .strawberryMug, .mirror, .yarn, .plush, .sakura, .easel:
+            if let kuro = item.kuro { KuroRoomArt.draw(kuro, pen, at: s) }
         }
     }
 
@@ -1388,4 +1446,8 @@ enum HomeScreen: Sendable {
     case off, code, sketch
 }
 
+extension HomeItem {
+    /// Her own item's drawing, `nil` for the rest.
+    var kuro: KuroRoomItem? { KuroRoomItem(rawValue: rawValue) }
+}
 #endif
