@@ -209,6 +209,22 @@
         }
       }
     },
+    "KURO，托着球" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "KURO, holding a ball"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "クロ、ボールを持っている"
+          }
+        }
+      }
+    },
     "KURO，托着腮等到 %@" : {
       "localizations" : {
         "en" : {
@@ -237,6 +253,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "クロ、頬杖をついて待っている"
+          }
+        }
+      }
+    },
+    "KURO，扶着瑜伽垫" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "KURO, holding a yoga mat"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "クロ、ヨガマットを持っている"
           }
         }
       }
@@ -317,6 +349,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "クロ、温かい飲み物を両手で持っている"
+          }
+        }
+      }
+    },
+    "KURO，泳镜推在头上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "KURO, swim goggles pushed up"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "クロ、ゴーグルをおでこに上げている"
+          }
+        }
+      }
+    },
+    "KURO，背着包拿着登山杖" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "KURO, with a backpack and a trekking pole"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "クロ、リュックを背負ってポールを持っている"
           }
         }
       }

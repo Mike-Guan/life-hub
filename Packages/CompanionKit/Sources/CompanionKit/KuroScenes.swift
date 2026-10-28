@@ -73,10 +73,12 @@ enum KuroScene: Equatable, Sendable {
     /// What her left hand holds in the identity-card looks; the score goes down with the finger on it.
     static let leftHanded: Set<KuroPart> = [.boxGloveL, .gymBlock, .studyNotebook, .scoreSheet, .scoreFinger]
 
+    // The outdoor card's backpack goes too: walking she carries her walk backpack instead.
     /// What she holds in her looks; put away when her hands are busy.
     static let handheld: Set<KuroPart> = [
         .chillCup, .tennisRacket, .itemGoldRacket, .workStylus, .deskPen, .deskBooks,
         .boxGloveL, .boxGloveR, .gymBlock, .studyNotebook, .studyHighlighter, .craftPen, .scoreSheet, .scoreFinger,
+        .yogaMat, .sportBall, .sportBallHand, .outPole, .outBackpack, .outStraps,
     ]
 
     // The tennis bag is a shop item, so she carries it only when she owns it; otherwise her backpack.
@@ -98,8 +100,8 @@ enum KuroScene: Equatable, Sendable {
         case .fitness: .inviteSleeveTennis
         case .study: .inviteSleeveChill
         case .art: .inviteSleeveSmock
-        case .dance, .ski: .inviteSleeveTennis
-        case .music: .inviteSleeveChill
+        case .dance, .ski, .swimming, .yoga, .ball: .inviteSleeveTennis
+        case .music, .outdoor: .inviteSleeveChill
         }
     }
 
