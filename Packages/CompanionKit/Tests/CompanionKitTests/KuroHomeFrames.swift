@@ -74,12 +74,12 @@ extension FrameSheets {
         var cells: [(String, CGImage)] = []
         for (item, name) in clothes {
             for back in [false, true] {
-                let model = HomeModel(kuroAtNight: false, card: .tennis)
+                let mode: Mode = item.look == .work ? .work : item.look == .desk ? .money : .chill
+                let model = HomeModel(kuroAtNight: false, card: .tennis, wearing: [mode: item.rawValue])
                 let scene = HomeScene(model: model)
+                model.switchMode(mode)
                 if back { model.tap(.wardrobe) }
                 scene.sync(animated: false)
-                let node = try #require(scene.haku as? KuroHomeNode)
-                node.dress(item.look, worn: [item.rawValue])
                 scene.settle()
                 scene.pose(at: 1.3)
                 cells.append(("\(name) · \(back ? "背面" : "正面")", try #require(Self.closeUp(scene))))
@@ -113,9 +113,14 @@ extension FrameSheets {
 
 extension HomeModel {
     /// Her room before any mode, as the app would send it.
-    fileprivate convenience init(kuroAtNight night: Bool, card: IdentityKind, energy: EnergyLevel? = nil) {
+    fileprivate convenience init(
+        kuroAtNight night: Bool, card: IdentityKind, energy: EnergyLevel? = nil, wearing: [Mode: String] = [:]
+    ) {
         var snapshot = HomeSnapshot.preview()
         snapshot.persona = .kuro
+        snapshot.wardrobe = Wardrobe(clothes: wearing)
+        // What she wears follows the snapshot's mode, so the clothes' mode is the snapshot's too.
+        if let mode = wearing.keys.first { snapshot.mode = mode }
         snapshot.cards = ModeCards(identity: card)
         snapshot.energy = energy
         self.init(snapshot: snapshot, night: night, now: Self.start)
