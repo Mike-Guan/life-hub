@@ -230,6 +230,8 @@ enum HomeRug: String, CaseIterable, Sendable {
 /// An area of the room that holds items.
 enum HomeZone: String, CaseIterable, Sendable {
     case furniture, sportFloor, sportWall, shelf, desk, sofaSide, corner
+    /// The left wall over the desk, where the two default posters hang until a bought one replaces them.
+    case posterWall
 
     /// The floor or wall the zone takes up; furniture has none of its own.
     var box: GridBox? {
@@ -241,6 +243,7 @@ enum HomeZone: String, CaseIterable, Sendable {
         case .desk: GridBox(x0: 0, y0: 0.4, x1: 1.5, y1: 3.4, z0: 1.36, z1: 2.4)
         case .sofaSide: GridBox(x0: 2.3, y0: 8.2, x1: 2.9, y1: 8.8, z1: 1)
         case .corner: GridBox(x0: 0.9, y0: 8.7, x1: 2.1, y1: 9.9, z1: 2.6)
+        case .posterWall: GridBox(x0: 0, y0: 0.6, x1: 0.1, y1: 3.3, z0: 2.6, z1: 4.8)
         }
     }
 
@@ -250,9 +253,12 @@ enum HomeZone: String, CaseIterable, Sendable {
         case .furniture, .shelf: []
         case .sportFloor: [GridPoint(x: 4.55, y: 2.0)]
         case .sportWall: [GridPoint(x: 4.4, y: 0.15, z: 3.4), GridPoint(x: 5.3, y: 0.15, z: 3.4)]
-        case .desk: [GridPoint(x: 0.6, y: 3.0, z: 1.36), GridPoint(x: 0.6, y: 0.9, z: 1.36)]
+        // UI 审核 2026-10-27: two items in the left front corner touched. One stands left of the mouse, the other on
+        // the right by the mug, in front of the notebook.
+        case .desk: [GridPoint(x: 0.45, y: 3.05, z: 1.36), GridPoint(x: 1.25, y: 1.35, z: 1.36)]
         case .sofaSide: [GridPoint(x: 2.6, y: 8.5)]
         case .corner: [GridPoint(x: 1.5, y: 9.3)]
+        case .posterWall: [GridPoint(x: 0.02, y: 1.95, z: 3.7)]
         }
     }
 }
@@ -262,6 +268,15 @@ enum HomeItem: String, CaseIterable, Sendable {
     case plant, bag, cactus, speaker
     // The sports corner: gloves, racket and snowboard hang on the back wall, the bench stands under them.
     case gloves, racket, snowboard, bench
+    // 商店扩充 v1 §2.2: HAKU's own room items.
+    case clipLamp = "lamp.clip"
+    case headphones, gamepad, cube, comics, fan, monstera, skateboard
+    case arcadePoster = "poster.arcade"
+    case cityPoster = "poster.city"
+    // §2.4 and §4: shared by both characters, the last two only with the dance or music card.
+    case mat, rope
+    case danceMirror = "mirror.dance"
+    case musicStand = "stand.music"
 
     /// The room item a shop catalog id names, such as `room.bench` or `haku.weekly.room.cactus`.
     init?(shopID: String) {
@@ -272,49 +287,80 @@ enum HomeItem: String, CaseIterable, Sendable {
     /// The zone the item goes in.
     var zone: HomeZone {
         switch self {
-        case .plant: .corner
-        case .bag, .bench: .sportFloor
-        case .cactus: .desk
-        case .speaker: .sofaSide
-        case .gloves, .racket, .snowboard: .sportWall
+        case .plant, .monstera, .skateboard, .musicStand: .corner
+        case .bag, .bench, .mat: .sportFloor
+        case .cactus, .clipLamp, .headphones, .gamepad, .cube: .desk
+        case .speaker, .comics, .fan: .sofaSide
+        case .gloves, .racket, .snowboard, .rope, .danceMirror: .sportWall
+        case .arcadePoster, .cityPoster: .posterWall
         }
     }
 
-    /// Where the item stands, or hangs.
+    /// Where the item stands, or hangs; on the desk, where it stands alone.
     // Wall items stay left of x 5.5: further right the wardrobe's side hides them.
     var spot: GridPoint {
         switch self {
-        case .plant: GridPoint(x: 1.5, y: 9.3)
+        case .plant, .musicStand: GridPoint(x: 1.5, y: 9.3)
+        // UI 审核 2026-10-27: at the plant's spot its leaves covered the floor lamp's pole; further into the corner.
+        case .monstera: GridPoint(x: 1.15, y: 9.55)
+        case .skateboard: GridPoint(x: 1.0, y: 9.3)
         case .bag: GridPoint(x: 5.9, y: 3.1)
-        case .cactus: GridPoint(x: 0.6, y: 3.0, z: 1.36)
-        case .speaker: GridPoint(x: 2.6, y: 8.5)
+        case .cactus, .clipLamp, .headphones, .gamepad, .cube: HomeZone.desk.slots[0]
+        case .speaker, .comics, .fan: GridPoint(x: 2.6, y: 8.5)
         case .gloves: GridPoint(x: 4.9, y: 0.15, z: 3.4)
         case .racket: GridPoint(x: 5.25, y: 0.1, z: 3.3)
         case .snowboard: GridPoint(x: 5.3, y: 0.1)
-        case .bench: GridPoint(x: 4.55, y: 2.0)
+        case .bench, .mat: GridPoint(x: 4.55, y: 2.0)
+        case .rope: GridPoint(x: 4.85, y: 0.12, z: 3.4)
+        case .danceMirror: GridPoint(x: 4.85, y: 0.05, z: 2.6)
+        case .arcadePoster, .cityPoster: HomeZone.posterWall.slots[0]
         }
+    }
+
+    /// Where each of `items` stands: alone in its zone at its spot; sharing a zone, the items take its slots in
+    /// catalog order, each keeping its own height.
+    static func places(_ items: Set<HomeItem>) -> [HomeItem: GridPoint] {
+        var places: [HomeItem: GridPoint] = [:]
+        for zone in HomeZone.allCases {
+            // The mirror is too wide for the sports wall's right slot, by the wardrobe, so it takes the left one.
+            let here = allCases.filter { items.contains($0) && $0.zone == zone }
+                .sorted { $0 == .danceMirror && $1 != .danceMirror }
+            for (i, item) in here.enumerated() {
+                let slot = here.count > 1 && i < zone.slots.count ? zone.slots[i] : nil
+                places[item] = slot.map { GridPoint(x: $0.x, y: $0.y, z: item.spot.z) } ?? item.spot
+            }
+        }
+        return places
     }
 
     /// The floor the item takes up, or `nil` when it hangs on the wall or stands on furniture.
     var footprint: GridBox? {
         let s = spot
         switch self {
-        case .cactus, .gloves, .racket, .snowboard: return nil
+        // HAKU walks over the mat.
+        case .cactus, .clipLamp, .headphones, .gamepad, .cube, .gloves, .racket, .snowboard, .arcadePoster,
+            .cityPoster, .mat, .rope, .danceMirror:
+            return nil
         case .bench: return GridBox(x0: 3.9, y0: 0.3, x1: 5.2, y1: 3.4, z1: 1.9)
         case .bag: return GridBox(x0: s.x - 0.4, y0: s.y - 0.4, x1: s.x + 0.4, y1: s.y + 0.4, z1: 2.5)
-        case .plant, .speaker: return GridBox(x0: s.x - 0.3, y0: s.y - 0.3, x1: s.x + 0.3, y1: s.y + 0.3, z1: 1)
+        case .skateboard: return GridBox(x0: 0.1, y0: s.y - 0.25, x1: s.x + 0.1, y1: s.y + 0.25, z1: 1.7)
+        case .plant, .speaker, .comics, .fan, .monstera, .musicStand:
+            return GridBox(x0: s.x - 0.3, y0: s.y - 0.3, x1: s.x + 0.3, y1: s.y + 0.3, z1: 1)
         }
     }
 
     /// Back to front, as `HomePiece.depth`.
     var depth: Double {
         switch self {
-        case .plant: 10.8
+        case .plant, .monstera, .musicStand: 10.8
+        case .skateboard: 10.3
         case .bag: 9.0
-        case .cactus: 3.7
-        case .speaker: 11.1
-        case .gloves, .racket, .snowboard: 0.6
+        case .cactus, .clipLamp, .headphones, .gamepad, .cube: 3.7
+        case .speaker, .comics, .fan: 11.1
+        case .gloves, .racket, .snowboard, .rope, .danceMirror: 0.6
         case .bench: 6.55
+        case .mat: -0.9
+        case .arcadePoster, .cityPoster: 0.55
         }
     }
 }

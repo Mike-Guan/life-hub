@@ -836,6 +836,18 @@ enum HomeArt {
             return [GridBox(x0: s.x - 0.25, y0: s.y - 0.25, x1: s.x + 0.25, y1: s.y + 0.25, z0: s.z, z1: s.z + 0.7)]
         case .speaker: return [GridBox(x0: s.x - 0.35, y0: s.y - 0.35, x1: s.x + 0.35, y1: s.y + 0.35, z1: 1)]
         case .bag: return [GridBox(x0: s.x - 0.5, y0: s.y - 0.5, x1: s.x + 0.5, y1: s.y + 0.5, z0: s.z, z1: s.z + 2.8)]
+        case .clipLamp, .headphones, .gamepad, .cube:
+            return [GridBox(x0: s.x - 0.3, y0: s.y - 0.3, x1: s.x + 0.45, y1: s.y + 0.3, z0: s.z, z1: s.z + 1.0)]
+        case .comics: return [GridBox(x0: s.x - 0.35, y0: s.y - 0.35, x1: s.x + 0.35, y1: s.y + 0.35, z1: 0.5)]
+        case .fan: return [GridBox(x0: s.x - 0.4, y0: s.y - 0.45, x1: s.x + 0.4, y1: s.y + 0.45, z1: 1.35)]
+        case .monstera: return [GridBox(x0: s.x - 1.3, y0: s.y - 1.3, x1: s.x + 0.7, y1: s.y + 0.7, z1: 2.9)]
+        case .skateboard: return [GridBox(x0: 0, y0: s.y - 0.3, x1: s.x + 0.15, y1: s.y + 0.3, z1: 1.8)]
+        case .arcadePoster, .cityPoster: return [HomeZone.posterWall.box ?? GridBox(x0: 0, y0: 0, x1: 0, y1: 0, z1: 0)]
+        case .mat: return [GridBox(x0: 3.95, y0: 0.45, x1: 5.15, y1: 3.4, z1: 0.45)]
+        case .rope:
+            return [GridBox(x0: s.x - 0.4, y0: 0, x1: s.x + 0.4, y1: 0.4, z0: s.z - 1.2, z1: s.z + 0.7)]
+        case .danceMirror: return [GridBox(x0: s.x - 0.45, y0: 0, x1: s.x + 0.45, y1: 0.2, z0: 0.5, z1: s.z + 1.75)]
+        case .musicStand: return [GridBox(x0: s.x - 0.6, y0: s.y - 0.6, x1: s.x + 0.6, y1: s.y + 0.6, z1: 2.5)]
         }
     }
 
@@ -912,7 +924,498 @@ enum HomeArt {
             pen.box(4.5, 1.1, 0, 4.65, 3.3, 0.45, 0x2A2C34)
             pen.box(4.3, 1.0, 0.45, 4.85, 3.4, 0.62, HomeColors.navy, top: tone(HomeColors.navy, 0.2))
             pen.line([p(4.85, 1.05, 0.55), p(4.85, 3.35, 0.55)], tone(HomeColors.navy, 0.25), width: 1)
+        case .clipLamp: clipLamp(pen, at: s)
+        case .headphones: headphones(pen, at: s)
+        case .gamepad: gamepad(pen, at: s)
+        case .cube: cube(pen, at: s)
+        case .comics: comics(pen, at: s)
+        case .fan: fan(pen, at: s)
+        case .monstera: monstera(pen, at: s)
+        case .skateboard: skateboard(pen, at: s)
+        case .arcadePoster: arcadePoster(pen)
+        case .cityPoster: cityPoster(pen)
+        case .mat: mat(pen, at: s)
+        case .rope: rope(pen, at: s)
+        case .danceMirror: danceMirror(pen, at: s)
+        case .musicStand: musicStand(pen, at: s)
         }
+    }
+
+    // MARK: Shared items
+
+    /// A yoga mat rolled out along the sports floor, its far end still rolled up against the wall.
+    private static func mat(_ pen: IsoPen, at s: GridPoint) {
+        let lilac: UInt32 = 0x9C8CFF
+        let (x0, x1) = (s.x - 0.5, s.x + 0.5)
+        pen.floor(x0, 0.85, x1, 3.3, Color(hex: lilac), z: 0.02, line: 2)
+        pen.floor(x0 + 0.08, 0.95, x1 - 0.08, 3.2, tone(lilac, 0.2), z: 0.02, line: 0)
+        for y in stride(from: 1.2, to: 3.2, by: 0.35) {
+            pen.line(
+                [HomeGrid.plan(x0 + 0.1, y, 0.02), HomeGrid.plan(x1 - 0.1, y, 0.02)], tone(lilac, -0.12), width: 0.8)
+        }
+        // The roll: its side, then its round end facing the room with the mat's spiral.
+        let (y, z, r) = (0.72, 0.17, 0.17)
+        pen.box(GridBox(x0: x0, y0: y - r, x1: x1, y1: y + r, z0: 0, z1: 2 * r), lilac, line: 0)
+        pen.line([HomeGrid.plan(x0, y + r, z), HomeGrid.plan(x1, y + r, z)], width: 2)
+        pen.line([HomeGrid.plan(x0, y - 0.02, 2 * r), HomeGrid.plan(x1, y - 0.02, 2 * r)], width: 2)
+        pen.line(
+            [HomeGrid.plan(x0, y + 0.1, 2 * r - 0.02), HomeGrid.plan(x1, y + 0.1, 2 * r - 0.02)], tone(lilac, 0.4),
+            width: 1.2)
+        pen.discAcross(x: x1, y, z, r: r, tone(lilac, -0.15), line: 1.8)
+        let spiral = (0..<28).map { i -> CGPoint in
+            let a = Double(i) / 28 * 4 * .pi
+            let k = r * 0.85 * (1 - Double(i) / 32)
+            return HomeGrid.plan(x1, y + k * cos(a), z + k * sin(a))
+        }
+        pen.line(spiral, tone(lilac, 0.35), width: 1)
+        pen.contact(x0, y - r, x1, y + r)
+    }
+
+    /// A jump rope hanging from a hook by its handles, the rope looping below.
+    private static func rope(_ pen: IsoPen, at s: GridPoint) {
+        let p = { (x: Double, z: Double) in HomeGrid.plan(x, s.y, z) }
+        let hook = p(s.x, s.z + 0.5)
+        pen.box(s.x - 0.05, 0, s.z + 0.45, s.x + 0.05, 0.12, s.z + 0.55, 0xC3C8D2, line: 1.4)
+        // The rope: from each handle's bottom, down in a loop under them.
+        var loop = Path()
+        loop.move(to: p(s.x - 0.17, s.z - 0.12))
+        loop.addCurve(
+            to: p(s.x + 0.17, s.z - 0.12), control1: p(s.x - 0.32, s.z - 1.25), control2: p(s.x + 0.3, s.z - 1.2))
+        pen.context.stroke(loop, with: .color(IsoPen.ink), style: StrokeStyle(lineWidth: 3.4, lineCap: .round))
+        pen.context.stroke(
+            loop, with: .color(Color(hex: 0x3EC8FF)), style: StrokeStyle(lineWidth: 1.8, lineCap: .round))
+        var inner = Path()
+        inner.move(to: p(s.x - 0.12, s.z - 0.12))
+        inner.addCurve(
+            to: p(s.x + 0.12, s.z - 0.12), control1: p(s.x - 0.22, s.z - 0.85), control2: p(s.x + 0.2, s.z - 0.8))
+        pen.context.stroke(inner, with: .color(IsoPen.ink), style: StrokeStyle(lineWidth: 3.4, lineCap: .round))
+        pen.context.stroke(
+            inner, with: .color(Color(hex: 0x3EC8FF)), style: StrokeStyle(lineWidth: 1.8, lineCap: .round))
+        // Handles hanging off the hook by short cords.
+        for dx in [-0.15, 0.15] {
+            let top = p(s.x + dx, s.z + 0.28)
+            pen.line([hook, top], width: 1.2)
+            let handle = Path(roundedRect: CGRect(x: top.x - 3, y: top.y, width: 6, height: 15), cornerRadius: 3)
+            pen.context.fill(handle, with: .color(Color(hex: HomeColors.pink)))
+            pen.context.stroke(handle, with: .color(IsoPen.ink), lineWidth: 1.6 * IsoPen.weight)
+            pen.line(
+                [CGPoint(x: top.x - 2, y: top.y + 3), CGPoint(x: top.x - 2, y: top.y + 11)], Color.white.opacity(0.5),
+                width: 1)
+        }
+    }
+
+    /// A tall dance mirror on the sports wall, in a light wood frame, with the room's light on the glass.
+    private static func danceMirror(_ pen: IsoPen, at s: GridPoint) {
+        let (u0, u1, v0, v1) = (s.x - 0.38, s.x + 0.38, 0.55, s.z + 1.7)
+        pen.box(u0 - 0.06, 0, v0 - 0.06, u1 + 0.06, 0.06, v1 + 0.06, 0xE2B887, line: 2)
+        pen.onBackWall(y: 0.065, u0, v0, u1, v1, Color(hex: 0xCFE9F5), line: 1.6)
+        // A faint copy of the window's light, then two bright streaks.
+        pen.onBackWall(y: 0.066, u0, v1 - 0.9, u0 + 0.3, v1, Color.white.opacity(0.35), line: 0)
+        for (a, b, w) in [(0.15, 0.9, 3.0), (0.4, 1.3, 1.6)] {
+            pen.line(
+                [HomeGrid.plan(u0 + a, 0.066, v1 - 0.2), HomeGrid.plan(u0 + a + 0.3, 0.066, v1 - b)],
+                Color.white.opacity(0.75), width: w)
+        }
+        pen.line(
+            [HomeGrid.plan(u1 - 0.2, 0.066, v0 + 0.5), HomeGrid.plan(u1 - 0.05, 0.066, v0 + 0.25)],
+            Color.white.opacity(0.6), width: 1.6)
+    }
+
+    /// A black folding music stand with a page of music on it, facing the room.
+    private static func musicStand(_ pen: IsoPen, at s: GridPoint) {
+        let p = { (x: Double, y: Double, z: Double) in HomeGrid.plan(x, y, z) }
+        let black = Color(hex: 0x1B1C26)
+        pen.contact(s.x - 0.35, s.y - 0.35, s.x + 0.35, s.y + 0.35)
+        for (dx, dy) in [(-0.35, -0.2), (0.3, -0.25), (0.05, 0.38)] {
+            pen.line([p(s.x, s.y, 0.45), p(s.x + dx, s.y + dy, 0)], width: 2.6)
+        }
+        pen.line([p(s.x, s.y, 0.45), p(s.x, s.y, 1.55)], width: 3)
+        pen.line([p(s.x, s.y, 0.45), p(s.x, s.y, 1.55)], Color(hex: 0x3A3D52), width: 1.2)
+        // The desk leans back: its bottom edge in front, its top towards the wall.
+        let (b, t) = ((x: s.x + 0.05, z: 1.5), (x: s.x - 0.2, z: 2.25))
+        let (y0, y1) = (s.y - 0.48, s.y + 0.48)
+        pen.polygon([p(b.x, y0, b.z), p(b.x, y1, b.z), p(t.x, y1, t.z), p(t.x, y0, t.z)], black, line: 2)
+        pen.box(
+            GridBox(x0: b.x - 0.02, y0: y0, x1: b.x + 0.1, y1: y1, z0: b.z - 0.06, z1: b.z + 0.04), 0x1B1C26, line: 1.4)
+        // The page and its staves with a few notes.
+        let page = { (u: Double, v: Double) in
+            p(b.x + (t.x - b.x) * v - 0.02, y0 + 0.1 + u * (y1 - y0 - 0.2), b.z + 0.04 + (t.z - b.z - 0.06) * v)
+        }
+        pen.polygon([page(0, 0), page(1, 0), page(1, 1), page(0, 1)], Color(hex: 0xFFFBF2), line: 1.2)
+        for v in [0.3, 0.55, 0.8] {
+            pen.line([page(0.08, v), page(0.92, v)], Color(hex: 0x6B6F85), width: 0.8)
+        }
+        for (u, v) in [(0.2, 0.33), (0.38, 0.27), (0.6, 0.58), (0.78, 0.52), (0.5, 0.83)] {
+            pen.ellipse(at: page(u, v), rx: 1.6, ry: 1.2, black, line: 0)
+            pen.line([page(u + 0.02, v), page(u + 0.02, v + 0.12)], black, width: 0.8)
+        }
+    }
+
+    // MARK: Desk items, standing at the desk's first slot
+
+    /// A yellow clamp lamp: clamp on the desk, two arms, the shade tipped down at the desk.
+    private static func clipLamp(_ pen: IsoPen, at s: GridPoint) {
+        let p = { (x: Double, y: Double, z: Double) in HomeGrid.plan(x, y, z) }
+        let yellow: UInt32 = 0xFFD23F
+        pen.box(s.x - 0.1, s.y - 0.1, s.z, s.x + 0.1, s.y + 0.1, s.z + 0.08, 0x2A2C38)
+        let elbow = p(s.x - 0.05, s.y, s.z + 0.62)
+        let head = p(s.x + 0.25, s.y - 0.05, s.z + 0.82)
+        pen.line([p(s.x, s.y, s.z + 0.08), elbow, head], width: 2.6)
+        pen.line([p(s.x, s.y, s.z + 0.08), elbow, head], Color(hex: yellow), width: 1.2)
+        pen.ellipse(at: elbow, rx: 2.2, ry: 2.2, Color(hex: 0x2A2C38), line: 1)
+        // The shade, a cone opening down towards the desk front, with the bulb's glow under it.
+        var shade = Path()
+        shade.move(to: CGPoint(x: head.x - 3, y: head.y - 3))
+        shade.addLine(to: CGPoint(x: head.x + 3, y: head.y - 4))
+        shade.addLine(to: CGPoint(x: head.x + 11, y: head.y + 7))
+        shade.addQuadCurve(to: CGPoint(x: head.x - 2, y: head.y + 10), control: CGPoint(x: head.x + 6, y: head.y + 13))
+        shade.closeSubpath()
+        pen.context.fill(shade, with: .color(Color(hex: yellow)))
+        pen.context.stroke(shade, with: .color(IsoPen.ink), style: StrokeStyle(lineWidth: 1.8 * IsoPen.weight))
+        pen.line(
+            [CGPoint(x: head.x - 1, y: head.y - 1), CGPoint(x: head.x + 7, y: head.y + 6)], tone(yellow, 0.6), width: 1)
+        pen.ellipse(at: CGPoint(x: head.x + 4.5, y: head.y + 9.5), rx: 3, ry: 1.8, Color(hex: 0xFFF6D0), line: 1)
+    }
+
+    /// Headphones hanging on a little stand.
+    private static func headphones(_ pen: IsoPen, at s: GridPoint) {
+        let p = { (x: Double, y: Double, z: Double) in HomeGrid.plan(x, y, z) }
+        pen.cylinder(s.x, s.y, r: 0.15, s.z, s.z + 0.05, 0x2A2C38, line: 1.6)
+        pen.box(s.x - 0.03, s.y - 0.03, s.z + 0.05, s.x + 0.03, s.y + 0.03, s.z + 0.72, 0x2A2C38, line: 1.4)
+        let left = p(s.x, s.y - 0.17, s.z + 0.45)
+        let right = p(s.x, s.y + 0.17, s.z + 0.45)
+        var band = Path()
+        band.move(to: CGPoint(x: left.x, y: left.y - 4))
+        band.addQuadCurve(to: CGPoint(x: right.x, y: right.y - 4), control: p(s.x, s.y, s.z + 1.02))
+        pen.context.stroke(band, with: .color(IsoPen.ink), style: StrokeStyle(lineWidth: 4.2, lineCap: .round))
+        pen.context.stroke(
+            band, with: .color(Color(hex: HomeColors.navy)), style: StrokeStyle(lineWidth: 2.2, lineCap: .round))
+        for (c, k) in [(left, -0.15), (right, 0.0)] {
+            pen.ellipse(at: c, rx: 4.6, ry: 6, tone(HomeColors.pink, k), line: 1.6)
+            pen.ellipse(at: CGPoint(x: c.x + 0.8, y: c.y), rx: 2.2, ry: 3.4, Color(hex: 0x2A2C38), line: 0)
+        }
+    }
+
+    /// A game controller lying on the desk: d-pad on one grip, four buttons on the other.
+    private static func gamepad(_ pen: IsoPen, at s: GridPoint) {
+        let p = { (x: Double, y: Double, z: Double) in HomeGrid.plan(x, y, z) }
+        let body: UInt32 = 0x2A2C38
+        let z = s.z + 0.07
+        for dy in [-0.17, 0.17] {
+            pen.box(s.x - 0.05, s.y + dy - 0.09, s.z, s.x + 0.2, s.y + dy + 0.09, z, body, line: 1.6)
+        }
+        pen.box(s.x - 0.12, s.y - 0.24, s.z, s.x + 0.1, s.y + 0.24, z, body, top: tone(body, 0.2), line: 1.6)
+        // D-pad.
+        let d = p(s.x, s.y - 0.14, z)
+        pen.line([CGPoint(x: d.x - 3, y: d.y), CGPoint(x: d.x + 3, y: d.y)], Color(hex: 0xC3C8D2), width: 1.6)
+        pen.line([CGPoint(x: d.x, y: d.y - 2), CGPoint(x: d.x, y: d.y + 2)], Color(hex: 0xC3C8D2), width: 1.6)
+        // Buttons.
+        let b = p(s.x, s.y + 0.14, z)
+        for (dx, dy, c) in [
+            (CGFloat(-2.6), CGFloat(0), UInt32(0xFF3EA5)), (2.6, 0, 0x3EF0FF), (0, -1.6, 0xFFD23F), (0, 1.6, 0x7CFF4F),
+        ] {
+            pen.ellipse(at: CGPoint(x: b.x + dx, y: b.y + dy), rx: 1.2, ry: 0.9, Color(hex: c), line: 0)
+        }
+        pen.ellipse(at: p(s.x - 0.02, s.y, z), rx: 1.6, ry: 0.9, Color(hex: 0x3EF0FF).opacity(0.8), line: 0)
+    }
+
+    /// A puzzle cube, three by three on every face, a bit scrambled.
+    private static func cube(_ pen: IsoPen, at s: GridPoint) {
+        let n = 3
+        let side = 0.3
+        let (x0, y0, z0) = (s.x - side / 2, s.y - side / 2, s.z)
+        let (x1, y1, z1) = (x0 + side, y0 + side, z0 + side)
+        let cell = side / Double(n)
+        let colours: [UInt32] = [0xFF3B4E, 0xFFFFFF, 0xFFD23F, 0x3E8BFF, 0x58C25A, 0xFF9F43]
+        func colour(_ face: Int, _ i: Int, _ j: Int) -> Color {
+            // The middle sticker names the face; the rest are a fixed scramble.
+            let k = i == 1 && j == 1 ? face : (face * 7 + i * 5 + j * 3) % colours.count
+            return Color(hex: colours[k])
+        }
+        pen.box(x0, y0, z0, x1, y1, z1, 0x1B1C26, line: 1.8)
+        for i in 0..<n {
+            for j in 0..<n {
+                let a = Double(i) * cell
+                let b = Double(j) * cell
+                let e = 0.012
+                // Top (z = z1), front-left (y = y1), front-right (x = x1).
+                pen.polygon(
+                    [
+                        HomeGrid.plan(x0 + a + e, y0 + b + e, z1), HomeGrid.plan(x0 + a + cell - e, y0 + b + e, z1),
+                        HomeGrid.plan(x0 + a + cell - e, y0 + b + cell - e, z1),
+                        HomeGrid.plan(x0 + a + e, y0 + b + cell - e, z1),
+                    ], colour(0, i, j), line: 0)
+                pen.onBackWall(
+                    y: y1, x0 + a + e, z0 + b + e, x0 + a + cell - e, z0 + b + cell - e, colour(1, i, j).opacity(0.85),
+                    line: 0)
+                pen.onLeftWall(
+                    x: x1, y0 + a + e, z0 + b + e, y0 + a + cell - e, z0 + b + cell - e, colour(2, i, j).opacity(0.7),
+                    line: 0)
+            }
+        }
+    }
+
+    // MARK: Beside the sofa
+
+    /// A stack of five comics, the top one's cover up.
+    private static func comics(_ pen: IsoPen, at s: GridPoint) {
+        pen.contact(s.x - 0.28, s.y - 0.22, s.x + 0.28, s.y + 0.22)
+        let spines: [UInt32] = [0x3E8BFF, 0xFF3EA5, 0xFFD23F, 0x58C25A, 0xFF9F43]
+        var z = 0.0
+        for (i, c) in spines.enumerated() {
+            let dx = [0.0, 0.04, -0.03, 0.05, -0.02][i]
+            let dy = [0.0, -0.03, 0.04, 0.0, -0.04][i]
+            let h = 0.07
+            pen.box(
+                GridBox(
+                    x0: s.x - 0.25 + dx, y0: s.y - 0.19 + dy, x1: s.x + 0.25 + dx, y1: s.y + 0.19 + dy, z0: z, z1: z + h
+                ),
+                0xFFF6E5, top: Color(hex: c), left: Color(hex: c), right: Color(hex: 0xFFF6E5), line: 1.4)
+            z += h
+        }
+        // The top cover: a burst and a title strip.
+        let top = HomeGrid.plan(s.x - 0.02, s.y - 0.04, z)
+        var burst = Path()
+        for k in 0..<12 {
+            let a = Double(k) / 12 * 2 * .pi
+            let r = k.isMultiple(of: 2) ? 5.5 : 3.0
+            let q = CGPoint(x: top.x + CGFloat(r * cos(a)) * 1.3, y: top.y + CGFloat(r * sin(a)) * 0.65)
+            if k == 0 { burst.move(to: q) } else { burst.addLine(to: q) }
+        }
+        burst.closeSubpath()
+        pen.context.fill(burst, with: .color(Color(hex: 0xFFFFFF)))
+        pen.context.stroke(burst, with: .color(IsoPen.ink), lineWidth: 0.9)
+        pen.line(
+            [HomeGrid.plan(s.x - 0.2, s.y + 0.12, z), HomeGrid.plan(s.x + 0.15, s.y + 0.12, z)], Color(hex: 0x1B1C26),
+            width: 1.6)
+    }
+
+    /// A small floor fan facing the room: round foot, post, the cage with three blades.
+    private static func fan(_ pen: IsoPen, at s: GridPoint) {
+        let mint: UInt32 = 0x6FD6C2
+        let hub = (y: s.y, z: 0.9)
+        pen.contact(s.x - 0.25, s.y - 0.25, s.x + 0.25, s.y + 0.25)
+        pen.cylinder(s.x, s.y, r: 0.24, 0, 0.07, mint, line: 1.6)
+        pen.box(s.x - 0.04, s.y - 0.04, 0.07, s.x + 0.04, s.y + 0.04, 0.62, 0x4FA898, line: 1.4)
+        pen.discAcross(x: s.x - 0.08, hub.y, hub.z, r: 0.1, tone(mint, -0.25), line: 1.4)
+        pen.discAcross(x: s.x, hub.y, hub.z, r: 0.36, Color.white.opacity(0.35), line: 2)
+        for k in 0..<3 {
+            let a = Double(k) / 3 * 2 * .pi + 0.4
+            let points = stride(from: -0.5, through: 0.5, by: 0.25).map { t in
+                HomeGrid.plan(s.x + 0.01, hub.y + 0.27 * cos(a + t * 0.9), hub.z + 0.27 * sin(a + t * 0.9))
+            }
+            pen.polygon(
+                [HomeGrid.plan(s.x + 0.01, hub.y, hub.z)] + points, Color(hex: 0xFFFFFF).opacity(0.85), line: 1.1)
+        }
+        // Cage wires.
+        for k in 0..<8 {
+            let a = Double(k) / 8 * 2 * .pi
+            pen.line(
+                [
+                    HomeGrid.plan(s.x + 0.02, hub.y, hub.z),
+                    HomeGrid.plan(s.x + 0.02, hub.y + 0.36 * cos(a), hub.z + 0.36 * sin(a)),
+                ], tone(mint, -0.35), width: 0.7)
+        }
+        pen.discAcross(x: s.x + 0.03, hub.y, hub.z, r: 0.06, Color(hex: mint), line: 1.2)
+    }
+
+    // MARK: Corner
+
+    /// A monstera in a tall pot, its big leaves split to the edge.
+    private static func monstera(_ pen: IsoPen, at s: GridPoint) {
+        pen.contact(s.x - 0.35, s.y - 0.35, s.x + 0.35, s.y + 0.35)
+        pen.cylinder(s.x, s.y, r: 0.3, 0, 0.75, 0xFFF6E5)
+        pen.line(
+            [HomeGrid.plan(s.x - 0.3, s.y, 0.6), HomeGrid.plan(s.x + 0.25, s.y + 0.15, 0.6)], tone(0xFFF6E5, -0.25),
+            width: 1)
+        let top = HomeGrid.plan(s.x, s.y, 0.75)
+        pen.ellipse(at: top, rx: 11, ry: 5.5, Color(hex: 0x5B3A29), line: 0)
+        let green: UInt32 = 0x2F9E5B
+        // (tip of the stem, leaf size, which way the leaf points in radians from straight down), back leaves first.
+        let leaves: [(CGFloat, CGFloat, CGFloat, Double)] = [
+            (-16, -60, 17, 2.5), (16, -66, 18, -2.5), (-28, -34, 15, 1.75), (28, -38, 16, -1.75), (2, -40, 15, -0.25),
+        ]
+        for (dx, dy, size, tilt) in leaves {
+            let stem = CGPoint(x: top.x + dx, y: top.y + dy)
+            pen.line([CGPoint(x: top.x + dx * 0.1, y: top.y - 2), stem], tone(green, -0.25), width: 1.8)
+            monsteraLeaf(pen, at: stem, size: size, tilt: tilt, green)
+        }
+    }
+
+    /// One heart-shaped leaf hanging from `stem`, with slits cut through to what is behind it.
+    private static func monsteraLeaf(_ pen: IsoPen, at stem: CGPoint, size: CGFloat, tilt: Double, _ green: UInt32) {
+        var c = pen.context
+        c.translateBy(x: stem.x, y: stem.y)
+        c.rotate(by: .radians(tilt))
+        var leaf = Path()
+        leaf.move(to: .zero)
+        leaf.addCurve(
+            to: CGPoint(x: 0, y: size * 1.25), control1: CGPoint(x: -size * 1.15, y: -size * 0.45),
+            control2: CGPoint(x: -size * 0.9, y: size * 1.0))
+        leaf.addCurve(
+            to: .zero, control1: CGPoint(x: size * 0.9, y: size * 1.0),
+            control2: CGPoint(x: size * 1.15, y: -size * 0.45))
+        leaf.closeSubpath()
+        c.fill(leaf, with: .color(Color(hex: green)))
+        c.stroke(leaf, with: .color(IsoPen.ink), style: StrokeStyle(lineWidth: 1.8 * IsoPen.weight, lineJoin: .round))
+        // Slits from the edge towards the midrib, both sides.
+        var cut = c
+        cut.blendMode = .clear
+        for t in [0.3, 0.55, 0.8] as [CGFloat] {
+            for side in [-1.0, 1.0] as [CGFloat] {
+                var slit = Path()
+                slit.move(to: CGPoint(x: side * size * 0.95, y: size * (t - 0.05)))
+                slit.addLine(to: CGPoint(x: side * size * 0.3, y: size * (t + 0.08)))
+                cut.stroke(slit, with: .color(.black), style: StrokeStyle(lineWidth: 2.2, lineCap: .round))
+            }
+        }
+        c.stroke(
+            Path {
+                $0.move(to: CGPoint(x: 0, y: 2))
+                $0.addLine(to: CGPoint(x: 0, y: size * 1.1))
+            },
+            with: .color(tone(green, -0.3)), lineWidth: 1)
+        c.stroke(
+            Path {
+                $0.move(to: CGPoint(x: -size * 0.5, y: size * 0.05))
+                $0.addLine(to: CGPoint(x: -size * 0.2, y: size * 0.2))
+            },
+            with: .color(tone(green, 0.35)), lineWidth: 1.2)
+    }
+
+    /// A skateboard on its tail, leaning back on the left wall, grip side out.
+    private static func skateboard(_ pen: IsoPen, at s: GridPoint) {
+        let (y0, y1) = (s.y - 0.19, s.y + 0.19)
+        let tail = (x: s.x - 0.05, z: 0.05)
+        let nose = (x: 0.12, z: 1.62)
+        // Along the deck, 0 at the tail, 1 at the nose; `out` lifts off the deck towards the room.
+        func at(_ t: Double, _ y: Double, out: Double = 0) -> CGPoint {
+            let x = tail.x + (nose.x - tail.x) * t + out * 0.89
+            let z = tail.z + (nose.z - tail.z) * t + out * 0.45
+            return HomeGrid.plan(x, y, z)
+        }
+        pen.contact(s.x - 0.25, y0, s.x + 0.1, y1)
+        // Wheels and trucks under the deck, towards the wall.
+        for t in [0.16, 0.84] {
+            for y in [y0 - 0.02, y1 + 0.02] {
+                pen.ellipse(at: at(t, y, out: -0.1), rx: 3.4, ry: 3.6, Color(hex: 0xFFF6E5), line: 1.4)
+            }
+            pen.line([at(t, y0, out: -0.08), at(t, y1, out: -0.08)], Color(hex: 0xC3C8D2), width: 2.4)
+        }
+        // The deck's pink edge, then the black grip on top with rounded ends.
+        func outline(out: Double) -> [CGPoint] {
+            let ends = 8
+            var points: [CGPoint] = []
+            for k in 0...ends {
+                let a = Double(k) / Double(ends) * .pi
+                points.append(at(0.06 - 0.06 * sin(a), s.y - 0.19 * cos(a), out: out))
+            }
+            for k in 0...ends {
+                let a = Double(k) / Double(ends) * .pi
+                points.append(at(0.94 + 0.06 * sin(a), s.y + 0.19 * cos(a), out: out))
+            }
+            return points
+        }
+        pen.polygon(outline(out: 0), Color(hex: HomeColors.pink), line: 1.8)
+        pen.polygon(outline(out: 0.05), Color(hex: 0x23252F), line: 1.6)
+        pen.line(
+            [at(0.12, y1 - 0.04, out: 0.05), at(0.88, y1 - 0.04, out: 0.05)], Color.white.opacity(0.25), width: 1.2)
+        for (t, y) in [(0.3, s.y - 0.08), (0.5, s.y + 0.06), (0.7, s.y - 0.02)] {
+            pen.ellipse(at: at(t, y, out: 0.05), rx: 1, ry: 1, Color.white.opacity(0.3), line: 0)
+        }
+    }
+
+    // MARK: Poster wall
+
+    /// A poster on the left wall over the desk, from y `u0` to `u1` and z `v0` to `v1`, with tape on its corners.
+    private static func posterFrame(
+        _ pen: IsoPen, _ u0: Double, _ v0: Double, _ u1: Double, _ v1: Double, _ fill: Color
+    ) {
+        pen.onLeftWall(x: 0.02, u0, v0, u1, v1, fill, line: 2.2)
+        for (u, v) in [(u0, v1), (u1, v1)] {
+            pen.onLeftWall(x: 0.03, u - 0.1, v - 0.07, u + 0.1, v + 0.07, Color(hex: 0xFFF6E5).opacity(0.85), line: 0)
+        }
+    }
+
+    /// A pixel-art arcade poster: a little pixel monster, hearts and a score row.
+    private static func arcadePoster(_ pen: IsoPen) {
+        let (u0, v0, u1, v1) = (0.85, 2.75, 3.05, 4.65)
+        posterFrame(pen, u0, v0, u1, v1, Color(hex: 0x2A1B4A))
+        let px = 0.13
+        func pixel(_ col: Int, _ row: Int, at u: Double, _ v: Double, _ c: UInt32) {
+            let a = u + Double(col) * px
+            let b = v - Double(row) * px
+            pen.onLeftWall(x: 0.025, a, b - px, a + px, b, Color(hex: c), line: 0)
+        }
+        // Score dots along the top.
+        for i in 0..<6 { pixel(i * 2, 0, at: u0 + 0.25, v1 - 0.15, i < 4 ? 0xFFD23F : 0x6B5A8F) }
+        // The monster.
+        let monster = [
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XX.XXX.XX",
+            "XXXXXXXXX",
+            "XXX...XXX",
+            "X.X.X.X.X",
+        ]
+        for (row, line) in monster.enumerated() {
+            for (col, ch) in line.enumerated() where ch == "X" {
+                pixel(col, row, at: u0 + 0.5, v1 - 0.45, 0x7CFF4F)
+            }
+        }
+        // Eyes and three hearts at the bottom.
+        pixel(2, 2, at: u0 + 0.5, v1 - 0.45, 0xFFFFFF)
+        pixel(6, 2, at: u0 + 0.5, v1 - 0.45, 0xFFFFFF)
+        let heart = [".X.X.", "XXXXX", ".XXX.", "..X.."]
+        for h in 0..<3 {
+            for (row, line) in heart.enumerated() {
+                for (col, ch) in line.enumerated() where ch == "X" {
+                    let a = u0 + 0.3 + Double(h) * 0.62 + Double(col) * 0.09
+                    let b = v0 + 0.6 - Double(row) * 0.09
+                    pen.onLeftWall(x: 0.025, a, b - 0.09, a + 0.09, b, Color(hex: 0xFF3EA5), line: 0)
+                }
+            }
+        }
+        // A few stars.
+        for (u, v) in [(0.95, 4.2), (2.95, 3.9), (1.05, 3.2), (2.85, 3.1)] {
+            pen.onLeftWall(x: 0.025, u, v, u + 0.05, v + 0.05, Color.white.opacity(0.8), line: 0)
+        }
+    }
+
+    /// A poster of a city at night: dusk sky, skyline with lit windows, a moon.
+    private static func cityPoster(_ pen: IsoPen) {
+        let (u0, v0, u1, v1) = (0.85, 2.75, 3.05, 4.65)
+        posterFrame(pen, u0, v0, u1, v1, Color(hex: 0xFFF6E5))
+        let (a0, b0, a1, b1) = (u0 + 0.1, v0 + 0.1, u1 - 0.1, v1 - 0.1)
+        let x = 0.025
+        pen.shade(
+            [HomeGrid.plan(x, a0, b0), HomeGrid.plan(x, a1, b0), HomeGrid.plan(x, a1, b1), HomeGrid.plan(x, a0, b1)],
+            .linearGradient(
+                Gradient(colors: [Color(hex: 0x1C1F4A), Color(hex: 0x6A3A8A), Color(hex: 0xFF7A8A)]),
+                startPoint: HomeGrid.plan(x, 2, b1), endPoint: HomeGrid.plan(x, 2, b0 + 0.5)))
+        pen.ellipse(at: HomeGrid.plan(x, a1 - 0.45, b1 - 0.4), rx: 6, ry: 6, Color(hex: 0xFFF3C4), line: 0)
+        pen.ellipse(at: HomeGrid.plan(x, a1 - 0.36, b1 - 0.34), rx: 5, ry: 5, Color(hex: 0x23255A), line: 0)
+        let blocks: [(Double, Double, Double)] = [
+            (0.0, 0.3, 0.9), (0.3, 0.5, 1.25), (0.5, 0.85, 0.75), (0.85, 1.05, 1.45), (1.05, 1.4, 1.0),
+            (1.4, 1.6, 0.65), (1.6, 2.0, 1.15),
+        ]
+        for (i, (s0, s1, h)) in blocks.enumerated() {
+            pen.onLeftWall(
+                x: x, a0 + s0, b0, a0 + s1, b0 + h, Color(hex: i.isMultiple(of: 2) ? 0x1B1C3A : 0x262850), line: 0)
+            var v = b0 + 0.15
+            var k = i
+            while v + 0.1 < b0 + h {
+                var u = a0 + s0 + 0.05
+                while u + 0.06 < a0 + s1 {
+                    k += 1
+                    if k % 3 != 0 { pen.onLeftWall(x: x, u, v, u + 0.05, v + 0.07, Color(hex: 0xFFD23F), line: 0) }
+                    u += 0.11
+                }
+                v += 0.17
+            }
+        }
+        // A thin neon line where the street is.
+        pen.line([HomeGrid.plan(x, a0, b0 + 0.06), HomeGrid.plan(x, a1, b0 + 0.06)], Color(hex: 0x3EF0FF), width: 1.4)
     }
 
     /// The middle of the bar resting on the rack's hooks.
