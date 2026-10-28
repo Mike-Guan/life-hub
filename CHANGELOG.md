@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Added
+- In the home HAKU wears every top and set the shop sells: the pixel cardigan, the souvenir jacket, the arcade
+  T and the Harajuku raincoat join the earlier four, and the varsity set brings its cap. The headband colour, the
+  mask print on his chin and the glove colour he bought show too.
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
   her tennis day, guards and punches in two gloves with the boxing card, and dozes over her tablet in bed.

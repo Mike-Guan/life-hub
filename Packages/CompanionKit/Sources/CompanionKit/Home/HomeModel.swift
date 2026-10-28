@@ -8,15 +8,19 @@ import SwiftUI
 
 /// A top HAKU can wear at home.
 enum HomeOutfit: String, CaseIterable, Sendable {
-    case jacket, blazer, aloha, flame, varsity
+    case jacket, blazer, cardigan, aloha, flame, sukajan, arcade, varsity, raincoat
 
     var name: String {
         switch self {
         case .jacket: "默认外套"
         case .blazer: "学院西装"
+        case .cardigan: "像素开衫"
         case .aloha: "浪花夏威夷衫"
         case .flame: "火焰连帽卫衣"
+        case .sukajan: "刺绣夹克"
+        case .arcade: "街机 T"
         case .varsity: "校队夹克"
+        case .raincoat: "原宿雨衣"
         }
     }
 
@@ -25,9 +29,13 @@ enum HomeOutfit: String, CaseIterable, Sendable {
         switch self {
         case .jacket: nil
         case .blazer: "haku.top.work.blazer"
+        case .cardigan: "haku.top.work.cardigan"
         case .aloha: "haku.top.chill.aloha"
         case .flame: "haku.top.chill.flame"
+        case .sukajan: "haku.top.side.sukajan"
+        case .arcade: "haku.top.side.arcade"
         case .varsity: "haku.set.chill.varsity"
+        case .raincoat: "haku.set.work.raincoat"
         }
     }
 
@@ -37,26 +45,18 @@ enum HomeOutfit: String, CaseIterable, Sendable {
         self = Self.allCases.first { $0.shopID.map(worn.contains) ?? false } ?? .jacket
     }
 
-    /// The drawn parts of the top, in place of the jacket.
+    /// The drawn parts of the top, in place of the jacket; the raincoat's hood lies behind the shoulders.
     var parts: [RunnerPart] {
-        switch self {
-        case .jacket: [.jacket, .stripeNeon, .hoodCollar]
-        case .blazer: [.topWorkIvy]
-        case .aloha: [.topChillAloha]
-        case .flame: [.topChillFlame, .hoodieStringsCyan]
-        case .varsity: [.setVarsityTop]
-        }
+        guard let id = shopID, let parts = Outfit.clothesParts[id] else { return [.jacket, .stripeNeon, .hoodCollar] }
+        return RunnerPart.allCases.filter { parts.contains($0) && $0 != hat }
     }
+
+    /// The cap of a full set, worn on the head.
+    var hat: RunnerPart? { self == .varsity ? .setVarsityCap : nil }
 
     /// The colour of the sleeves and of the top seen from behind.
     var base: Color {
-        switch self {
-        case .jacket: RunnerPalette.jacketChill
-        case .blazer: RunnerPalette.hood
-        case .aloha: RunnerPalette.catOrange
-        case .flame: RunnerPalette.bubblegum
-        case .varsity: RunnerPalette.varsityRed
-        }
+        shopID.flatMap { Outfit.clothesBackColors[$0] } ?? RunnerPalette.jacketChill
     }
 }
 
@@ -180,6 +180,12 @@ final class HomeModel {
     private var lines: HomeLines { HomeLines(snapshot.persona) }
     /// The top HAKU wears in the room.
     var outfit: HomeOutfit { HomeOutfit(worn: snapshot.worn) }
+    /// The headband, mask print and gloves worn in the current mode, for the card picked.
+    var accessories: Outfit {
+        let worn = snapshot.worn
+        let equipped = snapshot.wardrobe.showing(card: card).equipped.filter { worn.contains($0.value) }
+        return Outfit(Wardrobe(equipped: equipped))
+    }
     /// The drawn tops HAKU owns, hanging in the wardrobe; the jacket always.
     var ownedOutfits: [HomeOutfit] {
         HomeOutfit.allCases.filter { $0.shopID.map(snapshot.owned.contains) ?? true }
