@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- With the watch screen dimmed (Always On), the second preset character naps over her tablet when she is off work
+  before bedtime, instead of only closing her eyes.
 - The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
   headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
   headphones she bought.

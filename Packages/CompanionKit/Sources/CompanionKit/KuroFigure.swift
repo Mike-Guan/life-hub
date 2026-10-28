@@ -724,7 +724,8 @@ public struct KuroView: View {
                 // 动作展示总表 C14: a tap while a move plays gets a blink instead of nothing.
                 let winking = winkStart.map { (0..<Self.wink).contains(time - $0.timeIntervalSinceReferenceDate) }
                 let shut = (nod ?? 1) < 0.1 || winking == true
-                let pose = dozing ? self.pose.showing(.closed) : shut ? awake.showing(.closed) : awake
+                let pose =
+                    dozing ? Self.dozed(self.pose, look: look, bedtime: bedtime) : shut ? awake.showing(.closed) : awake
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
                 let still = Self.holdsStill(reduceMotion: reduceMotion, unboxing: unbox != nil, dozing: dozing)
                 // KURO-16: her idle runs on from where it was when her pace changes, and eases back in after
@@ -1215,6 +1216,15 @@ public struct KuroView: View {
             guard !Task.isCancelled, bathStart == start, dryStart == nil else { return }
             say(KuroScene.bathLine, for: 3)
         }
+    }
+
+    /// `pose` while the watch screen is dimmed (Always On): eyes shut, and before bedtime in the chill look she
+    /// naps over her tablet.
+    nonisolated static func dozed(_ pose: KuroPose, look: KuroLook, bedtime: Bedtime) -> KuroPose {
+        var pose = pose.showing(.closed)
+        // UI 三组 交接 §3 抱平板睡着: its still frame is also her Always On face.
+        if look == .chill, bedtime == .off { pose.napping = true }
+        return pose
     }
 
     /// Her pose while unboxing: acting calm in the new item, with low eyes and a flat mouth.
