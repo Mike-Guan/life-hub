@@ -1,11 +1,12 @@
 #if os(iOS) || os(macOS)
 import CoreGraphics
+import Foundation
 import HubCore
 import Testing
 
 @testable import CompanionKit
 
-@Suite struct HomeWindowTests {
+@Suite @MainActor struct HomeWindowTests {
     @Test func theLineSaysOnlyWhereTheCharacterIs() {
         #expect(HomeWindow.line(.work, persona: .haku) == "HAKU 在书桌前")
         #expect(HomeWindow.line(.side, persona: .haku) == "HAKU 在书桌前")
