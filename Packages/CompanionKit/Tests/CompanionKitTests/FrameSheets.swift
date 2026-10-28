@@ -262,39 +262,52 @@ struct FrameSheets {
         try write("haku-8-swap-sparkles", rows, frames: 6, step: 0.1)
     }
 
+    // Frames run 40765011148: with every look on one page the sheet was too big to write, so each page holds five.
+    /// Her looks, five to a page.
+    static var kuroPages: [ArraySlice<KuroLook>] {
+        let looks = KuroLook.allCases
+        return stride(from: 0, to: looks.count, by: 5).map { looks[$0..<min($0 + 5, looks.count)] }
+    }
+
     @Test func kuroLooks() throws {
-        var rows: [Row] = []
-        for look in KuroLook.allCases {
-            for (name, energy) in Self.energies {
+        for (page, looks) in Self.kuroPages.enumerated() {
+            var rows: [Row] = []
+            for look in looks {
+                for (name, energy) in Self.energies {
+                    rows.append(
+                        Row(label: "kuro \(look) · \(name)", start: Self.base) {
+                            AnyView(KuroView(look: look, energy: energy))
+                        })
+                }
                 rows.append(
-                    Row(label: "kuro \(look) · \(name)", start: Self.base) {
-                        AnyView(KuroView(look: look, energy: energy))
+                    Row(label: "kuro \(look) · bedtime", start: Self.base) {
+                        AnyView(KuroView(look: look, energy: 50, bedtime: .on))
                     })
             }
-            rows.append(
-                Row(label: "kuro \(look) · bedtime", start: Self.base) {
-                    AnyView(KuroView(look: look, energy: 50, bedtime: .on))
-                })
+            if page == 0 {
+                rows.append(
+                    Row(label: "kuro work · overtime", start: Self.base) {
+                        let until = Self.base.addingTimeInterval(9 * 3600)
+                        return AnyView(KuroView(look: .work, energy: 50, moment: .overtime, overtimeUntil: until))
+                    })
+            }
+            try write("kuro-1-looks-\(page + 1)", rows)
         }
-        rows.append(
-            Row(label: "kuro work · overtime", start: Self.base) {
-                let until = Self.base.addingTimeInterval(9 * 3600)
-                return AnyView(KuroView(look: .work, energy: 50, moment: .overtime, overtimeUntil: until))
-            })
-        try write("kuro-1-looks", rows)
     }
 
     @Test func kuroWatch() throws {
-        var rows: [Row] = []
-        for look in KuroLook.allCases {
-            for (name, energy) in Self.energies {
-                rows.append(
-                    Row(label: "watch · kuro \(look) · \(name)", start: Self.base) {
-                        AnyView(KuroView(look: look, energy: energy, style: .watch))
-                    })
+        for (page, looks) in Self.kuroPages.enumerated() {
+            var rows: [Row] = []
+            for look in looks {
+                for (name, energy) in Self.energies {
+                    rows.append(
+                        Row(label: "watch · kuro \(look) · \(name)", start: Self.base) {
+                            AnyView(KuroView(look: look, energy: energy, style: .watch))
+                        })
+                }
             }
+            try write("kuro-2-watch-\(page + 1)", rows, size: CGSize(width: 198, height: 242))
         }
-        try write("kuro-2-watch", rows, size: CGSize(width: 198, height: 242))
     }
 
     // QA §1b: everything owned and every trace on at once, one still per state, with the placement test's

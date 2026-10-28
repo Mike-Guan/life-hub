@@ -15,6 +15,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - With the watch screen dimmed (Always On), the second preset character naps over her tablet when she is off work
   before bedtime, instead of only closing her eyes.
+- The second preset character has her own looks for the swimming, yoga, ball and outdoor cards (goggles, a
+  rolled mat, a ball, a backpack and trekking pole), each with its own idle move. The cards are not in the
+  picker yet.
 - When the second preset character notices one of your needs she leans out to peek at you, blinks and leans
   back smiling, instead of hopping with her look's move. When the need is scrolling on the couch, a tap
   then shows her peeking lines.
