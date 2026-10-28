@@ -188,7 +188,7 @@ import Testing
         #expect(cards.pickedIdentity(for: .boxing, persona: .haku) == .swimming)
         #expect(cards.pickedIdentity(for: .work, persona: .haku) == nil)
         #expect(cards.code(for: .boxing, persona: .haku) == "SWIM")
-        #expect(cards.tagline(for: .boxing, persona: .haku) == "泳帽塞好了")
+        #expect(cards.tagline(for: .boxing, persona: .haku) == "泳镜推上去了")
         #expect(ModeCards(identity: .ski).tagline(for: .boxing, persona: .kuro) == "围巾裹好了")
         #expect(cards.code(for: .work, persona: .haku) == "WORK")
         #expect(IdentityKind.swimming.symbol == "figure.pool.swim")

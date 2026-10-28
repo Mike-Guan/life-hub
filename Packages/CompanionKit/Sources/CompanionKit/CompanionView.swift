@@ -128,6 +128,8 @@ public struct CompanionView: View {
     // Seconds since the reference date HAKU last started packing up, shared by every CompanionView.
     @AppStorage("companion.lastPackUp") private var lastPackUp: Double = 0
     @State private var slapStart: Date?
+    // When the planned task's cue came in while the app was open; nil shows it already in place.
+    @State private var cueStart: Date?
     // Ids of the last planned tasks HAKU reacted to before and at their start, shared by every CompanionView so
     // each plays once.
     @AppStorage("companion.lastDailySoon") private var lastDailySoon = ""
@@ -339,7 +341,10 @@ public struct CompanionView: View {
                     let life = idleLife(mode, at: frameClock ?? context.date)
                     let motion = idleMotion(mode, life: life, time: time)
                     // HAKU-04: a new bit at home starts with a quick squash instead of parts just swapping.
-                    let turn = reduceMotion ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
+                    // HAKU-08/10: on a dimmed watch screen the body comes to rest before the frame freezes.
+                    let still = reduceMotion || dozing
+                    let turn = still ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
+                    let squash = still ? 0 : motion.squash
                     let posed = pose(mode, life: life, time: time, react: react)
                     let dressed = posed.dressed(
                         for: card, in: mode, watch: style == .watch, time: reduceMotion ? nil : time
@@ -347,9 +352,14 @@ public struct CompanionView: View {
                     RunnerFigure(mode: mode, pose: glance(dressed.wearing(wardrobeOutfit).leaving(traces)))
                         .saturation(vitals.saturation)
                         .brightness(vitals.brightness)
-                        .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                        .offset(y: reduceMotion ? 0 : motion.dy)
-                        .scaleEffect(x: 1 + 0.07 * turn, y: 1 - 0.1 * turn, anchor: .bottom)
+                        .rotationEffect(.degrees(still ? 0 : motion.angle), anchor: .bottom)
+                        .offset(y: still ? 0 : motion.dy)
+                        .scaleEffect(
+                            x: 1 + 0.07 * turn + 0.08 * squash,
+                            y: 1 - 0.1 * turn - 0.12 * squash,
+                            anchor: .bottom
+                        )
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: dozing)
                 }
             } keyframes: { _ in
                 KeyframeTrack {
@@ -581,7 +591,10 @@ public struct CompanionView: View {
         } else if bath {
             pose.callToBath(time: CGFloat(time))
         }
-        if let daily { pose.cue(daily, time: time, slap: slap(at: time)) }
+        if let daily {
+            let entered = cueStart.map { CGFloat(min(1, (time - $0.timeIntervalSinceReferenceDate) / 0.8)) } ?? 1
+            pose.cue(daily, time: time, slap: slap(at: time), entered: entered)
+        }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
         if let progress = Self.progress(since: nodStart, at: time, duration: Self.nodDuration) {
             pose.nod(progress: CGFloat(progress), still: reduceMotion)
@@ -763,11 +776,13 @@ public struct CompanionView: View {
         case .soon:
             guard let id = Self.newCue(daily, stage: .soon, last: lastDailySoon) else { return }
             lastDailySoon = id
+            cueStart = .now
             if claimsOpening(.daily) { say("还有 15 分钟。我先替你紧张一下。", for: 3.5) }
         case .now:
             guard let id = Self.newCue(daily, stage: .now, last: lastDailyNow) else { return }
             lastDailyNow = id
             slapStart = .now
+            if lastDailySoon != id { cueStart = .now }
             if claimsOpening(.daily) { say("到点了。") }
         }
     }
@@ -905,7 +920,8 @@ public struct CompanionView: View {
     }
 
     private static let goodnightDuration = 3.2
-    private static let celebrationDuration = 1.6
+    // HAKU-23: 1.6 s read the same as a poke; 2.4 s leaves room to crouch before each hop and land.
+    static let celebrationDuration = 2.4
     // 「哦。」 stays up 1.6 s; the nod plays inside it (Issue #236, 纠正预览 v6).
     nonisolated static let nodDuration = 1.6
     private static let offWorkDuration = 4.0
@@ -1481,24 +1497,33 @@ struct Squash {
     }
 }
 
-/// Lays the figure out for the watch's full-screen page: full width, 30 pt from the top, running off the bottom.
+/// Lays the figure out for the watch's full-screen page: three quarters wide, lowered, running off the bottom.
 struct WatchFigureFrame: ViewModifier {
     let isEnabled: Bool
 
     @ViewBuilder func body(content: Content) -> some View {
         if isEnabled {
             // The approved C layout shows him from the chest up and the screen edge crops the rest. At the full
-            // width he filled the screen and his hair ran into the mode chip, so the card width is scaled to 80%,
-            // centered and lowered (values tried on Mike's watch). The card padding is undone here.
+            // width he filled the screen and his hair ran into the mode chip, so the card width is scaled down,
+            // centered and lowered. The card padding is undone here.
+            // UI 审核 2026-10-13: the clock row (up to 55 pt) cut the hair flat and the screen edge cut the props,
+            // so the card is smaller and lower: the hair clears the clock and the chest props stay in view.
             GeometryReader { proxy in
-                let width = proxy.size.width * 0.8 + 24
+                let width = proxy.size.width * 0.75 + 24
                 content
                     .frame(width: width, height: width * 2, alignment: .top)
-                    .offset(x: (proxy.size.width - width) / 2, y: 24)
+                    .offset(x: (proxy.size.width - width) / 2, y: Self.drop(screenWidth: proxy.size.width))
             }
         } else {
             content
         }
+    }
+
+    // Round 2 screenshots: a fixed 38 pt left 45 pt of empty space on 40 mm and cut the chest props, while 46 mm
+    // was down to 10 pt. Scaling with the width keeps about the same gap on every size.
+    /// How far the figure sits below the top of a watch screen `screenWidth` points wide.
+    nonisolated static func drop(screenWidth: CGFloat) -> CGFloat {
+        screenWidth * 0.18
     }
 }
 
@@ -1517,20 +1542,44 @@ public enum CompanionStyle: Sendable {
 struct IdleMotion {
     var dy: CGFloat
     var angle: Double
+    /// How far the body is pressed wide and low, 0 (standing) to 1 (deepest crouch).
+    var squash: CGFloat = 0
 
     /// Slumped on the couch: tilted back, barely breathing.
     static func slumped(time t: TimeInterval) -> IdleMotion {
         IdleMotion(dy: 4 + CGFloat(sin(t * 2 * .pi / 5)), angle: -3)
     }
 
-    /// Two happy hops over a celebration; `progress` runs 0..<1.
-    static func celebrating(progress: Double) -> IdleMotion {
-        IdleMotion(dy: -CGFloat(abs(sin(progress * 2 * .pi))) * 22, angle: sin(progress * 4 * .pi) * 3)
+    /// Two happy hops over a celebration, each from a crouch and landing pressed down; `progress` runs 0..<1.
+    static func celebrating(progress p: Double) -> IdleMotion {
+        // Crouch 0-0.1, hop 0.1-0.38, land into the next crouch 0.38-0.48, hop 0.48-0.76, land 0.76-0.92.
+        let hops = [(0.1, 0.38), (0.48, 0.76)]
+        guard let (up, down) = hops.first(where: { p >= $0.0 && p < $0.1 }) else {
+            return IdleMotion(dy: 0, angle: 0, squash: CGFloat(crouch(at: p)))
+        }
+        let air = (p - up) / (down - up)
+        let release = 1 - smooth(min(1, (p - up) / 0.04))
+        return IdleMotion(dy: -CGFloat(sin(air * .pi)) * 22, angle: sin(air * 2 * .pi) * 3, squash: CGFloat(release))
     }
+
+    /// The crouch while standing between hops: down before the first, held through the landing into the
+    /// second, then eased back up after the last landing.
+    private static func crouch(at p: Double) -> Double {
+        switch p {
+        case ..<0.1: smooth(p / 0.1)
+        case 0.38..<0.48: smooth(min(1, (p - 0.38) / 0.05))
+        case 0.76..<0.8: smooth((p - 0.76) / 0.04)
+        case 0.8..<0.92: 1 - smooth((p - 0.8) / 0.12)
+        default: 0
+        }
+    }
+
+    /// Ease in and out over `x` in 0...1.
+    private static func smooth(_ x: Double) -> Double { x * x * (3 - 2 * x) }
 
     /// The same motion with its bounce scaled by `factor`.
     func bouncing(_ factor: CGFloat) -> IdleMotion {
-        IdleMotion(dy: dy * factor, angle: angle)
+        IdleMotion(dy: dy * factor, angle: angle, squash: squash)
     }
 
     /// Slow breathing at bedtime, 4 s period.
@@ -1544,9 +1593,10 @@ struct IdleMotion {
         return IdleMotion(dy: breath.dy + 2 * CGFloat(sin(progress * .pi)), angle: 8 * sin(progress * .pi))
     }
 
-    init(dy: CGFloat, angle: Double) {
+    init(dy: CGFloat, angle: Double, squash: CGFloat = 0) {
         self.dy = dy
         self.angle = angle
+        self.squash = squash
     }
 
     /// The idle loop for `moment`: walking bob, a slumped breath, or the mode's own loop.

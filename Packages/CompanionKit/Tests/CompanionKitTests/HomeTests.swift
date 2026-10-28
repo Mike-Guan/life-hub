@@ -350,10 +350,25 @@ import Testing
     @Test func thePreviewShowsEveryItemTheZonesHoldWithoutOwningIt() {
         let model = HomeModel(night: false)
         model.togglePreviewItems()
-        #expect(model.items == Set(HomeItem.allCases).subtracting([.bag]))
+        #expect(
+            model.items == [
+                .monstera, .clipLamp, .headphones, .comics, .gloves, .racket, .bench, .arcadePoster,
+            ])
         #expect(model.snapshot.owned.isEmpty)
         model.togglePreviewItems()
         #expect(model.items.isEmpty)
+    }
+
+    @Test func herPreviewShowsHerOwnItemsAndNoneOfHis() {
+        var snapshot = HomeSnapshot.preview()
+        snapshot.persona = .kuro
+        let model = HomeModel(snapshot: snapshot, night: false, now: HomeModel.start)
+        model.togglePreviewItems()
+        #expect(
+            model.items == [
+                .sakura, .catClock, .jar, .yarn, .gloves, .racket, .bench, .catPoster,
+            ])
+        #expect(model.items.allSatisfy { $0.persona != .haku })
     }
 }
 
@@ -364,6 +379,38 @@ import Testing
             let s = item.spot
             #expect(s.x >= box.x0 && s.x <= box.x1 && s.y >= box.y0 && s.y <= box.y1, "\(item)")
         }
+    }
+
+    @Test func deskItemsTakeTheDeskSlotsInCatalogOrder() {
+        let slots = HomeZone.desk.slots
+        #expect(HomeItem.places([.cube]) == [.cube: slots[0]])
+        #expect(HomeItem.places([.cube, .cactus]) == [.cactus: slots[0], .cube: slots[1]])
+        #expect(HomeItem.places([.plant, .gamepad])[.plant] == HomeItem.plant.spot)
+        // On the sports wall an item keeps its own height in its slot, and alone it hangs at its spot.
+        let wall = HomeItem.places([.snowboard, .rope])
+        #expect(wall[.snowboard]?.x == HomeZone.sportWall.slots[0].x && wall[.snowboard]?.z == 0)
+        #expect(wall[.rope]?.x == HomeZone.sportWall.slots[1].x && wall[.rope]?.z == HomeItem.rope.spot.z)
+        #expect(HomeItem.places([.danceMirror]) == [.danceMirror: HomeItem.danceMirror.spot])
+        #expect(HomeItem.places([.gloves, .danceMirror])[.danceMirror]?.x == HomeZone.sportWall.slots[0].x)
+        for item in HomeItem.allCases where item.zone == .desk { #expect(item.spot == slots[0], "\(item)") }
+    }
+
+    @Test func herRoomItemsGoInTheirZonesAndDrawHerPictures() {
+        #expect(HomeItem(shopID: "kuro.room.poster.cat") == .catPoster)
+        #expect(HomeItem(shopID: "kuro.room.mug.strawberry") == .strawberryMug)
+        let hers = HomeItem.allCases.filter { $0.persona == .kuro }
+        #expect(hers.count == KuroRoomItem.allCases.count)
+        #expect(Set(hers.compactMap(\.kuro)) == Set(KuroRoomItem.allCases))
+        #expect(hers.filter { $0.zone == .desk }.count == 4)
+        let desk = HomeItem.places([.catClock, .jar])
+        #expect(desk[.catClock] == HomeZone.desk.slots[0] && desk[.jar] == HomeZone.desk.slots[1])
+    }
+
+    @Test func shopIDsNameTheNewRoomItems() {
+        #expect(HomeItem(shopID: "haku.room.lamp.clip") == .clipLamp)
+        #expect(HomeItem(shopID: "haku.room.poster.city") == .cityPoster)
+        #expect(HomeItem(shopID: "haku.room.monstera") == .monstera)
+        #expect(HomeItem(shopID: "kuro.room.poster.none") == nil)
     }
 
     @Test func wallHooksAreNotHiddenByTheWardrobe() {
@@ -379,6 +426,7 @@ import Testing
         #expect(HomeZone.desk.slots.count == 2)
         #expect(HomeZone.sofaSide.slots.count == 1)
         #expect(HomeZone.corner.slots.count == 1)
+        #expect(HomeZone.posterWall.slots.count == 1)
         for zone in HomeZone.allCases {
             guard let box = zone.box else { continue }
             for slot in zone.slots {
@@ -509,6 +557,24 @@ import Testing
         let data = try #require(still.dataProvider?.data as Data?)
         let middle = (still.height / 2) * still.bytesPerRow + (still.width / 2) * 4
         #expect(data[middle + 3] > 0)
+    }
+
+    @Test func twoDeskItemsStandApartAndABoughtPosterReplacesTheDefaultOnes() throws {
+        let model = HomeModel(night: false)
+        let scene = HomeScene(model: model)
+        model.stand([.cube, .headphones, .cityPoster])
+        scene.sync(animated: false)
+        let nodes = scene.children.compactMap { $0 as? HomeLayerNode }
+        func node(_ item: HomeItem) throws -> HomeLayerNode {
+            try #require(nodes.first { $0.layer == .item(item) })
+        }
+        let slots = HomeZone.desk.slots.map { HomeGrid.scene(HomeGrid.plan($0)) }
+        // SpriteKit keeps positions in Float, so compare to the nearest point.
+        func near(_ a: CGPoint, _ b: CGPoint) -> Bool { abs(a.x - b.x) < 0.01 && abs(a.y - b.y) < 0.01 }
+        #expect(try near(node(.headphones).position, slots[0]))
+        #expect(try near(node(.cube).position, slots[1]))
+        let posters = try #require(nodes.first { $0.layer == .piece(.posters, color: 0, covering: false) })
+        #expect(posters.isHidden)
     }
 
     @Test func everyDrawnRoomItemHasAHomePicture() {

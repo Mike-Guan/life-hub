@@ -185,6 +185,8 @@ final class HomeModel {
     private(set) var now: Date
     /// The room with the colours picked here, saved through the page.
     private(set) var layout: RoomLayout
+    /// The rug's style. Not saved yet: the shop sells the other two after 0.1.0.
+    private(set) var rug = HomeRug.fringe
     /// Whether the room shows every item, owned or not, to see where each one goes. DEBUG builds only.
     private(set) var previewsAllItems = false
     var isNight: Bool
@@ -240,13 +242,21 @@ final class HomeModel {
     // 家 区域规划 v0: the sports floor holds one piece at a time; the room puts the earlier one away. Mike
     // 2026-10-18: with every item shown, the bag stood in front of HAKU on the bench, so the preview keeps to that
     // too and shows the bench.
-    /// The items standing in the room: the owned ones the room has not put away, or while previewing every item
-    /// the zones have room for.
+    /// The items standing in the room: the owned ones the room has not put away, or while previewing, the first
+    /// items the character's shop sells that the zones have room for, her or his own first, then in catalog order.
     var items: Set<HomeItem> {
-        if previewsAllItems { return Set(HomeItem.allCases).subtracting([.bag]) }
+        if previewsAllItems {
+            let persona = snapshot.persona
+            let sold = HomeItem.allCases.filter { $0 != .bag && ($0.persona.map { $0 == persona } ?? true) }
+            let ownFirst = sold.filter { $0.persona != nil } + sold.filter { $0.persona == nil }
+            return Set(
+                HomeZone.allCases.flatMap { zone in ownFirst.filter { $0.zone == zone }.prefix(zone.slots.count) })
+        }
         let standing = Set(snapshot.room.placements.filter { !$0.isStored }.map(\.piece))
         return Set(snapshot.owned.filter(standing.contains).compactMap(HomeItem.init(shopID:)))
     }
+    /// Where each standing item is.
+    var places: [HomeItem: GridPoint] { HomeItem.places(items) }
     /// The keepsakes on the reward shelf, by name, oldest first, then the worn gloves once earned.
     var keepsakes: [HomeKeepsake] {
         let earned = snapshot.keepsakes.map { HomeKeepsake(id: $0.id, name: ShopItem.item($0.id)?.title ?? $0.id) }
@@ -346,6 +356,12 @@ final class HomeModel {
         return layout
     }
 
+    /// Lays the rug in `style`.
+    func lay(_ style: HomeRug) {
+        rug = style
+        changed()
+    }
+
     /// Shows or hides every item, owned or not.
     func togglePreviewItems() {
         previewsAllItems.toggle()
@@ -387,13 +403,12 @@ final class HomeModel {
 
     /// The open floor next to `item`, a step towards the middle of the room.
     static func previewSpot(_ item: HomeItem, items: Set<HomeItem>? = nil) -> GridPoint {
-        // In front of the cactus or the bench HAKU would hide it; by the chair, or left of the bench, he stands
+        // In front of a desk item or the bench HAKU would hide it; by the chair, or left of the bench, he stands
         // beside it.
         let s: GridPoint
         switch item {
-        case .cactus: s = GridPoint(x: 1.2, y: 1.6)
         case .bench: s = GridPoint(x: 2.5, y: 3.2)
-        default: s = item.spot
+        default: s = item.zone == .desk ? GridPoint(x: 1.2, y: 1.6) : item.spot
         }
         let hub = HomeSpot.hub
         let d = max(0.01, s.distance(to: hub))
