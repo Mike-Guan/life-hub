@@ -13,8 +13,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
-- The second preset character's shop has three more accessories: a red ribbon (on her ponytail, else at the
-  side of her hair), a moon hair clip and a check lap blanket. At home she wears the ribbon and the clip.
+- The second preset character has her own looks for the swimming, yoga, ball and outdoor cards (goggles, a
+  rolled mat, a ball, a backpack and trekking pole), each with its own idle move. The cards are not in the
+  picker yet.
 - When the second preset character notices one of your needs she leans out to peek at you, blinks and leans
   back smiling, instead of hopping with her look's move. When the need is scrolling on the couch, a tap
   then shows her peeking lines.
@@ -23,6 +24,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Test builds (DEV and STG) offer the swimming, yoga, ball and outdoor identity cards in the picker. The App
   Store build keeps the eight cards it has until their lines are final and both characters were checked on a
   device.
+- The second preset character's shop has three more accessories: a red ribbon (on her ponytail, else at the
+  side of her hair), a moon hair clip and a check lap blanket. At home she wears the ribbon and the clip.
 - HAKU can dress for four more identity cards: swimming (goggles up on the hair,
   pulled down and pushed back), yoga (a mat in hand, palms pressed while swaying), ball (a ball on the fist,
   spun on a fingertip until it drops and bounces back) and outdoor (backpack and trekking pole, a hand over the

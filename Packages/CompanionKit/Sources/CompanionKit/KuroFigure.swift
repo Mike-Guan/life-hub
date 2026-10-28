@@ -28,10 +28,19 @@ public enum KuroLook: String, CaseIterable, Sendable {
     case music
     /// Ski card: her sportswear and ski goggles up on her forehead.
     case ski
+    // Identity cards, batch 2 (第 2 批身份卡 草稿, UI 审核 pending).
+    /// Swimming card: her sportswear and swim goggles pushed up on her forehead.
+    case swimming
+    /// Yoga card: her sportswear and a rolled mat standing by her right hand.
+    case yoga
+    /// Ball card: her sportswear and a white ball on her right hand.
+    case ball
+    /// Outdoor card: her lilac top, a violet backpack and a trekking pole in her right hand.
+    case outdoor
 
     // The only place the mode-to-outfit mapping lives, like `Mode.riveValue`.
-    /// The look for `mode`: the identity card slot dresses her for `card`, or as her tennis day without one or
-    /// for a card she has no look for yet; the side-hustle slot is her desk time.
+    /// The look for `mode`: the identity card slot dresses her for `card`, or as her tennis day without one; the
+    /// side-hustle slot is her desk time.
     public init(mode: Mode, card: IdentityKind? = nil) {
         switch mode {
         case .work: self = .work
@@ -50,7 +59,11 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .dance: .dance
         case .music: .music
         case .ski: .ski
-        default: .tennis
+        case .swimming: .swimming
+        case .yoga: .yoga
+        case .ball: .ball
+        case .outdoor: .outdoor
+        case .tennis, nil: .tennis
         }
     }
 
@@ -69,6 +82,10 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .dance: Color(hex: 0xC9B8FF)
         case .music: Color(hex: 0xF2E8FF)
         case .ski: Color(hex: 0xE6E9EF)
+        case .swimming: Color(hex: 0xA8E6F0)
+        case .yoga: Color(hex: 0xD4F0E8)
+        case .ball: Color(hex: 0xFFE9A8)
+        case .outdoor: Color(hex: 0xC8E6A0)
         }
     }
 
@@ -83,6 +100,10 @@ public enum KuroLook: String, CaseIterable, Sendable {
         case .dance: .dance
         case .music: .music
         case .ski: .ski
+        case .swimming: .swimming
+        case .yoga: .yoga
+        case .ball: .ball
+        case .outdoor: .outdoor
         }
     }
 
@@ -91,7 +112,7 @@ public enum KuroLook: String, CaseIterable, Sendable {
         switch self {
         case .work: .work
         case .chill: .chill
-        case .tennis, .box, .fitness, .study, .art, .dance, .music, .ski: .boxing
+        case .tennis, .box, .fitness, .study, .art, .dance, .music, .ski, .swimming, .yoga, .ball, .outdoor: .boxing
         case .desk: .money
         }
     }
@@ -342,8 +363,8 @@ struct KuroFigure: View {
     nonisolated static func jacket(_ look: KuroLook) -> KuroPart {
         switch look {
         case .work: .jacketWork
-        case .chill, .study, .music: .jacketChill
-        case .tennis, .fitness, .dance, .ski: .jacketTennis
+        case .chill, .study, .music, .outdoor: .jacketChill
+        case .tennis, .fitness, .dance, .ski, .swimming, .yoga, .ball: .jacketTennis
         case .desk: .jacketDesk
         case .box: .jacketBox
         case .art: .jacketSmock
@@ -392,7 +413,7 @@ struct KuroFigure: View {
     nonisolated static let watchJuggleLift: CGFloat = 10
 
     /// The looks in her sportswear, where she smiles.
-    nonisolated private static let smiling: Set<KuroLook> = [.tennis, .fitness, .dance, .ski]
+    nonisolated private static let smiling: Set<KuroLook> = [.tennis, .fitness, .dance, .ski, .swimming, .yoga, .ball]
 
     /// How opaque `part` is for her idle move: notes, snow and the sneeze fade out, and what a tap cut short
     /// fades as it goes back. At the end of the tablet tap the tablet over her face fades into the one on her lap.
@@ -446,6 +467,10 @@ struct KuroFigure: View {
         case .dance: [.tennisPonytail, .jacketTennis]
         case .music: [.jacketChill, .scoreSheet, .scoreFinger]
         case .ski: [.tennisPonytail, .jacketTennis, .skiGoggles]
+        case .swimming: [.tennisPonytail, .jacketTennis, .swimGoggles]
+        case .yoga: [.tennisPonytail, .jacketTennis, .yogaMat]
+        case .ball: [.tennisPonytail, .jacketTennis, .sportBall, .sportBallHand]
+        case .outdoor: [.jacketChill, .outBackpack, .outStraps, .outPole]
         }
     }
 
@@ -453,10 +478,10 @@ struct KuroFigure: View {
         switch look {
         case .work: .tapRubSleeveWork
         case .chill: .tapRubSleeveChill
-        case .tennis, .fitness, .dance, .ski: .tapRubSleeveTennis
+        case .tennis, .fitness, .dance, .ski, .swimming, .yoga, .ball: .tapRubSleeveTennis
         case .desk: .tapRubSleeveDesk
         case .box: .tapRubSleeveBox
-        case .study, .music: .tapRubSleeveChill
+        case .study, .music, .outdoor: .tapRubSleeveChill
         case .art: .tapRubSleeveSmock
         }
     }
@@ -1361,9 +1386,9 @@ public struct KuroView: View {
         }
     }
 
-    /// The idle loop for `look`: work breathes and shifts her weight, chill, fitness and ski sway, tennis and
-    /// boxing hop, dancing she sways to the beat, and at the desk, studying, drawing or reading a score she nods
-    /// slowly over the page.
+    /// The idle loop for `look`: work breathes and shifts her weight, chill, fitness, ski, swimming and outdoor
+    /// sway, yoga sways at half the pace, tennis, boxing and the ball card hop, dancing she sways to the beat, and
+    /// at the desk, studying, drawing or reading a score she nods slowly over the page.
     nonisolated static func motion(_ look: KuroLook, time t: TimeInterval) -> IdleMotion {
         switch look {
         case .work: IdleMotion(dy: CGFloat(sin(t * 2 * .pi / 3.4)) * 1.5, angle: sin(t * 2 * .pi / 6.8))
@@ -1375,7 +1400,10 @@ public struct KuroView: View {
             IdleMotion(dy: 2 * IdleClock.nod(at: t, period: 1.6, seed: KuroIdle.seed), angle: 0)
         // Dancing, she sways about her feet once a second; on the slopes she sways calmly like at the gym.
         case .dance: IdleMotion(dy: 0, angle: 2.6 * sin(t * 2 * .pi))
-        case .ski: IdleMotion(mode: .chill, time: t)
+        case .ski, .swimming, .outdoor: IdleMotion(mode: .chill, time: t)
+        // On the yoga card she sways at half the pace; with a ball in her hand she can't keep still.
+        case .yoga: IdleMotion(mode: .chill, time: t / 2)
+        case .ball: IdleMotion(mode: .boxing, time: t)
         }
     }
 
@@ -1408,6 +1436,10 @@ public struct KuroView: View {
         case .dance: "KURO，跟着音乐摆"
         case .music: "KURO，捧着乐谱"
         case .ski: "KURO，戴着雪镜"
+        case .swimming: "KURO，泳镜推在头上"
+        case .yoga: "KURO，扶着瑜伽垫"
+        case .ball: "KURO，托着球"
+        case .outdoor: "KURO，背着包拿着登山杖"
         }
     }
 }
