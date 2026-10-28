@@ -98,10 +98,11 @@ import Testing
         for card: IdentityKind in [.dance, .ski, .ball] {
             let pose = RunnerPose().dressed(for: card, in: .boxing, watch: true)
             #expect(pose.watchFrame)
-            let shown = Set(RunnerFigure.parts(for: .boxing, pose: pose))
-            // The ball on the fist goes with it.
-            #expect(shown.isDisjoint(with: [.wristbandHand, .sportBall]), "\(card)")
+            #expect(!Set(RunnerFigure.parts(for: .boxing, pose: pose)).contains(.wristbandHand), "\(card)")
         }
+        // The ball stays by the shoulder, above the watch's bottom edge.
+        let ball = RunnerPose().dressed(for: .ball, in: .boxing, watch: true)
+        #expect(Set(RunnerFigure.parts(for: .boxing, pose: ball)).contains(.sportBall))
     }
 
     private func beat(_ card: IdentityKind, at t: CGFloat) -> Set<RunnerPart> {
