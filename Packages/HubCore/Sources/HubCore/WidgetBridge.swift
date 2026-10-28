@@ -18,6 +18,8 @@ public final class WidgetBridge {
     public var rules = NeedRules.standard
     /// The work hours; the app sets it before syncing.
     public var work = ModeRules.standard
+    /// The user's cards, for the lines; the app sets it before syncing.
+    public var cards: ModeCards?
 
     public init(container: HubContainer, bedtime: BedtimeSchedule = .standard) {
         self.container = container
@@ -56,6 +58,7 @@ public final class WidgetBridge {
         snapshot.need = need?.need
         snapshot.needSince = need?.since
         snapshot.needUntil = need?.until
+        snapshot.needPhone = need?.phone
         let done = ActivitySignals(workouts: workouts, calendar: calendar)
         snapshot.trainedDay = done.trainedDay
         snapshot.ranDay = done.ranDay
@@ -76,17 +79,22 @@ public final class WidgetBridge {
         let scene = HakuLines.scene(mode: current, need: need?.need, energy: reading?.level, bedtime: state)
         let after = HakuLines.scene(mode: current, need: nil, energy: reading?.level, bedtime: state)
         let persona = rules.persona
-        snapshot.line = scene.map { HakuLines.line($0, at: now, calendar: calendar, persona: persona) }
-        snapshot.lineAfterNeed = after.map { HakuLines.line($0, at: now, calendar: calendar, persona: persona) }
+        let cards = cards
+        snapshot.line = scene.map { HakuLines.line($0, at: now, calendar: calendar, persona: persona, cards: cards) }
+        snapshot.lineAfterNeed = after.map {
+            HakuLines.line($0, at: now, calendar: calendar, persona: persona, cards: cards)
+        }
         snapshot.nextNeed = NeedEngine.nextScheduled(after: now, rules: rules, calendar: calendar)
         if let next = snapshot.nextNeed {
-            snapshot.nextNeed?.line = HakuLines.line(.boxingWarmup, at: next.from, calendar: calendar, persona: persona)
+            snapshot.nextNeed?.line = HakuLines.line(
+                .boxingWarmup, at: next.from, calendar: calendar, persona: persona, cards: cards
+            )
         }
         do {
             try snapshot.write(to: url)
             lastError = nil
         } catch {
-            lastError = "小组件数据没写进去：\(error.localizedDescription)"
+            lastError = String(format: "小组件数据没写进去：%@".localized, error.localizedDescription)
         }
     }
 }

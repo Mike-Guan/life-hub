@@ -37,7 +37,7 @@ final class DailyLink {
             isOn = true
             await read()
         } catch {
-            lastError = "联动 Daily 失败：\(error.localizedDescription)"
+            lastError = String(format: "联动 Daily 失败：%@".localized, error.localizedDescription)
         }
     }
 
@@ -58,7 +58,7 @@ final class DailyLink {
         guard let bookmark = AppGroup.defaults.data(forKey: Self.bookmarkKey) else { return }
         var stale = false
         guard let folder = try? URL(resolvingBookmarkData: bookmark, options: [], bookmarkDataIsStale: &stale) else {
-            lastError = "找不到 Daily 的文件夹了，请在设置里重新联动"
+            lastError = "找不到 Daily 的文件夹了，请在设置里重新联动".localized
             return
         }
         let result = await Task.detached { Self.load(from: folder) }.value
@@ -68,7 +68,7 @@ final class DailyLink {
             noteDone(DailyAgenda.occurrences(read, now: .now))
             lastError = nil
         case .failure(let error):
-            lastError = "读不到 Daily 的文件夹：\(error.localizedDescription)"
+            lastError = String(format: "读不到 Daily 的文件夹：%@".localized, error.localizedDescription)
         }
         if stale, let fresh = try? Self.bookmark(for: folder) {
             AppGroup.defaults.set(fresh, forKey: Self.bookmarkKey)

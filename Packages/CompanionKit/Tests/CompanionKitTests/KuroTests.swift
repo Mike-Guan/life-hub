@@ -22,13 +22,40 @@ import Testing
         let parts = Set(KuroFigure.parts(for: look, pose: KuroPose(look: look, energy: nil)))
         let jackets: [KuroLook: KuroPart] = [
             .work: .jacketWork, .chill: .jacketChill, .tennis: .jacketTennis, .desk: .jacketDesk,
+            .box: .jacketBox, .fitness: .jacketTennis, .study: .jacketChill, .art: .jacketSmock,
+            .dance: .jacketTennis, .music: .jacketChill, .ski: .jacketTennis,
         ]
         #expect(parts.intersection(Set(jackets.values)) == [jackets[look]!])
         #expect(parts.isSuperset(of: [.hairBack, .faceBase, .hairFringe, .catEars, .blush]))
         #expect(parts.contains(.maskWork) == (look == .work))
-        #expect(parts.contains(.tennisPonytail) == (look == .tennis))
+        #expect(parts.contains(.tennisPonytail) == [.tennis, .box, .fitness, .dance, .ski].contains(look))
         #expect(parts.contains(.deskGlasses) == (look == .desk))
         #expect(parts.contains(.chillCup) == (look == .chill))
+    }
+
+    // The identity-card looks from #320 keep their own props on the watch for now.
+    @Test(arguments: [KuroLook.work, .chill, .tennis, .desk])
+    func onTheWatchSheHoldsHerPropHigher(_ look: KuroLook) {
+        let pose = KuroPose(look: look, energy: nil)
+        let phone = Set(KuroFigure.parts(for: look, pose: pose))
+        let watch = Set(KuroFigure.parts(for: look, pose: pose, watch: true))
+        let props: [KuroLook: (KuroPart, KuroPart)] = [
+            .work: (.workTablet, .watchTablet), .chill: (.chillCup, .watchCup),
+            .tennis: (.tennisRacket, .watchRacket), .desk: (.deskBooks, .watchBooks),
+        ]
+        let (low, high) = props[look]!
+        #expect(phone.contains(low) && !phone.contains(high))
+        #expect(watch.contains(high) && !watch.contains(low))
+        #expect(watch.isDisjoint(with: [.deskPen, .workStylus, .workBadge]))
+    }
+
+    @Test func theWatchLeavesOutWhatSitsOnTheFloorOrHerLap() {
+        for (look, item) in [(KuroLook.chill, KuroItem.flower), (.desk, .lamp), (.chill, .blanket)] {
+            var pose = KuroPose(look: look, energy: nil)
+            pose.items = [item]
+            #expect(KuroFigure.parts(for: look, pose: pose).contains(item.part))
+            #expect(!KuroFigure.parts(for: look, pose: pose, watch: true).contains(item.part))
+        }
     }
 
     @Test func theMaskHidesHerMouthAtWork() {
@@ -38,6 +65,29 @@ import Testing
         #expect(tennis.contains(.mouthSmile))
         let chill = Set(KuroFigure.parts(for: .chill, pose: KuroPose(look: .chill, energy: nil)))
         #expect(chill.contains(.mouthCat))
+    }
+
+    @Test func herNodDipsOnceAfterTheBlink() {
+        let start = Date(timeIntervalSinceReferenceDate: 100)
+        #expect(KuroView.nod(since: start, at: 100.05) ?? 1 < 0.1)
+        #expect(KuroView.nod(since: start, at: 100.01 + CompanionView.nodDuration) == nil)
+        #expect(KuroView.nod(since: nil, at: 100) == nil)
+        #expect(KuroView.nodDip(0.05) == 0)
+        #expect(KuroView.nodDip(0.31) > 3.5)
+        #expect(KuroView.nodDip(0.6) == 0)
+    }
+
+    @Test(arguments: KuroLook.allCases)
+    func fullEnergyReadsApartFromOkay(_ look: KuroLook) {
+        let full = KuroPose(look: look, energy: 90)
+        let parts = Set(KuroFigure.parts(for: look, pose: full))
+        #expect(parts.isSuperset(of: [.eyesFull, .cheeksFull, .sparkle]))
+        #expect(!parts.contains(.eyesBright) && !parts.contains(.blush))
+        #expect(KuroFigure.offset(.catEars, pose: full).height == -3)
+        let okay = KuroPose(look: look, energy: 50)
+        #expect(Set(KuroFigure.parts(for: look, pose: okay)).isDisjoint(with: [.eyesFull, .cheeksFull, .sparkle]))
+        #expect(KuroFigure.offset(.catEars, pose: okay) == .zero)
+        #expect(!KuroPose(look: look, energy: 90, bedtime: .on).full)
     }
 
     @Test func energyPicksHerFace() {
@@ -94,7 +144,7 @@ import Testing
     }
 
     @Test func modesPickHerLooks() {
-        #expect(Mode.allCases.map(KuroLook.init(mode:)) == [.work, .chill, .tennis, .desk])
+        #expect(Mode.allCases.map { KuroLook(mode: $0) } == [.work, .chill, .tennis, .desk])
     }
 
     @Test func bedtimeMakesHerSleepy() {
@@ -102,6 +152,13 @@ import Testing
         #expect(pose.eyes == .drowsy && !pose.blink(at: 0.05).blinking)
         #expect(KuroFigure.parts(for: .tennis, pose: pose).contains(.eyesDrowsy))
         #expect(KuroView.accessibilityLabel(.tennis, bedtime: .on) == "KURO，困了")
+    }
+
+    @Test func atBedtimeATapGetsAMumble() {
+        let day = KuroBubbleLines.lines(for: .money)
+        #expect(KuroView.tapLines(day, bedtime: .on) == KuroBubbleLines.bedtime)
+        #expect(KuroView.tapLines(day, bedtime: .off) == day)
+        #expect(Set(KuroBubbleLines.bedtime).isDisjoint(with: day))
     }
 
     @Test func sheSharesHakusFrame() {
@@ -125,8 +182,8 @@ import Testing
     }
 
     @Test func herMomentLinesDifferFromHakus() {
-        // Flow and blanket lines are the same for both.
-        for moment in CompanionMoment.allCases where ![.flow, .blanket].contains(moment) {
+        // Flow and blanket lines are the same for both, and dozing is silent.
+        for moment in CompanionMoment.allCases where ![.flow, .blanket, .dozing].contains(moment) {
             let hers = CompanionLines.lines(for: .chill, moment: moment, persona: .kuro)
             #expect(!hers.isEmpty && hers != CompanionLines.lines(for: .chill, moment: moment))
         }
@@ -136,7 +193,7 @@ import Testing
         let kinds: [WorkoutSummary.Kind] = [.boxing, .running, .strength, .other]
         let hers = kinds.map { CompanionLines.celebration($0, persona: .kuro) }
         #expect(Set(hers).count == kinds.count && hers != kinds.map { CompanionLines.celebration($0) })
-        #expect(CompanionLines.unlock("gloves.gold", persona: .kuro) == "……给你的。不是特意挑的。")
+        #expect(CompanionLines.unlock("gloves.gold", persona: .kuro) == "……给你。有点不好意思。")
         #expect(CompanionLines.unlock("room.plant", persona: .kuro) == "……还行吧。")
     }
 
@@ -162,7 +219,7 @@ import Testing
         #expect(KuroOneOff(.celebrate(id: "run-1", kind: .running)) == nil)
         #expect(KuroOneOff(kind: .taskDone, id: "d").heart && !KuroOneOff(kind: .stayHome, id: "a").heart)
         #expect(events.allSatisfy { !KuroBubbleLines.oneOff($0).isEmpty })
-        #expect(KuroBubbleLines.oneOff(.taskDone(id: "d", focus: true)) == ["……刚才很认真。"])
+        #expect(KuroBubbleLines.oneOff(.taskDone(id: "d", focus: true)) == ["……结束了。辛苦了。"])
         let quiet = ReturnReplay(tier: .box, cards: [], cans: 0)
         #expect(KuroBubbleLines.oneOff(.welcomeBack(id: "w", replay: quiet)) == ["……坐这边。"])
         let full = ReturnReplay(tier: .box, cards: [], cans: 3)
@@ -177,7 +234,7 @@ import Testing
     }
 
     @Test func eachLookMapsBackToItsMode() {
-        #expect(KuroLook.allCases.allSatisfy { KuroLook(mode: $0.mode) == $0 })
+        #expect(KuroLook.allCases.allSatisfy { KuroLook(mode: $0.mode, card: $0.card) == $0 })
     }
 
     @Test func aTapNeverRepeatsTheShownLine() {

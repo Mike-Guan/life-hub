@@ -2,29 +2,77 @@ import CompanionKit
 import HubCore
 import SwiftUI
 
+/// The shop's two shelves.
+enum ShopShelf: CaseIterable {
+    case clothes, room
+
+    /// The shelf's name on its tab.
+    var title: LocalizedStringKey {
+        switch self {
+        case .clothes: "衣服"
+        case .room: "房间"
+        }
+    }
+
+    /// Whether `item` is on this shelf.
+    func holds(_ item: ShopItem) -> Bool { (item.slot == .room) == (self == .room) }
+}
+
 /// The shop for `persona`: her items to buy with cans, what's owned, and the keepsakes still to earn.
 struct ShopView: View {
     let growth: GrowthStore
     @Binding var wardrobe: Wardrobe
     let persona: Persona
+    /// The current mode, for the unboxing.
+    var mode: Mode?
     @Environment(\.dismiss) private var dismiss
     @State private var buyError: String?
     @State private var unboxing: CanEntry?
+    /// The room items the last purchase put in the cupboard, for the unboxing's line.
+    @State private var putAway: [String] = []
+    @State private var previewing: ShopItem?
+    @State private var shelf: ShopShelf
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    // Wins the app can detect today. Keepsakes and the footer only mention these, so nothing
+    // 商店与家 同步方案 §1: the home screen's door opens the clothes, the home page's door the room.
+    /// - Parameter shelf: the shelf to show first.
+    init(
+        growth: GrowthStore,
+        wardrobe: Binding<Wardrobe>,
+        persona: Persona,
+        mode: Mode? = nil,
+        shelf: ShopShelf = .clothes
+    ) {
+        self.growth = growth
+        _wardrobe = wardrobe
+        self.persona = persona
+        self.mode = mode
+        _shelf = State(initialValue: shelf)
+    }
+
+    // Wins the app can detect today. The footer only mentions these, so nothing
     // promises a reward the app can't give yet. Add a win here when its source is wired.
-    static let liveWins: [Win] = [.boxing, .run5k, .exercise, .daylight, .earlySleep]
+    static let liveWins: [Win] = [.boxing, .run5k, .exercise, .daylight, .earlySleep, .steps]
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 header
+                shelfTabs
                 banner
+                // 界面空状态与报错 §2: with no cans yet, how to earn them comes first instead of at the bottom.
+                if balance == 0 {
+                    howToEarn
+                }
                 Text("上架")
                     .font(Toy.body(15, weight: .heavy))
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
-                    ForEach(forSale) { item in
-                        itemCard(item)
+                if forSale.isEmpty {
+                    allBought
+                } else {
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
+                        ForEach(forSale) { item in
+                            itemCard(item)
+                        }
                     }
                 }
                 ForEach(ownedFromShop) { item in
@@ -33,31 +81,41 @@ struct ShopView: View {
                 if let buyError {
                     ErrorLine(text: buyError)
                 }
-                if !keepsakes.isEmpty {
-                    Text("纪念品 · 只能靠做到拿")
-                        .font(Toy.body(15, weight: .heavy))
-                    VStack(spacing: 0) {
-                        ForEach(keepsakes) { item in
-                            keepsakeRow(item)
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 4)
-                    .toyCard(radius: 16, shadow: 4)
+                if balance > 0 {
+                    Text(footer)
+                        .font(Toy.body(12, weight: .bold))
+                        .foregroundStyle(Toy.muted)
+                        .lineSpacing(4)
                 }
-                Text(footer)
-                    .font(Toy.body(12, weight: .bold))
-                    .foregroundStyle(Toy.muted)
-                    .lineSpacing(4)
             }
             .padding(20)
             .frame(maxWidth: 560)
             .frame(maxWidth: .infinity)
+            // 动态: the shelf's items fade over 0.2 s when the tab changes.
+            .animation(fade, value: shelf)
         }
         .foregroundStyle(Toy.ink)
         .background(Toy.paper.ignoresSafeArea())
+        .overlay {
+            if let item = previewing {
+                ShopPreviewSheet(
+                    item: item,
+                    persona: persona,
+                    wardrobe: wardrobe,
+                    balance: balance,
+                    mode: mode,
+                    onCancel: { previewing = nil },
+                    onBuy: {
+                        previewing = nil
+                        buy(item)
+                    }
+                )
+                .transition(reduceMotion ? .identity : .opacity)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: previewing?.id)
         .fullScreenCover(item: $unboxing) { entry in
-            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
+            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona, mode: mode, putAway: putAway)
         }
     }
 
@@ -65,52 +123,125 @@ struct ShopView: View {
     private var ledger: CanLedger { growth.ledger.only(persona) }
     private var balance: Int { ledger.balance }
     private var owned: Set<String> { ledger.owned }
+    // Card items show only with their card. Ones bought under another card stay owned and wearable.
+    private var card: IdentityKind? { .picked(for: persona) }
 
+    private var weekly: ShopItem? { ShopItem.weekly(for: persona, ledger: growth.ledger, now: .now) }
+
+    private var fade: Animation? { reduceMotion ? nil : .smooth(duration: 0.2) }
+
+    // 商店完整目录 v0 §1.4: this week's item leads its shelf, and stays there marked owned once bought.
     private var forSale: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { $0.price != nil && !owned.contains($0.id) }
+        var items = [weekly].compactMap { $0 }
+        items += ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) }
+        return items.filter(shelf.holds)
     }
 
     private var ownedFromShop: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { $0.price != nil && owned.contains($0.id) }
+        ShopItem.catalog(for: persona)
+            .filter { $0.price != nil && owned.contains($0.id) && $0.id != weekly?.id && shelf.holds($0) }
     }
 
-    private var keepsakes: [ShopItem] {
-        ShopItem.catalog(for: persona).filter { item in
-            guard let keepsake = item.keepsake else { return false }
-            return Self.liveWins.contains(keepsake.win) || owned.contains(item.id)
-        }
-    }
+    // The user's own names for the modes and the identity card.
+    private var cards: ModeCards { ModeCards.current(in: AppGroup.defaults, persona: persona) }
 
+    // 奖励数值表 §2: the identity card's win reads with the user's name for the card, and is left out without one.
     private var footer: String {
         let wins = Self.liveWins.compactMap { win in
-            win.shopTitle(for: persona).map { "\($0) +\(win.cans)" }
+            guard win == .boxing else { return win.shopTitle(for: persona).map { "\($0) +\(win.cans)" } }
+            guard cards.identity != nil else { return nil }
+            return "\(cards.title(for: .boxing, persona: persona)) 那天 +\(win.cans)（每周一次）"
         }.joined(separator: "，")
         return "能量罐只靠真的做到才有：\(wins)。不过期，也不会被扣。"
     }
 
+    private var howToEarn: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("怎么拿罐子")
+                .font(Toy.body(15, weight: .heavy))
+            Text(footer)
+                .font(Toy.body(12.5, weight: .bold))
+                .lineSpacing(4)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .toyCard(fill: Toy.paper)
+        .accessibilityElement(children: .combine)
+    }
+
+    // 界面空状态与报错 §1: everything on the shelf is owned. Text only, nothing to tap.
+    private var allBought: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("上架的都换到了")
+                .font(Toy.body(15, weight: .heavy))
+            Text("罐子会一直留着。每周会有一件本周款。")
+                .font(Toy.body(12.5, weight: .bold))
+                .foregroundStyle(Toy.muted)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .toyCard()
+        .accessibilityElement(children: .combine)
+    }
+
     private var header: some View {
+        // A full-screen cover closes with "完成" at the top right, not a back arrow.
         HStack(spacing: 8) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(Toy.body(20, weight: .heavy))
-                    .frame(width: 44, height: 44)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("返回")
             Text("商店")
                 .font(Toy.display(26))
             Spacer()
             CanChip(count: balance)
+            Button {
+                dismiss()
+            } label: {
+                Text("完成")
+                    .font(Toy.body(17, weight: .black))
+                    .foregroundStyle(Toy.ink)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         }
+    }
+
+    // UI 二组 商店两栏 v1.1: the wardrobe's tabs. Mike 2026-10-17: the sliding fill felt slow, so the tapped tab
+    // turns black at once (静态: a tab is a switch, not a move) while the shelf below still fades.
+    private var shelfTabs: some View {
+        HStack(spacing: 6) {
+            ForEach(ShopShelf.allCases, id: \.self) { tab in
+                Button {
+                    shelf = tab
+                } label: {
+                    Text(tab.title)
+                        .font(Toy.body(14, weight: .heavy))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .foregroundStyle(shelf == tab ? Toy.paper : Toy.ink)
+                        .padding(.horizontal, 6)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background {
+                            if shelf == tab {
+                                Capsule().fill(Toy.ink)
+                            } else {
+                                Capsule().fill(Toy.card)
+                            }
+                        }
+                        .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(shelf == tab ? .isSelected : [])
+            }
+        }
+        .transaction { $0.animation = nil }
     }
 
     private var banner: some View {
         HStack(alignment: .bottom, spacing: 10) {
             PersonaPortrait(persona: persona, mode: .chill)
                 .frame(width: 88, height: 112)
-            Text(persona == .kuro ? "……随便看看，不急。" : "看上哪个了？……我只是随便问问。")
+            // UI 审核 2026-10-17: the line breaks after the question, so 「问。」 doesn't sit alone.
+            Text(persona == .kuro ? "……随便看看，不急。" : "看上哪个了？\n……我只是随便问问。")
                 .font(Toy.body(14, weight: .heavy))
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -118,7 +249,7 @@ struct ShopView: View {
                 .frame(maxHeight: .infinity)
         }
         .padding(.horizontal, 12)
-        .frame(height: 118)
+        .frame(minHeight: 118)
         .frame(maxWidth: .infinity, alignment: .leading)
         .toyCard(fill: Mode.chill.color(for: persona))
         .accessibilityElement(children: .combine)
@@ -133,16 +264,22 @@ struct ShopView: View {
                 .toyCard(fill: item.slot.tileColor(for: persona), radius: 12, shadow: 0)
             Text(item.title)
                 .font(Toy.body(14, weight: .heavy))
-            if let price = item.price {
+            if owned.contains(item.id) {
+                Label("已拥有", systemImage: "checkmark")
+                    .font(Toy.body(13, weight: .heavy))
+                    .foregroundStyle(Toy.ink)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            } else if let price = item.price {
                 if price <= balance {
                     Button {
-                        buy(item)
+                        previewing = item
                     } label: {
                         Text("\(price) 能量罐 换")
                             .font(Toy.body(15, weight: .heavy))
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(ToyButtonStyle(fill: Toy.pink, isSelected: true))
+                    .accessibilityLabel("用 \(price) 个能量罐换\(item.title)")
                 } else {
                     Text("\(price) 能量罐 · 还差 \(price - balance)")
                         .font(Toy.body(14, weight: .bold))
@@ -157,8 +294,35 @@ struct ShopView: View {
         }
         .padding(10)
         .toyCard(radius: 16, shadow: 4)
+        .overlay(alignment: .topLeading) {
+            // 界面空状态与报错 §3: clothes say which mode wears them, in that mode's color and the user's name for it.
+            if let mode = item.mode {
+                Text("\(cards.title(for: mode, persona: persona))穿")
+                    .font(Toy.body(12, weight: .heavy))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .padding(.horizontal, 8)
+                    .frame(height: 24)
+                    .background(Capsule().fill(mode.color(for: persona)))
+                    .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
+                    .padding(.horizontal, 8)
+                    .offset(y: -10)
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            // 商店完整目录 v0 §1.4: only this tag, no countdown and no "limited" wording.
+            if item.week != nil {
+                Text("本周")
+                    .font(Toy.body(12, weight: .heavy))
+                    .padding(.horizontal, 8)
+                    .frame(height: 24)
+                    .background(Capsule().fill(Toy.pink))
+                    .overlay(Capsule().stroke(Toy.ink, lineWidth: Toy.outline))
+                    .offset(x: 8, y: -10)
+            }
+        }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(item.title)
+        .accessibilityLabel(item.week != nil ? String(format: "本周 %@".localized, item.title) : item.title)
     }
 
     private func ownedRow(_ item: ShopItem) -> some View {
@@ -178,46 +342,30 @@ struct ShopView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private func keepsakeRow(_ item: ShopItem) -> some View {
-        let isOwned = owned.contains(item.id)
-        let keepsake = item.keepsake
-        let count = keepsake.map { min(ledger.count($0.win, card: $0.card), $0.count) } ?? 0
-        let goal = keepsake?.count ?? 1
-        return HStack(spacing: 10) {
-            ShopItemIcon(item: item)
-                .frame(width: 32, height: 32)
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(item.title)
-                    Spacer()
-                    Text(isOwned ? "已拥有" : "\(keepsake?.title(for: persona) ?? "") \(count)/\(goal)")
-                        .foregroundStyle(Toy.muted)
-                }
-                .font(Toy.body(14, weight: .heavy))
-                if !isOwned {
-                    ProgressView(value: Double(count), total: Double(goal))
-                        .tint(item.slot.tileColor(for: persona))
-                        .accessibilityHidden(true)
-                }
+    private func buy(_ item: ShopItem) {
+        // 动态: the can count rolls down and the bought tile leaves smoothly, without a bounce.
+        var failure: GrowthStore.BuyError?
+        withAnimation(reduceMotion ? nil : .smooth) {
+            do throws(GrowthStore.BuyError) {
+                try growth.buy(item)
+            } catch {
+                failure = error
             }
         }
-        .padding(.vertical, 8)
-        .accessibilityElement(children: .combine)
-    }
-
-    private func buy(_ item: ShopItem) {
-        do {
-            try growth.buy(item)
-            buyError = growth.lastError
-            unboxing = ledger.unboxings(seen: UnboxLog.seen, persona: persona).last { $0.itemID == item.id }
-        } catch {
+        if let failure {
             buyError =
-                switch error {
+                switch failure {
                 case .notForSale: "这个不卖。"
                 case .alreadyOwned: "已经有了。"
                 case .notEnoughCans: "能量罐还不够。"
                 }
+            return
         }
+        buyError = growth.lastError
+        // A failed save stays on screen; the unboxing, still unseen, plays when the shop closes.
+        guard buyError == nil else { return }
+        putAway = item.slot == .room ? RoomLayout.placeBought(item.id, persona: persona, in: AppGroup.defaults) : []
+        unboxing = ledger.unboxings(seen: UnboxLog.seen, persona: persona).last { $0.itemID == item.id }
     }
 }
 
@@ -234,6 +382,7 @@ extension Win {
         case .earlySleep: "按时睡"
         case .plannedTask: "做完定好的事"
         case .exercise: "运动 30 分钟"
+        case .steps: "走了不少路"
         }
     }
 }
@@ -246,37 +395,9 @@ extension ShopItem.Keepsake {
 }
 
 extension IdentityKind {
-    // Until the card editor saves cards (#273), every install keeps its character's card from before.
+    // Launch saves the cards (ModeCards.adopt), so unreadable cards mean no card, never the character's old one.
     /// The identity card the user picked, `nil` when none.
     static func picked(for persona: Persona) -> IdentityKind? {
-        (ModeCards.stored(in: AppGroup.defaults) ?? .legacy(for: persona)).identity
-    }
-}
-
-/// A shop item's icon, drawn the way its character shows it.
-struct ShopItemIcon: View {
-    let item: ShopItem
-
-    var body: some View {
-        if let kuro = KuroItem(rawValue: item.id) {
-            KuroItemIcon(item: kuro)
-        } else {
-            WardrobeItemIcon(item: item)
-        }
-    }
-}
-
-/// `persona` standing still in `mode`'s look, wearing `wardrobe`.
-struct PersonaPortrait: View {
-    let persona: Persona
-    let mode: Mode
-    var wardrobe = Wardrobe()
-
-    var body: some View {
-        if persona == .kuro {
-            KuroPortrait(look: KuroLook(mode: mode), wearing: Set(wardrobe.equipped.values))
-        } else {
-            CompanionPortrait(mode: mode, wardrobe: wardrobe)
-        }
+        ModeCards.current(in: AppGroup.defaults, persona: persona).identity
     }
 }

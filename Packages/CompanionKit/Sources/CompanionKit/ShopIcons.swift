@@ -37,12 +37,19 @@ public struct CanIcon: View {
 /// A wardrobe item as a small square picture, for the shop and wardrobe screens.
 public struct WardrobeItemIcon: View {
     let picture: ItemPicture
+    #if os(iOS) || os(macOS)
+    private var home: HomeItemIcon?
+    #endif
 
     /// - Parameter item: the catalog item to draw.
     public init(item: ShopItem) {
         var wardrobe = Wardrobe()
         wardrobe.equip(item)
         picture = ItemPicture(slot: item.slot, outfit: Outfit(wardrobe), itemID: item.id)
+        #if os(iOS) || os(macOS)
+        // Room items HAKU's figure has no part for, such as the bench, are drawn as the home draws them.
+        home = item.slot == .room && picture.parts.isEmpty ? HomeItemIcon(itemID: item.id) : nil
+        #endif
     }
 
     /// The default look of `slot`, before anything is worn there. Draws nothing for `.room`.
@@ -51,6 +58,18 @@ public struct WardrobeItemIcon: View {
     }
 
     public var body: some View {
+        #if os(iOS) || os(macOS)
+        if let home {
+            home
+        } else {
+            figure
+        }
+        #else
+        figure
+        #endif
+    }
+
+    private var figure: some View {
         Canvas { context, size in
             let crop = picture.crop
             let scale = min(size.width / crop.width, size.height / crop.height)
@@ -85,16 +104,26 @@ struct ItemPicture: Equatable {
             red = outfit.headband
             crop = CGRect(x: 23, y: -0.5, width: 86, height: 86)
         case .mask:
-            parts = [.maskUp, outfit.stripedMask ? .maskStripes : .panelLines, .ledLine]
+            parts = [.maskUp, outfit.mask == .stripes ? .maskStripes : .panelLines, .ledLine]
+            if let print = outfit.mask, print != .stripes { parts.append(print.up) }
             crop = CGRect(x: 29, y: 51, width: 62, height: 62)
         case .room:
-            parts = outfit.room.map { [$0] } ?? []
+            parts = outfit.room.map { $0 == .roomSpeaker ? [$0, .roomSpeakerRing] : [$0] } ?? []
             crop = CGRect(x: -8, y: 94, width: 48, height: 48)
         case .celebration:
             // The first get-up keepsake adds a sneaky peace sign; the default is the sparkle burst.
             let peace = itemID == "celebrate.up"
             parts = peace ? [.peaceHand] : [.sparkle]
             crop = peace ? CGRect(x: 77, y: 48, width: 40, height: 40) : CGRect(x: 3, y: 14, width: 20, height: 20)
+        case .top, .fullSet:
+            // The torso only: a set's cap sits too far above it for a small tile. Parts in figure order.
+            let worn = outfit.clothes.values.reduce(into: Set<RunnerPart>()) { $0.formUnion($1) }
+            parts = RunnerPart.allCases.filter(worn.contains)
+            crop = CGRect(x: 22, y: 84, width: 76, height: 58)
+        case .badge, .hat:
+            // Placeholder until UI 一组 draws the weekly badge and beanie. Undrawn items stay off the shelf.
+            parts = []
+            crop = CGRect(x: 23, y: -0.5, width: 86, height: 86)
         }
     }
 }
@@ -115,7 +144,8 @@ extension Slot {
         case .headband: .work
         case .mask: .money
         case .room: .chill
-        case .celebration: nil
+        case .celebration, .top, .fullSet: nil
+        case .badge, .hat: nil
         }
     }
 
@@ -124,7 +154,8 @@ extension Slot {
         switch self {
         case .gloves, .headband: .boxing
         case .mask: .work
-        case .room, .celebration: .chill
+        case .room, .celebration, .top, .fullSet: .chill
+        case .badge, .hat: .chill
         }
     }
 }

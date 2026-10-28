@@ -78,7 +78,7 @@ import Testing
     @Test func onlyReleasedKindsAreListed() {
         #expect(IdentityKind.released.allSatisfy { $0.isReleased })
         #expect(IdentityKind.boxing.isReleased)
-        #expect(!IdentityKind.ski.isReleased)
+        #expect(!IdentityKind.swimming.isReleased)
         #expect(IdentityKind.allCases.count == 12)
         #expect(IdentityKind.allCases.allSatisfy { ModeCards.width(of: $0.title) <= ModeCards.nameWidth })
         #expect(ChillActivity.allCases.allSatisfy { !$0.title.isEmpty })
@@ -132,5 +132,161 @@ import Testing
         let cards = ModeCards(identity: .art)
         cards.store(in: defaults)
         #expect(ModeCards.stored(in: defaults) == cards)
+    }
+
+    @Test func tryingACharacterPutsTheOwnCardsAsideAndBack() throws {
+        let suite = "ModeCardsTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        ModeCards.restoreOwn(in: defaults)
+        #expect(ModeCards.stored(in: defaults) == nil)
+        let own = ModeCards(identity: .art)
+        own.store(in: defaults)
+        #expect(!ModeCards.isTrying(in: defaults))
+
+        ModeCards.tryDefaults(of: .haku, from: .haku, in: defaults)
+        #expect(ModeCards.isTrying(in: defaults))
+        #expect(ModeCards.stored(in: defaults) == ModeCards(identity: .boxing))
+        ModeCards.switchWhileTrying(to: .kuro, in: defaults)
+        #expect(ModeCards.stored(in: defaults) == ModeCards(identity: .tennis))
+        ModeCards.tryDefaults(of: .kuro, from: .kuro, in: defaults)
+        #expect(ModeCards.stored(in: defaults) == ModeCards(identity: .tennis))
+
+        ModeCards.restoreOwn(in: defaults)
+        #expect(!ModeCards.isTrying(in: defaults))
+        #expect(ModeCards.stored(in: defaults) == own)
+    }
+
+    @Test func switchingBackToTheOwnCharacterRestoresTheOwnCards() throws {
+        let suite = "ModeCardsTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let own = ModeCards(identity: .art)
+        own.store(in: defaults)
+        ModeCards.switchWhileTrying(to: .kuro, in: defaults)
+        #expect(ModeCards.stored(in: defaults) == own)
+
+        ModeCards.tryDefaults(of: .haku, from: .haku, in: defaults)
+        ModeCards.switchWhileTrying(to: .kuro, in: defaults)
+        #expect(ModeCards.stored(in: defaults) == ModeCards(identity: .tennis))
+        ModeCards.switchWhileTrying(to: .haku, in: defaults)
+        #expect(!ModeCards.isTrying(in: defaults))
+        #expect(ModeCards.stored(in: defaults) == own)
+    }
+
+    @Test func tryingWithNoSavedCardsRestoresTheDefaults() throws {
+        let suite = "ModeCardsTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        ModeCards.tryDefaults(of: .kuro, from: .kuro, in: defaults)
+        ModeCards.restoreOwn(in: defaults)
+        #expect(ModeCards.stored(in: defaults) == ModeCards())
+    }
+
+    @Test func aPickedCardBringsItsOwnCodeLineAndSymbol() {
+        let cards = ModeCards(identity: .swimming)
+        #expect(cards.pickedIdentity(for: .boxing, persona: .haku) == .swimming)
+        #expect(cards.pickedIdentity(for: .work, persona: .haku) == nil)
+        #expect(cards.code(for: .boxing, persona: .haku) == "SWIM")
+        #expect(cards.tagline(for: .boxing, persona: .haku) == "泳帽塞好了")
+        #expect(ModeCards(identity: .ski).tagline(for: .boxing, persona: .kuro) == "围巾裹好了")
+        #expect(cards.code(for: .work, persona: .haku) == "WORK")
+        #expect(IdentityKind.swimming.symbol == "figure.pool.swim")
+    }
+
+    @Test func eachCardInvitesInTheCharactersVoice() {
+        #expect(IdentityKind.tennis.invite(for: .haku) == "球拍在门口。去不去随你。")
+        #expect(IdentityKind.tennis.invite(for: .kuro) == "今天网球。……拍子带好了。")
+        #expect(IdentityKind.ski.invite(for: .haku) == "雪板靠在门口了。")
+        for kind in IdentityKind.allCases {
+            #expect(!kind.invite(for: .kuro).isEmpty && !kind.tagline(for: .kuro).isEmpty)
+            #expect(!kind.lines(for: .haku).isEmpty && !kind.lines(for: .kuro).isEmpty)
+        }
+    }
+
+    @Test func theCharactersOwnCardKeepsHerLines() {
+        let haku = ModeCards.legacy(for: .haku)
+        #expect(haku.pickedIdentity(for: .boxing, persona: .haku) == nil)
+        #expect(haku.code(for: .boxing, persona: .haku) == Mode.boxing.code(for: .haku))
+        #expect(haku.tagline(for: .boxing, persona: .haku) == Mode.boxing.tagline(for: .haku))
+        let kuro = ModeCards.legacy(for: .kuro)
+        #expect(kuro.tagline(for: .boxing, persona: .kuro) == Mode.boxing.tagline(for: .kuro))
+        #expect(ModeCards(identity: .boxing).pickedIdentity(for: .boxing, persona: .kuro) == .boxing)
+    }
+
+    @Test func withoutAnIdentityCardOnlyThreeModesShow() {
+        #expect(ModeCards().modes == [.work, .chill, .money])
+        #expect(ModeCards(identity: .art).modes == Mode.allCases)
+        var unknown = ModeCards()
+        unknown.identityName = "surfing"
+        #expect(unknown.modes == Mode.allCases)
+    }
+
+    @Test func aNewInstallStartsWithTheGenericCards() throws {
+        let suite = "ModeCardsTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        #expect(ModeCards.current(in: defaults, persona: .kuro) == ModeCards())
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: false)
+        #expect(ModeCards.current(in: defaults, persona: .kuro).identity == nil)
+        // Records saved later don't turn a new install into the legacy cards.
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: true)
+        #expect(ModeCards.current(in: defaults, persona: .kuro) == ModeCards())
+    }
+
+    @Test func anInstallWithRecordsKeepsItsCharactersCards() throws {
+        let suite = "ModeCardsTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: true)
+        #expect(ModeCards.current(in: defaults, persona: .kuro) == .legacy(for: .kuro))
+        ModeCards(identity: .study).store(in: defaults)
+        ModeCards.adopt(in: defaults, persona: .kuro, existingInstall: true)
+        #expect(ModeCards.current(in: defaults, persona: .kuro).identity == .study)
+    }
+
+    // Issue #350: with no translation in the catalog the Chinese text comes back unchanged.
+    @Test func textWithoutATranslationStaysChinese() {
+        #expect("拳击日".localized == "拳击日")
+        #expect(IdentityKind.dance.tagline(for: .haku) == "歌单选好了")
+        #expect(IdentityKind.ski.lines(for: .kuro) == ["……好冷。", "手好冰。", "……再滑一次？"])
+        #expect(ChillActivity.walking.title == "散步晒太阳")
+    }
+
+    // Issue #416: after the default cards, the identity card can be added, changed or cleared in Settings.
+    @Test func identityCardCanBeAddedChangedAndCleared() {
+        var cards = ModeCards()
+        #expect(cards.identity == nil)
+        // #expect can't call a mutating method, so each result is kept first.
+        let swimming = cards.pickIdentity(.swimming)
+        #expect(!swimming)
+        #expect(cards.identity == .swimming)
+        #expect(cards.title(for: .boxing, persona: .haku) == IdentityKind.swimming.title)
+        let study = cards.pickIdentity(.study)
+        #expect(!study)
+        #expect(cards.identity == .study)
+        let cleared = cards.pickIdentity(nil)
+        #expect(!cleared)
+        #expect(cards.identity == nil)
+        #expect(cards.chill == Set(ChillActivity.allCases))
+    }
+
+    @Test func fitnessCardTakesTheGymOutOfChillAndGivesItBack() {
+        var cards = ModeCards()
+        let fitness = cards.pickIdentity(.fitness)
+        #expect(fitness)
+        #expect(!cards.chill.contains(.fitness))
+        // Picking it again moves nothing.
+        let again = cards.pickIdentity(.fitness)
+        #expect(!again)
+        let boxing = cards.pickIdentity(.boxing)
+        #expect(!boxing)
+        #expect(cards.chill.contains(.fitness))
+        // Leaving the fitness card puts 健身 in Chill even if it wasn't there before: it was on the card.
+        var noGym = ModeCards(chill: [.walking])
+        let moved = noGym.pickIdentity(.fitness)
+        #expect(!moved)
+        noGym.pickIdentity(nil)
+        #expect(noGym.chill == [.walking, .fitness])
     }
 }

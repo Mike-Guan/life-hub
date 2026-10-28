@@ -132,3 +132,20 @@ extension ModeLog {
         return before
     }
 }
+
+extension ModeLog {
+    // Issue #481: turning a card's control off goes back to what came before it.
+    /// The mode of the latest active change that isn't `mode`, `nil` when there is none.
+    public func latest(other mode: Mode) -> Mode? {
+        active.last { $0.mode != mode }?.mode
+    }
+}
+
+extension ModeLog {
+    // ModeStore is the log's single writer, so this only reads the file and never moves it aside.
+    /// The log in the file at `url`, or an empty one when there is none or it can't be read.
+    public static func read(from url: URL?) -> ModeLog {
+        guard let url, let data = try? Data(contentsOf: url) else { return ModeLog() }
+        return (try? HubJSON.decoder().decode(ModeLog.self, from: data)) ?? ModeLog()
+    }
+}

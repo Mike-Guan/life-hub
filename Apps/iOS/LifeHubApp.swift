@@ -1,4 +1,5 @@
 import AppIntents
+import CompanionKit
 import FamilyControls
 import HubCore
 import SwiftUI
@@ -14,15 +15,23 @@ struct LifeHubApp: App {
     @State private var widgets: WidgetBridge
     @State private var setupErrors: [String]
     @State private var bedtime: BedtimeSchedule
+    @State private var remindsAtBedtime: Bool
     @State private var rules: ModeRules
     @State private var offWorkError: String?
     @State private var reminderError: String?
     @State private var showsSettings = false
     @State private var showsShop = false
     @State private var showsWardrobe = false
+    @State private var showsHome = false
+    @State private var showsHomeShop = false
+    @State private var showsOnboarding: Bool
     @State private var unboxing: CanEntry?
     @State private var welcomeBack: CompanionEvent?
     @State private var persona = Persona.stored(in: AppGroup.defaults)
+    @State private var cards = ModeCards.current(
+        in: AppGroup.defaults,
+        persona: Persona.stored(in: AppGroup.defaults)
+    )
     @State private var wardrobe = Wardrobe.stored(
         in: AppGroup.defaults,
         persona: Persona.stored(in: AppGroup.defaults)
@@ -38,24 +47,47 @@ struct LifeHubApp: App {
     @State private var taps: NotificationTaps
     @State private var daily = DailyLink()
     @State private var bathDoneAt = BathTime.doneAt(in: AppGroup.defaults)
+    @AppStorage(Languages.key, store: AppGroup.defaults) private var languageChoice = Languages.Choice.system.rawValue
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        Languages.load(from: AppGroup.defaults)
         let container = AppGroup.container
         var errors = container.adoptLogs(from: .applicationSupport())
         if !AppGroup.isAvailable {
             errors.append("小组件连不上共享文件夹（App Group），它们会一直是空的")
         }
+        let missingFonts = AppFonts.register()
+        if !missingFonts.isEmpty {
+            errors.append(String(format: "日文字体没装上，日文会用系统字体：%@".localized, missingFonts.joined(separator: "、")))
+        }
         let store = ModeStore.live(in: container, defaults: AppGroup.defaults)
+        let persona = Persona.stored(in: AppGroup.defaults)
+        Greeting.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
+        ModeCards.adopt(in: AppGroup.defaults, persona: persona, existingInstall: !store.log.records.isEmpty)
+        _showsOnboarding = State(
+            initialValue: OnboardingDraft.isNeeded(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty)
+        )
+        _cards = State(initialValue: ModeCards.current(in: AppGroup.defaults, persona: persona))
         let energy = EnergyStore.live(in: container, defaults: AppGroup.defaults)
+        BedtimeSchedule.adoptStandard(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty)
         let bedtime = BedtimeSchedule.stored(in: AppGroup.defaults)
         let widgets = WidgetBridge(container: container, bedtime: bedtime)
         widgets.work = ModeRules.stored(in: AppGroup.defaults)
+        widgets.cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
         let places = PlaceSettings.stored(in: AppGroup.defaults)
         let placeMonitor = PlaceMonitor()
         let needs = NeedTracker()
         let growth = GrowthStore.live(in: container, defaults: AppGroup.defaults)
         growth.persona = Persona.stored(in: AppGroup.defaults)
+        growth.lookAt = { persona, date in
+            Look.at(
+                date,
+                log: store.log,
+                wardrobe: .stored(in: AppGroup.defaults, persona: persona),
+                card: .picked(for: persona)
+            )
+        }
         _store = State(initialValue: store)
         // The Focus filter switches mode through this store, so the app keeps one writer for the log.
         AppDependencyManager.shared.add { store }
@@ -63,6 +95,7 @@ struct LifeHubApp: App {
         UnboxLog.start(with: growth.ledger)
         _growth = State(initialValue: growth)
         _bedtime = State(initialValue: bedtime)
+        _remindsAtBedtime = State(initialValue: BedtimeSchedule.remindsAtBedtime(in: AppGroup.defaults))
         _rules = State(initialValue: ModeRules.stored(in: AppGroup.defaults))
         _widgets = State(initialValue: widgets)
         _setupErrors = State(initialValue: errors)
@@ -73,8 +106,7 @@ struct LifeHubApp: App {
         // Only a changed mode reloads, since background widget reloads have a daily budget. The watch gets
         // the current scenes either way, since it asked because it just opened.
         WatchSync.shared.onWatchCheck {
-            let work = ModeRules.stored(in: AppGroup.defaults)
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults), rules: work) {
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
                 Dogfood.note("settle", "手表打开，\(settled.reason)，切到\(settled.mode.title)")
                 widgets.sync(mode: store, energy: energy)
                 WidgetCenter.shared.reloadAllTimelines()
@@ -91,6 +123,27 @@ struct LifeHubApp: App {
         )
         UNUserNotificationCenter.current().delegate = taps
         _taps = State(initialValue: taps)
+        // Issue #481: a widget mode button runs in the app's process, so the watch, the off-work notice and the
+        // countdown follow at once instead of on the next open.
+        WidgetTaps.apply = {
+            widgets.sync(mode: store, energy: energy)
+            needs.refresh(
+                places: PlaceSettings.stored(in: AppGroup.defaults),
+                manualSince: store.log.active.last(where: \.source.isManual)?.at,
+                mode: store.current
+            )
+            widgets.need = needs.reading
+            widgets.rules = AppGroup.needRules()
+            widgets.writeSnapshot(mode: store, energy: energy)
+            WidgetCenter.shared.reloadAllTimelines()
+            Self.sendToWatch(store: store, needs: needs, growth: growth)
+            let rules = ModeRules.stored(in: AppGroup.defaults)
+            let atOffice = PlacePresence.stored(in: AppGroup.defaults).since(.office) != nil
+            Task {
+                _ = await OffWorkReminder.schedule(rules, mode: store.current, atOffice: atOffice)
+                _ = await BoxingCountdown.update(for: needs.reading)
+            }
+        }
         // Started here, not in a view: a geofence can launch the app in the background with no UI.
         guard !ScreenshotMode.isOn else { return }
         _screenTimeError = State(initialValue: Self.restartScrollWatch())
@@ -113,10 +166,22 @@ struct LifeHubApp: App {
                 ScreenshotMemory(filled: filled)
             } else if let shows = ScreenshotMode.settings {
                 ScreenshotSettings(asksErase: shows == "erase")
+            } else if let screen = ScreenshotMode.growth {
+                ScreenshotGrowth(screen: screen)
+            } else if let step = ScreenshotMode.onboarding {
+                ScreenshotOnboarding(step: step)
             } else {
                 home
             }
         }
+        // Read on every change of the choice, so views and HubCore's lines change language together.
+        .environment(\.locale, locale)
+    }
+
+    // Reading `languageChoice` redraws the views when the user picks another language.
+    private var locale: Locale {
+        _ = languageChoice
+        return Languages.locale
     }
 
     private var home: some View {
@@ -138,17 +203,22 @@ struct LifeHubApp: App {
             daily: daily.plan,
             dailyDone: daily.done,
             notice: NudgeBackoff.stored(in: AppGroup.defaults).notice(at: .now, persona: persona),
+            backoff: NudgeBackoff.stored(in: AppGroup.defaults),
             changes: ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: growth.ledger),
             onSettings: { showsSettings = true },
             cans: growth.ledger.only(persona).balance,
             onShop: { showsShop = true },
+            onHome: { showsHome = true },
             wardrobe: wardrobe,
             persona: persona,
+            greetingName: Greeting.name(in: AppGroup.defaults),
+            cards: cards,
             ledger: growth.ledger.only(persona),
             onWardrobe: { showsWardrobe = true },
             bathDoneAt: bathDoneAt,
             scrollSeenAt: needs.scrollSeenAt,
             commuteMotion: needs.commuteMotion,
+            stillSince: needs.stillSince,
             onBathDone: {
                 BathTime.markDone(at: .now, in: AppGroup.defaults)
                 bathDoneAt = .now
@@ -173,41 +243,28 @@ struct LifeHubApp: App {
             replayFrom = OpenReplay.switchFrom(log: store.log, lastSeen: away, now: .now)
             // Mike may have changed location access in Settings while away.
             placeMonitor.checkAccess(places)
-            // A missed or held leave still ends work when Mike opens the app in the evening.
-            let work = ModeRules.stored(in: AppGroup.defaults)
-            if let settled = store.settle(presence: .stored(in: AppGroup.defaults), rules: work) {
+            // A missed or held leave still ends work when Mike opens the app.
+            if let settled = store.settle(presence: .stored(in: AppGroup.defaults)) {
                 Dogfood.note("settle", "\(settled.reason)，切到\(settled.mode.title)")
             }
             syncWidgets()
-            // One after the other, so the two permission prompts don't overlap.
-            Task {
-                // Before rescheduling, which could replace today's delivered notice.
-                await replayOffWork()
-                await scheduleReminder()
-                await importSleep()
-                await earnHealthWins()
-                await needs.importMotion()
-                await needs.importCommuteMotion()
-                await daily.read()
-                syncWidgets()
-                earnWins()
-                refreshNeeds()
-                // After earnWins, so wins imported on this open count toward the cards and cans.
-                await welcome(away: away)
-                // The awaits above can include a permission sheet; celebrate only if still on screen.
-                if UIApplication.shared.applicationState == .active {
-                    needs.celebrate(bedtime: bedtime.state(at: .now))
-                    // Keepsakes open after the welcome back, which may show the same keepsake as a card.
-                    if welcomeBack == nil { showNextUnboxing() }
-                }
-                countdownError = await BoxingCountdown.update(for: needs.reading)
-            }
+            // The setup asks for each permission on its own screen, so nothing else asks while it shows.
+            guard !showsOnboarding else { return }
+            Task { await refreshOnOpen(away: away) }
+        }
+        .onChange(of: remindsAtBedtime) {
+            BedtimeSchedule.setRemindsAtBedtime(remindsAtBedtime, in: AppGroup.defaults)
+            Task { await scheduleReminder() }
         }
         .onChange(of: bedtime) {
             bedtime.store(in: AppGroup.defaults)
             widgets.bedtime = bedtime
             syncWidgets()
             Task { await scheduleReminder() }
+        }
+        .onChange(of: cards) {
+            widgets.cards = cards
+            syncWidgets()
         }
         .onChange(of: rules) {
             rules.store(in: AppGroup.defaults)
@@ -227,9 +284,10 @@ struct LifeHubApp: App {
             )
             refreshNeeds()
         }
-        .sheet(isPresented: $showsSettings, onDismiss: showNextUnboxing) {
+        .sheet(isPresented: $showsSettings, onDismiss: afterSettings) {
             SettingsView(
                 bedtime: $bedtime,
+                remindsAtBedtime: $remindsAtBedtime,
                 rules: $rules,
                 places: $places,
                 persona: $persona,
@@ -238,17 +296,37 @@ struct LifeHubApp: App {
                 store: store,
                 energy: energy,
                 ledger: growth.ledger,
+                cards: $cards,
                 onEraseAll: eraseAll
             )
         }
+        .fullScreenCover(isPresented: $showsOnboarding) {
+            OnboardingView(places: $places, monitor: placeMonitor, onDone: finishOnboarding)
+                .interactiveDismissDisabled()
+        }
         .fullScreenCover(isPresented: $showsShop, onDismiss: showNextUnboxing) {
-            ShopView(growth: growth, wardrobe: $wardrobe, persona: persona)
+            ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
+        }
+        .fullScreenCover(isPresented: $showsHome) {
+            // 商店与家 同步方案 §1: the home page's door opens the same shop on the room tab.
+            HakuHomeView(
+                snapshot: homeSnapshot,
+                onSwitch: { store.switchTo($0) },
+                onShop: { showsHomeShop = true },
+                // The wardrobe opens from the home screen for now.
+                onWardrobe: nil,
+                onSave: { $0.store(in: AppGroup.defaults) },
+                onExit: { showsHome = false }
+            )
+            .fullScreenCover(isPresented: $showsHomeShop) {
+                ShopView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, shelf: .room)
+            }
         }
         .fullScreenCover(isPresented: $showsWardrobe, onDismiss: showNextUnboxing) {
-            WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current)
+            WardrobeView(growth: growth, wardrobe: $wardrobe, persona: persona, mode: store.current, cards: cards)
         }
         .fullScreenCover(item: $unboxing, onDismiss: showNextUnboxing) { entry in
-            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona)
+            UnboxCover(entry: entry, wardrobe: $wardrobe, persona: persona, mode: store.current)
         }
         .onChange(of: persona) {
             persona.store(in: AppGroup.defaults)
@@ -256,6 +334,8 @@ struct LifeHubApp: App {
             growth.persona = persona
             // Each character keeps her own wardrobe; storing it again below is harmless.
             wardrobe = Wardrobe.stored(in: AppGroup.defaults, persona: persona)
+            // Cards follow the user, not the character; only the defaults before Issue #273 depend on her.
+            cards = .current(in: AppGroup.defaults, persona: persona)
             // Settings is a sheet, so the scene stays active: refresh here what an open would refresh.
             // Needs reschedule the invite, and the widgets and the watch get the new lines.
             refreshNeeds()
@@ -279,6 +359,41 @@ struct LifeHubApp: App {
         .onChange(of: energy.revision) { syncWidgets() }
     }
 
+    // One after the other, so the permission prompts don't overlap.
+    private func refreshOnOpen(away: Date?) async {
+        // Before rescheduling, which could replace today's delivered notice.
+        await replayOffWork()
+        await scheduleReminder()
+        await importSleep()
+        await earnHealthWins()
+        await needs.importMotion()
+        await needs.importCommuteMotion()
+        await daily.read()
+        syncWidgets()
+        earnWins()
+        refreshNeeds()
+        // After earnWins, so wins imported on this open count toward the cards and cans.
+        await welcome(away: away)
+        // The awaits above can include a permission sheet; celebrate only if still on screen.
+        if UIApplication.shared.applicationState == .active {
+            needs.celebrate(bedtime: bedtime.state(at: .now))
+            // Keepsakes open after the welcome back, which may show the same keepsake as a card.
+            if welcomeBack == nil { showNextUnboxing() }
+        }
+        countdownError = await BoxingCountdown.update(for: needs.reading)
+    }
+
+    // The answers replace the settings; the onChange handlers below store them and reschedule.
+    private func finishOnboarding(_ draft: OnboardingDraft) {
+        draft.apply(to: AppGroup.defaults)
+        persona = .stored(in: AppGroup.defaults)
+        cards = .current(in: AppGroup.defaults, persona: persona)
+        bedtime = .stored(in: AppGroup.defaults)
+        rules = .stored(in: AppGroup.defaults)
+        showsOnboarding = false
+        Task { await refreshOnOpen(away: nil) }
+    }
+
     // PRD §21.2 删除全部数据: as on a fresh install. The stores and their wiring stay, so the next write
     // starts a new file. Health data is read in place, so there is nothing of it to delete.
     private func eraseAll() {
@@ -295,14 +410,16 @@ struct LifeHubApp: App {
         do {
             try ScrollWatch.start(FamilyActivitySelection(), work: rules)
         } catch {
-            errors.append("Screen Time 监测没停：\(error.localizedDescription)")
+            errors.append(String(format: "Screen Time 监测没停：%@".localized, error.localizedDescription))
         }
         setupErrors = errors
         // Settings go back to their defaults; their onChange handlers store them and clear the geofences.
         persona = .stored(in: AppGroup.defaults)
         growth.persona = persona
         wardrobe = .stored(in: AppGroup.defaults, persona: persona)
+        cards = .current(in: AppGroup.defaults, persona: persona)
         bedtime = .stored(in: AppGroup.defaults)
+        remindsAtBedtime = BedtimeSchedule.remindsAtBedtime(in: AppGroup.defaults)
         rules = .stored(in: AppGroup.defaults)
         places = .stored(in: AppGroup.defaults)
         bathDoneAt = nil
@@ -344,7 +461,7 @@ struct LifeHubApp: App {
         do {
             nights = try await HealthSleep.nights(from: since, to: .now)
         } catch {
-            healthError = "读不到健康 App 里的睡眠：\(error.localizedDescription)"
+            healthError = String(format: "读不到健康 App 里的睡眠：%@".localized, error.localizedDescription)
         }
         let replay = ReturnReplay.make(
             lastSeen: since,
@@ -393,16 +510,41 @@ struct LifeHubApp: App {
         }
     }
 
+    // 交付差距 v1 工程 #7: after 删除全部数据 the app is as freshly installed, so the setup shows again.
+    // It opens once Settings has closed, since one view can't present two covers at once.
+    private func afterSettings() {
+        if OnboardingDraft.isNeeded(in: AppGroup.defaults, existingInstall: !store.log.records.isEmpty) {
+            showsOnboarding = true
+        } else {
+            showNextUnboxing()
+        }
+    }
+
+    // Issue #489: built on every redraw, so the page follows mode switches and new items while it is open.
+    private var homeSnapshot: HomeSnapshot {
+        HomeSnapshot.make(
+            persona: persona,
+            mode: store.current,
+            today: store.segments(on: .now),
+            ledger: growth.ledger,
+            energy: energy.log,
+            bedtime: bedtime.state(at: .now),
+            defaults: AppGroup.defaults
+        )
+    }
+
     // Keepsakes earned while the app was closed pop open on the home screen, one after another.
     private func showNextUnboxing() {
-        guard !showsShop, !showsWardrobe, !showsSettings else { return }
+        guard !showsShop, !showsWardrobe, !showsSettings, !showsHome else { return }
         unboxing = UnboxLog.next(in: growth.ledger, persona: persona)
     }
 
+    // QA 10-26 必修 5: declined permissions (location not "Always", Motion & Fitness off) are shown as a grey
+    // line in Settings, not as a red error on the home screen.
     private var firstError: String? {
         let errors = [
             widgets.lastError, growth.lastError, reminderError, offWorkError, healthError,
-            placeMonitor.lastError, placeMonitor.accessWarning, needs.lastError, countdownError, screenTimeError,
+            placeMonitor.lastError, needs.lastError, countdownError, screenTimeError,
             daily.lastError, DecisionLog.lastError(in: AppGroup.defaults),
         ]
         return (setupErrors + errors.compactMap { $0 }).first
@@ -417,38 +559,44 @@ struct LifeHubApp: App {
         needs: NeedTracker,
         growth: GrowthStore
     ) {
-        monitor.start(places) { place, entered in
-            var presence = PlacePresence.stored(in: AppGroup.defaults)
-            let arrived = presence.since(place.action == .boxing ? .gym : .fitness)
-            let stayStart = presence.since(place)
-            if entered, place.action == .fitness, presence.since(.fitness) == nil {
+        monitor.start(places) { event in
+            let place = event.place
+            let entered = event.entered
+            let persona = Persona.stored(in: AppGroup.defaults)
+            let rules = ModeRules.stored(in: AppGroup.defaults)
+            guard
+                let applied = event.apply(
+                    to: .stored(in: AppGroup.defaults),
+                    store: store,
+                    rules: rules,
+                    cards: ModeCards.current(in: AppGroup.defaults, persona: persona),
+                    persona: persona
+                )
+            else { return }
+            let before = applied.before
+            let presence = applied.after
+            if entered, place.action == .fitness, before.since(.fitness) == nil {
                 let departure = GymDeparture.stored(in: AppGroup.defaults)
                 let deviceID = HubDevice.id(defaults: AppGroup.defaults)
-                if let went = ChangeEngine.wentAfterGo(departure: departure, arrivedAt: .now, deviceID: deviceID) {
+                let went = ChangeEngine.wentAfterGo(departure: departure, arrivedAt: event.date, deviceID: deviceID)
+                if let went {
                     ChangeLog.note(went, in: AppGroup.defaults)
                 }
             }
-            presence.record(place, entered: entered, at: .now)
             presence.store(in: AppGroup.defaults)
             let identity = IdentityKind.picked(for: growth.persona)
-            if !entered, let arrived, let visit = Win.visit(place.action, from: arrived, to: .now, identity: identity) {
+            let arrived = before.since(place.action == .boxing ? .gym : .fitness)
+            if !entered, let arrived,
+                let visit = Win.visit(place.action, from: arrived, to: event.date, identity: identity)
+            {
                 growth.record(visit.win, source: visit.source, at: visit.at, card: visit.card)
             }
-            let rules = ModeRules.stored(in: AppGroup.defaults)
-            let decision: ModeDecision?
-            if !entered, let stayStart, Date.now.timeIntervalSince(stayStart) < PlacePresence.bounce {
-                // Walking past a fence takes back the switch the arrival made.
-                decision = store.autoSwitch(.passedBy(arrivedAt: stayStart), rules: rules)
-            } else if let trigger = place.trigger(entered: entered) {
-                // After a GPS-drift return the stay continues; this puts back a mode the leave changed.
-                decision = store.autoSwitch(trigger, rules: rules)
-            } else {
-                decision = nil
-            }
-            // Place comes first: a leave that was held or came early still ends work once it's evening.
-            let made = decision ?? store.settle(presence: presence, rules: rules)
-            let outcome = made.map { "切到\($0.mode.title)" } ?? "不切（\(Self.keptBecause(store: store, rules: rules))）"
-            Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)，\(outcome)")
+            let kept = "不切（\(Self.keptBecause(store: store, rules: rules))）"
+            let outcome = applied.decision.map { "切到\($0.mode.title)" } ?? kept
+            // A late event was missed while the app was closed and caught up at this launch.
+            let time = event.date.formatted(date: .omitted, time: .shortened)
+            let late = Date.now.timeIntervalSince(event.date) > 60 ? "（补上 \(time)）" : ""
+            Dogfood.note("geofence", "\(entered ? "到" : "离开")\(place.title)\(late)，\(outcome)")
             needs.refresh(
                 places: places,
                 manualSince: store.log.active.last(where: \.source.isManual)?.at,
@@ -533,7 +681,7 @@ struct LifeHubApp: App {
             return nil
         } catch {
             Dogfood.note("screenTime", "监测没启动：\(error.localizedDescription)")
-            return "Screen Time 监测没启动：\(error.localizedDescription)"
+            return String(format: "Screen Time 监测没启动：%@".localized, error.localizedDescription)
         }
     }
 
@@ -582,7 +730,8 @@ struct LifeHubApp: App {
             scrollSeenAt: needs.scrollSeenAt,
             daily: DailyPlan.stored(in: AppGroup.defaults),
             invite: needs.invite,
-            motion: needs.commuteMotion
+            motion: needs.commuteMotion,
+            stillSince: needs.stillSince
         )
         WatchSync.shared.send(WatchPlay(scenes: inputs.timeline(from: .now), event: event ?? needs.event))
     }
@@ -593,7 +742,7 @@ struct LifeHubApp: App {
     }
 
     private func scheduleReminder() async {
-        reminderError = await BedtimeReminder.schedule(bedtime, persona: persona)
+        reminderError = await BedtimeReminder.schedule(bedtime, on: remindsAtBedtime, persona: persona)
         // The bedtime call asks for permission; without it this would fail the same way.
         if reminderError == nil { await scheduleOffWork() }
     }
@@ -604,11 +753,12 @@ struct LifeHubApp: App {
             let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
             let slept = try await HealthSleep.earlySleep(schedule: schedule)
             let sunned = try await HealthMotion.daylight()
-            for earned in [slept, sunned].compactMap(\.self) {
+            let walked = try await HealthSteps.wins()
+            for earned in [slept, sunned].compactMap(\.self) + walked {
                 growth.record(earned.win, source: earned.source, at: earned.at)
             }
         } catch {
-            healthError = "读不到健康 App 里的日照或睡眠：\(error.localizedDescription)"
+            healthError = String(format: "读不到健康 App 里的日照、睡眠或步数：%@".localized, error.localizedDescription)
         }
     }
 
@@ -620,7 +770,7 @@ struct LifeHubApp: App {
             }
             healthError = nil
         } catch {
-            healthError = "读不到健康 App 里的睡眠：\(error.localizedDescription)"
+            healthError = String(format: "读不到健康 App 里的睡眠：%@".localized, error.localizedDescription)
         }
     }
 }

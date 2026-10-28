@@ -7,6 +7,10 @@ import SwiftUI
 /// `-screenshot-wearing <ids>` dresses her in shop items, given as comma-separated ids.
 /// `-screenshot-memory <full|empty>` shows the memory page instead (iOS), `-screenshot-ask <name>` with a confirmation.
 /// `-screenshot-settings <card|erase>` shows the bottom of Settings (iOS).
+/// `-screenshot-growth <shop|wardrobe[-accessories|-props|-room]|unbox|unbox-bottom>` shows that screen
+/// with made-up cans and items (iOS).
+/// `-screenshot-onboarding <step>` shows that first-run setup screen, named as in `OnboardingDraft.Step` (iOS).
+/// `-screenshot-identity <card|none>` gives those screens that identity card, or none; the character's own by default.
 enum ScreenshotMode {
     static var mode: Mode? {
         value(after: "-screenshot-mode").flatMap(Mode.init(rawValue:))
@@ -27,8 +31,26 @@ enum ScreenshotMode {
         value(after: "-screenshot-settings")
     }
 
+    /// The shop, wardrobe or keepsake unboxing to show: `shop`, `wardrobe`, `unbox` or `unbox-bottom`.
+    static var growth: String? {
+        value(after: "-screenshot-growth")
+    }
+
+    /// The first-run setup screen to show.
+    static var onboarding: OnboardingDraft.Step? {
+        value(after: "-screenshot-onboarding").flatMap { name in
+            OnboardingDraft.Step.allCases.first { "\($0)" == name }
+        }
+    }
+
+    /// The mode cards for the growth screens: `-screenshot-identity` picks the identity card, `none` for none.
+    static var cards: ModeCards {
+        guard let name = value(after: "-screenshot-identity") else { return .legacy(for: persona) }
+        return ModeCards(identity: IdentityKind(rawValue: name))
+    }
+
     /// Whether any screenshot is being drawn.
-    static var isOn: Bool { mode != nil || memory != nil || settings != nil }
+    static var isOn: Bool { mode != nil || memory != nil || settings != nil || growth != nil || onboarding != nil }
 
     static var persona: Persona {
         value(after: "-screenshot-persona").flatMap(Persona.init(rawValue:)) ?? .haku
@@ -57,7 +79,7 @@ enum ScreenshotMode {
     }
 
     /// What the "不对" card shows: `open` for the question, `reply` for the reply after a correction,
-    /// `hold` for nothing until a long press.
+    /// `hold` for nothing until 不对？ is tapped, `none` for a day with no energy at all.
     static var check: String? {
         value(after: "-screenshot-check")
     }
@@ -95,6 +117,8 @@ struct ScreenshotHome: View {
             // The "不对" card only asks about a guess, so its shots get energy from a night's sleep.
             if ScreenshotMode.check == nil {
                 energy.report(ScreenshotMode.energy)
+            } else if ScreenshotMode.check == "none" {
+                // No sleep and no self-report: the energy row says so.
             } else {
                 energy.record(.sleep(minutes: ScreenshotMode.sleepMinutes, endedAt: .now, deviceID: "screenshot"))
             }

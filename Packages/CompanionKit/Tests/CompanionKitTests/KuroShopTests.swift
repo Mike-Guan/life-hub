@@ -9,7 +9,10 @@ import Testing
         let ids = KuroItem.allCases.map(\.rawValue)
         #expect(Set(ids).count == ids.count)
         #expect(ids.allSatisfy { $0.hasPrefix("kuro.") })
-        #expect(Set(ids) == Set(ShopItem.catalog(for: .kuro).map(\.id)))
+        // Clothes are drawn before the shop offers them, so every offered item is drawn but not the other way.
+        let catalog = ShopItem.catalog(for: .kuro)
+        #expect(Set(ids).isSubset(of: catalog.map(\.id)))
+        #expect(Set(catalog.filter(\.isDrawn).map(\.id)).isSubset(of: ids))
         #expect(KuroItem.allCases.filter(\.isKeepsake) == [.spin, .sakura, .goldRacket])
         #expect(KuroItem.items(["kuro.room.flower", "gloves.gold", "nope"]) == [.flower])
     }
@@ -33,6 +36,196 @@ import Testing
         let parts = Set(KuroFigure.parts(for: .tennis, pose: pose))
         #expect(parts.isSuperset(of: [.itemSakura, .itemGoldRacket]))
         #expect(!parts.contains(.tennisHeadband) && !parts.contains(.tennisRacket))
+    }
+
+    @Test func sundayHairPiecesGoOnHerPonytailElseOnTheSideClip() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.mintTie]
+        #expect(KuroFigure.parts(for: .tennis, pose: pose).contains(.weeklyHairMintPony))
+        #expect(KuroFigure.parts(for: .box, pose: pose).contains(.weeklyHairMintPony))
+        for look in [KuroLook.chill, .work, .desk, .study] {
+            let parts = KuroFigure.parts(for: look, pose: pose)
+            #expect(parts.contains(.weeklyHairMintSide) && !parts.contains(.weeklyHairMintPony), "\(look)")
+        }
+        // Static on her: each piece moves with the hair it is worn on.
+        pose.idle = .ponytail
+        pose.idleProgress = 0.1
+        let ponytail = KuroFigure.offset(.tennisPonytail, pose: pose)
+        #expect(ponytail != .zero && KuroFigure.offset(.weeklyHairStarPony, pose: pose) == ponytail)
+        #expect(KuroFigure.offset(.itemScrunchie, pose: pose) == ponytail)
+        #expect(KuroFigure.offset(.weeklyHairStarSide, pose: pose) == KuroFigure.offset(.hairFringe, pose: pose))
+    }
+
+    @Test func oneThingOnHerLapAndOneOnTheFloor() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.flower, .blanket, .cloud, .succulent]
+        let chill = Set(KuroFigure.parts(for: .chill, pose: pose))
+        #expect(chill.isSuperset(of: [.weeklyRoomCloud, .weeklyRoomSucculent]))
+        #expect(chill.isDisjoint(with: [.itemBlanket, .itemFlower]))
+        pose.items = [.bag, .succulent]
+        let tennis = Set(KuroFigure.parts(for: .tennis, pose: pose))
+        #expect(tennis.contains(.weeklyRoomSucculent) && !tennis.contains(.itemBag))
+        pose.items = [.bearBlanket]
+        #expect(KuroFigure.parts(for: .chill, pose: pose).contains(.weeklyBlanketBear))
+        #expect(!KuroFigure.parts(for: .work, pose: pose).contains(.weeklyBlanketBear))
+    }
+
+    @Test func theNightlightHangsOverHerSofaAndHerDesk() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.nightlight]
+        for look in KuroLook.allCases {
+            let parts = Set(KuroFigure.parts(for: look, pose: pose))
+            let shown = look == .chill || look == .desk
+            #expect(parts.isSuperset(of: [.weeklyRoomNightlightGlow, .weeklyRoomNightlight]) == shown, "\(look)")
+        }
+        // The glow breathes from 0.2 to 0.65 and back every 3 s, and rests at 0.4.
+        #expect(abs(KuroPose.glow(at: 0) - 0.2) < 0.001 && abs(KuroPose.glow(at: 1.5) - 0.65) < 0.001)
+        #expect(abs(KuroPose.glow(at: 3) - 0.2) < 0.001 && KuroPose.restingGlow == 0.4)
+        #expect(KuroFigure.opacity(.weeklyRoomNightlightGlow, pose: pose) == KuroPose.restingGlow)
+        #expect(KuroFigure.opacity(.weeklyRoomNightlightGlow, pose: pose.glowing(0.6)) == 0.6)
+        #expect(KuroItemIcon.parts(.nightlight) == [.weeklyRoomNightlightGlow, .weeklyRoomNightlight])
+    }
+
+    @Test func theBeanieSitsBetweenHerCatEarsOnlyOffWork() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.beanie]
+        let beanie: Set<KuroPart> = [.weeklyHatBeanie, .weeklyHatBeaniePom]
+        let chill = KuroFigure.parts(for: .chill, pose: pose)
+        #expect(Set(chill).isSuperset(of: beanie) && chill.contains(.catEars))
+        // The ears are drawn over it.
+        #expect((chill.firstIndex(of: .weeklyHatBeanie) ?? 99) < (chill.firstIndex(of: .catEars) ?? 0))
+        #expect(Set(KuroFigure.parts(for: .chill, pose: pose, watch: true)).isSuperset(of: beanie))
+        #expect(Set(KuroFigure.parts(for: .work, pose: pose)).isDisjoint(with: beanie))
+        // A set hat or the bath towel takes it off; from behind it stays.
+        pose.items = [.beanie, .picnic]
+        #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isDisjoint(with: beanie))
+        pose.items = [.beanie]
+        pose.scene = .dried(time: 1)
+        #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isDisjoint(with: beanie))
+        pose.scene = nil
+        pose.tap = .turnAway
+        #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isSuperset(of: beanie))
+        #expect(KuroItemIcon.parts(.beanie) == [.weeklyHatBeanie, .weeklyHatBeaniePom])
+        // Her "…" bubble moves right of the pom.
+        #expect(KuroFigure.offset(.tapDots, pose: pose, beanie: true) == KuroFigure.beanieDots)
+    }
+
+    @Test func theBeaniePomSwaysFourDegrees() {
+        let leans = stride(from: 0.0, to: 2.4, by: 0.05).map { KuroPose.pom(at: $0) }
+        #expect(leans.allSatisfy { abs($0) <= 4 } && (leans.max() ?? 0) > 3.9 && (leans.min() ?? 0) < -3.9)
+        var pose = KuroPose(look: .chill, energy: nil)
+        #expect(KuroFigure.turn(.weeklyHatBeaniePom, pose: pose) == nil)
+        pose = pose.glowing(KuroPose.restingGlow, pom: 3)
+        #expect(KuroFigure.turn(.weeklyHatBeaniePom, pose: pose)?.angle == 3)
+        #expect(KuroFigure.turn(.weeklyHatBeanie, pose: pose) == nil)
+    }
+
+    @Test func herLapIsClearWhileSheDrinks() {
+        for item in [KuroItem.blanket, .bearBlanket, .cloud] {
+            var pose = KuroPose(look: .chill, energy: nil)
+            pose.items = [item]
+            pose.tap = .sip
+            pose.tapProgress = 0.4
+            #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isDisjoint(with: KuroFigure.lap), "\(item)")
+            pose.tap = nil
+            pose.idle = .blow
+            pose.idleProgress = 0.5
+            #expect(Set(KuroFigure.parts(for: .chill, pose: pose)).isDisjoint(with: KuroFigure.lap), "\(item)")
+        }
+    }
+
+    @Test func theWatchLeavesOutWhatIsOnHerLapOrTheFloor() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.bearBlanket, .succulent, .starTie, .nightlight]
+        let watch = Set(KuroFigure.parts(for: .chill, pose: pose, watch: true))
+        #expect(watch.isDisjoint(with: [.weeklyBlanketBear, .weeklyRoomSucculent]))
+        #expect(watch.isSuperset(of: [.weeklyHairStarSide, .weeklyRoomNightlight]))
+        pose.items = [.cloud]
+        #expect(!KuroFigure.parts(for: .chill, pose: pose, watch: true).contains(.weeklyRoomCloud))
+    }
+
+    static let clothes = KuroItem.allCases.filter { $0.clothes != nil }
+
+    @Test func herClothesAreTheCatalogsTopsAndSets() {
+        let catalog = ShopItem.catalog(for: .kuro).filter { $0.mode != nil && $0.mode != .boxing }
+        #expect(Set(Self.clothes.map(\.rawValue)) == Set(catalog.map(\.id)))
+        for item in Self.clothes {
+            #expect(item.look.mode == ShopItem.item(item.rawValue)?.mode, "\(item)")
+        }
+    }
+
+    @Test(arguments: clothes)
+    func clothesTakeThePlaceOfHerTopOnlyInTheirLook(_ item: KuroItem) throws {
+        let clothes = try #require(item.clothes)
+        var pose = KuroPose(look: item.look, energy: nil)
+        pose.items = [item]
+        let parts = Set(KuroFigure.parts(for: item.look, pose: pose))
+        #expect(parts.contains(clothes.top) && !parts.contains(KuroFigure.jacket(item.look)))
+        if let hat = clothes.hat { #expect(parts.contains(hat)) }
+        let other: KuroLook = item.look == .chill ? .work : .chill
+        pose = KuroPose(look: other, energy: nil)
+        pose.items = [item]
+        #expect(!KuroFigure.parts(for: other, pose: pose).contains(clothes.top))
+    }
+
+    @Test(arguments: clothes)
+    func herSleevesMatchHerClothes(_ item: KuroItem) throws {
+        let clothes = try #require(item.clothes)
+        var rub = KuroPose(look: item.look, energy: nil)
+        rub.items = [item]
+        rub.tap = .rub
+        rub.tapProgress = 0.3
+        let rubbing = Set(KuroFigure.parts(for: item.look, pose: rub))
+        #expect(rubbing.contains(clothes.rubSleeve) && rubbing.contains(.tapRub))
+        var invite = KuroPose(look: item.look, energy: nil)
+        invite.items = [item]
+        invite.scene = .invite(time: 1)
+        let pointing = Set(KuroFigure.parts(for: item.look, pose: invite))
+        #expect(pointing.contains(clothes.inviteSleeve) && !pointing.contains(KuroScene.sleeve(item.look)))
+    }
+
+    @Test func setHatsSitWithHerCatEars() {
+        var pose = KuroPose(look: .chill, energy: nil)
+        pose.items = [.picnic, .blanket]
+        let picnic = KuroFigure.parts(for: .chill, pose: pose)
+        #expect(picnic.contains(.setPicnicHat) && picnic.contains(.catEars))
+        // Her blanket still covers the top.
+        #expect((picnic.firstIndex(of: .setPicnicTop) ?? 99) < (picnic.firstIndex(of: .itemBlanket) ?? 0))
+        pose = KuroPose(look: .work, energy: nil)
+        pose.items = [.rain]
+        let rain = Set(KuroFigure.parts(for: .work, pose: pose))
+        #expect(rain.contains(.setRainHat) && !rain.contains(.catEars))
+        pose.scene = .dried(time: 1)
+        let dried = Set(KuroFigure.parts(for: .work, pose: pose))
+        #expect(dried.contains(.bathTurban) && !dried.contains(.setRainHat) && dried.contains(.setRainTop))
+    }
+
+    @Test(arguments: clothes)
+    func fromBehindSheShowsHerClothesPlainBack(_ item: KuroItem) throws {
+        let clothes = try #require(item.clothes)
+        var pose = KuroPose(look: item.look, energy: nil)
+        pose.items = [item]
+        pose.tap = .turnAway
+        pose.tapProgress = 0.5
+        let back = Set(KuroFigure.parts(for: item.look, pose: pose))
+        #expect(back.isSuperset(of: [clothes.back, .backHead]))
+        #expect(!back.contains(clothes.top) && !back.contains(KuroFigure.jacket(item.look)))
+        if let hat = clothes.hat { #expect(back.contains(hat)) }
+    }
+
+    @Test func herThoughtBubbleMovesAboveASetHat() {
+        #expect(KuroFigure.offset(.tapDots, pose: KuroPose(look: .work, energy: nil)) == .zero)
+        #expect(KuroFigure.offset(.tapDots, pose: KuroPose(look: .work, energy: nil), hatted: true).height < 0)
+        #expect(KuroFigure.offset(.backHead, pose: KuroPose(look: .work, energy: nil), hatted: true) == .zero)
+    }
+
+    @Test func herStarsMoveAboveASetHatsBrim() {
+        // 位置规划图 F11: full energy with a set hat on; the stars stay put without one.
+        let full = KuroPose(look: .work, energy: 95)
+        #expect(full.full)
+        #expect(KuroFigure.offset(.sparkle, pose: full) == .zero)
+        #expect(KuroFigure.offset(.sparkle, pose: full, hatted: true) == KuroFigure.hattedStars)
+        #expect(KuroFigure.offset(.sparkle, pose: full, beanie: true) == .zero)
     }
 
     @Test func actingCalmFlattensHerMouthButKeepsTheBlush() {
@@ -68,7 +261,7 @@ import Testing
 
     @Test func sheActsCalmAboutItemsAndShyAboutKeepsakes() {
         #expect(KuroBubbleLines.unlock(KuroItem.bag.rawValue) == "……还行吧。")
-        #expect(KuroBubbleLines.unlock(KuroItem.goldRacket.rawValue) == "……给你的。不是特意挑的。")
+        #expect(KuroBubbleLines.unlock(KuroItem.goldRacket.rawValue) == "……给你。有点不好意思。")
     }
 
     @Test func iconsAreSquareCropsOfTheItem() {
@@ -77,6 +270,7 @@ import Testing
             #expect(crop.width == crop.height && crop.width < KuroArt.bounds.height)
         }
         #expect(KuroItemIcon.parts(.lamp) == [.itemLamp])
+        #expect(KuroItemIcon.parts(.picnic) == [.setPicnicTop, .setPicnicHat])
         #expect(KuroItemIcon.parts(.spin).contains(.eyesHappy))
     }
 }

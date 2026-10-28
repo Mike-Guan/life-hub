@@ -1,37 +1,72 @@
 import Foundation
 
-// Issue #164. KURO's identity day is tennis, with boxing's rules. Her day follows the days she actually
-// goes, like gym days; Saturday until one qualifies. HAKU keeps Mike's fixed boxing Sunday.
+// Issue #164 gave the second character a learned identity day. PM 2026-10-13 (写死作息排查 v0 #7): every
+// character learns it from the identity wins, and there is none until one is learned. PM 写死作息 scan 10-15
+// #5: a user without an identity card has no identity day.
 extension NeedRules {
-    /// KURO's tennis day until one is learned: Saturday.
-    public static let tennisWeekday = 7
-
-    /// The rules for `persona`: HAKU's are `standard`; KURO's use her lines and her learned tennis day.
+    /// The rules for `persona`, with the identity day learned from the identity wins in `ledger`. On that
+    /// day the warm-up runs from an hour before the usual arrival to two hours after, and the countdown
+    /// runs to the arrival.
+    /// - Parameters:
+    ///   - arrivals: when the user switched to the identity card.
+    ///   - cards: the user's cards; `nil` for `persona`'s cards from before Issue #273.
     public static func standard(
         for persona: Persona,
         ledger: CanLedger,
+        arrivals: [Date] = [],
+        cards: ModeCards? = nil,
         now: Date,
         calendar: Calendar = .current
     ) -> NeedRules {
-        guard persona == .kuro else { return .standard }
         var rules = NeedRules.standard
-        rules.persona = .kuro
-        rules.boxingWeekday = learnedWeekday(of: .boxing, in: ledger, now: now, calendar: calendar) ?? tennisWeekday
+        rules.persona = persona
+        rules.identity = (cards ?? .legacy(for: persona)).identity
+        guard rules.identity != nil,
+            let weekday = learnedWeekday(of: .boxing, in: ledger, now: now, calendar: calendar),
+            let arrival = usualArrival(on: weekday, arrivals: arrivals, ledger: ledger, now: now, calendar: calendar)
+        else { return rules }
+        rules.boxingWeekday = weekday
+        rules.boxingStartMinute = arrival
+        rules.boxingWarmupStartMinute = arrival - 60
+        rules.boxingWarmupEndMinute = arrival + 120
+        rules.boxingFirstUntilMinute = arrival + 30
         return rules
+    }
+
+    // A win only stores when the session ended, so without arrivals a session and the way there count as
+    // 90 minutes.
+    /// The usual arrival on `weekday` in minutes after midnight, rounded down to 15 minutes and at least
+    /// 01:00: the middle one of the recent `arrivals` on that weekday, else of the identity wins there
+    /// minus 90 minutes. `nil` when there are neither.
+    static func usualArrival(
+        on weekday: Int,
+        arrivals: [Date],
+        ledger: CanLedger,
+        now: Date,
+        calendar: Calendar
+    ) -> Int? {
+        let today = StateEngine.dayStart(for: now, calendar: calendar)
+        var minutes = arrivals.compactMap { at -> Int? in
+            let day = StateEngine.dayStart(for: at, calendar: calendar)
+            let age = calendar.dateComponents([.day], from: day, to: today).day ?? .max
+            guard at <= now, (0..<ActivityDays.learnWeeks * 7).contains(age),
+                calendar.component(.weekday, from: day) == weekday
+            else { return nil }
+            return ActivityDays.minutesAfterMidnight(at, on: day, calendar: calendar)
+        }
+        if minutes.isEmpty {
+            minutes = ActivityDays.recentWins(.boxing, in: ledger, now: now, calendar: calendar)
+                .filter { calendar.component(.weekday, from: $0.day) == weekday }
+                .map { ActivityDays.minutesAfterMidnight($0.at, on: $0.day, calendar: calendar) - 90 }
+        }
+        let sorted = minutes.sorted()
+        guard !sorted.isEmpty else { return nil }
+        return max(60, sorted[sorted.count / 2] / 15 * 15)
     }
 
     /// The weekday with a `win` in the most of the last `ActivityDays.learnWeeks` weeks, if it reaches
     /// `ActivityDays.learnMinWeeks`; the earlier weekday wins a tie.
     static func learnedWeekday(of win: Win, in ledger: CanLedger, now: Date, calendar: Calendar) -> Int? {
-        let today = StateEngine.dayStart(for: now, calendar: calendar)
-        var weeks: [Int: Set<Int>] = [:]
-        for entry in ledger.active where entry.kind == .earned && entry.win == win && entry.at <= now {
-            let day = StateEngine.dayStart(for: entry.at, calendar: calendar)
-            let age = calendar.dateComponents([.day], from: day, to: today).day ?? .max
-            guard (0..<ActivityDays.learnWeeks * 7).contains(age) else { continue }
-            weeks[calendar.component(.weekday, from: day), default: []].insert(age / 7)
-        }
-        return weeks.filter { $0.value.count >= ActivityDays.learnMinWeeks }
-            .min { ($1.value.count, $0.key) < ($0.value.count, $1.key) }?.key
+        ActivityDays.mostWon(ActivityDays.weeksWon(win, in: ledger, now: now, calendar: calendar))
     }
 }

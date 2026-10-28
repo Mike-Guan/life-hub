@@ -25,6 +25,8 @@ public struct HubContainer: Sendable {
     public var modeLogURL: URL? { file("mode-log.json") }
     public var energyLogURL: URL? { file("energy-log.json") }
     public var canLedgerURL: URL? { file("can-ledger.json") }
+    /// How each character looked when an item reached her.
+    public var lookLogURL: URL? { file("look-log.json") }
     public var snapshotURL: URL? { file("widget-snapshot.json") }
     /// What the Apple Watch last got from the iPhone, in the watch's own container.
     public var watchPayloadURL: URL? { file("watch-payload.json") }
@@ -47,7 +49,9 @@ public struct HubContainer: Sendable {
                 try files.createDirectory(at: to.deletingLastPathComponent(), withIntermediateDirectories: true)
                 try files.moveItem(at: from, to: to)
             } catch {
-                errors.append("搬不动旧记录 \(from.lastPathComponent)：\(error.localizedDescription)")
+                errors.append(
+                    String(format: "搬不动旧记录 %1$@：%2$@".localized, from.lastPathComponent, error.localizedDescription)
+                )
             }
         }
         return errors
@@ -74,7 +78,7 @@ public struct HubContainer: Sendable {
             do {
                 try files.removeItem(at: folder.appending(path: name))
             } catch {
-                errors.append("删不掉 \(name)：\(error.localizedDescription)")
+                errors.append(String(format: "删不掉 %1$@：%2$@".localized, name, error.localizedDescription))
             }
         }
         return errors

@@ -6,6 +6,9 @@ options:
     macOS: "26.0"
     watchOS: "26.0"
   createIntermediateGroups: true
+  # Chinese is the source language of the String Catalogs (their keys). It ships no table of its own, so it must
+  # be the development region: with English here, picking 中文 in Settings showed English.
+  developmentLanguage: zh-Hans
 # DEV = Debug (local), STG = Staging (TestFlight internal), PROD = Release (Mike's daily build).
 configs:
   Debug: debug
@@ -22,6 +25,8 @@ settings:
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
     GENERATE_INFOPLIST_FILE: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
     PRODUCT_NAME: LifeHub
     PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID)
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -53,6 +58,9 @@ targets:
       - path: Apps/iOS
         excludes:
           - Info.plist
+      # Issue #481: the app runs widget mode buttons and the card control's intent itself.
+      - Apps/Widgets/SwitchModeIntent.swift
+      - Apps/Widgets/CardToggleIntent.swift
     dependencies:
       - package: HubCore
       - package: CompanionKit
@@ -61,10 +69,12 @@ targets:
       - target: LifeHub-ScreenTime
       - target: LifeHub-Watch
     settings:
-      # Family Controls is only in Debug until Apple approves it for distribution; see CI-CD.md.
+      # Family Controls is in DEV and STG; PROD gets it once Mike turns it on there. See CI-CD.md.
       configs:
         Debug:
-          CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-Debug.entitlements
+          CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-FamilyControls.entitlements
+        Staging:
+          CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-FamilyControls.entitlements
       base:
         CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub.entitlements
         TARGETED_DEVICE_FAMILY: "1"
@@ -75,10 +85,11 @@ targets:
         INFOPLIST_KEY_UIUserInterfaceStyle: Light
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_NSSupportsLiveActivities: YES
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Life Hub 用位置判断你是不是到了拳馆、公司或家：到拳馆和公司自动切模式，在家用来看你是不是窝着。位置只在这台 iPhone 上用，不会上传。"
-        INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "选「始终」后，App 关着时到了拳馆、公司或家也能知道。位置只在这台 iPhone 上用，不会上传。"
-        INFOPLIST_KEY_NSHealthShareUsageDescription: "Life Hub 只读取昨晚的睡眠、运动记录、最近几小时的步数、今天的站立小时和日照时长，用来估计电量、判断你是不是窝在家、运动完庆祝、坐太久时陪你伸懒腰，以及晒到太阳、按时睡时给能量罐。健康数据不会离开这台 iPhone。"
-        INFOPLIST_KEY_NSMotionUsageDescription: "Life Hub 只在你从家去公司、从公司回家的路上看一眼你是在走路还是在车上，让 HAKU 跟着演。运动数据只在这台 iPhone 上用，不会上传。"
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Life Hub 用位置判断你是不是到了公司、家或你设的其他地点：到公司和你设的地点自动切模式，在家用来看你是不是窝着。位置只在这台 iPhone 上用，不会上传。"
+        INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "选「始终」后，App 关着时到了公司、家或你设的其他地点也能知道。我们只检查你是否在你设置的这几个地点附近，不记录路线，位置只在这台 iPhone 上用，不会上传。"
+        INFOPLIST_KEY_NSHealthShareUsageDescription: "Life Hub 只读取昨晚的睡眠、运动记录、最近几小时和今天的步数、今天的站立小时和日照时长，用来估计电量、判断你是不是窝在家、运动完庆祝、坐太久时陪你伸懒腰，以及晒到太阳、按时睡、走满 6000 步时给能量罐。健康数据只在这台 iPhone 上处理，不会上传；只会把算好的状态发给你自己的 Apple Watch。"
+        INFOPLIST_KEY_NSMotionUsageDescription: "Life Hub 只在你从家去公司、从公司回家的路上看一眼你是在走路还是在车上，让角色跟着演；没给健康权限时，也用它数今天的步数，走满 6000 步给能量罐。运动数据只在这台 iPhone 上用，不会上传。"
+        INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "只在你在分享面板里点「存储图像」时，把分享卡存进相册。Life Hub 只往相册里加图，不读你的照片。"
     scheme: {}
   # Drives the "不对" card recording in scripts/check-card-shots.sh; CI doesn't build it.
   LifeHub-UITests:
@@ -137,6 +148,7 @@ targets:
           - Info.plist
           - "*.entitlements"
       - Apps/iOS/AppGroup.swift
+      - Apps/iOS/AppText.swift
       - Apps/iOS/InviteReminder.swift
       - Apps/iOS/OffWorkReminder.swift
     dependencies:
@@ -166,7 +178,9 @@ targets:
     settings:
       configs:
         Debug:
-          CODE_SIGN_ENTITLEMENTS: Apps/ScreenTime/LifeHubScreenTime-Debug.entitlements
+          CODE_SIGN_ENTITLEMENTS: Apps/ScreenTime/LifeHubScreenTime-FamilyControls.entitlements
+        Staging:
+          CODE_SIGN_ENTITLEMENTS: Apps/ScreenTime/LifeHubScreenTime-FamilyControls.entitlements
       base:
         PRODUCT_NAME: LifeHubScreenTime
         PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).screentime

@@ -19,14 +19,17 @@ public struct WatchPayload: Codable, Equatable, Sendable {
     public var scenes: [TimedScene]
     /// The latest one-off from the iPhone (a workout, a Daily task done, coming back); it plays once by id.
     public var event: CompanionEvent?
+    /// The user's cards, for the mode names; `nil` from builds before Issue #273.
+    public var cards: ModeCards?
 
     public init(
         snapshot: WidgetSnapshot,
         wardrobe: Wardrobe = Wardrobe(),
-        bedtime: BedtimeSchedule = .standard,
+        bedtime: BedtimeSchedule = .unset,
         persona: Persona = .haku,
         scenes: [TimedScene] = [],
-        event: CompanionEvent? = nil
+        event: CompanionEvent? = nil,
+        cards: ModeCards? = nil
     ) {
         self.schemaVersion = Self.currentSchemaVersion
         self.snapshot = snapshot
@@ -35,10 +38,11 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         self.persona = persona
         self.scenes = scenes
         self.event = event
+        self.cards = cards
     }
 
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, snapshot, wardrobe, bedtime, persona, scenes, event
+        case schemaVersion, snapshot, wardrobe, bedtime, persona, scenes, event, cards
     }
 
     /// Decodes the payload; anything missing besides the snapshot falls back to the defaults.
@@ -47,10 +51,11 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         schemaVersion = try values.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
         snapshot = try values.decode(WidgetSnapshot.self, forKey: .snapshot)
         wardrobe = (try? values.decodeIfPresent(Wardrobe.self, forKey: .wardrobe)) ?? Wardrobe()
-        bedtime = (try? values.decodeIfPresent(BedtimeSchedule.self, forKey: .bedtime)) ?? .standard
+        bedtime = (try? values.decodeIfPresent(BedtimeSchedule.self, forKey: .bedtime)) ?? .unset
         persona = (try? values.decodeIfPresent(Persona.self, forKey: .persona)) ?? .haku
         scenes = (try? values.decodeIfPresent([TimedScene].self, forKey: .scenes)) ?? []
         event = try? values.decodeIfPresent(CompanionEvent.self, forKey: .event)
+        cards = try? values.decodeIfPresent(ModeCards.self, forKey: .cards)
     }
 
     /// Whether this payload should replace `stored`: it is not older. Transfers can arrive out of order.
@@ -59,8 +64,8 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         return snapshot.updatedAt >= stored.snapshot.updatedAt
     }
 
-    /// Whether `other` draws the same watch face: equal apart from the write time, the work time, the
-    /// scenes and the event, which only the watch app plays.
+    /// Whether `other` draws the same watch face: equal apart from the write time, the work time and the
+    /// event, which only the watch app plays, with the same scenes starting within a few minutes.
     public func drawsLike(_ other: WatchPayload) -> Bool {
         var mine = self
         var theirs = other
@@ -73,19 +78,72 @@ public struct WatchPayload: Codable, Equatable, Sendable {
         theirs.scenes = []
         mine.event = nil
         theirs.event = nil
-        return mine == theirs
+        return mine == theirs && Self.sameFaces(faceScenes, other.faceScenes)
+    }
+
+    // The face draws only these parts of a scene; the rest (cans, events, invites) plays in the watch app.
+    // The first scene starts when the iPhone sends, so what plays from then on counts as already playing.
+    /// The changes in what the watch face draws, each with when it starts; a start of `distantPast` is
+    /// already playing when the iPhone sent.
+    var faceScenes: [TimedScene] {
+        var faces: [TimedScene] = []
+        for timed in scenes {
+            let scene = timed.scene
+            let face = HomeScene(
+                activity: scene.activity,
+                moment: scene.moment,
+                walking: scene.walking,
+                bath: scene.bath,
+                daily: scene.daily
+            )
+            guard face != (faces.last?.scene ?? HomeScene()) else { continue }
+            faces.append(TimedScene(from: timed.from == scenes.first?.from ? .distantPast : timed.from, scene: face))
+        }
+        return faces
+    }
+
+    // The iPhone samples scenes every 5 minutes from when it sends, so the same change lands up to a step
+    // apart in two sends. Redrawing for that alone would spend the watch face's daily reloads and
+    // complication transfers.
+    /// Whether `a` and `b` draw the same faces, each starting within `HomeSceneInputs.timelineStep`.
+    static func sameFaces(_ a: [TimedScene], _ b: [TimedScene]) -> Bool {
+        guard a.map(\.scene) == b.map(\.scene) else { return false }
+        return zip(a, b).allSatisfy { abs($0.from.timeIntervalSince($1.from)) <= HomeSceneInputs.timelineStep }
     }
 
     // The first scene starts at the iPhone's clock when it sent them, and the watch draws at the start of
-    // the minute, so a fresh payload is often read a few seconds before its first scene.
-    /// The scene the watch plays at `date`: the one started by then, else the first; `nil` with no scenes.
+    // the minute, so a fresh payload is often read a few seconds before its first scene. The iPhone works
+    // scenes out only `HomeSceneInputs.timelineHours` ahead; after that the last one is stale, and a stale
+    // scene is worse than the plain mode (PM 动作展示总表 C8).
+    /// The scene the watch plays at `date`: the one started by then, else the first; `nil` with no scenes
+    /// or once they run out.
     public func scene(at date: Date) -> HomeScene? {
-        scenes.scene(at: date) ?? scenes.first?.scene
+        guard let first = scenes.first,
+            date <= first.from.addingTimeInterval(HomeSceneInputs.timelineHours * 60 * 60)
+        else { return nil }
+        return scenes.scene(at: date) ?? first.scene
     }
 
-    /// When the watch widgets redraw: the iPhone widgets' times for this snapshot.
+    /// When the watch widgets redraw: the iPhone widgets' times for this snapshot, when each scene starts, when
+    /// the scenes run out and every 15 minutes, when the portrait changes its pose.
     public func timelineDates(after date: Date, calendar: Calendar = .current) -> [Date] {
-        WidgetSnapshot.timelineDates(after: date, bedtime: bedtime, needTimes: snapshot.needTimes, calendar: calendar)
+        let end = scenes.first.map { $0.from.addingTimeInterval(HomeSceneInputs.timelineHours * 60 * 60) }
+        let sceneTimes = scenes.map(\.from) + [end].compactMap { $0 }
+        let times = snapshot.needTimes + sceneTimes + WidgetSnapshot.slotDates(after: date)
+        return WidgetSnapshot.timelineDates(after: date, bedtime: bedtime, needTimes: times, calendar: calendar)
+    }
+
+    /// The identity card picked for `mode`'s slot, from the iPhone's cards or the character's defaults; `nil`
+    /// outside that slot or for the character's default card.
+    public func card(for mode: Mode) -> IdentityKind? {
+        (cards ?? .legacy(for: persona)).pickedIdentity(for: mode, persona: persona)
+    }
+
+    // An older iPhone build may send a name that doesn't fit the watch's clock row.
+    /// The name of the card in `mode`'s slot, from the iPhone's cards or the character's defaults, cut to
+    /// `ModeCards.nameWidth`.
+    public func title(for mode: Mode) -> String {
+        ModeCards.fitted((cards ?? .legacy(for: persona)).title(for: mode, persona: persona))
     }
 
     /// The payload as a WatchConnectivity dictionary, `nil` when it can't be encoded.

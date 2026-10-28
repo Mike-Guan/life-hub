@@ -8,6 +8,8 @@ import SwiftUI
 /// What the companion remembers: learned habits, long-term memories and her judgements.
 struct MemoryView: View {
     let persona: Persona
+    /// The user's cards, for the identity card's name.
+    let cards: ModeCards
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
@@ -89,23 +91,24 @@ struct MemoryView: View {
                     .frame(minWidth: 44, minHeight: 44)
             }
 
-            section("学到的习惯") {
-                ForEach(habits, id: \.habit) { habit in
-                    HStack(spacing: 10) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("\(habit.title)：\(habit.days)")
-                                .font(Toy.body(15, weight: .heavy))
-                            Text(habit.isLearned ? "从你去的日子学的" : "默认的，还在学")
-                                .font(Toy.body(12))
-                                .foregroundStyle(Toy.muted)
-                        }
-                        Spacer()
-                        if habit.isLearned {
+            // PM 2026-10-13: only what was really learned, so the section waits until something is.
+            if !habits.isEmpty {
+                section("学到的规律") {
+                    ForEach(habits, id: \.habit) { habit in
+                        HStack(spacing: 10) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(String(format: "%1$@：%2$@".localized, habit.title, habit.days))
+                                    .font(Toy.body(15, weight: .heavy))
+                                Text("从你去的日子学的")
+                                    .font(Toy.body(12))
+                                    .foregroundStyle(Toy.muted)
+                            }
+                            Spacer()
                             deleteButton("忘掉") { asking = .habit(habit) }
                         }
                     }
+                    note("忘掉后从你之后的日子重新学。")
                 }
-                note("忘掉后回到默认，再从你之后的日子重新学。")
             }
 
             section("长期记得的事") {
@@ -145,18 +148,27 @@ struct MemoryView: View {
             } label: {
                 Text("删掉所有记忆")
                     .font(Toy.body(15, weight: .heavy))
-                    .foregroundStyle(Toy.alert)
+                    .foregroundStyle(hasMemories ? Toy.alert : Toy.muted)
                     .frame(maxWidth: .infinity, minHeight: 48)
             }
             .buttonStyle(ToyButtonStyle(fill: Toy.card))
+            .disabled(!hasMemories)
             note("能量罐、商店物品、衣柜和纪念品不算记忆，留着。要一起清，用设置里的「删除全部数据」。")
         }
         .padding(20)
     }
 
+    // 交付差距 v1 工程 #15: with nothing left to forget, the button would only ask about nothing.
+    private var hasMemories: Bool {
+        !habits.isEmpty || !longTerm.isEmpty || !decisions.kept.isEmpty
+            || store.log.changes.contains { $0.deletedAt == nil }
+            || energy.log.events.contains { $0.deletedAt == nil }
+    }
+
     private var habits: [LearnedHabit] {
         Memory.habits(
             persona: persona,
+            cards: cards,
             days: ActivityDays.stored(in: AppGroup.defaults),
             ledger: ledger,
             resets: resets,
@@ -165,14 +177,22 @@ struct MemoryView: View {
     }
 
     private var longTerm: [LongMemory] {
-        Memory.longTerm(persona: persona, changes: store.log.changes, ledger: ledger, places: places, resets: resets)
+        Memory.longTerm(
+            persona: persona,
+            cards: cards,
+            changes: store.log.changes,
+            ledger: ledger,
+            places: places,
+            resets: resets
+        )
     }
 
     private var judgements: String {
         let kept = decisions.kept
-        guard !kept.isEmpty else { return "还没有判断" }
+        guard !kept.isEmpty else { return "还没有判断".localized }
         let corrected = kept.filter { $0.feedback == .corrected }.count
-        return corrected == 0 ? "\(kept.count) 次判断" : "\(kept.count) 次判断 · 纠正 \(corrected) 次"
+        guard corrected > 0 else { return String(format: "%lld 次判断".localized, kept.count) }
+        return String(format: "%lld 次判断 · 纠正 %lld 次".localized, kept.count, corrected)
     }
 
     private func section<Rows: View>(_ title: String, @ViewBuilder rows: () -> Rows) -> some View {
@@ -190,7 +210,7 @@ struct MemoryView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                Text(title)
+                Text(title.localized)
                     .font(Toy.body(16, weight: .heavy))
                 Spacer()
                 trailing()
@@ -203,16 +223,16 @@ struct MemoryView: View {
     }
 
     private func note(_ text: String) -> some View {
-        Text(text)
+        Text(text.localized)
             .font(Toy.body(12))
             .foregroundStyle(Toy.muted)
     }
 
     private func deleteButton(_ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
+            Text(title.localized)
                 .font(Toy.body(13, weight: .heavy))
-                .foregroundStyle(Toy.alert)
+                .foregroundStyle(Toy.alertText)
                 .padding(.horizontal, 12)
                 .frame(minHeight: 36)
                 .toyCard(radius: 12, shadow: 3)
@@ -225,7 +245,7 @@ struct MemoryView: View {
 
     private func question(_ item: Forget) -> String {
         switch item {
-        case .habit(let habit): "忘掉\(habit.title)？"
+        case .habit(let habit): String(format: "忘掉%@？".localized, habit.title)
         case .decisions: "删掉所有判断和纠正？"
         case .everything: "删掉所有记忆？"
         }
@@ -233,10 +253,10 @@ struct MemoryView: View {
 
     private func warning(_ item: Forget) -> String {
         switch item {
-        case .habit: "回到默认，再慢慢重新学。"
+        case .habit: "忘掉后从你之后的日子重新学。"
         case .decisions: "包括你说过「不对」的记录。删了不能恢复。"
         case .everything:
-            "习惯、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。"
+            "规律、长期记得的事、每天的记录和判断都会删掉。删掉后，所有角色都会像第一次认识你。"
                 + "能量罐、商店物品、衣柜和纪念品不算记忆，留着。删了不能恢复。"
         }
     }
@@ -280,12 +300,16 @@ struct MemoryView: View {
         return error
     }
 
-    /// `date` as e.g. "10月4日 周日".
+    /// `date` as e.g. "10月4日 周日", or the same month, day and weekday in the user's language.
     static func day(_ date: Date) -> String {
-        // FormatStyle drew "9/12周六"; a fixed pattern keeps the 月/日 words and the space.
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "M月d日 EEE"
+        formatter.locale = Languages.locale
+        if Languages.isOn {
+            formatter.setLocalizedDateFormatFromTemplate("MMMdEEE")
+        } else {
+            // FormatStyle drew "9/12周六"; a fixed pattern keeps the 月/日 words and the space.
+            formatter.dateFormat = "M月d日 EEE"
+        }
         return formatter.string(from: date)
     }
 }

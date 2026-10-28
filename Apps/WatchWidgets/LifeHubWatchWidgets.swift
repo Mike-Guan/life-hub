@@ -5,6 +5,11 @@ import WidgetKit
 
 @main
 struct LifeHubWatchWidgets: WidgetBundle {
+    init() {
+        // Like the watch app, the complications follow the watch's system language.
+        Languages.load(from: .standard)
+    }
+
     var body: some Widget {
         WatchStatusWidget()
     }
@@ -43,6 +48,7 @@ struct WatchStatusWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "status", provider: WatchProvider()) { entry in
             WatchStatusView(entry: entry)
+                .environment(\.locale, Languages.locale)
         }
         .configurationDisplayName("Life Hub")
         .description("角色现在在干什么。")
@@ -62,7 +68,11 @@ struct WatchStatusView: View {
     @ViewBuilder private var content: some View {
         switch family {
         case .accessoryCorner:
-            head.widgetLabel(title ?? "打开 iPhone")
+            if let title {
+                head.widgetLabel(title)
+            } else {
+                head.widgetLabel(placeholder)
+            }
         case .accessoryRectangular:
             HStack(spacing: 6) {
                 head.frame(width: 40)
@@ -78,15 +88,25 @@ struct WatchStatusView: View {
 
     // PM spec (Issue #160): one line, the mode and how long it has run.
     @ViewBuilder private var modeAndTime: some View {
-        if let mode = entry.mode, let since = entry.payload?.snapshot.since {
-            Text("\(mode.title(for: persona)) · \(Text(since, style: .relative))")
+        if let title, let since = entry.payload?.snapshot.since {
+            Text("\(title) · \(Text(since, style: .relative))")
+        } else if let title {
+            Text(title)
         } else {
-            Text(title ?? "打开 iPhone")
+            Text(placeholder)
         }
     }
 
-    private var persona: Persona { entry.payload?.persona ?? .haku }
-    private var title: String? { entry.mode?.title(for: persona) }
+    // UI 二组 预览 6: once the iPhone has sent, there is nothing to open; the mode just isn't set yet.
+    /// What shows instead of the mode: nothing received yet, or no mode yet.
+    private var placeholder: LocalizedStringKey {
+        entry.payload == nil ? "打开 iPhone" : "还没有模式"
+    }
+
+    private var title: String? {
+        guard let payload = entry.payload, let mode = entry.mode else { return nil }
+        return payload.title(for: mode)
+    }
 
     // A tinted face keeps only each pixel's alpha, so the filled figure would read as one flat blob.
     // There the outlines become the opaque part and light fills fade, like a line drawing in the face's tint.
@@ -107,25 +127,34 @@ struct WatchStatusView: View {
     @ViewBuilder private var portrait: some View {
         if let payload = entry.payload, let mode = entry.mode, payload.persona == .kuro {
             KuroPortrait(
-                look: KuroLook(mode: mode),
+                look: KuroLook(mode: mode, card: payload.card(for: mode)),
                 energy: payload.snapshot.energy(at: entry.date)?.value,
                 bedtime: payload.bedtime.state(at: entry.date),
-                wearing: Set(payload.wardrobe.equipped.values),
+                moment: payload.scene(at: entry.date)?.moment,
+                wearing: payload.wardrobe.worn(in: mode),
                 framing: .head,
                 lineArt: renderingMode != .fullColor
             )
         } else if let payload = entry.payload, let mode = entry.mode {
             let snapshot = payload.snapshot
+            // The same scene the watch app plays, like the iPhone Lock Screen (PM 动作展示总表 C9).
+            let scene = payload.scene(at: entry.date)
             CompanionPortrait(
                 mode: mode,
+                card: payload.card(for: mode),
                 energy: snapshot.energy(at: entry.date)?.value,
                 need: snapshot.need(at: entry.date),
                 needSince: snapshot.needSince(at: entry.date),
+                activity: scene?.activity,
+                moment: scene?.moment,
                 traces: snapshot.traces(at: entry.date),
                 vitals: snapshot.vitals ?? HakuVitals(),
                 date: entry.date,
                 bedtime: payload.bedtime.state(at: entry.date),
                 wardrobe: payload.wardrobe,
+                daily: scene?.daily,
+                walking: scene?.walking,
+                bath: scene?.bath ?? false,
                 framing: .head
             )
         } else {

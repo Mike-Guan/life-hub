@@ -3,11 +3,14 @@ import FamilyControls
 import HubCore
 import SwiftUI
 import UniformTypeIdentifiers
+import UserNotifications
+import WidgetKit
 
 /// App settings: the bedtime reminder time, the places that switch mode, the Daily Widget link and
 /// the Screen Time watch.
 struct SettingsView: View {
     @Binding var bedtime: BedtimeSchedule
+    @Binding var remindsAtBedtime: Bool
     @Binding var rules: ModeRules
     @Binding var places: PlaceSettings
     @Binding var persona: Persona
@@ -16,20 +19,28 @@ struct SettingsView: View {
     let store: ModeStore
     let energy: EnergyStore
     let ledger: CanLedger
+    /// The user's cards, for the place names and actions and the identity card row.
+    @Binding var cards: ModeCards
     /// Deletes every record and setting on this iPhone, as on a fresh install.
     let onEraseAll: () -> Void
     /// Starts at the bottom of the page, with the 删除全部数据 confirmation open when `true`. For screenshots only.
     var screenshot: Bool?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+    // Read again on every return to the app, so turning notifications on in Settings clears the line.
+    @State private var notificationsOff = false
+    @State private var motionOff = false
     @State private var pickingDaily = false
     @State private var editing: PlaceEdit?
+    @State private var answering: StepEdit?
     @State private var scrollApps = ScrollWatch.selection
     @State private var pickingApps = false
     @State private var screenTimeError: String?
     @State private var switchingTo: Persona?
     @State private var showsMemory = false
     @State private var asksErase = false
+    @AppStorage(Languages.key, store: AppGroup.defaults) private var languageChoice = Languages.Choice.system.rawValue
 
     var body: some View {
         ScrollView {
@@ -37,6 +48,11 @@ struct SettingsView: View {
         }
         .defaultScrollAnchor(screenshot == nil ? nil : .bottom)
         .task { asksErase = screenshot == true }
+        .task(id: scenePhase) {
+            let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+            notificationsOff = status == .denied
+            motionOff = CommuteMotion.isDenied
+        }
         .foregroundStyle(Toy.ink)
         .tint(Toy.pink)
         .background(Toy.paper.ignoresSafeArea())
@@ -95,7 +111,12 @@ struct SettingsView: View {
                     isPresented: Binding(get: { switchingTo != nil }, set: { if !$0 { switchingTo = nil } }),
                     presenting: switchingTo
                 ) { next in
-                    Button("换") { persona = next }
+                    Button("换") {
+                        #if DEBUG || ENV_STG
+                        ModeCards.switchWhileTrying(to: next, in: AppGroup.defaults)
+                        #endif
+                        persona = next
+                    }
                     Button("先不换", role: .cancel) {}
                 } message: { next in
                     Text(Self.switchMessage(from: persona, to: next))
@@ -103,14 +124,34 @@ struct SettingsView: View {
                 Text("每个角色有自己的能量罐和东西，换过去从零开始，原来的都留着。生活记录和规则都不变。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+                #if DEBUG || ENV_STG
+                Toggle("连同角色的默认模式一起试", isOn: tryDefaultsBinding)
+                    .font(Toy.body(15))
+                Text("打开后先用这个角色的默认模式卡，你自己的卡先存起来；关掉就换回来。地点和学到的作息不变。只在测试版里有。")
+                    .font(Toy.body(12))
+                    .foregroundStyle(Toy.muted)
+                #endif
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("睡觉提醒")
+                Text("睡觉时间")
                     .font(Toy.body(16, weight: .heavy))
-                timeRow("睡觉", selection: time($bedtime.startMinute))
-                timeRow("起床", selection: time($bedtime.endMinute))
-                Text("睡觉时间到了发一条通知，\(persona.title) 变困，一直到起床时间。只提醒一次。")
+                timeRow("睡觉", selection: time(shownBedtime.startMinute), muted: !bedtime.isSet)
+                timeRow("起床", selection: time(shownBedtime.endMinute), muted: !bedtime.isSet)
+                if !bedtime.isSet {
+                    Text("还没设。选一个时间就生效。")
+                        .font(Toy.body(12, weight: .bold))
+                        .foregroundStyle(Toy.muted)
+                }
+                // UI 二组 gap #11: the prefill is only a suggestion, so the reminder waits for a picked time.
+                // UI 审核: an old install can have it on with no time, so turning it off always works.
+                Toggle("到点提醒", isOn: reminderToggle)
+                    .font(Toy.body(15))
+                    .disabled(!bedtime.isSet && !remindsAtBedtime)
+                if remindsAtBedtime, notificationsOff {
+                    notificationsLine
+                }
+                Text("\(persona.title) 从睡觉时间开始变困，一直到起床时间。打开提醒，到点发一条通知，只提醒一次。")
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
             }
@@ -120,12 +161,18 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("上班时段")
                     .font(Toy.body(16, weight: .heavy))
+                placeRow(title: "上班日".localized, detail: workdaysLabel) {
+                    answering = StepEdit(step: .work)
+                }
                 timeRow("上班", selection: time($rules.workStartMinute))
                 timeRow("下班", selection: time($rules.workEndMinute))
                 Toggle("晚间延长", isOn: eveningBinding)
                     .font(Toy.body(15))
                 if rules.eveningUntilMinute != nil {
                     timeRow("延长到", selection: time(eveningMinute))
+                }
+                if !rules.workdays.isEmpty, notificationsOff {
+                    notificationsLine
                 }
                 Text("到公司才切到上班。在上班的日子，下班前 \(ModeRules.offWorkLead) 分钟提醒一次。晚间延长打开后，下班后还在公司就托腮等到延长时间。")
                     .font(Toy.body(12))
@@ -134,22 +181,119 @@ struct SettingsView: View {
             .padding(16)
             .toyCard()
 
+            VStack(alignment: .leading, spacing: 8) {
+                Text("模式卡名字")
+                    .font(Toy.body(16, weight: .heavy))
+                placeRow(title: commonCardNames, detail: "") {
+                    answering = StepEdit(step: .cards)
+                }
+            }
+            .padding(16)
+            .toyCard()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("身份卡")
+                    .font(Toy.body(16, weight: .heavy))
+                placeRow(title: cards.identity?.title ?? "没有".localized, detail: "") {
+                    answering = StepEdit(step: .identity)
+                }
+            }
+            .padding(16)
+            .toyCard()
+
             placesCard
 
+            // Daily Widget is Mike's own app; testers don't have it, so only DEV builds show the link.
+            #if DEBUG
             dailyCard
+            #endif
 
             memoryCard
 
-            // Debug only until Apple approves Family Controls for distribution; STG and PROD have no
-            // entitlement, so the button could only fail. Remove with the CI-CD.md Screen Time step.
-            #if DEBUG
+            // PROD has no Family Controls entitlement yet, so the button could only fail there.
+            // Remove the condition with the CI-CD.md Screen Time step.
+            #if DEBUG || ENV_STG
             scrollCard
+            #endif
+            languagesCard
+            #if DEBUG
             dogfoodCard
             #endif
+
+            if let url = AppLinks.privacyPolicy {
+                privacyCard(url)
+            }
 
             eraseCard
         }
         .padding(20)
+        .sheet(item: $answering) { edit in
+            OnboardingView(
+                places: $places,
+                monitor: monitor,
+                editing: .editing(edit.step, persona: persona, cards: cards, rules: rules)
+            ) { draft in
+                draft.applyStep(to: &cards, rules: &rules)
+                cards.store(in: AppGroup.defaults)
+                answering = nil
+            }
+        }
+    }
+
+    private var commonCardNames: String {
+        cards.modes.filter { $0 != .boxing }.map { cards.title(for: $0, persona: persona) }.joined(separator: " · ")
+    }
+
+    // Issue #416: 周一到周五 as one phrase, else the days in order, Monday first.
+    private var workdaysLabel: String {
+        if rules.workdays.isEmpty { return "不固定".localized }
+        if rules.workdays == [2, 3, 4, 5, 6] { return "周一到周五".localized }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Languages.locale
+        let days = [2, 3, 4, 5, 6, 7, 1].filter(rules.workdays.contains).map { calendar.shortWeekdaySymbols[$0 - 1] }
+        let list = ListFormatter()
+        list.locale = Languages.locale
+        return list.string(from: days) ?? days.joined(separator: " ")
+    }
+
+    // QA 10-26 必修 5: a permission the user declined, in grey, with the way to turn it on.
+    private func permissionLine(_ text: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(text.localized)
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text("去设置打开")
+                    .font(Toy.body(15, weight: .heavy))
+                    .underline()
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // UI 二组 preview 5: with notifications denied, the reminders that are on can't go out.
+    private var notificationsLine: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ErrorLine(text: "通知被关掉了，睡觉提醒和下班提醒发不出去。".localized, size: 13)
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text("去设置打开")
+                    .font(Toy.body(15, weight: .heavy))
+                    .underline()
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // PRD §21.2: the way to take everything back, at the very bottom. The sheet is the second step.
@@ -164,7 +308,7 @@ struct SettingsView: View {
                 } label: {
                     Text("删除…")
                         .font(Toy.body(13, weight: .heavy))
-                        .foregroundStyle(Toy.alert)
+                        .foregroundStyle(Toy.alertText)
                         .padding(.horizontal, 12)
                         .frame(minHeight: 36)
                         .toyCard(radius: 12, shadow: 3)
@@ -181,6 +325,21 @@ struct SettingsView: View {
         .toyCard()
     }
 
+    // TestFlight external review needs a privacy policy the user can reach from the app.
+    private func privacyCard(_ url: URL) -> some View {
+        HStack(spacing: 10) {
+            Text("隐私政策")
+                .font(Toy.body(16, weight: .heavy))
+            Spacer()
+            Link(destination: url) {
+                Text("打开").tapTarget()
+            }
+            .font(Toy.body(13, weight: .heavy))
+        }
+        .padding(16)
+        .toyCard()
+    }
+
     // Issue #237: what the companion remembers, on its own page.
     private var memoryCard: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -188,11 +347,14 @@ struct SettingsView: View {
                 Text("记得的事")
                     .font(Toy.body(16, weight: .heavy))
                 Spacer()
-                Button("看看") { showsMemory = true }
-                    .font(Toy.body(13, weight: .heavy))
-                    .frame(minHeight: 44)
+                Button {
+                    showsMemory = true
+                } label: {
+                    Text("看看").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
             }
-            Text("学到的习惯、长期记得的事和做过的判断。都只在这台 iPhone 上。")
+            Text("学到的规律、长期记得的事和做过的判断。都只在这台 iPhone 上。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
         }
@@ -201,6 +363,7 @@ struct SettingsView: View {
         .sheet(isPresented: $showsMemory) {
             MemoryView(
                 persona: persona,
+                cards: cards,
                 store: store,
                 energy: energy,
                 ledger: ledger,
@@ -249,13 +412,17 @@ struct SettingsView: View {
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
-                Button("选 App") {
+                Button {
                     Task { await pickApps() }
+                } label: {
+                    Text("选 App").tapTarget()
                 }
                 .font(Toy.body(13, weight: .heavy))
-                .frame(minHeight: 44)
             }
-            Text("选 B 站和小红书。一天合计刷满 \(ScrollWatch.minutes) 分钟，\(persona.title) 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。")
+            Text(scrollNote)
+                .font(Toy.body(12))
+                .foregroundStyle(Toy.muted)
+            Text("用了多久只有这台 iPhone 知道，我们看不到。")
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
             if let screenTimeError {
@@ -268,6 +435,53 @@ struct SettingsView: View {
         .onChange(of: scrollApps) { watchScrolling() }
     }
 
+    #if DEBUG || ENV_STG
+    // 角色切换 正式版 v0 §3: test builds try a character with her default cards; off puts the user's own back.
+    private var tryDefaultsBinding: Binding<Bool> {
+        Binding(
+            get: { ModeCards.isTrying(in: AppGroup.defaults) },
+            set: { on in
+                if on {
+                    ModeCards.tryDefaults(of: persona, from: persona, in: AppGroup.defaults)
+                } else {
+                    ModeCards.restoreOwn(in: AppGroup.defaults)
+                }
+                cards = .current(in: AppGroup.defaults, persona: persona)
+            }
+        )
+    }
+    #endif
+
+    // Issue #350: the app follows the phone's language until the user picks one here.
+    private var languagesCard: some View {
+        HStack {
+            Text("语言")
+                .font(Toy.body(16, weight: .heavy))
+            Spacer()
+            Picker("语言", selection: languageBinding) {
+                ForEach(Languages.Choice.allCases, id: \.self) { choice in
+                    // Each language keeps its own name (日本語, English) whatever language the app shows.
+                    (choice.language.map { Text(verbatim: $0.name) } ?? Text("跟随系统")).tag(choice)
+                }
+            }
+            .pickerStyle(.menu)
+            .tint(Toy.ink)
+        }
+        .padding(16)
+        .toyCard()
+    }
+
+    private var languageBinding: Binding<Languages.Choice> {
+        Binding(
+            get: { Languages.Choice(rawValue: languageChoice) ?? .system },
+            set: {
+                Languages.store($0, in: AppGroup.defaults)
+                languageChoice = $0.rawValue
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+        )
+    }
+
     // Debug builds only: the automatic decisions noted during the weeks of use (PRD section 19).
     private var dogfoodCard: some View {
         let log = DogfoodLog.stored(in: AppGroup.defaults)
@@ -278,13 +492,15 @@ struct SettingsView: View {
             HStack(spacing: 10) {
                 Text("调试记录")
                     .font(Toy.body(16, weight: .heavy))
-                Text("\(log.entries.count) 条 · 决策 \(decisions.kept.count) 条")
+                Text(String(format: "%1$lld 条 · 决策 %2$lld 条".localized, log.entries.count, decisions.kept.count))
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
                 Spacer()
-                ShareLink("导出", item: export)
-                    .font(Toy.body(13, weight: .heavy))
-                    .disabled(log.entries.isEmpty && decisions.kept.isEmpty)
+                ShareLink(item: export) {
+                    Text("导出").tapTarget()
+                }
+                .font(Toy.body(13, weight: .heavy))
+                .disabled(log.entries.isEmpty && decisions.kept.isEmpty)
             }
             ForEach(Array(log.entries.suffix(5).reversed().enumerated()), id: \.offset) { _, entry in
                 Text("\(entry.at.formatted(date: .omitted, time: .shortened)) \(entry.kind)：\(entry.detail)")
@@ -296,10 +512,15 @@ struct SettingsView: View {
         .toyCard()
     }
 
+    private var scrollNote: String {
+        let format = "选你最容易刷停不下来的 App。一天合计刷满 %1$lld 分钟，%2$@ 也瘫在沙发上；停下 20 分钟、走动或手动切模式，就起来。"
+        return String(format: format.localized, ScrollWatch.minutes, persona.title)
+    }
+
     private var pickedLabel: String {
         let apps = scrollApps.applicationTokens.count + scrollApps.categoryTokens.count
         let count = apps + scrollApps.webDomainTokens.count
-        return count == 0 ? "没选" : "已选 \(count) 项"
+        return count == 0 ? "没选".localized : String(format: "已选 %lld 项".localized, count)
     }
 
     // Screen Time asks once; after that the picker opens straight away.
@@ -326,14 +547,17 @@ struct SettingsView: View {
     }
 
     /// A time setting: the name on the left, the time in an outlined chip on the right.
-    private func timeRow(_ title: String, selection: Binding<Date>) -> some View {
+    // UI 审核 #340: a prefilled time that isn't set yet is drawn muted, so it doesn't look in effect.
+    private func timeRow(_ title: String, selection: Binding<Date>, muted: Bool = false) -> some View {
         HStack {
-            Text(title)
+            Text(title.localized)
                 .font(Toy.body(15, weight: .bold))
+                .foregroundStyle(muted ? Toy.muted : Toy.ink)
             Spacer()
-            DatePicker(title, selection: selection, displayedComponents: .hourAndMinute)
+            DatePicker(title.localized, selection: selection, displayedComponents: .hourAndMinute)
                 .labelsHidden()
                 .font(Toy.body(16, weight: .heavy))
+                .foregroundStyle(muted ? Toy.muted : Toy.ink)
                 .padding(3)
                 .toyCard(fill: Toy.card, radius: 10, shadow: 2)
         }
@@ -355,21 +579,30 @@ struct SettingsView: View {
                 .disabled(!places.canAdd)
                 .accessibilityLabel("添加地点")
             }
-            ForEach(HubPlace.Kind.presets, id: \.self) { kind in
+            ForEach(HubPlace.Kind.presets(with: cards), id: \.self) { kind in
                 let place = places[kind]
-                placeRow(title: kind.title(for: persona), detail: place == nil ? "没设" : "已设") {
+                let detail = (place == nil ? "没设" : "已设").localized
+                placeRow(title: kind.title(for: persona, cards: cards), detail: detail) {
                     let blank = HubPlace(kind: kind, latitude: 0, longitude: 0)
                     editing = PlaceEdit(place: place ?? blank, isNew: place == nil)
                 }
             }
             ForEach(places.custom) { place in
-                placeRow(title: place.title, detail: place.action.title(for: persona)) {
+                placeRow(title: place.title, detail: place.action.title(for: persona, cards: cards)) {
                     editing = PlaceEdit(place: place, isNew: false)
                 }
             }
             Text(placesNote)
                 .font(Toy.body(12))
                 .foregroundStyle(Toy.muted)
+            if let warning = monitor.accessWarning {
+                permissionLine(warning)
+            }
+            if motionOff {
+                permissionLine(
+                    String(format: "没开「运动与健身」权限：通勤路上 %@ 只会走路。".localized, persona.title)
+                )
+            }
         }
         .padding(16)
         .toyCard()
@@ -379,6 +612,7 @@ struct SettingsView: View {
                 hasLocation: !edit.isNew,
                 monitor: monitor,
                 persona: persona,
+                cards: cards,
                 onSave: { places.save($0) },
                 onDelete: edit.isNew ? nil : { places.remove(id: edit.place.id) }
             )
@@ -386,19 +620,21 @@ struct SettingsView: View {
     }
 
     private var placesNote: String {
-        let full = places.canAdd ? "" : "iOS 最多同时看 \(PlaceSettings.limit) 个地点，删掉一个才能再加。"
-        return full + "点一个地点设置位置。右上角 + 加自己的地点，选到了 \(persona.title) 做什么。"
-            + "地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。"
+        let full = places.canAdd ? "" : String(format: "iOS 最多同时看 %lld 个地点，删掉一个才能再加。".localized, PlaceSettings.limit)
+        return full + String(format: "点一个地点设置位置。右上角 + 加自己的地点，选到了 %@ 做什么。".localized, persona.title)
+            + "地点只存在这台 iPhone 上。定位权限选「始终」，App 关着时也能切。".localized
     }
 
     private func placeRow(title: String, detail: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Text(title)
+                Text(title.localized)
                     .font(Toy.body(15, weight: .bold))
-                Text(detail)
+                Text(detail.localized)
                     .font(Toy.body(12))
                     .foregroundStyle(Toy.muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(Toy.body(13, weight: .heavy))
@@ -408,6 +644,24 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    /// The bedtime reminder switch: it turns on only once a bedtime is set.
+    private var reminderToggle: Binding<Bool> {
+        Binding {
+            remindsAtBedtime
+        } set: { on in
+            remindsAtBedtime = on && bedtime.isSet
+        }
+    }
+
+    // PM 2026-10-13: an unset bedtime shows the prefill; picking a time sets the whole schedule.
+    private var shownBedtime: Binding<BedtimeSchedule> {
+        Binding {
+            bedtime.isSet ? bedtime : .standard
+        } set: { schedule in
+            bedtime = schedule
+        }
     }
 
     // The picker edits a Date; only its hour and minute are kept.
@@ -438,6 +692,12 @@ struct SettingsView: View {
     }
 }
 
+/// The setup step Settings opens to change one answer.
+private struct StepEdit: Identifiable {
+    let step: OnboardingDraft.Step
+    var id: Int { step.rawValue }
+}
+
 /// A place open in the editor; `isNew` until it has a location.
 private struct PlaceEdit: Identifiable {
     var place: HubPlace
@@ -447,19 +707,13 @@ private struct PlaceEdit: Identifiable {
 }
 
 extension SettingsView {
-    // Wording from the PM thread, 2026-10-07.
+    // Wording from the PM thread, 2026-10-07. 日语文案 2026-10-15: Japanese drops the pronouns, so each
+    // direction is one whole sentence to translate.
     /// The confirmation shown before switching from `old` to `new`.
     static func switchMessage(from old: Persona, to new: Persona) -> String {
-        "\(old.title) 会留在家里，\(old.pronoun)的罐子和东西都在。\(new.title) 用\(new.pronoun)自己的罐子，第一次从零开始。随时可以换回来。"
-    }
-}
-
-extension Persona {
-    /// How lines refer to the character: 他 or 她.
-    fileprivate var pronoun: String {
-        switch self {
-        case .haku: "他"
-        case .kuro: "她"
+        switch old {
+        case .haku: "HAKU 会留在家里，他的罐子和东西都在。KURO 用她自己的罐子，第一次从零开始。随时可以换回来。".localized
+        case .kuro: "KURO 会留在家里，她的罐子和东西都在。HAKU 用他自己的罐子，第一次从零开始。随时可以换回来。".localized
         }
     }
 }

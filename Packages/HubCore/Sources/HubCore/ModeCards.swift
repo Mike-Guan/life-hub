@@ -20,13 +20,15 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
     // Kinds whose art is done for every character. A kind joins once UI finishes its art,
     // so a card that slips to a later release needs no other change.
     /// The kinds the picker shows.
-    public static let released: [IdentityKind] = [.boxing, .tennis]
+    public static let released: [IdentityKind] = [.boxing, .tennis, .fitness, .study, .art, .dance, .music, .ski]
 
     /// Whether the picker shows this kind.
     public var isReleased: Bool { Self.released.contains(self) }
 
     /// The card's name.
-    public var title: String {
+    public var title: String { titleKey.localized }
+
+    private var titleKey: String {
         switch self {
         case .boxing: "拳击日"
         case .tennis: "网球日"
@@ -40,6 +42,124 @@ public enum IdentityKind: String, Codable, CaseIterable, Sendable {
         case .study: "自习"
         case .outdoor: "户外"
         case .ski: "滑雪"
+        }
+    }
+
+    /// The activity's name without 日, for sentences such as the countdown and place names.
+    public var activity: String {
+        switch self {
+        case .boxing: "拳击".localized
+        case .tennis: "网球".localized
+        default: title
+        }
+    }
+
+    /// The card's short English code, for the home header.
+    public var code: String {
+        switch self {
+        case .boxing: "BOXING"
+        case .tennis: "TENNIS"
+        case .fitness: "GYM"
+        case .swimming: "SWIM"
+        case .yoga: "YOGA"
+        case .dance: "DANCE"
+        case .ball: "BALL"
+        case .music: "MUSIC"
+        case .art: "ART"
+        case .study: "STUDY"
+        case .outdoor: "OUTDOOR"
+        case .ski: "SKI"
+        }
+    }
+
+    // 卡片标语与代码 v0 §2.
+    /// The line under the home card in `persona`'s voice.
+    public func tagline(for persona: Persona) -> String {
+        let lines: (haku: String, kuro: String)
+        switch self {
+        case .boxing: lines = ("头带系紧", "拳套系好了")
+        case .tennis: lines = ("球拍拿好", "拍线刚调过")
+        case .fitness: lines = ("包背好了", "水瓶装满了")
+        case .study: lines = ("书摊开了", "眼镜戴上")
+        case .art: lines = ("本子翻开了", "笔在手上")
+        case .outdoor: lines = ("鞋带系紧", "慢慢走")
+        case .swimming: lines = ("泳帽塞好了", "毛巾带上")
+        case .yoga: lines = ("垫子卷好了", "呼——吸")
+        case .ball: lines = ("球打满气了", "帮你看着")
+        case .dance: lines = ("歌单选好了", "……音乐放上")
+        case .music: lines = ("弦调好了", "……谱子翻开")
+        case .ski: lines = ("雪镜戴上", "围巾裹好了")
+        }
+        // The translators keep the short taglines in Localizable, not in the character tables.
+        return (persona == .kuro ? lines.kuro : lines.haku).localized
+    }
+
+    // 卡片标语与代码 v0 §2: the invite on the learned identity day.
+    /// The identity day's invite in `persona`'s voice.
+    public func invite(for persona: Persona) -> String {
+        let lines: (haku: String, kuro: String)
+        switch self {
+        case .boxing: lines = ("拳套我都戴好了，你随意啊。", "……拳套系好了。去吗。")
+        case .tennis: lines = ("球拍在门口。去不去随你。", "今天网球。……拍子带好了。")
+        case .fitness: lines = ("包我背好了。", "……包在门口。")
+        case .study: lines = ("书我装好了。", "……今天也去看会儿书？")
+        case .art: lines = ("速写本带上了。", "……今天去画吗。")
+        case .outdoor: lines = ("背包我收好了。", "……今天出去走走？")
+        case .swimming: lines = ("泳帽我找到了。", "……毛巾带了吗。")
+        case .yoga: lines = ("垫子卷好了。", "……今天去拉伸吗。")
+        case .ball: lines = ("球我打好气了。", "……今天去打球吗。")
+        case .dance: lines = ("鞋我放门口了。去不去随你。", "……今天去跳吗。")
+        case .music: lines = ("琴我擦过了。", "……今天去练吗。")
+        // Skiing is seasonal: months without going are normal, so the invite stays plain.
+        case .ski: lines = ("雪板靠在门口了。", "……今天上山吗。")
+        }
+        return (persona == .kuro ? lines.kuro : lines.haku).localized(for: persona)
+    }
+
+    // 第 1 批、第 2 批、顺延身份卡 台词与待机 v0: three tap lines per card and character.
+    /// What the character says in this card's mode, in `persona`'s voice.
+    public func lines(for persona: Persona) -> [String] {
+        let lines: (haku: [String], kuro: [String])
+        switch self {
+        case .boxing: lines = (["……别碰，手带刚缠好。", "打完再说。", "拳套有点味道。不是我的问题。"], ["……真是的。", "等一下，在系。", "……你看什么。"])
+        case .tennis: lines = (["球拍比我想的重。还是重。", "……别抢。", "捡球的不是我。"], ["……拍子别碰。", "等我颠完。", "……嗯。"])
+        case .fitness: lines = (["……我数，你练。", "……这个不重。", "别看我，看镜子。"], ["……我在这儿。", "数到几了？", "……慢点。"])
+        case .study: lines = (["安静。", "……这页我看过了。", "你看你的，我看我的。"], ["……嘘。", "这里有点难。", "……翻一页。"])
+        case .art: lines = (["……袖子挽起来了。", "……还没画完。", "不给看。"], ["……画好了给你看。", "还差一点。", "……别催。"])
+        case .outdoor: lines = (["……走这么远。", "包有点沉。不是抱怨。"], ["……慢慢走。", "这边好安静。", "……我走慢一点。"])
+        case .swimming: lines = (["我不下水。", "泳帽？不戴。", "毛巾在我这儿。"], ["……吹风机我拿来了。", "……我在岸上等。", "……嗯。"])
+        case .yoga: lines = (["这个姿势我做不了。", "……别笑。", "垫子是你的，我坐边上。"], ["……我也试试。", "呼——", "……慢一点。"])
+        case .ball: lines = (["球别往我这边打。", "……我就看看。", "谁赢了？算了，不重要。"], ["……我帮你看着。", "……我在这儿看。", "……嗯。"])
+        case .dance: lines = (["我刚才没跳。", "……节奏不错。", "别录。"], ["……嘿嘿。", "再来一遍？", "……不许看。"])
+        case .music: lines = (["……刚才那个音不算。", "别吵，在数拍。", "我只会这一段。"], ["……嘘，在听。", "这段好难。", "……再一遍。"])
+        case .ski: lines = (["冷。不是抱怨。", "……我坐缆车就行。", "雪镜起雾了。"], ["……好冷。", "手好冰。", "……再滑一次？"])
+        }
+        return (persona == .kuro ? lines.kuro : lines.haku).map { $0.localized(for: persona) }
+    }
+
+    /// Whether the card is a sport.
+    public var isSport: Bool {
+        switch self {
+        case .music, .art, .study: false
+        default: true
+        }
+    }
+
+    /// The SF Symbol for the card's mode button.
+    public var symbol: String {
+        switch self {
+        case .boxing: "figure.boxing"
+        case .tennis: "figure.tennis"
+        case .fitness: "dumbbell.fill"
+        case .swimming: "figure.pool.swim"
+        case .yoga: "figure.yoga"
+        case .dance: "figure.dance"
+        case .ball: "basketball.fill"
+        case .music: "guitars.fill"
+        case .art: "paintpalette.fill"
+        case .study: "book.fill"
+        case .outdoor: "figure.hiking"
+        case .ski: "figure.skiing.downhill"
         }
     }
 
@@ -73,7 +193,9 @@ public enum ChillActivity: String, Codable, CaseIterable, Sendable {
     case shopping
 
     /// The name in the picker.
-    public var title: String {
+    public var title: String { titleKey.localized }
+
+    private var titleKey: String {
         switch self {
         case .fitness: "健身"
         case .running: "跑步"
@@ -133,7 +255,9 @@ public struct ModeCards: Codable, Equatable, Sendable {
     // tennis, every Chill activity and the three 副业 states.
     /// The cards an existing install had with `persona`.
     public static func legacy(for persona: Persona) -> ModeCards {
+        // KURO's 副业 was called 备课 before the cards; it is her name for it now.
         ModeCards(
+            names: persona == .kuro ? [Mode.money.rawValue: "备课"] : [:],
             identity: persona == .kuro ? .tennis : .boxing,
             sideStates: [.vibeCoding, .shooting, .operating]
         )
@@ -184,9 +308,46 @@ public struct ModeCards: Codable, Equatable, Sendable {
     /// The name of the card in `mode`'s slot: the user's name, else the identity card's, else the
     /// character's default.
     public func title(for mode: Mode, persona: Persona) -> String {
-        if let name = names[mode.rawValue] { return name }
+        // A name the user typed has no key and comes back as typed; 备课, the old default, is translated.
+        if let name = names[mode.rawValue] { return name.localized }
         if mode == .boxing, let identity { return identity.title }
-        return mode.title(for: persona)
+        return mode.localizedTitle(for: persona)
+    }
+
+    /// The identity slot's activity for sentences, without 日: the picked card's, else the character's default.
+    public func activity(for persona: Persona) -> String {
+        (identity ?? Self.legacy(for: persona).identity ?? .boxing).activity
+    }
+
+    /// The card's short English code: the identity card's own, else the character's default.
+    public func code(for mode: Mode, persona: Persona) -> String {
+        guard let identity = pickedIdentity(for: mode, persona: persona) else { return mode.code(for: persona) }
+        return identity.code
+    }
+
+    /// The line under the home card: the identity card's own in the identity slot, else the mode's.
+    public func tagline(for mode: Mode, persona: Persona) -> String {
+        guard mode == .boxing, let identity else { return mode.tagline(for: persona).localized }
+        return identity.tagline(for: persona).localized
+    }
+
+    // 台词 泛化修改 v0 §1: lines about a sports bag are only for users who do sport.
+    /// Whether the user picked a sport card or a sporty Chill activity.
+    public var isSporty: Bool {
+        let sporty: Set<ChillActivity> = [.fitness, .running, .yoga, .cycling, .swimming, .ball]
+        return identity?.isSport == true || !chill.isDisjoint(with: sporty)
+    }
+
+    // 活动分类 v1 §4: without an identity card there is no empty slot.
+    /// The modes the user can switch to: all four, or the three common cards without an identity card.
+    public var modes: [Mode] {
+        identityName == nil ? Mode.allCases.filter { $0 != .boxing } : Mode.allCases
+    }
+
+    /// The identity card in `mode`'s slot when it differs from `persona`'s default one, else `nil`.
+    public func pickedIdentity(for mode: Mode, persona: Persona) -> IdentityKind? {
+        guard mode == .boxing, let identity, identity != Self.legacy(for: persona).identity else { return nil }
+        return identity
     }
 
     /// Renames the common card in `mode`'s slot, cut to `nameWidth`; an empty name restores the default.
@@ -230,6 +391,18 @@ public struct ModeCards: Codable, Equatable, Sendable {
         return true
     }
 
+    // 活动分类 v1: one activity sits on one card, so the fitness card takes 健身 out of Chill and gives it back
+    // when another card replaces it.
+    /// Picks `kind` as the identity card, or none for `nil`. Records made with the old card are kept.
+    /// - Returns: `true` when 健身 moved out of Chill into the fitness card.
+    @discardableResult
+    public mutating func pickIdentity(_ kind: IdentityKind?) -> Bool {
+        if identity == .fitness, kind != .fitness { chill.insert(.fitness) }
+        identity = kind
+        guard kind == .fitness else { return false }
+        return chill.remove(.fitness) != nil
+    }
+
     /// The 副业 state after `state` when the user taps the character. A state not picked goes to the first.
     public func next(after state: SideHustle) -> SideHustle {
         guard let index = sideStates.firstIndex(of: state) else { return sideStates[0] }
@@ -242,6 +415,20 @@ public struct ModeCards: Codable, Equatable, Sendable {
         return identity
     }
 
+    // PM #20: a new install starts with the generic cards and no identity card. Saving them on the first
+    // launch keeps an install that later gains records from turning into the legacy cards.
+    /// Saves the first cards when none are saved: `persona`'s cards from before Issue #273 for an install
+    /// that already has records, else the generic ones.
+    public static func adopt(in defaults: UserDefaults, persona: Persona, existingInstall: Bool) {
+        guard defaults.data(forKey: defaultsKey) == nil else { return }
+        (existingInstall ? legacy(for: persona) : ModeCards()).store(in: defaults)
+    }
+
+    /// The cards saved in `defaults`, or the generic cards when none are saved.
+    public static func current(in defaults: UserDefaults, persona: Persona) -> ModeCards {
+        stored(in: defaults) ?? ModeCards()
+    }
+
     /// The cards saved in `defaults`, or `nil` when none are saved or they can't be read.
     public static func stored(in defaults: UserDefaults) -> ModeCards? {
         guard let data = defaults.data(forKey: defaultsKey) else { return nil }
@@ -251,5 +438,53 @@ public struct ModeCards: Codable, Equatable, Sendable {
     /// Saves the cards in `defaults`.
     public func store(in defaults: UserDefaults) {
         defaults.set(try? JSONEncoder().encode(self), forKey: Self.defaultsKey)
+    }
+
+    // 角色切换 正式版 v0 §3 (Mike 2026-10-15): test builds can try a character with her default cards. The
+    // user's own cards wait under their own key; places and learned days live elsewhere and stay as they are.
+    static let ownKey = "modeCardsOwn"
+    static let ownPersonaKey = "modeCardsOwnPersona"
+
+    /// `persona`'s default cards: the common cards with their default names and her default identity card.
+    public static func characterDefaults(for persona: Persona) -> ModeCards {
+        ModeCards(identity: persona == .kuro ? .tennis : .boxing)
+    }
+
+    /// Whether the saved cards are a character's defaults being tried, with the user's own put aside.
+    public static func isTrying(in defaults: UserDefaults) -> Bool {
+        defaults.data(forKey: ownKey) != nil
+    }
+
+    /// Puts the user's own cards aside, unless they already are, and saves `persona`'s default cards.
+    /// - Parameters:
+    ///   - persona: The character whose default cards are tried.
+    ///   - own: The character picked when the own cards are put aside.
+    ///   - defaults: The store holding the cards.
+    public static func tryDefaults(of persona: Persona, from own: Persona, in defaults: UserDefaults) {
+        if !isTrying(in: defaults) {
+            let cards = defaults.data(forKey: defaultsKey) ?? (try? JSONEncoder().encode(ModeCards()))
+            defaults.set(cards, forKey: ownKey)
+            defaults.set(own.rawValue, forKey: ownPersonaKey)
+        }
+        characterDefaults(for: persona).store(in: defaults)
+    }
+
+    /// Saves the user's own cards back after `tryDefaults(of:from:in:)`; does nothing when none were put aside.
+    public static func restoreOwn(in defaults: UserDefaults) {
+        guard let own = defaults.data(forKey: ownKey) else { return }
+        defaults.set(own, forKey: defaultsKey)
+        defaults.removeObject(forKey: ownKey)
+        defaults.removeObject(forKey: ownPersonaKey)
+    }
+
+    /// Applies a character switch while trying: back to the character picked when trying started restores the
+    /// own cards, any other character gets her default cards. Does nothing when not trying.
+    public static func switchWhileTrying(to persona: Persona, in defaults: UserDefaults) {
+        guard isTrying(in: defaults) else { return }
+        if defaults.string(forKey: ownPersonaKey) == persona.rawValue {
+            restoreOwn(in: defaults)
+        } else {
+            characterDefaults(for: persona).store(in: defaults)
+        }
     }
 }

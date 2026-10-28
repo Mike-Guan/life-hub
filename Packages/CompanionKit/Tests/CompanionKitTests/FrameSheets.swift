@@ -113,6 +113,66 @@ struct FrameSheets {
         try write("haku-6-watch", rows, size: CGSize(width: 198, height: 242))
     }
 
+    // Mike 2026-10-15: the bigger room bag, and card backdrops without items, on the phone and the watch.
+    @Test func hakuBackdrops() throws {
+        let bag = Wardrobe(equipped: [.room: "room.bag"])
+        var rows = [
+            Row(label: "chill · 房间小沙袋", start: Self.base) {
+                AnyView(CompanionView(mode: .chill, energy: 50, wardrobe: bag))
+            },
+            Row(label: "boxing · 拳馆", start: Self.base) {
+                AnyView(CompanionView(mode: .boxing, energy: 50, activity: .boxingAtGym))
+            },
+        ]
+        let cards: [IdentityKind] = [.fitness, .dance, .music]
+        rows += cards.map { card in
+            Row(label: "card \(card)", start: Self.base) {
+                AnyView(CompanionView(mode: .boxing, card: card, energy: 50))
+            }
+        }
+        try write("haku-8-backdrops", rows)
+        let watch = cards.map { card in
+            Row(label: "watch · card \(card)", start: Self.base) {
+                AnyView(CompanionView(mode: .boxing, card: card, energy: 50, style: .watch))
+            }
+        }
+        try write("haku-8-backdrops-watch", watch, size: CGSize(width: 198, height: 242))
+    }
+
+    // HAKU-03 (UI 审核 2026-10-13): the last 0.5 s of the welcome back and 0.3 s of idle after it, 0.05 s apart.
+    @Test func hakuWelcomeEnd() throws {
+        let cases: [(WelcomeScene, Mode)] = [
+            (.sofa, .chill), (.quiet, .chill), (.glance, .chill), (.desk, .work), (.quiet, .work),
+        ]
+        let rows = cases.map { scene, mode in
+            Row(label: "welcome end · \(scene) · \(mode.rawValue)", start: Self.base) {
+                AnyView(WelcomeEndFrame(scene: scene, mode: mode, start: Self.base))
+            }
+        }
+        try write("haku-7-welcome-end", rows, frames: 16, step: 0.05)
+    }
+
+    // HAKU-23 (UI 审核 2026-10-08): the sports celebration crouches before each hop and lands pressed down.
+    @Test func hakuCelebration() throws {
+        let kinds: [(WorkoutSummary.Kind, Mode)] = [(.boxing, .boxing), (.running, .chill), (.strength, .chill)]
+        let rows = kinds.map { kind, mode in
+            Row(label: "celebrate · \(kind)", start: Self.base) {
+                AnyView(CelebrationFrame(kind: kind, mode: mode, start: Self.base))
+            }
+        }
+        try write("haku-8-celebration", rows, frames: 13, step: CompanionView.celebrationDuration / 12)
+    }
+
+    // The same sparkles on a mode switch, 0.5 s.
+    @Test func hakuSwapSparkles() throws {
+        let rows = [Mode.work, .chill].map { mode in
+            Row(label: "swap · \(mode.rawValue)", start: Self.base) {
+                AnyView(SwapFrame(mode: mode, start: Self.base))
+            }
+        }
+        try write("haku-8-swap-sparkles", rows, frames: 6, step: 0.1)
+    }
+
     @Test func kuroLooks() throws {
         var rows: [Row] = []
         for look in KuroLook.allCases {
@@ -146,6 +206,43 @@ struct FrameSheets {
             }
         }
         try write("kuro-2-watch", rows, size: CGSize(width: 198, height: 242))
+    }
+
+    // QA §1b: everything owned and every trace on at once, one still per state, with the placement test's
+    // conflicts in red under each cell. One page per mode and room item for HAKU, per look for KURO.
+    @Test func allItemsOn() throws {
+        let traces = Set(CompanionTrace.allCases)
+        let outfits = PlacementPoses.outfits.filter { $0.1.room != nil && $0.1.mask == .stripes && $0.1.peaceSign }
+        for mode in Mode.allCases {
+            for (outfitLabel, outfit) in outfits {
+                let cells = PlacementPoses.hakuStates(face: .mid).map { label, pose in
+                    let worn = pose.wearing(outfit).leaving(traces)
+                    let parts = RunnerFigure.parts(for: mode, pose: worn)
+                    return Cell(
+                        label: label,
+                        conflicts: Placement.conflicts(
+                            in: parts, spots: Placement.haku, forbidden: Placement.hakuForbidden),
+                        figure: AnyView(RunnerFigure(mode: mode, pose: worn))
+                    )
+                }
+                try writeStills("items-haku-\(mode.rawValue)-\(outfitLabel)", cells)
+            }
+        }
+        for look in KuroLook.allCases {
+            let cells = PlacementPoses.kuro
+                .filter { $0.look == look && $0.pose.items.count == KuroItem.allCases.count }
+                .filter { $0.label.hasPrefix("\(look.rawValue) 50 ") }
+                .map { state in
+                    Cell(
+                        label: String(state.label.dropFirst("\(look.rawValue) 50 ".count).dropLast(" items".count)),
+                        conflicts: Placement.conflicts(
+                            in: KuroFigure.parts(for: look, pose: state.pose), spots: Placement.kuro,
+                            forbidden: Placement.kuroForbidden),
+                        figure: AnyView(KuroFigure(look: look, pose: state.pose))
+                    )
+                }
+            try writeStills("items-kuro-\(look.rawValue)", cells)
+        }
     }
 
     @Test func lockScreenHeads() throws {
@@ -257,6 +354,65 @@ struct FrameSheets {
         return date
     }
 
+    /// HAKU at the end of the welcome back scene: frame 0 is 0.5 s before it ends; after it ends, the idle pose.
+    struct WelcomeEndFrame: View {
+        let scene: WelcomeScene
+        let mode: Mode
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            let length = scene.length(cards: 2, cans: 3)
+            let t = CGFloat((clock ?? start).timeIntervalSince(start)) + length - 0.5
+            let open = scene.open(cards: 2, cans: 3)
+            let pose =
+                t < length
+                ? RunnerPose.welcome(scene, time: t, open: open, face: .mid, mode: mode, length: length)
+                : RunnerPose(face: .mid)
+            RunnerFigure(mode: mode, pose: pose)
+                .padding(12)
+                .background(mode.color)
+        }
+    }
+
+    /// HAKU celebrating `kind`, moved and squashed the way `CompanionView` does it.
+    struct CelebrationFrame: View {
+        let kind: WorkoutSummary.Kind
+        let mode: Mode
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            let t = (clock ?? start).timeIntervalSince(start) / CompanionView.celebrationDuration
+            let p = min(t, 0.999)
+            let motion = IdleMotion.celebrating(progress: p)
+            var pose = RunnerPose(face: .mid)
+            pose.celebrate(kind, progress: CGFloat(p))
+            return RunnerFigure(mode: mode, pose: pose)
+                .rotationEffect(.degrees(motion.angle), anchor: .bottom)
+                .offset(y: motion.dy)
+                .scaleEffect(x: 1 + 0.08 * motion.squash, y: 1 - 0.12 * motion.squash, anchor: .bottom)
+                .padding(12)
+                .background(mode.color)
+        }
+    }
+
+    /// HAKU in `mode` with the mode-switch sparkles, 0.5 s long.
+    struct SwapFrame: View {
+        let mode: Mode
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            var pose = RunnerPose(mode: mode, time: 0, face: .mid, react: 0)
+            pose.burst = CGFloat(min((clock ?? start).timeIntervalSince(start) / 0.5, 0.999))
+            pose.swapping = true
+            return RunnerFigure(mode: mode, pose: pose)
+                .padding(12)
+                .background(mode.color)
+        }
+    }
+
     /// Renders `rows` into `<name>.png`: one row per case, `frames` frames `step` apart.
     func write(
         _ name: String, _ rows: [Row], size: CGSize = CGSize(width: 180, height: 240), frames: Int = Self.frames,
@@ -294,6 +450,77 @@ struct FrameSheets {
         .padding(16)
         .background(Color.white)
         try save(sheet, as: name, scale: 2)
+    }
+
+    /// One still on a stills page: what it shows, the placement conflicts in it, and the drawing.
+    struct Cell {
+        let label: String
+        let conflicts: [String]
+        let figure: AnyView
+    }
+
+    /// Renders `cells` as stills into `<name>.png`, `columns` to a row.
+    func writeStills(_ name: String, _ cells: [Cell], columns: Int = 8) throws {
+        let commit = ProcessInfo.processInfo.environment["FRAME_SHA"].map { String($0.prefix(7)) } ?? "local"
+        let found = cells.filter { !$0.conflicts.isEmpty }.count
+        let sheet = VStack(alignment: .leading, spacing: 10) {
+            Text("\(name) · \(commit) · 物品和痕迹全开 · 红字 = 同一位置两件（\(found) / \(cells.count) 格）")
+                .font(.system(size: 15, weight: .bold, design: .monospaced))
+            ForEach(Array(stride(from: 0, to: cells.count, by: columns)), id: \.self) { start in
+                HStack(alignment: .top, spacing: 6) {
+                    ForEach(start..<min(start + columns, cells.count), id: \.self) { index in
+                        let cell = cells[index]
+                        VStack(spacing: 2) {
+                            Text(cell.label)
+                                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                                .lineLimit(2)
+                            cell.figure
+                                .frame(width: 120, height: 160)
+                            Text(cell.conflicts.sorted().joined(separator: "\n"))
+                                .font(.system(size: 8, weight: .bold, design: .monospaced))
+                                .foregroundStyle(Color.red)
+                        }
+                        .frame(width: 130, alignment: .top)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        try save(sheet, as: name, scale: 2)
+    }
+
+    // Issue #352 PR B, for UI 审核: each card in both shapes, plus the longest Japanese keepsake name to check the
+    // 85% shrink and the line breaks.
+    @Test func shareCards() throws {
+        let fonts = URL(filePath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appending(path: "Apps/iOS/Fonts")
+        #expect(AppFonts.register(in: fonts).isEmpty)
+        let look = Look(mode: .boxing, wardrobe: Wardrobe(), card: .boxing)
+        let gloves = try #require(ShopItem.item("gloves.gold"))
+        let keepsake = try #require(ShareCard(persona: .haku, look: look, item: gloves))
+        let hoodie = try #require(ShopItem.item("kuro.top.chill.hoodie"))
+        let chill = Look(mode: .chill, wardrobe: Wardrobe(), card: nil)
+        let outfit = try #require(ShareCard(persona: .kuro, look: chill, item: hoodie))
+        // The longest Japanese keepsake name with the writers' phrase breaks; the count line is made up until
+        // the writers translate it.
+        let runner = try #require(ShopItem.item("keepsake.headband.runner"))
+        let runnerCard = try #require(ShareCard(persona: .haku, look: look, item: runner))
+        let japanese = ShareCard.Words(
+            name: "HAKU", title: "ランナーのヘッドバンド", subtitle: "5 km ラン 4 回目", line: "……やる。ついでだ。")
+        let ja = Locale.Language(identifier: "ja")
+        let cards: [(String, ShareCard, ShareCard.Words, Locale.Language)] = [
+            ("zh-keepsake", keepsake, keepsake.words(counting: "拳击"), Locale.Language(identifier: "zh-Hans")),
+            ("ja-keepsake-longest", runnerCard, japanese, ja),
+            ("zh-outfit", outfit, outfit.words(counting: "网球"), Locale.Language(identifier: "zh-Hans")),
+        ]
+        for (name, card, words, language) in cards {
+            for shape in ShareCard.Shape.allCases {
+                let view = ShareCardView(card: card, words: words, shape: shape, language: language)
+                try save(view, as: "share-\(name)-\(shape.rawValue)", scale: 3)
+            }
+        }
     }
 
     /// Writes `view` to `<name>.png` in the sheets folder.

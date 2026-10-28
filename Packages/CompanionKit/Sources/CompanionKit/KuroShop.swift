@@ -11,13 +11,45 @@ public enum KuroItem: String, CaseIterable, Sendable {
     case spin = "kuro.celebrate.spin"
     case sakura = "kuro.headband.sakura"
     case goldRacket = "kuro.racket.gold"
+    // Clothes (商店衣服 pop, Mike approved 2026-10-14): a top or full set worn in one mode.
+    case workBlouse = "kuro.top.work.blouse"
+    case workVest = "kuro.top.work.vest"
+    case chillCardigan = "kuro.top.chill.cardigan"
+    case chillHoodie = "kuro.top.chill.hoodie"
+    case sideSmock = "kuro.top.side.smock"
+    case sideDenim = "kuro.top.side.denim"
+    case picnic = "kuro.set.chill.picnic"
+    case rain = "kuro.set.work.rain"
+    // Sunday items (商店完整目录 v0 §2.4, Mike approved 2026-10-14). The beanie follows with its hat slot.
+    case mintTie = "kuro.weekly.hair.mint"
+    case bearBlanket = "kuro.weekly.blanket.bear"
+    case succulent = "kuro.weekly.room.succulent"
+    case cherryClip = "kuro.weekly.hair.cherry"
+    case starTie = "kuro.weekly.hair.star"
+    case cloud = "kuro.weekly.room.cloud"
+    case nightlight = "kuro.weekly.room.nightlight"
+    case beanie = "kuro.weekly.hat.beanie"
 
     /// The look she shows the item in.
     public var look: KuroLook {
         switch self {
-        case .flower, .blanket, .spin: .chill
-        case .scrunchie, .bag, .sakura, .goldRacket: .tennis
-        case .lamp: .desk
+        case .flower, .blanket, .spin, .chillCardigan, .chillHoodie, .picnic: .chill
+        case .bearBlanket, .succulent, .cloud, .nightlight, .beanie: .chill
+        case .scrunchie, .bag, .sakura, .goldRacket, .mintTie, .cherryClip, .starTie: .tennis
+        case .lamp, .sideSmock, .sideDenim: .desk
+        case .workBlouse, .workVest, .rain: .work
+        }
+    }
+
+    // UI 五组 Sunday items r1 (位置规划图 §12): the hair pieces go with every look, the succulent also stands where
+    // her tennis bag does, and the nightlight also hangs over her desk.
+    /// Whether she shows the item in `look`.
+    public func shows(in look: KuroLook) -> Bool {
+        switch self {
+        case .mintTie, .cherryClip, .starTie: true
+        case .succulent: look == .chill || look == .tennis
+        case .nightlight: look == .chill || look == .desk
+        default: self.look == look
         }
     }
 
@@ -25,7 +57,7 @@ public enum KuroItem: String, CaseIterable, Sendable {
     public var isKeepsake: Bool {
         switch self {
         case .spin, .sakura, .goldRacket: true
-        case .flower, .scrunchie, .blanket, .lamp, .bag: false
+        default: false
         }
     }
 
@@ -40,21 +72,97 @@ public enum KuroItem: String, CaseIterable, Sendable {
         case .spin: .itemSpin
         case .sakura: .itemSakura
         case .goldRacket: .itemGoldRacket
+        case .workBlouse: .topWorkSailor
+        case .workVest: .topWorkArgyle
+        case .chillCardigan: .topChillStrawberry
+        case .chillHoodie: .topChillCathoodie
+        case .sideSmock: .topSideGingham
+        case .sideDenim: .topSideDenim
+        case .picnic: .setPicnicTop
+        case .rain: .setRainTop
+        case .mintTie: .weeklyHairMintPony
+        case .bearBlanket: .weeklyBlanketBear
+        case .succulent: .weeklyRoomSucculent
+        case .cherryClip: .weeklyHairCherryPony
+        case .starTie: .weeklyHairStarPony
+        case .cloud: .weeklyRoomCloud
+        case .nightlight: .weeklyRoomNightlight
+        case .beanie: .weeklyHatBeanie
         }
     }
 
-    /// The part of her look the item takes the place of, if any.
-    var replaces: KuroPart? {
+    /// The parts that draw the item on her; a hair piece goes on her ponytail when `ponytail`, else on the clip
+    /// point on the right of her hair.
+    func parts(ponytail: Bool) -> Set<KuroPart> {
         switch self {
-        case .sakura: .tennisHeadband
-        case .goldRacket: .tennisRacket
+        case .mintTie: [ponytail ? .weeklyHairMintPony : .weeklyHairMintSide]
+        case .cherryClip: [ponytail ? .weeklyHairCherryPony : .weeklyHairCherrySide]
+        case .starTie: [ponytail ? .weeklyHairStarPony : .weeklyHairStarSide]
+        case .nightlight: [.weeklyRoomNightlightGlow, .weeklyRoomNightlight]
+        case .beanie: [.weeklyHatBeanie, .weeklyHatBeaniePom]
+        default: [part]
+        }
+    }
+
+    /// The parts a top or set draws in place of her own top, or nil for anything else.
+    var clothes: KuroClothes? {
+        switch self {
+        case .workBlouse:
+            KuroClothes(part, .topWorkSailorRubSleeve, .topWorkSailorInviteSleeve, back: .topWorkSailorBack)
+        case .workVest: KuroClothes(part, .topWorkArgyleRubSleeve, .topWorkArgyleInviteSleeve, back: .topWorkArgyleBack)
+        case .chillCardigan:
+            KuroClothes(
+                part, .topChillStrawberryRubSleeve, .topChillStrawberryInviteSleeve, back: .topChillStrawberryBack)
+        case .chillHoodie:
+            KuroClothes(part, .topChillCathoodieRubSleeve, .topChillCathoodieInviteSleeve, back: .topChillCathoodieBack)
+        case .sideSmock:
+            KuroClothes(part, .topSideGinghamRubSleeve, .topSideGinghamInviteSleeve, back: .topSideGinghamBack)
+        case .sideDenim: KuroClothes(part, .topSideDenimRubSleeve, .topSideDenimInviteSleeve, back: .topSideDenimBack)
+        case .picnic:
+            KuroClothes(part, .setPicnicRubSleeve, .setPicnicInviteSleeve, back: .setPicnicBack, hat: .setPicnicHat)
+        case .rain: KuroClothes(part, .setRainRubSleeve, .setRainInviteSleeve, back: .setRainBack, hat: .setRainHat)
         default: nil
+        }
+    }
+
+    // One thing on her lap and one on the floor: the cushion is hugged over a blanket, and the succulent takes
+    // the tennis bag's spot.
+    /// The parts the item takes the place of.
+    var replaces: Set<KuroPart> {
+        switch self {
+        case .sakura: [.tennisHeadband]
+        case .goldRacket: [.tennisRacket]
+        case .cloud: [.itemBlanket, .weeklyBlanketBear]
+        case .succulent: [.itemFlower, .itemBag]
+        default: []
         }
     }
 
     /// The items among `ids`; unknown ids are skipped.
     public static func items(_ ids: Set<String>) -> Set<KuroItem> {
         Set(ids.compactMap(KuroItem.init(rawValue:)))
+    }
+}
+
+/// The parts a top or full set draws over KURO's own top.
+struct KuroClothes: Sendable {
+    /// Drawn in place of her look's jacket.
+    var top: KuroPart
+    /// Drawn in place of her own sleeve when she rubs her eye.
+    var rubSleeve: KuroPart
+    /// Drawn in place of her own sleeve when she points to invite.
+    var inviteSleeve: KuroPart
+    /// Drawn in place of her look's jacket when she turns away: only its outline and colour.
+    var back: KuroPart
+    /// A set's hat, under her cat ears.
+    var hat: KuroPart?
+
+    init(_ top: KuroPart, _ rubSleeve: KuroPart, _ inviteSleeve: KuroPart, back: KuroPart, hat: KuroPart? = nil) {
+        self.top = top
+        self.rubSleeve = rubSleeve
+        self.inviteSleeve = inviteSleeve
+        self.back = back
+        self.hat = hat
     }
 }
 
@@ -85,13 +193,19 @@ public struct KuroItemIcon: View {
     // The spin is a celebration, so its picture is her head inside the arcs.
     /// The parts that picture `item`.
     nonisolated static func parts(_ item: KuroItem) -> [KuroPart] {
+        if let clothes = item.clothes { return [clothes.top] + (clothes.hat.map { [$0] } ?? []) }
+        if item == .nightlight { return [.weeklyRoomNightlightGlow, .weeklyRoomNightlight] }
+        if item == .beanie { return [.weeklyHatBeanie, .weeklyHatBeaniePom] }
         guard item == .spin else { return [item.part] }
         return [.hairBack, .earL, .earR, .faceBase, .blush, .eyesHappy, .mouthCat, .hairFringe, .catEars, .itemSpin]
     }
 
     /// The square of figure space around `parts`, in SVG units.
     nonisolated static func crop(_ parts: [KuroPart]) -> CGRect {
-        let box = parts.flatMap(KuroArt.cachedInks).reduce(CGRect.null) { $0.union($1.path.boundingRect) }
+        // A clipped pattern (the gingham checks) reaches far past its clip, so only the clipped area counts.
+        let box = parts.flatMap(KuroArt.cachedInks).reduce(CGRect.null) { box, ink in
+            box.union(ink.clip.map { ink.path.boundingRect.intersection($0.boundingRect) } ?? ink.path.boundingRect)
+        }
         guard !box.isNull else { return KuroArt.bounds }
         let side = max(box.width, box.height) + 8
         return CGRect(x: box.midX - side / 2, y: box.midY - side / 2, width: side, height: side)

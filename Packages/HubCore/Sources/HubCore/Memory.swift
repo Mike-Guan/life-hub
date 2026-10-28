@@ -73,9 +73,13 @@ public struct LongMemory: Equatable, Sendable {
 
 /// What the memory page lists.
 public enum Memory {
-    /// The habits `persona` learns, learned from `ledger` after the resets.
+    // PM, 2026-10-13 (写死作息排查 v0 #21): the memory page only lists what was really learned.
+    /// The habits `persona` learned from `ledger` after the resets. Habits not learned yet are left out.
+    /// - Parameter cards: the user's cards, for the identity card's name; `nil` for `persona`'s cards from
+    ///   before Issue #273.
     public static func habits(
         persona: Persona,
+        cards: ModeCards? = nil,
         days: ActivityDays,
         ledger: CanLedger,
         resets: MemoryResets,
@@ -89,24 +93,31 @@ public enum Memory {
         var list = [
             LearnedHabit(
                 habit: .gymDays,
-                title: "健身日",
+                title: "健身日".localized,
                 days: weekdays(learned.gymWeekdays.isEmpty ? days.gymWeekdays : learned.gymWeekdays),
                 isLearned: !learned.gymWeekdays.isEmpty
             )
         ]
-        if persona == .kuro {
-            let identity = ledger.since(resets.since(.identityDay))
-            let learned = NeedRules.learnedWeekday(of: .boxing, in: identity, now: now, calendar: calendar)
+        let identity = ledger.since(resets.since(.identityDay))
+        let name = identityName(cards, persona: persona)
+        if let name, let learned = NeedRules.learnedWeekday(of: .boxing, in: identity, now: now, calendar: calendar) {
             list.append(
                 LearnedHabit(
                     habit: .identityDay,
-                    title: Mode.boxing.title(for: persona),
-                    days: weekdays([learned ?? NeedRules.tennisWeekday]),
-                    isLearned: learned != nil
+                    title: name,
+                    days: weekdays([learned]),
+                    isLearned: true
                 )
             )
         }
-        return list
+        return list.filter(\.isLearned)
+    }
+
+    // 交付差距 v1 工程 #1: the identity slot is named after the user's card, not the boxing default.
+    // PM 写死作息 scan 10-15 #1: a user without a card gets no identity memories at all.
+    private static func identityName(_ cards: ModeCards?, persona: Persona) -> String? {
+        let cards = cards ?? .legacy(for: persona)
+        return cards.identityName == nil ? nil : cards.title(for: .boxing, persona: persona)
     }
 
     /// Wins that are a sport done for the first time, with what the memory is called.
@@ -116,8 +127,11 @@ public enum Memory {
 
     /// The first identity-card day, the first of each sport and the places the user spends most time at,
     /// counting only records after everything was last forgotten.
+    /// - Parameter cards: the user's cards, for the identity card's name; `nil` for `persona`'s cards from
+    ///   before Issue #273.
     public static func longTerm(
         persona: Persona,
+        cards: ModeCards? = nil,
         changes: [ModeChange],
         ledger: CanLedger,
         places: [HubPlace],
@@ -126,13 +140,14 @@ public enum Memory {
         let since = resets.all ?? .distantPast
         let kept = changes.filter { $0.deletedAt == nil && $0.at >= since }.sorted { $0.at < $1.at }
         var list: [LongMemory] = []
-        if let first = kept.first(where: { $0.mode == .boxing }) {
-            list.append(LongMemory(title: "第一次\(Mode.boxing.title(for: persona))", date: first.at))
+        if let name = identityName(cards, persona: persona), let first = kept.first(where: { $0.mode == .boxing }) {
+            let title = String(format: "第一次%@".localized, name)
+            list.append(LongMemory(title: title, date: first.at))
         }
         let earned = ledger.since(resets.all).active.filter { $0.kind == .earned }
         for (win, title) in firstWins {
             if let first = earned.first(where: { $0.win == win }) {
-                list.append(LongMemory(title: title, date: first.at))
+                list.append(LongMemory(title: title.localized, date: first.at))
             }
         }
         // Visits aren't stored, so a place counts by the automatic switches into the mode it sets.
@@ -146,7 +161,7 @@ public enum Memory {
         .sorted { $0.1 > $1.1 }
         .prefix(3)
         if !often.isEmpty {
-            list.append(LongMemory(title: "常待的地方", detail: often.map(\.0).joined(separator: "、")))
+            list.append(LongMemory(title: "常待的地方".localized, detail: joined(often.map(\.0))))
         }
         return list
     }
@@ -166,7 +181,15 @@ public enum Memory {
     /// `days` as Chinese weekday names in week order from Monday, e.g. "周二、周四".
     static func weekdays(_ days: Set<Int>) -> String {
         let names = [1: "周日", 2: "周一", 3: "周二", 4: "周三", 5: "周四", 6: "周五", 7: "周六"]
-        return days.sorted { ($0 + 5) % 7 < ($1 + 5) % 7 }.compactMap { names[$0] }.joined(separator: "、")
+        let ordered = days.sorted { ($0 + 5) % 7 < ($1 + 5) % 7 }
+        guard Languages.isOn else { return joined(ordered.compactMap { names[$0] }) }
+        let symbols = Languages.weekCalendar().shortWeekdaySymbols
+        return joined(ordered.map { symbols[$0 - 1] })
+    }
+
+    /// `items` joined with 、 in Chinese, else as a list in the app's language (Tue and Thu).
+    static func joined(_ items: [String]) -> String {
+        Languages.isOn ? items.formatted(.list(type: .and).locale(Languages.locale)) : items.joined(separator: "、")
     }
 }
 

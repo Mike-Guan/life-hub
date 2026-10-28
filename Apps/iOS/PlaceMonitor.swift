@@ -22,8 +22,9 @@ final class PlaceMonitor {
 
     // Called at launch too: after a geofence wakes the app in the background, iterating the
     // events of the monitor with the same name delivers the event that woke it.
-    /// Watches `settings` and calls `onEvent` with the place and whether Mike entered it.
-    func start(_ settings: PlaceSettings, onEvent: @escaping @MainActor (HubPlace, Bool) -> Void) {
+    /// Watches `settings` and calls `onEvent` for each arrival and departure. At each start it first
+    /// replays the last state of every fence, so a change missed while the app was closed is applied too.
+    func start(_ settings: PlaceSettings, onEvent: @escaping @MainActor (PlaceEvent) -> Void) {
         task?.cancel()
         lastError = nil
         session = settings.places.isEmpty ? nil : CLServiceSession(authorization: .always)
@@ -45,24 +46,37 @@ final class PlaceMonitor {
                 let condition = CLMonitor.CircularGeographicCondition(center: center, radius: place.radius)
                 await monitor.add(condition, identifier: place.id)
             }
-            var lastState: [String: CLMonitor.Event.State] = [:]
+            // The handler skips what the stored presence already shows, so a replay is applied once.
+            // Oldest first, so leaving home comes before arriving at the office.
+            var replays: [PlaceEvent] = []
+            for place in settings.places {
+                guard let event = await monitor.record(for: place.id)?.lastEvent,
+                    let entered = Self.entered(event.state)
+                else { continue }
+                replays.append(PlaceEvent(place: place, entered: entered, date: event.date))
+            }
+            for event in replays.sorted(by: { $0.date < $1.date }) {
+                onEvent(event)
+            }
             do {
                 for try await event in await monitor.events {
                     Self.noteDiagnostics(event)
-                    guard let place = settings.places.first(where: { $0.id == event.identifier }) else { continue }
-                    guard lastState[event.identifier] != event.state else { continue }
-                    lastState[event.identifier] = event.state
-                    let entered: Bool
-                    switch event.state {
-                    case .satisfied: entered = true
-                    case .unsatisfied: entered = false
-                    default: continue
-                    }
-                    onEvent(place, entered)
+                    guard let place = settings.places.first(where: { $0.id == event.identifier }),
+                        let entered = Self.entered(event.state)
+                    else { continue }
+                    onEvent(PlaceEvent(place: place, entered: entered, date: event.date))
                 }
             } catch {
-                lastError = "地点监测停了：\(error.localizedDescription)"
+                lastError = String(format: "地点监测停了：%@".localized, error.localizedDescription)
             }
+        }
+    }
+
+    private static func entered(_ state: CLMonitor.Event.State) -> Bool? {
+        switch state {
+        case .satisfied: true
+        case .unsatisfied: false
+        default: nil
         }
     }
 
@@ -72,7 +86,9 @@ final class PlaceMonitor {
         accessWarning = settings.places.isEmpty || always ? nil : Self.notAlways
     }
 
-    private static let notAlways = "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。到 设置 > Life Hub > 位置 选「始终」"
+    private static var notAlways: String {
+        "位置权限不是「始终」：App 关着时不知道你到了或离开公司、家。".localized
+    }
 
     // The background delivery problem Mike hit on 2026-10-05 left no trace; these flags say why.
     private static func noteDiagnostics(_ event: CLMonitor.Event) {
@@ -120,8 +136,35 @@ final class PlaceMonitor {
     static let goodAccuracy: CLLocationAccuracy = 50
 
     private static func matches(_ condition: CLMonitor.CircularGeographicCondition, _ place: HubPlace) -> Bool {
+        // Core Location may hand back a stored value a hair off; re-adding would drop the fence's state.
         let center = condition.center
-        let samePoint = center.latitude == place.latitude && center.longitude == place.longitude
-        return samePoint && condition.radius == place.radius
+        let samePoint = abs(center.latitude - place.latitude) < 1e-6 && abs(center.longitude - place.longitude) < 1e-6
+        return samePoint && abs(condition.radius - place.radius) < 1
+    }
+}
+
+// UI 二组 preview 5 (空状态与报错 v1.1): the system text ("kCLErrorDomain error 1") said nothing to the user.
+/// Why the current location couldn't be found, in words, and the step that fixes it.
+struct LocationFailure: Equatable {
+    /// The line to show.
+    let message: String
+    /// `true` when only Settings can fix it, else trying again may.
+    let opensSettings: Bool
+
+    init(_ error: Error) {
+        switch (error as? CLError)?.code {
+        case .denied?:
+            message = "位置权限关着，定不了位。".localized
+            opensSettings = true
+        case .locationUnknown?:
+            message = "现在定不到位置，到窗边或室外再点一次。".localized
+            opensSettings = false
+        case .network?:
+            message = "定位要用网络，联网后再点一次。".localized
+            opensSettings = false
+        default:
+            message = "没定到位置，再点一次试试。".localized
+            opensSettings = false
+        }
     }
 }

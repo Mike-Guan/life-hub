@@ -29,6 +29,17 @@ import Testing
         #expect(backoff.judgedSentAt == date(7, 21))
     }
 
+    // PM 动作总表 U2: no peeking at the bag while the couch invite is paused.
+    @Test func noPeekingWhileTheInviteIsPaused() {
+        let couch = NeedReading(need: .couchScroll, since: date(8, 20), reasons: [])
+        var backoff = NudgeBackoff()
+        #expect(backoff.peekSince(couch, at: date(8, 21)) == date(8, 20))
+        backoff.pausedAt["couchScroll"] = date(8, 9)
+        #expect(backoff.peekSince(couch, at: date(8, 21)) == nil)
+        #expect(backoff.peekSince(couch, at: date(15, 21)) == date(8, 20))
+        #expect(backoff.peekSince(nil, at: date(8, 21)) == nil)
+    }
+
     @Test func aFollowedInviteStartsTheCountAgain() {
         var backoff = NudgeBackoff()
         backoff.record(.gymDay, followed: false, sentAt: date(5, 20), now: date(5, 22))

@@ -104,6 +104,19 @@ import Testing
         #expect(Win.visit(.fitness, from: at, to: left, identity: nil)?.card == nil)
     }
 
+    @Test func theFitnessCardPaysAGymVisitAndAStrengthWorkoutOnce() {
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        let left = at + Win.visitMinimum
+        let visit = Win.visit(.fitness, from: at, to: left, identity: .fitness)
+        #expect(visit?.win == .boxing)
+        #expect(visit?.card == .fitness)
+        let lifting = WorkoutSummary(id: "lift", kind: .strength, start: at, end: left)
+        let earned = Win.wins(in: [lifting], identity: .fitness) + [visit].compactMap(\.self)
+        for win in earned { store.record(win.win, source: win.source, at: win.at, card: win.card) }
+        #expect(store.ledger.balance == Win.boxing.cans)
+        #expect(Win.visit(.fitness, from: at, to: left, identity: .boxing)?.win == .gym)
+    }
+
     @Test func goldKeepsakesCountOnlyTheirOwnCard() throws {
         let store = GrowthStore(fileURL: nil, deviceID: "t")
         let gloves = try item("gloves.gold")
@@ -238,8 +251,9 @@ import Testing
         #expect(throws: GrowthStore.BuyError.notEnoughCans) { try store.buy(try item("kuro.room.flower"), at: at) }
         #expect(throws: GrowthStore.BuyError.notForSale) { try store.buy(try item("room.plant"), at: at) }
         store.persona = .haku
-        try store.buy(try item("room.plant"), at: at)
-        #expect(store.ledger.only(.haku).balance == 4 * Win.boxing.cans - 10)
+        let plant = try item("room.plant")
+        try store.buy(plant, at: at)
+        #expect(store.ledger.only(.haku).balance == 4 * Win.boxing.cans - (plant.price ?? 0))
         #expect(store.ledger.only(.kuro).balance == Win.gym.cans)
         #expect(store.ledger.only(.kuro).owned.isEmpty)
     }
@@ -285,11 +299,12 @@ import Testing
     }
 
     @Test func kuroHasHerOwnCatalogAtHakusPrices() {
-        let haku = ShopItem.catalog(for: .haku)
-        let kuro = ShopItem.catalog(for: .kuro)
-        #expect(haku.count + kuro.count == ShopItem.catalog.count)
+        // Identity card clothes and weekly items follow each character's own line, so those are left out.
+        let haku = ShopItem.catalog(for: .haku).filter { $0.week == nil && $0.mode != .boxing }
+        let kuro = ShopItem.catalog(for: .kuro).filter { $0.week == nil && $0.mode != .boxing }
+        #expect(ShopItem.catalog(for: .haku).count + ShopItem.catalog(for: .kuro).count == ShopItem.catalog.count)
         #expect(kuro.compactMap(\.price).sorted() == haku.compactMap(\.price).sorted())
-        #expect(kuro.compactMap(\.keepsake).map(\.win) == [.gotUp, .run5k, .boxing])
+        #expect(kuro.filter(\.isDrawn).compactMap(\.keepsake).map(\.win) == [.gotUp, .run5k, .boxing])
     }
 
     @Test func ledgerPersistsAndKeepsUnreadableEntries() throws {
@@ -349,5 +364,352 @@ import Testing
     @Test func catalogIDsAreUnique() {
         #expect(Set(ShopItem.catalog.map(\.id)).count == ShopItem.catalog.count)
         #expect(ShopItem.catalog.allSatisfy { ($0.price == nil) != ($0.keepsake == nil) })
+    }
+
+    @Test func cardItemsShowOnlyWithTheirCard() {
+        let boxing = ShopItem.catalog(for: .haku, card: .boxing).map(\.id)
+        let tennis = ShopItem.catalog(for: .haku, card: .tennis).map(\.id)
+        let none = ShopItem.catalog(for: .haku, card: nil).map(\.id)
+        for id in ["gloves.pink", "room.bag", "gloves.gold"] {
+            #expect(boxing.contains(id))
+            #expect(!tennis.contains(id))
+            #expect(!none.contains(id))
+        }
+        #expect(tennis.contains("room.plant") && none.contains("room.plant"))
+        let kuro = ShopItem.catalog(for: .kuro, card: .boxing).map(\.id)
+        #expect(!kuro.contains("kuro.bag.tennis") && !kuro.contains("kuro.racket.gold"))
+        #expect(ShopItem.catalog(for: .kuro, card: .tennis).map(\.id).contains("kuro.bag.tennis"))
+    }
+
+    @Test func aKeepsakeBelongsToTheCardItCounts() {
+        #expect(ShopItem.item("gloves.gold")?.card == .boxing)
+        #expect(ShopItem.item("kuro.racket.gold")?.card == .tennis)
+        #expect(ShopItem.item("keepsake.headband.runner")?.card == nil)
+    }
+
+    // QA S2: every character gets a whole shop, not a few items borrowed from HAKU.
+    @Test func everyCharacterHasAWholeShop() {
+        let haku = ShopItem.catalog(for: .haku).filter { $0.week == nil && $0.mode != .boxing }
+        func keepsakes(_ items: [ShopItem]) -> [String] {
+            items.compactMap(\.keepsake).map { "\($0.win.rawValue)×\($0.count)" }.sorted()
+        }
+        for persona in Persona.allCases {
+            let items = ShopItem.catalog(for: persona).filter { $0.week == nil && $0.mode != .boxing }
+            #expect(items.count == haku.count, "\(persona)")
+            // Badges and hats are only sold as weekly items so far.
+            #expect(Set(items.map(\.slot)) == Set(Slot.allCases).subtracting([.badge, .hat]), "\(persona)")
+            #expect(keepsakes(items) == keepsakes(haku), "\(persona)")
+        }
+    }
+
+    @Test func clothesAreWornOnePerModeAndASetReplacesTheTop() throws {
+        var wardrobe = Wardrobe()
+        let blazer = try #require(ShopItem.item("haku.top.work.blazer"))
+        let raincoat = try #require(ShopItem.item("haku.set.work.raincoat"))
+        let aloha = try #require(ShopItem.item("haku.top.chill.aloha"))
+        wardrobe.equip(blazer)
+        wardrobe.equip(aloha)
+        #expect(wardrobe.clothes == [.work: blazer.id, .chill: aloha.id])
+        #expect(wardrobe.equipped.isEmpty)
+        wardrobe.equip(raincoat)
+        #expect(wardrobe.clothes == [.work: raincoat.id, .chill: aloha.id])
+        wardrobe.undress(.work)
+        #expect(wardrobe.clothes == [.chill: aloha.id])
+    }
+
+    @Test func wardrobesKeepTheirClothesAndOldOnesLoad() throws {
+        let worn = Wardrobe(equipped: [.gloves: "gloves.gold"], clothes: [.chill: "haku.top.chill.aloha"])
+        let data = try JSONEncoder().encode(worn)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: data) == worn)
+        let json = try #require(String(data: data, encoding: .utf8))
+        #expect(json.contains(#""chill":"haku.top.chill.aloha""#))
+        let old = Data(#"{"equipped":{"gloves":"gloves.gold"}}"#.utf8)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: old) == Wardrobe(equipped: [.gloves: "gloves.gold"]))
+        let future = Data(#"{"equipped":{},"clothes":{"dance":"x","work":"haku.top.work.cardigan"}}"#.utf8)
+        #expect(try JSONDecoder().decode(Wardrobe.self, from: future).clothes == [.work: "haku.top.work.cardigan"])
+    }
+
+    @Test func slotsAndModesFromANewerBuildAreWrittenBack() throws {
+        let future = Data(#"{"equipped":{"scarf":"x.scarf","mask":"mask.stripes"},"clothes":{"dance":"x.top"}}"#.utf8)
+        var wardrobe = try JSONDecoder().decode(Wardrobe.self, from: future)
+        #expect(wardrobe.equipped == [.mask: "mask.stripes"])
+        #expect(wardrobe.clothes.isEmpty)
+        wardrobe.clear(.mask)
+        wardrobe.equip(try item("haku.top.chill.aloha"))
+        let saved = try JSONDecoder().decode([String: [String: String]].self, from: JSONEncoder().encode(wardrobe))
+        #expect(saved["equipped"] == ["scarf": "x.scarf"])
+        #expect(saved["clothes"] == ["dance": "x.top", "chill": "haku.top.chill.aloha"])
+    }
+
+    @Test func valuesFromANewerBuildAreWrittenBack() throws {
+        let future = Data(
+            #"{"equipped":{"mask":{"id":"mask.stripes","tint":2},"room":"room.bag"},"clothes":{"work":["a","b"]}}"#.utf8
+        )
+        var wardrobe = try JSONDecoder().decode(Wardrobe.self, from: future)
+        #expect(wardrobe.equipped == [.room: "room.bag"])
+        #expect(wardrobe.clothes.isEmpty)
+        wardrobe.equip(try item("haku.top.chill.aloha"))
+        let saved = try JSONDecoder().decode(JSONValue.self, from: JSONEncoder().encode(wardrobe))
+        let expected = try JSONDecoder().decode(
+            JSONValue.self,
+            from: Data(
+                #"{"equipped":{"mask":{"id":"mask.stripes","tint":2},"room":"room.bag"},"clothes":{"work":["a","b"],"chill":"haku.top.chill.aloha"}}"#
+                    .utf8))
+        #expect(saved == expected)
+    }
+
+    @Test func anUnreadableWardrobeIsKeptAside() throws {
+        let defaults = try #require(UserDefaults(suiteName: "wardrobe-\(UUID())"))
+        let broken = Data(#"{"equipped":["mask.stripes"]}"#.utf8)
+        defaults.set(broken, forKey: "wardrobe")
+        #expect(Wardrobe.stored(in: defaults) == Wardrobe())
+        #expect(defaults.data(forKey: "wardrobe.unreadable") == broken)
+    }
+
+    // Prices from the shop catalogue (2026-10-14): tops 30-40, full sets 80-90.
+    @Test func clothesFollowTheApprovedPricesAndOnlyHakusAreOnTheShelf() {
+        for persona in Persona.allCases {
+            let clothes = ShopItem.catalog(for: persona).filter { $0.mode != nil && $0.mode != .boxing }
+            #expect(Set(clothes.compactMap(\.mode)) == [.work, .chill, .money], "\(persona)")
+            for item in clothes {
+                let range = item.slot == .fullSet ? 80...90 : 30...40
+                #expect(range.contains(item.price ?? 0), "\(item.id)")
+                #expect(item.slot == .top || item.slot == .fullSet)
+                #expect(item.isDrawn, "\(item.id)")
+            }
+            let onShelf = ShopItem.catalog(for: persona, card: .boxing).filter { $0.mode != nil }
+            #expect(onShelf.count == clothes.count, "\(persona)")
+        }
+    }
+
+    // 2026-10-04 is a Sunday.
+    func weeklyItem(firstCan: String, now: String, persona: Persona = .haku) throws -> String? {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        let day = DateFormatter()
+        day.calendar = calendar
+        day.timeZone = calendar.timeZone
+        day.dateFormat = "yyyy-MM-dd HH:mm"
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        store.persona = persona
+        store.record(.boxing, source: "first", at: try #require(day.date(from: firstCan)))
+        let drawn = ShopItem.catalog.map { item in
+            var item = item
+            item.isDrawn = item.isDrawn || item.week != nil
+            return item
+        }
+        return ShopItem.weekly(
+            for: persona, from: drawn, ledger: store.ledger, now: try #require(day.date(from: now)), calendar: calendar
+        )?.id
+    }
+
+    @Test func aWeeklyItemShowsFromTheThirdWeekAndTakesTurns() throws {
+        #expect(try weeklyItem(firstCan: "2026-10-07 12:00", now: "2026-10-17 23:59") == nil)
+        #expect(try weeklyItem(firstCan: "2026-10-07 12:00", now: "2026-10-18 00:00") == "haku.weekly.headband.orange")
+        #expect(try weeklyItem(firstCan: "2026-10-07 12:00", now: "2026-10-24 23:59") == "haku.weekly.headband.orange")
+        #expect(try weeklyItem(firstCan: "2026-10-07 12:00", now: "2026-10-25 00:00") == "haku.weekly.mask.dots")
+        #expect(try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-11-08 08:00") == "haku.weekly.top.badge")
+        #expect(try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-12-06 08:00") == "haku.weekly.hat.beanie")
+        // Eight items, then it starts over.
+        #expect(try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-12-13 08:00") == "haku.weekly.headband.orange")
+        // The second character has her own rotation, counted from her own first can.
+        #expect(
+            try weeklyItem(firstCan: "2026-10-03 23:59", now: "2026-10-18 00:00", persona: .kuro)
+                == "kuro.weekly.blanket.bear")
+        #expect(
+            try weeklyItem(firstCan: "2026-10-04 00:00", now: "2026-11-08 08:00", persona: .kuro)
+                == "kuro.weekly.hair.cherry")
+    }
+
+    @Test func hakusWeeklyItemsAreDrawn() {
+        let weekly = ShopItem.catalog(for: .haku).filter { $0.week != nil }
+        #expect(weekly.map(\.week) == Array(1...8))
+        // The badge and the beanie wait for their art.
+        #expect(weekly.filter { !$0.isDrawn }.map(\.slot) == [.badge, .hat])
+        let hers = ShopItem.catalog(for: .kuro).filter { $0.week != nil }
+        #expect(hers.map(\.week) == Array(1...8))
+        #expect(hers.allSatisfy { $0.isDrawn })
+    }
+
+    @Test func noWeeklyItemWithoutCansOrArt() throws {
+        #expect(ShopItem.weekly(for: .haku, ledger: CanLedger(), now: at) == nil)
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        store.record(.boxing, source: "old", at: at.addingTimeInterval(-60 * 86_400))
+        // Only HAKU has cans here, so only his rotation has started.
+        #expect(ShopItem.weekly(for: .haku, ledger: store.ledger, now: at) != nil)
+        #expect(ShopItem.weekly(for: .kuro, ledger: store.ledger, now: at) == nil)
+    }
+
+    @Test func weeklyItemsStayOffTheRegularShelf() {
+        let weekly = ShopItem.catalog.filter { $0.week != nil }
+        #expect(weekly.allSatisfy { (15...20).contains($0.price ?? 0) && $0.mode == nil && $0.card == nil })
+        for persona in Persona.allCases {
+            let weeks = weekly.filter { $0.persona == persona }.compactMap(\.week)
+            #expect(weeks == weeks.sorted() && Set(weeks).count == weeks.count, "\(persona)")
+            #expect(ShopItem.catalog(for: persona, card: nil).allSatisfy { $0.week == nil })
+        }
+    }
+
+    @Test func shelvesGroupSlotsByWhereTheyAreWorn() {
+        #expect(Slot.allCases.filter { $0.shelf == .clothes } == [.top, .fullSet])
+        #expect(Slot.allCases.filter { $0.shelf == .accessories } == [.headband, .mask, .celebration, .badge, .hat])
+        #expect(Slot.allCases.filter { $0.shelf == .props } == [.gloves])
+        #expect(Slot.allCases.filter { $0.shelf == .room } == [.room])
+    }
+
+    @Test func propsShowOnlyInTheIdentityCardsModeWithACard() {
+        #expect(WardrobeShelf.shelves(in: .boxing, card: .art) == [.clothes, .accessories, .props, .room])
+        #expect(WardrobeShelf.shelves(in: .chill, card: .boxing) == [.clothes, .accessories, .room])
+        #expect(WardrobeShelf.shelves(in: .boxing, card: nil) == [.clothes, .accessories, .room])
+    }
+
+    @Test func theWardrobeListsItemsForTheModeAndCard() throws {
+        let pink = try #require(ShopItem.item("gloves.pink"))
+        let mask = try #require(ShopItem.item("mask.stripes"))
+        let bag = try #require(ShopItem.item("room.bag"))
+        let aloha = try #require(ShopItem.item("haku.top.chill.aloha"))
+        #expect(pink.shows(in: .boxing, card: .boxing))
+        #expect(!pink.shows(in: .boxing, card: .art))
+        #expect(!pink.shows(in: .work, card: .boxing))
+        #expect(mask.shows(in: .work, card: .art))
+        #expect(mask.shows(in: .boxing, card: nil))
+        #expect(bag.shows(in: .chill, card: .boxing))
+        #expect(!bag.shows(in: .chill, card: .tennis))
+        #expect(aloha.shows(in: .chill, card: nil))
+        #expect(!aloha.shows(in: .work, card: nil))
+        let racket = try #require(ShopItem.item("kuro.racket.gold"))
+        #expect(racket.shows(in: .boxing, card: .tennis))
+        #expect(!racket.shows(in: .boxing, card: .boxing))
+    }
+
+    @Test func wearingCoversClothesInTheirMode() throws {
+        let aloha = try #require(ShopItem.item("haku.top.chill.aloha"))
+        let mask = try #require(ShopItem.item("mask.stripes"))
+        var wardrobe = Wardrobe()
+        wardrobe.equip(aloha)
+        wardrobe.equip(mask)
+        #expect(wardrobe.isWearing(aloha))
+        #expect(wardrobe.isWearing(mask))
+        wardrobe.undress(.chill)
+        #expect(!wardrobe.isWearing(aloha))
+    }
+
+    @Test func wornHasOnlyThatModesClothes() {
+        let wardrobe = Wardrobe(
+            equipped: [.mask: "mask.stripes"],
+            clothes: [.work: "kuro.top.work.blouse", .chill: "kuro.top.chill.cardigan"]
+        )
+        #expect(wardrobe.worn(in: .work) == ["mask.stripes", "kuro.top.work.blouse"])
+        #expect(wardrobe.worn(in: .money) == ["mask.stripes"])
+    }
+
+    @Test func aHatIsWornOnlyOffWork() throws {
+        let beanie = try item("haku.weekly.hat.beanie")
+        let badge = try item("haku.weekly.top.badge")
+        #expect(beanie.shows(in: .chill, card: nil))
+        #expect(!beanie.shows(in: .work, card: nil))
+        #expect(!beanie.shows(in: .boxing, card: .boxing))
+        #expect(badge.shows(in: .work, card: nil) && badge.shows(in: .boxing, card: .art))
+        var wardrobe = Wardrobe()
+        wardrobe.equip(beanie)
+        wardrobe.equip(badge)
+        #expect(wardrobe.worn(in: .chill) == [beanie.id, badge.id])
+        #expect(wardrobe.worn(in: .work) == [badge.id])
+    }
+
+    @Test func anotherCardsItemsAreHiddenButKept() {
+        let wardrobe = Wardrobe(
+            equipped: [.gloves: "gloves.pink", .mask: "mask.stripes", .room: "room.bag", .headband: "headband.future"],
+            clothes: [.chill: "haku.top.chill.aloha"]
+        )
+        #expect(
+            wardrobe.showing(card: .art)
+                == Wardrobe(
+                    equipped: [.mask: "mask.stripes", .headband: "headband.future"],
+                    clothes: [.chill: "haku.top.chill.aloha"]
+                )
+        )
+        #expect(wardrobe.showing(card: .boxing) == wardrobe)
+    }
+
+    @Test func eachFirstBatchCardHasAPropColourAndAGoldProp() {
+        let cards: [Persona: [IdentityKind]] = [
+            .haku: [.tennis, .fitness, .study, .art], .kuro: [.boxing, .fitness, .study, .art],
+        ]
+        for (persona, kinds) in cards {
+            for card in kinds {
+                let line = ShopItem.catalog(for: persona).filter {
+                    $0.card == card && $0.slot == .gloves && !$0.isDrawn
+                }
+                #expect(line.compactMap(\.price) == [15], "\(persona) \(card)")
+                #expect(line.compactMap(\.keepsake).map(\.count) == [10], "\(persona) \(card)")
+                #expect(line.allSatisfy { $0.suits(card) && !$0.suits(nil) && $0.slot.shelf == .props })
+            }
+        }
+    }
+
+    @Test func cardsWithoutTheirOwnOutfitShareABaseOutfit() {
+        #expect(IdentityKind.boxing.baseOutfit(for: .haku) == nil)
+        #expect(IdentityKind.boxing.baseOutfit(for: .kuro) == .sport)
+        #expect(IdentityKind.tennis.baseOutfit(for: .haku) == .sport)
+        #expect(IdentityKind.tennis.baseOutfit(for: .kuro) == nil)
+        for persona in Persona.allCases {
+            #expect(IdentityKind.fitness.baseOutfit(for: persona) == .sport)
+            #expect(IdentityKind.study.baseOutfit(for: persona) == .outing)
+            #expect(IdentityKind.art.baseOutfit(for: persona) == .craft)
+        }
+    }
+
+    @Test func baseClothesSuitEveryCardOnTheirBase() throws {
+        let tank = try item("haku.top.gym.tank")
+        #expect(tank.suits(.fitness) && tank.suits(.tennis) && tank.suits(.ski))
+        #expect(!tank.suits(.boxing) && !tank.suits(.art) && !tank.suits(nil))
+        let apron = try item("haku.top.art.apron")
+        #expect(apron.suits(.art) && !apron.suits(.study))
+        let track = try item("kuro.top.gym.track")
+        #expect(track.suits(.boxing) && !track.suits(.tennis))
+        #expect(tank.shows(in: .boxing, card: .fitness))
+        #expect(!tank.shows(in: .chill, card: .fitness))
+    }
+
+    @Test func cardTopsSuitOnlyTheirCard() throws {
+        let jacket = try item("haku.top.boxing.blackgold")
+        #expect(jacket.suits(.boxing) && !jacket.suits(.tennis) && !jacket.suits(nil))
+        let lilac = try item("kuro.top.boxing.lilac")
+        #expect(lilac.suits(.boxing) && !lilac.suits(.fitness))
+        #expect(try item("kuro.top.tennis.sakura").suits(.tennis))
+    }
+
+    @Test func identityClothesAreWornInTheCardsModeAtTheirPrices() {
+        let clothes = ShopItem.catalog.filter { $0.mode == .boxing }
+        #expect(clothes.count == 15)
+        for item in clothes {
+            #expect(item.slot == .top, "\(item.id)")
+            #expect((item.card == nil) != (item.base == nil), "\(item.id)")
+            #expect(item.price == 30 || item.price == 40, "\(item.id)")
+            #expect(!item.isDrawn, "\(item.id)")
+        }
+        for persona in Persona.allCases {
+            for base in BaseOutfit.allCases {
+                let prices = clothes.filter { $0.persona == persona && $0.base == base }.compactMap(\.price)
+                #expect(prices == [30, 40], "\(persona) \(base)")
+            }
+        }
+    }
+
+    @Test func aKeepsakeWaitsForItsArt() throws {
+        let store = GrowthStore(fileURL: nil, deviceID: "t")
+        for day in 0..<10 {
+            #expect(store.record(.boxing, source: "day-\(day)", at: at, card: .fitness).isEmpty)
+        }
+        #expect(!store.ledger.only(.haku).owned.contains("haku.dumbbell.gym.gold"))
+        #expect(try item("haku.dumbbell.gym.gold").keepsake?.card == .fitness)
+    }
+
+    @Test func switchingToACardOnAnotherBaseHidesTheWornBaseTop() {
+        let wardrobe = Wardrobe(clothes: [.boxing: "haku.top.gym.tank"])
+        #expect(wardrobe.showing(card: .tennis) == wardrobe)
+        #expect(wardrobe.showing(card: .art).clothes.isEmpty)
+        #expect(wardrobe.clothes[.boxing] == "haku.top.gym.tank")
     }
 }

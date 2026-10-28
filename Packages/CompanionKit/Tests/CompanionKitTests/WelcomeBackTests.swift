@@ -69,6 +69,56 @@ import Testing
         #expect(SceneMove.welcome(.phone, pose: RunnerPose(face: .mid)) == nil)
     }
 
+    // HAKU-03 (UI 审核 2026-10-13): the end eases back to rest instead of cutting in one frame.
+    @Test(arguments: [WelcomeScene.quiet, .sofa, .glance])
+    func theEndSettlesWithoutACut(_ scene: WelcomeScene) {
+        let length = scene.length(cards: 2, cans: 3)
+        let open = scene.open(cards: 2, cans: 3)
+        let frames = stride(from: length - 1.5, to: length, by: 0.05).map {
+            RunnerPose.welcome(scene, time: $0, open: open, face: .mid, length: length)
+        }
+        for (a, b) in zip(frames, frames.dropFirst()) {
+            // About 2 pt a frame on a 180 pt card.
+            #expect(abs(b.shift - a.shift) <= 1.3 && abs(b.headDy - a.headDy) <= 1.3)
+            #expect(abs(b.bounce - a.bounce) <= 1.3)
+            #expect(abs((b.welcome?.exit ?? 0) - (a.welcome?.exit ?? 0)) <= 0.35)
+        }
+        let last = RunnerPose.welcome(scene, time: length - 0.001, open: open, face: .mid, length: length)
+        #expect(abs(last.shift) < 0.1 && abs(last.headDy) < 0.1 && abs(last.lean) < 0.1)
+        #expect((last.welcome?.exit ?? 0) > 0.99)
+        if let sofa = SceneMove.welcome(.sofaArm, pose: last) { #expect(sofa.opacity < 0.01) }
+    }
+
+    // UI 审核 2026-10-13: a tap that skips the scene puts the props away over 0.3 s instead of cutting.
+    @Test(arguments: [WelcomeScene.sofa, .desk, .glance, .quiet])
+    func aSkipSettlesWithoutACut(_ scene: WelcomeScene) {
+        let length = scene.length(cards: 2, cans: 3)
+        let open = scene.open(cards: 2, cans: 3)
+        let skip: CGFloat = 3
+        let end = skip + CompanionView.welcomeSkipLength
+        let frames = stride(from: skip, to: end, by: 0.05).map {
+            RunnerPose.welcome(scene, time: $0, open: open, face: .mid, length: length, skippedAt: skip)
+        }
+        #expect((frames.first?.welcome?.exit ?? 1) < 0.01)
+        for (a, b) in zip(frames, frames.dropFirst()) {
+            #expect(abs((b.welcome?.exit ?? 0) - (a.welcome?.exit ?? 0)) <= 0.35)
+        }
+        let last = RunnerPose.welcome(
+            scene, time: end - 0.001, open: open, face: .mid, length: length, skippedAt: skip)
+        #expect(abs(last.shift) < 0.1 && abs(last.headDy) < 0.1 && abs(last.lean) < 0.1)
+        #expect((last.welcome?.exit ?? 0) > 0.99)
+    }
+
+    // UI 审核 2026-10-13: the can of the sofa rest pose fades in over the ending instead of popping in.
+    @Test func theCanFadesInWithTheEnding() {
+        let during = RunnerPose.welcome(.sofa, time: 3, open: nil, face: .mid, skippedAt: 3)
+        #expect(!RunnerFigure.parts(for: .chill, pose: during).contains(.monsterCan))
+        let ending = RunnerPose.welcome(.sofa, time: 3.15, open: nil, face: .mid, skippedAt: 3)
+        #expect(RunnerFigure.parts(for: .chill, pose: ending).contains(.monsterCan))
+        let fade = SceneMove.welcome(.monsterCan, pose: ending)?.opacity ?? 0
+        #expect(fade > 0.1 && fade < 0.9)
+    }
+
     // HAKU-17 (UI 审核 2026-10-08): at the office the short scenes play at the desk, never on the sofa.
     @Test(arguments: [WelcomeScene.glance, .quiet])
     func atWorkTheShortScenesPlayAtTheDesk(_ scene: WelcomeScene) {

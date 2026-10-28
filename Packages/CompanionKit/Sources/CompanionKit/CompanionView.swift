@@ -6,6 +6,8 @@ import SwiftUI
 /// RUNNER, reacting to the current mode and energy.
 public struct CompanionView: View {
     let mode: Mode?
+    /// The identity card worn in the identity card mode, or nil for the boxing kit.
+    let card: IdentityKind?
     /// Energy 0-100, or nil when unknown. Below 30 RUNNER looks tired; from 70 it looks bright.
     let energy: Double?
     /// What RUNNER acts out on top of the mode, or nil.
@@ -43,12 +45,18 @@ public struct CompanionView: View {
     let invite: String?
     /// Increment to play the cheer jump.
     let cheer: Int
+    /// Increment to play the nod after an answer: a blink and a small dip of the head.
+    let nods: Int
     /// `.on` turns RUNNER sleepy; each change to `.on` plays the good-night animation once.
     let bedtime: Bedtime
     /// What HAKU wears from the shop and keepsakes.
     let wardrobe: Wardrobe
     let style: CompanionStyle
     let showsBubble: Bool
+    // C19 (动作展示总表): a second HAKU, in a sheet or the first-run setup, would use up the home screen's
+    // once-a-night "还不睡。" and the look up after half a day away.
+    /// Whether HAKU plays the app-open notice turn and keeps the shared record of when the app was last seen.
+    let notices: Bool
     /// Called after HAKU reacts to a tap, for example to switch the 副业 state.
     let onTap: (() -> Void)?
     /// Called once the welcome back scene ends or is skipped with a tap.
@@ -59,6 +67,7 @@ public struct CompanionView: View {
     @Environment(\.frameReduceMotion) private var frameReduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.isLuminanceReduced) private var dozing
+    @Environment(\.companionOffscreen) private var offscreen
     @Environment(\.companionHold) private var hold
     /// True for a moment after the watch screen comes back on, while the figure stays still.
     @State private var settling = false
@@ -73,6 +82,7 @@ public struct CompanionView: View {
     // Seconds since the reference date of the last good-night animation, shared by every CompanionView.
     @AppStorage("companion.lastGoodnight") private var lastGoodnight: Double = 0
     @State private var celebrationStart: Date?
+    @State private var nodStart: Date?
     @State private var celebrationKind: WorkoutSummary.Kind?
     @State private var inviteJumps = 0
     // Id of the last celebrated workout, shared by every CompanionView so each plays once.
@@ -91,7 +101,7 @@ public struct CompanionView: View {
     // Seconds since the reference date when the app was last open, shared by every CompanionView.
     @AppStorage("companion.lastSeen") private var lastSeen: Double = 0
     @State private var noticeLookUp = false
-    // Night (day of its evening) HAKU last said "还不睡。", shared by every CompanionView so it is said once a
+    // Night (day of its evening) HAKU last said "……我也还醒着。", shared by every CompanionView so it is said once a
     // night.
     @AppStorage("companion.lastLateNight") private var lastLateNight = ""
     @State private var lateNightStart: Date?
@@ -131,17 +141,26 @@ public struct CompanionView: View {
     // Id of the last time HAKU got up from the sofa, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastRevived") private var lastRevived = ""
     @State private var welcomeStart: Date?
+    /// Seconds into the welcome back scene when a tap skipped it.
+    @State private var welcomeSkip: CGFloat?
     @State private var welcomeReplay: ReturnReplay?
     @State private var welcomeTask: Task<Void, Never>?
     // Id of the last welcome back, shared by every CompanionView so each plays once.
     @AppStorage("companion.lastWelcome") private var lastWelcome = ""
     @State private var bubble: String?
     @State private var bubbleTask: Task<Void, Never>?
+    /// When the app last opened, for the one line it may say then.
+    @State private var openedAt: Date?
+    /// The line that spoke since the app opened, if any.
+    @State private var opening: OpeningLine?
+    /// When a tap during a one-off animation made HAKU blink.
+    @State private var tapBlinkStart: Date?
 
     private var reduceMotion: Bool { frameReduceMotion ?? systemReduceMotion }
 
     public init(
         mode: Mode?,
+        card: IdentityKind? = nil,
         energy: Double? = nil,
         need: CompanionNeed? = nil,
         needSince: Date? = nil,
@@ -157,15 +176,18 @@ public struct CompanionView: View {
         bath: Bool = false,
         invite: String? = nil,
         cheer: Int = 0,
+        nods: Int = 0,
         bedtime: Bedtime = .off,
         wardrobe: Wardrobe = Wardrobe(),
         style: CompanionStyle = .standard,
         showsBubble: Bool = true,
+        notices: Bool = true,
         onTap: (() -> Void)? = nil,
         onBathDone: (() -> Void)? = nil,
         onWelcomeDone: (() -> Void)? = nil
     ) {
         self.mode = mode
+        self.card = card
         self.energy = energy
         self.need = need
         self.needSince = needSince
@@ -181,10 +203,12 @@ public struct CompanionView: View {
         self.bath = bath
         self.invite = invite
         self.cheer = cheer
+        self.nods = nods
         self.bedtime = bedtime
         self.wardrobe = wardrobe
         self.style = style
         self.showsBubble = showsBubble
+        self.notices = notices
         self.onTap = onTap
         self.onBathDone = onBathDone
         self.onWelcomeDone = onWelcomeDone
@@ -198,11 +222,15 @@ public struct CompanionView: View {
                 .animation(.easeInOut(duration: 0.25), value: mode)
                 .animation(.easeInOut(duration: 0.8), value: bedtime)
 
+            // HAKU-05 (UI 审核 2026-10-13): an automatic switch comes with no animation, so the figure cut over at
+            // once. Every mode change now fades in 0.3 s, whoever made it.
             character
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: mode)
                 .padding(.top, 24)
                 .padding(.horizontal, 12)
                 .scaleEffect(closeUp ? 1.8 : 1, anchor: UnitPoint(x: 0.5, y: 0.22))
-                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: closeUp)
+                .offset(y: closeUp ? 0 : Self.bubbleRoom(style: style, showsBubble: showsBubble))
+                .animation(.smooth(duration: 0.35), value: closeUp)
 
             if welcomeStart != nil, let replay = welcomeReplay {
                 TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
@@ -231,24 +259,27 @@ public struct CompanionView: View {
         .sensoryFeedback(.impact(weight: .light), trigger: pokes)
         .onChange(of: mode) { _, _ in
             pop += 1
-            // The welcome back keeps its line through a mode change (issue #184).
-            if welcomeStart == nil { say(nil) }
+            if offWork(at: Date.now.timeIntervalSinceReferenceDate) == nil { offWorkStart = nil }
+            // The welcome back keeps its line through a mode change (issue #184), and so does the line the app
+            // opened with (C16, 动作展示总表).
+            if welcomeStart == nil, !holdsOpening { say(nil) }
         }
         .onAppear {
-            startNotice()
+            open()
+            if notices { startNotice() }
             startStretchUp()
             startPackUp()
             startCue()
             if bedtime == .on, !Self.playedTonight(last: lastGoodnight, now: .now) { startGoodnight() }
             playEventIfNew()
             if invite != nil { startInvite() }
-            if bath { say(Self.bathLine, for: 3) }
+            if bath, claimsOpening(.bath) { say(Self.bathLine, for: 3) }
         }
         .onChange(of: bath) { _, new in
             guard new else { return }
             // The view lives for days, so each evening's bath time starts with dry hair.
             dryStart = nil
-            say(Self.bathLine, for: 3)
+            if claimsOpening(.bath) { say(Self.bathLine, for: 3) }
         }
         .onChange(of: invite) { _, new in
             if new != nil { startInvite() }
@@ -257,12 +288,13 @@ public struct CompanionView: View {
         .onChange(of: daily) { _, _ in startCue() }
         .onChange(of: scenePhase) { _, new in
             if new == .active {
-                startNotice()
+                open()
+                if notices { startNotice() }
                 startStretchUp()
                 startPackUp()
                 startCue()
             }
-            if new == .background { lastSeen = Date.now.timeIntervalSinceReferenceDate }
+            if new == .background, notices { lastSeen = Date.now.timeIntervalSinceReferenceDate }
         }
         .onChange(of: moment) { _, _ in
             startPackUp()
@@ -273,6 +305,11 @@ public struct CompanionView: View {
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodnight() }
         }
+        // C13 (动作展示总表): leaving the office lets go of the held off-work pose, also before the mode changes.
+        .onChange(of: walking) { _, new in
+            if new == .office, offWork(at: Date.now.timeIntervalSinceReferenceDate) == nil { offWorkStart = nil }
+        }
+        .onChange(of: nods) { _, _ in nodStart = .now }
         .onChange(of: asleep) { _, new in
             guard style == .watch else { return }
             if new {
@@ -305,18 +342,22 @@ public struct CompanionView: View {
                     // HAKU-08/10: on a dimmed watch screen the body comes to rest before the frame freezes.
                     let still = reduceMotion || dozing
                     let turn = still ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
-                    RunnerFigure(
-                        mode: mode,
-                        pose: glance(
-                            pose(mode, life: life, time: time, react: react).wearing(Outfit(wardrobe)).leaving(traces)
-                        )
+                    let squash = still ? 0 : motion.squash
+                    let posed = pose(mode, life: life, time: time, react: react)
+                    let dressed = posed.dressed(
+                        for: card, in: mode, watch: style == .watch, time: reduceMotion ? nil : time
                     )
-                    .saturation(vitals.saturation)
-                    .brightness(vitals.brightness)
-                    .rotationEffect(.degrees(still ? 0 : motion.angle), anchor: .bottom)
-                    .offset(y: still ? 0 : motion.dy)
-                    .scaleEffect(x: 1 + 0.07 * turn, y: 1 - 0.1 * turn, anchor: .bottom)
-                    .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: dozing)
+                    RunnerFigure(mode: mode, pose: glance(dressed.wearing(wardrobeOutfit).leaving(traces)))
+                        .saturation(vitals.saturation)
+                        .brightness(vitals.brightness)
+                        .rotationEffect(.degrees(still ? 0 : motion.angle), anchor: .bottom)
+                        .offset(y: still ? 0 : motion.dy)
+                        .scaleEffect(
+                            x: 1 + 0.07 * turn + 0.08 * squash,
+                            y: 1 - 0.1 * turn - 0.12 * squash,
+                            anchor: .bottom
+                        )
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: dozing)
                 }
             } keyframes: { _ in
                 KeyframeTrack {
@@ -330,23 +371,12 @@ public struct CompanionView: View {
             .keyframeAnimator(initialValue: Squash(), trigger: pop) { content, value in
                 content.scaleEffect(x: value.x, y: value.y, anchor: .bottom)
             } keyframes: { _ in
-                KeyframeTrack(\.x) {
-                    CubicKeyframe(1.07, duration: 0.08)
-                    SpringKeyframe(1, duration: 0.35, spring: .bouncy)
-                }
-                KeyframeTrack(\.y) {
-                    CubicKeyframe(0.9, duration: 0.08)
-                    SpringKeyframe(1, duration: 0.35, spring: .bouncy)
-                }
+                Squash.tap()
             }
             .keyframeAnimator(initialValue: 0.0, trigger: cheer + inviteJumps) { content, lift in
                 content.offset(y: -lift)
             } keyframes: { _ in
-                KeyframeTrack {
-                    CubicKeyframe(0, duration: 0.05)
-                    SpringKeyframe(36, duration: 0.18)
-                    SpringKeyframe(0, duration: 0.45, spring: .bouncy)
-                }
+                Squash.jump()
             }
             .modifier(WatchFigureFrame(isEnabled: style == .watch))
         } else {
@@ -381,7 +411,8 @@ public struct CompanionView: View {
             life: life,
             activity: activity,
             moment: shownMoment,
-            bedtime: bedtime
+            bedtime: bedtime,
+            card: card
         )
     }
 
@@ -418,13 +449,34 @@ public struct CompanionView: View {
         return since < length ? since / length : nil
     }
 
-    private var paused: Bool { reduceMotion || asleep || settling }
+    private var paused: Bool {
+        Self.paused(
+            reduceMotion: reduceMotion, scenePhase: scenePhase, dozing: dozing, settling: settling,
+            offscreen: offscreen
+        )
+    }
+
+    /// Whether the figure's frame clock stops: with Reduce Motion, outside the active scene, with the watch screen
+    /// dimmed, while settling after it comes back on, or while kept off screen.
+    nonisolated static func paused(
+        reduceMotion: Bool, scenePhase: ScenePhase, dozing: Bool, settling: Bool, offscreen: Bool = false
+    ) -> Bool {
+        reduceMotion || scenePhase != .active || dozing || settling || offscreen
+    }
 
     /// The app is in the background or the watch screen is dimmed.
     private var asleep: Bool { scenePhase != .active || dozing }
 
     /// Seconds between animation frames: fewer on the watch.
     private var frameInterval: Double { style == .watch ? 1 / 15 : 1 / 30 }
+
+    // 位置规划图 §12 (UI 审核 2026-10-14): the watch's bottom edge would leave only a scrap of a floor item.
+    /// What HAKU wears; the watch leaves out the room item, which stands on the floor.
+    private var wardrobeOutfit: Outfit {
+        var outfit = Outfit(wardrobe)
+        if style == .watch { outfit.room = nil }
+        return outfit
+    }
 
     private func idleMotion(_ mode: Mode, life: IdleLife?, time: TimeInterval) -> IdleMotion {
         if pokeKind == .rollOver, let progress = poke(at: time) {
@@ -456,6 +508,11 @@ public struct CompanionView: View {
         if let progress = offWork(at: time) {
             return RunnerPose.offWork(time: time, progress: reduceMotion ? 1 : progress, face: face)
         }
+        // HAKU-02 (UI 审核 2026-10-13): once it has played, the off-work pose holds until the mode really changes,
+        // instead of putting the headset back on.
+        if Self.holdsOffWork(since: offWorkStart, mode: mode, at: Date(timeIntervalSinceReferenceDate: time)) {
+            return RunnerPose.offWork(time: time, progress: 1, face: face)
+        }
         if let progress = stayHome(at: time) {
             return RunnerPose.stayHome(time: time, progress: reduceMotion ? 1 : progress, face: face)
         }
@@ -471,13 +528,18 @@ public struct CompanionView: View {
             let scene = WelcomeScene(replay, mode: mode)
             let open = scene.open(cards: replay.cards.count, cans: replay.cans)
             // Reduced motion holds the last frame.
-            let shown = reduceMotion ? scene.length(cards: replay.cards.count, cans: replay.cans) - 0.2 : t
-            return RunnerPose.welcome(scene, time: shown, open: open, face: face, mode: mode)
+            let length = scene.length(cards: replay.cards.count, cans: replay.cans)
+            if reduceMotion {
+                return RunnerPose.welcome(scene, time: length - 1.3, open: open, face: face, mode: mode)
+            }
+            return RunnerPose.welcome(
+                scene, time: t, open: open, face: face, mode: mode, length: length, skippedAt: welcomeSkip)
         }
         let stage = couchStage(at: Date(timeIntervalSinceReferenceDate: time))
         if reduceMotion {
             var pose = RunnerPose(face: face, need: shownNeed, life: life, activity: activity, moment: shownMoment)
             pose.codingCans = codingCans
+            pose.otherCard = RunnerCardLook(card: card) != nil
             if stage == .peeking { pose.bagLift = 0 }
             if stage == .up { pose.bagLift = 1 }
             pose.headDy += vitals.slouch
@@ -499,17 +561,24 @@ public struct CompanionView: View {
             life: life,
             activity: activity,
             moment: shownMoment,
+            card: card,
             react: react
         )
         pose.codingCans = codingCans
+        pose.otherCard = RunnerCardLook(card: card) != nil
         pose.headDy += vitals.slouch
         if stage == .peeking { pose.peekAtBag(time: time) }
         if stage == .up { pose.bagLift = 1 }
         if let progress = Self.progress(since: swapStart, at: time, duration: Self.swapDuration) {
-            // Switching state: a quick burst of sparkles over the squash.
+            // Switching state: a quick burst of sparkles over the squash. C17 (动作展示总表): only the sparkles,
+            // so the peace sign, the dumbbell reps and the card's props stay with real celebrations.
             pose.burst = CGFloat(progress)
+            pose.swapping = true
         }
-        if let progress = lifeSwap(mode, life: life, at: time) { pose.burst = CGFloat(progress) }
+        if let progress = lifeSwap(mode, life: life, at: time) {
+            pose.burst = CGFloat(progress)
+            pose.swapping = true
+        }
         if let commute, daily?.scene == nil, activity == nil {
             pose.commute(commute, time: CGFloat(time))
         } else if let walking, daily?.scene == nil, activity == nil {
@@ -522,6 +591,9 @@ public struct CompanionView: View {
         }
         if let daily { pose.cue(daily, time: time, slap: slap(at: time)) }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
+        if let progress = Self.progress(since: nodStart, at: time, duration: Self.nodDuration) {
+            pose.nod(progress: CGFloat(progress), still: reduceMotion)
+        }
         if let progress = taskDone(at: time) {
             if doneFocus {
                 pose.cheerFocus(progress: progress)
@@ -569,9 +641,16 @@ public struct CompanionView: View {
         return pose
     }
 
-    /// `pose` with the eyes following a press, and dozing while the screen is dimmed (Always On).
+    /// `pose` with the eyes following a press, dozing while the screen is dimmed (Always On), and the props
+    /// lifted on the watch.
     private func glance(_ pose: RunnerPose) -> RunnerPose {
         var pose = pose
+        if style == .watch { pose.propLift = 1 }
+        if !closeUp {
+            pose.starDrop = Self.starDrop(style: style, showsBubble: showsBubble)
+            pose.sunDrop = Self.sunDrop(style: style, showsBubble: showsBubble)
+        }
+        if let tapBlinkStart, Date.now.timeIntervalSince(tapBlinkStart) < 0.25 { pose.eyesShut = true }
         pose.eyesDx += 4 * look
         pose.headTilt += 4 * Double(look)
         if closeUp { pose.eyesDy -= 1 }
@@ -611,6 +690,35 @@ public struct CompanionView: View {
             }
     }
 
+    // D5 (UI 审核 10/15): on a small iPhone the longest one-line bubble covered the hair tips, the headset band and
+    // the gift box on the head. The phone figure sits lower instead of the bubble moving onto the body.
+    /// How far the figure sits below its usual place to leave room for the bubble at the top, in points.
+    nonisolated static func bubbleRoom(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
+        style == .standard && showsBubble ? 24 : 0
+    }
+
+    // D5 (UI 审核 10/15): with the figure 24 pt lower, the sparkles beside the headset still touched the bubble,
+    // and a Japanese line is about 13 pt taller. They drop to clear the bubble while staying off the band.
+    /// How far the sparkles beside the headset sit lower to clear the bubble, in figure units.
+    nonisolated static func starDrop(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
+        bubbleRoom(style: style, showsBubble: showsBubble) > 0 ? 8 : 0
+    }
+
+    // D5 round 3 (UI 审核 10/15): under a Japanese line the window's top edge met the bubble's, so the two black
+    // outlines ran together. It drops to leave a clear gap.
+    /// How far the sunlit window sits lower to clear the bubble, in figure units.
+    nonisolated static func sunDrop(style: CompanionStyle, showsBubble: Bool) -> CGFloat {
+        bubbleRoom(style: style, showsBubble: showsBubble) > 0 ? 3 : 0
+    }
+
+    /// Whether the off-work pose that played from `start` still holds at `date` in `mode`: in work mode, the same day.
+    nonisolated static func holdsOffWork(
+        since start: Date?, mode: Mode, at date: Date, calendar: Calendar = .current
+    ) -> Bool {
+        guard mode == .work, let start, date >= start else { return false }
+        return calendar.isDate(start, inSameDayAs: date)
+    }
+
     /// Starts the notice turn as the app opens, as a slow look up when the app was closed for half a day.
     private func startNotice() {
         let now = Date.now
@@ -622,11 +730,12 @@ public struct CompanionView: View {
         if let night = Self.newLateNight(at: now, last: lastLateNight) {
             lastLateNight = night
             lateNightStart = now
+            guard claimsOpening(.lateNight) else { return }
             bubbleTask?.cancel()
             bubbleTask = Task {
                 try? await Task.sleep(for: .seconds(noticeDuration))
                 guard !Task.isCancelled else { return }
-                say("还不睡。", for: 3)
+                say("……我也还醒着。", for: 3)
             }
         }
     }
@@ -637,6 +746,7 @@ public struct CompanionView: View {
         guard shownMoment == .stiff, bedtime == .off, Self.stretchUpDue(last: lastStretchUp, now: now) else { return }
         lastStretchUp = now.timeIntervalSinceReferenceDate
         stretchUpStart = now
+        guard claimsOpening(.stretch) else { return }
         bubbleTask?.cancel()
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(Self.stretchUpDuration * 0.57))
@@ -661,12 +771,12 @@ public struct CompanionView: View {
         case .soon:
             guard let id = Self.newCue(daily, stage: .soon, last: lastDailySoon) else { return }
             lastDailySoon = id
-            say("还有 15 分钟。我先替你紧张一下。", for: 3.5)
+            if claimsOpening(.daily) { say("还有 15 分钟。我先替你紧张一下。", for: 3.5) }
         case .now:
             guard let id = Self.newCue(daily, stage: .now, last: lastDailyNow) else { return }
             lastDailyNow = id
             slapStart = .now
-            say("到点了。")
+            if claimsOpening(.daily) { say("到点了。") }
         }
     }
 
@@ -716,8 +826,12 @@ public struct CompanionView: View {
         guard let start = welcomeStart?.timeIntervalSinceReferenceDate, let replay = welcomeReplay else { return nil }
         let length = WelcomeScene(replay, mode: mode ?? .chill).length(cards: replay.cards.count, cans: replay.cans)
         let t = CGFloat(time - start)
-        return t >= 0 && t < length ? t : nil
+        let end = min(length, welcomeSkip.map { $0 + Self.welcomeSkipLength } ?? length)
+        return t >= 0 && t < end ? t : nil
     }
+
+    /// How long the welcome back scene takes to put itself away after a tap skips it.
+    nonisolated static let welcomeSkipLength: CGFloat = 0.3
 
     /// The card flipped over at the top, or at the bottom when there is no crate, then the cans chip.
     @ViewBuilder private func welcomeChips(_ replay: ReturnReplay, at time: TimeInterval) -> some View {
@@ -793,13 +907,16 @@ public struct CompanionView: View {
             let goodnight = (time - start) / Self.goodnightDuration
             return RunnerPose.bedtime(time: time, goodnight: goodnight, liesDown: true)
         case .notification:
-            let loop = time.truncatingRemainder(dividingBy: Self.notificationLoop) / Self.notificationLoop
-            return RunnerPose.bedtime(time: time, goodnight: loop, liesDown: false)
+            let start = goodnightStart?.timeIntervalSinceReferenceDate ?? -.infinity
+            return Self.notificationBedtime(time: time, start: start)
         }
     }
 
     private static let goodnightDuration = 3.2
-    private static let celebrationDuration = 1.6
+    // HAKU-23: 1.6 s read the same as a poke; 2.4 s leaves room to crouch before each hop and land.
+    static let celebrationDuration = 2.4
+    // 「哦。」 stays up 1.6 s; the nod plays inside it (Issue #236, 纠正预览 v6).
+    nonisolated static let nodDuration = 1.6
     private static let offWorkDuration = 4.0
     private static let unlockDuration = 2.8
     private static let stayHomeDuration = 3.2
@@ -836,7 +953,13 @@ public struct CompanionView: View {
         taps.filter { now.timeIntervalSince($0) < pesterWindow }.count >= count
     }
 
-    /// The night to say "还不睡。" for when the app opens at `date`, or nil outside 0:00 to 5:00 or when it was
+    // PM 2026-10-13: at bedtime the character is sleepy, not annoyed, so no one turns away then.
+    /// Whether `taps` turn the character away: `count` or more within `pesterWindow`, outside bedtime.
+    nonisolated static func turnsAway(_ taps: [Date], now: Date, count: Int, bedtime: Bedtime) -> Bool {
+        bedtime == .off && pestered(taps, now: now, count: count)
+    }
+
+    /// The night to say "……我也还醒着。" for when the app opens at `date`, or nil outside 0:00 to 5:00 or when it was
     /// already said that night. A night is named by the day of its evening, as `yyyy-MM-dd`.
     nonisolated static func newLateNight(at date: Date, last: String, calendar: Calendar = .current) -> String? {
         guard calendar.component(.hour, from: date) < 5,
@@ -924,7 +1047,7 @@ public struct CompanionView: View {
             lastCelebration = id
             celebrationKind = kind
             celebrationStart = .now
-            say(CompanionLines.celebration(kind))
+            if claimsOpening(.celebration) { say(CompanionLines.celebration(kind)) }
         }
         if let day = Self.newOffWork(event, last: lastOffWork) {
             lastOffWork = day
@@ -933,7 +1056,8 @@ public struct CompanionView: View {
             bubbleTask = Task {
                 try? await Task.sleep(for: .seconds(Self.offWorkDuration * 0.75))
                 guard !Task.isCancelled else { return }
-                say("终于。")
+                // Fades as the animation ends, so it never hangs over the held pose.
+                say("终于。", for: Self.offWorkDuration * 0.25)
             }
         }
         if let id = Self.newUnlock(event, last: lastUnlock), case .unlock(_, let item) = event {
@@ -993,13 +1117,21 @@ public struct CompanionView: View {
             }
         }
     }
-    private static let notificationLoop = 2.4
+    nonisolated private static let notificationGoodnight = 2.4
+
+    // HAKU-18 (UI 审核 2026-10-13): the notification used to loop the whole good night, so the headset went back on
+    // every 2.4 s. Now it comes off once and only the breathing, blinks and yawns loop.
+    /// The good night in the notification at `time`, after it started at `start`: played once, then held.
+    nonisolated static func notificationBedtime(time: TimeInterval, start: TimeInterval) -> RunnerPose {
+        RunnerPose.bedtime(time: time, goodnight: (time - start) / notificationGoodnight, liesDown: false)
+    }
 
     /// Plays the welcome back scene for `replay`, with its line, and calls `onWelcomeDone` as it ends.
     private func startWelcome(_ replay: ReturnReplay) {
         let scene = WelcomeScene(replay, mode: mode ?? .chill)
         welcomeReplay = replay
         welcomeStart = .now
+        welcomeSkip = nil
         say(nil)
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(scene.line.at))
@@ -1019,6 +1151,7 @@ public struct CompanionView: View {
         guard welcomeStart != nil else { return }
         welcomeTask?.cancel()
         welcomeStart = nil
+        welcomeSkip = nil
         welcomeReplay = nil
         say(nil)
         onWelcomeDone?()
@@ -1033,15 +1166,16 @@ public struct CompanionView: View {
         goodnightStart = .now
         guard style != .notification else { return }
         lastGoodnight = Date.now.timeIntervalSinceReferenceDate
+        guard claimsOpening(.goodnight) else { return }
         bubbleTask?.cancel()
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(Self.goodnightDuration * 0.85))
             guard !Task.isCancelled else { return }
-            say("该睡了")
+            say("……困了。")
         }
     }
 
-    static let bathLine = "……去洗澡。我先占浴室了。"
+    static let bathLine = "……我先去洗了。浴室归我。"
     static let reviveLine = "……活过来了？"
 
     private func react() {
@@ -1049,9 +1183,20 @@ public struct CompanionView: View {
             reactToPoke()
             return
         }
-        if welcome(at: Date.now.timeIntervalSinceReferenceDate) != nil {
-            // A tap skips the welcome back.
-            endWelcome()
+        if let t = welcome(at: Date.now.timeIntervalSinceReferenceDate) {
+            // A tap skips the welcome back: it puts itself away over 0.3 s instead of cutting.
+            guard welcomeSkip == nil else { return }
+            if reduceMotion {
+                endWelcome()
+                return
+            }
+            welcomeSkip = t
+            welcomeTask?.cancel()
+            welcomeTask = Task {
+                try? await Task.sleep(for: .seconds(Double(Self.welcomeSkipLength)))
+                guard !Task.isCancelled else { return }
+                endWelcome()
+            }
             return
         }
         if bath, dryStart == nil {
@@ -1072,8 +1217,14 @@ public struct CompanionView: View {
             return
         }
         rollStart = nil
+        // C15 (动作展示总表): at bedtime a tap gets a mumble and changes nothing.
+        if bedtime == .on {
+            pop += 1
+            say(Self.bedtimeMumbles.filter { $0 != bubble }.randomElement())
+            return
+        }
         tapTimes = tapTimes.filter { Date.now.timeIntervalSince($0) < Self.pesterWindow } + [.now]
-        if bedtime == .off, Self.pestered(tapTimes, now: .now, count: WatchPoke.tooMany) {
+        if Self.turnsAway(tapTimes, now: .now, count: WatchPoke.tooMany, bedtime: bedtime) {
             tapTimes = []
             pokeKind = nil
             turnAwayStart = .now
@@ -1092,29 +1243,39 @@ public struct CompanionView: View {
             peeking: peeking,
             life: life,
             activity: activity,
-            moment: shownMoment
+            moment: shownMoment,
+            card: card
         )
         let candidates = lines.filter { $0 != bubble }
-        say((candidates.isEmpty ? lines : candidates).randomElement())
-        // Taps during a one-off animation only get HAKU's reaction.
+        // Taps during a one-off animation only get a blink, and its line stays (G10, C14).
         let time = Date.now.timeIntervalSinceReferenceDate
-        guard celebration(at: time) == nil, taskDone(at: time) == nil, !stillOneOff(at: time) else { return }
+        guard celebration(at: time) == nil, taskDone(at: time) == nil, !stillOneOff(at: time) else {
+            tapBlinkStart = .now
+            return
+        }
         // The same body move as a poke on the watch (Mike 2026-10-07: one action library for phone and watch).
+        var poke: WatchPoke?
         if let mode {
-            pokeKind = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on, busy: isBusy(life))
+            poke = WatchPoke.pick(mode: mode, energy: energy, asleep: bedtime == .on, busy: isBusy(life))
+        }
+        // The boxing duck and hook ends on its own line (身份卡第 3 轮 B2).
+        say(poke == .duckHook ? poke?.line : (candidates.isEmpty ? lines : candidates).randomElement())
+        if let poke {
+            pokeKind = poke
             pokeStart = .now
         }
         onTap?()
     }
 
-    /// Plays the reaction to a poke on the watch with a light tap on the wrist; 5 pokes in a row turn HAKU away.
+    /// Plays the reaction to a poke on the watch with a light tap on the wrist; 5 pokes in a row turn HAKU away,
+    /// except at bedtime.
     private func reactToPoke() {
         guard let mode else { return }
         let now = Date.now
         pokes += 1
         guard turnAway(at: now.timeIntervalSinceReferenceDate) == nil else { return }
         tapTimes = tapTimes.filter { now.timeIntervalSince($0) < Self.pesterWindow } + [now]
-        if Self.pestered(tapTimes, now: now, count: WatchPoke.tooMany) {
+        if Self.turnsAway(tapTimes, now: now, count: WatchPoke.tooMany, bedtime: bedtime) {
             tapTimes = []
             pokeKind = nil
             turnAwayStart = now
@@ -1128,7 +1289,7 @@ public struct CompanionView: View {
         pokeKind = kind
         pokeStart = now
         if kind != .rollOver { pop += 1 }
-        say(kind.line)
+        say(kind.line, after: kind.lineDelay)
     }
 
     // QA §5.1: a shake drops the wrist and dims the watch screen, so the watch listens for up to 5 s more after
@@ -1189,7 +1350,13 @@ public struct CompanionView: View {
             say(WatchPoke.tooManyLine)
             return
         }
-        let reaction = ShakeReaction.pick(mode: mode, asleep: bedtime == .on || idleLife(mode, at: now) == .nap)
+        // C14 (动作展示总表): shaken at bedtime, HAKU only rolls over half asleep.
+        if bedtime == .on {
+            pokeKind = .rollOver
+            pokeStart = now
+            return
+        }
+        let reaction = ShakeReaction.pick(mode: mode, asleep: idleLife(mode, at: now) == .nap)
         switch reaction {
         case .dizzy:
             dizzyStart = now
@@ -1204,29 +1371,77 @@ public struct CompanionView: View {
         say(reaction.line(for: mode))
     }
 
+    // A card look has no gloves for the boxing poke, so it glares until the card gets a poke of its own.
     /// Whether HAKU acts out something other than the plain mode, given its idle `life`.
     private func isBusy(_ life: IdleLife?) -> Bool {
         shownNeed != nil || activity != nil || shownMoment != nil || life != nil || daily != nil || walking != nil
-            || bath || invite != nil
+            || bath || invite != nil || (mode == .boxing && RunnerCardLook(card: card) != nil)
     }
 
     private func startInvite() {
         guard bedtime == .off, let invite else { return }
         pop += 1
         inviteJumps += 1
-        say(invite, for: 5)
+        if claimsOpening(.invite) { say(invite, for: 5) }
     }
 
-    private func say(_ text: String?, for seconds: Double = 2.4) {
+    /// Starts a new opening of the app, unless one started within the opening window; cold launch opens twice.
+    private func open() {
+        guard openedAt.map({ Date.now.timeIntervalSince($0) >= Self.openingWindow }) ?? true else { return }
+        openedAt = .now
+        opening = nil
+    }
+
+    /// Whether `line` may speak now: always outside the opening window, else only when no line above it spoke.
+    private func claimsOpening(_ line: OpeningLine) -> Bool {
+        guard let openedAt, Date.now.timeIntervalSince(openedAt) < Self.openingWindow else { return true }
+        guard Self.speaks(line, over: opening) else { return false }
+        opening = line
+        return true
+    }
+
+    /// Whether the line the app opened with is still due or showing.
+    private var holdsOpening: Bool {
+        guard opening != nil, let openedAt else { return false }
+        return Date.now.timeIntervalSince(openedAt) < Self.openingWindow
+    }
+
+    /// Whether `line` speaks when `spoken` already did since the app opened.
+    nonisolated static func speaks(_ line: OpeningLine, over spoken: OpeningLine?) -> Bool {
+        spoken.map { line <= $0 } ?? true
+    }
+
+    // Long enough for the slowest opening line, the stretch at 3.4 s, to come due.
+    private static let openingWindow: TimeInterval = 8
+
+    /// What HAKU mumbles when tapped at bedtime.
+    nonisolated static let bedtimeMumbles = ["……嗯。", "……还没睡。快了。", "……明天再说。"]
+
+    private func say(_ text: String?, for seconds: Double = 2.4, after delay: Double = 0) {
+        let text = text?.localized(for: .haku)
         bubbleTask?.cancel()
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { bubble = text }
+        withAnimation(.smooth(duration: 0.3)) { bubble = delay > 0 ? nil : text }
         guard text != nil else { return }
         bubbleTask = Task {
+            if delay > 0 {
+                try? await Task.sleep(for: .seconds(delay))
+                guard !Task.isCancelled else { return }
+                withAnimation(.smooth(duration: 0.3)) { bubble = text }
+            }
             try? await Task.sleep(for: .seconds(seconds))
             guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: 0.2)) { bubble = nil }
         }
     }
+}
+
+// C1 (动作展示总表, Mike 10/15): opening the app with several lines due showed one after another, or the last
+// one over the more important one.
+/// The lines HAKU may say as the app opens, highest first. Only one of them speaks each time the app opens.
+enum OpeningLine: Int, Comparable {
+    case celebration, invite, goodnight, lateNight, daily, bath, stretch
+
+    static func < (lhs: Self, rhs: Self) -> Bool { lhs.rawValue < rhs.rawValue }
 }
 
 // Made-up records for the previews.
@@ -1250,6 +1465,29 @@ private let previewWelcomes: [(String, Mode, ReturnReplay)] = {
 struct Squash {
     var x: CGFloat = 1
     var y: CGFloat = 1
+
+    // UI 审核 2026-10-13 (视觉现状 §2): every move eases back once and never springs past where it rests.
+    /// The squash on a tap: wide and low for 0.08 s, then back to 1 with an ease-out, no overshoot.
+    @KeyframesBuilder<Squash> static func tap() -> some Keyframes<Squash> {
+        KeyframeTrack(\.x) {
+            CubicKeyframe(1.07, duration: 0.08)
+            LinearKeyframe(1, duration: 0.3, timingCurve: .easeOut)
+        }
+        KeyframeTrack(\.y) {
+            CubicKeyframe(0.9, duration: 0.08)
+            LinearKeyframe(1, duration: 0.3, timingCurve: .easeOut)
+        }
+    }
+
+    // UI 审核 2026-10-13: at 36 the hair tips were cut flat by the top of the card at the peak; at 20 they kept 1 pt.
+    /// The hop on a cheer or an invite, in points up: a 1.5 pt dip, up to 18, back down to 0 with no bounce.
+    @KeyframesBuilder<Double> static func jump() -> some Keyframes<Double> {
+        KeyframeTrack {
+            LinearKeyframe(-1.5, duration: 0.1, timingCurve: .easeOut)
+            LinearKeyframe(18, duration: 0.18, timingCurve: .easeOut)
+            LinearKeyframe(0, duration: 0.32, timingCurve: .easeIn)
+        }
+    }
 }
 
 /// Lays the figure out for the watch's full-screen page: three quarters wide, lowered, running off the bottom.
@@ -1261,8 +1499,8 @@ struct WatchFigureFrame: ViewModifier {
             // The approved C layout shows him from the chest up and the screen edge crops the rest. At the full
             // width he filled the screen and his hair ran into the mode chip, so the card width is scaled down,
             // centered and lowered. The card padding is undone here.
-            // UI 审核 2026-10-13: the clock band (up to 55 pt) cut the hair flat and the screen edge cut the props,
-            // so the card is smaller and lower: the hair clears the band and the chest props stay in view.
+            // UI 审核 2026-10-13: the clock row (up to 55 pt) cut the hair flat and the screen edge cut the props,
+            // so the card is smaller and lower: the hair clears the clock and the chest props stay in view.
             GeometryReader { proxy in
                 let width = proxy.size.width * 0.75 + 24
                 content
@@ -1274,7 +1512,7 @@ struct WatchFigureFrame: ViewModifier {
         }
     }
 
-    // Round 2 screenshots: a fixed 38 pt left 45 pt of empty band on 40 mm and cut the chest props, while 46 mm
+    // Round 2 screenshots: a fixed 38 pt left 45 pt of empty space on 40 mm and cut the chest props, while 46 mm
     // was down to 10 pt. Scaling with the width keeps about the same gap on every size.
     /// How far the figure sits below the top of a watch screen `screenWidth` points wide.
     nonisolated static func drop(screenWidth: CGFloat) -> CGFloat {
@@ -1297,20 +1535,44 @@ public enum CompanionStyle: Sendable {
 struct IdleMotion {
     var dy: CGFloat
     var angle: Double
+    /// How far the body is pressed wide and low, 0 (standing) to 1 (deepest crouch).
+    var squash: CGFloat = 0
 
     /// Slumped on the couch: tilted back, barely breathing.
     static func slumped(time t: TimeInterval) -> IdleMotion {
         IdleMotion(dy: 4 + CGFloat(sin(t * 2 * .pi / 5)), angle: -3)
     }
 
-    /// Two happy hops over a celebration; `progress` runs 0..<1.
-    static func celebrating(progress: Double) -> IdleMotion {
-        IdleMotion(dy: -CGFloat(abs(sin(progress * 2 * .pi))) * 22, angle: sin(progress * 4 * .pi) * 3)
+    /// Two happy hops over a celebration, each from a crouch and landing pressed down; `progress` runs 0..<1.
+    static func celebrating(progress p: Double) -> IdleMotion {
+        // Crouch 0-0.1, hop 0.1-0.38, land into the next crouch 0.38-0.48, hop 0.48-0.76, land 0.76-0.92.
+        let hops = [(0.1, 0.38), (0.48, 0.76)]
+        guard let (up, down) = hops.first(where: { p >= $0.0 && p < $0.1 }) else {
+            return IdleMotion(dy: 0, angle: 0, squash: CGFloat(crouch(at: p)))
+        }
+        let air = (p - up) / (down - up)
+        let release = 1 - smooth(min(1, (p - up) / 0.04))
+        return IdleMotion(dy: -CGFloat(sin(air * .pi)) * 22, angle: sin(air * 2 * .pi) * 3, squash: CGFloat(release))
     }
+
+    /// The crouch while standing between hops: down before the first, held through the landing into the
+    /// second, then eased back up after the last landing.
+    private static func crouch(at p: Double) -> Double {
+        switch p {
+        case ..<0.1: smooth(p / 0.1)
+        case 0.38..<0.48: smooth(min(1, (p - 0.38) / 0.05))
+        case 0.76..<0.8: smooth((p - 0.76) / 0.04)
+        case 0.8..<0.92: 1 - smooth((p - 0.8) / 0.12)
+        default: 0
+        }
+    }
+
+    /// Ease in and out over `x` in 0...1.
+    private static func smooth(_ x: Double) -> Double { x * x * (3 - 2 * x) }
 
     /// The same motion with its bounce scaled by `factor`.
     func bouncing(_ factor: CGFloat) -> IdleMotion {
-        IdleMotion(dy: dy * factor, angle: angle)
+        IdleMotion(dy: dy * factor, angle: angle, squash: squash)
     }
 
     /// Slow breathing at bedtime, 4 s period.
@@ -1324,9 +1586,10 @@ struct IdleMotion {
         return IdleMotion(dy: breath.dy + 2 * CGFloat(sin(progress * .pi)), angle: 8 * sin(progress * .pi))
     }
 
-    init(dy: CGFloat, angle: Double) {
+    init(dy: CGFloat, angle: Double, squash: CGFloat = 0) {
         self.dy = dy
         self.angle = angle
+        self.squash = squash
     }
 
     /// The idle loop for `moment`: walking bob, a slumped breath, or the mode's own loop.
@@ -1349,7 +1612,7 @@ struct IdleMotion {
             self.init(mode: .work, time: t)
         case .shooting:
             self.init(mode: .money, time: t)
-        case .collapsed, .blanket:
+        case .collapsed, .blanket, .dozing:
             let breath = IdleMotion.sleeping(time: t)
             self.init(dy: breath.dy, angle: breath.angle)
         case .morning:
@@ -1410,7 +1673,7 @@ struct SpeechBubble: View {
             CompanionView(mode: .chill, need: .couchScroll, needSince: .now.addingTimeInterval(-45 * 60))
                 .frame(height: 180)
                 .toyCard()
-            CompanionView(mode: .chill, need: .couchScroll, invite: "起来，下楼走 10 分钟？").frame(height: 180).toyCard()
+            CompanionView(mode: .chill, need: .couchScroll, invite: "下楼走 10 分钟？我先穿鞋。").frame(height: 180).toyCard()
             CompanionView(mode: .boxing, event: .celebrate(id: "preview", kind: .boxing)).frame(height: 180).toyCard()
             CompanionView(mode: .chill, event: .celebrate(id: "preview-run", kind: .running))
                 .frame(height: 180)

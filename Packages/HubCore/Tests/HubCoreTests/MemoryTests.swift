@@ -55,17 +55,16 @@ import Testing
         let learned = habits(ledger)
         #expect(learned == [LearnedHabit(habit: .gymDays, title: "健身日", days: "周二、周四", isLearned: true)])
         let forgotten = habits(ledger, resets: MemoryResets(habits: [.gymDays: date(16)]))
-        #expect(forgotten.first?.days == "周二、周三、周四")
-        #expect(forgotten.first?.isLearned == false)
+        #expect(forgotten.isEmpty)
     }
 
     @Test func kuroAlsoLearnsHerIdentityDay() {
         let ledger = CanLedger(entries: wins(.boxing, [3, 10]))
         let list = habits(ledger, persona: .kuro)
-        #expect(list.map(\.habit) == [.gymDays, .identityDay])
+        #expect(list.map(\.habit) == [.identityDay])
         #expect(list.last == LearnedHabit(habit: .identityDay, title: "网球日", days: "周六", isLearned: true))
         let forgotten = habits(ledger, persona: .kuro, resets: MemoryResets(all: date(11)))
-        #expect(forgotten.last?.isLearned == false)
+        #expect(forgotten.isEmpty)
     }
 
     @Test func longTermMemoriesComeFromRecordsAfterTheLastForget() {
@@ -107,6 +106,54 @@ import Testing
         #expect(
             after == [LongMemory(title: "第一次去健身房", date: date(6)), LongMemory(title: "常待的地方", detail: "公司")]
         )
+    }
+
+    @Test func theIdentityMemoriesUseTheUsersCard() {
+        let cards = ModeCards(identity: .tennis)
+        let ledger = CanLedger(entries: wins(.boxing, [3, 10]))
+        let learned = Memory.habits(
+            persona: .haku,
+            cards: cards,
+            days: .standard,
+            ledger: ledger,
+            resets: MemoryResets(),
+            now: date(20),
+            calendar: calendar
+        )
+        #expect(learned.map(\.title) == ["网球日"])
+        let changes = [ModeChange(mode: .boxing, source: .manual, at: date(4, 10), deviceID: "t")]
+        let list = Memory.longTerm(
+            persona: .haku,
+            cards: cards,
+            changes: changes,
+            ledger: CanLedger(),
+            places: [],
+            resets: MemoryResets()
+        )
+        #expect(list == [LongMemory(title: "第一次网球日", date: date(4, 10))])
+    }
+
+    @Test func aUserWithoutACardHasNoIdentityMemories() {
+        let cards = ModeCards()
+        let learned = Memory.habits(
+            persona: .haku,
+            cards: cards,
+            days: .standard,
+            ledger: CanLedger(entries: wins(.boxing, [3, 10])),
+            resets: MemoryResets(),
+            now: date(20),
+            calendar: calendar
+        )
+        #expect(learned.isEmpty)
+        let list = Memory.longTerm(
+            persona: .haku,
+            cards: cards,
+            changes: [ModeChange(mode: .boxing, source: .manual, at: date(4, 10), deviceID: "t")],
+            ledger: CanLedger(),
+            places: [],
+            resets: MemoryResets()
+        )
+        #expect(list.isEmpty)
     }
 
     @Test func deletedChangesAreNotRemembered() {

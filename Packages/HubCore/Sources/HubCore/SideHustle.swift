@@ -8,19 +8,25 @@ public enum SideHustle: String, Codable, CaseIterable, Sendable {
     case operating
     case writing
     case studying
+    /// 做项目, the default for new users (onboarding 文案 v0 §6).
+    case project
 
     /// The state of a 副业 change with `tag`. Changes without a known tag are vibe coding.
     public init(tag: String?) {
         self = tag.flatMap(SideHustle.init(rawValue:)) ?? .vibeCoding
     }
 
-    public var title: String {
+    /// The state's name in the app's language.
+    public var title: String { chinese.localized }
+
+    private var chinese: String {
         switch self {
         case .vibeCoding: "vibe coding"
         case .shooting: "拍摄"
         case .operating: "运营"
         case .writing: "写作"
         case .studying: "学习"
+        case .project: "做项目"
         }
     }
 
@@ -32,7 +38,7 @@ public enum SideHustle: String, Codable, CaseIterable, Sendable {
     /// The look HAKU takes in this state.
     public var moment: CompanionMoment {
         switch self {
-        case .vibeCoding, .writing, .studying: .vibeCoding
+        case .vibeCoding, .writing, .studying, .project: .vibeCoding
         case .shooting, .operating: .shooting
         }
     }

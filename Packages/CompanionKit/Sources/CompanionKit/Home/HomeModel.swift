@@ -1,0 +1,521 @@
+import Foundation
+import HubCore
+import Observation
+import SwiftUI
+
+// Issue #489 (Mike 2026-10-17: the home runs on real data only). The model is built from the app's
+// `HomeSnapshot`; changes go back through the page's callbacks and come in again as a new snapshot.
+
+/// A top HAKU can wear at home.
+enum HomeOutfit: String, CaseIterable, Sendable {
+    case jacket, blazer, aloha, flame, varsity
+
+    var name: String {
+        switch self {
+        case .jacket: "默认外套"
+        case .blazer: "学院西装"
+        case .aloha: "浪花夏威夷衫"
+        case .flame: "火焰连帽卫衣"
+        case .varsity: "校队夹克"
+        }
+    }
+
+    /// The shop item the top is, `nil` for the default jacket.
+    var shopID: String? {
+        switch self {
+        case .jacket: nil
+        case .blazer: "haku.top.work.blazer"
+        case .aloha: "haku.top.chill.aloha"
+        case .flame: "haku.top.chill.flame"
+        case .varsity: "haku.set.chill.varsity"
+        }
+    }
+
+    // The tops drawn in the room so far (M4 adds the rest); anything else worn shows the default jacket.
+    /// The room version of what is worn: the first drawn top among `worn` item ids, else the jacket.
+    init(worn: Set<String>) {
+        self = Self.allCases.first { $0.shopID.map(worn.contains) ?? false } ?? .jacket
+    }
+
+    /// The drawn parts of the top, in place of the jacket.
+    var parts: [RunnerPart] {
+        switch self {
+        case .jacket: [.jacket, .stripeNeon, .hoodCollar]
+        case .blazer: [.topWorkIvy]
+        case .aloha: [.topChillAloha]
+        case .flame: [.topChillFlame, .hoodieStringsCyan]
+        case .varsity: [.setVarsityTop]
+        }
+    }
+
+    /// The colour of the sleeves and of the top seen from behind.
+    var base: Color {
+        switch self {
+        case .jacket: RunnerPalette.jacketChill
+        case .blazer: RunnerPalette.hood
+        case .aloha: RunnerPalette.catOrange
+        case .flame: RunnerPalette.bubblegum
+        case .varsity: RunnerPalette.varsityRed
+        }
+    }
+}
+
+/// A piece of furniture whose colour can be changed.
+enum HomePaintable: String, CaseIterable, Sendable {
+    case sofa, bed, rug, walls
+
+    var name: String {
+        switch self {
+        case .sofa: "沙发"
+        case .bed: "被子"
+        case .rug: "地毯"
+        case .walls: "墙"
+        }
+    }
+
+    /// The piece's id in the saved room layout.
+    var layoutID: String { "home.\(rawValue)" }
+
+    /// The colours to pick from; the first is the default.
+    var swatches: [UInt32] {
+        switch self {
+        case .sofa: [0x2D3250, 0x3A6B58, 0xFF8FC8, 0xFF9F43]
+        case .bed: [0x3A6B58, 0x2D3250, 0xC7A6FF, 0xFF3B4E]
+        case .rug: [0xAFC6E3, 0xEADCC2, 0x7CFF4F, 0xFFE14D]
+        case .walls: [0xF6E4C8, 0xDDEBD9, 0xE3E0F5, 0xF7D9D9]
+        }
+    }
+}
+
+/// A keepsake on the reward shelf, earned by something that really happened.
+struct HomeKeepsake: Identifiable, Sendable {
+    let id: String
+    let name: String
+}
+
+extension HomeSnapshot {
+    /// HAKU's room before any mode, owning only `owned`; for previews.
+    static func preview(owning owned: Set<String> = []) -> HomeSnapshot {
+        HomeSnapshot(
+            persona: .haku, mode: nil, cards: ModeCards(), cans: 0, owned: owned, wardrobe: Wardrobe(),
+            energy: nil, vitals: HakuVitals(), bedtime: .off, today: [],
+            room: RoomLayout(persona: .haku, now: .distantPast, deviceID: ""))
+    }
+}
+
+/// A line in the TODAY list.
+struct HomeTimelineEntry: Identifiable, Sendable {
+    let id = UUID()
+    let time: String
+    let mode: Mode?
+    let title: String
+}
+
+/// Something the scene plays once.
+enum HomeCue: Equatable, Sendable {
+    case bounce
+    case annoyed
+    case changed
+    case placed(HomeItem)
+    case poof
+}
+
+/// State of the home page: where HAKU is going, what he wears, what the room holds.
+@MainActor
+@Observable
+final class HomeModel {
+    /// What the app last sent.
+    private(set) var snapshot: HomeSnapshot
+    /// The current mode, `nil` before the first one.
+    private(set) var mode: Mode?
+    /// Where HAKU is, or is walking to.
+    private(set) var spot: HomeSpot = .idle
+    /// Where HAKU was dropped after being carried, until he walks somewhere.
+    private(set) var dropPoint: GridPoint?
+    /// Seconds until HAKU leaves a place he was sent to or dropped at and goes back to where the rules put him.
+    private(set) var visitLeft: Double?
+    /// The time in the room, advanced by the scene.
+    private(set) var now: Date
+    /// The room with the colours picked here, saved through the page.
+    private(set) var layout: RoomLayout
+    /// Whether the room shows every item, owned or not, to see where each one goes. DEBUG builds only.
+    private(set) var previewsAllItems = false
+    var isNight: Bool
+    /// What the character says on the card.
+    private(set) var line: String
+    /// Bumped on every change the scene draws.
+    private(set) var revision = 0
+    /// Where the scene last drew the character, in scene points; null before the first frame.
+    private(set) var figureFrame = CGRect.null
+    /// One-off animations for the scene, oldest first.
+    private(set) var cues: [HomeCue] = []
+
+    private var taps: [Date] = []
+    private var lineIndex = 0
+    /// What the behavior rules last said, `nil` when they couldn't tell.
+    private var beat: HomeBeat?
+    /// Seconds since the rules were last asked.
+    private var sinceBeat = 0.0
+
+    /// - Parameters:
+    ///   - snapshot: what the app shows.
+    ///   - night: day or night; by default from the clock.
+    ///   - now: the time, for day or night.
+    init(snapshot: HomeSnapshot, night: Bool? = nil, now: Date = .now) {
+        self.snapshot = snapshot
+        line = HomeLines(snapshot.persona).arrive
+        mode = snapshot.mode
+        layout = snapshot.room
+        let hour = Calendar.current.component(.hour, from: now)
+        isNight = night ?? (hour >= 18 || hour < 6)
+        self.now = now
+        goHome()
+    }
+
+    /// The user's identity card, the fourth mode.
+    var card: IdentityKind? { snapshot.cards.identity }
+    var cans: Int { snapshot.cans }
+    /// Whether today's energy is low; unknown counts as not low.
+    var isLow: Bool { snapshot.energy == .low }
+    private var lines: HomeLines { HomeLines(snapshot.persona) }
+    /// The top HAKU wears in the room.
+    var outfit: HomeOutfit { HomeOutfit(worn: snapshot.worn) }
+    /// The drawn tops HAKU owns, hanging in the wardrobe; the jacket always.
+    var ownedOutfits: [HomeOutfit] {
+        HomeOutfit.allCases.filter { $0.shopID.map(snapshot.owned.contains) ?? true }
+    }
+    // 家 区域规划 v0: the sports floor holds one piece at a time; the room puts the earlier one away. Mike
+    // 2026-10-18: with every item shown, the bag stood in front of HAKU on the bench, so the preview keeps to that
+    // too and shows the bench.
+    /// The items standing in the room: the owned ones the room has not put away, or while previewing, the first
+    /// items in catalog order the zones have room for.
+    var items: Set<HomeItem> {
+        if previewsAllItems {
+            return Set(
+                HomeZone.allCases.flatMap { zone in
+                    HomeItem.allCases.filter { $0.zone == zone && $0 != .bag }.prefix(zone.slots.count)
+                })
+        }
+        let standing = Set(snapshot.room.placements.filter { !$0.isStored }.map(\.piece))
+        return Set(snapshot.owned.filter(standing.contains).compactMap(HomeItem.init(shopID:)))
+    }
+    /// Where each standing item is.
+    var places: [HomeItem: GridPoint] { HomeItem.places(items) }
+    /// The keepsakes on the reward shelf, by name, oldest first, then the worn gloves once earned.
+    var keepsakes: [HomeKeepsake] {
+        let earned = snapshot.keepsakes.map { HomeKeepsake(id: $0.id, name: ShopItem.item($0.id)?.title ?? $0.id) }
+        return earned + (snapshot.wornGloves ? [HomeKeepsake(id: "wornGloves", name: "磨旧的拳套")] : [])
+    }
+    /// Today's modes, oldest first.
+    var timeline: [HomeTimelineEntry] {
+        snapshot.today.map {
+            HomeTimelineEntry(time: Self.clock($0.startedAt), mode: $0.mode, title: title($0.mode))
+        }
+    }
+
+    /// The colour picked for `piece`.
+    func color(_ piece: HomePaintable) -> UInt32 {
+        let picked = piece == .walls ? layout.wallpaper : layout.placements.first { $0.piece == piece.layoutID }?.color
+        return picked.flatMap { UInt32($0, radix: 16) }.flatMap { piece.swatches.contains($0) ? $0 : nil }
+            ?? piece.swatches[0]
+    }
+
+    // MARK: Actions
+
+    /// Takes a new snapshot from the app: HAKU follows a changed mode, and new items show up with a pop.
+    func apply(_ new: HomeSnapshot) {
+        let before = items
+        let modeChanged = new.mode != snapshot.mode
+        snapshot = new
+        layout = new.room
+        for item in items.subtracting(before) { cues.append(.placed(item)) }
+        if modeChanged, new.mode != mode {
+            mode = new.mode
+            goHome()
+            if let mode = new.mode {
+                line = Self.modeLine(mode, title: title(mode), card: card, items: items, persona: new.persona)
+            }
+        }
+        changed()
+    }
+
+    /// Switches the mode here at once and sends HAKU to act it out; the page also tells the app.
+    func switchMode(_ new: Mode) {
+        mode = new
+        goHome()
+        line = Self.modeLine(new, title: title(new), card: card, items: items, persona: snapshot.persona)
+        changed()
+    }
+
+    /// Reacts to a tap in the room.
+    func tap(_ hotspot: HomeHotspot, at date: Date = .now) {
+        switch hotspot {
+        case .haku: tapHaku(at: date)
+        case .desk:
+            visit(mode == .money ? .side : .work)
+            line = lines.desk
+        case .sofa:
+            visit(.sofa)
+            line = isLow ? lines.sofaLow : lines.sofa
+        case .bed:
+            visit(.rest)
+            line = lines.bed
+        case .bag:
+            visit(.box)
+            line = lines.bag
+        case .bench:
+            visit(.bench)
+            line = lines.bench
+        case .window:
+            visit(.window)
+            line = isNight ? lines.windowNight : lines.windowDay
+        case .wardrobe:
+            visit(.wardrobe)
+            line = lines.wardrobe
+        case .shop:
+            visit(.shop)
+            line = lines.shop
+        case .shelf:
+            line = lines.shelf
+        case .exit:
+            break
+        }
+        changed()
+    }
+
+    /// Picks swatch `index` for `piece` and returns the room to save.
+    @discardableResult
+    func paint(_ piece: HomePaintable, _ index: Int, now: Date = .now, deviceID: String = "") -> RoomLayout {
+        guard piece.swatches.indices.contains(index) else { return layout }
+        let hex = String(format: "%06X", piece.swatches[index])
+        if piece == .walls {
+            layout.wallpaper = hex
+        } else if let i = layout.placements.firstIndex(where: { $0.piece == piece.layoutID }) {
+            layout.placements[i].color = hex
+        } else {
+            layout.placements.append(RoomPlacement(piece: piece.layoutID, color: hex))
+        }
+        layout.touch(now: now, deviceID: deviceID)
+        changed()
+        return layout
+    }
+
+    /// Shows or hides every item, owned or not.
+    func togglePreviewItems() {
+        previewsAllItems.toggle()
+        changed()
+    }
+
+    /// Switches day and night by hand. DEBUG builds only.
+    func toggleNight() {
+        isNight.toggle()
+        line = isNight ? "天黑了。灯开着就行。" : "天亮了。"
+        changed()
+    }
+
+    /// HAKU was carried and let go over `hotspot`, or over the floor at `point`.
+    func drop(on hotspot: HomeHotspot?, at point: GridPoint) {
+        switch hotspot {
+        case .sofa: visit(.sofa)
+        case .bed: visit(.rest)
+        case .desk: visit(mode == .money ? .side : .work)
+        case .bag: visit(.box)
+        case .bench: visit(.bench)
+        default:
+            // Dropped on something HAKU can't stand on: he lands on the nearest open floor.
+            dropPoint = HomeNav.room(items: items).nearestOpen(to: point)
+            spot = .idle
+            visitLeft = Self.landingPause
+            cues.append(.bounce)
+        }
+        line = lines.drop
+        changed()
+    }
+
+    /// Puts HAKU on the open floor next to `item`, where he stays.
+    func standBeside(_ item: HomeItem) {
+        go(.idle)
+        dropPoint = Self.previewSpot(item, items: items.union([item]))
+        changed()
+    }
+
+    /// The open floor next to `item`, a step towards the middle of the room.
+    static func previewSpot(_ item: HomeItem, items: Set<HomeItem>? = nil) -> GridPoint {
+        // In front of a desk item or the bench HAKU would hide it; by the chair, or left of the bench, he stands
+        // beside it.
+        let s: GridPoint
+        switch item {
+        case .bench: s = GridPoint(x: 2.5, y: 3.2)
+        default: s = item.zone == .desk ? GridPoint(x: 1.2, y: 1.6) : item.spot
+        }
+        let hub = HomeSpot.hub
+        let d = max(0.01, s.distance(to: hub))
+        let toward = GridPoint(x: s.x + (hub.x - s.x) / d * 1.3, y: s.y + (hub.y - s.y) / d * 1.3)
+        return HomeNav.room(items: items ?? [item]).nearestOpen(to: toward)
+    }
+
+    /// HAKU was picked up.
+    func lift() {
+        line = lines.lift
+        changed()
+    }
+
+    /// Advances the room's time: a visit counts down and then HAKU goes back; otherwise he follows the rules when
+    /// what they say changes.
+    func tick(_ seconds: Double) {
+        now += seconds
+        if let left = visitLeft {
+            guard left <= seconds else {
+                visitLeft = left - seconds
+                return
+            }
+        } else {
+            // The scene ticks every frame; the rules change at most every few seconds.
+            sinceBeat += seconds
+            guard sinceBeat >= 1 else { return }
+            sinceBeat = 0
+            guard currentBeat() != beat else { return }
+        }
+        goHome()
+        changed()
+    }
+
+    /// Notes where the scene draws the character, so the labels over the room can step aside.
+    func noteFigure(_ frame: CGRect) {
+        figureFrame = frame
+    }
+
+    /// Takes the cues the scene has not played yet.
+    func takeCues() -> [HomeCue] {
+        defer { cues = [] }
+        return cues
+    }
+
+    // MARK: Helpers
+
+    private func tapHaku(at date: Date) {
+        taps = taps.filter { date.timeIntervalSince($0) < 2 } + [date]
+        if taps.count >= 3 {
+            taps = []
+            line = lines.annoyed
+            cues.append(.annoyed)
+            return
+        }
+        let said = Self.tapLines(spot: spot, low: isLow, persona: snapshot.persona)
+        line = said[lineIndex % said.count]
+        lineIndex += 1
+        cues.append(.bounce)
+    }
+
+    // PM 家 功能范围 v0: tapping furniture or dropping HAKU somewhere is a short visit, not a mode change.
+    private func visit(_ next: HomeSpot) {
+        go(next)
+        if next != Self.place(beat, card: card, items: items).spot { visitLeft = Self.visitLength }
+    }
+
+    private func go(_ next: HomeSpot) {
+        dropPoint = nil
+        visitLeft = nil
+        spot = next
+    }
+
+    /// Sends HAKU where the behavior rules put him now.
+    private func goHome() {
+        beat = currentBeat()
+        let place = Self.place(beat, card: card, items: items)
+        go(place.spot)
+        dropPoint = place.drop
+    }
+
+    // 家 执行计划 v0 §3: the rules decide; the mode switched here counts before the app has caught up.
+    private func currentBeat() -> HomeBeat? {
+        var home = snapshot
+        home.mode = mode
+        // The same day wanders the same way. Days start at midnight UTC.
+        let day = UInt64(bitPattern: Int64((now.timeIntervalSinceReferenceDate / 86_400).rounded(.down)))
+        return HomeBehavior.beat(for: home, now: now, seed: day)
+    }
+
+    /// Where HAKU goes for `beat`: a spot, or the floor next to an item; the middle of the rug when the rules can't
+    /// tell.
+    static func place(
+        _ beat: HomeBeat?, card: IdentityKind?, items: Set<HomeItem>
+    ) -> (spot: HomeSpot, drop: GridPoint?) {
+        guard let beat else { return (.idle, nil) }
+        switch beat.spot {
+        case .desk: return (beat.action == .sideHustle ? .side : .work, nil)
+        case .sofa: return (.sofa, nil)
+        case .bed: return (.rest, nil)
+        // The bench has no card, so the rules send a fitness day here; the bench is its gear.
+        case .sportsCorner: return (cardSpot(card, items: items), nil)
+        // No shelf spot yet: keepsake moments aren't played.
+        case .shelf: return (.idle, nil)
+        case .item(let id):
+            guard let item = HomeItem(shopID: id) else { return (.idle, nil) }
+            if beat.action == .use(id), item == .bag { return (.box, nil) }
+            return (.idle, previewSpot(item, items: items))
+        }
+    }
+
+    /// How long a visit lasts, in seconds.
+    static let visitLength = 30.0
+    /// How long HAKU stands where he was dropped before walking back.
+    static let landingPause = 1.5
+
+    private func changed() {
+        revision += 1
+    }
+
+    /// The mode's card name, as the user named it.
+    func title(_ mode: Mode) -> String {
+        snapshot.cards.title(for: mode, persona: snapshot.persona)
+    }
+
+    // PM 2026-10-15: the fourth mode follows the user's identity card, so its spot and line branch on the card.
+    static func cardSpot(_ card: IdentityKind?, items: Set<HomeItem>) -> HomeSpot {
+        switch card {
+        case .boxing: items.contains(.bag) ? .box : .shadowbox
+        case .fitness: items.contains(.bench) ? .bench : .practice
+        case nil: .idle
+        default: .practice
+        }
+    }
+
+    /// What `persona` says when the mode changes; `title` is the card's name.
+    static func modeLine(
+        _ mode: Mode, title: String, card: IdentityKind?, items: Set<HomeItem>, persona: Persona = .haku
+    ) -> String {
+        let lines = HomeLines(persona)
+        func line(_ format: String) -> String { String(format: format.localized(for: persona), title) }
+        return switch mode {
+        case .work: line(lines.work)
+        case .chill: line(lines.chill)
+        case .boxing:
+            switch card {
+            case .boxing: line(items.contains(.bag) ? lines.boxBag : lines.boxAir)
+            case .fitness where items.contains(.bench): line(lines.benchMode)
+            default: line(lines.goingOut)
+            }
+        case .money: line(lines.money)
+        }
+    }
+
+    /// What `persona` may say when tapped at `spot`; `low` when energy is low.
+    static func tapLines(spot: HomeSpot, low: Bool, persona: Persona = .haku) -> [String] {
+        let lines = HomeLines(persona)
+        return switch spot {
+        case .work: lines.atWork
+        case .side: lines.atSide
+        case .sofa: lines.atSofa
+        case .rest: lines.atRest
+        case .box, .shadowbox: lines.atBox
+        case .bench: lines.atBench
+        default: low ? lines.low : lines.idle
+        }
+    }
+
+    static func clock(_ date: Date = .now) -> String {
+        let c = Calendar.current.dateComponents([.hour, .minute], from: date)
+        return String(format: "%02d:%02d", c.hour ?? 0, c.minute ?? 0)
+    }
+}

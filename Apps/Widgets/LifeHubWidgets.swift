@@ -1,15 +1,23 @@
+import CompanionKit
 import HubCore
 import SwiftUI
 import WidgetKit
 
 @main
 struct LifeHubWidgets: WidgetBundle {
+    init() {
+        Languages.load(from: AppGroup.defaults)
+        // A font that fails to register falls back to the system font; the app reports it in its error list.
+        AppFonts.register()
+    }
+
     var body: some Widget {
         StatusWidget()
         ModeWidget()
         EnergyWidget()
         BoxingCountdownWidget()
         GoToGymControl()
+        CardControl()
     }
 }
 
@@ -21,6 +29,8 @@ struct HubEntry: TimelineEntry {
     var wardrobe = Wardrobe()
     /// Which character the widgets draw.
     var persona = Persona.haku
+    /// The user's cards, for the mode names; `nil` uses the character's default cards.
+    var cards: ModeCards?
     /// What HAKU does alongside Mike at `date`, `nil` while `moment` replaces the gym bag.
     var activity: CompanionActivity?
     /// The state within the mode HAKU acts out at `date`, such as vibe coding or walking to the gym.
@@ -43,6 +53,8 @@ struct HubEntry: TimelineEntry {
     var bath = false
 
     var mode: Mode? { snapshot?.mode }
+    /// The cards the names come from.
+    var names: ModeCards { cards ?? .legacy(for: persona) }
     var energy: EnergyLevel? { snapshot?.energy(at: date) }
     var vitals: HakuVitals { snapshot?.vitals ?? HakuVitals() }
     var need: CompanionNeed? { snapshot?.need(at: date) }
@@ -53,7 +65,7 @@ struct HubEntry: TimelineEntry {
     var detail: String {
         if let offWork { return offWork }
         // The second character's picture shows neither of these, so her line skips them.
-        if persona == .haku && bath { return "去洗澡" }
+        if persona == .haku && bath { return "占浴室中" }
         if let activity { return activity.reason(for: persona) }
         if persona == .haku && moment == .heading { return "出发了，包我背着" }
         if let scene = moment.flatMap(HakuLines.scene(for:)) {
@@ -92,7 +104,7 @@ struct HubProvider: TimelineProvider {
         let schedule = BedtimeSchedule.stored(in: AppGroup.defaults)
         let work = ModeRules.stored(in: AppGroup.defaults)
         let days = AppGroup.activityDays(now: now)
-        let starts = ActivityEngine.startTimes(on: now, days: days, work: work)
+        let starts = ActivityEngine.startTimes(on: now, days: days, work: work, bedtime: schedule)
         let departure = GymDeparture.stored(in: AppGroup.defaults)
         let walk = [departure?.at, departure?.until].compactMap { $0 }
         let presence = PlacePresence.stored(in: AppGroup.defaults)
@@ -100,9 +112,9 @@ struct HubProvider: TimelineProvider {
             since: presence.since(.office),
             now: now,
             work: work,
-            rules: NeedRules.standard.following(work)
+            rules: NeedRules.standard.following(work, bedtime: schedule)
         )
-        let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work)
+        let home = MomentEngine.homeTimes(since: presence.since(.home), now: now, work: work, bedtime: schedule)
         let slots = WidgetSnapshot.slotDates(after: now)
         let daily = DailyPlan.stored(in: AppGroup.defaults)
         let dailyTimes = daily?.times ?? []
@@ -116,6 +128,7 @@ struct HubProvider: TimelineProvider {
         let dates = WidgetSnapshot.timelineDates(after: now, bedtime: schedule, needTimes: needTimes)
         let persona = Persona.stored(in: AppGroup.defaults)
         let wardrobe = Wardrobe.stored(in: AppGroup.defaults, persona: persona)
+        let cards = ModeCards.current(in: AppGroup.defaults, persona: persona)
         let backoff = NudgeBackoff.stored(in: AppGroup.defaults)
         let ledger = CanLedger.read(from: AppGroup.container.canLedgerURL)
         let changes = ChangeEngine.times(log: .stored(in: AppGroup.defaults), ledger: ledger)
@@ -145,9 +158,11 @@ struct HubProvider: TimelineProvider {
                 officeSince: presence.since(.office),
                 home: snapshot?.home(since: presence.since(.home), at: date),
                 stiff: sit?.isStiff(mode: snapshot?.mode, at: date) ?? false,
+                phone: snapshot?.needPhone ?? true,
                 now: date,
                 work: work,
-                rules: NeedRules.standard.following(work)
+                rules: NeedRules.standard.following(work, bedtime: schedule),
+                bedtime: schedule
             )
             return HubEntry(
                 date: date,
@@ -155,6 +170,7 @@ struct HubProvider: TimelineProvider {
                 bedtime: schedule.state(at: date),
                 wardrobe: wardrobe,
                 persona: persona,
+                cards: cards,
                 activity: activity == .gymDay && moment != nil ? nil : activity,
                 moment: moment,
                 traces: snapshot?.traces(at: date) ?? [],

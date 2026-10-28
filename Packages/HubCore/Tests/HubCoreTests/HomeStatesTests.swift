@@ -86,6 +86,76 @@ import Testing
         #expect(home(since: arrived, at: date(5, 0, 30)) == .blanket)
     }
 
+    // PM action table U6: couch scrolling guessed from stillness shows the blanket, with no phone.
+    @Test func couchWithoutScreenTimeIsTheBlanket() {
+        let signals = HomeSignals(since: date(4, 18), workedToday: 0, manualAt: nil)
+        func moment(phone: Bool, mode: Mode? = .chill) -> CompanionMoment? {
+            MomentEngine.moment(
+                mode: mode,
+                sideHustle: nil,
+                activity: nil,
+                need: .couchScroll,
+                departing: false,
+                officeSince: nil,
+                home: signals,
+                phone: phone,
+                now: date(4, 20),
+                calendar: calendar
+            )
+        }
+        #expect(moment(phone: false) == .blanket)
+        #expect(moment(phone: true) == nil)
+        #expect(moment(phone: false, mode: .money) == nil)
+    }
+
+    // PM action table C2: couch scrolling in the blanket hours dozes off instead of peeking at the bag.
+    @Test func scrollingBeforeBedtimeDozesOff() {
+        let signals = HomeSignals(since: date(4, 18), workedToday: 0, manualAt: nil)
+        func moment(_ need: CompanionNeed?, mode: Mode? = .chill, at now: Date) -> CompanionMoment? {
+            MomentEngine.moment(
+                mode: mode,
+                sideHustle: nil,
+                activity: nil,
+                need: need,
+                departing: false,
+                officeSince: nil,
+                home: signals,
+                now: now,
+                calendar: calendar
+            )
+        }
+        #expect(moment(.couchScroll, at: date(4, 20, 59)) == nil)
+        #expect(moment(.couchScroll, at: date(4, 21)) == .dozing)
+        #expect(moment(.couchScroll, at: date(5, 1)) == .dozing)
+        #expect(moment(nil, at: date(4, 21)) == .blanket)
+        #expect(moment(.couchScroll, mode: .money, at: date(4, 21)) == nil)
+        #expect(moment(.boxingWarmup, at: date(4, 21)) == nil)
+    }
+
+    @Test func theBlanketComesTwoAndAHalfHoursBeforeBedtime() {
+        let signals = HomeSignals(since: date(4, 18), workedToday: 0, manualAt: nil)
+        func home(bedtime startMinute: Int, at now: Date) -> CompanionMoment? {
+            let bedtime = BedtimeSchedule(startMinute: startMinute, endMinute: 5 * 60)
+            return MomentEngine.home(mode: .chill, signals: signals, now: now, bedtime: bedtime, calendar: calendar)
+        }
+        #expect(home(bedtime: 22 * 60, at: date(4, 19, 29)) == nil)
+        #expect(home(bedtime: 22 * 60, at: date(4, 19, 30)) == .blanket)
+        // Bedtime at 01:00 puts the blanket at 22:30 the evening before.
+        #expect(home(bedtime: 60, at: date(4, 22, 29)) == nil)
+        #expect(home(bedtime: 60, at: date(4, 22, 30)) == .blanket)
+        // Bedtime at 06:00 puts the blanket at 03:30, and the day after 05:00 has none.
+        #expect(home(bedtime: 6 * 60, at: date(5, 3, 29)) == nil)
+        #expect(home(bedtime: 6 * 60, at: date(5, 3, 30)) == .blanket)
+        #expect(home(bedtime: 6 * 60, at: date(5, 12)) == nil)
+        let times = MomentEngine.homeTimes(
+            since: date(4, 18),
+            now: date(4, 18),
+            bedtime: BedtimeSchedule(startMinute: 22 * 60, endMinute: 5 * 60),
+            calendar: calendar
+        )
+        #expect(times.contains(date(4, 19, 30)))
+    }
+
     @Test func homeStatesGiveWayToEverythingElse() {
         let signals = HomeSignals(since: date(4, 22), workedToday: 0, manualAt: nil)
         func moment(

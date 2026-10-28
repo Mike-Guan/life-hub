@@ -21,6 +21,7 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
     }
 
     private func show(invite: String?, need: CompanionNeed?, bedtime: Bedtime, offWork: Bool) {
+        AppFonts.register()
         // The app writes the snapshot; the notification only reads the current mode from it.
         // Off work shows the chill outfit the schedule is about to switch to.
         let mode = offWork ? .chill : AppGroup.container.snapshotURL.flatMap(WidgetSnapshot.read(from:))?.mode
@@ -30,12 +31,15 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
             case .sitting: .stiff
             default: GymDeparture.moment(activity: nil, need: need, departing: false)
             }
+        let persona = Persona.stored(in: AppGroup.defaults)
+        let card = ModeCards.current(in: AppGroup.defaults, persona: persona).identity
         let runner =
-            switch Persona.stored(in: AppGroup.defaults) {
+            switch persona {
             case .haku:
                 AnyView(
                     CompanionView(
                         mode: mode,
+                        card: card,
                         need: need,
                         moment: moment,
                         invite: invite,
@@ -47,7 +51,8 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
             case .kuro:
                 AnyView(
                     KuroView(
-                        look: KuroLook(mode: mode ?? .chill),
+                        look: KuroLook(mode: mode ?? .chill, card: card),
+                        card: card,
                         bedtime: bedtime,
                         need: need,
                         moment: moment,

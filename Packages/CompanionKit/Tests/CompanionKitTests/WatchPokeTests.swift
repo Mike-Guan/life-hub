@@ -7,7 +7,7 @@ import Testing
 @Suite struct WatchPokeTests {
     @Test func eachModeHasItsOwnPoke() {
         let picks = Mode.allCases.map { WatchPoke.pick(mode: $0, energy: 50, asleep: false, busy: false) }
-        #expect(picks == [.headsetUp, .clink, .punch, .codeFlash])
+        #expect(picks == [.headsetUp, .clink, .duckHook, .codeFlash])
     }
 
     @Test(arguments: Mode.allCases)
@@ -21,6 +21,7 @@ import Testing
         #expect(WatchPoke.glare.line == "……干嘛。")
         #expect(WatchPoke.headsetUp.line == "在上班。")
         #expect(WatchPoke.clink.line == "叮。")
+        #expect(WatchPoke.duckHook.line == "……反射。")
         #expect([WatchPoke.punch, .codeFlash, .rollOver].allSatisfy { $0.line == nil })
     }
 
@@ -54,6 +55,23 @@ import Testing
         #expect(done.canScale == 1 && done.canOffset == .zero)
     }
 
+    @Test func boxingHakuDucksThenHooksShort() {
+        let at = { (seconds: Double) -> RunnerPose in
+            var pose = RunnerPose()
+            pose.poke(.duckHook, progress: seconds / WatchPoke.duration)
+            return pose
+        }
+        #expect(at(0.05).blink == 1)
+        #expect(at(0.32).bounce == 7 && at(0.32).gloveL == .zero)
+        // The hook stops in front of the chest, never over the face.
+        let hook = at(0.8)
+        #expect(hook.gloveL == CGSize(width: 22, height: -6) && hook.bounce == 0)
+        #expect(abs(hook.gloveLScale - 1.15) < 0.001)
+        #expect(at(1.2).gloveL == .zero && at(1.2).eyesDx == -4)
+        let done = at(WatchPoke.duration)
+        #expect(done.gloveL == .zero && done.gloveLScale == 1 && done.eyesDx == 0)
+    }
+
     @Test func pokesSwapTheirParts() {
         var glare = RunnerPose()
         glare.poke(.glare, progress: 0.1)
@@ -73,6 +91,14 @@ import Testing
         var punch = RunnerPose()
         punch.poke(.punch, progress: 0.4)
         #expect(RunnerFigure.parts(for: .boxing, pose: punch).contains(.thumpLines))
+    }
+
+    @Test func watchDuckHookSpeaksOnceTheHookIsBack() {
+        #expect(WatchPoke.allCases.filter { $0.lineDelay > 0 } == [.duckHook])
+        let delay = WatchPoke.duckHook.lineDelay
+        var pose = RunnerPose()
+        pose.poke(.duckHook, progress: delay / WatchPoke.duration)
+        #expect(abs(pose.gloveLScale - 1) < 0.001 && delay < WatchPoke.duration)
     }
 
     @Test(arguments: WatchPoke.allCases)

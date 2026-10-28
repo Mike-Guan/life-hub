@@ -31,6 +31,22 @@ import Testing
         #expect(WatchPayload(message: message) == payload())
     }
 
+    @Test func carriesTheUsersCardNames() throws {
+        var cards = ModeCards(identity: .swimming)
+        cards.rename(.work, to: "上学")
+        var sent = payload()
+        sent.cards = cards
+        let message = try #require(sent.message)
+        let received = try #require(WatchPayload(message: message))
+        #expect(received.title(for: .work) == "上学")
+        #expect(received.title(for: .boxing) == "游泳")
+        #expect(payload().title(for: .boxing) == "拳击日")
+        // A name stored by a build without the limit is still cut on the watch.
+        var long = payload()
+        long.cards = ModeCards(names: [Mode.work.rawValue: "一二三四五六"])
+        #expect(long.title(for: .work) == "一二三四")
+    }
+
     @Test func anOlderPayloadNeverReplacesANewerOne() {
         let newer = payload()
         var older = payload()
@@ -53,7 +69,7 @@ import Testing
         let json = #"{"snapshot":"# + String(decoding: snapshot, as: UTF8.self) + "}"
         let decoded = try HubJSON.decoder().decode(WatchPayload.self, from: Data(json.utf8))
         #expect(decoded.wardrobe == Wardrobe())
-        #expect(decoded.bedtime == .standard)
+        #expect(decoded.bedtime == .unset)
         #expect(decoded.persona == .haku)
         #expect(decoded.snapshot == payload().snapshot)
     }
@@ -83,13 +99,46 @@ import Testing
 
     @Test func redrawsWhenTheIPhoneWidgetsDo() {
         let now = date(7, 12)
+        var sent = payload()
+        sent.bedtime = .standard
         let expected = WidgetSnapshot.timelineDates(
             after: now,
             bedtime: .standard,
-            needTimes: payload().snapshot.needTimes,
+            needTimes: sent.snapshot.needTimes + WidgetSnapshot.slotDates(after: now),
             calendar: calendar
         )
-        #expect(payload().timelineDates(after: now, calendar: calendar) == expected)
+        #expect(sent.timelineDates(after: now, calendar: calendar) == expected)
+    }
+
+    @Test func redrawsWhenAScenePlays() {
+        let now = date(7, 12, 2)
+        var sent = payload()
+        let start = date(7, 12, 7)
+        sent.scenes = [
+            TimedScene(from: now, scene: HomeScene()), TimedScene(from: start, scene: HomeScene(bath: true)),
+        ]
+        let dates = sent.timelineDates(after: now, calendar: calendar)
+        #expect(dates.contains(start))
+        // The face goes back to the plain look when the scenes run out (#401).
+        #expect(dates.contains(date(7, 15, 2)))
+    }
+
+    @Test func drawsLikeComparesScenesWithinAStep() {
+        let bath = HomeScene(bath: true)
+        var sent = payload()
+        sent.scenes = [TimedScene(from: date(7, 12), scene: HomeScene()), TimedScene(from: date(7, 13), scene: bath)]
+        // A send two minutes later samples the same change up to one step apart.
+        var again = payload()
+        again.scenes = [
+            TimedScene(from: date(7, 12, 2), scene: HomeScene()), TimedScene(from: date(7, 13, 2), scene: bath),
+        ]
+        #expect(sent.drawsLike(again))
+        var moved = again
+        moved.scenes[1].from = date(7, 14)
+        #expect(!sent.drawsLike(moved))
+        var other = again
+        other.scenes[1].scene = HomeScene(moment: .lateCoding)
+        #expect(!sent.drawsLike(other))
     }
 
     @Test func carriesThePersona() throws {
@@ -108,5 +157,26 @@ import Testing
         #expect(sent.scene(at: date(7, 21)) == coding)
         #expect(sent.scene(at: date(7, 23)) == late)
         #expect(payload().scene(at: date(7, 21)) == nil)
+    }
+
+    @Test func carriesThePickedIdentityCard() {
+        var sent = payload()
+        #expect(sent.card(for: .boxing) == nil)
+        sent.cards = ModeCards(identity: .study)
+        #expect(sent.card(for: .boxing) == .study)
+        #expect(sent.card(for: .chill) == nil)
+        // The character's own card draws her default look.
+        sent.persona = .kuro
+        sent.cards = ModeCards(identity: .tennis)
+        #expect(sent.card(for: .boxing) == nil)
+    }
+
+    @Test func dropsTheLastSceneOnceTheScenesRunOut() {
+        let late = HomeScene(moment: .lateCoding)
+        var sent = payload()
+        sent.scenes = [TimedScene(from: date(7, 20), scene: HomeScene()), TimedScene(from: date(7, 22), scene: late)]
+        // The iPhone sent at 20:00 and worked out scenes until 23:00.
+        #expect(sent.scene(at: date(7, 23)) == late)
+        #expect(sent.scene(at: date(7, 23, 1)) == nil)
     }
 }

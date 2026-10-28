@@ -17,7 +17,7 @@ import Testing
     }
 
     func need(_ signals: NeedSignals, at now: Date) -> NeedReading? {
-        NeedEngine.need(signals, now: now, calendar: calendar)
+        NeedEngine.need(signals, now: now, rules: .sundayFixture, calendar: calendar)
     }
 
     func workout(_ kind: WorkoutSummary.Kind, _ start: Date, minutes: Double, meters: Double? = nil) -> WorkoutSummary {
@@ -96,6 +96,9 @@ import Testing
         #expect(reading.need == .couchScroll)
         #expect(reading.since == date(5, 20, 10))
         #expect(reading.reasons == ["在家 60 分钟没怎么动了，我也瘫着"])
+        // Guessed from stillness, so HAKU holds no phone.
+        #expect(!reading.phone)
+        #expect(try #require(need(NeedSignals(scrollThresholdAt: date(5, 20)), at: date(5, 20, 10))).phone)
     }
 
     @Test func stillBeforeTheEveningStartsCountingAtTheEvening() throws {
@@ -124,6 +127,11 @@ import Testing
         #expect(need(boxed, at: date(4, 9, 30)) == nil)
         let yesterday = NeedSignals(workouts: [workout(.boxing, date(3, 10), minutes: 45)])
         #expect(need(yesterday, at: date(4, 9, 30))?.need == .boxingWarmup)
+        // The Screen Time extension only has the day of the last workout.
+        let trainedToday = NeedSignals(trainedDay: StateEngine.dayStart(for: date(4, 7), calendar: calendar))
+        #expect(need(trainedToday, at: date(4, 9, 30)) == nil)
+        let trainedYesterday = NeedSignals(trainedDay: StateEngine.dayStart(for: date(3, 10), calendar: calendar))
+        #expect(need(trainedYesterday, at: date(4, 9, 30))?.need == .boxingWarmup)
     }
 
     @Test func boxingComesFirstOnBoxingMorningThenCouch() {
@@ -162,18 +170,18 @@ import Testing
     }
 
     @Test func noCouchInviteAfterAShortNight() {
-        let couch = NeedReading(need: .couchScroll, since: date(5, 20), reasons: [])
+        let couch = NeedReading(need: .couchScroll, since: date(5, 19), reasons: [])
         let time = { (sleptShort: Bool) in
             NeedEngine.inviteTime(
                 for: couch,
-                now: date(5, 20),
+                now: date(5, 19),
                 lastInviteAt: nil,
                 bedtime: .standard,
                 sleptShort: sleptShort,
                 calendar: self.calendar
             )
         }
-        #expect(time(false) == date(5, 21))
+        #expect(time(false) == date(5, 20))
         #expect(time(true) == nil)
     }
 
@@ -182,10 +190,10 @@ import Testing
     }
 
     @Test func inviteIsScheduledWhenTheNeedHasLasted() {
-        let couch = NeedReading(need: .couchScroll, since: date(5, 20), reasons: [], until: date(5, 23))
-        #expect(time(couch, date(5, 20, 10), nil) == date(5, 21))
-        #expect(time(couch, date(5, 21, 30), nil) == date(5, 21, 30))
-        #expect(time(couch, date(5, 21), date(5, 9)) == nil)
+        let couch = NeedReading(need: .couchScroll, since: date(5, 19), reasons: [], until: date(5, 23))
+        #expect(time(couch, date(5, 19, 10), nil) == date(5, 20))
+        #expect(time(couch, date(5, 20, 30), nil) == date(5, 20, 30))
+        #expect(time(couch, date(5, 20), date(5, 9)) == nil)
         #expect(time(nil, date(5, 21), nil) == nil)
 
         let late = NeedReading(need: .couchScroll, since: date(5, 22, 45), reasons: [])
@@ -194,6 +202,17 @@ import Testing
         #expect(time(ending, date(5, 20, 10), nil) == nil)
         let boxing = NeedReading(need: .boxingWarmup, since: date(4, 9), reasons: [], until: date(4, 12))
         #expect(time(boxing, date(4, 9), nil) == date(4, 9, 30))
+    }
+
+    // PM action table C2: from 21:00 for a 23:30 bedtime, HAKU dozes off instead of inviting.
+    @Test func noCouchInviteInTheHoursBeforeBedtime() {
+        let couch = NeedReading(need: .couchScroll, since: date(5, 20), reasons: [], until: date(5, 23))
+        #expect(time(couch, date(5, 20, 10), nil) == nil)
+        #expect(time(couch, date(5, 20, 59), nil) == nil)
+        let early = NeedReading(need: .couchScroll, since: date(5, 19, 30), reasons: [], until: date(5, 23))
+        #expect(time(early, date(5, 19, 40), nil) == date(5, 20, 30))
+        let slacking = NeedReading(need: .slacking, since: date(5, 21), reasons: [], until: date(5, 23))
+        #expect(time(slacking, date(5, 21), nil) != nil)
     }
 
     @Test func boxingCountdownRunsUntilClass() {
@@ -304,7 +323,7 @@ import Testing
         snapshot.needUntil = date(3, 23)
         #expect(snapshot.needSince(at: date(3, 21), calendar: calendar) == date(3, 20))
         #expect(snapshot.needSince(at: date(3, 23), calendar: calendar) == nil)
-        snapshot.nextNeed = NeedEngine.nextScheduled(after: date(3, 22), calendar: calendar)
+        snapshot.nextNeed = NeedEngine.nextScheduled(after: date(3, 22), rules: .sundayFixture, calendar: calendar)
         #expect(snapshot.needSince(at: date(4, 10), calendar: calendar) == date(4, 9))
     }
 
@@ -341,16 +360,17 @@ import Testing
     }
 
     @Test func nextBoxingMorningIsScheduledAhead() throws {
-        let saturday = try #require(NeedEngine.nextScheduled(after: date(3, 22), calendar: calendar))
+        let rules = NeedRules.sundayFixture
+        let saturday = try #require(NeedEngine.nextScheduled(after: date(3, 22), rules: rules, calendar: calendar))
         #expect(saturday.need == .boxingWarmup)
         #expect(saturday.from == date(4, 9))
         #expect(saturday.until == date(4, 12))
-        let sundayLate = try #require(NeedEngine.nextScheduled(after: date(4, 9), calendar: calendar))
+        let sundayLate = try #require(NeedEngine.nextScheduled(after: date(4, 9), rules: rules, calendar: calendar))
         #expect(sundayLate.from == date(11, 9))
     }
 
     @Test func snapshotShowsTheScheduledNeedWithoutTheApp() throws {
-        let next = try #require(NeedEngine.nextScheduled(after: date(3, 22), calendar: calendar))
+        let next = try #require(NeedEngine.nextScheduled(after: date(3, 22), rules: .sundayFixture, calendar: calendar))
         var snapshot = WidgetSnapshot(mode: .chill, since: nil, updatedAt: date(3, 22))
         snapshot.nextNeed = next
         #expect(snapshot.need(at: date(4, 8, 59), calendar: calendar) == nil)

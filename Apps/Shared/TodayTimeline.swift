@@ -6,6 +6,8 @@ import SwiftUI
 struct TodayTimeline: View {
     let segments: [ModeSegment]
     var persona = Persona.haku
+    /// The user's cards, for the mode names; `nil` uses the character's default cards.
+    var cards: ModeCards?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -19,7 +21,7 @@ struct TodayTimeline: View {
                     .foregroundStyle(Toy.muted)
             } else {
                 ForEach(segments.reversed()) { segment in
-                    Row(segment: segment, persona: persona)
+                    Row(segment: segment, persona: persona, cards: cards ?? .legacy(for: persona))
                 }
             }
         }
@@ -31,6 +33,7 @@ struct TodayTimeline: View {
     private struct Row: View {
         let segment: ModeSegment
         let persona: Persona
+        let cards: ModeCards
 
         var body: some View {
             HStack(spacing: 12) {
@@ -52,7 +55,7 @@ struct TodayTimeline: View {
                     .overlay(RoundedRectangle(cornerRadius: 4).stroke(Toy.ink, lineWidth: 2))
                     .frame(width: 16, height: 16)
 
-                Text(segment.mode.title(for: persona))
+                Text(cards.title(for: segment.mode, persona: persona))
                     .font(Toy.body(15, weight: .heavy))
                     .foregroundStyle(Toy.ink)
 
@@ -77,7 +80,7 @@ struct TodayTimeline: View {
         private var durationText: String {
             let minutes = Int(segment.fullDuration / 60)
             let text = minutes >= 60 ? "\(minutes / 60)h \(minutes % 60)m" : "\(minutes)m"
-            return segment.isOngoing ? "\(text) · 进行中" : text
+            return segment.isOngoing ? String(localized: "\(text) · 进行中") : text
         }
     }
 }

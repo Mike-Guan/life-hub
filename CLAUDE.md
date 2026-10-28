@@ -90,9 +90,9 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   are separate types. Never derive one by overloading the other.
 - Manual mode changes always win. Automatic sources (Focus filter, calendar, geofence)
   may suggest, or switch only under rules Mike enabled; no auto-switch for 2h after a manual change.
-  The clock never switches the mode: work starts by arriving at the office, ends by leaving it from an hour
-  before the end of work hours (17:30 for 18:30). Place comes first: from then, having left the office or
-  come home ends work even within the 2h window,
+  The clock never switches the mode: work starts by arriving at the office and ends by leaving it, at any
+  time (a lunch break too; coming back starts work again). Place comes first: having left the office or
+  come home today ends work even within the 2h window,
   unless the mode changed after that move. The app re-checks this at every place event and every open.
 - Every ModeChange is stored with its source.
 - Exception: entering the boxing gym geofence (CLMonitor, ~100 m) switches straight to boxing with no
@@ -104,8 +104,8 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   L2 push notification max 1/day with a 3h cooldown. Low energy + low load is rest: do nothing.
   An invite ignored 3 times in a row pauses for 7 days (`NudgeBackoff`); when signals can't tell, no judgement.
 - Bedtime reminder (Mike's explicit exception, not counted in L2): one local notification a day at the
-  set time (default 23:30). `Bedtime` (off/on) is an overlay state, not a fifth mode. No follow-up,
-  nothing logged about when Mike sleeps.
+  bedtime the user set (none until set). `Bedtime` (off/on) is an overlay state, not a fifth mode.
+  No follow-up, nothing logged about when Mike sleeps.
 - Off-work notice (Mike's explicit exception, not counted in L2): one local notification on each work
   day Mike is in work mode or at the office, 15 min before the end of work hours (Settings). No follow-up. Tapping it plays the off-work animation.
 
@@ -204,7 +204,7 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
 - 2026-10-05: Mike approved the nudge back-off: an invite ignored 3 times in a row pauses for 7 days,
   with one line and no catch-up; uncertain signals are never counted as ignored.
 - 2026-10-05: Gym is an off-work activity inside Chill, not a mode. Gym days are learned from gym wins
-  (a weekday won in 2 of the last 4 weeks; Tue-Thu until one qualifies), with no setting.
+  (a weekday won in 2 of the last 4 weeks), with no setting. The Tue-Thu default ended 2026-10-13.
 - 2026-10-05: Mike: leaving the office ends work only from 17:30; an earlier leave (lunch) keeps 上班.
 - 2026-10-05: Mike (via PM, PRD §16): arriving at the fitness gym in Work or 副业 switches to Chill (location,
   2h manual hold applies). Lifting shows only in Chill; the gym can is mode-independent; leaving keeps the mode.
@@ -219,3 +219,14 @@ Logic goes in packages, with unit tests. If iOS and macOS need the same logic, i
   Before the second user: go private and move CI to a self-hosted runner on Mike's Mac.
 - 2026-10-13: PM (hard-coded schedule review #4, #8): leaving the office ends work from an hour before the
   end of work hours; the evening, overtime, gym invite and drowsy times follow the work hours too.
+- 2026-10-13: Mike approved the pre-friend-test polish list (15:55Z). Its row 写死 Mike 作息: onboarding asks
+  for bedtime and work days; gym, run and identity-card days are learned from records and trigger nothing
+  until learned. Mike's own routines (bedtime 23:30, Tue-Thu gym, Saturday run) stop being defaults.
+  Existing installs keep their data.
+- 2026-10-15: Mike: 「离开公司就应该下班」. Leaving the office ends work at any time, not only from an hour before
+  the end of work hours. A lunch break ends work and coming back starts it again. The off-work line still
+  plays only from an hour before the end of work hours.
+- 2026-10-15: Mike: the home room keeps semi-realistic furniture, rendered in Blender. Reversed 2026-10-16.
+- 2026-10-16: Mike: the home room is drawn in code (`HomeArt.swift`), the first prototype's ink-line look refined
+  (thinner lines, more detail, contact shadows). The Blender renders are gone: no 3D game, and code keeps colours
+  and new shop items cheap.

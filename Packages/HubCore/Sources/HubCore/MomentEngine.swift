@@ -24,8 +24,9 @@ public enum MomentEngine {
     public static let collapsedLasts: TimeInterval = 30 * 60
     /// How many minutes after work start HAKU waits at the door before giving up for the day.
     public static let leaveWaitMinutes = 90
-    /// From this minute after midnight a quiet evening at home is the blanket.
-    public static let blanketMinute = 21 * 60
+    // PM 2026-10-13 (写死作息排查 v0 #9): 21:00 for a 23:30 bedtime, moving with the bedtime.
+    /// Minutes before bedtime that a quiet evening at home becomes the blanket.
+    public static let blanketLead = 150
     /// Time boxing or vibe coding today that leaves a trace.
     public static let traceAfter: TimeInterval = 30 * 60
     /// Boxing cans earned before the gloves look worn.
@@ -40,15 +41,18 @@ public enum MomentEngine {
     public static let packUpAfter = 30
 
     /// The state HAKU acts out at `now`: stiff from sitting, the 副业 state, then the gym-day states, then
-    /// scrolling at work, then overtime, packing up or drowsy at the office, then the states at home.
+    /// scrolling at work, then overtime, packing up or drowsy at the office, then dozing on the couch before
+    /// bedtime, then the states at home.
     /// - Parameters:
     ///   - stiff: whether Mike has sat too long, from `SitState.isStiff(mode:at:)`.
     ///   - activity: what HAKU does alongside Mike; only the gym bag gives way to a gym-day state.
     ///   - need: the current need.
+    ///   - phone: whether the need comes from Screen Time; couch scrolling without it shows the blanket.
     ///   - departing: whether Mike said he is going to the gym.
     ///   - officeSince: when Mike arrived at the office, `nil` when he isn't there.
     ///   - home: what the states at home depend on, `nil` when Mike isn't home.
     ///   - work: the work days and hours, for the weekday morning.
+    ///   - bedtime: the bedtime, for the blanket and dozing.
     /// - Returns: `nil` when HAKU shows the plain mode, activity or need.
     public static func moment(
         mode: Mode?,
@@ -59,9 +63,11 @@ public enum MomentEngine {
         officeSince: Date?,
         home: HomeSignals? = nil,
         stiff: Bool = false,
+        phone: Bool = true,
         now: Date,
         work: ModeRules = .standard,
         rules: NeedRules = .standard,
+        bedtime: BedtimeSchedule = .standard,
         calendar: Calendar = .current
     ) -> CompanionMoment? {
         if stiff || need == .sitting, need != .slacking { return .stiff }
@@ -70,21 +76,34 @@ public enum MomentEngine {
         if need == .slacking { return .slacking }
         let atOffice = office(mode: mode, since: officeSince, now: now, work: work, rules: rules, calendar: calendar)
         if let atOffice { return atOffice }
+        // PM action table U6 (2026-10-15): couch scrolling guessed from stillness, without Screen Time, has no
+        // phone to hold, so HAKU only slumps under the blanket.
+        if need == .couchScroll, !phone, activity == nil, home != nil, mode == nil || mode == .chill {
+            return .blanket
+        }
+        // PM action table C2 (2026-10-15): scrolling on the couch in the hours before bedtime, HAKU dozes off
+        // with the phone instead of peeking at the gym bag.
+        if need == .couchScroll, activity == nil, let home, mode == nil || mode == .chill, home.since <= now,
+            isWindingDown(now, bedtime: bedtime, calendar: calendar)
+        {
+            return .dozing
+        }
         // At home the bag, the couch and the other needs come first.
         guard activity == nil, need == nil, let home else { return nil }
-        return self.home(mode: mode, signals: home, now: now, work: work, calendar: calendar)
+        return self.home(mode: mode, signals: home, now: now, work: work, bedtime: bedtime, calendar: calendar)
     }
 
     // Mike, 2026-10-05: the clock never switches to work, so a weekday morning at home is chill with
     // HAKU getting ready, then waiting at the door. A manual change today means a day off: no nudge.
     /// The state at home in chill: collapsed after a long work day, the weekday morning and the wait at the
-    /// door, then the blanket in the evening.
+    /// door, then the blanket from `blanketLead` minutes before bedtime.
     /// - Returns: `nil` in other modes or with nothing going on.
     public static func home(
         mode: Mode?,
         signals: HomeSignals,
         now: Date,
         work: ModeRules = .standard,
+        bedtime: BedtimeSchedule = .standard,
         calendar: Calendar = .current
     ) -> CompanionMoment? {
         guard mode == nil || mode == .chill, signals.since <= now else { return nil }
@@ -97,8 +116,19 @@ public enum MomentEngine {
         if waiting, isWorkMorning(signals, now: now, work: work, calendar: calendar) {
             return minute < work.workStartMinute ? .morning : .timeToLeave
         }
+        return isWindingDown(now, bedtime: bedtime, calendar: calendar) ? .blanket : nil
+    }
+
+    /// Whether `now` is in the hours before bedtime: from `blanketLead` minutes before it, or after midnight
+    /// until the day starts. Without a bedtime, only after midnight.
+    public static func isWindingDown(_ now: Date, bedtime: BedtimeSchedule, calendar: Calendar = .current) -> Bool {
+        let minute = minuteOfDay(now, calendar: calendar)
         let lateNight = calendar.startOfDay(for: now) > StateEngine.dayStart(for: now, calendar: calendar)
-        return lateNight || minute >= blanketMinute ? .blanket : nil
+        guard bedtime.isSet else { return lateNight }
+        let start = blanketMinute(bedtime)
+        // A bedtime after 07:30 starts the blanket after midnight, so it runs only until the day starts.
+        if start < StateEngine.dayStartHour * 60 { return lateNight && minute >= start }
+        return lateNight || minute >= start
     }
 
     /// The give-up animation once HAKU stops waiting at the door: Mike was home when the wait ended and
@@ -138,6 +168,12 @@ public enum MomentEngine {
         return work.workdays.contains(calendar.component(.weekday, from: now)) && !lateNight && !dayOff
     }
 
+    // A bedtime after midnight puts the blanket the evening before.
+    /// When the blanket starts, in minutes after midnight.
+    static func blanketMinute(_ bedtime: BedtimeSchedule) -> Int {
+        (bedtime.startMinute - blanketLead + 24 * 60) % (24 * 60)
+    }
+
     private static func minuteOfDay(_ date: Date, calendar: Calendar) -> Int {
         let parts = calendar.dateComponents([.hour, .minute], from: date)
         return (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
@@ -148,12 +184,14 @@ public enum MomentEngine {
         since: Date?,
         now: Date,
         work: ModeRules = .standard,
+        bedtime: BedtimeSchedule = .standard,
         calendar: Calendar = .current
     ) -> [Date] {
         guard let since else { return [] }
         let midnight = calendar.startOfDay(for: now)
         let minute = { (value: Int) in calendar.date(byAdding: .minute, value: value, to: midnight) ?? midnight }
-        let minutes = [work.workStartMinute, work.workStartMinute + leaveWaitMinutes, blanketMinute]
+        let blanket = bedtime.isSet ? [blanketMinute(bedtime)] : []
+        let minutes = [work.workStartMinute, work.workStartMinute + leaveWaitMinutes] + blanket
         return [since.addingTimeInterval(collapsedLasts)] + minutes.map(minute)
     }
 
@@ -203,7 +241,7 @@ public enum MomentEngine {
     // One drowsy spell a day: from 3 hours after arriving or 14:00, whichever comes first.
     // PRD section 16, Mike 2026-10-05: packing up runs from 15 minutes before the end of work hours to
     // 30 minutes after, on work days only. Overtime still wins, and the evening extension counts as overtime.
-    /// Overtime, packing up or drowsy while in work mode at the office, else `nil`.
+    /// Overtime, packing up or drowsy while in work mode at the office, else `nil`. Never for irregular work.
     public static func office(
         mode: Mode?,
         since: Date?,
@@ -212,7 +250,7 @@ public enum MomentEngine {
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> CompanionMoment? {
-        guard mode == .work, let since, since <= now else { return nil }
+        guard mode == .work, let since, since <= now, !work.isIrregular else { return nil }
         let midnight = calendar.startOfDay(for: now)
         func time(_ minute: Int) -> Date {
             calendar.date(byAdding: .minute, value: minute, to: midnight) ?? midnight
@@ -235,7 +273,7 @@ public enum MomentEngine {
         rules: NeedRules = .standard,
         calendar: Calendar = .current
     ) -> [Date] {
-        guard let since else { return [] }
+        guard let since, !work.isIrregular else { return [] }
         let midnight = calendar.startOfDay(for: now)
         let minute = { (value: Int) in calendar.date(byAdding: .minute, value: value, to: midnight) ?? midnight }
         let start = min(minute(rules.drowsyStartMinute), since.addingTimeInterval(rules.drowsyAfterArrival))
