@@ -573,14 +573,30 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(prop: "haku.bookmark.study.gold", title: "金书签", card: .study),
         ShopItem(prop: "haku.sketch.art.yellow", title: "黄色速写本", price: 15, card: .art),
         ShopItem(prop: "haku.pencil.art.gold", title: "金铅笔", card: .art),
-        ShopItem(prop: "kuro.gloves.boxing.pink", title: "粉色拳套", price: 15, card: .boxing, persona: .kuro),
-        ShopItem(prop: "kuro.gloves.boxing.gold", title: "金拳套", card: .boxing, persona: .kuro),
-        ShopItem(prop: "kuro.block.gym.mint", title: "薄荷瑜伽砖", price: 15, card: .fitness, persona: .kuro),
-        ShopItem(prop: "kuro.block.gym.gold", title: "金瑜伽砖", card: .fitness, persona: .kuro),
-        ShopItem(prop: "kuro.glasses.study.red", title: "红框眼镜", price: 15, card: .study, persona: .kuro),
-        ShopItem(prop: "kuro.bookmark.study.gold", title: "金书签", card: .study, persona: .kuro),
-        ShopItem(prop: "kuro.stylus.art.blue", title: "蓝色触控笔", price: 15, card: .art, persona: .kuro),
-        ShopItem(prop: "kuro.brush.art.gold", title: "金画笔", card: .art, persona: .kuro),
+        // The second character's are drawn (商城扩充, 2026-10-27).
+        ShopItem(prop: "kuro.gloves.boxing.pink", title: "粉色拳套", price: 15, card: .boxing, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.gloves.boxing.gold", title: "金拳套", card: .boxing, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.block.gym.mint", title: "薄荷瑜伽砖", price: 15, card: .fitness, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.block.gym.gold", title: "金瑜伽砖", card: .fitness, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.glasses.study.red", title: "红框眼镜", price: 15, card: .study, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.bookmark.study.gold", title: "金书签", card: .study, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.stylus.art.blue", title: "蓝色触控笔", price: 15, card: .art, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.brush.art.gold", title: "金画笔", card: .art, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.phones.dance.mint", title: "薄荷挂脖耳机", price: 15, card: .dance, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.phones.dance.gold", title: "金挂脖耳机", card: .dance, persona: .kuro, drawn: true),
+        ShopItem(
+            prop: "kuro.folder.music.sakura", title: "樱色乐谱夹", price: 15, card: .music, persona: .kuro, drawn: true
+        ),
+        ShopItem(prop: "kuro.folder.music.gold", title: "金乐谱夹", card: .music, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.goggles.ski.sakura", title: "樱色雪镜", price: 15, card: .ski, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.goggles.ski.gold", title: "金雪镜", card: .ski, persona: .kuro, drawn: true),
+        // HAKU's matching props, off the shelf until UI 一组's drawings (#559) are wired.
+        ShopItem(prop: "haku.wristband.dance.pink", title: "粉色护腕", price: 15, card: .dance),
+        ShopItem(prop: "haku.wristband.dance.gold", title: "金护腕", card: .dance),
+        ShopItem(prop: "haku.pick.music.neon", title: "霓虹拨片", price: 15, card: .music),
+        ShopItem(prop: "haku.pick.music.gold", title: "金拨片", card: .music),
+        ShopItem(prop: "haku.goggles.ski.cyan", title: "青色雪镜", price: 15, card: .ski),
+        ShopItem(prop: "haku.goggles.ski.gold", title: "金雪镜", card: .ski),
         // Clothes (商店完整目录 v0 §1.1 and §2.1, prices of 2026-10-14), off the shelf until drawn.
         // HAKU's eight are the pop set Mike approved 2026-10-14; the second character's are still placeholders.
         ShopItem(clothes: "haku.top.work.blazer", slot: .top, title: "学院西装", price: 30, mode: .work),
@@ -659,10 +675,13 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     }
 
     // A prop without a price is the card's gold keepsake. The identity card's win carries the card.
-    init(prop id: String, title: String, price: Int? = nil, card: IdentityKind, persona: Persona = .haku) {
+    init(
+        prop id: String, title: String, price: Int? = nil, card: IdentityKind, persona: Persona = .haku,
+        drawn: Bool = false
+    ) {
         let keepsake = price == nil ? Keepsake(win: .boxing, count: 10, card: card) : nil
         self.init(id: id, slot: .gloves, title: title, price: price, keepsake: keepsake, persona: persona, card: card)
-        isDrawn = false
+        isDrawn = drawn
     }
 
     init(clothes id: String, slot: Slot, title: String, price: Int, mode: Mode, persona: Persona = .haku) {

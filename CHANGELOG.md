@@ -11,6 +11,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ### Added
 - The second preset character's shop has three more accessories: a red ribbon (on her ponytail, else at the
   side of her hair), a moon hair clip and a check lap blanket. At home she wears the ribbon and the clip.
+- The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
+  headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
+  headphones she bought.
+- The second preset character's identity card props are in the shop: pink and gold gloves (boxing), a mint
+  and a gold yoga block (fitness), red glasses and a gold bookmark (study), a blue stylus and a gold brush (art).
+  Each one moves with every tap and idle of the prop it replaces, and her gloves at home take their colour.
 - The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
   puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
   corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters
@@ -159,6 +165,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The shop's room shelf is grouped by where each item goes in the home: on the desk, by the sofa, in the corner
+  and the workout corner. This week's item still comes first.
 - After a workout HAKU crouches before each of his two hops and lands pressed down, and the celebration
   runs 2.4 s instead of 1.6 s, so it no longer looks like a poke.
 - The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
@@ -472,6 +480,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
 - The character on the watch face shows the same scene as the watch app and the iPhone Lock Screen (the gym
   bag, setting off, the bath) and changes its pose every 15 minutes, instead of only the plain mode look.
+- On the watch, the labels on the second page, the mode chip, a save failure and the page actions follow the
+  watch's language (Japanese and English), and VoiceOver can turn between the two pages. The no-mode complication
+  has a spoken label.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his

@@ -2203,6 +2203,22 @@
         }
       }
     },
+    "樱色乐谱夹" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakura score folder"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "さくら色の楽譜ファイル"
+          }
+        }
+      }
+    },
     "樱色网球服" : {
       "comment" : "她的网球服是裙装就用 dress，不是改 outfit",
       "localizations" : {
@@ -2233,6 +2249,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "さくら色のヘアバンド"
+          }
+        }
+      }
+    },
+    "樱色雪镜" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakura ski goggles"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "さくら色のゴーグル"
           }
         }
       }
@@ -2871,6 +2903,22 @@
         }
       }
     },
+    "粉色护腕" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pink wristband"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ピンクのリストバンド"
+          }
+        }
+      }
+    },
     "粉色拳套" : {
       "localizations" : {
         "en" : {
@@ -3131,6 +3179,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ミントのヘッドバンド"
+          }
+        }
+      }
+    },
+    "薄荷挂脖耳机" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mint neck headphones"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミントのネックヘッドホン"
           }
         }
       }
@@ -3539,6 +3603,23 @@
         }
       }
     },
+    "金乐谱夹" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold score folder"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金の楽譜ファイル"
+          }
+        }
+      }
+    },
     "金书签" : {
       "comment" : "纪念品",
       "localizations" : {
@@ -3573,6 +3654,40 @@
         }
       }
     },
+    "金护腕" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold wristband"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のリストバンド"
+          }
+        }
+      }
+    },
+    "金拨片" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold pick"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のピック"
+          }
+        }
+      }
+    },
     "金拳套" : {
       "comment" : "纪念品",
       "localizations" : {
@@ -3586,6 +3701,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "金のグローブ"
+          }
+        }
+      }
+    },
+    "金挂脖耳机" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold neck headphones"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のネックヘッドホン"
           }
         }
       }
@@ -3654,6 +3786,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "金のえんぴつ"
+          }
+        }
+      }
+    },
+    "金雪镜" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold ski goggles"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のゴーグル"
           }
         }
       }
@@ -3756,6 +3905,22 @@
         }
       }
     },
+    "霓虹拨片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neon pick"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネオンのピック"
+          }
+        }
+      }
+    },
     "霓虹粉拳套" : {
       "localizations" : {
         "en" : {
@@ -3785,6 +3950,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "水色のヘッドバンド"
+          }
+        }
+      }
+    },
+    "青色雪镜" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cyan ski goggles"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シアンのゴーグル"
           }
         }
       }
