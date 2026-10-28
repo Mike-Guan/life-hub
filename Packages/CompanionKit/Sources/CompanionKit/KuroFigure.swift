@@ -865,7 +865,7 @@ public struct KuroView: View {
         .onChange(of: nods) { _, _ in nodStart = .now }
         .onChange(of: cheer) { _, _ in
             guard bedtime == .off, unboxStart == nil else { return }
-            play(KuroTap(look: look, sleepy: false), at: .now)
+            play(Self.cheerMove(look, overtime: pose.overtime), at: .now)
         }
         .onChange(of: asleep) { _, new in
             guard style == .watch else { return }
@@ -999,6 +999,13 @@ public struct KuroView: View {
         }
     }
 
+    // KURO-18 (动画精修计划 v1, F6): with her chin on her hand the tablet is already down, so a cheer stays seated
+    // and taps her cheek instead of raising the tablet in front of the desk and her hand.
+    /// The move she plays for a cheer, a workout or a one-off in `look`.
+    nonisolated static func cheerMove(_ look: KuroLook, overtime: Bool) -> KuroTap {
+        overtime ? .chinTap : KuroTap(look: look, sleepy: false)
+    }
+
     /// Plays the unboxing, the workout cheer or the off-work move that `event` brings, if it is new.
     private func playEventIfNew() {
         playUnboxIfNew()
@@ -1006,7 +1013,7 @@ public struct KuroView: View {
         if let (id, kind) = Self.newCelebration(event, last: lastCelebration) {
             lastCelebration = id
             // Until she has her own cheer per workout group (新角色清单), she plays her tap move with a heart.
-            play(KuroTap(look: look, sleepy: false), at: .now)
+            play(Self.cheerMove(look, overtime: pose.overtime), at: .now)
             tapHeart = true
             if style == .watch { pokes += 1 }
             if showsBubble { say(KuroBubbleLines.celebration(kind), for: 4) }
@@ -1022,7 +1029,7 @@ public struct KuroView: View {
         if let oneOff = KuroOneOff(event), oneOff.id != last(oneOff) {
             markPlayed(oneOff)
             // KURO-04: until she has her own animation for each (新角色清单), she plays her tap move.
-            play(KuroTap(look: look, sleepy: false), at: .now)
+            play(Self.cheerMove(look, overtime: pose.overtime), at: .now)
             tapHeart = oneOff.heart
             if style == .watch { pokes += 1 }
             if showsBubble, let line = KuroBubbleLines.oneOff(event).randomElement() { say(line, for: 3) }
