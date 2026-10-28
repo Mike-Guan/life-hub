@@ -167,10 +167,11 @@ import Testing
         // It ends where it started, on the fist.
         let end = RunnerCardLook.ball.move(.sportBall, at: 3.4)
         #expect(abs(end?.offset.width ?? 1) < 0.01 && abs(end?.offset.height ?? 1) < 0.01)
-        // On the floor it stays inside the frame.
+        // On the floor it stays inside the frame and clear of the fist (UI 审核 10/28).
         let floor = RunnerCardLook.ball.move(.sportBall, at: 2.45)?.offset ?? .zero
-        #expect(104.5 + 9 + floor.width < RunnerArt.bounds.maxX)
         #expect(106 + 9 + floor.height < RunnerArt.bounds.maxY)
+        let gap = hypot(104.5 + floor.width - 104.5, 106 + floor.height - 121)
+        #expect(gap > 9 + 6.2)
     }
 
     @Test func outdoorShadesTheEyesWithThePoleLeaning() {

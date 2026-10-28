@@ -254,7 +254,7 @@ extension RunnerCardLook {
         case (.ball, .sportBall):
             let spot = Self.ballSpot(at: t)
             move.offset = CGSize(width: spot.x, height: spot.y)
-            move.angle = 720 * Double(Self.ramp(t, 0.4, 1.9)) + 180 * Double(Self.ramp(t, 2.3, 2.6))
+            move.angle = 720 * Double(Self.ramp(t, 0.4, 1.9)) - 180 * Double(Self.ramp(t, 2.3, 2.6))
             move.anchor = Self.point(104.5, 106)
         case (.outdoor, .outPole):
             // Leans on the pack while the hand shades the eyes.
@@ -345,17 +345,18 @@ extension RunnerCardLook {
         Double(-6 * ramp(t, 0.7, 1.3) + 10 * ramp(t, 1.5, 2.2) - 4 * ramp(t, 2.4, 2.9))
     }
 
-    // Up to the fingertip, two turns, then it drops, rolls by the foot and bounces back onto the fist.
+    // Up to the fingertip, two turns, then it drops below and left of the fist, clear of it (UI 审核 10/28), rolls a
+    // little and bounces back onto the fist.
     /// Where the ball is `t` seconds into the ball idle, as an offset from the fist in SVG units.
     private static func ballSpot(at t: CGFloat) -> CGPoint {
         if t < 1.9 { return CGPoint(x: 0, y: -27 * ramp(t, 0.15, 0.4)) }
         if t < 2.3 {
             let u = (t - 1.9) / 0.4
-            return CGPoint(x: 4 * u, y: -27 + 51 * u * u)
+            return CGPoint(x: -13 * u, y: -27 + 51 * u * u)
         }
-        if t < 2.6 { return CGPoint(x: 4 + 2 * ramp(t, 2.3, 2.6), y: 24) }
+        if t < 2.6 { return CGPoint(x: -13 - 2 * ramp(t, 2.3, 2.6), y: 24) }
         let v = min((t - 2.6) / 0.5, 1)
-        return CGPoint(x: 6 * (1 - v), y: 24 * (1 - v) - 14 * sin(v * .pi))
+        return CGPoint(x: -15 * (1 - v), y: 24 * (1 - v) - 14 * sin(v * .pi))
     }
 
     /// 0 before `a`, 1 after `b`, eased in between.
