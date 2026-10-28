@@ -19,12 +19,15 @@ enum ShopShelf: CaseIterable {
 }
 
 /// A section of the shop's room shelf, in the order the home is laid out.
+// UI 二组 2026-10-28: rugs and the poster wall come first.
 enum RoomSection: CaseIterable {
-    case desk, sofaSide, corner, sports
+    case rug, wall, desk, sofaSide, corner, sports
 
     /// The section's title over its items.
     var title: LocalizedStringKey {
         switch self {
+        case .rug: "地毯"
+        case .wall: "墙上"
         case .desk: "书桌上"
         case .sofaSide: "沙发旁"
         case .corner: "角落"
@@ -32,9 +35,13 @@ enum RoomSection: CaseIterable {
         }
     }
 
-    /// Whether items in `zone` are in this section; the sports floor and wall share one.
-    func holds(_ zone: RoomZone) -> Bool {
-        switch self {
+    /// Whether `item` is in this section; the sports floor and wall share one.
+    func holds(_ item: ShopItem) -> Bool {
+        if self == .rug { return item.isRug }
+        guard let zone = item.zone else { return false }
+        return switch self {
+        case .rug: false
+        case .wall: zone == .posterWall
         case .desk: zone == .desk
         case .sofaSide: zone == .sofaSide
         case .corner: zone == .corner
@@ -169,10 +176,10 @@ struct ShopView: View {
             groups.append((nil, [rest.removeFirst()]))
         }
         for section in RoomSection.allCases {
-            let here = rest.filter { $0.zone.map(section.holds) ?? false }
+            let here = rest.filter(section.holds)
             if !here.isEmpty { groups.append((section.title, here)) }
         }
-        let unzoned = rest.filter { $0.zone == nil }
+        let unzoned = rest.filter { item in !RoomSection.allCases.contains { $0.holds(item) } }
         if !unzoned.isEmpty { groups.append((nil, unzoned)) }
         return groups
     }

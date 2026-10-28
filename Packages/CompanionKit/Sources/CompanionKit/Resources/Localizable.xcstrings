@@ -335,6 +335,22 @@
         }
       }
     },
+    "圆形编织" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Round woven"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "丸い編み"
+          }
+        }
+      }
+    },
     "在 iPhone 上选个模式" : {
       "comment" : "手表",
       "localizations" : {
@@ -528,6 +544,38 @@
         }
       }
     },
+    "条纹" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Striped"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ストライプ"
+          }
+        }
+      }
+    },
+    "款式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Style"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "柄"
+          }
+        }
+      }
+    },
     "每一件都是真的发生过的事换来的。" : {
       "localizations" : {
         "en" : {
@@ -556,6 +604,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ソファ"
+          }
+        }
+      }
+    },
+    "流苏 · 免费" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Fringed · free"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "フリンジ · 無料"
           }
         }
       }
@@ -652,6 +716,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "モードを選ぶと、HAKUが出てくる"
+          }
+        }
+      }
+    },
+    "颜色 · 免费" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Colour · free"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "色 · 無料"
           }
         }
       }

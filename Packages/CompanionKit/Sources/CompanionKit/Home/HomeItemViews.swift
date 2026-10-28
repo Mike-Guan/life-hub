@@ -4,16 +4,25 @@ import SwiftUI
 
 /// A room item as the home draws it, for the shop's small icons.
 public struct HomeItemIcon: View {
-    let item: HomeItem
+    let layers: [HomeLayer]
 
     /// - Parameter itemID: the shop catalog id, such as `room.bench`. `nil` when the home has no such item.
     public init?(itemID: String) {
+        // A rug shows in the first rug colour, the one a new room has.
+        if let rug = HomeRug(shopID: itemID) {
+            layers = [.rug(rug, color: HomePaintable.rug.swatches[0])]
+            return
+        }
         guard let item = HomeItem(shopID: itemID) else { return nil }
-        self.item = item
+        layers = Self.layers(item)
+    }
+
+    /// The rug in `rug`'s style and `color`, for picking a style.
+    init(rug: HomeRug, color: UInt32) {
+        layers = [.rug(rug, color: color)]
     }
 
     public var body: some View {
-        let layers = Self.layers(item)
         let crop = Self.square(layers.map(\.rect).reduce(CGRect.null) { $0.union($1) })
         Canvas { context, size in
             let scale = min(size.width / crop.width, size.height / crop.height)
@@ -41,18 +50,25 @@ public struct HomeItemIcon: View {
 /// The real room around one item where it stands, circled, with HAKU breathing and blinking next to it, over a still
 /// of the same room. For the shop's preview before buying.
 public struct HomeItemPreview: View {
-    let item: HomeItem
+    let ring: CGRect
     @State private var stage: HomeStage
     // Under the live room, so the preview still shows where SpriteKit can't draw (the CI simulator has no GPU).
     @State private var still: CGImage?
     @Environment(\.scenePhase) private var scenePhase
 
-    /// - Parameter itemID: the shop catalog id, such as `room.bench`. `nil` when the home has no such item.
+    /// - Parameter itemID: the shop catalog id, such as `room.bench` or `room.rug.stripe`. `nil` when the home has
+    ///   no such item.
     public init?(itemID: String) {
-        guard let item = HomeItem(shopID: itemID) else { return nil }
-        self.item = item
         let model = HomeModel(snapshot: .preview(owning: [itemID]), night: false)
-        model.standBeside(item)
+        if let item = HomeItem(shopID: itemID) {
+            ring = Self.ring(item)
+            model.standBeside(item)
+        } else if let rug = HomeRug(shopID: itemID) {
+            ring = Self.ring(rug)
+            model.lay(rug)
+        } else {
+            return nil
+        }
         let stage = HomeStage(model: model)
         stage.scene.sync(animated: false)
         stage.scene.settle()
@@ -61,8 +77,7 @@ public struct HomeItemPreview: View {
 
     public var body: some View {
         let canvas = HomeGrid.canvas
-        let ring = Self.ring(item)
-        let crop = Self.crop(item, haku: stage.model.dropPoint)
+        let crop = Self.crop(ring, haku: stage.model.dropPoint)
         GeometryReader { geo in
             let scale = geo.size.width / crop.width
             ZStack(alignment: .topLeading) {
@@ -92,9 +107,19 @@ public struct HomeItemPreview: View {
         HomeGrid.bounds(HomeArt.boxes(item), margin: 8)
     }
 
+    /// The plan rectangle the ring goes round for a rug: the floor it covers.
+    static func ring(_ rug: HomeRug) -> CGRect {
+        HomeGrid.bounds([rug.box], margin: 8)
+    }
+
     /// The square of the plan shown: the item, and HAKU standing at `haku`.
     static func crop(_ item: HomeItem, haku: GridPoint?) -> CGRect {
-        var shown = ring(item)
+        crop(ring(item), haku: haku)
+    }
+
+    /// The square of the plan shown: `ring`, and HAKU standing at `haku`.
+    static func crop(_ ring: CGRect, haku: GridPoint?) -> CGRect {
+        var shown = ring
         if let haku {
             let feet = HomeGrid.plan(haku)
             // He stands about 95 points tall.

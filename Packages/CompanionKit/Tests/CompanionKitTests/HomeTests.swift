@@ -373,6 +373,13 @@ import Testing
 }
 
 @Suite struct HomeZoneTests {
+    @Test func theShopAndTheHomePutEachItemInTheSameZone() {
+        for item in ShopItem.catalog where item.slot == .room {
+            guard let home = HomeItem(shopID: item.id) else { continue }
+            #expect(item.zone?.rawValue == home.zone.rawValue, "\(item.id)")
+        }
+    }
+
     @Test func everyItemStandsInsideItsZone() throws {
         for item in HomeItem.allCases {
             let box = try #require(item.zone.box, "\(item)")
@@ -578,7 +585,9 @@ import Testing
     }
 
     @Test func everyDrawnRoomItemHasAHomePicture() {
-        for item in ShopItem.catalog(for: .haku) where item.isDrawn && item.slot == .room {
+        for item in ShopItem.catalog where item.isDrawn && item.slot == .room {
+            // The second character's first room items are drawn on her figure (KuroShopTests).
+            if KuroItem(rawValue: item.id) != nil { continue }
             #expect(HomeItemIcon(itemID: item.id) != nil, "\(item.id)")
         }
     }

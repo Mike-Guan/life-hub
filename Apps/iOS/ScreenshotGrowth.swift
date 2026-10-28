@@ -1,3 +1,4 @@
+import CompanionKit
 import HubCore
 import SwiftUI
 
@@ -5,6 +6,8 @@ import SwiftUI
 // Everything lives in memory: ten identity-card wins and one 5 km run, then the first item bought.
 /// The shop, the wardrobe or a keepsake's unboxing for `ScreenshotMode.persona`, picked by `screen`.
 /// `unbox-bottom` opens the unboxing scrolled down to its buttons; `wardrobe-<shelf>` opens the wardrobe on that tab.
+/// `shop-room` opens the shop on the room tab, `preview-rug` the striped rug's preview, and `home-decorate` the
+/// home's 家具换颜色 panel with the striped rug bought.
 struct ScreenshotGrowth: View {
     let screen: String
     @State private var growth = Self.growth()
@@ -33,9 +36,35 @@ struct ScreenshotGrowth: View {
                     startsAtBottom: screen == "unbox-bottom"
                 )
             }
+        case "shop-room":
+            ShopView(growth: growth, wardrobe: $wardrobe, persona: ScreenshotMode.persona, shelf: .room)
+        case "preview-rug":
+            if let rug = ShopItem.item(Self.stripedRug) {
+                ShopPreviewSheet(
+                    item: rug, persona: ScreenshotMode.persona, wardrobe: wardrobe, balance: 99, onCancel: {},
+                    onBuy: {})
+            }
+        case "home-decorate":
+            HakuHomeView(
+                snapshot: Self.home(), onSwitch: { _ in }, onShop: nil, onWardrobe: nil, onSave: { _ in }, onExit: {})
         default:
             ShopView(growth: growth, wardrobe: $wardrobe, persona: ScreenshotMode.persona)
         }
+    }
+
+    private static var stripedRug: String {
+        ScreenshotMode.persona == .kuro ? "kuro.room.rug.stripe" : "room.rug.stripe"
+    }
+
+    // A room of its own, in memory, with the striped rug bought, so the panel shows the rug's styles.
+    private static func home() -> HomeSnapshot {
+        let growth = growth()
+        if let rug = ShopItem.item(stripedRug) { try? growth.buy(rug) }
+        let suite = "screenshot-home"
+        UserDefaults().removePersistentDomain(forName: suite)
+        return HomeSnapshot.make(
+            persona: ScreenshotMode.persona, mode: .chill, today: [], ledger: growth.ledger, energy: EnergyLog(),
+            bedtime: .off, defaults: UserDefaults(suiteName: suite) ?? .standard)
     }
 
     private static func growth() -> GrowthStore {

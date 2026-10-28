@@ -288,6 +288,8 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
     public var deletedAt: Date?
     public var wallpaper: String?
     public var floor: String?
+    /// The shop id of the rug laid in the room, `nil` for the free fringed one.
+    public var rug: String?
     public var placements: [RoomPlacement]
     // DW-02: placements this build can't read and fields a newer build added, written back unchanged.
     var unreadable: [JSONValue] = []
@@ -304,7 +306,7 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
     }
 
     private enum CodingKeys: String, CodingKey, CaseIterable {
-        case schemaVersion, id, persona, createdAt, updatedAt, updatedBy, deletedAt, wallpaper, floor, placements
+        case schemaVersion, id, persona, createdAt, updatedAt, updatedBy, deletedAt, wallpaper, floor, rug, placements
     }
 
     /// Decodes the layout; missing fields fall back to defaults and unknown ones are kept.
@@ -321,6 +323,7 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
         deletedAt = try? values.decodeIfPresent(Date.self, forKey: .deletedAt)
         wallpaper = try? values.decodeIfPresent(String.self, forKey: .wallpaper)
         floor = try? values.decodeIfPresent(String.self, forKey: .floor)
+        rug = try? values.decodeIfPresent(String.self, forKey: .rug)
         let entries = (try? values.decodeIfPresent([PlacementEntry].self, forKey: .placements)) ?? []
         placements = entries.compactMap(\.placement)
         unreadable = entries.compactMap(\.raw)
@@ -341,6 +344,7 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
         try values.encodeIfPresent(deletedAt, forKey: .deletedAt)
         try values.encodeIfPresent(wallpaper, forKey: .wallpaper)
         try values.encodeIfPresent(floor, forKey: .floor)
+        try values.encodeIfPresent(rug, forKey: .rug)
         try values.encode(placements.map(PlacementEntry.read) + unreadable.map(PlacementEntry.raw), forKey: .placements)
     }
 
@@ -352,7 +356,8 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
 
     // 商店与家 同步方案 v0 §4 (Mike 2026-10-16): a room item bought anywhere goes to its own spot in the room.
     // 家 区域规划 v0 §2: without a catalog spot it goes to its zone, and a full zone puts its earliest item away.
-    /// Places each of `items` not yet in the room at its catalog spot, in its zone, or in the cupboard.
+    // 商店扩充 v1 §2.4: a bought rug is laid at once; the one it replaces stays owned, to lay again in 整理.
+    /// Places each of `items` not yet in the room at its catalog spot, in its zone, or in the cupboard; lays a rug.
     /// - Returns: the items added and the ones put away to make room.
     @discardableResult
     public mutating func place(
@@ -363,7 +368,10 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
         for item in items where !placed.contains(item) {
             let id = UUID.derived(from: "room.\(persona).\(item)")
             placements.append(RoomPlacement(id: id, piece: item, at: catalog.piece(item)?.defaultSpot))
-            if catalog.piece(item)?.defaultSpot == nil, let zone = ShopItem.item(item)?.zone {
+            // A rug keeps its placement in the cupboard, so it is laid only when it first comes in.
+            if ShopItem.item(item)?.isRug == true {
+                rug = item
+            } else if catalog.piece(item)?.defaultSpot == nil, let zone = ShopItem.item(item)?.zone {
                 change.putAway += settle(placements.count - 1, in: zone, now: now)
             }
             placed.insert(item)
@@ -398,6 +406,13 @@ public struct RoomLayout: Equatable, Codable, Sendable, Identifiable {
     public mutating func putAway(_ item: String, now: Date = Date(), deviceID: String) {
         guard let index = placements.firstIndex(where: { $0.piece == item && !$0.isStored }) else { return }
         placements[index].clearSpot()
+        touch(now: now, deviceID: deviceID)
+    }
+
+    /// Lays the rug with shop id `item`, or the free fringed one when `item` is `nil`.
+    public mutating func lay(rug item: String?, now: Date = Date(), deviceID: String) {
+        guard rug != item else { return }
+        rug = item
         touch(now: now, deviceID: deviceID)
     }
 
