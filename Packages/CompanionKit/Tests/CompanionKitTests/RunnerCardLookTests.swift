@@ -6,6 +6,11 @@ import Testing
 
 // Identity cards, batch 1 (第 1 批身份卡 预览): HAKU dresses for the card the user picked.
 @Suite struct RunnerCardLookTests {
+    /// Every card with a look of its own.
+    private let looks: [IdentityKind] = [
+        .tennis, .fitness, .study, .art, .dance, .music, .ski, .swimming, .yoga, .ball, .outdoor,
+    ]
+
     private func parts(_ mode: Mode, card: IdentityKind?) -> Set<RunnerPart> {
         Set(RunnerFigure.parts(for: mode, pose: RunnerPose(face: .mid).dressed(for: card, in: mode)))
     }
@@ -18,8 +23,12 @@ import Testing
         #expect(RunnerCardLook(card: .dance) == .dance)
         #expect(RunnerCardLook(card: .music) == .music)
         #expect(RunnerCardLook(card: .ski) == .ski)
-        // No card, boxing, or a card without a look yet keeps the boxing kit.
-        for card: IdentityKind? in [nil, .boxing, .swimming, .yoga] {
+        #expect(RunnerCardLook(card: .swimming) == .swimming)
+        #expect(RunnerCardLook(card: .yoga) == .yoga)
+        #expect(RunnerCardLook(card: .ball) == .ball)
+        #expect(RunnerCardLook(card: .outdoor) == .outdoor)
+        // No card or boxing keeps the boxing kit.
+        for card: IdentityKind? in [nil, .boxing] {
             #expect(RunnerCardLook(card: card) == nil)
             #expect(parts(.boxing, card: card).isSuperset(of: [.gloveL, .gloveR, .headband]))
         }
@@ -34,7 +43,7 @@ import Testing
 
     // Mike 2026-10-15: a card's own backdrop holds no items, so nothing stands on the floor or in the corner.
     @Test func cardBackdropsHoldNoItems() {
-        for card: IdentityKind in [.tennis, .fitness, .study, .art, .dance, .music, .ski] {
+        for card in looks {
             for watch in [false, true] {
                 let pose = RunnerPose().dressed(for: card, in: .boxing, watch: watch)
                 #expect(pose.bagLift < 0, "\(card)")
@@ -55,6 +64,10 @@ import Testing
             .dance: [.stripeSport, .wristbandHand],
             .music: [.stripeNeon, .eyesWork],
             .ski: [.stripeSport, .wristbandHand, .skiGoggles],
+            .swimming: [.stripeSport, .cheerGoggles],
+            .yoga: [.stripeSport, .yogaMat, .matHand],
+            .ball: [.stripeSport, .wristbandHand, .sportBall],
+            .outdoor: [.stripeNeon, .outPack, .outStraps, .outPole, .poleFist],
         ]
         for (card, things) in expected {
             let shown = parts(.boxing, card: card)
@@ -71,7 +84,7 @@ import Testing
         var pose = RunnerPose(face: .mid)
         pose.dailyProp = .note
         pose.propRaise = 1
-        for card: IdentityKind in [.tennis, .fitness, .study, .art, .dance, .music, .ski] {
+        for card in looks {
             let dressed = pose.dressed(for: card, in: .boxing)
             let shown = Set(RunnerFigure.parts(for: .boxing, pose: dressed))
             #expect(shown.isDisjoint(with: RunnerCardLook(card: card)!.props), "\(card)")
@@ -82,11 +95,17 @@ import Testing
 
     // 顺延身份卡 (UI 审核 10/14): the watch draws no fist with the wristband.
     @Test func theWatchLeavesOutTheWristband() {
-        for card: IdentityKind in [.dance, .ski] {
+        for card: IdentityKind in [.dance, .ski, .ball] {
             let pose = RunnerPose().dressed(for: card, in: .boxing, watch: true)
             #expect(pose.watchFrame)
             #expect(!Set(RunnerFigure.parts(for: .boxing, pose: pose)).contains(.wristbandHand), "\(card)")
         }
+        // The ball stays by the shoulder, raised clear of the watch's bottom edge, and is on the fist mid-spin.
+        let ball = RunnerPose().dressed(for: .ball, in: .boxing, watch: true)
+        #expect(Set(RunnerFigure.parts(for: .boxing, pose: ball)).contains(.sportBall))
+        #expect(106 + 9 + RunnerCardLook.watchBallLift(at: -1) < 110)
+        #expect(RunnerCardLook.watchBallLift(at: 1.0) == 0)
+        #expect(abs(RunnerCardLook.watchBallLift(at: 3.4) - RunnerCardLook.watchBallLift(at: -1)) < 0.01)
     }
 
     private func beat(_ card: IdentityKind, at t: CGFloat) -> Set<RunnerPart> {
@@ -123,6 +142,58 @@ import Testing
         #expect(!breath.contains(.goggleHand))
     }
 
+    // 第2批 身份卡 (HAKU 第2批 说明): all four idles are 动态.
+    @Test func swimmingGogglesComeDownOverEyesThatStillShow() {
+        let down = beat(.swimming, at: 1.2)
+        #expect(down.isSuperset(of: [.goggleHand, .cheerGoggles, .eyesClosed]))
+        #expect(beat(.swimming, at: 0.8).contains(.eyesChill))
+        // Pushed back up, the eyes squint.
+        let up = beat(.swimming, at: 2.5)
+        #expect(up.contains(.eyesWork) && !up.contains(.goggleHand))
+    }
+
+    @Test func yogaPressesThePalmsAndSwaysWhileTheMatStands() {
+        let palms = beat(.yoga, at: 1.5)
+        #expect(palms.isSuperset(of: [.yogaPalms, .yogaMat, .eyesClosed]))
+        #expect(!palms.contains(.matHand))
+        #expect(beat(.yoga, at: 3.2).contains(.eyesWork))
+        #expect(beat(.yoga, at: 3.9).isSuperset(of: [.matHand, .yogaMat]))
+        #expect(RunnerCardLook.yoga.move(.yogaMat, at: 1.2) == nil)
+        #expect(RunnerCardLook.yoga.head(at: 1.3).tilt < -5)
+    }
+
+    @Test func theBallSpinsDropsAndComesBackToTheFist() {
+        let spin = beat(.ball, at: 1.0)
+        #expect(spin.isSuperset(of: [.cheerBallHand, .sportBall]))
+        #expect(!spin.contains(.wristbandHand))
+        let away = beat(.ball, at: 2.8)
+        #expect(away.isSuperset(of: [.wristbandHand, .sportBall, .eyesWork]))
+        // It ends where it started, on the fist.
+        let end = RunnerCardLook.ball.move(.sportBall, at: 3.4)
+        #expect(abs(end?.offset.width ?? 1) < 0.01 && abs(end?.offset.height ?? 1) < 0.01)
+        // On the floor it stays inside the frame and clear of the fist (UI 审核 10/28).
+        let floor = RunnerCardLook.ball.move(.sportBall, at: 2.45)?.offset ?? .zero
+        #expect(106 + 9 + floor.height < RunnerArt.bounds.maxY)
+        let gap = hypot(104.5 + floor.width - 104.5, 106 + floor.height - 121)
+        #expect(gap > 9 + 6.2)
+    }
+
+    @Test func outdoorShadesTheEyesWithThePoleLeaning() {
+        let looking = beat(.outdoor, at: 1.5)
+        #expect(looking.isSuperset(of: [.browHand, .outPole, .windGust, .eyesWork, .outPack]))
+        #expect(!looking.contains(.poleFist))
+        #expect(beat(.outdoor, at: 2.0).contains(.eyesClosed))
+        #expect((RunnerCardLook.outdoor.move(.outPole, at: 1.5)?.angle ?? 0) < -10)
+        #expect(beat(.outdoor, at: 3.5).isSuperset(of: [.poleFist, .outPole]))
+        #expect(!beat(.outdoor, at: 3.5).contains(.browHand))
+    }
+
+    @Test func aWornBackpackStaysOnThroughTheShrug() {
+        for t in stride(from: 0.0, to: 1.2, by: 0.1) {
+            #expect(RunnerBaseIdle.hitchPack.move(.outPack, .outdoor, at: t)?.opacity == 1)
+        }
+    }
+
     @Test func theCardIdlePlaysNowAndThenOnlyWithFreeHands() {
         let times = stride(from: 0.0, to: 120, by: 0.25)
         let beats = times.map { RunnerPose(face: .mid).dressed(for: .dance, in: .boxing, time: $0).cardBeat }
@@ -146,7 +217,6 @@ import Testing
                 .dressed(for: card, in: .boxing, time: t)
         }
         #expect(times.contains { boxing(pose(nil, at: $0)) })
-        #expect(times.contains { boxing(pose(.swimming, at: $0)) })
         for card in IdentityKind.allCases where RunnerCardLook(card: card) != nil {
             #expect(times.contains { pose(card, at: $0).cardBeat >= 0 })
             #expect(!times.contains { boxing(pose(card, at: $0)) })
