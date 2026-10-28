@@ -57,10 +57,10 @@ extension FrameSheets {
         ]
         for (label, mode, card) in modes {
             var cells: [CGImage] = []
-            for back in [false, true] {
+            for spot in [HomeHotspot?.none, .sofa, .wardrobe] {
                 let model = HomeModel(night: false, card: card, mode: mode)
                 let scene = HomeScene(model: model)
-                if back { model.tap(.wardrobe) }
+                if let spot { model.tap(spot) }
                 scene.sync(animated: false)
                 scene.settle()
                 scene.pose(at: 1.3)
@@ -94,7 +94,7 @@ extension FrameSheets {
                     }
                 }
             }
-            Text(verbatim: "模式和身份卡的默认衣服（正面 / 背面 · 衣柜前）").font(.system(size: 14, weight: .bold))
+            Text(verbatim: "模式和身份卡的默认衣服（模式的位置 / 沙发 / 背面 · 衣柜前）").font(.system(size: 14, weight: .bold))
             ForEach(defaults.indices, id: \.self) { r in
                 HStack(spacing: 10) {
                     Text(verbatim: defaults[r].0).font(.system(size: 12, weight: .bold)).frame(
@@ -110,11 +110,11 @@ extension FrameSheets {
         try save(sheet, as: "home-10-clothes", scale: 1)
     }
 
-    /// A 120 pt square of the scene around HAKU, two pixels per point.
+    /// A 120 pt square of the scene around HAKU, with room above the hair for a cap, two pixels per point.
     private static func hakuCloseUp(_ scene: CompanionKit.HomeScene) -> CGImage? {
         guard let image = composite(scene, scale: 2) else { return nil }
         let p = scene.haku.position
-        let rect = CGRect(x: (p.x - 60) * 2, y: (scene.size.height - p.y - 90) * 2, width: 240, height: 240)
+        let rect = CGRect(x: (p.x - 60) * 2, y: (scene.size.height - p.y - 102) * 2, width: 240, height: 240)
         return image.cropping(to: rect)
     }
 }
