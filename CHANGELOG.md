@@ -4,6 +4,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ## [Unreleased]
 
+### Fixed
+- A workout cheer while the second preset character rests her chin on her hand at the desk no longer raises her
+  tablet in front of the desk and her hand: she stays seated and taps her cheek.
+
 ### Added
 - The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
   headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
@@ -11,6 +15,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character's identity card props are in the shop: pink and gold gloves (boxing), a mint
   and a gold yoga block (fitness), red glasses and a gold bookmark (study), a blue stylus and a gold brush (art).
   Each one moves with every tap and idle of the prop it replaces, and her gloves at home take their colour.
+- The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
+  puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
+  corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters
+  can have: a yoga mat, a jump rope, a dance mirror and a music stand. Two items in the same zone (desk or
+  sports wall) stand side by side, and a poster replaces the two default ones. The shop doesn't sell them yet.
 - The home draws the second preset character in her own figure: the same room, spots and poses as HAKU,
   with her own head, hair and tops. She sits with her hands on her lap, swings a forehand with her racket on
   her tennis day, guards and punches in two gloves with the boxing card, and dozes over her tablet in bed.
@@ -154,6 +163,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- After a workout HAKU crouches before each of his two hops and lands pressed down, and the celebration
+  runs 2.4 s instead of 1.6 s, so it no longer looks like a poke.
 - The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
   reward list names them. The shelf no longer draws gloves nobody earned.
 - In the home the floor lamp's cord runs to a socket on the wall beside it, not out across the floor.
@@ -771,6 +782,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tap move, with a heart and a line after a workout.
 
 ### Fixed
+- The TODAY card's 进行中 after the running mode shows in Japanese and English too.
 - With the app closed, arriving at or leaving a place now switches the mode, in every mode. Each launch
   (including the background one a geofence causes) replays the last state of every place fence, and the
   place handling moved into HubCore (`PlaceEvent`) with tests. A place whose stored coordinates come back a
