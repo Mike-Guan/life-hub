@@ -27,6 +27,8 @@ enum KuroTap: Equatable, Sendable {
     case chinTap
     /// Asleep at bedtime: eyes shut, she leans over and back as if rolling over.
     case rollOver
+    /// A need of yours she noticed: she leans out to one side to peek at you, blinks, and leans back smiling.
+    case peek
     /// Bedtime starting: she rubs an eye, stretches up in a big yawn, then settles with heavy eyes.
     case goodNight
 
@@ -55,6 +57,7 @@ enum KuroTap: Equatable, Sendable {
         switch self {
         case .turnAway: 3
         case .rollOver: 1.4
+        case .peek: 2
         case .goodNight: 3.2
         default: 1.1
         }
@@ -173,6 +176,10 @@ extension KuroPose {
             pose.eyes = p < 0.75 ? .open : .drowsy
         case .rollOver:
             pose.eyes = .closed
+        case .peek:
+            // Leans out wide-eyed (0-0.25), holds with one blink (0.45-0.52), leans back smiling (0.7-1).
+            pose.eyes = p < 0.45 ? .bright : p < 0.52 ? .closed : p < 0.7 ? .bright : .happy
+            pose.calm = p < 0.7
         case .goodNight:
             // Rubs an eye (0-0.3), yawns with her eyes squeezed shut (0.3-0.65), then settles, drowsy.
             pose.eyes = p < 0.65 ? .closed : .drowsy
@@ -272,7 +279,7 @@ extension KuroFigure {
             if p < 0.3 { visible.insert(.tapRub) }
         case .mark:
             if p >= 0.5 { visible.insert(.studyMark) }
-        case .chinTap, .bump, .hug, .sketch, .rollOver:
+        case .chinTap, .bump, .hug, .sketch, .rollOver, .peek:
             break
         case .turnAway:
             guard KuroTap.facesAway(p) else { return }
