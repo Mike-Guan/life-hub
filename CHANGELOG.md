@@ -181,6 +181,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   and the workout corner. This week's item still comes first.
 - After a workout HAKU crouches before each of his two hops and lands pressed down, and the celebration
   runs 2.4 s instead of 1.6 s, so it no longer looks like a poke.
+- HAKU's hands and what they hold come up into view and go down again instead of popping in: the phone he
+  glances at, the scratching hand and the watch he taps before a planned task. When a planned task's prop
+  comes up, the can in his hand goes down first.
+- Scene effects such as the coffee breath, the haircut buzz and the ouch lines fade in and out instead of
+  blinking on and off.
 - The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
   reward list names them. The shelf no longer draws gloves nobody earned.
 - In the home the floor lamp's cord runs to a socket on the wall beside it, not out across the floor.
