@@ -725,7 +725,7 @@ public struct KuroView: View {
                 let loopMotion =
                     sleepy ? IdleMotion.sleeping(time: time) : homeScene?.motion ?? Self.motion(loop, time: idleTime)
                 let motion = napping ? Self.nap(time: time) : loopMotion
-                let moving = Self.rollOver(tap, time: time) ?? motion
+                let moving = Self.rollOver(tap, time: time) ?? Self.peek(tap ?? slotMove, motion: motion) ?? motion
                 let hop: CGFloat = still ? 0 : Self.hop(tap ?? (slot?.hops == true ? slotMove : nil))
                 // Her small idle moves play only in the plain idle.
                 let busy = still || tap != nil || slot != nil || homeScene != nil || sleepy
@@ -1097,6 +1097,16 @@ public struct KuroView: View {
         let beat = IdleClock.beat(at: t, every: 11.5, spread: 1.75, lengths: [napNod], seed: KuroIdle.seed &+ 0x40)
         let dip = beat.map { IdleClock.dip(CGFloat($0.phase / napNod)) } ?? 0
         return IdleMotion(dy: breath + 3 * dip, angle: 3 * Double(dip))
+    }
+
+    // 第 5 批 偷看: she leans out from behind what she holds, like a cat round a door, then back.
+    /// `motion` with her peek while `move` is one: a 7° lean out that holds and comes back, lifting her 2 pt;
+    /// nil for any other move.
+    nonisolated static func peek(_ move: (KuroTap, Double)?, motion: IdleMotion) -> IdleMotion? {
+        guard let move, move.0 == .peek else { return nil }
+        let p = move.1
+        let out = p < 0.25 ? sin(p / 0.25 * .pi / 2) : p < 0.7 ? 1 : cos((p - 0.7) / 0.3 * .pi / 2)
+        return IdleMotion(dy: motion.dy - 2 * CGFloat(out), angle: motion.angle + 7 * out)
     }
 
     /// How long one nod takes while she naps, in seconds.
