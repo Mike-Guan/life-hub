@@ -188,6 +188,18 @@ private let figureItems = ShopItem.catalog(for: .haku).filter {
         #expect(abs(IdleMotion.celebrating(progress: 0).dy) < 0.01)
     }
 
+    @Test func celebrationCrouchesBeforeEachHopAndPressesDownOnLanding() {
+        func squash(_ p: Double) -> CGFloat { IdleMotion.celebrating(progress: p).squash }
+        let all = (0..<100).map { squash(Double($0) / 100) }
+        #expect(all.allSatisfy { (0...1).contains($0) })
+        // Crouched just before the first hop and between the two, airborne with no crouch at each peak.
+        #expect(squash(0.09) > 0.9 && squash(0.47) > 0.9)
+        #expect(squash(0.24) == 0 && squash(0.62) == 0)
+        // Pressed down after the last landing, then standing still again.
+        #expect(squash(0.8) > 0.9)
+        #expect(squash(0.95) == 0 && IdleMotion.celebrating(progress: 0.95).dy == 0)
+    }
+
     @Test func bedtimeHidesTheHighEnergyLook() {
         var pose = RunnerPose.bedtimeStill()
         pose.face = .high
