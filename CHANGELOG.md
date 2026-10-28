@@ -483,6 +483,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - On the watch, the labels on the second page, the mode chip, a save failure and the page actions follow the
   watch's language (Japanese and English), and VoiceOver can turn between the two pages. The no-mode complication
   has a spoken label.
+- On the watch, both characters sit a little smaller and lower (less on the smaller watch), so the hair
+  clears the clock and what they hold stays on screen. When the watch screen dims, HAKU comes to rest
+  instead of freezing mid-move.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
