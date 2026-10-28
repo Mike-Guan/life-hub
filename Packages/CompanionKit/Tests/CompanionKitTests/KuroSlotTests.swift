@@ -53,7 +53,7 @@ import Testing
     }
 
     // 朋友测前 打磨清单: her widget face follows the day like the home screen's.
-    @Test func herPortraitFaceFollowsTheDay() {
+    @Test @MainActor func herPortraitFaceFollowsTheDay() {
         #expect(KuroPortrait(look: .chill, energy: 50).pose.eyes == .open)
         #expect(KuroPortrait(look: .chill, energy: 50, need: .sitting).pose.eyes == .bright)
         #expect(KuroPortrait(look: .chill, energy: 50, moment: .drowsy).pose.eyes == .drowsy)
