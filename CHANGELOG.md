@@ -157,6 +157,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   raincoat's duck swing a little with his breath.
 
 ### Changed
+- The shop's room shelf is grouped by where each item goes in the home: on the desk, by the sofa, in the corner
+  and the workout corner. This week's item still comes first.
 - After a workout HAKU crouches before each of his two hops and lands pressed down, and the celebration
   runs 2.4 s instead of 1.6 s, so it no longer looks like a poke.
 - The home's reward shelf shows the worn, taped boxing gloves once the character has boxed 5 times, and the
