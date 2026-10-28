@@ -1259,6 +1259,22 @@
         }
       }
     },
+    "书桌上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "On the desk"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "机の上"
+          }
+        }
+      }
+    },
     "二" : {
       "localizations" : {
         "en" : {
@@ -4269,6 +4285,22 @@
         }
       }
     },
+    "沙发旁" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "By the sofa"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ソファの横"
+          }
+        }
+      }
+    },
     "没发到手表：%@" : {
       "localizations" : {
         "en" : {
@@ -5394,6 +5426,22 @@
         }
       }
     },
+    "角落" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "In the corner"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "すみっこ"
+          }
+        }
+      }
+    },
     "记得的事" : {
       "localizations" : {
         "en" : {
@@ -5731,6 +5779,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "マイカード"
+          }
+        }
+      }
+    },
+    "运动" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Workout"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "運動"
           }
         }
       }

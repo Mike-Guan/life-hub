@@ -259,6 +259,15 @@ enum Placement {
         .outStraps: Spot(.torso, "背包"),
         .pencilLoose: Spot(.handR, "pencil"),
         .paintHand: Spot(.handR, "paintHand"),
+        // 第2批 身份卡: the pole leans on the pack while the hand shades the eyes, so the hand sits on the brow.
+        .outPole: Spot(.handR, "登山杖"),
+        .poleFist: Spot(.handR, "登山杖"),
+        .browHand: Spot(.headTop, "手搭眉"),
+        .windGust: .fx,
+        .yogaMat: Spot(.handR, "瑜伽垫"),
+        .matHand: Spot(.handR, "瑜伽垫"),
+        .yogaPalms: Spot(.handsFront, "合掌"),
+        .sportBall: Spot(.handR, "球"),
     ]
 
     static let kuro: [KuroPart: Spot] = [
@@ -334,6 +343,23 @@ enum Placement {
         .craftPen: Spot(.handR, "craftPen"),
         .gymBlock: Spot(.handsFront, "gymBlock"),
         .studyNotebook: Spot(.handsFront, "studyNotebook"),
+        // Card props drawn in place of her own (KuroItem.skin) take that prop's spot; the red glasses are glasses.
+        .itemGlovePinkL: Spot(.handL, "拳套"),
+        .itemGlovePinkR: Spot(.handR, "拳套"),
+        .itemGloveGoldL: Spot(.handL, "拳套"),
+        .itemGloveGoldR: Spot(.handR, "拳套"),
+        .itemBlockMint: Spot(.handsFront, "gymBlock"),
+        .itemBlockGold: Spot(.handsFront, "gymBlock"),
+        .itemBookmarkGold: Spot(.handsFront, "studyNotebook"),
+        .itemStylusBlue: Spot(.handR, "craftPen"),
+        .itemBrushGold: Spot(.handR, "craftPen"),
+        .itemGlassesRed: Spot(.eyes, "deskGlasses"),
+        .itemPhonesMint: Spot(.neck, "挂脖耳机"),
+        .itemPhonesGold: Spot(.neck, "挂脖耳机"),
+        .itemFolderSakura: Spot(.handsFront, "乐谱"),
+        .itemFolderGold: Spot(.handsFront, "乐谱"),
+        .itemGogglesSakura: Spot(.headTop, "skiGoggles"),
+        .itemGogglesGold: Spot(.headTop, "skiGoggles"),
         .boxSandbag: Spot(.corner1, "boxSandbag"),
         // Deferred identity cards (顺延身份卡 预览): the finger on the score is part of holding it.
         .danceSpeaker: Spot(.corner1, "danceSpeaker"),
@@ -472,6 +498,7 @@ enum Placement {
     ]
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
+    // the ball card's ball sits on the fist with the wristband (第2批 身份卡);
     // the swimming cheer's ear tap over the earring. KURO's rows are UI 三组's: the rub over the blush, the pen on the
     // books, the ball bouncing on the racket, the sleeve in front of the tablet, yoga block or notebook. The spin is a
     // cheer, not held.
@@ -483,7 +510,7 @@ enum Placement {
         .cheek: [["bandage", "bathBlush"], ["blush", "tapRub"]],
         .handR: [
             ["deskBooks", "deskPen"], ["tapBall", "tennisRacket"],
-            ["itemGoldRacket", "tapBall"],
+            ["itemGoldRacket", "tapBall"], ["wristbandHand", "球"],
         ],
         .handsFront: [
             ["workTablet", "揉眼袖子"], ["gymBlock", "揉眼袖子"], ["studyNotebook", "揉眼袖子"], ["乐谱", "揉眼袖子"],
