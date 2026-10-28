@@ -348,6 +348,11 @@ extension KuroFigure {
     nonisolated static func turn(_ part: KuroPart, pose: KuroPose) -> KuroTurn? {
         // About a point inside her head, so the pom swings side to side on top of the beanie.
         if part == .weeklyHatBeaniePom, pose.pom != 0 { return KuroTurn(pivot: CGPoint(x: 60, y: 30), angle: pose.pom) }
+        // The yoga stretch bends her whole body about her hips; a tap that cuts it short eases her back upright.
+        if let idle = pose.idle, let angle = idle.lean(part, progress: pose.idleProgress) {
+            let back = pose.tap == nil ? 0 : ease(pose.idleBack)
+            return KuroTurn(pivot: KuroIdle.hips, angle: angle * (1 - back))
+        }
         // 动作展示总表 C7: at the end of the juggle the flat racket flips edge-on about her grip.
         if part == .juggleRacket {
             guard pose.tap == nil, pose.idle == .juggle else { return nil }

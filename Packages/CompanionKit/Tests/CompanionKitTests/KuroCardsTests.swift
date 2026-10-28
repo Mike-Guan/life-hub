@@ -139,14 +139,20 @@ import Testing
         #expect(Set(KuroFigure.parts(for: .swimming, pose: snapped)).isSuperset(of: [.eyesSurprised, .mouthO]))
     }
 
+    // UI 审核 #569 r1: the bend has to read as one, at least 6° each way, with the mat standing still.
     @Test func sheBendsSideToSideButTheMatStays() {
         let pose = KuroPose(look: .yoga, energy: 50)
         let left = pose.idling((.stretch, 2 / 6))
         let right = pose.idling((.stretch, 4.1 / 6))
-        #expect(KuroFigure.shift(.faceBase, pose: left).width < -4)
-        #expect(KuroFigure.shift(.faceBase, pose: right).width > 4)
-        #expect(KuroFigure.shift(.jacketTennis, pose: left).width > KuroFigure.shift(.faceBase, pose: left).width)
+        for part in [KuroPart.faceBase, .jacketTennis, .hairBack, .catEars] {
+            #expect((KuroFigure.turn(part, pose: left)?.angle ?? 0) <= -6, "\(part)")
+            #expect((KuroFigure.turn(part, pose: right)?.angle ?? 0) >= 6, "\(part)")
+        }
+        #expect(KuroFigure.turn(.yogaMat, pose: left) == nil && KuroFigure.turn(.yogaMat, pose: right) == nil)
         #expect(KuroFigure.shift(.yogaMat, pose: left) == .zero && KuroFigure.shift(.yogaMat, pose: right) == .zero)
+        // Upright again before she breathes out, and still between moves.
+        #expect((KuroFigure.turn(.faceBase, pose: pose.idling((.stretch, 5.5 / 6)))?.angle ?? 0) == 0)
+        #expect(KuroFigure.turn(.faceBase, pose: pose) == nil)
         #expect(KuroFigure.parts(for: .yoga, pose: left).contains(.eyesClosed))
     }
 

@@ -246,11 +246,12 @@ struct KuroFigure: View {
         let parts = Self.parts(for: look, pose: pose, watch: watch)
         let hatted = parts.contains(.setPicnicHat) || parts.contains(.setRainHat)
         let beanie = parts.contains(.weeklyHatBeanie)
+        let skins = Self.skins(look, items: pose.items)
         ZStack {
             ForEach(parts, id: \.self) { part in
                 KuroPartView(
                     part: part, shift: Self.offset(part, pose: pose, hatted: hatted, beanie: beanie, watch: watch),
-                    turn: Self.turn(part, pose: pose)
+                    turn: Self.turn(part, pose: pose), drawn: skins[part]
                 )
                 .opacity(Self.opacity(part, pose: pose))
             }
@@ -259,6 +260,14 @@ struct KuroFigure: View {
             }
         }
         .aspectRatio(KuroArt.bounds.width / KuroArt.bounds.height, contentMode: .fit)
+    }
+
+    /// The parts drawn in place of her own props in `look` for the card props among `items`.
+    nonisolated static func skins(_ look: KuroLook, items: Set<KuroItem>) -> [KuroPart: [KuroPart]] {
+        // In catalog order, so a gold prop wins over its colour.
+        KuroItem.allCases.filter { items.contains($0) && $0.shows(in: look) }.reduce(into: [:]) { skins, item in
+            skins.merge(item.skin) { _, gold in gold }
+        }
     }
 
     /// Visible parts in back-to-front order; `watch` swaps her low props for the raised watch ones and leaves off
@@ -537,6 +546,8 @@ struct KuroPartView: View {
     var shift: CGSize = .zero
     /// How the part turns about a point, if it does.
     var turn: KuroTurn?
+    /// The parts drawn in its place, for a shop item that recolours it; `nil` draws the part itself.
+    var drawn: [KuroPart]?
     @Environment(\.kuroLineArt) private var lineArt
 
     var body: some View {
@@ -550,7 +561,7 @@ struct KuroPartView: View {
                 context.rotate(by: .degrees(-turn.axis))
                 context.translateBy(x: -turn.pivot.x, y: -turn.pivot.y)
             }
-            let inks = KuroArt.cachedInks(part)
+            let inks = (drawn ?? [part]).flatMap(KuroArt.cachedInks)
             RunnerDrawing.draw(lineArt ? KuroArt.lineArt(inks) : inks, in: context)
         }
     }

@@ -345,11 +345,9 @@ enum KuroIdle: CaseIterable, Sendable {
         case .goggles where part == .swimGoggles:
             return CGSize(width: 0, height: 28 * Self.gogglesDown(p * length))
         case .stretch where part != .yogaMat && !Self.ground.contains(part):
-            // Taller on the breath in; the head bends further than the body.
+            // Taller on the breath in; the bend itself is a turn about her hips (`lean`).
             let t = p * length
-            let side = Self.bend(t) * (Self.head.contains(part) ? 5 : 2)
-            let rise = Self.ramp(t, 0.2, 0.9) * (1 - Self.ramp(t, 4.6, 5.3))
-            return CGSize(width: CGFloat(side), height: CGFloat(-2 * rise))
+            return CGSize(width: 0, height: -2 * Self.ramp(t, 0.2, 0.9) * (1 - Self.ramp(t, 4.6, 5.3)))
         case .dribble where part == .sportBall:
             return CGSize(width: 0, height: 17 * Self.bounce(p * length))
         case .dribble where part == .sportBallHand:
@@ -370,6 +368,20 @@ enum KuroIdle: CaseIterable, Sendable {
         default: return .zero
         }
     }
+
+    // UI 审核 #569 r1: shifted sideways her body hardly moved, so the stretch turns her whole body about her hips.
+    /// How far `part` turns about `hips` at `progress` (0..<1) into the move, in degrees, or nil when it keeps
+    /// still: everything but the mat and the floor in the stretch.
+    func lean(_ part: KuroPart, progress p: Double) -> Double? {
+        guard self == .stretch, part != .yogaMat, !Self.ground.contains(part) else { return nil }
+        return Self.bendAngle * Self.bend(p * length)
+    }
+
+    /// The point she bends about in the stretch: her hips, at the bottom middle of the figure.
+    static let hips = CGPoint(x: 60, y: 138)
+
+    /// How far she bends each way in the stretch, in degrees.
+    static let bendAngle = 8.0
 
     /// The card props each base-outfit idle puts down.
     private var putDown: Set<KuroPart> {
