@@ -2269,34 +2269,34 @@
         }
       }
     },
-    "泳帽我找到了。" : {
+    "泳镜我找到了。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Found the swim cap."
+            "value" : "Found the goggles."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スイムキャップ、見つけた。"
+            "value" : "ゴーグル、見つけた。"
           }
         }
       }
     },
-    "泳帽？不戴。" : {
+    "泳镜？在头上。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Swim cap? Pass."
+            "value" : "Goggles? On my head."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スイムキャップ？かぶらない。"
+            "value" : "ゴーグル？頭の上。"
           }
         }
       }

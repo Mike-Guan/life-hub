@@ -128,6 +128,8 @@ public struct CompanionView: View {
     // Seconds since the reference date HAKU last started packing up, shared by every CompanionView.
     @AppStorage("companion.lastPackUp") private var lastPackUp: Double = 0
     @State private var slapStart: Date?
+    // When the planned task's cue came in while the app was open; nil shows it already in place.
+    @State private var cueStart: Date?
     // Ids of the last planned tasks HAKU reacted to before and at their start, shared by every CompanionView so
     // each plays once.
     @AppStorage("companion.lastDailySoon") private var lastDailySoon = ""
@@ -339,8 +341,10 @@ public struct CompanionView: View {
                     let life = idleLife(mode, at: frameClock ?? context.date)
                     let motion = idleMotion(mode, life: life, time: time)
                     // HAKU-04: a new bit at home starts with a quick squash instead of parts just swapping.
-                    let turn = reduceMotion ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
-                    let squash = reduceMotion ? 0 : motion.squash
+                    // HAKU-08/10: on a dimmed watch screen the body comes to rest before the frame freezes.
+                    let still = reduceMotion || dozing
+                    let turn = still ? 0 : CGFloat(sin((lifeSwap(mode, life: life, at: time) ?? 0) * .pi))
+                    let squash = still ? 0 : motion.squash
                     let posed = pose(mode, life: life, time: time, react: react)
                     let dressed = posed.dressed(
                         for: card, in: mode, watch: style == .watch, time: reduceMotion ? nil : time
@@ -348,13 +352,14 @@ public struct CompanionView: View {
                     RunnerFigure(mode: mode, pose: glance(dressed.wearing(wardrobeOutfit).leaving(traces)))
                         .saturation(vitals.saturation)
                         .brightness(vitals.brightness)
-                        .rotationEffect(.degrees(reduceMotion ? 0 : motion.angle), anchor: .bottom)
-                        .offset(y: reduceMotion ? 0 : motion.dy)
+                        .rotationEffect(.degrees(still ? 0 : motion.angle), anchor: .bottom)
+                        .offset(y: still ? 0 : motion.dy)
                         .scaleEffect(
                             x: 1 + 0.07 * turn + 0.08 * squash,
                             y: 1 - 0.1 * turn - 0.12 * squash,
                             anchor: .bottom
                         )
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: dozing)
                 }
             } keyframes: { _ in
                 KeyframeTrack {
@@ -586,7 +591,10 @@ public struct CompanionView: View {
         } else if bath {
             pose.callToBath(time: CGFloat(time))
         }
-        if let daily { pose.cue(daily, time: time, slap: slap(at: time)) }
+        if let daily {
+            let entered = cueStart.map { CGFloat(min(1, (time - $0.timeIntervalSinceReferenceDate) / 0.8)) } ?? 1
+            pose.cue(daily, time: time, slap: slap(at: time), entered: entered)
+        }
         if let progress = celebration(at: time) { pose.celebrate(celebrationKind, progress: CGFloat(progress)) }
         if let progress = Self.progress(since: nodStart, at: time, duration: Self.nodDuration) {
             pose.nod(progress: CGFloat(progress), still: reduceMotion)
@@ -768,11 +776,13 @@ public struct CompanionView: View {
         case .soon:
             guard let id = Self.newCue(daily, stage: .soon, last: lastDailySoon) else { return }
             lastDailySoon = id
+            cueStart = .now
             if claimsOpening(.daily) { say("还有 15 分钟。我先替你紧张一下。", for: 3.5) }
         case .now:
             guard let id = Self.newCue(daily, stage: .now, last: lastDailyNow) else { return }
             lastDailyNow = id
             slapStart = .now
+            if lastDailySoon != id { cueStart = .now }
             if claimsOpening(.daily) { say("到点了。") }
         }
     }
@@ -1487,24 +1497,33 @@ struct Squash {
     }
 }
 
-/// Lays the figure out for the watch's full-screen page: full width, 30 pt from the top, running off the bottom.
+/// Lays the figure out for the watch's full-screen page: three quarters wide, lowered, running off the bottom.
 struct WatchFigureFrame: ViewModifier {
     let isEnabled: Bool
 
     @ViewBuilder func body(content: Content) -> some View {
         if isEnabled {
             // The approved C layout shows him from the chest up and the screen edge crops the rest. At the full
-            // width he filled the screen and his hair ran into the mode chip, so the card width is scaled to 80%,
-            // centered and lowered (values tried on Mike's watch). The card padding is undone here.
+            // width he filled the screen and his hair ran into the mode chip, so the card width is scaled down,
+            // centered and lowered. The card padding is undone here.
+            // UI 审核 2026-10-13: the clock row (up to 55 pt) cut the hair flat and the screen edge cut the props,
+            // so the card is smaller and lower: the hair clears the clock and the chest props stay in view.
             GeometryReader { proxy in
-                let width = proxy.size.width * 0.8 + 24
+                let width = proxy.size.width * 0.75 + 24
                 content
                     .frame(width: width, height: width * 2, alignment: .top)
-                    .offset(x: (proxy.size.width - width) / 2, y: 24)
+                    .offset(x: (proxy.size.width - width) / 2, y: Self.drop(screenWidth: proxy.size.width))
             }
         } else {
             content
         }
+    }
+
+    // Round 2 screenshots: a fixed 38 pt left 45 pt of empty space on 40 mm and cut the chest props, while 46 mm
+    // was down to 10 pt. Scaling with the width keeps about the same gap on every size.
+    /// How far the figure sits below the top of a watch screen `screenWidth` points wide.
+    nonisolated static func drop(screenWidth: CGFloat) -> CGFloat {
+        screenWidth * 0.18
     }
 }
 
