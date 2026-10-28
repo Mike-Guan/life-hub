@@ -472,6 +472,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   points at the door for an invite, walks after leaving a place and goes to the bath, like HAKU.
 - The character on the watch face shows the same scene as the watch app and the iPhone Lock Screen (the gym
   bag, setting off, the bath) and changes its pose every 15 minutes, instead of only the plain mode look.
+- On the watch, the labels on the second page, the mode chip, a save failure and the page actions follow the
+  watch's language (Japanese and English), and VoiceOver can turn between the two pages. The no-mode complication
+  has a spoken label.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
