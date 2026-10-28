@@ -152,6 +152,73 @@ struct FrameSheets {
         try write("haku-7-welcome-end", rows, frames: 16, step: 0.05)
     }
 
+    // HAKU-19 (UI 审核 2026-10-08): hands and props come up into view and go down again, 0.1 s apart.
+    @Test func hakuHandsIn() throws {
+        let work = IdleClockTests.firstStart(kind: 1, lengths: RunnerPose.workBeats) ?? 0
+        let chill = IdleClockTests.firstStart(kind: 1, lengths: RunnerPose.chillBeats) ?? 0
+        // The cue rows start where no idle beat plays, so only the cue's own hands move.
+        let quiet =
+            (0..<6000).lazy.map { Double($0) * 0.01 }.first { t in
+                stride(from: t, through: t + 3, by: 0.1).allSatisfy {
+                    IdleClock.beat(
+                        at: $0, every: 14, spread: 3, lengths: RunnerPose.chillBeats, seed: RunnerPose.seed) == nil
+                }
+            } ?? 0
+        let soon = DailyCue(stage: .soon, prop: .note, id: "frames")
+        let now = DailyCue(stage: .now, prop: .note, id: "frames")
+        let rows: [(String, Mode, (TimeInterval) -> RunnerPose)] = [
+            ("phone glance", .work, { RunnerPose(mode: .work, time: work + $0, face: .mid, react: 0) }),
+            ("scratch in", .chill, { RunnerPose(mode: .chill, time: chill + $0, face: .mid, react: 0) }),
+            ("scratch out", .chill, { RunnerPose(mode: .chill, time: chill + 0.8 + $0, face: .mid, react: 0) }),
+            (
+                "watch tap in", .chill,
+                { t in
+                    var pose = RunnerPose(mode: .chill, time: quiet + t, face: .mid, react: 0)
+                    pose.cue(soon, time: t, slap: nil)
+                    return pose
+                }
+            ),
+            (
+                "watch tap out", .chill,
+                { t in
+                    var pose = RunnerPose(mode: .chill, time: quiet + t, face: .mid, react: 0)
+                    pose.cue(soon, time: 1.8 + t, slap: nil)
+                    return pose
+                }
+            ),
+            (
+                "can out, note up", .chill,
+                { t in
+                    var pose = RunnerPose(mode: .chill, time: quiet + t, face: .mid, react: 0)
+                    pose.cue(now, time: 5, slap: nil, entered: CGFloat(min(1, t / 0.8)))
+                    return pose
+                }
+            ),
+        ]
+        let sheet = rows.map { label, mode, pose in
+            Row(label: label, start: Self.base) {
+                AnyView(PoseFrame(mode: mode, start: Self.base, pose: pose))
+            }
+        }
+        // UI 审核 HAKU-27: the scene effects breathe instead of blinking.
+        let effects: [(String, DailyScene)] = [
+            ("coffee breath", .coffee), ("shop shine", .shopping), ("wave arcs", .friends), ("haircut buzz", .haircut),
+            ("ouch lines", .doctor),
+        ]
+        let effectRows = effects.map { label, scene in
+            Row(label: label, start: Self.base) {
+                AnyView(
+                    PoseFrame(mode: .chill, start: Self.base) { t in
+                        var pose = RunnerPose(mode: .chill, time: quiet + t, face: .mid, react: 0)
+                        pose.cue(
+                            DailyCue(stage: .now, prop: .note, scene: scene, id: "frames"), time: 0.5 + t, slap: nil)
+                        return pose
+                    })
+            }
+        }
+        try write("haku-9-hands-in", sheet + effectRows, frames: 13, step: 0.1)
+    }
+
     // 第2批 身份卡 for UI 审核: each look's own idle from its start, then the look in the app and on the watch.
     @Test func hakuCardsBatch2() throws {
         let cards: [IdentityKind] = [.swimming, .yoga, .ball, .outdoor]
@@ -392,6 +459,20 @@ struct FrameSheets {
                 ? RunnerPose.welcome(scene, time: t, open: open, face: .mid, mode: mode, length: length)
                 : RunnerPose(face: .mid)
             RunnerFigure(mode: mode, pose: pose)
+                .padding(12)
+                .background(mode.color)
+        }
+    }
+
+    /// HAKU in the pose `pose` gives for the seconds since `start`.
+    struct PoseFrame: View {
+        let mode: Mode
+        let start: Date
+        let pose: (TimeInterval) -> RunnerPose
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            RunnerFigure(mode: mode, pose: pose((clock ?? start).timeIntervalSince(start)))
                 .padding(12)
                 .background(mode.color)
         }

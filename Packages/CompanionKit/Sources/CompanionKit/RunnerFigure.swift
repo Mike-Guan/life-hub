@@ -324,6 +324,9 @@ struct RunnerPose {
     var propRaise: CGFloat = 0
     /// Tapping the watch before a planned task.
     var watchTap = false
+    /// How far a hand and what it holds have come up into view: 0 = out of view below, 1 = in place. Applies to
+    /// the phone glanced at, the scratching hand and the watch being tapped.
+    var handIn: CGFloat = 1
     /// Progress of the sticky note slapped on the screen as a planned task starts, 0..<1, or -1 when none.
     var noteSlap: CGFloat = -1
     /// Height of the fist pumped for the day's focus done: 0 = low, 1 = high, or -1 when hidden.
@@ -521,6 +524,9 @@ struct RunnerPose {
                     headsetOff = 0.1 * Self.bump(CGFloat(phase), from: 2, to: 3)
                 } else {
                     phoneGlance = true
+                    handIn =
+                        Self.ramp(CGFloat(beat.phase), from: 0, to: 0.2)
+                        * (1 - Self.ramp(CGFloat(beat.phase), from: 1, to: 1.2))
                     eyesDy = 2
                     headDy = 1
                 }
@@ -546,7 +552,10 @@ struct RunnerPose {
                 eyesDx = emptyCan ? 3 : 0
             } else if let pause {
                 let itch = pause.phase
-                if itch < 2 { scratch = CGFloat(itch / 2) }
+                if itch < 2 {
+                    scratch = CGFloat(itch / 2)
+                    handIn = Self.ramp(scratch, from: 0, to: 0.12) * (1 - Self.ramp(scratch, from: 0.88, to: 1))
+                }
                 tuft = Self.ramp(CGFloat(itch), from: 0.5, to: 2) * (1 - Self.ramp(CGFloat(itch), from: 2, to: 7))
             }
         case .boxing:
@@ -823,7 +832,8 @@ struct RunnerPose {
 
     /// The planned task's prop at `time`. Soon: a 10 s loop of tapping the watch, then the prop held up. Now: the
     /// prop held up, with the sticky note slapped on the screen at `slap` (0..<1), or nil when it isn't.
-    mutating func cue(_ cue: DailyCue, time t: TimeInterval, slap: Double?) {
+    /// `entered` (0...1) is how far the cue has come in since it started: the can goes down and out first.
+    mutating func cue(_ cue: DailyCue, time t: TimeInterval, slap: Double?, entered: CGFloat = 1) {
         dailyProp = cue.prop
         dailyScene = cue.scene
         sceneTime = CGFloat(t)
@@ -836,9 +846,18 @@ struct RunnerPose {
                 prop = CGSize(width: 0, height: 3 * abs(sin(c * .pi / 0.4)))
                 eyesDx = 3
                 eyesDy = 1.5
+                handIn = Self.ramp(c, from: 0, to: 0.3) * (1 - Self.ramp(c, from: 2.1, to: 2.4))
             }
             propRaise = Self.ramp(c, from: 2.4, to: 2.9) * (1 - Self.ramp(c, from: 9.4, to: 10))
         }
+        // UI 审核 HAKU-19: the can in hand used to vanish in one frame; it goes down and fades, then the hand
+        // and the prop come up.
+        let away = Self.ramp(entered, from: 0, to: 0.5)
+        canOpacity = min(canOpacity, Double(1 - away))
+        canOffset.height += 30 * away
+        let up = Self.ramp(entered, from: 0.5, to: 1)
+        propRaise *= up
+        handIn *= up
         if let scene = cue.scene {
             playScene(scene, time: CGFloat(t))
         } else if cue.prop == .gymBag {
@@ -1286,6 +1305,8 @@ struct RunnerFigure: View {
                     let parts = Self.parts(for: mode, pose: pose)
                     ForEach(parts, id: \.self) { part in
                         layer(part, scale: scale, headband: parts.contains(.headset))
+                            // UI 审核 HAKU-19: the arm comes up from behind the shoulder, under the head and body.
+                            .zIndex(part == .scratchHand && pose.handIn < 1 ? -1 : 0)
                     }
                     if pose.sleepTalk >= 0, pose.life == .nap, !pose.bedtime {
                         RunnerTextView(text: Self.sleepTalkText)
@@ -1464,13 +1485,13 @@ struct RunnerFigure: View {
 
     /// The planned task's prop, and the watch while HAKU taps it.
     nonisolated private static func holdUp(_ prop: DailyProp, pose: RunnerPose, on visible: inout Set<RunnerPart>) {
-        if pose.watchTap { visible.formUnion([.watchWrist, .tapHand]) }
+        if pose.watchTap, pose.handIn > 0 { visible.formUnion([.watchWrist, .tapHand]) }
         if let scene = pose.dailyScene {
             if pose.propRaise > 0 {
                 visible.subtract(scene.hides)
                 visible.formUnion(scene.parts)
             }
-            visible.remove(.monsterCan)
+            if pose.canOpacity <= 0 { visible.remove(.monsterCan) }
             return
         }
         switch prop {
@@ -1480,8 +1501,8 @@ struct RunnerFigure: View {
         case .note:
             if pose.propRaise > 0 { visible.insert(.stickyNote) }
         }
-        // The right hand holds the note or taps the watch, so the can goes.
-        visible.remove(.monsterCan)
+        // The right hand holds the note or taps the watch, so the can goes once it is down.
+        if pose.canOpacity <= 0 { visible.remove(.monsterCan) }
     }
 
     /// Parts that fill the bottom left corner, where the room item and the running shoes stand.
@@ -1814,6 +1835,10 @@ struct RunnerFigure: View {
             }
         }
         .offset(y: (isHead ? pose.headDy : 0) * scale)
+        .offset(y: Self.reachParts.contains(part) ? 24 * (1 - pose.handIn) * scale : 0)
+        // Fully opaque within the first third of the rise, so nothing shows through a see-through arm.
+        .opacity(Self.reachParts.contains(part) ? Double(min(1, 3 * pose.handIn)) : 1)
+        .clipped(if: Self.reachParts.contains(part))
         .offset(y: Self.shrugParts.contains(part) ? pose.shrug * scale : 0)
         .offset(y: part == .sportBall ? ballLift * scale : 0)
         .offset(y: isHead || Self.chinParts.contains(part) ? 30 * pose.slump * scale : 0)
@@ -2038,6 +2063,8 @@ struct RunnerFigure: View {
                     .rotationEffect(.degrees(pose.canAngle), anchor: Self.unit(x: 102, y: 136))
                     .offset(x: pose.canShown.width * scale, y: pose.canShown.height * scale)
                     .opacity(pose.canOpacity)
+                    // UI 审核 HAKU-19: going down, the can stays inside the card.
+                    .clipped()
             case .headband:
                 RunnerPartView(part: part, red: pose.outfit.headband)
             case .gloveL:
@@ -2189,6 +2216,10 @@ struct RunnerFigure: View {
 
     /// Parts of the body that rise in a shrug while the head stays.
     private static let shrugParts: Set<RunnerPart> = [.jacket, .stripeNeon, .stripeSport, .hoodCollar]
+    /// Hands and what they hold that come up into view with `handIn`.
+    private static let reachParts: Set<RunnerPart> = [
+        .phone, .phoneFeed, .phoneHand, .scratchHand, .watchWrist, .tapHand,
+    ]
 
     /// Parts at the chin that drop with the head onto the desk, but don't nod with it.
     private static let chinParts: Set<RunnerPart> = [.maskDown, .maskStripesDown, .maskDotsDown, .maskBoltDown]
@@ -2674,4 +2705,11 @@ struct HeadCrop<Content: View>: View {
         }
     }
     .padding()
+}
+
+extension View {
+    /// Clips the view to its frame when `on`.
+    @ViewBuilder fileprivate func clipped(if on: Bool) -> some View {
+        if on { clipped() } else { self }
+    }
 }
