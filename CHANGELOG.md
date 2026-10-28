@@ -5,18 +5,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Fixed
+- When the second preset character pops out of a gift box she grows as a whole instead of stretching up, and
+  halfway through the spin you see her back instead of her face mirrored.
 - A workout cheer while the second preset character rests her chin on her hand at the desk no longer raises her
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
 - The second preset character's shop has three more accessories: a red ribbon (on her ponytail, else at the
   side of her hair), a moon hair clip and a check lap blanket. At home she wears the ribbon and the clip.
+- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
+  pulled down and pushed back), yoga (a mat in hand, palms pressed while swaying), ball (a ball on the fist,
+  spun on a fingertip until it drops and bounces back) and outdoor (backpack and trekking pole, a hand over the
+  eyes to look far while the wind blows by).
 - The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
   headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
   headphones she bought.
 - The second preset character's identity card props are in the shop: pink and gold gloves (boxing), a mint
   and a gold yoga block (fitness), red glasses and a gold bookmark (study), a blue stylus and a gold brush (art).
   Each one moves with every tap and idle of the prop it replaces, and her gloves at home take their colour.
+- The second preset character's ten room items stand in her home: two posters on the poster wall, a cat
+  clock, a jar, a strawberry mug and a mirror on the desk, yarn and a plush by the sofa, a sakura pot and an easel
+  in the corner. Each character's item preview shows only what her or his shop sells, own items first.
 - The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
   puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
   corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters

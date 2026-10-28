@@ -32,8 +32,8 @@ enum RunnerBaseIdle: CaseIterable, Sendable {
     /// The base-outfit moves `look` draws from.
     static func pool(_ look: RunnerCardLook) -> [RunnerBaseIdle] {
         switch look {
-        case .tennis, .fitness, .dance, .ski: [.stretch, .drink]
-        case .study, .music: [.checkWrist, .hitchPack]
+        case .tennis, .fitness, .dance, .ski, .swimming, .yoga, .ball: [.stretch, .drink]
+        case .study, .music, .outdoor: [.checkWrist, .hitchPack]
         case .art: [.twirlPencil, .wipeHands]
         }
     }
@@ -132,7 +132,8 @@ enum RunnerBaseIdle: CaseIterable, Sendable {
             move.offset.height = key([30, 4, 0, 0, 6, 30], at: u)
         case (.hitchPack, .outPack), (.hitchPack, .outStraps):
             move.offset.height = key([0, 0, -3, -7, -1, 0], at: u)
-            move.opacity = Double(fadeInOut(at: t))
+            // A look that already wears the backpack keeps it on.
+            move.opacity = look.parts.contains(.outPack) ? 1 : Double(fadeInOut(at: t))
         case (.hitchPack, .chinHand):
             move.offset = CGSize(width: 12, height: key([22.5, 22.5, 19.5, 15.5, 21.5, 21.5], at: u))
         case (.twirlPencil, .pencil):
