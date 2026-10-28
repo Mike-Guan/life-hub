@@ -67,6 +67,11 @@ import Testing
         #expect(KuroView.peek((.sip, 0.5), motion: still) == nil && KuroView.peek(nil, motion: still) == nil)
     }
 
+    @Test func whileSheLeansOutHerPeekingLinesShow() {
+        let lines = CompanionLines.lines(for: .chill, need: .couchScroll, peeking: true, persona: .kuro)
+        #expect(lines.contains("……我们今天，真的不动了吗。"))
+    }
+
     // 抱平板睡着 v2 (Mike 2026-10-15).
     @Test func dozingOnTheCouchSheNapsOverHerTablet() {
         let nap = KuroView.pose(.chill, energy: 50, bedtime: .off, moment: .dozing, overtimeUntil: nil)

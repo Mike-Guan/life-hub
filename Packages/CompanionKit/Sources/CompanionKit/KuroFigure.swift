@@ -1285,8 +1285,10 @@ public struct KuroView: View {
         return String(format: "%02d:%02d", time.hour ?? 0, time.minute ?? 0)
     }
 
+    // KURO-06: her peeking lines show while she leans out to peek.
     private var lines: [String] {
-        CompanionLines.lines(for: look.mode, need: need, activity: activity, moment: moment, persona: .kuro)
+        CompanionLines.lines(
+            for: look.mode, need: need, peeking: slot == .peek, activity: activity, moment: moment, persona: .kuro)
     }
 
     /// The lines a tap picks from: her mumbles at bedtime, otherwise `lines`.

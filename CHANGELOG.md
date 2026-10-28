@@ -10,7 +10,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ### Added
 - When the second preset character notices one of your needs she leans out to peek at you, blinks and leans
-  back smiling, instead of hopping with her look's move.
+  back smiling, instead of hopping with her look's move. Tapping her then shows her peeking lines.
 - The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
   puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
   corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters
