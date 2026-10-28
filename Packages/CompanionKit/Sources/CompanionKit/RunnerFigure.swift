@@ -1523,8 +1523,8 @@ struct RunnerFigure: View {
                     } else if pose.cardBeat >= 0 {
                         look.beatParts(at: pose.cardBeat, &visible)
                     }
-                    // UI 审核 10/14: the watch's bottom edge cuts the fist with the wristband.
-                    if pose.watchFrame { visible.remove(.wristbandHand) }
+                    // UI 审核 10/14: the watch's bottom edge cuts the fist with the wristband; the ball on it goes too.
+                    if pose.watchFrame { visible.subtract([.wristbandHand, .sportBall]) }
                 } else {
                     visible.formUnion(boxingParts)
                 }

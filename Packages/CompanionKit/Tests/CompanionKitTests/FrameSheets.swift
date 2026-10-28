@@ -152,6 +152,28 @@ struct FrameSheets {
         try write("haku-7-welcome-end", rows, frames: 16, step: 0.05)
     }
 
+    // 第2批 身份卡 for UI 审核: each look's own idle from its start, then the look in the app and on the watch.
+    @Test func hakuCardsBatch2() throws {
+        let cards: [IdentityKind] = [.swimming, .yoga, .ball, .outdoor]
+        var rows = cards.map { card in
+            Row(label: "card \(card) · 待机", start: Self.base) {
+                AnyView(CardBeatFrame(card: card, start: Self.base))
+            }
+        }
+        rows += cards.map { card in
+            Row(label: "card \(card)", start: Self.base) {
+                AnyView(CompanionView(mode: .boxing, card: card, energy: 50))
+            }
+        }
+        try write("haku-9-cards-batch2", rows)
+        let watch = cards.map { card in
+            Row(label: "watch · card \(card)", start: Self.base) {
+                AnyView(CompanionView(mode: .boxing, card: card, energy: 50, style: .watch))
+            }
+        }
+        try write("haku-9-cards-batch2-watch", watch, size: CGSize(width: 198, height: 242))
+    }
+
     @Test func kuroLooks() throws {
         var rows: [Row] = []
         for look in KuroLook.allCases {
@@ -351,6 +373,27 @@ struct FrameSheets {
             RunnerFigure(mode: mode, pose: pose)
                 .padding(12)
                 .background(mode.color)
+        }
+    }
+
+    /// HAKU in a card look, playing the look's own idle from `start`.
+    struct CardBeatFrame: View {
+        let card: IdentityKind
+        let start: Date
+        @Environment(\.frameClock) private var clock
+
+        var body: some View {
+            RunnerFigure(mode: .boxing, pose: pose)
+                .padding(12)
+                .background(Mode.boxing.color)
+        }
+
+        private var pose: RunnerPose {
+            var pose = RunnerPose(face: .mid).dressed(for: card, in: .boxing)
+            if let look = RunnerCardLook(card: card) {
+                pose.play(look, nil, at: CGFloat((clock ?? start).timeIntervalSince(start)))
+            }
+            return pose
         }
     }
 
