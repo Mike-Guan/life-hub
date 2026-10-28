@@ -434,6 +434,11 @@ enum Placement {
         .weeklyRoomNightlightGlow: Spot(.wall, "小夜灯"),
         .weeklyHatBeanie: Spot(.headTop, "帽子"),
         .weeklyHatBeaniePom: Spot(.headTop, "帽子"),
+        // 商店扩充 v1 §3: the ribbon and moon clip in the hair tie places, the check blanket on her lap.
+        .itemRibbonPony: Spot(.ponytail, "马尾"),
+        .itemRibbonSide: Spot(.earR, "发夹"),
+        .itemClipMoon: Spot(.earR, "发夹"),
+        .itemBlanketCheck: Spot(.lap, "itemBlanket"),
         .topBoxLilac: Spot(.torso, "外套"),
         .topTennisSakura: Spot(.torso, "外套"),
         .topFitnessTrack: Spot(.torso, "外套"),

@@ -9,6 +9,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- The second preset character's shop has three more accessories: a red ribbon (on her ponytail, else at the
+  side of her hair), a moon hair clip and a check lap blanket. At home she wears the ribbon and the clip.
 - The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
   headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
   headphones she bought.

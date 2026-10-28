@@ -45,7 +45,7 @@ enum KuroScene: Equatable, Sendable {
     /// The room items she leaves behind when she walks off.
     static let room: Set<KuroPart> = [
         .itemFlower, .itemLamp, .itemBlanket, .itemBag, .boxSandbag, .danceSpeaker, .weeklyBlanketBear,
-        .weeklyRoomCloud, .weeklyRoomSucculent, .weeklyRoomNightlightGlow, .weeklyRoomNightlight,
+        .weeklyRoomCloud, .weeklyRoomSucculent, .weeklyRoomNightlightGlow, .weeklyRoomNightlight, .itemBlanketCheck,
     ]
 
     /// Shows and hides the scene's parts in `look`; `items` are the shop items she owns and wears.
