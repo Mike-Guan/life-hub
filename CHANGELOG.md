@@ -14,7 +14,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - Test builds (DEV and STG) offer the swimming, yoga, ball and outdoor identity cards in the picker. The App
   Store build keeps the eight cards it has until their lines are final and both characters were checked on a
   device.
-- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
+- HAKU can dress for four more identity cards: swimming (goggles up on the hair,
   pulled down and pushed back), yoga (a mat in hand, palms pressed while swaying), ball (a ball on the fist,
   spun on a fingertip until it drops and bounces back) and outdoor (backpack and trekking pole, a hand over the
   eyes to look far while the wind blows by).
