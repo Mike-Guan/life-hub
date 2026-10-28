@@ -138,6 +138,8 @@ final class HomeModel {
     private(set) var now: Date
     /// The room with the colours picked here, saved through the page.
     private(set) var layout: RoomLayout
+    /// The rug's style. Not saved yet: the shop sells the other two after 0.1.0.
+    private(set) var rug = HomeRug.fringe
     /// Whether the room shows every item, owned or not, to see where each one goes. DEBUG builds only.
     private(set) var previewsAllItems = false
     var isNight: Bool
@@ -298,6 +300,12 @@ final class HomeModel {
         layout.touch(now: now, deviceID: deviceID)
         changed()
         return layout
+    }
+
+    /// Lays the rug in `style`.
+    func lay(_ style: HomeRug) {
+        rug = style
+        changed()
     }
 
     /// Shows or hides every item, owned or not.
