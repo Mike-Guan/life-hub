@@ -9,6 +9,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- HAKU's seven identity card tops are drawn and on the shop shelf: the black and gold boxing jacket, the sport
+  tank and the white sport jacket, the cardigan and the windbreaker for outings, and the canvas apron and the
+  overalls for crafts. Each shows only with a card that wears it, and from behind as a plain jacket.
 - The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
   puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
   corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters

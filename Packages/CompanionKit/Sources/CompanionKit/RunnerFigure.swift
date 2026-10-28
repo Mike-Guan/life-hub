@@ -1515,6 +1515,8 @@ struct RunnerFigure: View {
                 if let look = pose.cardLook {
                     // Asleep, HAKU holds nothing (QA spec S6).
                     visible = look.parts
+                    // A craft top brings its own apron or bib in place of the default apron.
+                    if pose.outfit.clothes[.boxing] != nil { visible.remove(.apron) }
                     if pose.bedtime { visible.subtract(look.held) }
                     if !pose.holdsCardProps {
                         visible.subtract(look.props)
@@ -1724,7 +1726,7 @@ struct RunnerFigure: View {
     nonisolated private static let warmupParts: Set<RunnerPart> = [.headband, .gloveL, .gloveR]
     // 商店衣服 pop: no ¥ or gold chain on any of the clothes, so the 副业 chain and coin go with the jacket.
     nonisolated private static let jacketParts: Set<RunnerPart> = [
-        .jacket, .stripeNeon, .hoodCollar, .hoodieStrings, .chainGold, .coin,
+        .jacket, .stripeNeon, .stripeSport, .hoodCollar, .hoodieStrings, .chainGold, .coin,
     ]
     nonisolated private static let headgear: Set<RunnerPart> = [
         .headband, .headset, .cheerGoggles, .bathTowel, .cheerHelmet,

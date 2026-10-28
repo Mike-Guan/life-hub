@@ -1230,6 +1230,32 @@ private let figureItems = ShopItem.catalog(for: .haku).filter {
         #expect(parts.contains(.topSideArcade) && parts.isDisjoint(with: [.chainGold, .coin, .jacket]))
     }
 
+    static let cardTops: [(String, IdentityKind, RunnerPart)] = [
+        ("haku.top.boxing.blackgold", .boxing, .topBoxingBlackgold),
+        ("haku.top.gym.tank", .fitness, .topGymTank),
+        ("haku.top.tennis.white", .tennis, .topTennisWhite),
+        ("haku.top.study.cardigan", .study, .topStudyCardigan),
+        ("haku.base.outing.windbreaker", .music, .topOutingWindbreaker),
+        ("haku.top.art.apron", .art, .topArtApron),
+        ("haku.base.craft.overalls", .art, .topCraftOveralls),
+    ]
+
+    @Test(arguments: cardTops)
+    func cardTopsReplaceTheJacketWithTheirCard(_ id: String, _ card: IdentityKind, _ top: RunnerPart) throws {
+        let item = try #require(ShopItem.item(id))
+        #expect(item.isDrawn && item.suits(card))
+        let pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.boxing: id]))).dressed(for: card, in: .boxing)
+        let parts = Set(RunnerFigure.parts(for: .boxing, pose: pose))
+        #expect(parts.contains(top))
+        #expect(parts.isDisjoint(with: [.jacket, .stripeNeon, .stripeSport, .hoodCollar, .apron]))
+        #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(top))
+        var away = pose
+        away.turnedAway = true
+        let back = Set(RunnerFigure.parts(for: .boxing, pose: away))
+        #expect(back.contains(.jacket) && !back.contains(top))
+        #expect(pose.outfit.clothesBack[.boxing] != nil)
+    }
+
     @Test func capGivesWayToHeadgear() {
         let varsity = Outfit(Wardrobe(clothes: [.chill: "haku.set.chill.varsity"]))
         var pose = RunnerPose(need: .boxingWarmup).wearing(varsity)

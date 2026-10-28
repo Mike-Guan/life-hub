@@ -139,6 +139,28 @@ struct FrameSheets {
         try write("haku-8-backdrops-watch", watch, size: CGSize(width: 198, height: 242))
     }
 
+    // HAKU's identity card tops, each with a card that wears it: the idle from the front, then a still from behind.
+    @Test func hakuCardTops() throws {
+        var rows: [Row] = []
+        for (id, card, _) in CompanionKitTests.cardTops {
+            let wardrobe = Wardrobe(clothes: [.boxing: id])
+            rows.append(
+                Row(label: "\(id) · \(card)", start: Self.base) {
+                    AnyView(CompanionView(mode: .boxing, card: card, energy: 50, wardrobe: wardrobe))
+                })
+            rows.append(
+                Row(label: "\(id) · 背面", start: Self.base) {
+                    var pose = RunnerPose(face: .mid).wearing(Outfit(wardrobe)).dressed(for: card, in: .boxing)
+                    pose.turnedAway = true
+                    return AnyView(
+                        RunnerFigure(mode: .boxing, pose: pose)
+                            .padding(12)
+                            .background(Mode.boxing.color))
+                })
+        }
+        try write("haku-9-card-tops", rows)
+    }
+
     // HAKU-03 (UI 审核 2026-10-13): the last 0.5 s of the welcome back and 0.3 s of idle after it, 0.05 s apart.
     @Test func hakuWelcomeEnd() throws {
         let cases: [(WelcomeScene, Mode)] = [
