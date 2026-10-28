@@ -369,6 +369,8 @@ final class HakuNode: SKNode {
     // MARK: Textures
 
     static let headRect = CGRect(x: 0, y: -12, width: 120, height: 120)
+    /// How far the cap sits lower on the back of the head than on the front.
+    static let capSinkFromBehind: CGFloat = 8
     static let torsoRect = CGRect(x: 18, y: 84, width: 84, height: 60)
     static let armRect = CGRect(x: -14, y: -8, width: 28, height: 48)
     static let legRect = CGRect(x: -12, y: -4, width: 24, height: 42)
@@ -385,7 +387,16 @@ final class HakuNode: SKNode {
         let key = "\(parts.map(\.rawValue)).\(String(describing: headband))"
         if let cached = heads[key] { return cached }
         let texture = HomeTextures.texture(headRect) { context in
-            for part in parts { RunnerDrawing.draw(part, in: context, red: part == .headband ? headband : nil) }
+            for part in parts {
+                // UI 审核 2026-10-28: from behind the cap sat on the spike tips with a gap; it sinks into the hair.
+                if face == .back, part == .setVarsityCap {
+                    var sunk = context
+                    sunk.translateBy(x: 0, y: Self.capSinkFromBehind)
+                    RunnerDrawing.draw(part, in: sunk)
+                } else {
+                    RunnerDrawing.draw(part, in: context, red: part == .headband ? headband : nil)
+                }
+            }
         }
         heads[key] = texture
         return texture
