@@ -100,6 +100,10 @@ struct HomeView: View {
         let reading = energy.reading()
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
+                // Throwaway preview: the window on top, so the first screen shows it drawn.
+                if let onHome, let homeSnapshot {
+                    homeWindow(homeSnapshot, open: onHome)
+                }
                 Header(
                     mode: shownMode,
                     error: store.lastError ?? energy.lastError ?? extraError,
@@ -254,9 +258,6 @@ struct HomeView: View {
                 }
                 .anchorPreference(key: SwitcherBounds.self, value: .bounds) { $0 }
 
-                if let onHome, let homeSnapshot {
-                    homeWindow(homeSnapshot, open: onHome)
-                }
 
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     TodayTimeline(
