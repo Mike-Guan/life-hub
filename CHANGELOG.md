@@ -5,12 +5,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Fixed
+- The second preset character's face on the widgets and watch face follows the day like on the home screen:
+  drowsy when worn out, eyes down when busy, bright when she notices a need, chin on hand at overtime.
 - When the second preset character pops out of a gift box she grows as a whole instead of stretching up, and
   halfway through the spin you see her back instead of her face mirrored.
 - A workout cheer while the second preset character rests her chin on her hand at the desk no longer raises her
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- The second preset character has her own good night: as bedtime starts she rubs an eye, stretches up in a
+  big yawn and settles with heavy eyes, instead of only dimming.
+- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
 - In the home HAKU wears every top and set the shop sells: the pixel cardigan, the souvenir jacket, the arcade
   T and the Harajuku raincoat join the earlier four, and the varsity set brings its cap. The headband colour, the
   mask print on his chin and the glove colour he bought show too.
@@ -513,6 +518,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - On the watch, both characters sit a little smaller and lower (less on the smaller watch), so the hair
   clears the clock and what they hold stays on screen. When the watch screen dims, HAKU comes to rest
   instead of freezing mid-move.
+- Before the iPhone has sent anything, the watch shows the home's paper colour with a phone icon and what to do,
+  instead of plain system text on black. A note that the watch could not save the iPhone's status goes away
+  after 10 seconds.
 
 ### Added
 - Commute scenes: on the way to work HAKU walks briskly with a tote bag and yawns; on the way home he drags his
