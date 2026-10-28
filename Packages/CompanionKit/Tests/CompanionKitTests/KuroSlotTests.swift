@@ -41,7 +41,7 @@ import Testing
 
     @Test func slotsFollowWhatIsHappening() {
         #expect(KuroSlot(need: nil, activity: nil, moment: nil, look: .chill) == nil)
-        #expect(KuroSlot(need: .sitting, activity: nil, moment: nil, look: .work) == .invite)
+        #expect(KuroSlot(need: .sitting, activity: nil, moment: nil, look: .work) == .peek)
         #expect(KuroSlot(need: nil, activity: .running, moment: nil, look: .chill) == .active)
         #expect(KuroSlot(need: nil, activity: .gymDay, moment: nil, look: .chill) == .invite)
         #expect(KuroSlot(need: .sitting, activity: nil, moment: .flow, look: .desk) == .focus)
@@ -50,6 +50,26 @@ import Testing
         #expect(KuroSlot(need: nil, activity: nil, moment: .packingUp, look: .work) == .packingUp)
         #expect(KuroSlot.tired.move(in: .tennis) == .rub && KuroSlot.focus.move(in: .desk) == .glasses)
         #expect(KuroSlot.invite.hops && KuroSlot.active.hops && !KuroSlot.focus.hops && !KuroSlot.tired.hops)
+    }
+
+    // 第 5 批 偷看: a need gets her own peek, no hop.
+    @Test func forANeedSheLeansOutToPeekAtYou() {
+        #expect(KuroSlot.peek.move(in: .chill) == .peek && !KuroSlot.peek.hops)
+        #expect(KuroTap.peek.duration == 2)
+        let rest = KuroPose(look: .chill, energy: 50)
+        #expect(rest.reacting(.peek, progress: 0.3).eyes == .bright)
+        #expect(rest.reacting(.peek, progress: 0.48).eyes == .closed)
+        #expect(rest.reacting(.peek, progress: 0.9).eyes == .happy)
+        let still = IdleMotion(dy: 0, angle: 0)
+        #expect(abs((KuroView.peek((.peek, 0.5), motion: still)?.angle ?? 0) - 7) < 0.001)
+        #expect((KuroView.peek((.peek, 0.5), motion: still)?.dy ?? 0) < -1.9)
+        #expect(abs(KuroView.peek((.peek, 0), motion: still)?.angle ?? 1) < 0.001)
+        #expect(KuroView.peek((.sip, 0.5), motion: still) == nil && KuroView.peek(nil, motion: still) == nil)
+    }
+
+    @Test func whileSheLeansOutHerPeekingLinesShow() {
+        let lines = CompanionLines.lines(for: .chill, need: .couchScroll, peeking: true, persona: .kuro)
+        #expect(lines.contains("……我们今天，真的不动了吗。"))
     }
 
     // 朋友测前 打磨清单: her widget face follows the day like the home screen's.
@@ -105,6 +125,7 @@ import Testing
         let low = KuroPose(look: .chill, energy: 10)
         #expect(KuroSlot.invite.dressing(low).eyes == .low)
         #expect(KuroSlot.invite.dressing(KuroPose(look: .chill, energy: 50)).eyes == .bright)
+        #expect(KuroSlot.peek.dressing(KuroPose(look: .chill, energy: 50)).eyes == .bright)
         #expect(KuroSlot.tired.dressing(low).eyes == .drowsy)
     }
 
