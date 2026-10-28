@@ -43,9 +43,7 @@ struct WatchHomeView: View {
                 // stays in its plain look. Page 2 reads the mode, so there is only this page.
                 companionPage(payload, mode: nil, at: context.date)
             } else {
-                (failure.map(Self.failureLine) ?? Text("先在 iPhone 上打开一次 Life Hub"))
-                    .font(.footnote)
-                    .multilineTextAlignment(.center)
+                firstRun
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: WatchReceiver.didReceive)) { _ in
@@ -58,6 +56,28 @@ struct WatchHomeView: View {
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active { WatchReceiver.shared.askPhoneToCheck() }
         }
+        // A save failure is a note, not a state: it goes away by itself, and the next payload clears it too.
+        .task(id: failure) {
+            guard failure != nil else { return }
+            try? await Task.sleep(for: .seconds(10))
+            failure = nil
+        }
+    }
+
+    /// Before the iPhone has sent anything: the home's empty-state paper and ink, with what to do.
+    private var firstRun: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "iphone")
+                .font(.system(size: 28, weight: .black))
+                .accessibilityHidden(true)
+            (failure.map(Self.failureLine) ?? Text("先在 iPhone 上打开一次 Life Hub"))
+                .font(Toy.body(13, weight: .bold))
+                .multilineTextAlignment(.center)
+        }
+        .foregroundStyle(Toy.ink)
+        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Toy.paper.ignoresSafeArea())
     }
 
     /// The line for a payload that could not be saved, looked up in the view's locale.
