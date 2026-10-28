@@ -1,0 +1,28 @@
+name: fmt-check
+
+on:
+  push:
+    branches: [chore/fmt-check]
+
+permissions:
+  contents: read
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container: swift:6.2-noble
+    steps:
+      - uses: actions/checkout@v7
+      - name: Format and lint
+        shell: bash
+        run: |
+          set +e
+          echo "::warning::start $(which git) $(swift --version 2>&1 | head -1)"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          swift format format --in-place --recursive Apps Packages; echo "::warning::format exit $?"
+          git diff --stat | head -40 | while IFS= read -r l; do echo "::warning::stat $l"; done
+          git diff -U0 | grep -E '^(\+\+\+|@@|[-+][^-+])' | head -150 | while IFS= read -r l; do echo "::warning::d $l"; done
+          git checkout -- .
+          swift format lint --strict --recursive Apps Packages 2>&1 | head -60 | while IFS= read -r l; do echo "::warning::lint $l"; done
+          echo "::warning::done"
