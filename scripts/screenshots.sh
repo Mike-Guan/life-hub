@@ -47,7 +47,7 @@ if se=$(xcrun simctl create "Screenshot SE" com.apple.CoreSimulator.SimDeviceTyp
     for persona in haku kuro; do
       xcrun simctl launch --terminate-running-process "$se" "$bundle" -screenshot-mode "$mode" \
         -screenshot-persona "$persona"
-      sleep 10
+      sleep 25
       xcrun simctl io "$se" screenshot "$out/ios-se-$persona-$mode.png"
     done
   done
