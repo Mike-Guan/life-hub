@@ -7,7 +7,7 @@ import Testing
 @testable import CompanionKit
 
 // 商店与家 同步方案 v0, M4: every drawn top in the room, front, back, at the desk and on the sofa, the first week's
-// accessories, then each mode's and identity card's default look, for the UI review.
+// accessories, then each mode's and identity card's default look and the identity card tops, for the UI review.
 extension FrameSheets {
     @Test func hakuHomeClothes() throws {
         let columns: [(String, Bool, (HomeModel) -> Void)] = [
@@ -17,7 +17,12 @@ extension FrameSheets {
             ("沙发", true, { $0.switchMode(.chill) }),
         ]
         var rows: [(String, [CGImage])] = []
-        for outfit in HomeOutfit.allCases where outfit.shopID != nil {
+        // A card top shows only in the card mode with its card, so those get their own section below.
+        func card(of outfit: HomeOutfit) -> IdentityKind? {
+            guard let item = outfit.shopID.flatMap(ShopItem.item), !item.suits(nil) else { return nil }
+            return IdentityKind.allCases.first { item.suits($0) }
+        }
+        for outfit in HomeOutfit.allCases where outfit.shopID != nil && card(of: outfit) == nil {
             var cells: [CGImage] = []
             for (_, night, setup) in columns {
                 let model = HomeModel(night: night)
@@ -68,6 +73,22 @@ extension FrameSheets {
             }
             defaults.append(("\(label) · \(HomeOutfit(worn: [], mode: mode, card: card).name)", cells))
         }
+        var cardTops: [(String, [CGImage])] = []
+        for outfit in HomeOutfit.allCases {
+            guard let card = card(of: outfit) else { continue }
+            var cells: [CGImage] = []
+            for spot in [HomeHotspot?.none, .sofa, .wardrobe] {
+                let model = HomeModel(night: false, card: card, mode: .boxing)
+                let scene = HomeScene(model: model)
+                model.wearEverywhere(outfit)
+                if let spot { model.tap(spot) }
+                scene.sync(animated: false)
+                scene.settle()
+                scene.pose(at: 1.3)
+                cells.append(try #require(Self.hakuCloseUp(scene)))
+            }
+            cardTops.append(("\(outfit.name) · \(card.rawValue)", cells))
+        }
         let sheet = VStack(alignment: .leading, spacing: 8) {
             Text(verbatim: "家 · HAKU 衣服房间版（每格 120×120 pt）").font(.system(size: 16, weight: .bold))
             HStack(spacing: 10) {
@@ -101,6 +122,16 @@ extension FrameSheets {
                         width: 110, alignment: .leading)
                     ForEach(defaults[r].1.indices, id: \.self) { c in
                         Image(decorative: defaults[r].1[c], scale: 1).resizable().frame(width: 240, height: 240)
+                    }
+                }
+            }
+            Text(verbatim: "身份卡上衣（卡片模式的位置 / 沙发 / 背面 · 衣柜前）").font(.system(size: 14, weight: .bold))
+            ForEach(cardTops.indices, id: \.self) { r in
+                HStack(spacing: 10) {
+                    Text(verbatim: cardTops[r].0).font(.system(size: 12, weight: .bold)).frame(
+                        width: 110, alignment: .leading)
+                    ForEach(cardTops[r].1.indices, id: \.self) { c in
+                        Image(decorative: cardTops[r].1[c], scale: 1).resizable().frame(width: 240, height: 240)
                     }
                 }
             }
