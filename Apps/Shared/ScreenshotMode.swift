@@ -105,6 +105,11 @@ struct ScreenshotHome: View {
         // An empty bedtime window, so RUNNER is awake whatever time CI runs.
         HomeView(
             bedtime: BedtimeSchedule(startMinute: 0, endMinute: 0),
+            onHome: {},
+            homeSnapshot: HomeSnapshot(
+                persona: ScreenshotMode.persona, mode: mode, cards: ModeCards(), cans: 0, owned: [],
+                wardrobe: ScreenshotMode.wardrobe, energy: nil, vitals: HakuVitals(), bedtime: .off, today: [],
+                room: RoomLayout(persona: ScreenshotMode.persona, deviceID: "screenshot")),
             wardrobe: ScreenshotMode.wardrobe,
             persona: ScreenshotMode.persona,
             screenshotCheck: ScreenshotMode.check

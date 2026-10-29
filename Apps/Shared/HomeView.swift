@@ -45,8 +45,10 @@ struct HomeView: View {
     var cans: Int?
     /// Opens the shop, when set.
     var onShop: (() -> Void)?
-    /// Shows a house button that calls this, when set.
+    /// Opens the home page from the window under the mode cards, when set with `homeSnapshot`.
     var onHome: (() -> Void)?
+    /// What the home page shows, for its window on this screen.
+    var homeSnapshot: HomeSnapshot?
     /// What the character wears.
     var wardrobe = Wardrobe()
     /// Which character the card draws.
@@ -103,7 +105,6 @@ struct HomeView: View {
                     error: store.lastError ?? energy.lastError ?? extraError,
                     cans: cans,
                     onShop: onShop,
-                    onHome: onHome,
                     onSettings: onSettings,
                     persona: persona,
                     name: greetingName,
@@ -253,6 +254,10 @@ struct HomeView: View {
                 }
                 .anchorPreference(key: SwitcherBounds.self, value: .bounds) { $0 }
 
+                if let onHome, let homeSnapshot {
+                    homeWindow(homeSnapshot, open: onHome)
+                }
+
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     TodayTimeline(
                         segments: store.segments(on: context.date, now: context.date),
@@ -303,6 +308,34 @@ struct HomeView: View {
         .onChange(of: replayFrom) {
             replayEnded = false
         }
+    }
+
+    // UI 二组 首页家窗口 v1: the window is the home screen's one door into the home, so the header has no house
+    // button.
+    private func homeWindow(_ snapshot: HomeSnapshot, open: @escaping () -> Void) -> some View {
+        Button(action: open) {
+            TimelineView(.everyMinute) { context in
+                HomeWindow(snapshot: snapshot, now: context.date)
+            }
+            .frame(height: 124)
+            .overlay(alignment: .bottomTrailing) {
+                HStack(spacing: 4) {
+                    Text("家")
+                    Image(systemName: "chevron.right")
+                }
+                .font(Toy.body(14, weight: .black))
+                .foregroundStyle(Toy.paper)
+                .padding(.horizontal, 12)
+                .frame(height: 34)
+                .background(Capsule().fill(Toy.ink))
+                .padding(10)
+            }
+            .toyCard()
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
     }
 
     /// The "不对" card over a dimmed layer that closes it on a tap.
@@ -541,7 +574,6 @@ private struct Header: View {
     let error: String?
     let cans: Int?
     let onShop: (() -> Void)?
-    let onHome: (() -> Void)?
     let onSettings: (() -> Void)?
     let persona: Persona
     let name: String?
@@ -572,17 +604,6 @@ private struct Header: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("商店，\(cans) 个能量罐")
-                }
-                if let onHome {
-                    Button(action: onHome) {
-                        Image(systemName: "house.fill")
-                            .font(Toy.body(18, weight: .heavy))
-                            .foregroundStyle(Toy.ink)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("家")
                 }
                 if let onSettings {
                     Button(action: onSettings) {
