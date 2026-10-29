@@ -101,7 +101,7 @@ struct Outfit: Equatable, Sendable {
         "haku.goggles.ski.gold": [.skiGoggles: [RunnerPalette.catOrange: RunnerPalette.gold]],
     ]
 
-    // 商店衣服 pop (Mike 2026-10-14). The second character's clothes are not drawn yet.
+    // 商店衣服 pop (Mike 2026-10-14) and HAKU's identity card tops. The second character's are in KuroShop.
     static let clothesParts: [String: Set<RunnerPart>] = [
         "haku.top.work.blazer": [.topWorkIvy],
         "haku.top.work.cardigan": [.topWorkPixel],
@@ -111,6 +111,14 @@ struct Outfit: Equatable, Sendable {
         "haku.top.side.arcade": [.topSideArcade, .sideCassette],
         "haku.set.chill.varsity": [.setVarsityTop, .setVarsityCap],
         "haku.set.work.raincoat": [.setKawaiiHood, .setKawaiiTop, .setDuckCharm],
+        // Identity card tops, worn in the card's mode.
+        "haku.top.boxing.blackgold": [.topBoxingBlackgold],
+        "haku.top.gym.tank": [.topGymTank],
+        "haku.top.tennis.white": [.topTennisWhite],
+        "haku.top.study.cardigan": [.topStudyCardigan],
+        "haku.base.outing.windbreaker": [.topOutingWindbreaker],
+        "haku.top.art.apron": [.topArtApron],
+        "haku.base.craft.overalls": [.topCraftOveralls],
     ]
 
     // UI 审核 2026-10-14: from the back each top shows as a plain jacket in its base colour, like the second character.
@@ -123,6 +131,14 @@ struct Outfit: Equatable, Sendable {
         "haku.top.side.arcade": RunnerPalette.cream,
         "haku.set.chill.varsity": RunnerPalette.varsityRed,
         "haku.set.work.raincoat": RunnerPalette.lilac,
+        "haku.top.boxing.blackgold": RunnerPalette.mask,
+        "haku.top.gym.tank": RunnerPalette.catOrange,
+        "haku.top.tennis.white": RunnerPalette.white,
+        "haku.top.study.cardigan": RunnerPalette.lilac,
+        "haku.base.outing.windbreaker": RunnerPalette.sky,
+        // The apron and the overalls are worn over the green craft jacket, which is all the back shows.
+        "haku.top.art.apron": RunnerPalette.jacketChill,
+        "haku.base.craft.overalls": RunnerPalette.jacketChill,
     ]
 }
 

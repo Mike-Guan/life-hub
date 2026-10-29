@@ -479,7 +479,8 @@ import Testing
                 #expect(item.slot == .top || item.slot == .fullSet)
                 #expect(item.isDrawn, "\(item.id)")
             }
-            let onShelf = ShopItem.catalog(for: persona, card: .boxing).filter { $0.mode != nil }
+            // The boxing card's own top is on its shelf too; identity card clothes are checked below.
+            let onShelf = ShopItem.catalog(for: persona, card: .boxing).filter { $0.mode != nil && $0.mode != .boxing }
             #expect(onShelf.count == clothes.count, "\(persona)")
         }
     }
@@ -672,6 +673,17 @@ import Testing
         #expect(!tank.shows(in: .chill, card: .fitness))
     }
 
+    @Test func hakusCardTopsAreOnTheShelfOfTheirCards() {
+        let tops = { (card: IdentityKind) in
+            ShopItem.catalog(for: .haku, card: card).filter { $0.mode == .boxing }.map(\.id)
+        }
+        #expect(tops(.boxing) == ["haku.top.boxing.blackgold"])
+        #expect(tops(.fitness) == ["haku.top.gym.tank", "haku.top.tennis.white"])
+        #expect(tops(.study) == ["haku.top.study.cardigan", "haku.base.outing.windbreaker"])
+        #expect(tops(.art) == ["haku.top.art.apron", "haku.base.craft.overalls"])
+        #expect(ShopItem.catalog(for: .kuro, card: .boxing).allSatisfy { $0.mode != .boxing })
+    }
+
     @Test func cardTopsSuitOnlyTheirCard() throws {
         let jacket = try item("haku.top.boxing.blackgold")
         #expect(jacket.suits(.boxing) && !jacket.suits(.tennis) && !jacket.suits(nil))
@@ -687,7 +699,8 @@ import Testing
             #expect(item.slot == .top, "\(item.id)")
             #expect((item.card == nil) != (item.base == nil), "\(item.id)")
             #expect(item.price == 30 || item.price == 40, "\(item.id)")
-            #expect(!item.isDrawn, "\(item.id)")
+            // HAKU's are drawn; the second character's wait for their art.
+            #expect(item.isDrawn == (item.persona == .haku), "\(item.id)")
         }
         for persona in Persona.allCases {
             for base in BaseOutfit.allCases {

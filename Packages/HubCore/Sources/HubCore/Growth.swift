@@ -653,8 +653,8 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(
             clothes: "kuro.set.chill.picnic", slot: .fullSet, title: "野餐", price: 80, mode: .chill, persona: .kuro),
         ShopItem(clothes: "kuro.set.work.rain", slot: .fullSet, title: "雨天", price: 90, mode: .work, persona: .kuro),
-        // Identity card clothes (商店完整目录 v0 §1.2, §1.5, §2.2, §2.5), off the shelf until drawn. Base clothes
-        // are bought once and worn with every card on their base outfit.
+        // Identity card clothes (商店完整目录 v0 §1.2, §1.5, §2.2, §2.5). HAKU's are drawn; the second character's
+        // are off the shelf until drawn. Base clothes are bought once and worn with every card on their base outfit.
         ShopItem(cardTop: "haku.top.boxing.blackgold", title: "黑金拳击外套", price: 40, card: .boxing),
         ShopItem(cardTop: "haku.top.gym.tank", title: "运动背心", price: 30, base: .sport),
         ShopItem(cardTop: "haku.top.tennis.white", title: "白色运动服", price: 40, base: .sport),
@@ -742,7 +742,7 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         self.init(id: id, slot: .top, title: title, price: price, persona: persona, card: card)
         mode = .boxing
         self.base = base
-        isDrawn = false
+        isDrawn = persona == .haku
     }
 
     /// Whether it is a rug, which changes the rug's style instead of standing in a zone.

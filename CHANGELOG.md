@@ -32,7 +32,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   low-energy day, and a tangle of lines that smooths out and goes while the user scrolls for a long while.
 - The second preset character has her own good night: as bedtime starts she rubs an eye, stretches up in a
   big yawn and settles with heavy eyes, instead of only dimming.
-- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
 - In the home HAKU wears every top and set the shop sells: the pixel cardigan, the souvenir jacket, the arcade
   T and the Harajuku raincoat join the earlier four, and the varsity set brings its cap. The headband colour, the
   mask print on his chin and the glove colour he bought show too.
@@ -59,6 +58,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character's ten room items stand in her home: two posters on the poster wall, a cat
   clock, a jar, a strawberry mug and a mirror on the desk, yarn and a plush by the sofa, a sakura pot and an easel
   in the corner. Each character's item preview shows only what her or his shop sells, own items first.
+- HAKU's seven identity card tops are drawn and on the shop shelf: the black and gold boxing jacket, the sport
+  tank and the white sport jacket, the cardigan and the windbreaker for outings, and the canvas apron and the
+  overalls for crafts. Each shows only with a card that wears it, and from behind as a plain jacket. HAKU wears them at home
+  too, with the boxing headband or the tennis visor kept on.
 - The home can draw ten more of HAKU's room items: a clamp lamp, headphones on a stand, a game controller and a
   puzzle cube on the desk, a stack of comics and a small fan by the sofa, a monstera and a skateboard in the
   corner, and an arcade or a city poster on the wall over the desk. It also draws four items both characters

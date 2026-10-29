@@ -30,11 +30,13 @@ const RUNNER_PALETTE = {
   '#C3C8D2': 'canLid', '#7CFF4F': 'monsterGreen', '#EADCC2': 'beige', '#C9B794': 'beigeShade',
   '#D9AE6E': 'cardboard', '#B58A4E': 'cardboardTape', '#E6C08A': 'cardboardFlap',
   '#FFF6E5': 'cream', '#E8D9BC': 'creamShade', '#FF9F43': 'catOrange', '#C96F1E': 'catStripe',
-  // Not in the SVG: per-mode jacket colors from the RUNNER v5 sheet.
+  // Per-mode jacket colors from the RUNNER v5 sheet. Only the craft card tops draw one in the SVG.
   '#3A6B58': 'jacketChill', '#121219': 'jacketMoney',
   // Shop clothes (UI 审核 2026-10-14: named clothes colours).
   '#FF8FC8': 'bubblegum', '#F07AB6': 'bubblegumDeep', '#C7A6FF': 'lilac', '#8D6BD6': 'lilacDeep',
   '#7FB2FF': 'sky', '#FF4D5E': 'varsityRed', '#4A5280': 'capSeam',
+  // Identity card tops.
+  '#3F6FB5': 'denim', '#2C528C': 'denimDeep',
 };
 const KURO_PALETTE = {
   '#111111': 'ink', '#111': 'ink', '#FFFFFF': 'white', '#fff': 'white',

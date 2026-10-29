@@ -1538,6 +1538,8 @@ struct RunnerFigure: View {
                 if let look = pose.cardLook {
                     // Asleep, HAKU holds nothing (QA spec S6).
                     visible = look.parts
+                    // A craft top brings its own apron or bib in place of the default apron.
+                    if pose.outfit.clothes[.boxing] != nil { visible.remove(.apron) }
                     if pose.bedtime { visible.subtract(look.held) }
                     if !pose.holdsCardProps {
                         visible.subtract(look.props)
@@ -1752,8 +1754,14 @@ struct RunnerFigure: View {
     ]
     nonisolated private static let warmupParts: Set<RunnerPart> = [.headband, .gloveL, .gloveR]
     // 商店衣服 pop: no ¥ or gold chain on any of the clothes, so the 副业 chain and coin go with the jacket.
+    // UI 审核 2026-10-28: held at the chest, the book and the sketchbook hid a bought card top completely.
+    /// How far the card look's book or sketchbook sits lower while a bought top is worn, so its shoulders show.
+    nonisolated static func propDrop(_ pose: RunnerPose, mode: Mode) -> CGFloat {
+        pose.cardLook != nil && pose.outfit.clothes[mode] != nil ? 10 : 0
+    }
+
     nonisolated private static let jacketParts: Set<RunnerPart> = [
-        .jacket, .stripeNeon, .hoodCollar, .hoodieStrings, .chainGold, .coin,
+        .jacket, .stripeNeon, .stripeSport, .hoodCollar, .hoodieStrings, .chainGold, .coin,
     ]
     nonisolated private static let headgear: Set<RunnerPart> = [
         .headband, .headset, .cheerGoggles, .bathTowel, .cheerHelmet,
@@ -2061,12 +2069,17 @@ struct RunnerFigure: View {
                     .opacity(Double(1 - pose.propHidden))
             case .sketchbook:
                 RunnerPartView(part: part)
-                    .offset(y: 34 * pose.propHidden * scale)
+                    .offset(y: (34 * pose.propHidden + Self.propDrop(pose, mode: mode)) * scale)
                     .opacity(Double(1 - pose.propHidden))
             case .pencil:
                 RunnerPartView(part: part)
-                    .offset(x: pose.pencil.width * scale, y: (pose.pencil.height + 34 * pose.propHidden) * scale)
+                    .offset(
+                        x: pose.pencil.width * scale,
+                        y: (pose.pencil.height + 34 * pose.propHidden + Self.propDrop(pose, mode: mode)) * scale
+                    )
                     .opacity(Double(1 - pose.propHidden))
+            case .book, .bookPage:
+                RunnerPartView(part: part).offset(y: Self.propDrop(pose, mode: mode) * scale)
             case .monsterCan:
                 RunnerPartView(part: part)
                     .scaleEffect(pose.canScale, anchor: Self.unit(x: 102, y: 136))
