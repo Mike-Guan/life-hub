@@ -68,14 +68,6 @@ targets:
       - target: LifeHub-Notification
       - target: LifeHub-ScreenTime
       - target: LifeHub-Watch
-    # PROD ships without the Screen Time extension until Family Controls is on there too. See CI-CD.md.
-    postBuildScripts:
-      - name: Leave the Screen Time extension out of PROD
-        basedOnDependencyAnalysis: false
-        script: |
-          if [ "$CONFIGURATION" = Release ]; then
-            rm -rf "$TARGET_BUILD_DIR/$PLUGINS_FOLDER_PATH/LifeHubScreenTime.appex"
-          fi
     settings:
       # Family Controls is in DEV and STG; PROD gets it once Mike turns it on there. See CI-CD.md.
       configs:
@@ -83,6 +75,9 @@ targets:
           CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-FamilyControls.entitlements
         Staging:
           CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-FamilyControls.entitlements
+        # Until then PROD doesn't embed the Screen Time extension either.
+        Release:
+          EXCLUDED_SOURCE_FILE_NAMES: LifeHubScreenTime.appex
       base:
         CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub.entitlements
         TARGETED_DEVICE_FAMILY: "1"
