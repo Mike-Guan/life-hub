@@ -4,6 +4,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-28
+
 ### Fixed
 - The home screen's window into the home shows the floor colour and a faint figure until the room is drawn,
   and no longer redraws when only the room's record changes.
@@ -21,7 +23,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The home screen has a window into the home under the mode cards: a still of the real room around the character,
   with a line saying where she is (at the desk, on the sofa, in bed). Tapping it opens the home; the header's
   house button is gone. The picture fades to the new one when the mode changes.
-- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
 - With the watch screen dimmed (Always On), the second preset character naps over her tablet when she is off work
   before bedtime, instead of only closing her eyes.
 - The second preset character has her own looks for the swimming, yoga, ball and outdoor cards (goggles, a
