@@ -33,7 +33,14 @@ public struct HomeWindow: View {
             }
         }
         .clipped()
-        .background(Toy.paper)
+        .background(drawn == nil ? Color(hex: HomeColors.floor) : Toy.paper)
+        .overlay {
+            if drawn == nil {
+                GeometryReader { geo in
+                    silhouette.position(x: geo.size.width / 4, y: geo.size.height - 44)
+                }
+            }
+        }
         .overlay(alignment: .topTrailing) {
             if let drawn {
                 Text(drawn.line)
@@ -49,16 +56,37 @@ public struct HomeWindow: View {
             }
         }
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: drawn?.revision)
-        .task(id: key) { draw(key) }
+        .task(id: key) {
+            // UI 审核 2026-10-29: the card was empty while the scene was built. The placeholder gets a frame first,
+            // and quick snapshot changes at launch settle before the main actor is held.
+            try? await Task.sleep(for: .milliseconds(150))
+            guard !Task.isCancelled else { return }
+            draw(key)
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(drawn?.line ?? "")
     }
 
-    /// What changes the picture: not today's timeline or the cans, which the room doesn't show.
+    /// The room's floor colour with a faint figure where the character will stand, until the still is drawn.
+    private var silhouette: some View {
+        VStack(spacing: -6) {
+            Circle().frame(width: 38, height: 38)
+            UnevenRoundedRectangle(topLeadingRadius: 18, topTrailingRadius: 18).frame(width: 46, height: 46)
+        }
+        .foregroundStyle(Toy.ink.opacity(0.12))
+        .accessibilityHidden(true)
+    }
+
+    /// What changes the picture: not today's timeline, the cans or the layout's record fields, which the room
+    /// doesn't show.
     private var key: Key {
         var shown = snapshot
         shown.today = []
         shown.cans = 0
+        shown.room.id = Self.anyRoom
+        shown.room.createdAt = .distantPast
+        shown.room.updatedAt = .distantPast
+        shown.room.updatedBy = ""
         return Key(snapshot: shown, night: HomeModel.isNight(at: now))
     }
 
@@ -102,6 +130,9 @@ public struct HomeWindow: View {
             }
         return String(format: format.localized, persona.title)
     }
+
+    /// The one layout id every key uses, so a new layout record with the same room draws nothing new.
+    private static let anyRoom = UUID()
 
     private struct Key: Equatable {
         var snapshot: HomeSnapshot

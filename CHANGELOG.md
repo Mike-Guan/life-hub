@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [Unreleased]
 
 ### Fixed
+- The home screen's window into the home shows the floor colour and a faint figure until the room is drawn,
+  and no longer redraws when only the room's record changes.
 - The second preset character's face on the widgets and watch face follows the day like on the home screen:
   drowsy when worn out, eyes down when busy, bright when she notices a need, chin on hand at overtime.
 - When the second preset character pops out of a gift box she grows as a whole instead of stretching up, and
