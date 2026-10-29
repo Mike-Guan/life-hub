@@ -25,7 +25,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   low-energy day, and a tangle of lines that smooths out and goes while the user scrolls for a long while.
 - The second preset character has her own good night: as bedtime starts she rubs an eye, stretches up in a
   big yawn and settles with heavy eyes, instead of only dimming.
-- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
 - In the home HAKU wears every top and set the shop sells: the pixel cardigan, the souvenir jacket, the arcade
   T and the Harajuku raincoat join the earlier four, and the varsity set brings its cap. The headband colour, the
   mask print on his chin and the glove colour he bought show too.
