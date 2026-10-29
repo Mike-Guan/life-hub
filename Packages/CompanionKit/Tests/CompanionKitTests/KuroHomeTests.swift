@@ -27,11 +27,53 @@ import Testing
         #expect(parts.torso == [.jacketDesk])
     }
 
+    @Test func atHomeSheWearsTheTopSheBoughtFrontAndBack() {
+        let front = KuroHomeNode.parts(.work, items: [.workBlouse], face: .idle, sleeping: false)
+        #expect(front.torso.contains(.topWorkSailor) && !front.torso.contains(.jacketWork))
+        let back = KuroHomeNode.parts(.work, items: [.workBlouse], face: .back, sleeping: false)
+        #expect(back.torso == [.topWorkSailorBack])
+        #expect(KuroHomeNode.parts(.work, items: [], face: .back, sleeping: false).torso.isEmpty)
+        let rain = KuroHomeNode.parts(.work, items: [.rain], face: .back, sleeping: false)
+        #expect(rain.torso == [.setRainBack] && rain.head.contains(.setRainHat))
+        #expect(back.head.contains(.catEars) && back.head.contains(.backHead) && !rain.head.contains(.catEars))
+    }
+
+    @Test func herSleevesMatchTheTopSheBought() {
+        #expect(KuroHomeNode.sleeve(.chill, items: []) == KuroHomeNode.sleeve(.chill))
+        #expect(KuroHomeNode.sleeve(.chill, items: [.chillCardigan]) == 0xFFD1DC)
+        #expect(KuroHomeNode.sleeve(.desk, items: [.sideDenim]) == 0x7FB7FF)
+        #expect(KuroHomeNode.sleeve(.work, items: [.workBlouse]) == 0xFFFFFF)
+        // A top shows only in its own mode.
+        #expect(KuroHomeNode.sleeve(.chill, items: [.sideDenim]) == KuroHomeNode.sleeve(.chill))
+    }
+
     @Test func herForehandGoesBackSweepsAndComesBack() {
         #expect(KuroHomeNode.forehand(0.2) == 0)
         #expect(KuroHomeNode.forehand(0.9) == 1)
         #expect(abs(KuroHomeNode.forehand(1.6) - KuroHomeNode.forehand(0)) < 1e-9)
         #expect(KuroHomeNode.forehand(0.62) > 0 && KuroHomeNode.forehand(0.62) < 1)
+    }
+
+    @Test func atHomeSheWearsTheGlovesSheBought() {
+        #expect(KuroHomeNode.glove([]) == .boxGloveR)
+        #expect(KuroHomeNode.glove([.pinkGloves]) == .itemGlovePinkR)
+        #expect(KuroHomeNode.glove([.pinkGloves, .goldGloves]) == .itemGloveGoldR)
+    }
+
+    @Test func atHomeHerRedGlassesComeOffForBed() {
+        let awake = KuroHomeNode.parts(.study, items: [.redGlasses], face: .idle, sleeping: false)
+        #expect(awake.head.contains(.itemGlassesRed))
+        let asleep = KuroHomeNode.parts(.study, items: [.redGlasses], face: .closed, sleeping: true)
+        #expect(!asleep.head.contains(.itemGlassesRed))
+    }
+
+    @Test func atHomeSheWearsTheGogglesAndHeadphonesSheBought() {
+        let ski = KuroHomeNode.parts(.ski, items: [.sakuraGoggles], face: .idle, sleeping: false)
+        #expect(ski.head.contains(.itemGogglesSakura) && !ski.head.contains(.skiGoggles))
+        let dance = KuroHomeNode.parts(.dance, items: [.goldPhones], face: .idle, sleeping: false)
+        #expect(dance.head.contains(.itemPhonesGold))
+        let asleep = KuroHomeNode.parts(.ski, items: [.sakuraGoggles], face: .closed, sleeping: true)
+        #expect(!asleep.head.contains(.itemGogglesSakura))
     }
 
     @MainActor @Test func theHomeDrawsHerForHerPersona() {

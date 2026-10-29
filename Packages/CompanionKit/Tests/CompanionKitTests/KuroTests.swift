@@ -23,12 +23,14 @@ import Testing
         let jackets: [KuroLook: KuroPart] = [
             .work: .jacketWork, .chill: .jacketChill, .tennis: .jacketTennis, .desk: .jacketDesk,
             .box: .jacketBox, .fitness: .jacketTennis, .study: .jacketChill, .art: .jacketSmock,
-            .dance: .jacketTennis, .music: .jacketChill, .ski: .jacketTennis,
+            .dance: .jacketTennis, .music: .jacketChill, .ski: .jacketTennis, .swimming: .jacketTennis,
+            .yoga: .jacketTennis, .ball: .jacketTennis, .outdoor: .jacketChill,
         ]
         #expect(parts.intersection(Set(jackets.values)) == [jackets[look]!])
         #expect(parts.isSuperset(of: [.hairBack, .faceBase, .hairFringe, .catEars, .blush]))
         #expect(parts.contains(.maskWork) == (look == .work))
-        #expect(parts.contains(.tennisPonytail) == [.tennis, .box, .fitness, .dance, .ski].contains(look))
+        let ponytail: Set<KuroLook> = [.tennis, .box, .fitness, .dance, .ski, .swimming, .yoga, .ball]
+        #expect(parts.contains(.tennisPonytail) == ponytail.contains(look))
         #expect(parts.contains(.deskGlasses) == (look == .desk))
         #expect(parts.contains(.chillCup) == (look == .chill))
     }
@@ -282,6 +284,15 @@ import Testing
     }
 
     // UI-32 (UI 审核 2026-10-08): KURO's mode icons were HAKU's headphones, can and yen sign.
+    @Test func withTheWatchDimmedSheNapsOverHerTabletAtHome() {
+        let chill = KuroView.dozed(KuroPose(look: .chill, energy: 50), look: .chill, bedtime: .off)
+        let parts = Set(KuroFigure.parts(for: .chill, pose: chill, watch: true))
+        #expect(parts.isSuperset(of: [.eyesClosed, .napTablet, .napHands]))
+        let work = KuroView.dozed(KuroPose(look: .work, energy: 50), look: .work, bedtime: .off)
+        #expect(!work.napping && work.eyes == .closed)
+        #expect(!KuroView.dozed(KuroPose(look: .chill, energy: 50), look: .chill, bedtime: .on).napping)
+    }
+
     @Test(arguments: Mode.allCases)
     func herModeIconsAreHerOwn(_ mode: Mode) {
         #expect(mode.symbol(for: .haku) == mode.symbol)

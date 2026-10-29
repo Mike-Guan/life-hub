@@ -80,6 +80,8 @@ enum PlacementPoses {
             var pose = RunnerPose(face: face)
             pose.dailyProp = prop
             pose.propRaise = 1
+            // A cue that has fully come in: the can is down and gone.
+            pose.canOpacity = 0
             states.append(("daily.\(prop.rawValue)", pose))
             pose.watchTap = true
             states.append(("daily.\(prop.rawValue).watchTap", pose))

@@ -258,4 +258,39 @@ extension RoomTests {
         #expect(saved.placements.first { $0.piece == "room.bench" }?.zone == RoomZone.sportFloor.rawValue)
         #expect(RoomLayout.placeBought("room.bench", persona: .haku, in: defaults, now: later).isEmpty)
     }
+
+    @Test func aBoughtRugIsLaidAndTheFringedOneComesBackByHand() throws {
+        var layout = RoomLayout(persona: .haku, now: now, deviceID: "a")
+        #expect(layout.rug == nil)
+        let change = layout.place(["room.rug.stripe"], catalog: RoomCatalog(), now: now, deviceID: "b")
+        #expect(change == RoomChange(added: ["room.rug.stripe"]))
+        #expect(layout.rug == "room.rug.stripe")
+        #expect(layout.placements.map(\.piece) == ["room.rug.stripe"])
+        #expect(layout.placements[0].isStored)
+        #expect(layout.place(["room.rug.stripe"], catalog: RoomCatalog(), now: now, deviceID: "c").isEmpty)
+        #expect(layout.updatedBy == "b")
+
+        let later = now.addingTimeInterval(60)
+        layout.lay(rug: nil, now: later, deviceID: "d")
+        #expect(layout.rug == nil)
+        #expect(layout.updatedBy == "d")
+        layout.lay(rug: nil, now: later, deviceID: "e")
+        #expect(layout.updatedBy == "d")
+        // Owning it doesn't lay it again: the home places every owned item each time it opens.
+        #expect(layout.place(["room.rug.stripe"], catalog: RoomCatalog(), now: later, deviceID: "e").isEmpty)
+        #expect(layout.rug == nil)
+
+        layout.lay(rug: "room.rug.round", now: later, deviceID: "f")
+        let again = try HubJSON.decoder().decode(RoomLayout.self, from: HubJSON.encoder().encode(layout))
+        #expect(again.rug == "room.rug.round")
+        #expect(again == layout)
+    }
+
+    @Test func everyRoomItemButTheRugsHasAZone() {
+        for item in ShopItem.catalog where item.slot == .room {
+            #expect((item.zone == nil) == item.isRug, "\(item.id)")
+        }
+        #expect(RoomZone.posterWall.capacity == 1)
+        #expect(!RoomZone.posterWall.isSports)
+    }
 }

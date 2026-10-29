@@ -4,9 +4,10 @@ import Testing
 
 @testable import CompanionKit
 
-// The bench and the snowboard stand only in the home page, which draws them (HomeTests); the figure has no part.
+// Room items other than these four stand only in the home page, which draws them (HomeTests); the figure has no part.
+private let figureRooms = ["room.plant", "room.bag", "haku.weekly.room.cactus", "haku.weekly.room.speaker"]
 private let figureItems = ShopItem.catalog(for: .haku).filter {
-    $0.isDrawn && !["room.bench", "room.snowboard"].contains($0.id)
+    $0.isDrawn && ($0.slot != .room || figureRooms.contains($0.id))
 }
 
 @Suite struct CompanionKitTests {
@@ -186,6 +187,18 @@ private let figureItems = ShopItem.catalog(for: .haku).filter {
         #expect(hops.allSatisfy { $0.dy <= 0 && $0.dy >= -22 && abs($0.angle) <= 3 })
         #expect(hops.contains { $0.dy < -15 })
         #expect(abs(IdleMotion.celebrating(progress: 0).dy) < 0.01)
+    }
+
+    @Test func celebrationCrouchesBeforeEachHopAndPressesDownOnLanding() {
+        func squash(_ p: Double) -> CGFloat { IdleMotion.celebrating(progress: p).squash }
+        let all = (0..<100).map { squash(Double($0) / 100) }
+        #expect(all.allSatisfy { (0...1).contains($0) })
+        // Crouched just before the first hop and between the two, airborne with no crouch at each peak.
+        #expect(squash(0.09) > 0.9 && squash(0.47) > 0.9)
+        #expect(squash(0.24) == 0 && squash(0.62) == 0)
+        // Pressed down after the last landing, then standing still again.
+        #expect(squash(0.8) > 0.9)
+        #expect(squash(0.95) == 0 && IdleMotion.celebrating(progress: 0.95).dy == 0)
     }
 
     @Test func bedtimeHidesTheHighEnergyLook() {
@@ -1216,6 +1229,40 @@ private let figureItems = ShopItem.catalog(for: .haku).filter {
         let pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.money: "haku.top.side.arcade"])))
         let parts = Set(RunnerFigure.parts(for: .money, pose: pose))
         #expect(parts.contains(.topSideArcade) && parts.isDisjoint(with: [.chainGold, .coin, .jacket]))
+    }
+
+    static let cardTops: [(String, IdentityKind, RunnerPart)] = [
+        ("haku.top.boxing.blackgold", .boxing, .topBoxingBlackgold),
+        ("haku.top.gym.tank", .fitness, .topGymTank),
+        ("haku.top.tennis.white", .tennis, .topTennisWhite),
+        ("haku.top.study.cardigan", .study, .topStudyCardigan),
+        ("haku.base.outing.windbreaker", .music, .topOutingWindbreaker),
+        ("haku.top.art.apron", .art, .topArtApron),
+        ("haku.base.craft.overalls", .art, .topCraftOveralls),
+    ]
+
+    @Test(arguments: cardTops)
+    func cardTopsReplaceTheJacketWithTheirCard(_ id: String, _ card: IdentityKind, _ top: RunnerPart) throws {
+        let item = try #require(ShopItem.item(id))
+        #expect(item.isDrawn && item.suits(card))
+        let pose = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.boxing: id]))).dressed(for: card, in: .boxing)
+        let parts = Set(RunnerFigure.parts(for: .boxing, pose: pose))
+        #expect(parts.contains(top))
+        #expect(parts.isDisjoint(with: [.jacket, .stripeNeon, .stripeSport, .hoodCollar, .apron]))
+        #expect(!RunnerFigure.parts(for: .chill, pose: pose).contains(top))
+        var away = pose
+        away.turnedAway = true
+        let back = Set(RunnerFigure.parts(for: .boxing, pose: away))
+        #expect(back.contains(.jacket) && !back.contains(top))
+        #expect(pose.outfit.clothesBack[.boxing] != nil)
+    }
+
+    @Test func heldPropsSitLowerOverABoughtCardTop() {
+        let plain = RunnerPose().dressed(for: .study, in: .boxing)
+        #expect(RunnerFigure.propDrop(plain, mode: .boxing) == 0)
+        let cardigan = RunnerPose().wearing(Outfit(Wardrobe(clothes: [.boxing: "haku.top.study.cardigan"])))
+        #expect(RunnerFigure.propDrop(cardigan.dressed(for: .study, in: .boxing), mode: .boxing) > 0)
+        #expect(RunnerFigure.propDrop(cardigan, mode: .boxing) == 0)
     }
 
     @Test func capGivesWayToHeadgear() {

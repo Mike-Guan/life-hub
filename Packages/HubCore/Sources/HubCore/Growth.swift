@@ -498,6 +498,25 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         // 商店完整目录 §10.2: the bench is for every card, the snowboard only for the ski card.
         ShopItem(id: "room.bench", slot: .room, title: "房间卧推架", price: 25),
         ShopItem(id: "room.snowboard", slot: .room, title: "房间单板", price: 20, card: .ski),
+        // 商店扩充 v1 §2.2: HAKU's own room items (#558).
+        ShopItem(id: "haku.room.poster.arcade", slot: .room, title: "街机海报", price: 15),
+        ShopItem(id: "haku.room.poster.city", slot: .room, title: "城市夜景海报", price: 20),
+        ShopItem(id: "haku.room.lamp.clip", slot: .room, title: "夹子台灯", price: 15),
+        ShopItem(id: "haku.room.headphones", slot: .room, title: "耳机架", price: 12),
+        ShopItem(id: "haku.room.gamepad", slot: .room, title: "游戏手柄", price: 12),
+        ShopItem(id: "haku.room.cube", slot: .room, title: "魔方", price: 10),
+        ShopItem(id: "haku.room.comics", slot: .room, title: "一摞漫画", price: 10),
+        ShopItem(id: "haku.room.fan", slot: .room, title: "落地小风扇", price: 12),
+        ShopItem(id: "haku.room.monstera", slot: .room, title: "龟背竹", price: 20),
+        ShopItem(id: "haku.room.skateboard", slot: .room, title: "靠墙滑板", price: 15),
+        // §2.4 and §4: drawn once, bought by each character with her own cans; the mirror and the stand only with
+        // their card. A rug changes the rug's style and keeps the colour picked for it.
+        ShopItem(id: "room.mat", slot: .room, title: "瑜伽垫", price: 15),
+        ShopItem(id: "room.rope", slot: .room, title: "跳绳", price: 10),
+        ShopItem(id: "room.mirror.dance", slot: .room, title: "练舞镜", price: 20, card: .dance),
+        ShopItem(id: "room.stand.music", slot: .room, title: "谱架", price: 15, card: .music),
+        ShopItem(id: "room.rug.stripe", slot: .room, title: "条纹地毯", price: 20),
+        ShopItem(id: "room.rug.round", slot: .room, title: "圆形编织地毯", price: 25),
         ShopItem(
             id: "gloves.gold",
             slot: .gloves,
@@ -514,7 +533,32 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(id: "kuro.room.flower", slot: .room, title: "地上小粉花", price: 8, persona: .kuro),
         ShopItem(id: "kuro.hair.scrunchie", slot: .headband, title: "粉色发圈", price: 10, persona: .kuro),
         ShopItem(id: "kuro.blanket.cats", slot: .mask, title: "粉色猫猫毯", price: 12, persona: .kuro),
+        // 商店扩充 v1 §3.
+        ShopItem(id: "kuro.hair.ribbon", slot: .headband, title: "蝴蝶结发圈", price: 12, persona: .kuro),
+        ShopItem(id: "kuro.hair.clip.moon", slot: .headband, title: "月亮发夹", price: 15, persona: .kuro),
+        ShopItem(id: "kuro.blanket.check", slot: .mask, title: "格子小毯", price: 15, persona: .kuro),
+        // HAKU's matching three (#559).
+        ShopItem(id: "haku.headband.check", slot: .headband, title: "格纹头带", price: 12),
+        ShopItem(id: "haku.headband.flame", slot: .headband, title: "火焰头带", price: 15),
+        ShopItem(id: "haku.mask.smile", slot: .mask, title: "笑脸面罩", price: 15),
         ShopItem(id: "kuro.room.lamp", slot: .room, title: "猫耳台灯", price: 15, persona: .kuro),
+        // §2.3: her own room items (#563), then the shared ones.
+        ShopItem(id: "kuro.room.poster.cat", slot: .room, title: "猫咪海报", price: 15, persona: .kuro),
+        ShopItem(id: "kuro.room.poster.stars", slot: .room, title: "星空海报", price: 20, persona: .kuro),
+        ShopItem(id: "kuro.room.clock.cat", slot: .room, title: "小猫闹钟", price: 12, persona: .kuro),
+        ShopItem(id: "kuro.room.jar", slot: .room, title: "香薰小罐", price: 15, persona: .kuro),
+        ShopItem(id: "kuro.room.mug.strawberry", slot: .room, title: "草莓牛奶杯", price: 10, persona: .kuro),
+        ShopItem(id: "kuro.room.mirror", slot: .room, title: "小圆镜", price: 12, persona: .kuro),
+        ShopItem(id: "kuro.room.yarn", slot: .room, title: "毛线篮", price: 10, persona: .kuro),
+        ShopItem(id: "kuro.room.plush", slot: .room, title: "猫猫玩偶", price: 12, persona: .kuro),
+        ShopItem(id: "kuro.room.sakura", slot: .room, title: "樱花盆栽", price: 20, persona: .kuro),
+        ShopItem(id: "kuro.room.easel", slot: .room, title: "小画架", price: 15, persona: .kuro),
+        ShopItem(id: "kuro.room.mat", slot: .room, title: "瑜伽垫", price: 15, persona: .kuro),
+        ShopItem(id: "kuro.room.rope", slot: .room, title: "跳绳", price: 10, persona: .kuro),
+        ShopItem(id: "kuro.room.mirror.dance", slot: .room, title: "练舞镜", price: 20, persona: .kuro, card: .dance),
+        ShopItem(id: "kuro.room.stand.music", slot: .room, title: "谱架", price: 15, persona: .kuro, card: .music),
+        ShopItem(id: "kuro.room.rug.stripe", slot: .room, title: "条纹地毯", price: 20, persona: .kuro),
+        ShopItem(id: "kuro.room.rug.round", slot: .room, title: "圆形编织地毯", price: 25, persona: .kuro),
         ShopItem(
             id: "kuro.bag.tennis",
             slot: .gloves,
@@ -555,24 +599,40 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
             keepsake: Keepsake(win: .boxing, count: 10, card: .tennis),
             persona: .kuro
         ),
-        // The other first-batch cards' lines (商店完整目录 v0 §1.2 and §2.2), off the shelf until drawn: a prop
-        // colour, and a gold prop on the card's 10th win.
-        ShopItem(prop: "haku.racket.tennis.mint", title: "薄荷色球拍", price: 15, card: .tennis),
-        ShopItem(prop: "haku.racket.tennis.gold", title: "金色网球拍", card: .tennis),
-        ShopItem(prop: "haku.dumbbell.gym.orange", title: "橙色哑铃", price: 15, card: .fitness),
-        ShopItem(prop: "haku.dumbbell.gym.gold", title: "金哑铃", card: .fitness),
-        ShopItem(prop: "haku.book.study.navy", title: "藏青书皮", price: 15, card: .study),
-        ShopItem(prop: "haku.bookmark.study.gold", title: "金书签", card: .study),
-        ShopItem(prop: "haku.sketch.art.yellow", title: "黄色速写本", price: 15, card: .art),
-        ShopItem(prop: "haku.pencil.art.gold", title: "金铅笔", card: .art),
-        ShopItem(prop: "kuro.gloves.boxing.pink", title: "粉色拳套", price: 15, card: .boxing, persona: .kuro),
-        ShopItem(prop: "kuro.gloves.boxing.gold", title: "金拳套", card: .boxing, persona: .kuro),
-        ShopItem(prop: "kuro.block.gym.mint", title: "薄荷瑜伽砖", price: 15, card: .fitness, persona: .kuro),
-        ShopItem(prop: "kuro.block.gym.gold", title: "金瑜伽砖", card: .fitness, persona: .kuro),
-        ShopItem(prop: "kuro.glasses.study.red", title: "红框眼镜", price: 15, card: .study, persona: .kuro),
-        ShopItem(prop: "kuro.bookmark.study.gold", title: "金书签", card: .study, persona: .kuro),
-        ShopItem(prop: "kuro.stylus.art.blue", title: "蓝色触控笔", price: 15, card: .art, persona: .kuro),
-        ShopItem(prop: "kuro.brush.art.gold", title: "金画笔", card: .art, persona: .kuro),
+        // The other first-batch cards' lines (商店完整目录 v0 §1.2 and §2.2): a prop colour, and a gold prop on the
+        // card's 10th win. HAKU's are drawn in #559. The study cover is burgundy; its id keeps the old colour.
+        ShopItem(prop: "haku.racket.tennis.mint", title: "薄荷色球拍", price: 15, card: .tennis, drawn: true),
+        ShopItem(prop: "haku.racket.tennis.gold", title: "金色网球拍", card: .tennis, drawn: true),
+        ShopItem(prop: "haku.dumbbell.gym.orange", title: "橙色哑铃", price: 15, card: .fitness, drawn: true),
+        ShopItem(prop: "haku.dumbbell.gym.gold", title: "金哑铃", card: .fitness, drawn: true),
+        ShopItem(prop: "haku.book.study.navy", title: "酒红书皮", price: 15, card: .study, drawn: true),
+        ShopItem(prop: "haku.bookmark.study.gold", title: "金书签", card: .study, drawn: true),
+        ShopItem(prop: "haku.sketch.art.yellow", title: "黄色速写本", price: 15, card: .art, drawn: true),
+        ShopItem(prop: "haku.pencil.art.gold", title: "金铅笔", card: .art, drawn: true),
+        // The second character's are drawn (商城扩充, 2026-10-27).
+        ShopItem(prop: "kuro.gloves.boxing.pink", title: "粉色拳套", price: 15, card: .boxing, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.gloves.boxing.gold", title: "金拳套", card: .boxing, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.block.gym.mint", title: "薄荷瑜伽砖", price: 15, card: .fitness, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.block.gym.gold", title: "金瑜伽砖", card: .fitness, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.glasses.study.red", title: "红框眼镜", price: 15, card: .study, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.bookmark.study.gold", title: "金书签", card: .study, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.stylus.art.blue", title: "蓝色触控笔", price: 15, card: .art, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.brush.art.gold", title: "金画笔", card: .art, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.phones.dance.mint", title: "薄荷挂脖耳机", price: 15, card: .dance, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.phones.dance.gold", title: "金挂脖耳机", card: .dance, persona: .kuro, drawn: true),
+        ShopItem(
+            prop: "kuro.folder.music.sakura", title: "樱色乐谱夹", price: 15, card: .music, persona: .kuro, drawn: true
+        ),
+        ShopItem(prop: "kuro.folder.music.gold", title: "金乐谱夹", card: .music, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.goggles.ski.sakura", title: "樱色雪镜", price: 15, card: .ski, persona: .kuro, drawn: true),
+        ShopItem(prop: "kuro.goggles.ski.gold", title: "金雪镜", card: .ski, persona: .kuro, drawn: true),
+        // HAKU's matching props (#559).
+        ShopItem(prop: "haku.wristband.dance.pink", title: "粉色护腕", price: 15, card: .dance, drawn: true),
+        ShopItem(prop: "haku.wristband.dance.gold", title: "金护腕", card: .dance, drawn: true),
+        ShopItem(prop: "haku.pick.music.neon", title: "霓虹拨片", price: 15, card: .music, drawn: true),
+        ShopItem(prop: "haku.pick.music.gold", title: "金拨片", card: .music, drawn: true),
+        ShopItem(prop: "haku.goggles.ski.cyan", title: "青色雪镜", price: 15, card: .ski, drawn: true),
+        ShopItem(prop: "haku.goggles.ski.gold", title: "金雪镜", card: .ski, drawn: true),
         // Clothes (商店完整目录 v0 §1.1 and §2.1, prices of 2026-10-14), off the shelf until drawn.
         // HAKU's eight are the pop set Mike approved 2026-10-14; the second character's are still placeholders.
         ShopItem(clothes: "haku.top.work.blazer", slot: .top, title: "学院西装", price: 30, mode: .work),
@@ -593,8 +653,8 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         ShopItem(
             clothes: "kuro.set.chill.picnic", slot: .fullSet, title: "野餐", price: 80, mode: .chill, persona: .kuro),
         ShopItem(clothes: "kuro.set.work.rain", slot: .fullSet, title: "雨天", price: 90, mode: .work, persona: .kuro),
-        // Identity card clothes (商店完整目录 v0 §1.2, §1.5, §2.2, §2.5), off the shelf until drawn. Base clothes
-        // are bought once and worn with every card on their base outfit.
+        // Identity card clothes (商店完整目录 v0 §1.2, §1.5, §2.2, §2.5). HAKU's are drawn; the second character's
+        // are off the shelf until drawn. Base clothes are bought once and worn with every card on their base outfit.
         ShopItem(cardTop: "haku.top.boxing.blackgold", title: "黑金拳击外套", price: 40, card: .boxing),
         ShopItem(cardTop: "haku.top.gym.tank", title: "运动背心", price: 30, base: .sport),
         ShopItem(cardTop: "haku.top.tennis.white", title: "白色运动服", price: 40, base: .sport),
@@ -651,10 +711,13 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
     }
 
     // A prop without a price is the card's gold keepsake. The identity card's win carries the card.
-    init(prop id: String, title: String, price: Int? = nil, card: IdentityKind, persona: Persona = .haku) {
+    init(
+        prop id: String, title: String, price: Int? = nil, card: IdentityKind, persona: Persona = .haku,
+        drawn: Bool = false
+    ) {
         let keepsake = price == nil ? Keepsake(win: .boxing, count: 10, card: card) : nil
         self.init(id: id, slot: .gloves, title: title, price: price, keepsake: keepsake, persona: persona, card: card)
-        isDrawn = false
+        isDrawn = drawn
     }
 
     init(clothes id: String, slot: Slot, title: String, price: Int, mode: Mode, persona: Persona = .haku) {
@@ -679,8 +742,11 @@ public struct ShopItem: Identifiable, Equatable, Sendable {
         self.init(id: id, slot: .top, title: title, price: price, persona: persona, card: card)
         mode = .boxing
         self.base = base
-        isDrawn = false
+        isDrawn = persona == .haku
     }
+
+    /// Whether it is a rug, which changes the rug's style instead of standing in a zone.
+    public var isRug: Bool { id.contains("room.rug.") }
 
     /// Whether the shop offers it to someone who picked `card`.
     public func suits(_ card: IdentityKind?) -> Bool {

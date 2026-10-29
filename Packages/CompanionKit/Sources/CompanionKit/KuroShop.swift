@@ -29,15 +29,42 @@ public enum KuroItem: String, CaseIterable, Sendable {
     case cloud = "kuro.weekly.room.cloud"
     case nightlight = "kuro.weekly.room.nightlight"
     case beanie = "kuro.weekly.hat.beanie"
+    // 商店扩充 v1 §3: accessories in the hair band and blanket places she already has.
+    case ribbon = "kuro.hair.ribbon"
+    case moonClip = "kuro.hair.clip.moon"
+    case checkBlanket = "kuro.blanket.check"
+    // Identity card props (商店完整目录 v0 §2.2): a colour bought for 15 cans, and gold on the card's 10th win.
+    case pinkGloves = "kuro.gloves.boxing.pink"
+    case goldGloves = "kuro.gloves.boxing.gold"
+    case mintBlock = "kuro.block.gym.mint"
+    case goldBlock = "kuro.block.gym.gold"
+    case redGlasses = "kuro.glasses.study.red"
+    case goldBookmark = "kuro.bookmark.study.gold"
+    case blueStylus = "kuro.stylus.art.blue"
+    case goldBrush = "kuro.brush.art.gold"
+    // 商店扩充 v1 §4: the three newer cards' props.
+    case mintPhones = "kuro.phones.dance.mint"
+    case goldPhones = "kuro.phones.dance.gold"
+    case sakuraFolder = "kuro.folder.music.sakura"
+    case goldFolder = "kuro.folder.music.gold"
+    case sakuraGoggles = "kuro.goggles.ski.sakura"
+    case goldGoggles = "kuro.goggles.ski.gold"
 
     /// The look she shows the item in.
     public var look: KuroLook {
         switch self {
         case .flower, .blanket, .spin, .chillCardigan, .chillHoodie, .picnic: .chill
-        case .bearBlanket, .succulent, .cloud, .nightlight, .beanie: .chill
-        case .scrunchie, .bag, .sakura, .goldRacket, .mintTie, .cherryClip, .starTie: .tennis
+        case .bearBlanket, .succulent, .cloud, .nightlight, .beanie, .moonClip, .checkBlanket: .chill
+        case .scrunchie, .bag, .sakura, .goldRacket, .mintTie, .cherryClip, .starTie, .ribbon: .tennis
         case .lamp, .sideSmock, .sideDenim: .desk
         case .workBlouse, .workVest, .rain: .work
+        case .pinkGloves, .goldGloves: .box
+        case .mintBlock, .goldBlock: .fitness
+        case .redGlasses, .goldBookmark: .study
+        case .blueStylus, .goldBrush: .art
+        case .mintPhones, .goldPhones: .dance
+        case .sakuraFolder, .goldFolder: .music
+        case .sakuraGoggles, .goldGoggles: .ski
         }
     }
 
@@ -46,7 +73,7 @@ public enum KuroItem: String, CaseIterable, Sendable {
     /// Whether she shows the item in `look`.
     public func shows(in look: KuroLook) -> Bool {
         switch self {
-        case .mintTie, .cherryClip, .starTie: true
+        case .mintTie, .cherryClip, .starTie, .ribbon, .moonClip: true
         case .succulent: look == .chill || look == .tennis
         case .nightlight: look == .chill || look == .desk
         default: self.look == look
@@ -56,7 +83,9 @@ public enum KuroItem: String, CaseIterable, Sendable {
     /// Whether the item is a keepsake, granted for a milestone instead of bought.
     public var isKeepsake: Bool {
         switch self {
-        case .spin, .sakura, .goldRacket: true
+        case .spin, .sakura, .goldRacket, .goldGloves, .goldBlock, .goldBookmark, .goldBrush, .goldPhones, .goldFolder,
+            .goldGoggles:
+            true
         default: false
         }
     }
@@ -88,6 +117,23 @@ public enum KuroItem: String, CaseIterable, Sendable {
         case .cloud: .weeklyRoomCloud
         case .nightlight: .weeklyRoomNightlight
         case .beanie: .weeklyHatBeanie
+        case .ribbon: .itemRibbonPony
+        case .moonClip: .itemClipMoon
+        case .checkBlanket: .itemBlanketCheck
+        case .pinkGloves: .itemGlovePinkR
+        case .goldGloves: .itemGloveGoldR
+        case .mintBlock: .itemBlockMint
+        case .goldBlock: .itemBlockGold
+        case .redGlasses: .itemGlassesRed
+        case .goldBookmark: .itemBookmarkGold
+        case .blueStylus: .itemStylusBlue
+        case .goldBrush: .itemBrushGold
+        case .mintPhones: .itemPhonesMint
+        case .goldPhones: .itemPhonesGold
+        case .sakuraFolder: .itemFolderSakura
+        case .goldFolder: .itemFolderGold
+        case .sakuraGoggles: .itemGogglesSakura
+        case .goldGoggles: .itemGogglesGold
         }
     }
 
@@ -98,8 +144,12 @@ public enum KuroItem: String, CaseIterable, Sendable {
         case .mintTie: [ponytail ? .weeklyHairMintPony : .weeklyHairMintSide]
         case .cherryClip: [ponytail ? .weeklyHairCherryPony : .weeklyHairCherrySide]
         case .starTie: [ponytail ? .weeklyHairStarPony : .weeklyHairStarSide]
+        case .ribbon: [ponytail ? .itemRibbonPony : .itemRibbonSide]
         case .nightlight: [.weeklyRoomNightlightGlow, .weeklyRoomNightlight]
         case .beanie: [.weeklyHatBeanie, .weeklyHatBeaniePom]
+        case .pinkGloves, .goldGloves, .mintBlock, .goldBlock, .goldBookmark, .blueStylus, .goldBrush, .sakuraFolder,
+            .goldFolder, .sakuraGoggles, .goldGoggles:
+            []
         default: [part]
         }
     }
@@ -132,9 +182,29 @@ public enum KuroItem: String, CaseIterable, Sendable {
         switch self {
         case .sakura: [.tennisHeadband]
         case .goldRacket: [.tennisRacket]
-        case .cloud: [.itemBlanket, .weeklyBlanketBear]
+        case .cloud: [.itemBlanket, .weeklyBlanketBear, .itemBlanketCheck]
         case .succulent: [.itemFlower, .itemBag]
         default: []
+        }
+    }
+
+    // A card prop is drawn in place of her look's own prop, so it moves, hides and turns with every tap and idle
+    // that moves that prop.
+    /// The parts drawn in place of her look's own props while she holds the item.
+    var skin: [KuroPart: [KuroPart]] {
+        switch self {
+        case .pinkGloves: [.boxGloveL: [.itemGlovePinkL], .boxGloveR: [.itemGlovePinkR]]
+        case .goldGloves: [.boxGloveL: [.itemGloveGoldL], .boxGloveR: [.itemGloveGoldR]]
+        case .mintBlock: [.gymBlock: [.itemBlockMint]]
+        case .goldBlock: [.gymBlock: [.itemBlockGold]]
+        case .goldBookmark: [.studyNotebook: [.studyNotebook, .itemBookmarkGold]]
+        case .blueStylus: [.craftPen: [.itemStylusBlue]]
+        case .goldBrush: [.craftPen: [.itemBrushGold]]
+        case .sakuraFolder: [.scoreSheet: [.itemFolderSakura, .scoreSheet]]
+        case .goldFolder: [.scoreSheet: [.itemFolderGold, .scoreSheet]]
+        case .sakuraGoggles: [.skiGoggles: [.itemGogglesSakura]]
+        case .goldGoggles: [.skiGoggles: [.itemGogglesGold]]
+        default: [:]
         }
     }
 
@@ -196,6 +266,8 @@ public struct KuroItemIcon: View {
         if let clothes = item.clothes { return [clothes.top] + (clothes.hat.map { [$0] } ?? []) }
         if item == .nightlight { return [.weeklyRoomNightlightGlow, .weeklyRoomNightlight] }
         if item == .beanie { return [.weeklyHatBeanie, .weeklyHatBeaniePom] }
+        if item == .pinkGloves { return [.itemGlovePinkL, .itemGlovePinkR] }
+        if item == .goldGloves { return [.itemGloveGoldL, .itemGloveGoldR] }
         guard item == .spin else { return [item.part] }
         return [.hairBack, .earL, .earR, .faceBase, .blush, .eyesHappy, .mouthCat, .hairFringe, .catEars, .itemSpin]
     }

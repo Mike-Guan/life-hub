@@ -304,7 +304,9 @@ import Testing
         let kuro = ShopItem.catalog(for: .kuro).filter { $0.week == nil && $0.mode != .boxing }
         #expect(ShopItem.catalog(for: .haku).count + ShopItem.catalog(for: .kuro).count == ShopItem.catalog.count)
         #expect(kuro.compactMap(\.price).sorted() == haku.compactMap(\.price).sorted())
-        #expect(kuro.filter(\.isDrawn).compactMap(\.keepsake).map(\.win) == [.gotUp, .run5k, .boxing])
+        // Her gold racket, then her seven gold card props.
+        let wins = kuro.filter(\.isDrawn).compactMap(\.keepsake).map(\.win)
+        #expect(wins == [.gotUp, .run5k] + Array(repeating: .boxing, count: 8))
     }
 
     @Test func ledgerPersistsAndKeepsUnreadableEntries() throws {
@@ -477,7 +479,8 @@ import Testing
                 #expect(item.slot == .top || item.slot == .fullSet)
                 #expect(item.isDrawn, "\(item.id)")
             }
-            let onShelf = ShopItem.catalog(for: persona, card: .boxing).filter { $0.mode != nil }
+            // The boxing card's own top is on its shelf too; identity card clothes are checked below.
+            let onShelf = ShopItem.catalog(for: persona, card: .boxing).filter { $0.mode != nil && $0.mode != .boxing }
             #expect(onShelf.count == clothes.count, "\(persona)")
         }
     }
@@ -638,9 +641,7 @@ import Testing
         ]
         for (persona, kinds) in cards {
             for card in kinds {
-                let line = ShopItem.catalog(for: persona).filter {
-                    $0.card == card && $0.slot == .gloves && !$0.isDrawn
-                }
+                let line = ShopItem.catalog(for: persona).filter { $0.card == card && $0.slot == .gloves && $0.isDrawn }
                 #expect(line.compactMap(\.price) == [15], "\(persona) \(card)")
                 #expect(line.compactMap(\.keepsake).map(\.count) == [10], "\(persona) \(card)")
                 #expect(line.allSatisfy { $0.suits(card) && !$0.suits(nil) && $0.slot.shelf == .props })
@@ -672,6 +673,17 @@ import Testing
         #expect(!tank.shows(in: .chill, card: .fitness))
     }
 
+    @Test func hakusCardTopsAreOnTheShelfOfTheirCards() {
+        let tops = { (card: IdentityKind) in
+            ShopItem.catalog(for: .haku, card: card).filter { $0.mode == .boxing }.map(\.id)
+        }
+        #expect(tops(.boxing) == ["haku.top.boxing.blackgold"])
+        #expect(tops(.fitness) == ["haku.top.gym.tank", "haku.top.tennis.white"])
+        #expect(tops(.study) == ["haku.top.study.cardigan", "haku.base.outing.windbreaker"])
+        #expect(tops(.art) == ["haku.top.art.apron", "haku.base.craft.overalls"])
+        #expect(ShopItem.catalog(for: .kuro, card: .boxing).allSatisfy { $0.mode != .boxing })
+    }
+
     @Test func cardTopsSuitOnlyTheirCard() throws {
         let jacket = try item("haku.top.boxing.blackgold")
         #expect(jacket.suits(.boxing) && !jacket.suits(.tennis) && !jacket.suits(nil))
@@ -687,7 +699,8 @@ import Testing
             #expect(item.slot == .top, "\(item.id)")
             #expect((item.card == nil) != (item.base == nil), "\(item.id)")
             #expect(item.price == 30 || item.price == 40, "\(item.id)")
-            #expect(!item.isDrawn, "\(item.id)")
+            // HAKU's are drawn; the second character's wait for their art.
+            #expect(item.isDrawn == (item.persona == .haku), "\(item.id)")
         }
         for persona in Persona.allCases {
             for base in BaseOutfit.allCases {
@@ -697,12 +710,16 @@ import Testing
         }
     }
 
-    @Test func aKeepsakeWaitsForItsArt() throws {
+    // HAKU's gold card props are drawn since #559, so the card's 10th win grants one.
+    @Test func aCardsTenthWinGrantsItsGoldProp() throws {
         let store = GrowthStore(fileURL: nil, deviceID: "t")
-        for day in 0..<10 {
+        for day in 0..<9 {
             #expect(store.record(.boxing, source: "day-\(day)", at: at, card: .fitness).isEmpty)
         }
         #expect(!store.ledger.only(.haku).owned.contains("haku.dumbbell.gym.gold"))
+        let granted = store.record(.boxing, source: "day-9", at: at, card: .fitness)
+        #expect(granted.map(\.id) == ["haku.dumbbell.gym.gold"])
+        #expect(store.ledger.only(.haku).owned.contains("haku.dumbbell.gym.gold"))
         #expect(try item("haku.dumbbell.gym.gold").keepsake?.card == .fitness)
     }
 

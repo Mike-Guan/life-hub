@@ -49,6 +49,8 @@ enum Placement {
         .headBack: .figure,
         .hairFringe: .figure,
         .headband: Spot(.headTop, "headband"),
+        .headbandCheck: Spot(.headTop, "headband"),
+        .headbandFlame: Spot(.headTop, "headband"),
         .headset: Spot(.headTop, "耳机"),
         .hairTuft: Spot(.headTop, "hairTuft"),
         .cheerGoggles: Spot(.headTop, "cheerGoggles"),
@@ -79,6 +81,7 @@ enum Placement {
         .panelLines: Spot(.maskFace, "面罩"),
         .maskStripes: Spot(.maskFace, "面罩"),
         .maskDots: Spot(.maskFace, "面罩"),
+        .maskSmile: Spot(.maskFace, "面罩"),
         .maskBolt: Spot(.maskFace, "面罩"),
         .ledLine: Spot(.maskFace, "面罩"),
         .ledYen: Spot(.maskFace, "面罩"),
@@ -100,6 +103,7 @@ enum Placement {
         .maskDown: Spot(.neck, "面罩"),
         .maskStripesDown: Spot(.neck, "面罩"),
         .maskDotsDown: Spot(.neck, "面罩"),
+        .maskSmileDown: Spot(.neck, "面罩"),
         .maskBoltDown: Spot(.neck, "面罩"),
         .hoodCollar: Spot(.neck, "帽兜"),
         .hoodieStrings: Spot(.neck, "帽兜"),
@@ -114,6 +118,13 @@ enum Placement {
         .topSideSouvenir: Spot(.torso, "外套"),
         .topSideArcade: Spot(.torso, "外套"),
         .sideCassette: Spot(.torso, "外套"),
+        .topBoxingBlackgold: Spot(.torso, "外套"),
+        .topGymTank: Spot(.torso, "外套"),
+        .topTennisWhite: Spot(.torso, "外套"),
+        .topStudyCardigan: Spot(.torso, "外套"),
+        .topOutingWindbreaker: Spot(.torso, "外套"),
+        .topArtApron: Spot(.torso, "外套"),
+        .topCraftOveralls: Spot(.torso, "外套"),
         .setVarsityTop: Spot(.torso, "外套"),
         .setVarsityCap: Spot(.headTop, "棒球帽"),
         .setKawaiiHood: Spot(.torso, "外套"),
@@ -171,6 +182,8 @@ enum Placement {
         .sketchbook: Spot(.handsFront, "sketchbook"),
         .book: Spot(.handsFront, "book"),
         .bookPage: Spot(.handsFront, "book"),
+        .bookmarkRibbon: Spot(.handsFront, "book"),
+        .pickPendant: Spot(.badge, "拨片"),
         .laptop: Spot(.handsFront, "笔记本"),
         .laptopClosed: Spot(.handsFront, "笔记本"),
         .typingHands: Spot(.handsFront, "笔记本"),
@@ -259,6 +272,15 @@ enum Placement {
         .outStraps: Spot(.torso, "背包"),
         .pencilLoose: Spot(.handR, "pencil"),
         .paintHand: Spot(.handR, "paintHand"),
+        // 第2批 身份卡: the pole leans on the pack while the hand shades the eyes, so the hand sits on the brow.
+        .outPole: Spot(.handR, "登山杖"),
+        .poleFist: Spot(.handR, "登山杖"),
+        .browHand: Spot(.headTop, "手搭眉"),
+        .windGust: .fx,
+        .yogaMat: Spot(.handR, "瑜伽垫"),
+        .matHand: Spot(.handR, "瑜伽垫"),
+        .yogaPalms: Spot(.handsFront, "合掌"),
+        .sportBall: Spot(.handR, "球"),
     ]
 
     static let kuro: [KuroPart: Spot] = [
@@ -334,6 +356,23 @@ enum Placement {
         .craftPen: Spot(.handR, "craftPen"),
         .gymBlock: Spot(.handsFront, "gymBlock"),
         .studyNotebook: Spot(.handsFront, "studyNotebook"),
+        // Card props drawn in place of her own (KuroItem.skin) take that prop's spot; the red glasses are glasses.
+        .itemGlovePinkL: Spot(.handL, "拳套"),
+        .itemGlovePinkR: Spot(.handR, "拳套"),
+        .itemGloveGoldL: Spot(.handL, "拳套"),
+        .itemGloveGoldR: Spot(.handR, "拳套"),
+        .itemBlockMint: Spot(.handsFront, "gymBlock"),
+        .itemBlockGold: Spot(.handsFront, "gymBlock"),
+        .itemBookmarkGold: Spot(.handsFront, "studyNotebook"),
+        .itemStylusBlue: Spot(.handR, "craftPen"),
+        .itemBrushGold: Spot(.handR, "craftPen"),
+        .itemGlassesRed: Spot(.eyes, "deskGlasses"),
+        .itemPhonesMint: Spot(.neck, "挂脖耳机"),
+        .itemPhonesGold: Spot(.neck, "挂脖耳机"),
+        .itemFolderSakura: Spot(.handsFront, "乐谱"),
+        .itemFolderGold: Spot(.handsFront, "乐谱"),
+        .itemGogglesSakura: Spot(.headTop, "skiGoggles"),
+        .itemGogglesGold: Spot(.headTop, "skiGoggles"),
         .boxSandbag: Spot(.corner1, "boxSandbag"),
         // Deferred identity cards (顺延身份卡 预览): the finger on the score is part of holding it.
         .danceSpeaker: Spot(.corner1, "danceSpeaker"),
@@ -346,6 +385,15 @@ enum Placement {
         .mittenHand: Spot(.handL, "手套"),
         .snowBits: .fx,
         .sneezePuff: .fx,
+        // Identity cards, batch 2 (第 2 批身份卡 草稿): the pack and its straps are one thing on her back, the hand under
+        // the ball is part of holding it.
+        .swimGoggles: Spot(.headTop, "swimGoggles"),
+        .yogaMat: Spot(.handR, "yogaMat"),
+        .sportBall: Spot(.handR, "球"),
+        .sportBallHand: Spot(.handR, "球"),
+        .outPole: Spot(.handR, "登山杖"),
+        .outBackpack: Spot(.torso, "背包"),
+        .outStraps: Spot(.torso, "背包"),
         .studyMark: .fx,
         // Base-outfit idles (K4-K7, K10-K11, UI 四组 2026-10-14): the card props go down out of the frame first.
         .idleStrand: .figure,
@@ -417,6 +465,11 @@ enum Placement {
         .weeklyRoomNightlightGlow: Spot(.wall, "小夜灯"),
         .weeklyHatBeanie: Spot(.headTop, "帽子"),
         .weeklyHatBeaniePom: Spot(.headTop, "帽子"),
+        // 商店扩充 v1 §3: the ribbon and moon clip in the hair tie places, the check blanket on her lap.
+        .itemRibbonPony: Spot(.ponytail, "马尾"),
+        .itemRibbonSide: Spot(.earR, "发夹"),
+        .itemClipMoon: Spot(.earR, "发夹"),
+        .itemBlanketCheck: Spot(.lap, "itemBlanket"),
         .topBoxLilac: Spot(.torso, "外套"),
         .topTennisSakura: Spot(.torso, "外套"),
         .topFitnessTrack: Spot(.torso, "外套"),
@@ -472,6 +525,7 @@ enum Placement {
     ]
 
     // §9.3 (10/13 夜 included): the jacket carries one of chain, towel or apron; bath blush beside the bandage;
+    // the ball card's ball sits on the fist with the wristband (第2批 身份卡);
     // the swimming cheer's ear tap over the earring. KURO's rows are UI 三组's: the rub over the blush, the pen on the
     // books, the ball bouncing on the racket, the sleeve in front of the tablet, yoga block or notebook. The spin is a
     // cheer, not held.
@@ -483,7 +537,7 @@ enum Placement {
         .cheek: [["bandage", "bathBlush"], ["blush", "tapRub"]],
         .handR: [
             ["deskBooks", "deskPen"], ["tapBall", "tennisRacket"],
-            ["itemGoldRacket", "tapBall"],
+            ["itemGoldRacket", "tapBall"], ["wristbandHand", "球"],
         ],
         .handsFront: [
             ["workTablet", "揉眼袖子"], ["gymBlock", "揉眼袖子"], ["studyNotebook", "揉眼袖子"], ["乐谱", "揉眼袖子"],

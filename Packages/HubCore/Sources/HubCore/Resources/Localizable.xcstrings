@@ -294,6 +294,22 @@
         }
       }
     },
+    "一摞漫画" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Stack of comics"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "マンガの山"
+          }
+        }
+      }
+    },
     "上班" : {
       "comment" : "模式名，宽 4",
       "localizations" : {
@@ -1185,6 +1201,22 @@
         }
       }
     },
+    "圆形编织地毯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Round woven rug"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "丸い編みラグ"
+          }
+        }
+      }
+    },
     "圆领毛衣" : {
       "localizations" : {
         "en" : {
@@ -1250,6 +1282,22 @@
         }
       }
     },
+    "城市夜景海报" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "City night poster"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "夜景のポスター"
+          }
+        }
+      }
+    },
     "备课" : {
       "comment" : "第二个预设角色的副业默认名，宽 8",
       "localizations" : {
@@ -1295,6 +1343,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ヘッドバンド、きゅっと"
+          }
+        }
+      }
+    },
+    "夹子台灯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Clip lamp"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "クリップライト"
           }
         }
       }
@@ -1364,6 +1428,22 @@
         }
       }
     },
+    "小圆镜" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Little round mirror"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "小さな丸い鏡"
+          }
+        }
+      }
+    },
     "小夜灯" : {
       "localizations" : {
         "en" : {
@@ -1392,6 +1472,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "クマの毛布"
+          }
+        }
+      }
+    },
+    "小猫闹钟" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Cat alarm clock"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ねこの目覚まし時計"
+          }
+        }
+      }
+    },
+    "小画架" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Little easel"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "小さなイーゼル"
           }
         }
       }
@@ -1976,6 +2088,22 @@
         }
       }
     },
+    "星空海报" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Starry sky poster"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "星空のポスター"
+          }
+        }
+      }
+    },
     "昨晚睡了 %1$@ 小时 %2$@ 分，算「%3$@」" : {
       "comment" : "电量档进引号：“Low”；多个占位符：按中文出现顺序编号，请工程核对顺序",
       "localizations" : {
@@ -2022,6 +2150,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "いま%1$@を読めないため、変更はメモリに残しています：%2$@"
+          }
+        }
+      }
+    },
+    "月亮发夹" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moon hair clip"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月のヘアピン"
           }
         }
       }
@@ -2074,6 +2218,22 @@
         }
       }
     },
+    "条纹地毯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Striped rug"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ストライプのラグ"
+          }
+        }
+      }
+    },
     "条纹面罩" : {
       "localizations" : {
         "en" : {
@@ -2107,6 +2267,22 @@
         }
       }
     },
+    "格子小毯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check lap blanket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チェックのひざ掛け"
+          }
+        }
+      }
+    },
     "格子罩衫" : {
       "localizations" : {
         "en" : {
@@ -2119,6 +2295,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "チェックのスモック"
+          }
+        }
+      }
+    },
+    "格纹头带" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check headband"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チェックのヘッドバンド"
           }
         }
       }
@@ -2155,6 +2347,22 @@
         }
       }
     },
+    "樱色乐谱夹" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakura score folder"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "さくら色の楽譜ファイル"
+          }
+        }
+      }
+    },
     "樱色网球服" : {
       "comment" : "她的网球服是裙装就用 dress，不是改 outfit",
       "localizations" : {
@@ -2185,6 +2393,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "さくら色のヘアバンド"
+          }
+        }
+      }
+    },
+    "樱色雪镜" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakura ski goggles"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "さくら色のゴーグル"
+          }
+        }
+      }
+    },
+    "樱花盆栽" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Potted sakura"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "桜の鉢植え"
           }
         }
       }
@@ -2269,6 +2509,22 @@
         }
       }
     },
+    "毛线篮" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Yarn basket"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "毛糸のかご"
+          }
+        }
+      }
+    },
     "毛绒开衫" : {
       "localizations" : {
         "en" : {
@@ -2334,18 +2590,18 @@
         }
       }
     },
-    "泳帽塞好了" : {
+    "泳镜推上去了" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cap on, hair in"
+            "value" : "Goggles up"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キャップ、かぶった"
+            "value" : "ゴーグル、上げた"
           }
         }
       }
@@ -2378,6 +2634,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ラベンダーのトップ"
+          }
+        }
+      }
+    },
+    "游戏手柄" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Gamepad"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ゲームパッド"
           }
         }
       }
@@ -2432,6 +2704,22 @@
         }
       }
     },
+    "火焰头带" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flame headband"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ほのおのヘッドバンド"
+          }
+        }
+      }
+    },
     "火焰连帽卫衣" : {
       "localizations" : {
         "en" : {
@@ -2476,6 +2764,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "デニムジャケット"
+          }
+        }
+      }
+    },
+    "猫咪海报" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Cat poster"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ねこのポスター"
+          }
+        }
+      }
+    },
+    "猫猫玩偶" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Cat plush"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ねこのぬいぐるみ"
           }
         }
       }
@@ -2595,6 +2915,22 @@
         }
       }
     },
+    "瑜伽垫" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Yoga mat"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ヨガマット"
+          }
+        }
+      }
+    },
     "瑜伽拉伸" : {
       "localizations" : {
         "en" : {
@@ -2709,6 +3045,22 @@
         }
       }
     },
+    "笑脸面罩" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smiley mask"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "にこにこマスク"
+          }
+        }
+      }
+    },
     "笔在手上" : {
       "localizations" : {
         "en" : {
@@ -2791,6 +3143,22 @@
         }
       }
     },
+    "粉色护腕" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pink wristband"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ピンクのリストバンド"
+          }
+        }
+      }
+    },
     "粉色拳套" : {
       "localizations" : {
         "en" : {
@@ -2851,6 +3219,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "赤ぶちメガネ"
+          }
+        }
+      }
+    },
+    "练舞镜" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Dance mirror"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ダンスミラー"
           }
         }
       }
@@ -2940,6 +3324,22 @@
         }
       }
     },
+    "耳机架" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Headphone stand"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ヘッドホンスタンド"
+          }
+        }
+      }
+    },
     "背带裙" : {
       "comment" : "§5 美式说法；名字是占位",
       "localizations" : {
@@ -3007,6 +3407,38 @@
         }
       }
     },
+    "草莓牛奶杯" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Strawberry milk cup"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "いちごミルクのカップ"
+          }
+        }
+      }
+    },
+    "落地小风扇" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Little fan"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "小さな扇風機"
+          }
+        }
+      }
+    },
     "蓝色触控笔" : {
       "localizations" : {
         "en" : {
@@ -3051,6 +3483,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ミントのヘッドバンド"
+          }
+        }
+      }
+    },
+    "薄荷挂脖耳机" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mint neck headphones"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミントのネックヘッドホン"
           }
         }
       }
@@ -3104,18 +3552,18 @@
         }
       }
     },
-    "藏青书皮" : {
+    "蝴蝶结发圈" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Navy book cover"
+            "value" : "Ribbon hair tie"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "紺のブックカバー"
+            "value" : "リボンのヘアゴム"
           }
         }
       }
@@ -3165,6 +3613,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ゲーセンT"
+          }
+        }
+      }
+    },
+    "街机海报" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Arcade poster"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ゲーセンのポスター"
+          }
+        }
+      }
+    },
+    "谱架" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Music stand"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "譜面台"
           }
         }
       }
@@ -3259,6 +3739,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ランナーのヘッドバンド"
+          }
+        }
+      }
+    },
+    "跳绳" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Jump rope"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "なわとび"
           }
         }
       }
@@ -3426,6 +3922,22 @@
         }
       }
     },
+    "酒红书皮" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Burgundy book cover"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ワインレッドのブックカバー"
+          }
+        }
+      }
+    },
     "野餐" : {
       "comment" : "整套",
       "localizations" : {
@@ -3439,6 +3951,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ピクニック"
+          }
+        }
+      }
+    },
+    "金乐谱夹" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold score folder"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金の楽譜ファイル"
           }
         }
       }
@@ -3477,6 +4006,40 @@
         }
       }
     },
+    "金护腕" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold wristband"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のリストバンド"
+          }
+        }
+      }
+    },
+    "金拨片" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold pick"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のピック"
+          }
+        }
+      }
+    },
     "金拳套" : {
       "comment" : "纪念品",
       "localizations" : {
@@ -3490,6 +4053,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "金のグローブ"
+          }
+        }
+      }
+    },
+    "金挂脖耳机" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold neck headphones"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のネックヘッドホン"
           }
         }
       }
@@ -3558,6 +4138,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "金のえんぴつ"
+          }
+        }
+      }
+    },
+    "金雪镜" : {
+      "comment" : "纪念品",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gold ski goggles"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金のゴーグル"
           }
         }
       }
@@ -3660,6 +4257,22 @@
         }
       }
     },
+    "霓虹拨片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neon pick"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネオンのピック"
+          }
+        }
+      }
+    },
     "霓虹粉拳套" : {
       "localizations" : {
         "en" : {
@@ -3693,6 +4306,38 @@
         }
       }
     },
+    "青色雪镜" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cyan ski goggles"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シアンのゴーグル"
+          }
+        }
+      }
+    },
+    "靠墙滑板" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Skateboard"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "立てかけたスケボー"
+          }
+        }
+      }
+    },
     "鞋带系紧" : {
       "localizations" : {
         "en" : {
@@ -3709,6 +4354,22 @@
         }
       }
     },
+    "香薰小罐" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Little aroma jar"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "アロマの小びん"
+          }
+        }
+      }
+    },
     "骑车" : {
       "localizations" : {
         "en" : {
@@ -3721,6 +4382,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "自転車"
+          }
+        }
+      }
+    },
+    "魔方" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Puzzle cube"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ルービックキューブ"
           }
         }
       }
@@ -3753,6 +4430,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "黒金ブルゾン"
+          }
+        }
+      }
+    },
+    "龟背竹" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Monstera"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "モンステラ"
           }
         }
       }

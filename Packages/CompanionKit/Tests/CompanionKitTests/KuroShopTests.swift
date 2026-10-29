@@ -12,8 +12,14 @@ import Testing
         // Clothes are drawn before the shop offers them, so every offered item is drawn but not the other way.
         let catalog = ShopItem.catalog(for: .kuro)
         #expect(Set(ids).isSubset(of: catalog.map(\.id)))
-        #expect(Set(catalog.filter(\.isDrawn).map(\.id)).isSubset(of: ids))
-        #expect(KuroItem.allCases.filter(\.isKeepsake) == [.spin, .sakura, .goldRacket])
+        // Room items the home draws aren't on her figure.
+        let onHer = catalog.filter { $0.isDrawn && HomeItem(shopID: $0.id) == nil && HomeRug(shopID: $0.id) == nil }
+        #expect(Set(onHer.map(\.id)).isSubset(of: ids))
+        let keepsakes: [KuroItem] = [
+            .spin, .sakura, .goldRacket, .goldGloves, .goldBlock, .goldBookmark, .goldBrush, .goldPhones, .goldFolder,
+            .goldGoggles,
+        ]
+        #expect(KuroItem.allCases.filter(\.isKeepsake) == keepsakes)
         #expect(KuroItem.items(["kuro.room.flower", "gloves.gold", "nope"]) == [.flower])
     }
 
@@ -121,7 +127,7 @@ import Testing
     }
 
     @Test func herLapIsClearWhileSheDrinks() {
-        for item in [KuroItem.blanket, .bearBlanket, .cloud] {
+        for item in [KuroItem.blanket, .bearBlanket, .cloud, .checkBlanket] {
             var pose = KuroPose(look: .chill, energy: nil)
             pose.items = [item]
             pose.tap = .sip
@@ -142,6 +148,16 @@ import Testing
         #expect(watch.isSuperset(of: [.weeklyHairStarSide, .weeklyRoomNightlight]))
         pose.items = [.cloud]
         #expect(!KuroFigure.parts(for: .chill, pose: pose, watch: true).contains(.weeklyRoomCloud))
+    }
+
+    @Test func herRibbonGoesOnHerPonytailOrTheClipPointAndTheMoonClipAlwaysOnTheClipPoint() {
+        var pose = KuroPose(look: .tennis, energy: nil)
+        pose.items = [.ribbon]
+        #expect(KuroFigure.parts(for: .tennis, pose: pose).contains(.itemRibbonPony))
+        #expect(KuroFigure.parts(for: .chill, pose: pose).contains(.itemRibbonSide))
+        pose.items = [.moonClip]
+        #expect(KuroFigure.parts(for: .tennis, pose: pose).contains(.itemClipMoon))
+        #expect(KuroFigure.parts(for: .work, pose: pose).contains(.itemClipMoon))
     }
 
     static let clothes = KuroItem.allCases.filter { $0.clothes != nil }
@@ -244,6 +260,15 @@ import Testing
         #expect(KuroUnbox(.spin, progress: 0.9).spin == 1)
     }
 
+    @Test func halfwayThroughASpinSheShowsHerBack() {
+        var pose = KuroPose(look: .chill, energy: nil).showing(.low)
+        pose.items = [.chillHoodie]
+        pose.facingAway = true
+        let back = Set(KuroFigure.parts(for: .chill, pose: pose))
+        #expect(back.contains(.backHead) && !back.contains(.faceBase) && !back.contains(.eyesLow))
+        #expect(back.isSuperset(of: [.catEars, .topChillCathoodieBack]) && !back.contains(.topChillCathoodie))
+    }
+
     @Test func eachUnboxingOfHerItemsPlaysOnce() {
         let event = CompanionEvent.unlock(id: "e1", item: KuroItem.bag.rawValue)
         #expect(KuroView.newUnbox(event, last: "")?.1 == .bag)
@@ -257,6 +282,40 @@ import Testing
         #expect(KuroView.newCelebration(event, last: "w1") == nil)
         #expect(KuroView.newCelebration(.unlock(id: "e1", item: KuroItem.bag.rawValue), last: "") == nil)
         #expect(KuroBubbleLines.celebration(.cycling) == "嗯。……还行。")
+    }
+
+    @Test func aCardPropIsDrawnInPlaceOfHerOwnSoItMovesLikeIt() {
+        var pose = KuroPose(look: .box, energy: nil)
+        pose.items = [.pinkGloves]
+        let parts = KuroFigure.parts(for: .box, pose: pose)
+        #expect(parts.contains(.boxGloveL) && parts.contains(.boxGloveR) && !parts.contains(.itemGlovePinkL))
+        let pink: [KuroPart: [KuroPart]] = [.boxGloveL: [.itemGlovePinkL], .boxGloveR: [.itemGlovePinkR]]
+        #expect(KuroFigure.skins(.box, items: pose.items) == pink)
+        #expect(KuroFigure.skins(.box, items: [.pinkGloves, .goldGloves])[.boxGloveR] == [.itemGloveGoldR])
+        #expect(KuroFigure.skins(.fitness, items: [.pinkGloves]).isEmpty)
+        let bookmark = KuroFigure.skins(.study, items: [.goldBookmark])
+        #expect(bookmark == [.studyNotebook: [.studyNotebook, .itemBookmarkGold]])
+        #expect(KuroFigure.skins(.art, items: [.blueStylus])[.craftPen] == [.itemStylusBlue])
+        #expect(KuroFigure.skins(.fitness, items: [.goldBlock])[.gymBlock] == [.itemBlockGold])
+        #expect(KuroFigure.skins(.music, items: [.sakuraFolder])[.scoreSheet] == [.itemFolderSakura, .scoreSheet])
+        #expect(KuroFigure.skins(.ski, items: [.sakuraGoggles, .goldGoggles])[.skiGoggles] == [.itemGogglesGold])
+    }
+
+    @Test func herHeadphonesHangOnHerNeckOnlyWhenSheDances() {
+        var pose = KuroPose(look: .dance, energy: nil)
+        pose.items = [.mintPhones]
+        #expect(KuroFigure.parts(for: .dance, pose: pose).contains(.itemPhonesMint))
+        #expect(!KuroFigure.parts(for: .ski, pose: pose).contains(.itemPhonesMint))
+    }
+
+    @Test func herRedGlassesGoOnInStudyAndNotFromBehind() {
+        var pose = KuroPose(look: .study, energy: nil)
+        pose.items = [.redGlasses]
+        #expect(KuroFigure.parts(for: .study, pose: pose).contains(.itemGlassesRed))
+        #expect(!KuroFigure.parts(for: .desk, pose: pose).contains(.itemGlassesRed))
+        pose.tap = .turnAway
+        pose.tapProgress = 0.5
+        #expect(!KuroFigure.parts(for: .study, pose: pose).contains(.itemGlassesRed))
     }
 
     @Test func sheActsCalmAboutItemsAndShyAboutKeepsakes() {

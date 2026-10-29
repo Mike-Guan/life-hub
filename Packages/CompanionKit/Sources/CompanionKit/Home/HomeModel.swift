@@ -6,56 +6,120 @@ import SwiftUI
 // Issue #489 (Mike 2026-10-17: the home runs on real data only). The model is built from the app's
 // `HomeSnapshot`; changes go back through the page's callbacks and come in again as a new snapshot.
 
-/// A top HAKU can wear at home.
+/// A top HAKU can wear at home: a mode's or a card's default look, or a bought top.
 enum HomeOutfit: String, CaseIterable, Sendable {
-    case jacket, blazer, aloha, flame, varsity
+    // The defaults, as the companion dresses each mode and identity card (RunnerFigure, RunnerCardLook).
+    case jacket, workJacket, moneyJacket, boxing, sport, tennis, ski, craft
+    case blazer, cardigan, aloha, flame, sukajan, arcade, varsity, raincoat
+    // The identity card tops.
+    case blackGold, gymTank, tennisWhite, studyCardigan, windbreaker, artApron, overalls
 
     var name: String {
         switch self {
         case .jacket: "默认外套"
+        case .workJacket: "上班外套"
+        case .moneyJacket: "副业外套"
+        case .boxing: "拳击"
+        case .sport: "运动底衣"
+        case .tennis: "网球"
+        case .ski: "滑雪"
+        case .craft: "手作底衣"
         case .blazer: "学院西装"
+        case .cardigan: "像素开衫"
         case .aloha: "浪花夏威夷衫"
         case .flame: "火焰连帽卫衣"
+        case .sukajan: "刺绣夹克"
+        case .arcade: "街机 T"
         case .varsity: "校队夹克"
+        case .raincoat: "原宿雨衣"
+        case .blackGold: "黑金拳击外套"
+        case .gymTank: "运动背心"
+        case .tennisWhite: "白色运动服"
+        case .studyCardigan: "开衫"
+        case .windbreaker: "防风夹克"
+        case .artApron: "帆布围裙"
+        case .overalls: "工装背带"
         }
     }
 
-    /// The shop item the top is, `nil` for the default jacket.
+    /// The shop item the top is, `nil` for a default look.
     var shopID: String? {
         switch self {
-        case .jacket: nil
+        case .jacket, .workJacket, .moneyJacket, .boxing, .sport, .tennis, .ski, .craft: nil
         case .blazer: "haku.top.work.blazer"
+        case .cardigan: "haku.top.work.cardigan"
         case .aloha: "haku.top.chill.aloha"
         case .flame: "haku.top.chill.flame"
+        case .sukajan: "haku.top.side.sukajan"
+        case .arcade: "haku.top.side.arcade"
         case .varsity: "haku.set.chill.varsity"
+        case .raincoat: "haku.set.work.raincoat"
+        case .blackGold: "haku.top.boxing.blackgold"
+        case .gymTank: "haku.top.gym.tank"
+        case .tennisWhite: "haku.top.tennis.white"
+        case .studyCardigan: "haku.top.study.cardigan"
+        case .windbreaker: "haku.base.outing.windbreaker"
+        case .artApron: "haku.top.art.apron"
+        case .overalls: "haku.base.craft.overalls"
         }
     }
 
-    // The tops drawn in the room so far (M4 adds the rest); anything else worn shows the default jacket.
-    /// The room version of what is worn: the first drawn top among `worn` item ids, else the jacket.
-    init(worn: Set<String>) {
-        self = Self.allCases.first { $0.shopID.map(worn.contains) ?? false } ?? .jacket
+    // The tops drawn in the room so far (M4 adds the rest); anything else worn shows the default look.
+    /// The room version of what is worn: the first drawn top among `worn` item ids, else the default look of
+    /// `mode`, and in the card mode of `card`.
+    init(worn: Set<String>, mode: Mode? = nil, card: IdentityKind? = nil) {
+        if let top = Self.allCases.first(where: { $0.shopID.map(worn.contains) ?? false }) {
+            self = top
+            return
+        }
+        switch mode {
+        case .work: self = .workJacket
+        case .money: self = .moneyJacket
+        case .chill, nil: self = .jacket
+        case .boxing:
+            switch card {
+            case .tennis: self = .tennis
+            case .fitness, .dance: self = .sport
+            case .ski: self = .ski
+            case .art: self = .craft
+            case .study, .music: self = .jacket
+            default: self = .boxing
+            }
+        }
     }
 
-    /// The drawn parts of the top, in place of the jacket.
+    /// The drawn parts of the top, in place of the jacket; the raincoat's hood lies behind the shoulders.
     var parts: [RunnerPart] {
+        let parts: Set<RunnerPart>
         switch self {
-        case .jacket: [.jacket, .stripeNeon, .hoodCollar]
-        case .blazer: [.topWorkIvy]
-        case .aloha: [.topChillAloha]
-        case .flame: [.topChillFlame, .hoodieStringsCyan]
-        case .varsity: [.setVarsityTop]
+        case .jacket, .workJacket, .boxing: parts = [.jacket, .stripeNeon, .hoodCollar]
+        case .moneyJacket: parts = [.jacket, .stripeNeon, .hoodCollar, .chainGold]
+        case .sport, .tennis, .ski: parts = [.jacket, .stripeSport, .hoodCollar]
+        case .craft: parts = [.jacket, .stripeNeon, .hoodCollar, .apron]
+        default: parts = shopID.flatMap { Outfit.clothesParts[$0] } ?? []
+        }
+        return RunnerPart.allCases.filter { parts.contains($0) && $0 != hat }
+    }
+
+    /// What is worn on the head: a set's cap, the boxing headband, the tennis visor or the ski goggles, also over
+    /// the boxing and tennis card tops.
+    var hat: RunnerPart? {
+        switch self {
+        case .varsity: .setVarsityCap
+        case .boxing, .blackGold: .headband
+        case .tennis, .tennisWhite: .tennisVisor
+        case .ski: .skiGoggles
+        default: nil
         }
     }
 
     /// The colour of the sleeves and of the top seen from behind.
     var base: Color {
         switch self {
-        case .jacket: RunnerPalette.jacketChill
-        case .blazer: RunnerPalette.hood
-        case .aloha: RunnerPalette.catOrange
-        case .flame: RunnerPalette.bubblegum
-        case .varsity: RunnerPalette.varsityRed
+        case .jacket, .craft: RunnerPalette.jacketChill
+        case .workJacket, .boxing, .sport, .tennis, .ski: RunnerPalette.jacket
+        case .moneyJacket: RunnerPalette.jacketMoney
+        default: shopID.flatMap { Outfit.clothesBackColors[$0] } ?? RunnerPalette.jacketChill
         }
     }
 }
@@ -138,6 +202,12 @@ final class HomeModel {
     private(set) var now: Date
     /// The room with the colours picked here, saved through the page.
     private(set) var layout: RoomLayout
+    /// The rug's style.
+    var rug: HomeRug { HomeRug(shopID: layout.rug) ?? .fringe }
+    /// The rug styles the character can lay: the fringed one, then the bought ones.
+    var rugs: [HomeRug] {
+        HomeRug.allCases.filter { $0.shopID(for: snapshot.persona).map(snapshot.owned.contains) ?? true }
+    }
     /// Whether the room shows every item, owned or not, to see where each one goes. DEBUG builds only.
     private(set) var previewsAllItems = false
     var isNight: Bool
@@ -166,10 +236,15 @@ final class HomeModel {
         line = HomeLines(snapshot.persona).arrive
         mode = snapshot.mode
         layout = snapshot.room
-        let hour = Calendar.current.component(.hour, from: now)
-        isNight = night ?? (hour >= 18 || hour < 6)
+        isNight = night ?? Self.isNight(at: now)
         self.now = now
         goHome()
+    }
+
+    /// Whether the room is in its night look at `now`: from 18:00 to 6:00.
+    static func isNight(at now: Date) -> Bool {
+        let hour = Calendar.current.component(.hour, from: now)
+        return hour >= 18 || hour < 6
     }
 
     /// The user's identity card, the fourth mode.
@@ -179,21 +254,35 @@ final class HomeModel {
     var isLow: Bool { snapshot.energy == .low }
     private var lines: HomeLines { HomeLines(snapshot.persona) }
     /// The top HAKU wears in the room.
-    var outfit: HomeOutfit { HomeOutfit(worn: snapshot.worn) }
+    var outfit: HomeOutfit { HomeOutfit(worn: snapshot.worn, mode: mode, card: card) }
+    /// The headband, mask print and gloves worn in the current mode, for the card picked.
+    var accessories: Outfit {
+        let worn = snapshot.worn
+        let equipped = snapshot.wardrobe.showing(card: card).equipped.filter { worn.contains($0.value) }
+        return Outfit(Wardrobe(equipped: equipped))
+    }
     /// The drawn tops HAKU owns, hanging in the wardrobe; the jacket always.
     var ownedOutfits: [HomeOutfit] {
-        HomeOutfit.allCases.filter { $0.shopID.map(snapshot.owned.contains) ?? true }
+        HomeOutfit.allCases.filter { $0.shopID.map(snapshot.owned.contains) ?? ($0 == .jacket) }
     }
     // 家 区域规划 v0: the sports floor holds one piece at a time; the room puts the earlier one away. Mike
     // 2026-10-18: with every item shown, the bag stood in front of HAKU on the bench, so the preview keeps to that
     // too and shows the bench.
-    /// The items standing in the room: the owned ones the room has not put away, or while previewing every item
-    /// the zones have room for.
+    /// The items standing in the room: the owned ones the room has not put away, or while previewing, the first
+    /// items the character's shop sells that the zones have room for, her or his own first, then in catalog order.
     var items: Set<HomeItem> {
-        if previewsAllItems { return Set(HomeItem.allCases).subtracting([.bag]) }
+        if previewsAllItems {
+            let persona = snapshot.persona
+            let sold = HomeItem.allCases.filter { $0 != .bag && ($0.persona.map { $0 == persona } ?? true) }
+            let ownFirst = sold.filter { $0.persona != nil } + sold.filter { $0.persona == nil }
+            return Set(
+                HomeZone.allCases.flatMap { zone in ownFirst.filter { $0.zone == zone }.prefix(zone.slots.count) })
+        }
         let standing = Set(snapshot.room.placements.filter { !$0.isStored }.map(\.piece))
         return Set(snapshot.owned.filter(standing.contains).compactMap(HomeItem.init(shopID:)))
     }
+    /// Where each standing item is.
+    var places: [HomeItem: GridPoint] { HomeItem.places(items) }
     /// The keepsakes on the reward shelf, by name, oldest first, then the worn gloves once earned.
     var keepsakes: [HomeKeepsake] {
         let earned = snapshot.keepsakes.map { HomeKeepsake(id: $0.id, name: ShopItem.item($0.id)?.title ?? $0.id) }
@@ -293,6 +382,14 @@ final class HomeModel {
         return layout
     }
 
+    /// Lays the rug in `style` and returns the room to save.
+    @discardableResult
+    func lay(_ style: HomeRug, now: Date = .now, deviceID: String = "") -> RoomLayout {
+        layout.lay(rug: style.shopID(for: snapshot.persona), now: now, deviceID: deviceID)
+        changed()
+        return layout
+    }
+
     /// Shows or hides every item, owned or not.
     func togglePreviewItems() {
         previewsAllItems.toggle()
@@ -334,13 +431,12 @@ final class HomeModel {
 
     /// The open floor next to `item`, a step towards the middle of the room.
     static func previewSpot(_ item: HomeItem, items: Set<HomeItem>? = nil) -> GridPoint {
-        // In front of the cactus or the bench HAKU would hide it; by the chair, or left of the bench, he stands
+        // In front of a desk item or the bench HAKU would hide it; by the chair, or left of the bench, he stands
         // beside it.
         let s: GridPoint
         switch item {
-        case .cactus: s = GridPoint(x: 1.2, y: 1.6)
         case .bench: s = GridPoint(x: 2.5, y: 3.2)
-        default: s = item.spot
+        default: s = item.zone == .desk ? GridPoint(x: 1.2, y: 1.6) : item.spot
         }
         let hub = HomeSpot.hub
         let d = max(0.01, s.distance(to: hub))

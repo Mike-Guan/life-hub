@@ -18,6 +18,38 @@ enum ShopShelf: CaseIterable {
     func holds(_ item: ShopItem) -> Bool { (item.slot == .room) == (self == .room) }
 }
 
+/// A section of the shop's room shelf, in the order the home is laid out.
+// UI 二组 2026-10-28: rugs and the poster wall come first.
+enum RoomSection: CaseIterable {
+    case rug, wall, desk, sofaSide, corner, sports
+
+    /// The section's title over its items.
+    var title: LocalizedStringKey {
+        switch self {
+        case .rug: "地毯"
+        case .wall: "墙上"
+        case .desk: "书桌上"
+        case .sofaSide: "沙发旁"
+        case .corner: "角落"
+        case .sports: "运动"
+        }
+    }
+
+    /// Whether `item` is in this section; the sports floor and wall share one.
+    func holds(_ item: ShopItem) -> Bool {
+        if self == .rug { return item.isRug }
+        guard let zone = item.zone else { return false }
+        return switch self {
+        case .rug: false
+        case .wall: zone == .posterWall
+        case .desk: zone == .desk
+        case .sofaSide: zone == .sofaSide
+        case .corner: zone == .corner
+        case .sports: zone.isSports
+        }
+    }
+}
+
 /// The shop for `persona`: her items to buy with cans, what's owned, and the keepsakes still to earn.
 struct ShopView: View {
     let growth: GrowthStore
@@ -68,12 +100,10 @@ struct ShopView: View {
                     .font(Toy.body(15, weight: .heavy))
                 if forSale.isEmpty {
                     allBought
+                } else if shelf == .room {
+                    roomShelf(roomGroups)
                 } else {
-                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
-                        ForEach(forSale) { item in
-                            itemCard(item)
-                        }
-                    }
+                    grid(forSale)
                 }
                 ForEach(ownedFromShop) { item in
                     ownedRow(item)
@@ -135,6 +165,23 @@ struct ShopView: View {
         var items = [weekly].compactMap { $0 }
         items += ShopItem.catalog(for: persona, card: card).filter { $0.price != nil && !owned.contains($0.id) }
         return items.filter(shelf.holds)
+    }
+
+    // UI 二组 地毯两款 v1 (UI 审核 2026-10-27): the room shelf goes by the home's zones, this week's item first
+    // with no title.
+    private var roomGroups: [(title: LocalizedStringKey?, items: [ShopItem])] {
+        var rest = forSale
+        var groups: [(title: LocalizedStringKey?, items: [ShopItem])] = []
+        if let weekly, rest.first?.id == weekly.id {
+            groups.append((nil, [rest.removeFirst()]))
+        }
+        for section in RoomSection.allCases {
+            let here = rest.filter(section.holds)
+            if !here.isEmpty { groups.append((section.title, here)) }
+        }
+        let unzoned = rest.filter { item in !RoomSection.allCases.contains { $0.holds(item) } }
+        if !unzoned.isEmpty { groups.append((nil, unzoned)) }
+        return groups
     }
 
     private var ownedFromShop: [ShopItem] {
@@ -253,6 +300,26 @@ struct ShopView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .toyCard(fill: Mode.chill.color(for: persona))
         .accessibilityElement(children: .combine)
+    }
+
+    private func roomShelf(_ groups: [(title: LocalizedStringKey?, items: [ShopItem])]) -> some View {
+        ForEach(groups.indices, id: \.self) { i in
+            if let title = groups[i].title {
+                Text(title)
+                    .font(Toy.body(13, weight: .black))
+                    .foregroundStyle(Toy.muted)
+                    .accessibilityAddTraits(.isHeader)
+            }
+            grid(groups[i].items)
+        }
+    }
+
+    private func grid(_ items: [ShopItem]) -> some View {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
+            ForEach(items) { item in
+                itemCard(item)
+            }
+        }
     }
 
     private func itemCard(_ item: ShopItem) -> some View {

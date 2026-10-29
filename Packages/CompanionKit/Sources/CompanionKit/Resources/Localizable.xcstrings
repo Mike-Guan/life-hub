@@ -18,6 +18,91 @@
         }
       }
     },
+    "%@ 在书桌前" : {
+      "comment" : "Home screen window: where the character is in the home. %@ is her name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@ is at the desk"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@は机に向かってる"
+          }
+        }
+      }
+    },
+    "%@ 在屋里" : {
+      "comment" : "Home screen window: where the character is in the home. %@ is her name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@ is at home"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@は部屋にいる"
+          }
+        }
+      }
+    },
+    "%@ 在床上" : {
+      "comment" : "Home screen window: where the character is in the home. %@ is her name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@ is in bed"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@はベッドにいる"
+          }
+        }
+      }
+    },
+    "%@ 在沙发上" : {
+      "comment" : "Home screen window: where the character is in the home. %@ is her name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@ is on the sofa"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@はソファにいる"
+          }
+        }
+      }
+    },
+    "%@ 在活动身体" : {
+      "comment" : "Home screen window: where the character is in the home. %@ is her name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@ is moving around"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%@は体を動かしてる"
+          }
+        }
+      }
+    },
     "KURO，困了" : {
       "comment" : "VoiceOver",
       "localizations" : {
@@ -120,6 +205,40 @@
         }
       }
     },
+    "KURO，托着球" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "KURO, holding a ball"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "クロ、ボールを持っている"
+          }
+        }
+      }
+    },
+    "KURO，扶着瑜伽垫" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "KURO, holding a yoga mat"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "クロ、ヨガマットを持っている"
+          }
+        }
+      }
+    },
     "KURO，抱着瑜伽砖" : {
       "comment" : "VoiceOver",
       "localizations" : {
@@ -201,6 +320,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "クロ、温かい飲み物を両手で持っている"
+          }
+        }
+      }
+    },
+    "KURO，泳镜推在头上" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "KURO, swim goggles pushed up"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "クロ、ゴーグルをおでこに上げている"
+          }
+        }
+      }
+    },
+    "KURO，背着包拿着登山杖" : {
+      "comment" : "VoiceOver",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "KURO, with a backpack and a trekking pole"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "クロ、リュックを背負ってポールを持っている"
           }
         }
       }
@@ -331,6 +484,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ショップ"
+          }
+        }
+      }
+    },
+    "圆形编织" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Round woven"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "丸い編み"
           }
         }
       }
@@ -528,6 +697,38 @@
         }
       }
     },
+    "条纹" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Striped"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ストライプ"
+          }
+        }
+      }
+    },
+    "款式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Style"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "柄"
+          }
+        }
+      }
+    },
     "每一件都是真的发生过的事换来的。" : {
       "localizations" : {
         "en" : {
@@ -556,6 +757,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ソファ"
+          }
+        }
+      }
+    },
+    "流苏 · 免费" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Fringed · free"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "フリンジ · 無料"
           }
         }
       }
@@ -652,6 +869,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "モードを選ぶと、HAKUが出てくる"
+          }
+        }
+      }
+    },
+    "颜色 · 免费" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Colour · free"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "色 · 無料"
           }
         }
       }

@@ -110,4 +110,10 @@ import Testing
             #expect(order == order.sorted())
         }
     }
+
+    // 40, 42 and 46 mm screens: the drop grows with the screen, about 29, 33 and 37 pt.
+    @Test func theFigureDropsWithTheScreenWidth() {
+        let drops = [CGFloat(162), 187, 208].map { WatchFigureFrame.drop(screenWidth: $0).rounded(.down) }
+        #expect(drops == [29, 33, 37])
+    }
 }

@@ -49,6 +49,7 @@ final class HomeScene: SKScene {
 
     // What the drawing shows now, to redraw only what changed.
     private var shownColors: [UInt32]?
+    private var shownRug: HomeRug?
     private var shownOutfits: [HomeOutfit] = []
     private var shownNight: Bool?
     private var shownScreen: HomeScreen?
@@ -175,10 +176,10 @@ final class HomeScene: SKScene {
 
     /// The layer that shows `piece` with the colours picked now.
     private func layer(_ piece: HomePiece, covering: Bool) -> HomeLayer {
+        if piece == .rug { return .rug(model.rug, color: model.color(.rug)) }
         let color: UInt32 =
             switch piece {
             case .sofaBack, .sofaFarArm, .sofaSeat, .sofaNearArm: model.color(.sofa)
-            case .rug: model.color(.rug)
             case .blanket: model.color(.bed)
             default: 0
             }
@@ -193,6 +194,10 @@ final class HomeScene: SKScene {
         if colors != shownColors {
             redraw(flashing: shownColors != nil)
             shownColors = colors
+            shownRug = model.rug
+        } else if model.rug != shownRug {
+            shownRug = model.rug
+            layRug(animated: animated)
         }
         let outfits = model.ownedOutfits
         if outfits != shownOutfits {
@@ -208,8 +213,15 @@ final class HomeScene: SKScene {
             node.removeFromParent()
             itemNodes[item] = nil
         }
+        // An item is drawn at its spot; its node moves to the slot it takes.
+        for (item, place) in model.places {
+            itemNodes[item]?.position = HomeGrid.scene(HomeGrid.plan(place))
+        }
+        pieces[.posters]?.isHidden = items.contains { $0.zone == .posterWall }
         if items.contains(.bench), barbell == nil {
             let bar = HomeLayerNode(pivot: Self.rackedBar)
+            // On the rack from the start, before HAKU's first pose places it.
+            bar.zPosition = CGFloat(HomeItem.bench.depth + 0.01)
             bar.show(.barbell, night: model.isNight)
             barbell = bar
             addChild(bar)
@@ -245,6 +257,23 @@ final class HomeScene: SKScene {
             node.show(layer(piece, covering: shownCovering == true), night: night)
         }
         if flashing { flash() }
+    }
+
+    // UI 二组 地毯两款 v1: a new rug style fades in over 0.2 s, or shows at once with Reduce Motion.
+    private func layRug(animated: Bool) {
+        guard let node = pieces[.rug] else { return }
+        node.show(layer(.rug, covering: false), night: model.isNight)
+        guard animated, !Self.reducesMotion else { return }
+        node.alpha = 0
+        node.run(SKAction.fadeIn(withDuration: 0.2))
+    }
+
+    private static var reducesMotion: Bool {
+        #if os(iOS)
+        UIAccessibility.isReduceMotionEnabled
+        #else
+        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+        #endif
     }
 
     private func drawBlanket(covering: Bool) {
@@ -444,7 +473,7 @@ final class HomeScene: SKScene {
         }
         if face.blinks, clock.truncatingRemainder(dividingBy: 3.7) < 0.13 { face = .closed }
 
-        if let node = haku as? HakuNode { node.dress(model.outfit) }
+        if let node = haku as? HakuNode { node.dress(model.outfit, accessories: model.accessories) }
         if let node = haku as? KuroHomeNode {
             node.dress(KuroLook(mode: model.mode ?? .chill, card: model.card), worn: model.snapshot.worn)
         }
