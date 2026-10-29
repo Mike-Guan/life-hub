@@ -60,13 +60,14 @@ Linux 上的检查不占 Mac 额度（私有仓库 Mac 分钟按 10 倍算）。
 - 「刷手机」用到 Family Controls。开发版（Debug，Xcode 直接装）自带开发权限，可以直接用。
 - Apple 已批 Family Controls 分发权限（2026-10-05）。Mike 2026-10-14 同意先给 STG 打开：Debug 和 Staging 用
   `*-FamilyControls.entitlements`，设置里的「刷手机」卡在这两个版本里显示。Release（PROD）还没有它，
-  点不了的按钮不显示，HAKU 用「晚上在家 + 没走动」兜底。
+  点不了的按钮不显示，HAKU 用「晚上在家 + 没走动」兜底。PROD 包里也不放 Screen Time 扩展：`LifeHub-iOS` 的
+  构建脚本在 Release 下把 `LifeHubScreenTime.appex` 从 App 里删掉。
 - STG 签名前，Mike 在开发者后台（Certificates, Identifiers & Profiles → Identifiers）确认
   `com.guanshiyang.lifehub.stg` 和 `com.guanshiyang.lifehub.stg.screentime` 两个 App ID 都勾了 Family Controls，
   然后在 Mac 上重新生成或自动更新描述文件再上传。
 - PROD 也打开时：把 `com.apple.developer.family-controls` 加进 `Apps/iOS/LifeHub.entitlements` 和
   `Apps/ScreenTime/LifeHubScreenTime.entitlements`，删掉两个 `-FamilyControls` 文件、`project.yml` 里的覆盖和
-  `SettingsView.swift` 里的 `#if DEBUG || ENV_STG`。
+  `SettingsView.swift` 里的 `#if DEBUG || ENV_STG`，再删掉 `project.yml` 里删扩展的那段构建脚本。
 
 ## 动画录屏（`.github/workflows/recordings.yml`）
 
