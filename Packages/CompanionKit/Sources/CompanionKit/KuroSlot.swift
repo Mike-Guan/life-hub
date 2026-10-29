@@ -7,6 +7,8 @@ import HubCore
 enum KuroSlot: CaseIterable, Sendable {
     /// Asking you to get moving: bright eyes, and every 6 s a hop with her look's move.
     case invite
+    /// A need of yours she noticed: every 6 s she leans out to peek at you, blinks and leans back, smiling.
+    case peek
     /// Worn out: drowsy eyes, a slow breath, and every 7 s she rubs an eye.
     case tired
     /// Busy with something: eyes down, a calm mouth, and every 9 s her look's move without a hop.
@@ -39,13 +41,14 @@ enum KuroSlot: CaseIterable, Sendable {
             return
         }
         guard need != nil else { return nil }
-        self = .invite
+        // 第 5 批 偷看: her own move for a need, instead of the invite hop.
+        self = .peek
     }
 
     /// Seconds from the start of one move to the next.
     var period: TimeInterval {
         switch self {
-        case .invite, .packingUp: 6
+        case .invite, .peek, .packingUp: 6
         case .tired: 7
         case .focus: 9
         case .active: 5
@@ -57,7 +60,11 @@ enum KuroSlot: CaseIterable, Sendable {
 
     /// The move she plays in `look`.
     func move(in look: KuroLook) -> KuroTap {
-        self == .tired ? .rub : KuroTap(look: look, sleepy: false)
+        switch self {
+        case .tired: .rub
+        case .peek: .peek
+        default: KuroTap(look: look, sleepy: false)
+        }
     }
 
     /// The move playing at `time` (seconds since the reference date) and its progress (0..<1),
@@ -78,7 +85,7 @@ enum KuroSlot: CaseIterable, Sendable {
         case .focus:
             pose.eyes = .down
             pose.calm = true
-        case .invite, .active:
+        case .invite, .peek, .active:
             if !pose.tired { pose.eyes = .bright }
         case .packingUp:
             if !pose.tired { pose.eyes = .happy }
