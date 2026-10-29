@@ -84,7 +84,9 @@ final class HakuNode: SKNode {
     private let phone = SKSpriteNode()
 
     private var outfit = HomeOutfit.jacket
+    private var accessories = Outfit()
     private var shownFace: HakuFace?
+    private var shownAccessories: Outfit?
     private var shownOutfit: HomeOutfit?
     private var shownBack: Bool?
     private var shownGloves: Bool?
@@ -132,9 +134,10 @@ final class HakuNode: SKNode {
         nil
     }
 
-    /// Puts `outfit` on HAKU from the next pose on.
-    func dress(_ outfit: HomeOutfit) {
+    /// Puts `outfit` and the headband, mask print and gloves of `accessories` on HAKU from the next pose on.
+    func dress(_ outfit: HomeOutfit, accessories: Outfit = Outfit()) {
         self.outfit = outfit
+        self.accessories = accessories
     }
 
     /// Poses the rig for time `t`.
@@ -142,9 +145,11 @@ final class HakuNode: SKNode {
         let back = pose == .back || pose == .backStand
         dress(outfit, back: back, gloves: gloves || pose == .box)
         let shownHead: HakuFace = back ? .back : face
-        if shownHead != shownFace {
+        if shownHead != shownFace || outfit != shownOutfit || accessories != shownAccessories {
             shownFace = shownHead
-            setTexture(head, Self.head(shownHead), Self.headRect, pin: CGPoint(x: 60, y: 95))
+            setTexture(
+                head, Self.head(shownHead, hat: outfit.hat, accessories: accessories), Self.headRect,
+                pin: CGPoint(x: 60, y: 95))
         }
         flip.xScale = facingRight ? Self.scale : -Self.scale
 
@@ -343,8 +348,8 @@ final class HakuNode: SKNode {
             setTexture(
                 torso, back ? Self.torsoBack(outfit) : Self.torso(outfit), Self.torsoRect, pin: CGPoint(x: 60, y: 138))
         }
-        if outfit != shownOutfit || gloves != shownGloves {
-            let arm = Self.arm(outfit, gloves: gloves)
+        if outfit != shownOutfit || gloves != shownGloves || accessories.gloves != shownAccessories?.gloves {
+            let arm = Self.arm(outfit, gloves: gloves ? accessories.gloves ?? RunnerPalette.boxingRed : nil)
             setTexture(armL, arm, Self.armRect, pin: .zero)
             setTexture(armR, arm, Self.armRect, pin: .zero)
             armR.xScale = -1
@@ -352,6 +357,7 @@ final class HakuNode: SKNode {
         shownOutfit = outfit
         shownBack = back
         shownGloves = gloves
+        shownAccessories = accessories
     }
 
     private func setTexture(_ sprite: SKSpriteNode, _ texture: SKTexture, _ rect: CGRect, pin: CGPoint) {
@@ -363,23 +369,48 @@ final class HakuNode: SKNode {
     // MARK: Textures
 
     static let headRect = CGRect(x: 0, y: -12, width: 120, height: 120)
+    /// How far the cap sits lower on the back of the head than on the front.
+    static let capSinkFromBehind: CGFloat = 8
     static let torsoRect = CGRect(x: 18, y: 84, width: 84, height: 60)
     static let armRect = CGRect(x: -14, y: -8, width: 28, height: 48)
     static let legRect = CGRect(x: -12, y: -4, width: 24, height: 42)
     static let sitRect = CGRect(x: -20, y: -4, width: 40, height: 60)
     static let shadowRect = CGRect(x: -30, y: -9, width: 60, height: 18)
 
-    private static var heads: [HakuFace: SKTexture] = [:]
+    private static var heads: [String: SKTexture] = [:]
     private static var tops: [String: SKTexture] = [:]
 
-    static func head(_ face: HakuFace) -> SKTexture {
-        if let cached = heads[face] { return cached }
-        let parts = face.parts
+    /// The head with `face`, a set's `hat`, the mask print on the lowered mask and the headband's colour.
+    static func head(_ face: HakuFace, hat: RunnerPart? = nil, accessories: Outfit = Outfit()) -> SKTexture {
+        let parts = headParts(face, hat: hat, mask: accessories.mask)
+        let headband = accessories.headband
+        let key = "\(parts.map(\.rawValue)).\(String(describing: headband))"
+        if let cached = heads[key] { return cached }
         let texture = HomeTextures.texture(headRect) { context in
-            for part in parts { RunnerDrawing.draw(part, in: context) }
+            for part in parts {
+                // UI 审核 2026-10-28: from behind the cap sat on the spike tips with a gap; it sinks into the hair.
+                if face == .back, part == .setVarsityCap {
+                    var sunk = context
+                    sunk.translateBy(x: 0, y: Self.capSinkFromBehind)
+                    RunnerDrawing.draw(part, in: sunk)
+                } else {
+                    RunnerDrawing.draw(part, in: context, red: part == .headband ? headband : nil)
+                }
+            }
         }
-        heads[face] = texture
+        heads[key] = texture
         return texture
+    }
+
+    /// The parts of the head, back to front: as in the companion, any other hat gives way to the boxing headband
+    /// and a print goes over the lowered mask. From behind the visor and the goggles, drawn from the front, are left
+    /// off.
+    static func headParts(_ face: HakuFace, hat: RunnerPart?, mask: MaskPrint?) -> [RunnerPart] {
+        var parts = Set(face.parts)
+        let frontOnly: Set<RunnerPart> = [.tennisVisor, .skiGoggles]
+        if let hat, !parts.contains(.headband), !(face == .back && frontOnly.contains(hat)) { parts.insert(hat) }
+        if let mask, parts.contains(.maskDown) { parts.insert(mask.down) }
+        return RunnerPart.allCases.filter(parts.contains)
     }
 
     static func torso(_ outfit: HomeOutfit) -> SKTexture {
@@ -415,8 +446,9 @@ final class HakuNode: SKNode {
         return texture
     }
 
-    static func arm(_ outfit: HomeOutfit, gloves: Bool) -> SKTexture {
-        let key = "arm.\(outfit.rawValue).\(gloves)"
+    /// An arm in the top's base colour, with a bare hand or a glove in `gloves`.
+    static func arm(_ outfit: HomeOutfit, gloves: Color?) -> SKTexture {
+        let key = "arm.\(outfit.rawValue).\(String(describing: gloves))"
         if let cached = tops[key] { return cached }
         let texture = HomeTextures.texture(armRect) { context in
             var arm = Path()
@@ -424,9 +456,9 @@ final class HakuNode: SKNode {
             arm.addQuadCurve(to: CGPoint(x: -3, y: 27), control: CGPoint(x: -3, y: 14))
             context.stroke(arm, with: .color(RunnerPalette.ink), style: StrokeStyle(lineWidth: 13, lineCap: .round))
             context.stroke(arm, with: .color(outfit.base), style: StrokeStyle(lineWidth: 7.5, lineCap: .round))
-            let r: CGFloat = gloves ? 8.5 : 5.5
+            let r: CGFloat = gloves == nil ? 5.5 : 8.5
             let hand = Path(ellipseIn: CGRect(x: -3 - r, y: 29 - r, width: 2 * r, height: 2 * r))
-            context.fill(hand, with: .color(gloves ? RunnerPalette.boxingRed : RunnerPalette.skin))
+            context.fill(hand, with: .color(gloves ?? RunnerPalette.skin))
             context.stroke(hand, with: .color(RunnerPalette.ink), lineWidth: 2.5)
         }
         tops[key] = texture
