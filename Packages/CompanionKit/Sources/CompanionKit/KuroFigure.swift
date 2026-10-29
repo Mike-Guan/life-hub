@@ -326,9 +326,7 @@ struct KuroFigure: View {
         if pose.heart { visible.insert(.tapHeart) }
         if pose.tap == nil, let idle = pose.idle { idle.apply(pose.idleProgress, to: &visible) }
         if pose.facingAway { turnAround(&visible) }
-        // One top or set per mode, so the first worn one in catalog order is the only one.
-        let worn = KuroItem.allCases.filter { $0.look == look && pose.items.contains($0) }
-        if let clothes = worn.lazy.compactMap(\.clothes).first {
+        if let clothes = clothes(look, items: pose.items) {
             let back = pose.facingAway || pose.tap == .turnAway && KuroTap.facesAway(pose.tapProgress)
             dress(look, in: clothes, back: back, &visible)
         }
@@ -357,6 +355,12 @@ struct KuroFigure: View {
         }
         if visible.remove(rubSleeve(look)) != nil { visible.insert(clothes.rubSleeve) }
         if visible.remove(KuroScene.sleeve(look)) != nil { visible.insert(clothes.inviteSleeve) }
+    }
+
+    // One top or set per mode, so the first worn one in catalog order is the only one.
+    /// The top or set she wears in `look` among `items`, if any.
+    nonisolated static func clothes(_ look: KuroLook, items: Set<KuroItem>) -> KuroClothes? {
+        KuroItem.allCases.lazy.filter { $0.look == look && items.contains($0) }.compactMap(\.clothes).first
     }
 
     /// Her own top in `look`.
@@ -389,7 +393,8 @@ struct KuroFigure: View {
     nonisolated private static let wornOn: [KuroPart: KuroPart] = [
         .itemScrunchie: .tennisPonytail, .weeklyHairMintPony: .tennisPonytail, .weeklyHairCherryPony: .tennisPonytail,
         .weeklyHairStarPony: .tennisPonytail, .weeklyHairMintSide: .hairFringe, .weeklyHairCherrySide: .hairFringe,
-        .weeklyHairStarSide: .hairFringe,
+        .weeklyHairStarSide: .hairFringe, .itemRibbonPony: .tennisPonytail, .itemRibbonSide: .hairFringe,
+        .itemClipMoon: .hairFringe,
     ]
 
     /// How far `part` moves from where the SVG draws it, in SVG units; a hair piece moves with its hair, full
@@ -447,7 +452,7 @@ struct KuroFigure: View {
         }
         visible.subtract([
             .deskPen, .workStylus, .workBadge, .itemFlower, .itemLamp, .itemBlanket, .danceSpeaker,
-            .weeklyRoomSucculent, .weeklyBlanketBear, .weeklyRoomCloud,
+            .weeklyRoomSucculent, .weeklyBlanketBear, .weeklyRoomCloud, .itemBlanketCheck,
         ])
     }
 
@@ -646,6 +651,11 @@ public struct KuroView: View {
     @AppStorage("companion.lastRevived") private var lastRevived = ""
     @AppStorage("companion.lastTaskDone") private var lastTaskDone = ""
     @AppStorage("companion.lastWelcome") private var lastWelcome = ""
+    // Days her thought bubbles last played, so each shows once a day.
+    @AppStorage("companion.kuroLastRain") private var lastRain = ""
+    @AppStorage("companion.kuroLastTangle") private var lastTangle = ""
+    @State private var thought: KuroThought?
+    @State private var thoughtStart: Date?
     // Shared with HAKU's: one good night an evening, whoever is shown.
     @AppStorage("companion.lastGoodnight") private var lastGoodnight: Double = 0
 
@@ -755,7 +765,8 @@ public struct KuroView: View {
                 // 动作展示总表 C14: a tap while a move plays gets a blink instead of nothing.
                 let winking = winkStart.map { (0..<Self.wink).contains(time - $0.timeIntervalSinceReferenceDate) }
                 let shut = (nod ?? 1) < 0.1 || winking == true
-                let pose = dozing ? self.pose.showing(.closed) : shut ? awake.showing(.closed) : awake
+                let pose =
+                    dozing ? Self.dozed(self.pose, look: look, bedtime: bedtime) : shut ? awake.showing(.closed) : awake
                 let sleepy = bedtime == .on || pose.overtime || slot == .tired
                 let still = Self.holdsStill(reduceMotion: reduceMotion, unboxing: unbox != nil, dozing: dozing)
                 // KURO-16: her idle runs on from where it was when her pace changes, and eases back in after
@@ -823,6 +834,15 @@ public struct KuroView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             }
 
+            if let thought, let thoughtStart, unboxStart == nil {
+                TimelineView(.animation(minimumInterval: frameInterval, paused: paused)) { context in
+                    let time = (frameClock ?? context.date).timeIntervalSince(thoughtStart)
+                    KuroThoughtBubble(thought: thought, time: time, reduceMotion: reduceMotion)
+                        .frame(width: 72).padding(10)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            }
+
             if showsBubble, let bubble {
                 SpeechBubble(text: bubble)
                     .padding(12)
@@ -868,6 +888,7 @@ public struct KuroView: View {
             if unboxStart == nil { say(nil) }
         }
         .onAppear {
+            thinkIfNew()
             playEventIfNew()
             finishWelcomeIfNeeded()
             if invite != nil { startInvite() }
@@ -878,6 +899,8 @@ public struct KuroView: View {
         .onChange(of: bedtime) { _, new in
             if new == .on { startGoodNight() }
         }
+        .onChange(of: need) { _, _ in thinkIfNew() }
+        .onChange(of: energy) { _, _ in thinkIfNew() }
         .onChange(of: invite) { _, new in
             if new != nil { startInvite() }
         }
@@ -1010,6 +1033,24 @@ public struct KuroView: View {
         if showsBubble { say(Self.line(after: bubble, from: Self.tapLines(lines, bedtime: bedtime))) }
         // 动作总表 C15: at bedtime a tap only gets a mumble; it never changes the mode.
         if bedtime == .off { onTap?() }
+    }
+
+    /// Shows the thought bubble her energy or the user's need calls for, once a day each.
+    private func thinkIfNew() {
+        // Only on the home screen, where she talks: not on the watch, in a notification or in a preview.
+        guard bedtime == .off, style == .standard, showsBubble, thoughtStart == nil,
+            let new = KuroThought.pick(energy: energy, need: need)
+        else { return }
+        let last = new == .rain ? lastRain : lastTangle
+        guard let day = KuroThought.newDay(at: .now, last: last) else { return }
+        if new == .rain { lastRain = day } else { lastTangle = day }
+        thought = new
+        thoughtStart = .now
+        Task {
+            try? await Task.sleep(for: .seconds(new.duration(reduceMotion: reduceMotion)))
+            thought = nil
+            thoughtStart = nil
+        }
     }
 
     // KURO-18 (动画精修计划 v1, F6): with her chin on her hand the tablet is already down, so a cheer stays seated
@@ -1283,6 +1324,15 @@ public struct KuroView: View {
             guard !Task.isCancelled, bathStart == start, dryStart == nil else { return }
             say(KuroScene.bathLine, for: 3)
         }
+    }
+
+    /// `pose` while the watch screen is dimmed (Always On): eyes shut, and before bedtime in the chill look she
+    /// naps over her tablet.
+    nonisolated static func dozed(_ pose: KuroPose, look: KuroLook, bedtime: Bedtime) -> KuroPose {
+        var pose = pose.showing(.closed)
+        // UI 三组 交接 §3 抱平板睡着: its still frame is also her Always On face.
+        if look == .chill, bedtime == .off { pose.napping = true }
+        return pose
     }
 
     /// Her pose during `unbox`: acting calm in the new item, with low eyes and a flat mouth, and her back

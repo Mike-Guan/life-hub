@@ -125,7 +125,7 @@ import Testing
     }
 
     @Test func herLapIsClearWhileSheDrinks() {
-        for item in [KuroItem.blanket, .bearBlanket, .cloud] {
+        for item in [KuroItem.blanket, .bearBlanket, .cloud, .checkBlanket] {
             var pose = KuroPose(look: .chill, energy: nil)
             pose.items = [item]
             pose.tap = .sip
@@ -146,6 +146,16 @@ import Testing
         #expect(watch.isSuperset(of: [.weeklyHairStarSide, .weeklyRoomNightlight]))
         pose.items = [.cloud]
         #expect(!KuroFigure.parts(for: .chill, pose: pose, watch: true).contains(.weeklyRoomCloud))
+    }
+
+    @Test func herRibbonGoesOnHerPonytailOrTheClipPointAndTheMoonClipAlwaysOnTheClipPoint() {
+        var pose = KuroPose(look: .tennis, energy: nil)
+        pose.items = [.ribbon]
+        #expect(KuroFigure.parts(for: .tennis, pose: pose).contains(.itemRibbonPony))
+        #expect(KuroFigure.parts(for: .chill, pose: pose).contains(.itemRibbonSide))
+        pose.items = [.moonClip]
+        #expect(KuroFigure.parts(for: .tennis, pose: pose).contains(.itemClipMoon))
+        #expect(KuroFigure.parts(for: .work, pose: pose).contains(.itemClipMoon))
     }
 
     static let clothes = KuroItem.allCases.filter { $0.clothes != nil }
