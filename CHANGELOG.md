@@ -7,6 +7,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 ## [0.1.0] - 2026-10-28
 
 ### Fixed
+- The PROD build no longer carries the Screen Time extension, so it asks for no Family Controls access.
 - The home screen's window into the home shows the floor colour and a faint figure until the room is drawn,
   and no longer redraws when only the room's record changes.
 - The second preset character's face on the widgets and watch face follows the day like on the home screen:

@@ -75,6 +75,9 @@ targets:
           CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-FamilyControls.entitlements
         Staging:
           CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub-FamilyControls.entitlements
+        # Until then PROD doesn't embed the Screen Time extension either.
+        Release:
+          EXCLUDED_SOURCE_FILE_NAMES: LifeHubScreenTime.appex
       base:
         CODE_SIGN_ENTITLEMENTS: Apps/iOS/LifeHub.entitlements
         TARGETED_DEVICE_FAMILY: "1"
