@@ -11,6 +11,8 @@ enum HomeOutfit: String, CaseIterable, Sendable {
     // The defaults, as the companion dresses each mode and identity card (RunnerFigure, RunnerCardLook).
     case jacket, workJacket, moneyJacket, boxing, sport, tennis, ski, craft
     case blazer, cardigan, aloha, flame, sukajan, arcade, varsity, raincoat
+    // The identity card tops.
+    case blackGold, gymTank, tennisWhite, studyCardigan, windbreaker, artApron, overalls
 
     var name: String {
         switch self {
@@ -30,6 +32,13 @@ enum HomeOutfit: String, CaseIterable, Sendable {
         case .arcade: "街机 T"
         case .varsity: "校队夹克"
         case .raincoat: "原宿雨衣"
+        case .blackGold: "黑金拳击外套"
+        case .gymTank: "运动背心"
+        case .tennisWhite: "白色运动服"
+        case .studyCardigan: "开衫"
+        case .windbreaker: "防风夹克"
+        case .artApron: "帆布围裙"
+        case .overalls: "工装背带"
         }
     }
 
@@ -45,6 +54,13 @@ enum HomeOutfit: String, CaseIterable, Sendable {
         case .arcade: "haku.top.side.arcade"
         case .varsity: "haku.set.chill.varsity"
         case .raincoat: "haku.set.work.raincoat"
+        case .blackGold: "haku.top.boxing.blackgold"
+        case .gymTank: "haku.top.gym.tank"
+        case .tennisWhite: "haku.top.tennis.white"
+        case .studyCardigan: "haku.top.study.cardigan"
+        case .windbreaker: "haku.base.outing.windbreaker"
+        case .artApron: "haku.top.art.apron"
+        case .overalls: "haku.base.craft.overalls"
         }
     }
 
@@ -85,12 +101,13 @@ enum HomeOutfit: String, CaseIterable, Sendable {
         return RunnerPart.allCases.filter { parts.contains($0) && $0 != hat }
     }
 
-    /// What is worn on the head: a set's cap, the boxing headband, the tennis visor or the ski goggles.
+    /// What is worn on the head: a set's cap, the boxing headband, the tennis visor or the ski goggles, also over
+    /// the boxing and tennis card tops.
     var hat: RunnerPart? {
         switch self {
         case .varsity: .setVarsityCap
-        case .boxing: .headband
-        case .tennis: .tennisVisor
+        case .boxing, .blackGold: .headband
+        case .tennis, .tennisWhite: .tennisVisor
         case .ski: .skiGoggles
         default: nil
         }

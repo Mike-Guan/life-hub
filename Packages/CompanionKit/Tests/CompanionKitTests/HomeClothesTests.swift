@@ -12,11 +12,17 @@ import Testing
         for outfit in HomeOutfit.allCases {
             guard let id = outfit.shopID else { continue }
             let parts = try #require(Outfit.clothesParts[id])
-            #expect(Set(outfit.parts).union(outfit.hat.map { [$0] } ?? []) == parts, "\(outfit)")
+            #expect(Set(outfit.parts) == parts.filter { $0 != outfit.hat }, "\(outfit)")
             #expect(outfit.base == Outfit.clothesBackColors[id], "\(outfit)")
         }
         #expect(HomeOutfit(worn: ["haku.top.side.arcade"]) == .arcade)
         #expect(HomeOutfit(worn: ["haku.set.work.raincoat"]).parts.contains(.setKawaiiHood))
+    }
+
+    @Test func theBoxingAndTennisCardTopsKeepTheirCardsHat() {
+        #expect(HomeOutfit(worn: ["haku.top.boxing.blackgold"], mode: .boxing, card: .boxing).hat == .headband)
+        #expect(HomeOutfit(worn: ["haku.top.tennis.white"], mode: .boxing, card: .tennis).hat == .tennisVisor)
+        #expect(HomeOutfit(worn: ["haku.top.gym.tank"], mode: .boxing, card: .fitness).hat == nil)
     }
 
     @Test func eachModeAndCardHasItsDefaultLookUntilATopIsBought() {
