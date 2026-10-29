@@ -6,56 +6,103 @@ import SwiftUI
 // Issue #489 (Mike 2026-10-17: the home runs on real data only). The model is built from the app's
 // `HomeSnapshot`; changes go back through the page's callbacks and come in again as a new snapshot.
 
-/// A top HAKU can wear at home.
+/// A top HAKU can wear at home: a mode's or a card's default look, or a bought top.
 enum HomeOutfit: String, CaseIterable, Sendable {
-    case jacket, blazer, aloha, flame, varsity
+    // The defaults, as the companion dresses each mode and identity card (RunnerFigure, RunnerCardLook).
+    case jacket, workJacket, moneyJacket, boxing, sport, tennis, ski, craft
+    case blazer, cardigan, aloha, flame, sukajan, arcade, varsity, raincoat
 
     var name: String {
         switch self {
         case .jacket: "默认外套"
+        case .workJacket: "上班外套"
+        case .moneyJacket: "副业外套"
+        case .boxing: "拳击"
+        case .sport: "运动底衣"
+        case .tennis: "网球"
+        case .ski: "滑雪"
+        case .craft: "手作底衣"
         case .blazer: "学院西装"
+        case .cardigan: "像素开衫"
         case .aloha: "浪花夏威夷衫"
         case .flame: "火焰连帽卫衣"
+        case .sukajan: "刺绣夹克"
+        case .arcade: "街机 T"
         case .varsity: "校队夹克"
+        case .raincoat: "原宿雨衣"
         }
     }
 
-    /// The shop item the top is, `nil` for the default jacket.
+    /// The shop item the top is, `nil` for a default look.
     var shopID: String? {
         switch self {
-        case .jacket: nil
+        case .jacket, .workJacket, .moneyJacket, .boxing, .sport, .tennis, .ski, .craft: nil
         case .blazer: "haku.top.work.blazer"
+        case .cardigan: "haku.top.work.cardigan"
         case .aloha: "haku.top.chill.aloha"
         case .flame: "haku.top.chill.flame"
+        case .sukajan: "haku.top.side.sukajan"
+        case .arcade: "haku.top.side.arcade"
         case .varsity: "haku.set.chill.varsity"
+        case .raincoat: "haku.set.work.raincoat"
         }
     }
 
-    // The tops drawn in the room so far (M4 adds the rest); anything else worn shows the default jacket.
-    /// The room version of what is worn: the first drawn top among `worn` item ids, else the jacket.
-    init(worn: Set<String>) {
-        self = Self.allCases.first { $0.shopID.map(worn.contains) ?? false } ?? .jacket
+    // The tops drawn in the room so far (M4 adds the rest); anything else worn shows the default look.
+    /// The room version of what is worn: the first drawn top among `worn` item ids, else the default look of
+    /// `mode`, and in the card mode of `card`.
+    init(worn: Set<String>, mode: Mode? = nil, card: IdentityKind? = nil) {
+        if let top = Self.allCases.first(where: { $0.shopID.map(worn.contains) ?? false }) {
+            self = top
+            return
+        }
+        switch mode {
+        case .work: self = .workJacket
+        case .money: self = .moneyJacket
+        case .chill, nil: self = .jacket
+        case .boxing:
+            switch card {
+            case .tennis: self = .tennis
+            case .fitness, .dance: self = .sport
+            case .ski: self = .ski
+            case .art: self = .craft
+            case .study, .music: self = .jacket
+            default: self = .boxing
+            }
+        }
     }
 
-    /// The drawn parts of the top, in place of the jacket.
+    /// The drawn parts of the top, in place of the jacket; the raincoat's hood lies behind the shoulders.
     var parts: [RunnerPart] {
+        let parts: Set<RunnerPart>
         switch self {
-        case .jacket: [.jacket, .stripeNeon, .hoodCollar]
-        case .blazer: [.topWorkIvy]
-        case .aloha: [.topChillAloha]
-        case .flame: [.topChillFlame, .hoodieStringsCyan]
-        case .varsity: [.setVarsityTop]
+        case .jacket, .workJacket, .boxing: parts = [.jacket, .stripeNeon, .hoodCollar]
+        case .moneyJacket: parts = [.jacket, .stripeNeon, .hoodCollar, .chainGold]
+        case .sport, .tennis, .ski: parts = [.jacket, .stripeSport, .hoodCollar]
+        case .craft: parts = [.jacket, .stripeNeon, .hoodCollar, .apron]
+        default: parts = shopID.flatMap { Outfit.clothesParts[$0] } ?? []
+        }
+        return RunnerPart.allCases.filter { parts.contains($0) && $0 != hat }
+    }
+
+    /// What is worn on the head: a set's cap, the boxing headband, the tennis visor or the ski goggles.
+    var hat: RunnerPart? {
+        switch self {
+        case .varsity: .setVarsityCap
+        case .boxing: .headband
+        case .tennis: .tennisVisor
+        case .ski: .skiGoggles
+        default: nil
         }
     }
 
     /// The colour of the sleeves and of the top seen from behind.
     var base: Color {
         switch self {
-        case .jacket: RunnerPalette.jacketChill
-        case .blazer: RunnerPalette.hood
-        case .aloha: RunnerPalette.catOrange
-        case .flame: RunnerPalette.bubblegum
-        case .varsity: RunnerPalette.varsityRed
+        case .jacket, .craft: RunnerPalette.jacketChill
+        case .workJacket, .boxing, .sport, .tennis, .ski: RunnerPalette.jacket
+        case .moneyJacket: RunnerPalette.jacketMoney
+        default: shopID.flatMap { Outfit.clothesBackColors[$0] } ?? RunnerPalette.jacketChill
         }
     }
 }
@@ -181,10 +228,16 @@ final class HomeModel {
     var isLow: Bool { snapshot.energy == .low }
     private var lines: HomeLines { HomeLines(snapshot.persona) }
     /// The top HAKU wears in the room.
-    var outfit: HomeOutfit { HomeOutfit(worn: snapshot.worn) }
+    var outfit: HomeOutfit { HomeOutfit(worn: snapshot.worn, mode: mode, card: card) }
+    /// The headband, mask print and gloves worn in the current mode, for the card picked.
+    var accessories: Outfit {
+        let worn = snapshot.worn
+        let equipped = snapshot.wardrobe.showing(card: card).equipped.filter { worn.contains($0.value) }
+        return Outfit(Wardrobe(equipped: equipped))
+    }
     /// The drawn tops HAKU owns, hanging in the wardrobe; the jacket always.
     var ownedOutfits: [HomeOutfit] {
-        HomeOutfit.allCases.filter { $0.shopID.map(snapshot.owned.contains) ?? true }
+        HomeOutfit.allCases.filter { $0.shopID.map(snapshot.owned.contains) ?? ($0 == .jacket) }
     }
     // 家 区域规划 v0: the sports floor holds one piece at a time; the room puts the earlier one away. Mike
     // 2026-10-18: with every item shown, the bag stood in front of HAKU on the bench, so the preview keeps to that

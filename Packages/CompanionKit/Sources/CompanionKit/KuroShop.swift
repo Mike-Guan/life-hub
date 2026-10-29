@@ -29,6 +29,10 @@ public enum KuroItem: String, CaseIterable, Sendable {
     case cloud = "kuro.weekly.room.cloud"
     case nightlight = "kuro.weekly.room.nightlight"
     case beanie = "kuro.weekly.hat.beanie"
+    // 商店扩充 v1 §3: accessories in the hair band and blanket places she already has.
+    case ribbon = "kuro.hair.ribbon"
+    case moonClip = "kuro.hair.clip.moon"
+    case checkBlanket = "kuro.blanket.check"
     // Identity card props (商店完整目录 v0 §2.2): a colour bought for 15 cans, and gold on the card's 10th win.
     case pinkGloves = "kuro.gloves.boxing.pink"
     case goldGloves = "kuro.gloves.boxing.gold"
@@ -50,8 +54,8 @@ public enum KuroItem: String, CaseIterable, Sendable {
     public var look: KuroLook {
         switch self {
         case .flower, .blanket, .spin, .chillCardigan, .chillHoodie, .picnic: .chill
-        case .bearBlanket, .succulent, .cloud, .nightlight, .beanie: .chill
-        case .scrunchie, .bag, .sakura, .goldRacket, .mintTie, .cherryClip, .starTie: .tennis
+        case .bearBlanket, .succulent, .cloud, .nightlight, .beanie, .moonClip, .checkBlanket: .chill
+        case .scrunchie, .bag, .sakura, .goldRacket, .mintTie, .cherryClip, .starTie, .ribbon: .tennis
         case .lamp, .sideSmock, .sideDenim: .desk
         case .workBlouse, .workVest, .rain: .work
         case .pinkGloves, .goldGloves: .box
@@ -69,7 +73,7 @@ public enum KuroItem: String, CaseIterable, Sendable {
     /// Whether she shows the item in `look`.
     public func shows(in look: KuroLook) -> Bool {
         switch self {
-        case .mintTie, .cherryClip, .starTie: true
+        case .mintTie, .cherryClip, .starTie, .ribbon, .moonClip: true
         case .succulent: look == .chill || look == .tennis
         case .nightlight: look == .chill || look == .desk
         default: self.look == look
@@ -113,6 +117,9 @@ public enum KuroItem: String, CaseIterable, Sendable {
         case .cloud: .weeklyRoomCloud
         case .nightlight: .weeklyRoomNightlight
         case .beanie: .weeklyHatBeanie
+        case .ribbon: .itemRibbonPony
+        case .moonClip: .itemClipMoon
+        case .checkBlanket: .itemBlanketCheck
         case .pinkGloves: .itemGlovePinkR
         case .goldGloves: .itemGloveGoldR
         case .mintBlock: .itemBlockMint
@@ -137,6 +144,7 @@ public enum KuroItem: String, CaseIterable, Sendable {
         case .mintTie: [ponytail ? .weeklyHairMintPony : .weeklyHairMintSide]
         case .cherryClip: [ponytail ? .weeklyHairCherryPony : .weeklyHairCherrySide]
         case .starTie: [ponytail ? .weeklyHairStarPony : .weeklyHairStarSide]
+        case .ribbon: [ponytail ? .itemRibbonPony : .itemRibbonSide]
         case .nightlight: [.weeklyRoomNightlightGlow, .weeklyRoomNightlight]
         case .beanie: [.weeklyHatBeanie, .weeklyHatBeaniePom]
         case .pinkGloves, .goldGloves, .mintBlock, .goldBlock, .goldBookmark, .blueStylus, .goldBrush, .sakuraFolder,
@@ -174,7 +182,7 @@ public enum KuroItem: String, CaseIterable, Sendable {
         switch self {
         case .sakura: [.tennisHeadband]
         case .goldRacket: [.tennisRacket]
-        case .cloud: [.itemBlanket, .weeklyBlanketBear]
+        case .cloud: [.itemBlanket, .weeklyBlanketBear, .itemBlanketCheck]
         case .succulent: [.itemFlower, .itemBag]
         default: []
         }

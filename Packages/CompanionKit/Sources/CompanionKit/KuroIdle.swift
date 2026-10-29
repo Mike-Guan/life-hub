@@ -59,6 +59,17 @@ enum KuroIdle: CaseIterable, Sendable {
     case score
     /// Ski: the mitten pats the snow off her shoulder twice, the snow falls, then a small sneeze.
     case snow
+    // Identity cards, batch 2 (第 2 批身份卡 草稿). All 动态.
+    /// Swimming: the goggles come down over her eyes, she blinks behind them, and they snap back up.
+    case goggles
+    /// Yoga: eyes shut, she breathes in, bends to the left, back, to the right, back, and breathes out. The mat
+    /// stays put.
+    case stretch
+    /// Ball: the ball bounces down and back up to her hand twice, her eyes on it, and she looks pleased.
+    case dribble
+    /// Outdoor: the pole is planted, she looks up into the distance, the wind catches her ears and hair, and she
+    /// breathes out.
+    case gaze
 
     /// KURO's idle stream; HAKU has his own, so the two never blink together.
     static let seed: UInt64 = 0x4B55
@@ -80,6 +91,11 @@ enum KuroIdle: CaseIterable, Sendable {
         case .twirl: 2
         case .lap: 6
         case .groove, .score, .snow: 3
+        case .goggles: 2.5
+        // Twice as slow as the other cards' moves.
+        case .stretch: 6
+        case .dribble: 2.4
+        case .gaze: 3.5
         }
     }
 
@@ -111,6 +127,11 @@ enum KuroIdle: CaseIterable, Sendable {
         case .dance: [.ears, .ponytail, .groove]
         case .music: [.ears, .score]
         case .ski: [.ears, .snow]
+        // The towel would wipe across the goggles on her forehead, so swimming only reaches.
+        case .swimming: [.ears, .ponytail, .goggles, .reach]
+        case .yoga: [.ears, .ponytail, .stretch, .reach, .towel]
+        case .ball: [.ears, .ponytail, .dribble, .reach, .towel]
+        case .outdoor: [.ears, .gaze, .collar, .phone]
         }
     }
 
@@ -184,6 +205,27 @@ enum KuroIdle: CaseIterable, Sendable {
                 Self.swapMouth(&visible, to: .mouthCat)
                 visible.insert(.sneezePuff)
             }
+        case .goggles:
+            let t = p * length
+            if (0.95..<1.15).contains(t) { Self.eyesShut(&visible) }
+            if (1.6..<1.95).contains(t) {
+                Self.swapEyes(&visible, to: .eyesSurprised)
+                Self.swapMouth(&visible, to: .mouthO)
+            }
+            if (1.95..<2.35).contains(t) { Self.swapEyes(&visible, to: .eyesHappy) }
+        case .stretch:
+            let t = p * length
+            if (0.5..<5).contains(t) { Self.eyesShut(&visible) }
+            if (4.7..<5.2).contains(t) { Self.swapMouth(&visible, to: .mouthO) }
+            if (5..<5.6).contains(t) { Self.swapEyes(&visible, to: .eyesHappy) }
+        case .dribble:
+            let t = p * length
+            if (0.25..<1.55).contains(t) { Self.swapEyes(&visible, to: .eyesDown) }
+            if (1.75..<2.25).contains(t) { Self.swapEyes(&visible, to: .eyesHappy) }
+        case .gaze:
+            let t = p * length
+            if (2.6..<3.2).contains(t) { Self.swapEyes(&visible, to: .eyesHappy) }
+            if (2.65..<2.95).contains(t) { Self.swapMouth(&visible, to: .mouthO) }
         case .reach, .towel, .tuck, .frame, .collar, .phone:
             // Once the card props are all the way down they are out of the frame.
             if Self.hold(p, rise: 0.12, fall: 0.12) >= 1 { visible.subtract(putDown) }
@@ -300,18 +342,53 @@ enum KuroIdle: CaseIterable, Sendable {
             if (1.7..<2.0).contains(t) { return CGSize(width: 0, height: -2 * Self.ramp(t, 1.7, 1.95)) }
             if (2.0..<2.5).contains(t) { return CGSize(width: 0, height: 3 * (1 - Self.ramp(t, 2.1, 2.5))) }
             return .zero
+        case .goggles where part == .swimGoggles:
+            return CGSize(width: 0, height: 28 * Self.gogglesDown(p * length))
+        case .stretch where part != .yogaMat && !Self.ground.contains(part):
+            // Taller on the breath in; the bend itself is a turn about her hips (`lean`).
+            let t = p * length
+            return CGSize(width: 0, height: -2 * Self.ramp(t, 0.2, 0.9) * (1 - Self.ramp(t, 4.6, 5.3)))
+        case .dribble where part == .sportBall:
+            return CGSize(width: 0, height: 17 * Self.bounce(p * length))
+        case .dribble where part == .sportBallHand:
+            let t = p * length
+            return CGSize(width: 0, height: 4 * CGFloat(Self.bump(t, 0.2, 0.45) + Self.bump(t, 0.9, 1.15)))
+        case .gaze where part == .outPole:
+            return CGSize(width: 0, height: -5 * Self.bump(p * length, 0.1, 0.5))
+        case .gaze where Self.eyes.contains(part):
+            let t = p * length
+            return CGSize(width: 0, height: -2.5 * Self.ramp(t, 0.6, 0.9) * (1 - Self.ramp(t, 2.3, 2.6)))
+        case .gaze where part == .catEars:
+            let t = p * length
+            return CGSize(width: 0, height: -3 * CGFloat(Self.bump(t, 1.1, 1.5) + Self.bump(t, 1.6, 2)))
+        case .gaze where part == .hairBack:
+            return CGSize(width: 1.6 * Self.bump(p * length, 1.1, 2.2), height: 0)
         case .reach, .towel, .tuck, .frame, .collar, .phone:
             return baseShift(part, at: p * length)
         default: return .zero
         }
     }
 
+    // UI 审核 #569 r1: shifted sideways her body hardly moved, so the stretch turns her whole body about her hips.
+    /// How far `part` turns about `hips` at `progress` (0..<1) into the move, in degrees, or nil when it keeps
+    /// still: everything but the mat and the floor in the stretch.
+    func lean(_ part: KuroPart, progress p: Double) -> Double? {
+        guard self == .stretch, part != .yogaMat, !Self.ground.contains(part) else { return nil }
+        return Self.bendAngle * Self.bend(p * length)
+    }
+
+    /// The point she bends about in the stretch: her hips, at the bottom middle of the figure.
+    static let hips = CGPoint(x: 60, y: 138)
+
+    /// How far she bends each way in the stretch, in degrees.
+    static let bendAngle = 8.0
+
     /// The card props each base-outfit idle puts down.
     private var putDown: Set<KuroPart> {
         switch self {
-        case .reach, .towel: Self.rackets.union([.gymBlock])
+        case .reach, .towel: Self.rackets.union([.gymBlock, .yogaMat, .sportBall, .sportBallHand])
         case .tuck, .frame: Self.rackets.union([.workTablet, .watchTablet, .craftPen])
-        case .collar, .phone: Self.rackets.union([.studyNotebook, .studyHighlighter])
+        case .collar, .phone: Self.rackets.union([.studyNotebook, .studyHighlighter, .outPole])
         default: []
         }
     }
@@ -387,6 +464,21 @@ enum KuroIdle: CaseIterable, Sendable {
         return (0..<1).contains(u) ? u : nil
     }
 
+    /// 0 = the swim goggles up on her forehead, 1 = down over her eyes, at `t` seconds: down slowly, up with a snap.
+    static func gogglesDown(_ t: Double) -> CGFloat {
+        CGFloat(ramp(t, 0.2, 0.6) * (1 - ramp(t, 1.5, 1.65)))
+    }
+
+    /// Which way she bends at `t` seconds into the stretch: -1 all the way left, 1 all the way right.
+    private static func bend(_ t: Double) -> Double {
+        -ramp(t, 1, 1.8) * (1 - ramp(t, 2.2, 2.9)) + ramp(t, 3.1, 3.9) * (1 - ramp(t, 4.3, 5))
+    }
+
+    /// How far down the ball is (0...1) at `t` seconds: two bounces off the floor and back to her hand.
+    static func bounce(_ t: Double) -> CGFloat {
+        CGFloat(max(bump(t, 0.25, 0.85), bump(t, 0.95, 1.55)))
+    }
+
     /// How far down the finger is on the score (0...1) at `t` seconds: four light taps half a second apart.
     private static func scoreTap(_ t: Double) -> CGFloat {
         CGFloat((0..<4).map { bump(t, 0.4 + Double($0) * 0.5, 0.7 + Double($0) * 0.5) }.max() ?? 0)
@@ -405,8 +497,8 @@ enum KuroIdle: CaseIterable, Sendable {
 
     /// The parts of her head that nod together.
     private static let head: Set<KuroPart> = eyes.union([
-        .hairBack, .earL, .earR, .faceBase, .blush, .hairFringe, .catEars, .tennisPonytail, .skiGoggles,
-        .mouthCat, .mouthFlat, .mouthSmile, .mouthO, .sneezePuff,
+        .hairBack, .earL, .earR, .faceBase, .blush, .cheeksFull, .hairFringe, .catEars, .tennisPonytail, .skiGoggles,
+        .swimGoggles, .mouthCat, .mouthFlat, .mouthSmile, .mouthO, .sneezePuff,
     ])
 
     /// How far down (0...1) her lap things are at `p` into blowing on her drink: as in the sip tap, with the cup

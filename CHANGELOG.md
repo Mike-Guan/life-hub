@@ -13,14 +13,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- With the watch screen dimmed (Always On), the second preset character naps over her tablet when she is off work
+  before bedtime, instead of only closing her eyes.
+- The second preset character has her own looks for the swimming, yoga, ball and outdoor cards (goggles, a
+  rolled mat, a ball, a backpack and trekking pole), each with its own idle move. The cards are not in the
+  picker yet.
 - When the second preset character notices one of your needs she leans out to peek at you, blinks and leans
   back smiling, instead of hopping with her look's move. When the need is scrolling on the couch, a tap
   then shows her peeking lines.
+- The second preset character shows what she thinks in a bubble, once a day each: a little rain cloud on a
+  low-energy day, and a tangle of lines that smooths out and goes while the user scrolls for a long while.
 - The second preset character has her own good night: as bedtime starts she rubs an eye, stretches up in a
   big yawn and settles with heavy eyes, instead of only dimming.
+- HAKU can dress for four more identity cards, not yet offered in the picker: swimming (goggles up on the hair,
+- In the home HAKU wears every top and set the shop sells: the pixel cardigan, the souvenir jacket, the arcade
+  T and the Harajuku raincoat join the earlier four, and the varsity set brings its cap. The headband colour, the
+  mask print on his chin and the glove colour he bought show too.
+  Until he buys a top, he wears each mode's own look at home as on the main screen: the dark work jacket, the
+  black side-hustle jacket with the gold chain, the boxing headband, and with an identity card its base outfit
+  (the sport jacket with the visor or the ski goggles, or the craft apron).
 - Test builds (DEV and STG) offer the swimming, yoga, ball and outdoor identity cards in the picker. The App
   Store build keeps the eight cards it has until their lines are final and both characters were checked on a
   device.
+- The second preset character's shop has three more accessories: a red ribbon (on her ponytail, else at the
+  side of her hair), a moon hair clip and a check lap blanket. At home she wears the ribbon and the clip.
 - HAKU can dress for four more identity cards: swimming (goggles up on the hair,
   pulled down and pushed back), yoga (a mat in hand, palms pressed while swaying), ball (a ball on the fist,
   spun on a fingertip until it drops and bounces back) and outdoor (backpack and trekking pole, a hand over the
@@ -28,6 +44,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
 - The second preset character's props for the dance, music and ski cards are in the shop: mint and gold neck
   headphones, a sakura and a gold score folder, sakura and gold ski goggles. At home she wears the goggles and
   headphones she bought.
+- At home the second preset character wears the tops and sets she bought from behind too, and her sleeves
+  match them.
 - The second preset character's identity card props are in the shop: pink and gold gloves (boxing), a mint
   and a gold yoga block (fitness), red glasses and a gold bookmark (study), a blue stylus and a gold brush (art).
   Each one moves with every tap and idle of the prop it replaces, and her gloves at home take their colour.
