@@ -1,14 +1,14 @@
-name: check-card
+name: language-shots
 
-# Draws the "不对" card screenshots for UI 审核 (Issue #236) and pushes them to the out/check-card
-# branch. Push a branch named chore/check-card-shots to run it, or run it by hand.
+# Draws the "不对" card screenshots for UI 审核 (Issue #236) and pushes them to the out/language-shots
+# branch. Push a branch named chore/language-shots to run it, or run it by hand.
 on:
   workflow_dispatch:
   push:
-    branches: [chore/check-card-shots]
+    branches: [chore/language-shots]
 
 concurrency:
-  group: check-card-${{ github.ref }}
+  group: language-shots-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   shots:
-    name: Draw the 不对 card
+    name: Draw the language card
     runs-on: macos-15
     timeout-minutes: 40
     steps:
@@ -32,18 +32,18 @@ jobs:
         run: brew install xcodegen
 
       - name: Draw screenshots
-        run: scripts/check-card-shots.sh
+        run: scripts/language-shots.sh
 
-      - name: Push screenshots to out/check-card
+      - name: Push screenshots to out/language-shots
         if: always()
         env:
           TOKEN: ${{ github.token }}
         run: |
-          [ -d docs/screenshots/check-card ] || exit 0
-          cd docs/screenshots/check-card
-          git init -q -b out/check-card
+          [ -d docs/screenshots/language ] || exit 0
+          cd docs/screenshots/language
+          git init -q -b out/language-shots
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -q -m "不对 card screenshots from ${GITHUB_SHA::7}"
-          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" out/check-card
+          git commit -q -m "language card screenshots from ${GITHUB_SHA::7}"
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" out/language-shots
