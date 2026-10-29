@@ -49,6 +49,7 @@ final class HomeScene: SKScene {
 
     // What the drawing shows now, to redraw only what changed.
     private var shownColors: [UInt32]?
+    private var shownRug: HomeRug?
     private var shownOutfits: [HomeOutfit] = []
     private var shownNight: Bool?
     private var shownScreen: HomeScreen?
@@ -189,11 +190,14 @@ final class HomeScene: SKScene {
 
     /// Brings the drawing up to date with the model.
     func sync(animated: Bool = true) {
-        // The rug's style redraws the room like a colour does.
-        let colors = HomePaintable.allCases.map(model.color) + [UInt32(HomeRug.allCases.firstIndex(of: model.rug) ?? 0)]
+        let colors = HomePaintable.allCases.map(model.color)
         if colors != shownColors {
             redraw(flashing: shownColors != nil)
             shownColors = colors
+            shownRug = model.rug
+        } else if model.rug != shownRug {
+            shownRug = model.rug
+            layRug(animated: animated)
         }
         let outfits = model.ownedOutfits
         if outfits != shownOutfits {
@@ -253,6 +257,23 @@ final class HomeScene: SKScene {
             node.show(layer(piece, covering: shownCovering == true), night: night)
         }
         if flashing { flash() }
+    }
+
+    // UI 二组 地毯两款 v1: a new rug style fades in over 0.2 s, or shows at once with Reduce Motion.
+    private func layRug(animated: Bool) {
+        guard let node = pieces[.rug] else { return }
+        node.show(layer(.rug, covering: false), night: model.isNight)
+        guard animated, !Self.reducesMotion else { return }
+        node.alpha = 0
+        node.run(SKAction.fadeIn(withDuration: 0.2))
+    }
+
+    private static var reducesMotion: Bool {
+        #if os(iOS)
+        UIAccessibility.isReduceMotionEnabled
+        #else
+        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+        #endif
     }
 
     private func drawBlanket(covering: Bool) {

@@ -185,8 +185,12 @@ final class HomeModel {
     private(set) var now: Date
     /// The room with the colours picked here, saved through the page.
     private(set) var layout: RoomLayout
-    /// The rug's style. Not saved yet: the shop sells the other two after 0.1.0.
-    private(set) var rug = HomeRug.fringe
+    /// The rug's style.
+    var rug: HomeRug { HomeRug(shopID: layout.rug) ?? .fringe }
+    /// The rug styles the character can lay: the fringed one, then the bought ones.
+    var rugs: [HomeRug] {
+        HomeRug.allCases.filter { $0.shopID(for: snapshot.persona).map(snapshot.owned.contains) ?? true }
+    }
     /// Whether the room shows every item, owned or not, to see where each one goes. DEBUG builds only.
     private(set) var previewsAllItems = false
     var isNight: Bool
@@ -361,10 +365,12 @@ final class HomeModel {
         return layout
     }
 
-    /// Lays the rug in `style`.
-    func lay(_ style: HomeRug) {
-        rug = style
+    /// Lays the rug in `style` and returns the room to save.
+    @discardableResult
+    func lay(_ style: HomeRug, now: Date = .now, deviceID: String = "") -> RoomLayout {
+        layout.lay(rug: style.shopID(for: snapshot.persona), now: now, deviceID: deviceID)
         changed()
+        return layout
     }
 
     /// Shows or hides every item, owned or not.

@@ -33,6 +33,12 @@ struct ShopPreviewSheet: View {
                     Text(whereShown)
                         .font(Toy.body(13, weight: .bold))
                 }
+                // UI 二组 地毯两款 v1.
+                if item.isRug {
+                    Text("原来的款式留着，在家里随时换回。".localized)
+                        .font(Toy.body(13))
+                        .foregroundStyle(Toy.muted)
+                }
                 // 商店完整目录 §10.2: owning gear is not training.
                 if item.zone?.isSports == true {
                     Text("摆着不算练过，不给罐子。")
@@ -91,6 +97,7 @@ struct ShopPreviewSheet: View {
     /// Which modes the item shows in, by the user's card names; `nil` when it shows in all of them.
     private var whereShown: String? {
         if let zone = item.zone { return zone.place }
+        if item.isRug { return "换掉家里的地毯款式。颜色在家里免费换。".localized }
         let modes = Mode.allCases.filter { mode in
             if let kuro = KuroItem(rawValue: item.id) { return kuro.shows(in: KuroLook(mode: mode, card: card)) }
             return item.shows(in: mode, card: card)
@@ -154,6 +161,7 @@ extension RoomZone {
             case .desk: "摆在家里的书桌上。哪个模式都在。"
             case .sofaSide: "摆在家里的沙发旁边。哪个模式都在。"
             case .corner: "摆在家里的左前角。哪个模式都在。"
+            case .posterWall: "挂在家里书桌上方的墙上，换掉原来那两张海报。哪个模式都在。"
             }
         return text.localized
     }

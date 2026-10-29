@@ -13,6 +13,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow SemVer 
   tablet in front of the desk and her hand: she stays seated and taps her cheek.
 
 ### Added
+- The shop's room tab sells 16 new things per character (her own ten, a yoga mat, a jump rope, a dance mirror,
+  a music stand and two rugs), and HAKU's identity-card props in their colours. A bought poster replaces the two over
+  the desk; a bought rug is laid at once, and 家具换颜色 lets you switch the rug's style back.
 - The home screen has a window into the home under the mode cards: a still of the real room around the character,
   with a line saying where she is (at the desk, on the sofa, in bed). Tapping it opens the home; the header's
   house button is gone. The picture fades to the new one when the mode changes.

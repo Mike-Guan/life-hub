@@ -4,9 +4,10 @@ import Testing
 
 @testable import CompanionKit
 
-// The bench and the snowboard stand only in the home page, which draws them (HomeTests); the figure has no part.
+// Room items other than these four stand only in the home page, which draws them (HomeTests); the figure has no part.
+private let figureRooms = ["room.plant", "room.bag", "haku.weekly.room.cactus", "haku.weekly.room.speaker"]
 private let figureItems = ShopItem.catalog(for: .haku).filter {
-    $0.isDrawn && !["room.bench", "room.snowboard"].contains($0.id)
+    $0.isDrawn && ($0.slot != .room || figureRooms.contains($0.id))
 }
 
 @Suite struct CompanionKitTests {

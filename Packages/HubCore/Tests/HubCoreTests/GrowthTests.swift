@@ -640,10 +640,7 @@ import Testing
         ]
         for (persona, kinds) in cards {
             for card in kinds {
-                // The second character's are drawn; HAKU's wait for their art.
-                let line = ShopItem.catalog(for: persona).filter {
-                    $0.card == card && $0.slot == .gloves && $0.isDrawn == (persona == .kuro)
-                }
+                let line = ShopItem.catalog(for: persona).filter { $0.card == card && $0.slot == .gloves && $0.isDrawn }
                 #expect(line.compactMap(\.price) == [15], "\(persona) \(card)")
                 #expect(line.compactMap(\.keepsake).map(\.count) == [10], "\(persona) \(card)")
                 #expect(line.allSatisfy { $0.suits(card) && !$0.suits(nil) && $0.slot.shelf == .props })
@@ -700,12 +697,16 @@ import Testing
         }
     }
 
-    @Test func aKeepsakeWaitsForItsArt() throws {
+    // HAKU's gold card props are drawn since #559, so the card's 10th win grants one.
+    @Test func aCardsTenthWinGrantsItsGoldProp() throws {
         let store = GrowthStore(fileURL: nil, deviceID: "t")
-        for day in 0..<10 {
+        for day in 0..<9 {
             #expect(store.record(.boxing, source: "day-\(day)", at: at, card: .fitness).isEmpty)
         }
         #expect(!store.ledger.only(.haku).owned.contains("haku.dumbbell.gym.gold"))
+        let granted = store.record(.boxing, source: "day-9", at: at, card: .fitness)
+        #expect(granted.map(\.id) == ["haku.dumbbell.gym.gold"])
+        #expect(store.ledger.only(.haku).owned.contains("haku.dumbbell.gym.gold"))
         #expect(try item("haku.dumbbell.gym.gold").keepsake?.card == .fitness)
     }
 

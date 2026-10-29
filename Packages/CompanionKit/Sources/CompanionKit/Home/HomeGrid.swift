@@ -211,6 +211,28 @@ enum HomePiece: String, CaseIterable, Sendable {
 enum HomeRug: String, CaseIterable, Sendable {
     case fringe, stripe, round
 
+    /// The style a shop catalog id names, such as `room.rug.stripe` or `kuro.room.rug.round`; `nil` for other ids
+    /// and for no id.
+    init?(shopID: String?) {
+        guard let shopID, let range = shopID.range(of: "room.rug.") else { return nil }
+        guard let rug = HomeRug(rawValue: String(shopID[range.upperBound...])), rug != .fringe else { return nil }
+        self = rug
+    }
+
+    /// The style's label in the decorate sheet, the String Catalog key.
+    var label: String {
+        switch self {
+        case .fringe: "流苏 · 免费"
+        case .stripe: "条纹"
+        case .round: "圆形编织"
+        }
+    }
+
+    /// The shop catalog id that sells the style to `persona`, `nil` for the free fringed one.
+    func shopID(for persona: Persona) -> String? {
+        self == .fringe ? nil : (persona == .kuro ? "kuro." : "") + "room.rug.\(rawValue)"
+    }
+
     /// The middle of the round rug.
     static let centre = GridPoint(x: 4.3, y: 6.0)
     static let radius = 2.05
